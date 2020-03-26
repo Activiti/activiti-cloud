@@ -27,6 +27,12 @@ public interface ProcessInstanceController {
     @RequestMapping(method = RequestMethod.POST)
     Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload cmd);
 
+    @RequestMapping(value = "/create",method = RequestMethod.POST)
+    Resource<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload cmd);
+
+    @RequestMapping(value = "/{processInstanceId}/run",method = RequestMethod.POST)
+    Resource<CloudProcessInstance> runProcessInstance(@PathVariable String processInstanceId);
+
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     Resource<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId);
 
@@ -36,15 +42,15 @@ public interface ProcessInstanceController {
     @ResponseBody
     String getProcessDiagram(@PathVariable String processInstanceId);
 
-    @RequestMapping(value = "/signal", method = RequestMethod.POST) 
+    @RequestMapping(value = "/signal", method = RequestMethod.POST)
     ResponseEntity<Void> sendSignal(@RequestBody SignalPayload signalPayload);
 
-    @RequestMapping(value = "/message", method = RequestMethod.POST) 
-    Resource<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload);
+    @RequestMapping(value = "/message", method = RequestMethod.POST)
+    Resource<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload);
 
-    @RequestMapping(value = "/message", method = RequestMethod.PUT) 
+    @RequestMapping(value = "/message", method = RequestMethod.PUT)
     ResponseEntity<Void> receive(@RequestBody ReceiveMessagePayload receiveMessagePayload);
-    
+
     @RequestMapping(value = "{processInstanceId}/suspend", method = RequestMethod.POST)
     Resource<CloudProcessInstance> suspend(@PathVariable String processInstanceId);
 
@@ -53,11 +59,11 @@ public interface ProcessInstanceController {
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
     Resource<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId);
-    
+
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)
     Resource<CloudProcessInstance> updateProcess(@PathVariable("processInstanceId") String processInstanceId,
                                     @RequestBody UpdateProcessPayload payload);
-    
+
     @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
     PagedResources<Resource<CloudProcessInstance>> subprocesses(@PathVariable("processInstanceId") String processInstanceId,
                                                          Pageable pageable);

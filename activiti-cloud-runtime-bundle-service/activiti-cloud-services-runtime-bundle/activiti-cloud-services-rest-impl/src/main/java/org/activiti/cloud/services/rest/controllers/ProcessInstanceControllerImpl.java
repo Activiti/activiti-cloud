@@ -60,7 +60,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     private final ProcessRuntime processRuntime;
 
     private final SpringPageConverter pageConverter;
-    
+
     @Autowired
     public ProcessInstanceControllerImpl(RepositoryService repositoryService,
                                          ProcessDiagramGeneratorWrapper processDiagramGenerator,
@@ -87,6 +87,16 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     @Override
     public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
         return resourceAssembler.toResource(processRuntime.start(startProcessPayload));
+    }
+
+    @Override
+    public Resource<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload startProcessPayload) {
+        return resourceAssembler.toResource(processRuntime.create(startProcessPayload));
+    }
+
+    @Override
+    public Resource<CloudProcessInstance> runProcessInstance(String processInstanceId) {
+        return null;
     }
 
     @Override
@@ -152,7 +162,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public Resource<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
+    public Resource<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload) {
         ProcessInstance processInstance = processRuntime.start(startMessagePayload);
 
         return resourceAssembler.toResource(processInstance);
