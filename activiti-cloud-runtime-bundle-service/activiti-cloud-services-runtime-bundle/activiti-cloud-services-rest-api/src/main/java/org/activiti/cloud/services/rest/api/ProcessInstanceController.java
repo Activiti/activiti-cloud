@@ -30,9 +30,6 @@ public interface ProcessInstanceController {
     @RequestMapping(value = "/create",method = RequestMethod.POST)
     Resource<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload cmd);
 
-    @RequestMapping(value = "/{processInstanceId}/run",method = RequestMethod.POST)
-    Resource<CloudProcessInstance> runProcessInstance(@PathVariable String processInstanceId);
-
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     Resource<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId);
 

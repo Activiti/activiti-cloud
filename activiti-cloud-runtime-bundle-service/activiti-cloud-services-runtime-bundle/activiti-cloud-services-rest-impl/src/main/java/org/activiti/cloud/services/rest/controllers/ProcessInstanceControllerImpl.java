@@ -95,11 +95,6 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public Resource<CloudProcessInstance> runProcessInstance(String processInstanceId) {
-        return null;
-    }
-
-    @Override
     public Resource<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId) {
         return resourceAssembler.toResource(processRuntime.processInstance(processInstanceId));
     }
