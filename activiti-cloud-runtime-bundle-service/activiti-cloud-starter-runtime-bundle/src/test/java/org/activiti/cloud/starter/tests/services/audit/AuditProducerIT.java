@@ -907,7 +907,9 @@ public class AuditProducerIT {
     public void shouldProduceEventsDuringMultiInstanceCloudConnectorExecution() {
 
         //when
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("miParallelCloudConnector", null, null);
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("miParallelCloudConnector",
+                                                                                                                Collections.singletonMap("instanceCount", 3),
+                                                                                                                null);
 
         List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
 

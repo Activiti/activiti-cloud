@@ -13,7 +13,7 @@
       <bpmn:incoming>SequenceFlow_0j28z0s</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1plg9em</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics>
-        <bpmn:loopCardinality>${3}</bpmn:loopCardinality>
+        <bpmn:loopCardinality>${instanceCount}</bpmn:loopCardinality>
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:serviceTask>
   </bpmn:process>
