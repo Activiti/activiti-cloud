@@ -40,7 +40,7 @@ alter table bpmn_activity
     add column execution_id varchar(255);
 
 alter table bpmn_activity
-    delete constraint bpmn_activity_processInstance_elementId_idx;
+    drop constraint bpmn_activity_processInstance_elementId_idx;
     
 alter table bpmn_activity
     add constraint bpmn_activity_processInstance_elementId_idx unique (process_instance_id, element_id, executionId);
