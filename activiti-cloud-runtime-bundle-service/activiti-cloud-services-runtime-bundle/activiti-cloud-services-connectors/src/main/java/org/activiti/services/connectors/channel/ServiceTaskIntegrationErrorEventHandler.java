@@ -95,6 +95,14 @@ public class ServiceTaskIntegrationErrorEventHandler {
                                                                                                                          integrationError.getErrorClassName(),
                                                                                                                          integrationError.getStackTraceElements());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationErrorReceived);
+
+            IntegrationContext context = integrationError.getIntegrationContext();
+            integrationErrorReceived.setProcessInstanceId(context.getProcessInstanceId());
+            integrationErrorReceived.setProcessDefinitionId(context.getProcessDefinitionId());
+            integrationErrorReceived.setProcessDefinitionVersion(context.getProcessDefinitionVersion());
+            integrationErrorReceived.setProcessDefinitionKey(context.getProcessDefinitionKey());
+            integrationErrorReceived.setBusinessKey(context.getBusinessKey());
+
             Message<CloudRuntimeEvent[]> message = MessageBuilder.withPayload(new CloudRuntimeEvent[] {integrationErrorReceived})
                                                                  .build();
 

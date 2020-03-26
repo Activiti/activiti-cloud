@@ -17,6 +17,7 @@ package org.activiti.services.connectors;
 
 import java.util.stream.Stream;
 
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
@@ -63,10 +64,17 @@ public class IntegrationRequestSender {
             CloudIntegrationRequestedEventImpl integrationRequested = new CloudIntegrationRequestedEventImpl(integrationRequest.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequested);
 
-            Message<CloudRuntimeEvent[]> message = messageBuilderFactory.create(integrationRequest.getIntegrationContext()).withPayload(Stream.of(integrationRequested)
-                                                                                        .toArray(CloudRuntimeEvent[]::new))
-                .build();
+            IntegrationContext context = integrationRequest.getIntegrationContext();
+            integrationRequested.setProcessInstanceId(context.getProcessInstanceId());
+            integrationRequested.setProcessDefinitionId(context.getProcessDefinitionId());
+            integrationRequested.setProcessDefinitionVersion(context.getProcessDefinitionVersion());
+            integrationRequested.setProcessDefinitionKey(context.getProcessDefinitionKey());
+            integrationRequested.setBusinessKey(context.getBusinessKey());
 
+            Message<CloudRuntimeEvent[]> message = messageBuilderFactory.create(integrationRequest.getIntegrationContext())
+                                                                        .withPayload(Stream.of(integrationRequested)
+                                                                                           .toArray(CloudRuntimeEvent[]::new))
+                                                                        .build();
             auditProducer.send(message);
         }
     }

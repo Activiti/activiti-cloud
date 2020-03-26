@@ -43,6 +43,8 @@ import java.util.stream.Stream;
 
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.api.model.shared.model.ApplicationElement;
+import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
@@ -52,14 +54,18 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
-import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.activiti.cloud.api.process.model.impl.CandidateUser;
+import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
@@ -74,6 +80,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
@@ -81,6 +88,8 @@ import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -123,6 +132,12 @@ public class AuditProducerIT {
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
+
+    @Autowired
+    private BinderAwareChannelResolver channelResolver;
+
+    @Value("integrationResult_${spring.application.name}")
+    private String integrationResultDestination;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -887,6 +902,116 @@ public class AuditProducerIT {
                     .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
         });
     }
+
+    @Test
+    public void shouldProduceEventsDuringMultiInstanceCloudConnectorExecution() {
+
+        //when
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("miParallelCloudConnector", null, null);
+
+        List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
+
+        //then
+        await()
+            //.forever()
+            .untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+            receivedEvents = receivedEvents.stream()
+                    .filter(event -> startProcessEntity.getBody().getId().equals(event.getProcessInstanceId()))
+                    .collect(Collectors.toList());
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+
+
+            List<CloudBPMNActivityStartedEvent> receivedActivityStartedEvents = receivedEvents.stream()
+                    .filter(event -> event.getEventType() == ACTIVITY_STARTED && event.getEntityId()
+                                                                                      .equals("miCloudConnectorId"))
+                    .map(CloudBPMNActivityStartedEvent.class::cast)
+                    .collect(Collectors.toList());
+
+            assertThat(receivedActivityStartedEvents)
+                    .extracting(RuntimeEvent::getEventType, event -> ((BPMNActivity) event.getEntity()).getElementId())
+                    .containsExactlyInAnyOrder(
+                            tuple(ACTIVITY_STARTED, "miCloudConnectorId"),
+                            tuple(ACTIVITY_STARTED, "miCloudConnectorId"),
+                            tuple(ACTIVITY_STARTED, "miCloudConnectorId")
+                    );
+
+            List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = receivedEvents.stream()
+                    .filter(event -> event.getEventType() == INTEGRATION_REQUESTED &&
+                                        ((IntegrationContext) event.getEntity()).getClientId()
+                                                                                .equals("miCloudConnectorId"))
+                    .map(CloudIntegrationRequestedEvent.class::cast)
+                    .collect(Collectors.toList());
+
+            assertThat(receivedIntegrationRequestedEvents)
+                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
+                    .containsExactlyInAnyOrder(
+                            tuple(INTEGRATION_REQUESTED, "miCloudConnectorId"),
+                            tuple(INTEGRATION_REQUESTED, "miCloudConnectorId"),
+                            tuple(INTEGRATION_REQUESTED, "miCloudConnectorId")
+                    );
+
+            integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
+
+        });
+
+        MessageChannel resultsChannel = channelResolver.resolveDestination(integrationResultDestination);
+
+        // complete cloud connector tasks
+        integrationRequestedEvents.stream()
+                                  .map(request -> {
+                                      return new IntegrationResultImpl(new IntegrationRequestImpl(request.getEntity()),
+                                                                       request.getEntity());
+                                  })
+                                  .map(payload -> MessageBuilder.withPayload(payload)
+                                                                .build())
+                                  .forEach(resultsChannel::send);
+
+
+        //then
+        await()
+            .untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+            receivedEvents = receivedEvents.stream()
+                    .filter(event -> startProcessEntity.getBody().getId().equals(event.getProcessInstanceId()))
+                    .collect(Collectors.toList());
+
+            List<CloudBPMNActivityCompletedEvent> receivedActivityCompletedEvents = receivedEvents.stream()
+                    .filter(event -> event.getEventType() == ACTIVITY_COMPLETED && event.getEntityId()
+                                                                                      .equals("miCloudConnectorId"))
+                    .map(CloudBPMNActivityCompletedEvent.class::cast)
+                    .collect(Collectors.toList());
+
+            assertThat(receivedActivityCompletedEvents)
+                    .extracting(RuntimeEvent::getEventType, event -> ((BPMNActivity) event.getEntity()).getElementId())
+                    .containsExactlyInAnyOrder(
+                            tuple(ACTIVITY_COMPLETED, "miCloudConnectorId"),
+                            tuple(ACTIVITY_COMPLETED, "miCloudConnectorId"),
+                            tuple(ACTIVITY_COMPLETED, "miCloudConnectorId")
+                    );
+
+            List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = receivedEvents.stream()
+                    .filter(event -> event.getEventType() == INTEGRATION_RESULT_RECEIVED &&
+                                        ((IntegrationContext) event.getEntity()).getClientId()
+                                                                                .equals("miCloudConnectorId"))
+                    .map(CloudIntegrationResultReceivedEvent.class::cast)
+                    .collect(Collectors.toList());
+
+            assertThat(receivedIntegrationResultEvents)
+                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
+                    .containsExactlyInAnyOrder(
+                            tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId"),
+                            tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId"),
+                            tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId")
+                    );
+
+            assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
+                    RuntimeEvent::getProcessInstanceId)
+                    .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
+        });
+    }
+
 
     @Test
     public void shouldHaveAppVersionSetInBothEventsAndApplicationElementEntities() {

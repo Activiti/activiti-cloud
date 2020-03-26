@@ -95,6 +95,14 @@ public class ServiceTaskIntegrationResultEventHandler {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationResultReceivedEventImpl integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(integrationResult.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationResultReceived);
+
+            IntegrationContext context = integrationResult.getIntegrationContext();
+            integrationResultReceived.setProcessInstanceId(context.getProcessInstanceId());
+            integrationResultReceived.setProcessDefinitionId(context.getProcessDefinitionId());
+            integrationResultReceived.setProcessDefinitionVersion(context.getProcessDefinitionVersion());
+            integrationResultReceived.setProcessDefinitionKey(context.getProcessDefinitionKey());
+            integrationResultReceived.setBusinessKey(context.getBusinessKey());
+
             Message<CloudRuntimeEvent[]> message = MessageBuilder.withPayload(Stream.of(integrationResultReceived)
                                                                                         .toArray(CloudRuntimeEvent[]::new))
                 .build();

@@ -16,6 +16,7 @@
 
 package org.conf.activiti.services.connectors;
 
+import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.RuntimeService;
@@ -41,7 +42,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.messaging.MessageChannel;
 
 @Configuration
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
@@ -55,13 +55,13 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
                                                                                              IntegrationContextService integrationContextService,
-                                                                                             MessageChannel auditProducer,
+                                                                                             ProcessEngineChannels processEngineChannels,
                                                                                              RuntimeBundleProperties runtimeBundleProperties,
                                                                                              RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                                                              VariablesMappingProvider outboundVariablesProvider) {
         return new ServiceTaskIntegrationResultEventHandler(runtimeService,
                                                             integrationContextService,
-                                                            auditProducer,
+                                                            processEngineChannels.auditProducer(),
                                                             runtimeBundleProperties,
                                                             runtimeBundleInfoAppender,
                                                             outboundVariablesProvider);
@@ -71,12 +71,12 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
                                                                                            IntegrationContextService integrationContextService,
-                                                                                           MessageChannel auditProducer,
+                                                                                           ProcessEngineChannels processEngineChannels,
                                                                                            RuntimeBundleProperties runtimeBundleProperties,
                                                                                            RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
         return new ServiceTaskIntegrationErrorEventHandler(runtimeService,
                                                            integrationContextService,
-                                                           auditProducer,
+                                                           processEngineChannels.auditProducer(),
                                                            runtimeBundleProperties,
                                                            runtimeBundleInfoAppender);
     }
@@ -84,12 +84,12 @@ public class CloudConnectorsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public IntegrationRequestSender integrationRequestSender(RuntimeBundleProperties runtimeBundleProperties,
-                                                             MessageChannel auditProducer,
+                                                             ProcessEngineChannels processEngineChannels,
                                                              BinderAwareChannelResolver resolver,
                                                              RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                              IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         return new IntegrationRequestSender(runtimeBundleProperties,
-                                            auditProducer,
+                                            processEngineChannels.auditProducer(),
                                             resolver,
                                             runtimeBundleInfoAppender,
                                             messageBuilderFactory);
