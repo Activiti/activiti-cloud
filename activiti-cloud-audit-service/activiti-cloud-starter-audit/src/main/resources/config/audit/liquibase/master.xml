@@ -81,12 +81,6 @@
   </changeSet>
   
   <changeSet author="activiti-audit" id="alter-schema-m7" dbms="postgresql">
-    <preConditions onFail="CONTINUE">
-      <not>
-        <tableExists tableName="audit_event"/>
-        <sequenceExists sequenceName="audit_sequence"/>
-      </not>
-    </preConditions>
     <sqlFile dbms="postgresql"
              encoding="utf8"
              path="changelog/04-alter.pg.schema.m7.sql"
