@@ -3,12 +3,8 @@ package org.activiti.cloud.connectors.starter.channels;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorDestinationBuilder {
-
-    @Value("${ACT_INT_ERR_CONSUMER:}")
-    private String resultDestinationOverride;
 
     private final ConnectorProperties connectorProperties;
 
@@ -19,17 +15,11 @@ public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorD
 
     @Override
     public String buildDestination(IntegrationRequest event) {
-        String destination = (resultDestinationOverride == null || resultDestinationOverride.isEmpty())
-                ? "integrationError" + connectorProperties.getMqDestinationSeparator() + event.getServiceFullName() : resultDestinationOverride;
+        String errorDestinationOverride = connectorProperties.getErrorDestinationOverride();
+
+        String destination = (errorDestinationOverride == null || errorDestinationOverride.isEmpty())
+                ? "integrationError" + connectorProperties.getMqDestinationSeparator() + event.getServiceFullName() : errorDestinationOverride;
 
         return destination;
-    }
-
-    public String getResultDestinationOverride() {
-        return resultDestinationOverride;
-    }
-
-    public void setResultDestinationOverride(String resultDestinationOverride) {
-        this.resultDestinationOverride = resultDestinationOverride;
     }
 }

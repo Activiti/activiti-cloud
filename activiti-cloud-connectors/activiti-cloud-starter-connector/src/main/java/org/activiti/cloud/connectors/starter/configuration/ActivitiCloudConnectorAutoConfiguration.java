@@ -17,15 +17,19 @@ import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSenderImpl;
 import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableBinding({ProcessRuntimeChannels.class})
+@PropertySource("classpath:activiti-cloud-connector.properties")
+@EnableConfigurationProperties(ConnectorProperties.class)
 public class ActivitiCloudConnectorAutoConfiguration {
 
     @Bean
