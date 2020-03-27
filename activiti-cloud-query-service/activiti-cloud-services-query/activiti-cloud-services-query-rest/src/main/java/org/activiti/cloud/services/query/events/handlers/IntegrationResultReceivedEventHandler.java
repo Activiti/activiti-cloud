@@ -41,7 +41,7 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
         IntegrationContextEntity entity = findOrCreateIntegrationContextEntity(integrationEvent);
 
         entity.setResultDate(new Date(integrationEvent.getTimestamp()));
-        entity.setStatus(IntegrationContextStatus.RESULT_RECEIVED);
+        entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
         entity.setOutBoundVariables(entity.getOutBoundVariables());
 
         persistIntoDatabase(event,

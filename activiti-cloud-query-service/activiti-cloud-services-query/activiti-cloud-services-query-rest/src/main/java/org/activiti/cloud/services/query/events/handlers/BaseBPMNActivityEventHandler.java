@@ -39,7 +39,6 @@ public abstract class BaseBPMNActivityEventHandler  {
         BPMNActivityEntity bpmnActivityEntity = bpmnActivitiyRepository.findByProcessInstanceIdAndElementIdAndExecutionId(bpmnActivity.getProcessInstanceId(),
                                                                                                                           bpmnActivity.getElementId(),
                                                                                                                           bpmnActivity.getExecutionId());
-        // Let's persist to database if does not exists
         if(bpmnActivityEntity == null) {
             bpmnActivityEntity = new BPMNActivityEntity(event.getServiceName(),
                                                         event.getServiceFullName(),
@@ -65,7 +64,7 @@ public abstract class BaseBPMNActivityEventHandler  {
     }
 
     protected void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                     BPMNActivityEntity entity) {
+                                       BPMNActivityEntity entity) {
         try {
             bpmnActivitiyRepository.save(entity);
         } catch (Exception cause) {

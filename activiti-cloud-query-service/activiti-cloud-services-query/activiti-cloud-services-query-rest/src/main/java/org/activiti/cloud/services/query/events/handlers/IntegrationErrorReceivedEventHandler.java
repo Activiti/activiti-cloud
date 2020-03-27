@@ -41,7 +41,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         IntegrationContextEntity entity = findOrCreateIntegrationContextEntity(integrationEvent);
 
         entity.setErrorDate(new Date(integrationEvent.getTimestamp()));
-        entity.setStatus(IntegrationContextStatus.ERROR_RECEIVED);
+        entity.setStatus(IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
         entity.setErrorMessage(integrationEvent.getErrorMessage());
         entity.setErrorClassName(integrationEvent.getErrorClassName());
         entity.setStackTraceElements(integrationEvent.getStackTraceElements());

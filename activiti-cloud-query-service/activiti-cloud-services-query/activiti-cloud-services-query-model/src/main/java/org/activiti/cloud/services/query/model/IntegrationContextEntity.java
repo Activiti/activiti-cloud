@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class IntegrationContextEntity extends ActivitiEntityMetadata {
 
     public static enum IntegrationContextStatus {
-        INTEGRATION_REQUESTED, RESULT_RECEIVED, ERROR_RECEIVED
+        INTEGRATION_REQUESTED, INTEGRATION_RESULT_RECEIVED, INTEGRATION_ERROR_RECEIVED
     }
 
     @Id
