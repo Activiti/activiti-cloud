@@ -41,8 +41,14 @@ public class CloudIntegrationErrorReceivedEventImpl extends CloudRuntimeEventImp
                                                   List<StackTraceElement> stackTraceElements) {
         super(integrationContext);
         if (getEntity() != null) {
-            setEntityId(getEntity().getClientId());
+            setEntityId(getEntity().getId());
         }
+
+        setProcessInstanceId(integrationContext.getProcessInstanceId());
+        setProcessDefinitionId(integrationContext.getProcessDefinitionId());
+        setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
+        setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
+        setBusinessKey(integrationContext.getBusinessKey());
 
         this.errorMessage = errorMessage;
         this.errorClassName = errorClassName;
