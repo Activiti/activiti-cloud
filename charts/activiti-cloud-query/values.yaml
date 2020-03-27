@@ -51,6 +51,11 @@ javaOpts:
 
 ## Allows the specification of additional environment variables
 extraEnv: |
+  - name: GRAPHIQL_GRAPHQL_WEB_PATH
+    value: /notifications/graphql
+  - name: GRAPHIQL_GRAPHQL_WS_PATH
+    value: /notifications/ws/graphql
+    
   # - name: ACT_KEYCLOAK_URL
   #   valueFrom:
   #     configMapKeyRef:
