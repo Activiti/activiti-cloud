@@ -65,4 +65,28 @@ public class ConnectorProperties {
         this.errorDestinationOverride = errorDestinationOverride;
     }
 
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public void setServiceVersion(String serviceVersion) {
+        this.serviceVersion = serviceVersion;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
+    }
+
+    public void setMqDestinationSeparator(String mqDestinationSeparator) {
+        this.mqDestinationSeparator = mqDestinationSeparator;
+    }
+
 }
