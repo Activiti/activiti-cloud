@@ -996,7 +996,7 @@ public class AuditServiceIT {
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setProcessDefinitionId("28");
-        integrationContext.setProcessDefinitionId("47");
+        integrationContext.setProcessInstanceId("47");
         integrationContext.setClientId("elementId");
         integrationContext.setClientName("Connector Task");
         integrationContext.setClientType("serviceTask");
