@@ -32,12 +32,12 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
+import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 
 public class ServiceTaskIntegrationResultEventHandler {
 
@@ -49,19 +49,22 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private final VariablesMappingProvider outboundVariablesProvider;
+    private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
 
     public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
                                                     IntegrationContextService integrationContextService,
                                                     MessageChannel auditProducer,
                                                     RuntimeBundleProperties runtimeBundleProperties,
                                                     RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                    VariablesMappingProvider outboundVariablesProvider) {
+                                                    VariablesMappingProvider outboundVariablesProvider,
+                                                    IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.auditProducer = auditProducer;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.outboundVariablesProvider = outboundVariablesProvider;
+        this.messageBuilderFactory = messageBuilderFactory;
     }
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
@@ -90,22 +93,17 @@ public class ServiceTaskIntegrationResultEventHandler {
     }
 
 
-    @SuppressWarnings("rawtypes")
     private void sendAuditMessage(IntegrationResult integrationResult) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationResultReceivedEventImpl integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(integrationResult.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationResultReceived);
 
-            IntegrationContext context = integrationResult.getIntegrationContext();
-            integrationResultReceived.setProcessInstanceId(context.getProcessInstanceId());
-            integrationResultReceived.setProcessDefinitionId(context.getProcessDefinitionId());
-            integrationResultReceived.setProcessDefinitionVersion(context.getProcessDefinitionVersion());
-            integrationResultReceived.setProcessDefinitionKey(context.getProcessDefinitionKey());
-            integrationResultReceived.setBusinessKey(context.getBusinessKey());
+            CloudRuntimeEvent<?, ?>[] payload = Stream.of(integrationResultReceived)
+                                                      .toArray(CloudRuntimeEvent[]::new);
 
-            Message<CloudRuntimeEvent[]> message = MessageBuilder.withPayload(Stream.of(integrationResultReceived)
-                                                                                        .toArray(CloudRuntimeEvent[]::new))
-                .build();
+            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderFactory.create(integrationResult.getIntegrationContext())
+                                                                              .withPayload(payload)
+                                                                              .build();
 
             auditProducer.send(message);
         }

@@ -17,7 +17,6 @@ package org.activiti.services.connectors;
 
 import java.util.stream.Stream;
 
-import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
@@ -58,23 +57,17 @@ public class IntegrationRequestSender {
         sendAuditEvent(event);
     }
 
-    @SuppressWarnings("rawtypes")
     private void sendAuditEvent(IntegrationRequest integrationRequest) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationRequestedEventImpl integrationRequested = new CloudIntegrationRequestedEventImpl(integrationRequest.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequested);
 
-            IntegrationContext context = integrationRequest.getIntegrationContext();
-            integrationRequested.setProcessInstanceId(context.getProcessInstanceId());
-            integrationRequested.setProcessDefinitionId(context.getProcessDefinitionId());
-            integrationRequested.setProcessDefinitionVersion(context.getProcessDefinitionVersion());
-            integrationRequested.setProcessDefinitionKey(context.getProcessDefinitionKey());
-            integrationRequested.setBusinessKey(context.getBusinessKey());
+            CloudRuntimeEvent<?,?>[] payload = Stream.of(integrationRequested)
+                                                     .toArray(CloudRuntimeEvent[]::new);
 
-            Message<CloudRuntimeEvent[]> message = messageBuilderFactory.create(integrationRequest.getIntegrationContext())
-                                                                        .withPayload(Stream.of(integrationRequested)
-                                                                                           .toArray(CloudRuntimeEvent[]::new))
-                                                                        .build();
+            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderFactory.create(integrationRequested.getEntity())
+                                                                              .withPayload(payload)
+                                                                              .build();
             auditProducer.send(message);
         }
     }

@@ -17,6 +17,7 @@
 package org.activiti.services.connectors.channel;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -28,12 +29,12 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
+import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 
 public class ServiceTaskIntegrationErrorEventHandler {
 
@@ -44,17 +45,21 @@ public class ServiceTaskIntegrationErrorEventHandler {
     private final MessageChannel auditProducer;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
+
 
     public ServiceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
                                                     IntegrationContextService integrationContextService,
                                                     MessageChannel auditProducer,
                                                     RuntimeBundleProperties runtimeBundleProperties,
-                                                    RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+                                                    RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                    IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.auditProducer = auditProducer;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+        this.messageBuilderFactory = messageBuilderFactory;
     }
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
@@ -67,7 +72,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
             List<Execution> executions = runtimeService.createExecutionQuery().executionId(integrationContextEntity.getExecutionId()).list();
             if (executions.size() > 0) {
-                // TODO map error to integrationContextEntity.getExecutionId()
+
                 String message = "Received integration error with execution id `" +
                         integrationContextEntity.getExecutionId() +
                         ", flow node id `" + integrationContext.getClientId() +
@@ -87,7 +92,6 @@ public class ServiceTaskIntegrationErrorEventHandler {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     private void sendAuditMessage(IntegrationError integrationError) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationErrorReceivedEventImpl integrationErrorReceived = new CloudIntegrationErrorReceivedEventImpl(integrationError.getIntegrationContext(),
@@ -96,16 +100,12 @@ public class ServiceTaskIntegrationErrorEventHandler {
                                                                                                                          integrationError.getStackTraceElements());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationErrorReceived);
 
-            IntegrationContext context = integrationError.getIntegrationContext();
-            integrationErrorReceived.setProcessInstanceId(context.getProcessInstanceId());
-            integrationErrorReceived.setProcessDefinitionId(context.getProcessDefinitionId());
-            integrationErrorReceived.setProcessDefinitionVersion(context.getProcessDefinitionVersion());
-            integrationErrorReceived.setProcessDefinitionKey(context.getProcessDefinitionKey());
-            integrationErrorReceived.setBusinessKey(context.getBusinessKey());
+            CloudRuntimeEvent<?, ?>[] payload = Stream.of(integrationErrorReceived)
+                                                      .toArray(CloudRuntimeEvent[]::new);
 
-            Message<CloudRuntimeEvent[]> message = MessageBuilder.withPayload(new CloudRuntimeEvent[] {integrationErrorReceived})
-                                                                 .build();
-
+            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderFactory.create(integrationErrorReceived.getEntity())
+                                                                              .withPayload(payload)
+                                                                              .build();
             auditProducer.send(message);
         }
     }

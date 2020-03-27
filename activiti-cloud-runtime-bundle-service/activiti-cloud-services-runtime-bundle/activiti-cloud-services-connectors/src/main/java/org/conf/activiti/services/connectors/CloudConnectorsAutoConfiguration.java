@@ -58,13 +58,15 @@ public class CloudConnectorsAutoConfiguration {
                                                                                              ProcessEngineChannels processEngineChannels,
                                                                                              RuntimeBundleProperties runtimeBundleProperties,
                                                                                              RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                                                             VariablesMappingProvider outboundVariablesProvider) {
+                                                                                             VariablesMappingProvider outboundVariablesProvider,
+                                                                                             IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         return new ServiceTaskIntegrationResultEventHandler(runtimeService,
                                                             integrationContextService,
                                                             processEngineChannels.auditProducer(),
                                                             runtimeBundleProperties,
                                                             runtimeBundleInfoAppender,
-                                                            outboundVariablesProvider);
+                                                            outboundVariablesProvider,
+                                                            messageBuilderFactory);
     }
 
     @Bean
@@ -73,12 +75,14 @@ public class CloudConnectorsAutoConfiguration {
                                                                                            IntegrationContextService integrationContextService,
                                                                                            ProcessEngineChannels processEngineChannels,
                                                                                            RuntimeBundleProperties runtimeBundleProperties,
-                                                                                           RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+                                                                                           RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                                                           IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         return new ServiceTaskIntegrationErrorEventHandler(runtimeService,
                                                            integrationContextService,
                                                            processEngineChannels.auditProducer(),
                                                            runtimeBundleProperties,
-                                                           runtimeBundleInfoAppender);
+                                                           runtimeBundleInfoAppender,
+                                                           messageBuilderFactory);
     }
 
     @Bean
