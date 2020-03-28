@@ -16,7 +16,7 @@
     <activiti-cloud-modeling.version>7.1.737</activiti-cloud-modeling.version>
     <example-runtime-bundle.version>7.1.420</example-runtime-bundle.version>
     <example-cloud-connector.version>7.1.357</example-cloud-connector.version>
-    <activiti-cloud-query.version>7.1.353</activiti-cloud-query.version>
+    <activiti-cloud-query.version>7.1.354</activiti-cloud-query.version>
   </properties>
   <dependencies>
     <dependency>
