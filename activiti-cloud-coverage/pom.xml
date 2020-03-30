@@ -170,16 +170,19 @@
     <dependency>
       <groupId>org.activiti.cloud.acc</groupId>
       <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud.modeling</groupId>
       <artifactId>activiti-cloud-services-modeling-api-impl</artifactId>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-test</artifactId>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
 
