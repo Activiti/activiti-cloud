@@ -102,10 +102,12 @@ jobs:
       stage: activiti-cloud-coverage
       script:
         - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-coverage/pom.xml
+        - bash <(curl -s https://codecov.io/bash)
+
 
 # Send coverage data
 after_success:
-  bash <(curl -s https://codecov.io/bash)
+#  bash <(curl -s https://codecov.io/bash)
 
 after_failure:
   - cat **/target/surefire-reports/*.xml | grep -B 1 -A 10 "<error"
