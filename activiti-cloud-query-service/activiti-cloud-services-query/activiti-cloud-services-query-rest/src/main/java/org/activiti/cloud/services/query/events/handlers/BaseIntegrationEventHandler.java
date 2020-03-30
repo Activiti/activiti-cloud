@@ -37,7 +37,7 @@ public abstract class BaseIntegrationEventHandler {
                                                   event.getServiceVersion(),
                                                   event.getAppName(),
                                                   event.getAppVersion());
-            // Let use event id to persist activity id
+            // Let use event id to persist integration context
             entity.setId(bpmnActivityEntity.getId());
             entity.setClientId(integrationContext.getClientId());
             entity.setClientName(integrationContext.getClientName());
