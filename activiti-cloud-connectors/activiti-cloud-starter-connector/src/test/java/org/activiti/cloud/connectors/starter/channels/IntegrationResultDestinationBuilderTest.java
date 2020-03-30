@@ -13,17 +13,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 public class IntegrationResultDestinationBuilderTest {
-    
+
     @InjectMocks
     private IntegrationResultDestinationBuilderImpl subject;
 
     @Mock
     private ConnectorProperties connectorProperties;
-    
+
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        
+
         when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
     }
 
@@ -39,10 +39,10 @@ public class IntegrationResultDestinationBuilderTest {
         integrationRequest.setServiceVersion("1.0");
 
         // when
-        String resut = subject.buildDestination(integrationRequest);
-        
+        String result = subject.buildDestination(integrationRequest);
+
         // then
-        assertThat(resut).isEqualTo("integrationResult.myApp");
+        assertThat(result).isEqualTo("integrationResult.myApp");
 
     }
 
