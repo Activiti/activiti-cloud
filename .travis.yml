@@ -11,6 +11,17 @@ env:
 
 before_install:
   - mkdir -p $HOME/.m2
+  - cp settings.xml $HOME/.m2
+  - echo MAVEN_OPTS=-Xmx1536m > ~/.mavenrc
+  - curl -Ls https://github.com/jenkins-x/jx-release-version/releases/download/v1.0.24/jx-release-version_1.0.24_linux_amd64.tar.gz|  tar
+    xvz -C .
+  - curl -Ls -o updatebot.jar   https://repo1.maven.org/maven2/io/jenkins/updatebot/updatebot/1.1.53/updatebot-1.1.53.jar
+  - sudo cp jx-release-version /usr/bin/jx-release-version
+  - sudo cp updatebot.jar  /usr/bin/updatebot.jar
+  - echo "java -jar /usr/bin/updatebot.jar" > updatebot
+  - sudo cp updatebot  /usr/bin/updatebot
+  - sudo chmod a+x /usr/bin/updatebot
+  - echo $(jx-release-version) > VERSION
 
 install: travis_wait mvn ${MAVEN_CLI_OPTS} dependency:resolve dependency:resolve-plugins || true
 
@@ -39,7 +50,13 @@ stages:
   - name: activiti-cloud-modeling-service
   - name: activiti-cloud-notifications-graphql-service
   - name: activiti-cloud-connectors
-
+  - name: deploy
+    if: type != pull_request
+  - name: tag
+    if: type != pull_request
+  - name: updatebot
+    if: type != pull_request
+    
 jobs:
   include:
     - name: activiti-cloud-build
@@ -96,7 +113,27 @@ jobs:
       stage: activiti-cloud-connectors
       script:
         - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
-
+    - name: deploy
+      stage: deploy
+      script: 
+        -  
+    - name: Create a tag
+      stage: tag
+      script: |
+        mvn versions:set -DnewVersion=$(cat VERSION)
+        git add --all
+        git commit -m "Release $(cat VERSION)" --allow-empty
+        git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)"
+        git push -f -q https://${GITHUB_TOKEN}@github.com/almerico/Activiti.git v$(cat VERSION)
+    - name: Deploy to nexus
+      stage: deploy
+      script:
+      - mvn versions:set -DnewVersion=$(cat VERSION)
+      - mvn clean deploy -DskipTests
+    - name: Update versions in other components
+      stage: updatebot
+      script:
+      - export VERSION=$(cat VERSION)| make updatebot/push-version
 # Send coverage data
 after_success:
   bash <(curl -s https://codecov.io/bash)
