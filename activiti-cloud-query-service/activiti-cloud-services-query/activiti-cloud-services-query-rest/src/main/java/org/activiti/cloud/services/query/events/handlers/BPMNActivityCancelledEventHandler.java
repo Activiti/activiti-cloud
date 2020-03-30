@@ -35,7 +35,7 @@ public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHand
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityCancelledEvent activityEvent = CloudBPMNActivityCancelledEvent.class.cast(event);
 
-        BPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntityB(event);
+        BPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntity(event);
 
         bpmnActivityEntity.setCancelledDate(new Date(activityEvent.getTimestamp()));
         bpmnActivityEntity.setStatus(BPMNActivityStatus.CANCELLED);

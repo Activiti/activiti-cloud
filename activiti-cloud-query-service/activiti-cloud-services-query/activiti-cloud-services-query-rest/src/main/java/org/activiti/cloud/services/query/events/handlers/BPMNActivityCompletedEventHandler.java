@@ -35,7 +35,7 @@ public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHand
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityCompletedEvent activityEvent = CloudBPMNActivityCompletedEvent.class.cast(event);
 
-        BPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntityB(event);
+        BPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntity(event);
 
         bpmnActivityEntity.setCompletedDate(new Date(activityEvent.getTimestamp()));
         bpmnActivityEntity.setStatus(BPMNActivityStatus.COMPLETED);

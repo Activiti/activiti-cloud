@@ -35,7 +35,7 @@ public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandle
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityStartedEvent activityEvent = CloudBPMNActivityStartedEvent.class.cast(event);
 
-        BPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntityB(event);
+        BPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntity(event);
 
         // Activity can be cyclical, so we just update the status and started date anyways
         bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));

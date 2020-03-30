@@ -31,7 +31,7 @@ public abstract class BaseBPMNActivityEventHandler  {
         this.bpmnActivitiyRepository = activitiyRepository;
     }
 
-    protected BPMNActivityEntity findOrCreateBPMNActivityEntityB(CloudRuntimeEvent<?, ?> event) {
+    protected BPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
