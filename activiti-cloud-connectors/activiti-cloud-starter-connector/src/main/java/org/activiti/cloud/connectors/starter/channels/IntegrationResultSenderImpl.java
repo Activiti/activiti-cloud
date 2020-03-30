@@ -18,7 +18,6 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
@@ -26,7 +25,6 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
     private final IntegrationResultChannelResolver resolver;
 
-    @Autowired
     public IntegrationResultSenderImpl(IntegrationResultChannelResolver resolver) {
         this.resolver = resolver;
     }
@@ -34,9 +32,9 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
     @Override
     public void send(Message<IntegrationResult> message) {
         IntegrationRequest request = message.getPayload().getIntegrationRequest();
-        
+
         MessageChannel destination = resolver.resolveDestination(request);
-        
+
         destination.send(message);
     }
 }

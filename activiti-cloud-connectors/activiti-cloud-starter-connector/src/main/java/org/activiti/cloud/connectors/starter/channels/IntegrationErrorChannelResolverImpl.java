@@ -1,7 +1,6 @@
 package org.activiti.cloud.connectors.starter.channels;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.MessageChannel;
 
@@ -11,7 +10,6 @@ public class IntegrationErrorChannelResolverImpl implements IntegrationErrorChan
 
     private final IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder;
 
-    @Autowired
     public IntegrationErrorChannelResolverImpl(BinderAwareChannelResolver resolver,
                                                IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder) {
         this.resolver = resolver;

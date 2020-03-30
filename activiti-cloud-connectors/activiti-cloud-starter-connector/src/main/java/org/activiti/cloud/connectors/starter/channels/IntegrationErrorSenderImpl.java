@@ -18,7 +18,6 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
@@ -26,7 +25,6 @@ public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
     private final IntegrationErrorChannelResolver resolver;
 
-    @Autowired
     public IntegrationErrorSenderImpl(IntegrationErrorChannelResolver resolver) {
         this.resolver = resolver;
     }
