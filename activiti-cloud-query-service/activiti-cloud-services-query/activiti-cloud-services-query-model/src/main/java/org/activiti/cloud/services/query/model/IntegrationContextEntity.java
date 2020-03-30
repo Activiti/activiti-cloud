@@ -14,6 +14,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
@@ -25,9 +26,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity(name="IntegrationContext")
 @Table(name="INTEGRATION_CONTEXT", indexes={
-//    @Index(name="bpmn_activity_status_idx", columnList="status", unique=false),
-//    @Index(name="bpmn_activity_processInstance_idx", columnList="processInstanceId", unique=false),
-//    @Index(name="bpmn_activity_processInstance_elementId_idx", columnList="processInstanceId,elementId", unique=true)
+    @Index(name="integration_context_status_idx", columnList="status", unique=false),
+    @Index(name="integration_context_processInstance_idx", columnList="processInstanceId", unique=false),
+    @Index(name="integration_context_processInstance_elementId_idx", columnList="processInstanceId,clientId,executionId", unique=true)
 })
 public class IntegrationContextEntity extends ActivitiEntityMetadata {
 
@@ -282,6 +283,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
                                                processDefinitionKey,
                                                processDefinitionVersion,
                                                processInstanceId,
+                                               executionId,
                                                requestDate,
                                                resultDate,
                                                stackTraceElements,
@@ -317,6 +319,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
                Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
                Objects.equals(processInstanceId, other.processInstanceId) &&
+               Objects.equals(executionId, other.executionId) &&
                Objects.equals(executionId, other.executionId) &&
                Objects.equals(requestDate, other.requestDate) &&
                Objects.equals(resultDate, other.resultDate) &&

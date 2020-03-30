@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name="BPMN_ACTIVITY", indexes={
     @Index(name="bpmn_activity_status_idx", columnList="status", unique=false),
     @Index(name="bpmn_activity_processInstance_idx", columnList="processInstanceId", unique=false),
-    @Index(name="bpmn_activity_processInstance_elementId_idx", columnList="processInstanceId,elementId", unique=true)
+    @Index(name="bpmn_activity_processInstance_elementId_idx", columnList="processInstanceId,elementId,executionId", unique=true)
 })
 public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudBPMNActivity {
 
@@ -208,6 +208,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
         this.integrationContext = integrationContext;
     }
 
+    @Override
     public String getExecutionId() {
         return executionId;
     }
@@ -232,6 +233,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
                                                processDefinitionKey,
                                                processDefinitionVersion,
                                                processInstanceId,
+                                               executionId,
                                                startedDate,
                                                status);
         return result;
@@ -261,6 +263,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
                Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
                Objects.equals(processInstanceId, other.processInstanceId) &&
+               Objects.equals(executionId, other.executionId) &&
                Objects.equals(startedDate, other.startedDate) &&
                status == other.status;
     }
@@ -278,6 +281,8 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
                .append(activityType)
                .append(", processInstanceId=")
                .append(processInstanceId)
+               .append(", executionId=")
+               .append(executionId)
                .append(", processDefinitionId=")
                .append(processDefinitionId)
                .append(", status=")
