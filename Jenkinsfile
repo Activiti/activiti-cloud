@@ -22,7 +22,6 @@ pipeline {
             sh "mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install -DskipITs"
             sh 'export VERSION=$PREVIEW_VERSION'
-            sh "mvn deploy -DskipITs -DskipTests"
           }
         }
       }
