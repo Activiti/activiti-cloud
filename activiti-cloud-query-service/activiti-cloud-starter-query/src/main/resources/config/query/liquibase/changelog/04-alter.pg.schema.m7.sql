@@ -43,5 +43,5 @@ alter table bpmn_activity
     drop constraint bpmn_activity_processInstance_elementId_idx;
     
 alter table bpmn_activity
-    add constraint bpmn_activity_processInstance_elementId_idx unique (process_instance_id, element_id, executionId);
+    add constraint bpmn_activity_processInstance_elementId_idx unique (process_instance_id, element_id, execution_id);
         
