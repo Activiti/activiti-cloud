@@ -18,6 +18,8 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
+import javax.persistence.EntityManager;
+
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
@@ -29,9 +31,11 @@ import org.activiti.cloud.services.query.model.IntegrationContextEntity.Integrat
 public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
     public IntegrationRequestedEventHandler(IntegrationContextRepository repository,
-                                            BPMNActivityRepository bpmnActivityRepository) {
+                                            BPMNActivityRepository bpmnActivityRepository,
+                                            EntityManager entityManager) {
         super(repository,
-              bpmnActivityRepository);
+              bpmnActivityRepository,
+              entityManager);
     }
 
     @Override

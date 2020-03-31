@@ -18,6 +18,8 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
+import javax.persistence.EntityManager;
+
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
@@ -30,14 +32,12 @@ import org.activiti.cloud.services.query.model.IntegrationContextEntity.Integrat
 
 public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
-    private final BPMNActivityRepository bpmnActivityRepository;
-
     public IntegrationErrorReceivedEventHandler(IntegrationContextRepository repository,
-                                                BPMNActivityRepository bpmnActivityRepository) {
+                                                BPMNActivityRepository bpmnActivityRepository,
+                                                EntityManager entityManager) {
         super(repository,
-              bpmnActivityRepository);
-
-        this.bpmnActivityRepository = bpmnActivityRepository;
+              bpmnActivityRepository,
+              entityManager);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         BPMNActivityEntity bpmnActivityEntity = entity.getBpmnActivity();
         bpmnActivityEntity.setStatus(BPMNActivityStatus.ERROR);
 
-        bpmnActivityRepository.save(bpmnActivityEntity);
+        entityManager.persist(bpmnActivityEntity);
     }
 
     @Override

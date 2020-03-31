@@ -1,5 +1,7 @@
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
+
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
@@ -13,11 +15,14 @@ public abstract class BaseIntegrationEventHandler {
 
     protected final IntegrationContextRepository integrationContextRepository;
     protected final BPMNActivityRepository bpmnActivityRepository;
+    protected final EntityManager entityManager;
 
     public BaseIntegrationEventHandler(IntegrationContextRepository integrationContextRepository,
-                                       BPMNActivityRepository bpmnActivityRepository) {
+                                       BPMNActivityRepository bpmnActivityRepository,
+                                       EntityManager entityManager) {
         this.integrationContextRepository = integrationContextRepository;
         this.bpmnActivityRepository = bpmnActivityRepository;
+        this.entityManager = entityManager;
     }
 
     protected IntegrationContextEntity findOrCreateIntegrationContextEntity(CloudIntegrationEvent event) {
@@ -50,8 +55,6 @@ public abstract class BaseIntegrationEventHandler {
             entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
             entity.setBusinessKey(integrationContext.getBusinessKey());
             entity.setBpmnActivity(bpmnActivityEntity);
-
-            bpmnActivityRepository.save(bpmnActivityEntity);
         }
 
         return entity;
@@ -60,7 +63,7 @@ public abstract class BaseIntegrationEventHandler {
     protected void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
                                        IntegrationContextEntity entity) {
         try {
-            integrationContextRepository.save(entity);
+            entityManager.persist(entity);
         } catch (Exception cause) {
             throw new QueryException("Error handling CloudIntegrationEvent[" + event + "]",
                                      cause);
