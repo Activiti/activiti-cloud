@@ -3,15 +3,17 @@ package org.activiti.cloud.services.query.events.handlers;
 import javax.persistence.EntityManager;
 
 import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
-import org.activiti.cloud.services.query.model.QueryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseIntegrationEventHandler {
+
+    private final static Logger logger = LoggerFactory.getLogger(BaseIntegrationEventHandler.class);
 
     protected final IntegrationContextRepository integrationContextRepository;
     protected final BPMNActivityRepository bpmnActivityRepository;
@@ -37,6 +39,8 @@ public abstract class BaseIntegrationEventHandler {
             BPMNActivityEntity bpmnActivityEntity = bpmnActivityRepository.findByProcessInstanceIdAndElementIdAndExecutionId(integrationContext.getProcessInstanceId(),
                                                                                                                              integrationContext.getClientId(),
                                                                                                                              integrationContext.getExecutionId());
+            logger.info("Found BPMNActivityEntity: {}", bpmnActivityEntity);
+
             entity = new IntegrationContextEntity(event.getServiceName(),
                                                   event.getServiceFullName(),
                                                   event.getServiceVersion(),
@@ -55,18 +59,12 @@ public abstract class BaseIntegrationEventHandler {
             entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
             entity.setBusinessKey(integrationContext.getBusinessKey());
             entity.setBpmnActivity(bpmnActivityEntity);
+
+            entityManager.persist(entity);
+
         }
 
         return entity;
     }
 
-    protected void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                       IntegrationContextEntity entity) {
-        try {
-            entityManager.persist(entity);
-        } catch (Exception cause) {
-            throw new QueryException("Error handling CloudIntegrationEvent[" + event + "]",
-                                     cause);
-        }
-    }
 }

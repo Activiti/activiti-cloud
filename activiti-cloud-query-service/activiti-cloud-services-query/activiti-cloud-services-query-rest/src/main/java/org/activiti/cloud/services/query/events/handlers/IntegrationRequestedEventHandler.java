@@ -48,9 +48,6 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
         entity.setInboundVariables(entity.getInboundVariables());
 
-        persistIntoDatabase(event,
-                            entity);
-
     }
 
     @Override

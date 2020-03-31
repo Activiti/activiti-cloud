@@ -48,9 +48,6 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
         entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
         entity.setOutBoundVariables(entity.getOutBoundVariables());
 
-        persistIntoDatabase(event,
-                            entity);
-
     }
 
     @Override

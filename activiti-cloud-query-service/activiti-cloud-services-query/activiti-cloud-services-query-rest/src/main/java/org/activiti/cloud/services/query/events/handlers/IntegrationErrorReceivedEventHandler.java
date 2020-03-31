@@ -52,13 +52,8 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         entity.setErrorClassName(integrationEvent.getErrorClassName());
         entity.setStackTraceElements(integrationEvent.getStackTraceElements());
 
-        persistIntoDatabase(event,
-                            entity);
-
         BPMNActivityEntity bpmnActivityEntity = entity.getBpmnActivity();
         bpmnActivityEntity.setStatus(BPMNActivityStatus.ERROR);
-
-        entityManager.persist(bpmnActivityEntity);
     }
 
     @Override
