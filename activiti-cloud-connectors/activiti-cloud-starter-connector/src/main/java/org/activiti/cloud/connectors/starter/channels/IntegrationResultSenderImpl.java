@@ -16,32 +16,25 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
+import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 
 public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
-    @Value("${ACT_INT_RES_CONSUMER:}")
-    private String resultDestinationOverride;
+    private final IntegrationResultChannelResolver resolver;
 
-    private final BinderAwareChannelResolver resolver;
-
-    private final ConnectorProperties connectorProperties;
-
-    @Autowired
-    public IntegrationResultSenderImpl(BinderAwareChannelResolver resolver, ConnectorProperties connectorProperties) {
+    public IntegrationResultSenderImpl(IntegrationResultChannelResolver resolver) {
         this.resolver = resolver;
-        this.connectorProperties = connectorProperties;
     }
 
     @Override
     public void send(Message<IntegrationResult> message) {
-        String destination = (resultDestinationOverride == null || resultDestinationOverride.isEmpty())
-                ? "integrationResult" + connectorProperties.getMqDestinationSeparator() + message.getPayload().getIntegrationRequest().getServiceFullName() : resultDestinationOverride;
-        resolver.resolveDestination(destination).send(message);
+        IntegrationRequest request = message.getPayload().getIntegrationRequest();
+
+        MessageChannel destination = resolver.resolveDestination(request);
+
+        destination.send(message);
     }
 }

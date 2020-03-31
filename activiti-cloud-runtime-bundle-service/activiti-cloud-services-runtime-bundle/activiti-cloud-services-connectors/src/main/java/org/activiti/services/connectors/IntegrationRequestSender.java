@@ -26,13 +26,12 @@ import org.activiti.services.connectors.message.IntegrationContextMessageBuilder
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 public class IntegrationRequestSender {
     public static final String CONNECTOR_TYPE = "connectorType";
-    
+
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final MessageChannel auditProducer;
     private final BinderAwareChannelResolver resolver;
@@ -63,10 +62,12 @@ public class IntegrationRequestSender {
             CloudIntegrationRequestedEventImpl integrationRequested = new CloudIntegrationRequestedEventImpl(integrationRequest.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequested);
 
-            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderFactory.create(integrationRequest.getIntegrationContext()).withPayload(Stream.of(integrationRequested)
-                                                                                        .toArray(CloudRuntimeEvent<?, ?>[]::new))
-                .build();
-            
+            CloudRuntimeEvent<?,?>[] payload = Stream.of(integrationRequested)
+                                                     .toArray(CloudRuntimeEvent[]::new);
+
+            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderFactory.create(integrationRequested.getEntity())
+                                                                              .withPayload(payload)
+                                                                              .build();
             auditProducer.send(message);
         }
     }

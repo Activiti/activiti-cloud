@@ -25,6 +25,16 @@
              stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-audit"
+             id="oracle-schema-m7" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/01-alter.oracle.schema.m7.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
   <changeSet author="activiti-query"
              id="initial-schema-m3" dbms="postgresql">
     <preConditions onFail="CONTINUE">
@@ -60,6 +70,15 @@
              stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-query"
+             id="alter3-schema-m7" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/04-alter.pg.schema.m7.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
 
 
 </databaseChangeLog>

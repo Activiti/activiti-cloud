@@ -16,7 +16,7 @@
 package org.activiti.services.connectors.message;
 
 /**
- * Holds message header key names used in messages with IntegrationContext payload type  
+ * Holds message header key names used in messages with IntegrationContext payload type
  *
  */
 class IntegrationContextMessageHeaders {
@@ -27,6 +27,7 @@ class IntegrationContextMessageHeaders {
     public static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
     public static final String PROCESS_DEFINITION_ID = "processDefinitionId";
     public static final String PROCESS_DEFINITION_KEY = "processDefinitionKey";
+    public static final String EXECUTION_ID = "executionId";
     public static final String PROCESS_DEFINITION_VERSION = "processDefinitionVersion";
     public static final String APP_VERSION = "appVersion";
 
