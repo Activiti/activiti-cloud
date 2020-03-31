@@ -50,6 +50,8 @@ public abstract class BaseIntegrationEventHandler {
             entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
             entity.setBusinessKey(integrationContext.getBusinessKey());
             entity.setBpmnActivity(bpmnActivityEntity);
+
+            bpmnActivityRepository.save(bpmnActivityEntity);
         }
 
         return entity;
