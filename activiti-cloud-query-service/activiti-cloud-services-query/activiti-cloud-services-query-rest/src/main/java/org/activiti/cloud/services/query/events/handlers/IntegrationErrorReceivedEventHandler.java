@@ -53,6 +53,8 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         entity.setErrorMessage(integrationEvent.getErrorMessage());
         entity.setErrorClassName(integrationEvent.getErrorClassName());
         entity.setStackTraceElements(integrationEvent.getStackTraceElements());
+        entity.setInboundVariables(integrationEvent.getEntity().getInBoundVariables());
+        entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
         BPMNActivityEntity bpmnActivityEntity = entity.getBpmnActivity();
         bpmnActivityEntity.setStatus(BPMNActivityStatus.ERROR);

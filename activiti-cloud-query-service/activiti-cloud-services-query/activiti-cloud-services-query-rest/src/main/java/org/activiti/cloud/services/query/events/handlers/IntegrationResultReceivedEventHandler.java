@@ -48,8 +48,7 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
 
         entity.setResultDate(new Date(integrationEvent.getTimestamp()));
         entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
-        entity.setOutBoundVariables(entity.getOutBoundVariables());
-
+        entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
     }
 
     @Override

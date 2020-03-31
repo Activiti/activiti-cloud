@@ -27,10 +27,14 @@ import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity.IntegrationContextStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
+
+    private final static Logger logger = LoggerFactory.getLogger(IntegrationRequestedEventHandler.class);
 
     public IntegrationRequestedEventHandler(IntegrationContextRepository repository,
                                             BPMNActivityRepository bpmnActivityRepository,
@@ -48,8 +52,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
 
         entity.setRequestDate(new Date(integrationEvent.getTimestamp()));
         entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
-        entity.setInboundVariables(entity.getInboundVariables());
-
+        entity.setInboundVariables(integrationEvent.getEntity().getInBoundVariables());
     }
 
     @Override
