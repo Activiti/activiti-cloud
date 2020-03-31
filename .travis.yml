@@ -1,42 +1,6 @@
-language: java
-
-jdk:
-  - openjdk11
-
-env:
-  global:
-    - MAVEN_CLI_OPTS=" --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=false -U "
-    - MAVEN_TEST_OPTS=" -Dspring.main.banner-mode=off -Denforcer.skip "
-    - MAVEN_CMD="mvn ${MAVEN_CLI_OPTS} install ${MAVEN_TEST_OPTS}"
-
-before_install:
-  - mkdir -p $HOME/.m2
-  - cp settings.xml $HOME/.m2
-  - echo MAVEN_OPTS=-Xmx1536m > ~/.mavenrc
-  - curl -Ls https://github.com/jenkins-x/jx-release-version/releases/download/v1.0.24/jx-release-version_1.0.24_linux_amd64.tar.gz|  tar
-    xvz -C .
-  - curl -Ls -o updatebot.jar   https://repo1.maven.org/maven2/io/jenkins/updatebot/updatebot/1.1.53/updatebot-1.1.53.jar
-  - sudo cp jx-release-version /usr/bin/jx-release-version
-  - sudo cp updatebot.jar  /usr/bin/updatebot.jar
-  - echo "java -jar /usr/bin/updatebot.jar" > updatebot
-  - sudo cp updatebot  /usr/bin/updatebot
-  - sudo chmod a+x /usr/bin/updatebot
-  - echo $(jx-release-version) > VERSION
+import: Activiti/activiti-scripts:.travis.java.yml@dev-almerico-3212-movepropogation-to-trtavis
 
 install: travis_wait mvn ${MAVEN_CLI_OPTS} dependency:resolve dependency:resolve-plugins || true
-
-cache:
-  directories:
-    - ${HOME}/.m2/repository
-    - ${HOME}/sourceclear
-
-services:
-  - docker
-
-branches:
-  only:
-    - master
-    - develop
 
 stages:
   - name: activiti-cloud-build
@@ -134,11 +98,5 @@ jobs:
       stage: updatebot
       script:
       - export VERSION=$(cat VERSION)| make updatebot/push-version
-# Send coverage data
-after_success:
-  bash <(curl -s https://codecov.io/bash)
 
-after_failure:
-  - cat **/target/surefire-reports/*.xml | grep -B 1 -A 10 "<error"
-  - cat **/target/failsafe-reports/*.xml | grep -B 1 -A 10 "<error"
 
