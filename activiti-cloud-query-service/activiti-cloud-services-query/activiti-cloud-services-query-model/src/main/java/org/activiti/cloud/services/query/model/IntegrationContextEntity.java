@@ -408,6 +408,15 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
 
 
     public void setBpmnActivity(BPMNActivityEntity bpmnActivity) {
+        if (bpmnActivity == null) {
+            if (this.bpmnActivity != null) {
+                this.bpmnActivity.setIntegrationContext(null);
+            }
+        }
+        else {
+            bpmnActivity.setIntegrationContext(this);
+        }
+
         this.bpmnActivity = bpmnActivity;
     }
 
