@@ -254,6 +254,6 @@ create index task_var_taskId_idx on task_variable (task_id);
 create index task_var_name_idx on task_variable (name);
 create index task_var_executionId_idx on task_variable (execution_id);
 alter table integration_context
-    add constraint integration_context_unique_idx unique (process_instance_id, client_id, execution_id);
+    add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
 alter table process_model
     add constraint FKmqdabtfsoy52f0585vkfj40b foreign key (process_definition_id) references process_definition;

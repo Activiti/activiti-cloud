@@ -37,6 +37,9 @@ create table integration_context
     primary key (id)
 );
 
+alter table integration_context
+    add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
+
 alter table bpmn_activity
     add column execution_id varchar(255);
     

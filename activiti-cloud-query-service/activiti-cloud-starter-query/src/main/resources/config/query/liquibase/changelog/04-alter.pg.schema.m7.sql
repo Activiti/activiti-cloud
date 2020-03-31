@@ -12,6 +12,7 @@ create table integration_context
     process_definition_key     	varchar(255),
     process_definition_version 	integer,
     process_instance_id        	varchar(255),
+    execution_id	        	varchar(255),
     parent_process_instance_id  varchar(255),
     business_key		      	varchar(255),
 
@@ -35,6 +36,9 @@ create table integration_context
     
     primary key (id)
 );
+
+alter table integration_context
+    add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
 
 alter table bpmn_activity
     add column execution_id varchar(255);
