@@ -27,7 +27,9 @@ import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity.IntegrationContextStatus;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
     public IntegrationResultReceivedEventHandler(IntegrationContextRepository integrationContextRepository,
@@ -46,8 +48,7 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
 
         entity.setResultDate(new Date(integrationEvent.getTimestamp()));
         entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
-        entity.setOutBoundVariables(entity.getOutBoundVariables());
-
+        entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
     }
 
     @Override

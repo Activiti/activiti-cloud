@@ -32,10 +32,14 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
         logger.debug("Error Message exception occurred: {}", errorMessage);
 
         MessagingException throwablePayload = MessagingException.class.cast(errorMessage.getPayload());
-        Message<?> failedMessage = throwablePayload.getFailedMessage();
+        Message<?> originalMessage= errorMessage.getOriginalMessage();
 
-        if (failedMessage != null) {
-            byte[] data = (byte[]) failedMessage.getPayload();
+        if(originalMessage == null) {
+            originalMessage = throwablePayload.getFailedMessage();
+        }
+
+        if (originalMessage != null) {
+            byte[] data = (byte[]) originalMessage.getPayload();
             IntegrationRequest integrationRequest = null;
 
             try {
