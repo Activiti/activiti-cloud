@@ -29,6 +29,7 @@ import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensi
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionsValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.TaskMappingsServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.TaskMappingsValidator;
+import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionMessageMappingValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelCallActivityValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelEngineValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelNameValidator;
@@ -84,6 +85,12 @@ public class ProcessModelValidatorConfiguration {
     @ConditionalOnMissingBean
     public ProcessExtensionsTaskMappingsValidator processExtensionsTaskMappingsValidator(Set<TaskMappingsValidator> taskMappingsValidators) {
         return new ProcessExtensionsTaskMappingsValidator(taskMappingsValidators);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessExtensionMessageMappingValidator processExtensionMessageMappingValidator() {
+        return new ProcessExtensionMessageMappingValidator();
     }
 
     @Bean

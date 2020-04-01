@@ -629,6 +629,31 @@ public class ProjectControllerIT {
     }
 
     @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessWithInValidMessagePayload() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("message-project"));
+        Model processModel = modelService.importSingleModel(project,
+                                                      processModelType,
+                                                      processFileContent("Process_hg2itgWRj",
+                                                                         resourceAsByteArray("process/message-payload.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("Process_hg2itgWRj",
+                                                               extensions(resourceAsByteArray("process-extensions/message-payload-extension.json"))));
+
+        assertThatResponse(
+            mockMvc.perform(
+                get("{version}/projects/{projectId}/validate",
+                    API_VERSION,
+                    project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn())
+            .isSemanticValidationException()
+            .hasValidationErrorMessages(
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name my-message-payload",
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name wrong-payload",
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name 123abc");
+    }
+
+    @Test
     public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownConnectorParameterMapping() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
