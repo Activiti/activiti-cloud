@@ -24,8 +24,8 @@ pipeline {
           branch 'PR-*'
         }
         environment {
-          PROJECT_VERSION   = maven_project_version()      
-          VERSION           = "$PROJECT_VERSION".replaceAll("SNAPSHOT","$BRANCH_NAME-$BUILD_NUMBER-SNAPSHOT")
+          PROJECT_VERSION   = maven_project_version()
+          VERSION           = "$PROJECT_VERSION".replaceAll("SNAPSHOT","$BRANCH_NAME-$BUILD_NUMBER")
           PREVIEW_NAMESPACE = "$APP_NAME-$BRANCH_NAME".toLowerCase()
           HELM_RELEASE      = "$PREVIEW_NAMESPACE".toLowerCase()
         }
@@ -38,10 +38,8 @@ pipeline {
             // sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$VERSION"
 
             dir("./charts/$APP_NAME") {
-              sh "make preview"
+              sh "make build"
             }
-
-            sh "mvn deploy -DskipTests"
           }
         }
       }
@@ -114,12 +112,12 @@ pipeline {
 
 def jx_release_version() {
     container('maven') {
-        return sh( script: "echo \$(jx-release-version)", returnStdout: true).trim()
+        return sh( script: "echo \$(jx-release-version)", returnStdout: true).trim().toString()
     }
 }
 
 def maven_project_version() {
     container('maven') {
-        return sh( script: "echo \$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f pom.xml)", returnStdout: true).trim()
+        return sh( script: "echo \$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f pom.xml)", returnStdout: true).trim().toString()
     }
 }
