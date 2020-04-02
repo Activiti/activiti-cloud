@@ -21,11 +21,18 @@ import java.util.stream.Stream;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.impl.bpmn.helper.ErrorPropagation;
+import org.activiti.engine.impl.interceptor.Command;
+import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
@@ -46,11 +53,12 @@ public class ServiceTaskIntegrationErrorEventHandler {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
-
+    private final ManagementService managementService;
 
     public ServiceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
                                                     IntegrationContextService integrationContextService,
                                                     MessageChannel auditProducer,
+                                                    ManagementService managementService,
                                                     RuntimeBundleProperties runtimeBundleProperties,
                                                     RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                     IntegrationContextMessageBuilderFactory messageBuilderFactory) {
@@ -60,6 +68,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.messageBuilderFactory = messageBuilderFactory;
+        this.managementService = managementService;
     }
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
@@ -72,14 +81,20 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
             List<Execution> executions = runtimeService.createExecutionQuery().executionId(integrationContextEntity.getExecutionId()).list();
             if (executions.size() > 0) {
-
-                String message = "Received integration error with execution id `" +
+                String errorClassName = integrationError.getErrorClassName();
+                String message = "Received integration error ' + errorClassName + ' with execution id `" +
                         integrationContextEntity.getExecutionId() +
                         ", flow node id `" + integrationContext.getClientId() +
                         "`. The integration error for the integration context `" + integrationContext.getId() + "` is {}";
 
-                LOGGER.debug(message, integrationError);
+                LOGGER.error(message, integrationError);
 
+                if(CloudBpmnError.class.getName().equals(errorClassName)) {
+                    CloudBpmnError cloudBpmnError = new CloudBpmnError(integrationError.getErrorMessage());
+                    ExecutionEntity execution = ExecutionEntity.class.cast(executions.get(0));
+
+                    managementService.executeCommand(new PropagateCloudBpmnErrorCmd(cloudBpmnError, execution));
+                }
             } else {
                 String message = "No task is in this RB is waiting for integration result with execution id `" +
                     integrationContextEntity.getExecutionId() +
@@ -107,6 +122,26 @@ public class ServiceTaskIntegrationErrorEventHandler {
                                                                               .withPayload(payload)
                                                                               .build();
             auditProducer.send(message);
+        }
+    }
+
+    static class PropagateCloudBpmnErrorCmd implements Command<Void> {
+
+        private final CloudBpmnError cloudBpmnError;
+        private final DelegateExecution execution;
+
+        public PropagateCloudBpmnErrorCmd(CloudBpmnError cloudBpmnError, DelegateExecution execution) {
+            super();
+            this.cloudBpmnError = cloudBpmnError;
+            this.execution = execution;
+        }
+
+        @Override
+        public Void execute(CommandContext commandContext) {
+            // throw business fault so that it can be caught by an Error Intermediate Event or Error Event Sub-Process in the process
+            ErrorPropagation.propagateError(cloudBpmnError.getErrorCode(), execution);
+
+            return null;
         }
     }
 }
