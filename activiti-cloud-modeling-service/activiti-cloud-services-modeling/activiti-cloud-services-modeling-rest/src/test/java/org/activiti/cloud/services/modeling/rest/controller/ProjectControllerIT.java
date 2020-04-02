@@ -648,9 +648,9 @@ public class ProjectControllerIT {
                 .andReturn())
             .isSemanticValidationException()
             .hasValidationErrorMessages(
-                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name my-message-payload",
-                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name wrong-payload",
-                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name 123abc");
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name 'my-message-payload'",
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name 'wrong-payload'",
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name '123abc'");
     }
 
     @Test

@@ -25,7 +25,7 @@ public class ProcessExtensionMessageMappingValidator implements ProcessExtension
     private static final String PAYLOAD_PATTERN = "[a-z]([a-zA-Z0-9]+)?";
     private static final String INVALID_PAYLOAD_NAME_ERROR = "Invalid %s message payload name in process extensions: %s";
     private static final String INVALID_PAYLOAD_NAME_ERROR_DESCRIPTION =
-        "The extensions for process '%s' contains mappings to element '%s' for an invalid payload name %s";
+        "The extensions for process '%s' contains mappings to element '%s' for an invalid payload name '%s'";
 
 
     @Override
@@ -35,8 +35,8 @@ public class ProcessExtensionMessageMappingValidator implements ProcessExtension
             IntermediateCatchEvent.class,
             BoundaryEvent.class,
             ThrowEvent.class,
-            EndEvent.class)
-            .stream().filter(element -> isMessageElement((Event) element))
+            EndEvent.class).stream()
+            .filter(element -> isMessageElement((Event) element))
             .collect(Collectors.toSet());
 
         return extensions.getVariablesMappings().entrySet().stream().flatMap(taskMapping ->
@@ -50,15 +50,16 @@ public class ProcessExtensionMessageMappingValidator implements ProcessExtension
 
         FlowNode flowNode = messages.stream().filter(message -> message.getId().equals(elementId)).findFirst().orElse(null);
 
+        Stream<ModelValidationError> errorStream = Stream.of();
         if (flowNode != null) {
-            return extensionMapping.entrySet().stream()
+            errorStream = extensionMapping.entrySet().stream()
                 .map(mappingEntry -> new MappingModel(processId, flowNode, mappingEntry.getKey(), mappingEntry.getValue()))
                 .filter(mappingModel -> mappingModel.getAction() == ServiceTaskActionType.INPUTS)
                 .map(this::validate)
                 .flatMap(Collection::stream);
         }
 
-        return Stream.of();
+        return errorStream;
     }
 
     private List<ModelValidationError> validate(MappingModel mappingModel) {
