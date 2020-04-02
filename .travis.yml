@@ -86,6 +86,3 @@ jobs:
     stage: updatebot
     script:
     - export VERSION=$(cat VERSION)| make updatebot/push-version
-env:
-  global:
-    secure: iBa+89kVMvbcPg4y2DmYRPkKqacKznE53QipmHTHdnhc4dP1CQRYCmg35T2o7GOYKuBQ3b/S6vdDgLek7cB7f1BuqDmJ83w6kKMs/DqZjOxs1ZXYS5pK25mobLLXtxsnAV4S8twl5GjbsNgv7rWFVVqOlNk0emVu0xkGC4pc8HfHhoHIuB4HpFLW2Xvsk8LXOfBoLSbQGWTLUGC9ia7+usj3oPYfD11TKWO29IAUVi134UsXiKnFZauJuSC5stG1k53VWqYhN/tPxXhtlKl9GWtb3rKezr5ZquCEtssWzYUsKU3jOomD9gPTdkl+w9UV6zy2QxlAbB9N+qZ95ybX9PydAs+xB+801eIb9fyy6HjjZh1oO1JR2vKng62sOWN9t9Pt10vN3ZDrDp0J/b/iRACM4j6YzzHTzUlUjTZjZ7Kkqfo5vIvxqYecm6VcLS4hXcKNbeBFtPP6VtciECbum2T3pMhSf2F/LBHjPhNORrWu67iE31RNnyetBDLbok+qH4p+S9T5CIbYor5t8Eei1HNPgkBvUGCtr93WRsqGHuekkTSxSYOf5UyP/p3r7UdsnTvqht+iqZKY+uGdg6/MUwLOQOYgg3CJOnoFIDOgRe2cLQ4gYZCnA/YeByyST8xYzGOAtQ8ebkvRpUUZn8q53N/Keeq/twtVVwq5agToMSA=
