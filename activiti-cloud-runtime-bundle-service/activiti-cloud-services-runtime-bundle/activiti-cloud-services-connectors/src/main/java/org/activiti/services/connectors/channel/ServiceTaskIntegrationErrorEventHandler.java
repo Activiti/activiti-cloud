@@ -82,7 +82,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
             List<Execution> executions = runtimeService.createExecutionQuery().executionId(integrationContextEntity.getExecutionId()).list();
             if (executions.size() > 0) {
                 String errorClassName = integrationError.getErrorClassName();
-                String message = "Received integration error ' + errorClassName + ' with execution id `" +
+                String message = "Received integration error '" + errorClassName + "' with execution id `" +
                         integrationContextEntity.getExecutionId() +
                         ", flow node id `" + integrationContext.getClientId() +
                         "`. The integration error for the integration context `" + integrationContext.getId() + "` is {}";

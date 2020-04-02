@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:activiti="http://activiti.org/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1kzq71p" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Activiti Modeler" exporterVersion="3.0.0-beta">
+  <bpmn:process id="cloudBpmnErrorCloudConnectorProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_0zioauh</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0zioauh" sourceRef="StartEvent_1" targetRef="performBusinessTaskCloudConnector" />
+    <bpmn:endEvent id="EndEvent_08o6dag">
+      <bpmn:incoming>SequenceFlow_18yia5b</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_18yia5b" sourceRef="performBusinessTaskCloudConnector" targetRef="EndEvent_08o6dag" />
+    <bpmn:sequenceFlow id="SequenceFlow_03boqs3" sourceRef="BoundaryEvent_0w05ccr" targetRef="Task_1rhcxhq" />
+    <bpmn:sequenceFlow id="SequenceFlow_1gzrhyf" sourceRef="Task_1rhcxhq" targetRef="performBusinessTaskCloudConnector" />
+    <bpmn:userTask id="Task_1rhcxhq" name="Correct Business Error" activiti:assignee="hruser">
+      <bpmn:incoming>SequenceFlow_03boqs3</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1gzrhyf</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="performBusinessTaskCloudConnector" name="Perfrom Business Task" implementation="perfromBusinessTask">
+      <bpmn:incoming>SequenceFlow_0zioauh</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1gzrhyf</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_18yia5b</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent_0w05ccr" attachedToRef="performBusinessTaskCloudConnector">
+      <bpmn:outgoing>SequenceFlow_03boqs3</bpmn:outgoing>
+      <bpmn:errorEventDefinition errorRef="Error_116gnbk" />
+    </bpmn:boundaryEvent>
+  </bpmn:process>
+  <bpmn:error id="Error_116gnbk" name="Cloud Bpmn Business Error" errorCode="CLOUD_BPMN_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="cloudBpmnErrorCloudConnectorProcess">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="156" y="300" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0zioauh_di" bpmnElement="SequenceFlow_0zioauh">
+        <di:waypoint x="192" y="318" />
+        <di:waypoint x="303" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_08o6dag_di" bpmnElement="EndEvent_08o6dag">
+        <dc:Bounds x="502" y="300" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_18yia5b_di" bpmnElement="SequenceFlow_18yia5b">
+        <di:waypoint x="403" y="318" />
+        <di:waypoint x="502" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_03boqs3_di" bpmnElement="SequenceFlow_03boqs3">
+        <di:waypoint x="415" y="265" />
+        <di:waypoint x="447" y="229" />
+        <di:waypoint x="447" y="137" />
+        <di:waypoint x="403" y="137" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1gzrhyf_di" bpmnElement="SequenceFlow_1gzrhyf">
+        <di:waypoint x="303" y="137" />
+        <di:waypoint x="257" y="137" />
+        <di:waypoint x="257" y="241" />
+        <di:waypoint x="305" y="283" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_0f3upj2_di" bpmnElement="Task_1rhcxhq">
+        <dc:Bounds x="303" y="97" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1du2cks_di" bpmnElement="performBusinessTaskCloudConnector">
+        <dc:Bounds x="303" y="278" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0yo1kn3_di" bpmnElement="BoundaryEvent_0w05ccr">
+        <dc:Bounds x="385" y="260" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
