@@ -23,24 +23,24 @@ import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 
 /**
- * Object that encapsulate task mappings information
+ * Object that encapsulate FlowNode mappings information
  */
-public class TaskMapping {
+public class MappingModel {
 
     private String processId;
 
-    private FlowNode task;
+    private FlowNode flowNode;
 
     private ServiceTaskActionType action;
 
     private Map<String, ProcessVariableMapping> processVariableMappings;
 
-    public TaskMapping(String processId,
-                       FlowNode task,
-                       ServiceTaskActionType action,
-                       Map<String, ProcessVariableMapping> processVariableMappings) {
+    public MappingModel(String processId,
+                        FlowNode flowNode,
+                        ServiceTaskActionType action,
+                        Map<String, ProcessVariableMapping> processVariableMappings) {
         this.processId = processId;
-        this.task = task;
+        this.flowNode = flowNode;
         this.action = action;
         this.processVariableMappings = processVariableMappings;
     }
@@ -49,8 +49,8 @@ public class TaskMapping {
         return processId;
     }
 
-    public FlowNode getTask() {
-        return task;
+    public FlowNode getFlowNode() {
+        return flowNode;
     }
 
     public ServiceTaskActionType getAction() {
