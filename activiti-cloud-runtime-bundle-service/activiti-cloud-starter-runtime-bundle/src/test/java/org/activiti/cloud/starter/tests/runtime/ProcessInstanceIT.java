@@ -139,7 +139,7 @@ public class ProcessInstanceIT {
         CloudProcessInstance returnedProcInst = entity.getBody();
         assertThat(returnedProcInst).isNotNull();
         assertThat(returnedProcInst.getId()).isNotNull();
-        assertThat(returnedProcInst.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        assertThat(returnedProcInst.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.CREATED);
         assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
         assertThat(returnedProcInst.getInitiator()).isNotNull();
         assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloakTestUser);//will only match if using username not id
