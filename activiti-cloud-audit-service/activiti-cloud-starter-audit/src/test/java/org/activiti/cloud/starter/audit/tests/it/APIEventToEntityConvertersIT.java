@@ -16,10 +16,13 @@
 
 package org.activiti.cloud.starter.audit.tests.it;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
+import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
@@ -31,6 +34,9 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationErrorReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationRequestedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationResultReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCreatedEventConverter;
@@ -63,8 +69,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RunWith(SpringRunner.class)
@@ -165,6 +169,15 @@ APIEventToEntityConvertersIT {
 
         converter = eventConverters.getConverterByEventTypeName(BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name());
         assertThat(converter).isNotNull().isInstanceOf(TimerScheduledEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_REQUESTED.name());
+        assertThat(converter).isNotNull().isInstanceOf(IntegrationRequestedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(IntegrationResultReceivedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(IntegrationErrorReceivedEventConverter.class);
 
 
     }

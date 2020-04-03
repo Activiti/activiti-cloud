@@ -8,6 +8,9 @@ github:
         - name: activiti-cloud-dependencies
           branch: develop
           useSinglePullRequest: true
+        - name: activiti-cloud-application
+          branch: develop
+          useSinglePullRequest: true
         - name: example-cloud-connector
           branch: master
           useSinglePullRequest: true
