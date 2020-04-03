@@ -190,6 +190,18 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
+    public void createProcess() throws Exception {
+        StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
+        when(processRuntime.create(any(StartProcessPayload.class))).thenReturn(defaultProcessInstance());
+
+        mockMvc.perform(post("/v1/process-instances/create")
+            .contentType(APPLICATION_JSON)
+            .content(mapper.writeValueAsString(cmd)))
+            .andExpect(status().isOk())
+            .andDo(document(DOCUMENTATION_IDENTIFIER + "/create"));
+    }
+
+    @Test
     public void should_startProcessReturnForbidden_when_activitiForbiddenExceptionIsThrownByTheController() throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
