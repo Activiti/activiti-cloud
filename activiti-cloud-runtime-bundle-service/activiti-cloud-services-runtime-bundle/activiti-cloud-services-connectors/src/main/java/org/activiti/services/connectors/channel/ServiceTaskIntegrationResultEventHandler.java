@@ -28,6 +28,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultRe
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
@@ -77,16 +78,25 @@ public class ServiceTaskIntegrationResultEventHandler {
 
             List<Execution> executions = runtimeService.createExecutionQuery().executionId(integrationContextEntity.getExecutionId()).list();
             if (executions.size() > 0) {
-                runtimeService.trigger(integrationContextEntity.getExecutionId(),
-                                       outboundVariablesProvider.calculateOutPutVariables(buildMappingExecutionContext(integrationContext.getProcessDefinitionId(),
-                                                                                                                       executions.get(0).getActivityId()),
-                                                                                          integrationContext.getOutBoundVariables()));
+                ExecutionEntity execution = ExecutionEntity.class.cast(executions.get(0));
+
+                if(execution.getActivityId().equals(integrationContext.getClientId())) {
+                    runtimeService.trigger(integrationContextEntity.getExecutionId(),
+                                           outboundVariablesProvider.calculateOutPutVariables(buildMappingExecutionContext(integrationContext.getProcessDefinitionId(),
+                                                                                                                           execution.getActivityId()),
+                                                                                              integrationContext.getOutBoundVariables()));
+                } else {
+                    LOGGER.warn("Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
+                                 integrationContext.getClientId(),
+                                 integrationResult,
+                                 execution.getId());
+                }
             } else {
                 String message = "No task is in this RB is waiting for integration result with execution id `" +
                     integrationContextEntity.getExecutionId() +
                     ", flow node id `" + integrationContext.getClientId() +
                     "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
-                LOGGER.debug(message);
+                LOGGER.warn(message);
             }
             sendAuditMessage(integrationResult);
         }

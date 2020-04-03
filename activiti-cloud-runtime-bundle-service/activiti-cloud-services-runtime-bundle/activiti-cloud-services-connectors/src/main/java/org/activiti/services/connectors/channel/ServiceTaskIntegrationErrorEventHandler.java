@@ -81,26 +81,38 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
             List<Execution> executions = runtimeService.createExecutionQuery().executionId(integrationContextEntity.getExecutionId()).list();
             if (executions.size() > 0) {
+                ExecutionEntity execution = ExecutionEntity.class.cast(executions.get(0));
+
+                String clientId = integrationContext.getClientId();
                 String errorClassName = integrationError.getErrorClassName();
                 String message = "Received integration error '" + errorClassName + "' with execution id `" +
                         integrationContextEntity.getExecutionId() +
-                        ", flow node id `" + integrationContext.getClientId() +
+                        ", flow node id `" + clientId +
                         "`. The integration error for the integration context `" + integrationContext.getId() + "` is {}";
 
                 LOGGER.error(message, integrationError);
 
                 if(CloudBpmnError.class.getName().equals(errorClassName)) {
-                    CloudBpmnError cloudBpmnError = new CloudBpmnError(integrationError.getErrorMessage());
-                    ExecutionEntity execution = ExecutionEntity.class.cast(executions.get(0));
+                    if(execution.getActivityId().equals(clientId)) {
+                        CloudBpmnError cloudBpmnError = new CloudBpmnError(integrationError.getErrorMessage());
+                        cloudBpmnError.setStackTrace(integrationError.getStackTraceElements()
+                                                                     .toArray(new StackTraceElement[] {}));
 
-                    managementService.executeCommand(new PropagateCloudBpmnErrorCmd(cloudBpmnError, execution));
+                        managementService.executeCommand(new PropagateCloudBpmnErrorCmd(cloudBpmnError,
+                                                                                        execution));
+                    } else {
+                        LOGGER.warn("Could not find matching activityId '{}' for integration error '{}' with executionId '{}'",
+                                     clientId,
+                                     integrationError,
+                                     execution.getId());
+                    }
                 }
             } else {
                 String message = "No task is in this RB is waiting for integration result with execution id `" +
                     integrationContextEntity.getExecutionId() +
                     ", flow node id `" + integrationContext.getClientId() +
                     "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
-                LOGGER.debug(message);
+                LOGGER.warn(message);
             }
 
             sendAuditMessage(integrationError);
