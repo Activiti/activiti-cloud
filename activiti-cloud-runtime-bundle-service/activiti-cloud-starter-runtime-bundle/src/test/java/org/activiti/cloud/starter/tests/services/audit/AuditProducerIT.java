@@ -211,6 +211,7 @@ public class AuditProducerIT {
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(PROCESS_CREATED.name(),
                             VARIABLE_CREATED.name(),
+                            PROCESS_UPDATED.name(),
                             PROCESS_STARTED.name(),
                             ACTIVITY_STARTED.name()/*start event*/,
                             BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*start event*/,
@@ -687,7 +688,8 @@ public class AuditProducerIT {
                             CloudRuntimeEvent::getProcessInstanceId,
                             CloudRuntimeEvent::getParentProcessInstanceId,
                             CloudRuntimeEvent::getProcessDefinitionKey)
-                    .containsExactly(tuple(PROCESS_CREATED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                        .containsExactly(tuple(PROCESS_CREATED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(PROCESS_UPDATED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                             tuple(PROCESS_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                             tuple(ACTIVITY_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                             tuple(ACTIVITY_COMPLETED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
