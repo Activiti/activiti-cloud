@@ -90,6 +90,11 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
+    public Resource<CloudProcessInstance> startCreatedProcess(String processInstanceId) {
+        return resourceAssembler.toResource(processRuntime.startCreatedProcess(processInstanceId));
+    }
+
+    @Override
     public Resource<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload startProcessPayload) {
         return resourceAssembler.toResource(processRuntime.create(startProcessPayload));
     }

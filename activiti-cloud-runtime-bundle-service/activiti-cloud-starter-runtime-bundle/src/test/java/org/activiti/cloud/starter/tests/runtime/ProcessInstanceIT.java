@@ -49,6 +49,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestClientException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -150,6 +151,52 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getServiceFullName()).isEqualTo(runtimeBundleProperties.getServiceFullName());
         assertThat(returnedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());
         assertThat(returnedProcInst.getServiceVersion()).isEqualTo(runtimeBundleProperties.getServiceVersion());
+    }
+
+    @Test
+    public void shouldStartAnAlreadyCreatedProcess() {
+        //when
+        ResponseEntity<CloudProcessInstance> createdEntity = processInstanceRestTemplate.createProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+            null,
+            "business_key");
+        CloudProcessInstance createdProcInst = createdEntity.getBody();
+        assertThat(createdProcInst).isNotNull();
+        assertThat(createdProcInst.getId()).isNotNull();
+        assertThat(createdProcInst.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.CREATED);
+
+        ResponseEntity<CloudProcessInstance> startedEntity =
+            processInstanceRestTemplate.startCreatedProcess(createdEntity.getBody().getId());
+
+        //then
+        assertThat(startedEntity).isNotNull();
+        CloudProcessInstance startedProcInst = startedEntity.getBody();
+        assertThat(startedProcInst).isNotNull();
+        assertThat(startedProcInst.getId()).isNotNull();
+        assertThat(startedProcInst.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        assertThat(startedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
+        assertThat(startedProcInst.getInitiator()).isNotNull();
+        assertThat(startedProcInst.getInitiator()).isEqualTo(keycloakTestUser);//will only match if using username not id
+        assertThat(startedProcInst.getBusinessKey()).isEqualTo("business_key");
+        assertThat(startedProcInst.getAppName()).isEqualTo(runtimeBundleProperties.getAppName());
+        assertThat(startedProcInst.getAppVersion()).isEqualTo("1");
+        assertThat(startedProcInst.getServiceName()).isEqualTo(runtimeBundleProperties.getServiceName());
+        assertThat(startedProcInst.getServiceFullName()).isEqualTo(runtimeBundleProperties.getServiceFullName());
+        assertThat(startedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());
+        assertThat(startedProcInst.getServiceVersion()).isEqualTo(runtimeBundleProperties.getServiceVersion());
+    }
+
+    @Test
+    public void shouldThrowAnError_when_StartingAnAlreadyStartedProcess() {
+        //when
+        ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+            null,
+            "business_key");
+
+        //then
+        assertThat(entity).isNotNull();
+        CloudProcessInstance startedProcessInstance = entity.getBody();
+        assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+                    processInstanceRestTemplate.startCreatedProcess(startedProcessInstance.getId()));
     }
 
     @Test

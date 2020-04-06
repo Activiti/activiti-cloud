@@ -125,10 +125,6 @@ public class ProcessInstanceRestTemplate {
             businessKey);
     }
 
-    public ResponseEntity<CloudProcessInstance> startProcessWithoutCheck(StartProcessPayload startProcess) {
-        return startProcessWithoutCheck(PROCESS_INSTANCES_RELATIVE_URL,startProcess);
-    }
-
     public ResponseEntity<CloudProcessInstance> startProcess(StartProcessPayload startProcess) {
         return startProcess(PROCESS_INSTANCES_RELATIVE_URL,startProcess);
     }
@@ -149,6 +145,14 @@ public class ProcessInstanceRestTemplate {
                                           });
     }
 
+    private ResponseEntity<CloudProcessInstance> startCreatedProcessWithoutCheck(String baseURL) {
+        return  testRestTemplate.exchange(baseURL,
+            HttpMethod.POST,
+            new HttpEntity<>(null),
+            new ParameterizedTypeReference<CloudProcessInstance>() {
+            });
+    }
+
     private ResponseEntity<CloudProcessInstance> createProcessWithoutCheck(String baseURL, StartProcessPayload payload) {
         return  testRestTemplate.exchange(baseURL,
             HttpMethod.POST,
@@ -159,6 +163,16 @@ public class ProcessInstanceRestTemplate {
 
     private ResponseEntity<CloudProcessInstance> startProcess(String baseURL, StartProcessPayload startProcess) {
         ResponseEntity<CloudProcessInstance> responseEntity = startProcessWithoutCheck(baseURL, startProcess);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().getId()).isNotNull();
+        return responseEntity;
+    }
+
+    public ResponseEntity<CloudProcessInstance> startCreatedProcess(String processInstanceId) {
+        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat(processInstanceId).concat("/start");
+        ResponseEntity<CloudProcessInstance> responseEntity = startCreatedProcessWithoutCheck(baseURL);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
