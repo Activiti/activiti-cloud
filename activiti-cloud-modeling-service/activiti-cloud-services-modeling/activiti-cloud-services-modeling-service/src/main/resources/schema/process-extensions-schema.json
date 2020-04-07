@@ -195,6 +195,25 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "folder"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "object",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is folder"
+                }
+              }
+            }
+          }
         }
       ],
       "required": [
