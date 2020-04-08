@@ -18,7 +18,7 @@
     <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
     <activiti-cloud-notifications-service-graphql.version>${project.version}</activiti-cloud-notifications-service-graphql.version>
-    <graphql-jpa-query.version>0.4.1</graphql-jpa-query.version>
+    <graphql-jpa-query.version>0.4.4</graphql-jpa-query.version>
   </properties>
   <dependencyManagement>
     <dependencies>
