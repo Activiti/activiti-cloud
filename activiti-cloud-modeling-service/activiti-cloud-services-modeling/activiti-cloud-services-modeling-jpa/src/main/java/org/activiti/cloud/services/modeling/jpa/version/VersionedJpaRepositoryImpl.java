@@ -66,6 +66,12 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
         return super.save(versionedEntity);
     }
 
+    @Override
+    @Transactional
+    public <S extends T> S saveWithNoVersion(S versionedEntity) {
+        return super.save(versionedEntity);
+    }
+
     /**
      * Generate and add a new version to a given version entity.
      * @param versionedEntity the version entity to generate for

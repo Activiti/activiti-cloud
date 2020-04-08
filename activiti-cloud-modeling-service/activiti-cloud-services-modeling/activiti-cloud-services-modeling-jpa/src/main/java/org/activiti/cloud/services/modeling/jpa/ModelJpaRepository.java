@@ -87,7 +87,7 @@ public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, 
     @Override
     default ModelEntity updateModelContent(ModelEntity modelToBeUpdated,
                                            FileContent fileContent) {
-        return save(modelToBeUpdated);
+        return saveWithNoVersion(modelToBeUpdated);
     }
 
     @Override
