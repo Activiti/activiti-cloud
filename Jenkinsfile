@@ -106,7 +106,6 @@ pipeline {
       steps {
         container('maven') {
           // ensure we're not on a detached head
-          sh "mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$VERSION"
           sh "mvn install -DskipTests"
 
         }
