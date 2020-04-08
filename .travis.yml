@@ -7,7 +7,7 @@ env:
   global:
     - MAVEN_CLI_OPTS="--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=false -U"
     - MAVEN_TEST_OPTS=" -Dspring.main.banner-mode=off -Denforcer.skip"
-    - MAVEN_CMD="mvn ${MAVEN_CLI_OPTS} verify ${MAVEN_TEST_OPTS} -DskipITs=false"
+    - MAVEN_CMD="mvn ${MAVEN_CLI_OPTS} install ${MAVEN_TEST_OPTS} -DskipITs=false"
 
 before_install:
   - mkdir -p $HOME/.m2
