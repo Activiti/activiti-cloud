@@ -1,0 +1,3 @@
+{{- template "common.ingress" (list . "activiti.connector.ingress") -}}
+{{- define "activiti.connector.ingress" -}}
+{{- end -}}

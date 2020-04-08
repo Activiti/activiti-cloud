@@ -1,0 +1,4 @@
+{{- template "common.deployment" (list . "activiti.connector.deployment") -}}
+{{- define "activiti.connector.deployment" -}}
+
+{{- end -}}
