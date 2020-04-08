@@ -27,6 +27,7 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
@@ -53,7 +54,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestClientException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -166,6 +166,7 @@ public class ProcessInstanceIT {
 
         //then
         assertThat(startedEntity).isNotNull();
+        assertThat(startedEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         CloudProcessInstance startedProcInst = startedEntity.getBody();
         assertThat(startedProcInst).isNotNull();
         assertThat(startedProcInst.getId()).isNotNull();
@@ -191,9 +192,12 @@ public class ProcessInstanceIT {
 
         //then
         assertThat(entity).isNotNull();
+
         CloudProcessInstance startedProcessInstance = entity.getBody();
-        assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
-                    processInstanceRestTemplate.startCreatedProcess(startedProcessInstance.getId()));
+        ResponseEntity<ActivitiErrorMessageImpl> failEntity =
+            processInstanceRestTemplate.startCreatedProcessFailing(startedProcessInstance.getId());
+        assertThat(failEntity.getBody().getMessage()).isEqualTo("Process instance " + startedProcessInstance.getId() + " has already been started");
+        assertThat(failEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test

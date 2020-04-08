@@ -16,12 +16,9 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
@@ -32,6 +29,7 @@ import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.impl.util.IoUtil;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -46,6 +44,8 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @TestComponent
 public class ProcessInstanceRestTemplate {
@@ -145,11 +145,19 @@ public class ProcessInstanceRestTemplate {
                                           });
     }
 
-    private ResponseEntity<CloudProcessInstance> startCreatedProcessWithoutCheck(String baseURL) {
-        return  testRestTemplate.exchange(baseURL,
+    private ResponseEntity<CloudProcessInstance> startCreatedProcessCall(String baseURL) {
+        return testRestTemplate.exchange(baseURL,
             HttpMethod.POST,
             new HttpEntity<>(null),
             new ParameterizedTypeReference<CloudProcessInstance>() {
+            });
+    }
+
+    private ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessCallFail(String baseURL) {
+        return testRestTemplate.exchange(baseURL,
+            HttpMethod.POST,
+            new HttpEntity<>(null),
+            new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {
             });
     }
 
@@ -172,11 +180,17 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<CloudProcessInstance> startCreatedProcess(String processInstanceId) {
         String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat(processInstanceId).concat("/start");
-        ResponseEntity<CloudProcessInstance> responseEntity = startCreatedProcessWithoutCheck(baseURL);
+        ResponseEntity<CloudProcessInstance> responseEntity = startCreatedProcessCall(baseURL);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().getId()).isNotNull();
+        return responseEntity;
+    }
+
+    public ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessFailing(String processInstanceId) {
+        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat(processInstanceId).concat("/start");
+        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = startCreatedProcessCallFail(baseURL);
         return responseEntity;
     }
 
