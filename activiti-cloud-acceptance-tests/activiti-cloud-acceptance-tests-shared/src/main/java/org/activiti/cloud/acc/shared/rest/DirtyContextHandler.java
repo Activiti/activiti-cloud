@@ -16,16 +16,14 @@
 
 package org.activiti.cloud.acc.shared.rest;
 
-import feign.Feign;
+import static org.springframework.hateoas.Link.REL_SELF;
+
 import feign.Headers;
-import feign.Logger;
 import feign.RequestLine;
 import feign.gson.GsonEncoder;
 import net.serenitybdd.core.Serenity;
-import org.activiti.cloud.acc.shared.rest.feign.OAuth2FeignRequestInterceptor;
+import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.springframework.hateoas.Resource;
-
-import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
  * Dirty context handler
@@ -73,11 +71,7 @@ public class DirtyContextHandler {
     }
 
     public void deleteByUri(String uri) {
-        Feign.builder()
-                .encoder(new GsonEncoder())
-                .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.BASIC)
-                .requestInterceptor(new OAuth2FeignRequestInterceptor())
+        FeignRestDataClient.builder(new GsonEncoder(), new feign.codec.Decoder.Default())
                 .target(DeleteByUriClient.class,
                         uri)
                 .delete();
