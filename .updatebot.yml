@@ -1,0 +1,19 @@
+github:
+  organisations:
+    - name: activiti
+      repositories:
+        - name: activiti-cloud-full-chart
+          branch: master
+          useSinglePullRequest: true
+    - name: alfresco
+      repositories:
+        - name: alfresco-process-parent
+          useSinglePullRequest: true
+        - name: alfresco-process-application-oracle-kafka
+          useSinglePullRequest: true
+        - name: alfresco-process-application-deployment
+          useSinglePullRequest: true
+        - name: alfresco-process-springboot-service-deployment
+          useSinglePullRequest: true
+        - name: alfresco-adf-app-deployment
+          useSinglePullRequest: true
