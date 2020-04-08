@@ -96,7 +96,7 @@ public class RuntimeFeignConfiguration {
                 .encoder(new GsonEncoder())
                 .errorDecoder(new FeignErrorDecoder())
                 .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
+                .logLevel(Logger.Level.BASIC)
                 .requestInterceptor(new OAuth2FeignRequestInterceptor())
                 .target(ProcessRuntimeDiagramService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
@@ -256,7 +256,7 @@ public class RuntimeFeignConfiguration {
                 .encoder(new GsonEncoder())
                 .errorDecoder(new FeignErrorDecoder())
                 .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
+                .logLevel(Logger.Level.BASIC)
                 .requestInterceptor(new OAuth2FeignRequestInterceptor())
                 .target(ProcessQueryDiagramService.class,
                         runtimeTestsConfigurationProperties.getQueryUrl());
@@ -268,7 +268,7 @@ public class RuntimeFeignConfiguration {
                 .encoder(new GsonEncoder())
                 .errorDecoder(new FeignErrorDecoder())
                 .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
+                .logLevel(Logger.Level.BASIC)
                 .requestInterceptor(new OAuth2FeignRequestInterceptor())
                 .target(ProcessQueryAdminDiagramService.class,
                         runtimeTestsConfigurationProperties.getQueryUrl());

@@ -76,7 +76,7 @@ public class DirtyContextHandler {
         Feign.builder()
                 .encoder(new GsonEncoder())
                 .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
+                .logLevel(Logger.Level.BASIC)
                 .requestInterceptor(new OAuth2FeignRequestInterceptor())
                 .target(DeleteByUriClient.class,
                         uri)
