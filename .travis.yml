@@ -28,14 +28,41 @@ branches:
     - develop
 
 stages:
-  - name: activiti-cloud-app
+  - name: example-runtime-bundle
+  - name: activiti-cloud-query
+  - name: example-cloud-connector
+  - name: activiti-cloud-acceptance-scenarios
+  - name: activiti-cloud-dependencies
+
 
 jobs:
   include:
-    - name: activiti-cloud-app
-      stage: activiti-cloud-app
+    - name: example-runtime-bundle
+      stage: example-runtime-bundle
       script:
-        - travis_wait 120 ${MAVEN_CMD} -f pom.xml -pl !activiti-cloud-acceptance-scenarios
+        - travis_wait 120 ${MAVEN_CMD} -f example-runtime-bundle/pom.xml
+
+    - name: activiti-cloud-query
+      stage: activiti-cloud-query
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query/pom.xml
+
+    - name: example-cloud-connector
+      stage: example-cloud-connector
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f example-cloud-connector/pom.xml
+
+    - name: activiti-cloud-acceptance-scenarios
+      stage: activiti-cloud-acceptance-scenarios
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -DskipTests -f activiti-cloud-acceptance-scenarios/pom.xml
+
+    - name: activiti-cloud-dependencies
+      stage: activiti-cloud-dependencies
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-dependencies/pom.xml
+
+
 
 
 # Send coverage data
