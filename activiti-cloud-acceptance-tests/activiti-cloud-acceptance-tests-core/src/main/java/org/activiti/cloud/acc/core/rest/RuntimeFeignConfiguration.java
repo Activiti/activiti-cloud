@@ -17,8 +17,7 @@
 package org.activiti.cloud.acc.core.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.Feign;
-import feign.Logger;
+import feign.Feign.Builder;
 import feign.gson.GsonEncoder;
 import feign.jackson.JacksonEncoder;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
@@ -44,10 +43,8 @@ import org.activiti.cloud.acc.core.services.runtime.admin.TaskRuntimeAdminServic
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskVariablesRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.diagram.ProcessRuntimeDiagramService;
 import org.activiti.cloud.acc.shared.rest.feign.FeignConfiguration;
-import org.activiti.cloud.acc.shared.rest.feign.FeignErrorDecoder;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.acc.shared.rest.feign.HalDecoder;
-import org.activiti.cloud.acc.shared.rest.feign.OAuth2FeignRequestInterceptor;
 import org.activiti.cloud.acc.shared.service.SwaggerService;
 import org.activiti.cloud.api.model.shared.impl.conf.CloudCommonModelAutoConfiguration;
 import org.activiti.cloud.api.process.model.impl.conf.CloudProcessModelAutoConfiguration;
@@ -92,12 +89,7 @@ public class RuntimeFeignConfiguration {
 
     @Bean
     public ProcessRuntimeDiagramService runtimeBundleDiagramService() {
-        return Feign.builder()
-                .encoder(new GsonEncoder())
-                .errorDecoder(new FeignErrorDecoder())
-                .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
-                .requestInterceptor(new OAuth2FeignRequestInterceptor())
+        return baseFeignBuilder()
                 .target(ProcessRuntimeDiagramService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -182,7 +174,7 @@ public class RuntimeFeignConfiguration {
                 .target(AuditAdminService.class,
                         runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
-    
+
     @Bean
     public ProcessVariablesRuntimeAdminService processVariablesRuntimeAdminService() {
         return FeignRestDataClient
@@ -191,7 +183,7 @@ public class RuntimeFeignConfiguration {
                 .target(ProcessVariablesRuntimeAdminService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
-    
+
     @Bean
     public ProcessVariablesRuntimeService processVariablesRuntimeService() {
         return FeignRestDataClient
@@ -202,7 +194,7 @@ public class RuntimeFeignConfiguration {
     }
 
     @Bean
-    public ProcessModelQueryService processModelQueryService(){
+    public ProcessModelQueryService processModelQueryService() {
         return FeignRestDataClient
                 .builder(new feign.codec.Encoder.Default(),
                          new feign.codec.Decoder.Default())
@@ -210,7 +202,7 @@ public class RuntimeFeignConfiguration {
     }
 
     @Bean
-    public ProcessModelQueryAdminService processModelQueryAdminService(){
+    public ProcessModelQueryAdminService processModelQueryAdminService() {
         return FeignRestDataClient
                 .builder(new feign.codec.Encoder.Default(),
                          new feign.codec.Decoder.Default())
@@ -218,7 +210,7 @@ public class RuntimeFeignConfiguration {
     }
 
     @Bean
-    public TaskVariablesRuntimeAdminService taskVariablesRuntimeAdminService(){
+    public TaskVariablesRuntimeAdminService taskVariablesRuntimeAdminService() {
         return FeignRestDataClient
                 .builder(new JacksonEncoder(objectMapper),
                          new HalDecoder(objectMapper))
@@ -227,7 +219,7 @@ public class RuntimeFeignConfiguration {
     }
 
     @Bean
-    public SwaggerService runtimeBundleSwaggerService(){
+    public SwaggerService runtimeBundleSwaggerService() {
         return FeignRestDataClient
                 .builder(new feign.codec.Encoder.Default(),
                          new feign.codec.Decoder.Default())
@@ -235,7 +227,7 @@ public class RuntimeFeignConfiguration {
     }
 
     @Bean
-    public SwaggerService querySwaggerService(){
+    public SwaggerService querySwaggerService() {
         return FeignRestDataClient
                 .builder(new feign.codec.Encoder.Default(),
                          new feign.codec.Decoder.Default())
@@ -243,36 +235,29 @@ public class RuntimeFeignConfiguration {
     }
 
     @Bean
-    public SwaggerService auditSwaggerService(){
+    public SwaggerService auditSwaggerService() {
         return FeignRestDataClient
                 .builder(new feign.codec.Encoder.Default(),
                          new feign.codec.Decoder.Default())
                 .target(SwaggerService.class, runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
-    
+
     @Bean
     public ProcessQueryDiagramService queryDiagramService() {
-        return Feign.builder()
-                .encoder(new GsonEncoder())
-                .errorDecoder(new FeignErrorDecoder())
-                .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
-                .requestInterceptor(new OAuth2FeignRequestInterceptor())
+        return baseFeignBuilder()
                 .target(ProcessQueryDiagramService.class,
                         runtimeTestsConfigurationProperties.getQueryUrl());
-    }    
-    
+    }
+
+    private Builder baseFeignBuilder() {
+        return FeignRestDataClient.builder(new GsonEncoder(), new feign.codec.Decoder.Default());
+    }
+
     @Bean
     public ProcessQueryAdminDiagramService queryAdminDiagramService() {
-        return Feign.builder()
-                .encoder(new GsonEncoder())
-                .errorDecoder(new FeignErrorDecoder())
-                .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
-                .requestInterceptor(new OAuth2FeignRequestInterceptor())
+        return baseFeignBuilder()
                 .target(ProcessQueryAdminDiagramService.class,
                         runtimeTestsConfigurationProperties.getQueryUrl());
-    }    
-    
+    }
 
 }
