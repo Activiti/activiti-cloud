@@ -98,6 +98,20 @@ pipeline {
       }
     }
 
+    stage('Install artifacts') {
+
+      environment {
+        VERSION = version()
+      }
+      steps {
+        container('maven') {
+          // ensure we're not on a detached head
+          sh "mvn install -DskipTests"
+
+        }
+      }
+    }
+
     stage('Build Releases for apps') {
       when {
         anyOf {
