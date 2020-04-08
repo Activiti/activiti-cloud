@@ -1,0 +1,3 @@
+{{- template "common.ingress" (list . "activiti.rb.ingress") -}}
+{{- define "activiti.rb.ingress" -}}
+{{- end -}}

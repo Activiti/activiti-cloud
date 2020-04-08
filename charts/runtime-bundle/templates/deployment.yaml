@@ -1,0 +1,23 @@
+{{- template "common.deployment" (list . "activiti.runtime.deployment") -}}
+{{- define "activiti.runtime.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+      {{- if .Values.postgres.enabled }}
+        - name: wait-for-postgresql
+          image: {{ .Values.init.container.image | quote }}
+          imagePullPolicy: {{ .Values.init.container.imagePullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              until printf "." && nc -z -w 2 {{ .Release.Name }}-{{ .Values.postgres.name }} {{ .Values.postgres.port }}; do
+                  sleep 2;
+              done;
+              echo 'PostgreSQL OK ✓'
+      {{- end }}
+      {{- if .Values.extraInitContainers }}
+{{ tpl .Values.extraInitContainers . | indent 8 }}
+      {{- end }}
+{{- end -}}
