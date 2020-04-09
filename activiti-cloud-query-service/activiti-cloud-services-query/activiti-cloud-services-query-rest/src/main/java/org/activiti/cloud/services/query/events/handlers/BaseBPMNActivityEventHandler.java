@@ -16,19 +16,23 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
+
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.model.QueryException;
 
 public abstract class BaseBPMNActivityEventHandler  {
 
-    private final BPMNActivityRepository bpmnActivitiyRepository;
+    protected final BPMNActivityRepository bpmnActivitiyRepository;
+    protected final EntityManager entityManager;
 
-    public BaseBPMNActivityEventHandler(BPMNActivityRepository activitiyRepository) {
+    public BaseBPMNActivityEventHandler(BPMNActivityRepository activitiyRepository,
+                                        EntityManager entityManager) {
         this.bpmnActivitiyRepository = activitiyRepository;
+        this.entityManager = entityManager;
     }
 
     protected BPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
@@ -57,19 +61,11 @@ public abstract class BaseBPMNActivityEventHandler  {
             bpmnActivityEntity.setProcessDefinitionKey(activityEvent.getProcessDefinitionKey());
             bpmnActivityEntity.setProcessDefinitionVersion(activityEvent.getProcessDefinitionVersion());
             bpmnActivityEntity.setBusinessKey(activityEvent.getBusinessKey());
+
+            entityManager.persist(bpmnActivityEntity);
         }
 
         return bpmnActivityEntity;
 
-    }
-
-    protected void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                       BPMNActivityEntity entity) {
-        try {
-            bpmnActivitiyRepository.save(entity);
-        } catch (Exception cause) {
-            throw new QueryException("Error handling CloudBPMNActivityStartedEvent[" + event + "]",
-                                     cause);
-        }
     }
 }
