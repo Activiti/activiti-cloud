@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -37,9 +38,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -50,9 +49,6 @@ public class TaskEntityUpdatedEventHandlerTest {
 
     @Mock
     private TaskRepository taskRepository;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -109,11 +105,10 @@ public class TaskEntityUpdatedEventHandlerTest {
         given(taskRepository.findById(taskId)).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(QueryException.class);
-        expectedException.expectMessage("Unable to find task with id: " + taskId);
-
         //when
-        handler.handle(event);
+        assertThatExceptionOfType(QueryException.class)
+            .isThrownBy(() -> handler.handle(event))
+            .withMessageContaining("Unable to find task with id: " + taskId);
     }
 
     @Test

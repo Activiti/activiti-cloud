@@ -66,9 +66,7 @@ import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -90,8 +88,6 @@ import java.util.Optional;
 @WithMockModelerUser
 public class ModelControllerIT {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;

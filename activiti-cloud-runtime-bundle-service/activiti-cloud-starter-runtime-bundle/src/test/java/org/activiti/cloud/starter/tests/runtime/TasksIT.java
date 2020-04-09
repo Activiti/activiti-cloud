@@ -703,7 +703,7 @@ public class TasksIT {
 
     }
 
-    @Test()
+    @Test
     public void shouldNotSaveATaskWithEmptyPayload() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));

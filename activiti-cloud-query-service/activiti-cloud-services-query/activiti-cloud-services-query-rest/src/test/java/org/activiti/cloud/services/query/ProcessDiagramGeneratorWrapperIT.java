@@ -17,14 +17,13 @@
 package org.activiti.cloud.services.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDiagramController;
 import org.activiti.image.exception.ActivitiImageException;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -51,9 +50,6 @@ public class ProcessDiagramGeneratorWrapperIT {
 
     @Value("classpath:/processes/SubProcessTest.fixSystemFailureProcess.bpmn20.xml")
     private Resource subProcessTest;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     /**
      * Test for generating a valid process diagram
@@ -140,11 +136,10 @@ public class ProcessDiagramGeneratorWrapperIT {
                 .thenReturn("invalid-file-name");
 
         //THEN
-        expectedException.expect(ActivitiImageException.class);
-        expectedException.expectMessage("Error occurred while getting default diagram image from file");
-
         //WHEN
-        processDiagramGenerator.generateDiagram(bpmnModel);
+        assertThatExceptionOfType(ActivitiImageException.class)
+            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel))
+            .withMessageContaining("Error occurred while getting default diagram image from file");
     }
 
     /**
@@ -162,11 +157,10 @@ public class ProcessDiagramGeneratorWrapperIT {
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
         //THEN
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Error occurred while getting process diagram");
-
         //WHEN
-        processDiagramGenerator.generateDiagram(bpmnModel);
+        assertThatExceptionOfType(RuntimeException.class)
+            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel))
+            .withMessageContaining("Error occurred while getting process diagram");
     }
 
     /**

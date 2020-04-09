@@ -25,9 +25,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAdde
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,9 +44,6 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
 
     @Mock
     private TaskCandidateGroupRepository taskCandidateRepository;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() {

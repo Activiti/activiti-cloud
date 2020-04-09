@@ -21,14 +21,13 @@ import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.cloud.services.core.utils.MockUtils;
 import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -36,9 +35,6 @@ public class ProcessInstanceSortApplierTest {
 
     @InjectMocks
     private ProcessInstanceSortApplier sortApplier;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -97,11 +93,9 @@ public class ProcessInstanceSortApplierTest {
                                                  Sort.by(invalidProperty));
 
         //then
-        expectedException.expect(ActivitiIllegalArgumentException.class);
-        expectedException.expectMessage("invalidProperty");
-
         //when
-        sortApplier.applySort(query,
-                              pageRequest);
+        assertThatExceptionOfType(ActivitiIllegalArgumentException.class)
+            .isThrownBy(() -> sortApplier.applySort(query, pageRequest))
+            .withMessageContaining("invalidProperty");
     }
 }
