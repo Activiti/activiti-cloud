@@ -252,14 +252,16 @@ pipeline {
       }
       steps {
         container('maven') {
-          sh '''updatebot --dry push-version --kind helm activiti-cloud-dependencies $VERSION \
+          script {
+            def modeling_version = modeling_version()
+            sh '''updatebot --dry push-version --kind helm activiti-cloud-dependencies $VERSION \
                         runtime-bundle $VERSION \
                         activiti-cloud-connector $VERSION \
                         activiti-cloud-query $VERSION \
-                        activiti-cloud-modeling $VERSION
+                        activiti-cloud-modeling $modeling_versiom
                   '''
 
-          sh """cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+            sh """cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
                     rm -rf requirements.lock && \
                     rm -rf charts && \
                     rm -rf *.tgz && \
@@ -270,16 +272,17 @@ pipeline {
                     helm dependency build && \
                     helm lint && \
                     helm package . """
-          sh """echo "-------------------------------------" """
-          sh """cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+            sh """echo "-------------------------------------" """
+            sh """cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
             helm upgrade $PREVIEW_NAMESPACE . \
             --install \
             --set global.gateway.domain=$GLOBAL_GATEWAY_DOMAIN \
             --namespace $PREVIEW_NAMESPACE \
             --debug \
             --wait """
-          sh """echo "-------------------------------------" """
-          sh "sleep 30"
+            sh """echo "-------------------------------------" """
+            sh "sleep 30"
+          }
         }
       }
     }
@@ -356,31 +359,35 @@ pipeline {
       }
       steps {
         container('maven') {
-          retry(5) {
-            sh '''updatebot push-version --kind maven \
-                  org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $VERSION \
-                  org.activiti.cloud.audit:activiti-cloud-audit-dependencies $VERSION \
-                  org.activiti.cloud.api:activiti-cloud-api-dependencies $VERSION \
-                  org.activiti.cloud.build:activiti-cloud-parent $VERSION \
-                  org.activiti.cloud.build:activiti-cloud-dependencies-parent $VERSION\
-                  org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $VERSION \
-                  org.activiti.cloud.messages:activiti-cloud-messages-dependencies $VERSION \
-                  org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $VERSION \
-                  org.activiti.cloud.notifications.graphql:activiti-cloud-notifications-graphql-dependencies $VERSION \
-                  org.activiti.cloud.query:activiti-cloud-query-dependencies $VERSION \
-                  org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies $VERSION \
-                  org.activiti.cloud.common:activiti-cloud-service-common-dependencies $VERSION \
+          script {
+            def modeling_version = modeling_version()
+            def activiti_cloud_version = activiti_cloud_version()
+            retry(5) {
+              sh '''updatebot push-version --kind maven \
+                  org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $activiti_cloud_version \
+                  org.activiti.cloud.audit:activiti-cloud-audit-dependencies $activiti_cloud_version \
+                  org.activiti.cloud.api:activiti-cloud-api-dependencies $activiti_cloud_version \
+                  org.activiti.cloud.build:activiti-cloud-parent $activiti_cloud_version \
+                  org.activiti.cloud.build:activiti-cloud-dependencies-parent $activiti_cloud_version\
+                  org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $activiti_cloud_version \
+                  org.activiti.cloud.messages:activiti-cloud-messages-dependencies $activiti_cloud_version \
+                  org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $activiti_cloud_version \
+                  org.activiti.cloud.notifications.graphql:activiti-cloud-notifications-graphql-dependencies $activiti_cloud_version \
+                  org.activiti.cloud.query:activiti-cloud-query-dependencies $activiti_cloud_version \
+                  org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies $activiti_cloud_version \
+                  org.activiti.cloud.common:activiti-cloud-service-common-dependencies $activiti_cloud_version \
                   --merge false
                   '''
 
-            sh '''updatebot push-version --kind helm activiti-cloud-dependencies $VERSION \
+              sh '''updatebot push-version --kind helm activiti-cloud-dependencies $VERSION \
                         runtime-bundle $VERSION \
                         activiti-cloud-connector $VERSION \
                         activiti-cloud-query $VERSION \
-                        activiti-cloud-modeling $VERSION
+                        activiti-cloud-modeling $modeling_version
                   '''
 
-            sh '''updatebot push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $VERSION'''
+              sh '''updatebot push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $VERSION'''
+            }
           }
         }
       }
@@ -427,13 +434,21 @@ def maven_project_version() {
 }
 
 def hel_version() {
-
   container('maven') {
     return sh(script: "echo cat VERSION |rev|sed 's/\\./-/'|rev", returnStdout: true).trim()
-
   }
+}
 
+def modeling_version() {
+  container('maven') {
+    return sh(script: 'grep -oPm1 "(?<=<activiti-cloud-modeling.version>)[^<]+" "dependencies-tests/pom.xml"', returnStdout: true).trim()
+  }
+}
 
+def activiti_cloud_version() {
+  container('maven') {
+    return sh(script: 'grep -oPm1 "(?<=<activiti-cloud-build.version>)[^<]+" "pom.xml")', returnStdout: true).trim()
+  }
 }
 
 def version() {
