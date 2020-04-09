@@ -28,6 +28,7 @@ import org.activiti.cloud.services.modeling.jpa.version.VersionedJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * JPA Repository for {@link ModelEntity} entity
@@ -72,6 +73,13 @@ public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, 
     default ModelEntity createModel(ModelEntity model) {
         model.setId(null);
         return save(model);
+    }
+
+
+    @Override
+    @Transactional
+    default ModelEntity saveWithNoVersion(ModelEntity versionedEntity) {
+        return save(versionedEntity);
     }
 
     @Override
