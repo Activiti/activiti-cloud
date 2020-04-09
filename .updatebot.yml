@@ -2,27 +2,9 @@ github:
   organisations:
     - name: activiti
       repositories:
-        - name: activiti-cloud-acceptance-scenarios
-          branch: master
-          useSinglePullRequest: true
-        - name: activiti-cloud-dependencies
-          branch: develop
-          useSinglePullRequest: true
         - name: activiti-cloud-application
           branch: develop
           useSinglePullRequest: true
-        - name: example-cloud-connector
-          branch: master
-          useSinglePullRequest: true
-        - name: example-runtime-bundle
-          branch: master
-          useSinglePullRequest: true
         - name: activiti-cloud-modeling
-          branch: master
-          useSinglePullRequest: true
-        - name: activiti-cloud-query
-          useSinglePullRequest: true
-          branch: master
-        - name: example-runtime-bundle
           branch: master
           useSinglePullRequest: true
