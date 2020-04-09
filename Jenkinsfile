@@ -254,11 +254,12 @@ pipeline {
         container('maven') {
           script {
             def modeling_version = modeling_version()
+            echo "modeling version:: $modeling_version"
             sh '''updatebot --dry push-version --kind helm activiti-cloud-dependencies $VERSION \
                         runtime-bundle $VERSION \
                         activiti-cloud-connector $VERSION \
                         activiti-cloud-query $VERSION \
-                        activiti-cloud-modeling $modeling_versiom
+                        activiti-cloud-modeling $modeling_version
                   '''
 
             sh """cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
@@ -362,6 +363,8 @@ pipeline {
           script {
             def modeling_version = modeling_version()
             def activiti_cloud_version = activiti_cloud_version()
+            echo "modeling version:: $modeling_version  -  activiti cloud version:: $activiti_cloud_version"
+
             retry(5) {
               sh '''updatebot push-version --kind maven \
                   org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $activiti_cloud_version \
@@ -447,7 +450,7 @@ def modeling_version() {
 
 def activiti_cloud_version() {
   container('maven') {
-    return sh(script: 'grep -oPm1 "(?<=<activiti-cloud-build.version>)[^<]+" "activiti-cloud-dependencies/pom.xml")', returnStdout: true).trim()
+    return sh(script: 'grep -oPm1 "(?<=<activiti-cloud-build.version>)[^<]+" "activiti-cloud-dependencies/pom.xml"', returnStdout: true).trim()
   }
 }
 
