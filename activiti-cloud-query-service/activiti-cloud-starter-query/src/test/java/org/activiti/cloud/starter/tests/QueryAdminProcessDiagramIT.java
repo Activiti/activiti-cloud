@@ -45,9 +45,9 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTo
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.awaitility.Duration;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -94,7 +94,7 @@ public class QueryAdminProcessDiagramIT {
 
     private EventsAggregator eventsAggregator;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         keycloakTokenProducer.setKeycloakTestUser("hradmin");
 
@@ -113,7 +113,7 @@ public class QueryAdminProcessDiagramIT {
         producer.send(firstProcessDeployedEvent);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();

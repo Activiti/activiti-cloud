@@ -42,8 +42,8 @@ import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControl
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -87,7 +87,7 @@ public class EventsEngineEventsAdminControllerIT {
     @MockBean
     private UserGroupManager userGroupManager;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
     }

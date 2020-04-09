@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ListOfStackTraceElementsJpaJsonConverterTest {
 

@@ -35,8 +35,8 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFailedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFiredEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecrementedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -49,7 +49,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -74,7 +74,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         //then
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
-    
+
     @Test
     public void shouldConvertBPMNTimerScheduledEventToCloudBPMNTimerScheduledEvent() {
         //given
@@ -95,7 +95,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         //then
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
-    
+
     @Test
     public void shouldConvertBPMNTimerCancelledEventToCloudBPMNTimerCancelledEvent() {
         //given
@@ -116,7 +116,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         //then
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
-    
+
     @Test
     public void shouldConvertBPMNTimerExecutedEventToCloudBPMNTimerExecutedEvent() {
         //given
@@ -137,7 +137,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         //then
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
-    
+
     @Test
     public void shouldConvertBPMNTimerFailedEventToCloudBPMNTimerFailedEvent() {
         //given
@@ -158,7 +158,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         //then
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
-    
+
     @Test
     public void shouldConvertBPMNTimerRetriesDecrementedEventToCloudBPMNTimerRetriesDecrementedEvent() {
         //given

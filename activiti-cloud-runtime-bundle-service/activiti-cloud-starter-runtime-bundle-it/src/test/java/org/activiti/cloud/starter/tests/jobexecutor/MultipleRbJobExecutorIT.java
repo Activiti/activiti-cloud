@@ -20,9 +20,9 @@ import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.h2.tools.Server;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -41,22 +41,22 @@ public class MultipleRbJobExecutorIT {
     private static final Logger logger = LoggerFactory.getLogger(MultipleRbJobExecutorIT.class);
 
     private static final String ASYNC_TASK = "asyncTask";
-    
+
     private static ConfigurableApplicationContext h2Ctx;
     private static ConfigurableApplicationContext rbCtx1;
     private static ConfigurableApplicationContext rbCtx2;
-    
+
     @Configuration
     @Profile("h2")
     static class H2Application {
-        
+
         @Bean(initMethod = "start", destroyMethod = "stop")
         public Server inMemoryH2DatabaseaServer() throws SQLException {
             return Server.createTcpServer(
               "-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
-        }        
+        }
     }
-    
+
     @SpringBootApplication
     @ActivitiRuntimeBundle
     static class RbApplication {
@@ -69,10 +69,10 @@ public class MultipleRbJobExecutorIT {
                     return Mockito.spy(new JobMessageHandler(configuration));
                 }
             };
-        }        
+        }
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         h2Ctx = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
                                                                  .profiles("h2")
@@ -85,7 +85,7 @@ public class MultipleRbJobExecutorIT {
                                                                   .run();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         rbCtx1.close();
         rbCtx2.close();
@@ -94,30 +94,30 @@ public class MultipleRbJobExecutorIT {
 
     @Test
     public void contextLoads() throws Exception {
-        assertThat(h2Ctx).isNotNull();        
-        assertThat(rbCtx1).isNotNull();        
-        assertThat(rbCtx2).isNotNull();        
+        assertThat(h2Ctx).isNotNull();
+        assertThat(rbCtx1).isNotNull();
+        assertThat(rbCtx2).isNotNull();
     }
-    
+
     @Test
     public void shouldDistributeAsyncJobsBetweenMultipleRbReplicas() throws InterruptedException {
         //given
         int jobCount = 100;
         CountDownLatch jobsCompleted = new CountDownLatch(jobCount);
-        
+
         RuntimeService runtimeService = rbCtx1.getBean(RuntimeService.class);
         RepositoryService repositoryService = rbCtx1.getBean(RepositoryService.class);
         ManagementService managementService = rbCtx1.getBean(ManagementService.class);
-        
+
         JobMessageHandler jobMessageHandler1 = rbCtx1.getBean(JobMessageHandler.class);
         JobMessageHandler jobMessageHandler2 = rbCtx2.getBean(JobMessageHandler.class);
-        
-        rbCtx1.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted), 
+
+        rbCtx1.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
                                                               ActivitiEventType.JOB_EXECUTION_SUCCESS );
 
-        rbCtx2.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted), 
+        rbCtx2.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
                                                               ActivitiEventType.JOB_EXECUTION_SUCCESS );
-        
+
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
                                                       .processDefinitionKey(ASYNC_TASK)
                                                       .singleResult()
@@ -131,12 +131,12 @@ public class MultipleRbJobExecutorIT {
         //then
         assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should distribute and complete all jobs between rb replicas")
                                                             .isTrue();
-        
+
         await("the async executions should complete and no more jobs should exist")
             .untilAsserted(() -> {
                    assertThat(runtimeService.createExecutionQuery()
                                             .processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
-                    
+
                    assertThat(managementService.createJobQuery()
                                                .processDefinitionId(processDefinitionId)
                                                .count()).isEqualTo(0);
@@ -149,7 +149,7 @@ public class MultipleRbJobExecutorIT {
     }
 
     abstract class AbstractActvitiEventListener implements ActivitiEventListener {
-        
+
         @Override
         public boolean isFailOnException() {
             return false;
@@ -157,19 +157,19 @@ public class MultipleRbJobExecutorIT {
     }
 
     class CountDownLatchActvitiEventListener extends AbstractActvitiEventListener {
-        
+
         private final CountDownLatch countDownLatch;
-           
+
         public CountDownLatchActvitiEventListener(CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
         }
-        
+
         @Override
         public void onEvent(ActivitiEvent arg0) {
             logger.info("Received Activiti Event: {}", arg0);
-            
+
             countDownLatch.countDown();
         }
     }
-        
+
 }

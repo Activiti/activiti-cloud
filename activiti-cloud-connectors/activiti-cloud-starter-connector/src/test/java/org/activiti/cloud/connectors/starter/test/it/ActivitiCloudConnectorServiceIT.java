@@ -27,9 +27,9 @@ import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.junit.rabbit.RabbitTestSupport;
@@ -57,7 +57,7 @@ public class ActivitiCloudConnectorServiceIT {
     private final static String PROCESS_DEFINITION_ID = "myProcessDefinitionId";
     private final static String INTEGRATION_ID = "integrationId-" + UUID.randomUUID().toString();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         streamHandler.setIntegrationId(INTEGRATION_ID);
     }

@@ -36,9 +36,9 @@ import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSes
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionDisconnectEvent;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionSubscribeEvent;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionUnsubscribeEvent;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
@@ -71,7 +71,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Captor
     private ArgumentCaptor<Message<GraphQLMessage>> messageCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
@@ -81,7 +81,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
         when(outputChannel.send(Mockito.any(Message.class))).thenReturn(true);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         // nothing
     }

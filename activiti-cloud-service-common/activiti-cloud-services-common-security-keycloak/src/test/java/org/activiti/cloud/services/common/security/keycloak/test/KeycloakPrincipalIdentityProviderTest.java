@@ -23,8 +23,8 @@ import static org.mockito.Mockito.when;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
@@ -32,28 +32,28 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class KeycloakPrincipalIdentityProviderTest {
-    
+
     private KeycloakPrincipalIdentityProvider subject;
-    
+
     @Mock
     private KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
 
     @Mock
     private RefreshableKeycloakSecurityContext keycloakSecurityContext;
-    
+
     @Mock
     private AccessToken accessToken;
-    
-    @Before
+
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        
+
         KeycloakAccessTokenProvider keycloakAccessTokenProvider = new KeycloakAccessTokenProvider() { };
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator = new KeycloakAccessTokenValidator() { };        
-        
+        KeycloakAccessTokenValidator keycloakAccessTokenValidator = new KeycloakAccessTokenValidator() { };
+
         subject = new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider,
                                                         keycloakAccessTokenValidator);
-        
+
         when(principal.getKeycloakSecurityContext()).thenReturn(keycloakSecurityContext);
         when(keycloakSecurityContext.getToken()).thenReturn(accessToken);
         when(accessToken.getPreferredUsername()).thenReturn("username");
@@ -63,25 +63,25 @@ public class KeycloakPrincipalIdentityProviderTest {
     public void testGetUserIdValidToken() {
         // given
         when(accessToken.isActive()).thenReturn(true);
-        
+
         // when
         String userId = subject.getUserId(principal);
-        
+
         // then
         assertThat(userId).isEqualTo("username");
     }
-    
+
     @Test
     public void testGetUserIdInvalidToken() {
         // given
         when(accessToken.isActive()).thenReturn(false);
-        
+
         // when
         Throwable thrown = catchThrowable(() -> { subject.getUserId(principal); });
-        
+
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
     }
-    
+
 
 }

@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 

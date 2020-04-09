@@ -20,8 +20,8 @@ import java.util.Optional;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -39,7 +39,7 @@ public class EntityFinderTest {
     @Mock
     private ProcessInstanceRepository repository;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }

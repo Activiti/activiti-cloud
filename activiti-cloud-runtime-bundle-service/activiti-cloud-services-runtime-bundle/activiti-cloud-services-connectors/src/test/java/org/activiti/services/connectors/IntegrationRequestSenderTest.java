@@ -42,8 +42,8 @@ import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.activiti.services.test.DelegateExecutionBuilder;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
@@ -116,7 +116,7 @@ public class IntegrationRequestSenderTest {
 
     private IntegrationRequestImpl integrationRequest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
 

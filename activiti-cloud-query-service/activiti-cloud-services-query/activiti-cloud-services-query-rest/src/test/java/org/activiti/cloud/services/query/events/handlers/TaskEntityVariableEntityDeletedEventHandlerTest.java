@@ -35,8 +35,8 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -51,11 +51,11 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
     @Mock
     private EntityFinder entityFinder;
-    
+
     @Mock
     private TaskRepository taskRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -72,12 +72,12 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
         TaskVariableEntity variableEntity = new TaskVariableEntity();
         TaskEntity taskEntity = new TaskEntity();
-        taskEntity.setStatus(TaskStatus.CREATED);     
+        taskEntity.setStatus(TaskStatus.CREATED);
         Optional<TaskEntity> optional = Optional.of(taskEntity);
-        
+
         Mockito.when(taskRepository.findById(anyString())).thenReturn(optional);
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
-        
+
         //when
         handler.handle(event);
 

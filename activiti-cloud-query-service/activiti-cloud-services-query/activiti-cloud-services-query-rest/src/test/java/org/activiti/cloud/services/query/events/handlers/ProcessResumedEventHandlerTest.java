@@ -28,8 +28,8 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEvent
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -49,7 +49,7 @@ public class ProcessResumedEventHandlerTest {
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

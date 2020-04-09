@@ -4,8 +4,8 @@ import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.model.shared.impl.CloudVariableInstanceImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.hateoas.Link;
@@ -23,7 +23,7 @@ public class TaskVariablesResourceAssemblerTest {
     @Mock
     private ToCloudVariableInstanceConverter converter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

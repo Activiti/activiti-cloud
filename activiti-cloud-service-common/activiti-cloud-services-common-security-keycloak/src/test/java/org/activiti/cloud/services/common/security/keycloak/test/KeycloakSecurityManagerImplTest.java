@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
 import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

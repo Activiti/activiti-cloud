@@ -41,9 +41,9 @@ import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.asyncexecutor.AsyncExecutor;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,13 +100,13 @@ public class TimerAuditProducerIT {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         streamHandler.clear();
         processEngineConfiguration.getClock().reset();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processEngineConfiguration.getClock().reset();
     }

@@ -20,8 +20,8 @@ import org.activiti.engine.impl.ProcessInstanceQueryProperty;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.cloud.services.core.utils.MockUtils;
 import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.springframework.data.domain.PageRequest;
@@ -36,7 +36,7 @@ public class ProcessInstanceSortApplierTest {
     @InjectMocks
     private ProcessInstanceSortApplier sortApplier;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }

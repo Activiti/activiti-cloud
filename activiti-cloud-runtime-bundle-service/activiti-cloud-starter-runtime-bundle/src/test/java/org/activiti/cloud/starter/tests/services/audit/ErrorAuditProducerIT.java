@@ -32,8 +32,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -60,7 +60,7 @@ public class ErrorAuditProducerIT {
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         streamHandler.clear();
     }

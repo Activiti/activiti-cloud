@@ -20,8 +20,8 @@ import org.activiti.api.runtime.event.impl.BPMNSignalReceivedEventImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -39,7 +39,7 @@ public class CloudSignalReceivedProducerTest {
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

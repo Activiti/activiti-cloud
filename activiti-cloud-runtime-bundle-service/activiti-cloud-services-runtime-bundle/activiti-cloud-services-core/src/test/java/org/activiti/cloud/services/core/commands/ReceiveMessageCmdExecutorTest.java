@@ -8,8 +8,8 @@ import java.util.Collections;
 
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -21,7 +21,7 @@ public class ReceiveMessageCmdExecutorTest {
     @Mock
     private ProcessAdminRuntime processAdminRuntime;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

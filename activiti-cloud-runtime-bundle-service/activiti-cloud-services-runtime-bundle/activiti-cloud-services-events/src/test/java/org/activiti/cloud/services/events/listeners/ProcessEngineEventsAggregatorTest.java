@@ -21,8 +21,8 @@ import java.util.List;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -56,7 +56,7 @@ public class ProcessEngineEventsAggregatorTest {
     @Mock
     private CloudRuntimeEvent<?,?> event;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
         when(eventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);

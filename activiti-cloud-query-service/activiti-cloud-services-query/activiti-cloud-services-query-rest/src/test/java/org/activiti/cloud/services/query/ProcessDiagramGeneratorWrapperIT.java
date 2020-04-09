@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDiagramController;
 import org.activiti.image.exception.ActivitiImageException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;

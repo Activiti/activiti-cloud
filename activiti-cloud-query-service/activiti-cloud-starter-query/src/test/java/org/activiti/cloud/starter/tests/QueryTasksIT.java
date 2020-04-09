@@ -50,9 +50,9 @@ import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -105,7 +105,7 @@ public class QueryTasksIT {
 
     private TaskEventContainedBuilder taskEventContainedBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
@@ -113,7 +113,7 @@ public class QueryTasksIT {
         runningProcessInstance = processInstanceBuilder.aRunningProcessInstance("My running instance");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();

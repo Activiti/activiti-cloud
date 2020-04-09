@@ -21,7 +21,7 @@ import java.util.Date;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import static org.activiti.test.Assertions.assertThat;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;

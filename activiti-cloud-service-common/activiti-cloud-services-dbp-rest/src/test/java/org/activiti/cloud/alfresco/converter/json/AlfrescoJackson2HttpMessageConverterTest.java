@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
@@ -73,7 +73,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     @Captor
     private ArgumentCaptor<EntryResponseContent<String>> contentEntryArgumentCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

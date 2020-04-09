@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.alfresco.argument.resolver;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 

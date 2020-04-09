@@ -21,8 +21,8 @@ import org.activiti.engine.impl.TaskQueryProperty;
 import org.activiti.engine.task.TaskQuery;
 import org.activiti.cloud.services.core.utils.MockUtils;
 import org.activiti.cloud.services.core.pageable.sort.TaskSortApplier;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +37,7 @@ public class TaskSortApplierTest {
     @InjectMocks
     private TaskSortApplier sortApplier;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }

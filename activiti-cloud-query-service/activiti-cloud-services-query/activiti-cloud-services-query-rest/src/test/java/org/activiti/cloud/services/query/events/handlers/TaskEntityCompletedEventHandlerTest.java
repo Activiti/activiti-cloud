@@ -27,8 +27,8 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.api.task.model.impl.TaskImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -48,7 +48,7 @@ public class TaskEntityCompletedEventHandlerTest {
     @Mock
     private TaskRepository taskRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

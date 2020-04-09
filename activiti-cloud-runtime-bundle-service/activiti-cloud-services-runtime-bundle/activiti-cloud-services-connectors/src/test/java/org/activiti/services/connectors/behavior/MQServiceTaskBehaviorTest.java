@@ -26,8 +26,8 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -79,7 +79,7 @@ public class MQServiceTaskBehaviorTest {
     @Captor
     private ArgumentCaptor<IntegrationRequestImpl> integrationRequestCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         behavior = spy(new MQServiceTaskBehavior(integrationContextManager,

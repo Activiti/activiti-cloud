@@ -40,8 +40,8 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.conf.ConnectorsAutoConfiguration;
 import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -74,7 +74,7 @@ public class ConnectorDefinitionControllerImplIT {
     @MockBean
     private RepositoryService repositoryService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         assertThat(processExtensionService).isNotNull();
 

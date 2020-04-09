@@ -51,9 +51,9 @@ import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
@@ -171,14 +171,14 @@ public class JobExecutorIT {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         reset(jobMessageHandler);
 
         processEngineConfiguration = ProcessEngines.getProcessEngine("default").getProcessEngineConfiguration();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processEngineConfiguration.getClock().reset();
     }

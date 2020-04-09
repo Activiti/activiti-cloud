@@ -8,15 +8,15 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.MessageChannel;
 
 public class IntegrationResultChannelResolverImplTest {
-    
+
     private IntegrationResultChannelResolver subject;
 
     @Mock
@@ -26,20 +26,20 @@ public class IntegrationResultChannelResolverImplTest {
 
     @Mock
     private ConnectorProperties connectorProperties;
-    
+
     @Mock
     private MessageChannel messageChannel;
-    
-    @Before
+
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
-        
+
         when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
         when(resolver.resolveDestination(Mockito.anyString())).thenReturn(messageChannel);
-        
+
         builder = Mockito.spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
-        
-        subject = new IntegrationResultChannelResolverImpl(resolver, 
+
+        subject = new IntegrationResultChannelResolverImpl(resolver,
                                                      builder);
     }
 
@@ -56,7 +56,7 @@ public class IntegrationResultChannelResolverImplTest {
 
         // when
         MessageChannel resut = subject.resolveDestination(integrationRequest);
-        
+
         // then
         assertThat(resut).isEqualTo(messageChannel);
 

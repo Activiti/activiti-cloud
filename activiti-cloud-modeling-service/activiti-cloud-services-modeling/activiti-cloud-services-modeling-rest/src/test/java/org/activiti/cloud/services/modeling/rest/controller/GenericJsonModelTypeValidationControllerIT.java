@@ -37,8 +37,8 @@ import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -86,7 +86,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
     private Model genericJsonModel;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
         genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,

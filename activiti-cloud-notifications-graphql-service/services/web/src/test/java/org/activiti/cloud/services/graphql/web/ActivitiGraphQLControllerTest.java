@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -70,7 +70,7 @@ public class ActivitiGraphQLControllerTest {
      * to produce correct output content type in MockHttpResponse
      *
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         when(executor.execute(Mockito.anyString()))
             .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));

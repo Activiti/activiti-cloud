@@ -9,8 +9,8 @@ import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.*;
@@ -34,7 +34,7 @@ public class ProcessModelContentConverterTest {
     @Mock
     private ReferenceIdOverrider referenceIdOverrider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         processModelContentConverter = new ProcessModelContentConverter(processModelType, bpmnXMLConverter);

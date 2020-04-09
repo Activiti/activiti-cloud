@@ -36,8 +36,8 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.test.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -49,14 +49,14 @@ public class VariableEntityCreatedEventHandlerTest {
 
     @Mock
     private VariableRepository variableRepository;
-    
+
     @Mock
     private TaskVariableRepository taskVariableRepository;
 
     @Mock
     private EntityManager entityManager;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

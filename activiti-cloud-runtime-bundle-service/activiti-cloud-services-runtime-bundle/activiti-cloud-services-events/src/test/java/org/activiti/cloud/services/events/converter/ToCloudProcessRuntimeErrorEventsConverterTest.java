@@ -26,8 +26,8 @@ import org.activiti.api.runtime.event.impl.BPMNErrorReceivedEventImpl;
 import org.activiti.api.runtime.model.impl.BPMNErrorImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,8 +39,8 @@ public class ToCloudProcessRuntimeErrorEventsConverterTest {
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    
-    @Before
+
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -52,20 +52,20 @@ public class ToCloudProcessRuntimeErrorEventsConverterTest {
         BPMNErrorReceivedEvent runtimeEvent = new BPMNErrorReceivedEventImpl(entity);
 
         CloudBPMNErrorReceivedEvent cloudEvent = converter.from(runtimeEvent);
-        
+
         assertThat(cloudEvent.getEntity()).isEqualTo(entity);
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
-    
+
     private BPMNError bpmnErrorEntity(String entityId) {
         BPMNErrorImpl entity = new BPMNErrorImpl(entityId);
         entity.setProcessInstanceId("procInstId");
         entity.setProcessDefinitionId("procDefId");
         entity.setErrorCode("errorCode");
-        entity.setErrorId("errorId");   
+        entity.setErrorId("errorId");
         return entity;
     }
 }

@@ -34,9 +34,9 @@ import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -88,7 +88,7 @@ public class QueryAdminVariablesIT {
     private VariableEventContainedBuilder variableEventContainedBuilder;
     private TaskEventContainedBuilder taskEventContainedBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
@@ -98,7 +98,7 @@ public class QueryAdminVariablesIT {
         runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance("Process with variables");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processVariableRepository.deleteAll();
         taskVariableRepository.deleteAll();

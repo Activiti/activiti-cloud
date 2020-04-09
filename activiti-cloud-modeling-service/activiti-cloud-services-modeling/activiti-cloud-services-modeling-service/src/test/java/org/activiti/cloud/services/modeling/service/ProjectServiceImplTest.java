@@ -16,8 +16,8 @@ import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -38,7 +38,7 @@ public class ProjectServiceImplTest {
     @Mock
     private UserTask taskTwo;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

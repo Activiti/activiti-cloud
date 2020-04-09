@@ -27,9 +27,9 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -62,7 +62,7 @@ public class ProcessDefinitionRestrictionServiceIT {
     private ProcessDefinitionEntity defKey3AuthorizedService;
     private ProcessDefinitionEntity defKey1UnauthorizedService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         defKey1AuthorizedService = buildProcessDefinition("test-cmd-endpoint",
                                                           "defKey1");
@@ -84,7 +84,7 @@ public class ProcessDefinitionRestrictionServiceIT {
                                                           defKey2WildService));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processDefinitionRepository.deleteAll();
     }

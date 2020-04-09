@@ -19,9 +19,9 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.security.ProcessVariableLookupRestrictionService;
 import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -65,12 +65,12 @@ public class RestrictVariableEntityQueryIT {
     @Autowired
     private TaskVariableRepository taskVariableRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         taskCandidateUserRepository.deleteAll();
         variableRepository.deleteAll();

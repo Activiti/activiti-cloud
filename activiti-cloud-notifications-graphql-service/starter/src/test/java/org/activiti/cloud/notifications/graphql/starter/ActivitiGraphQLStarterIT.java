@@ -63,8 +63,8 @@ import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.apache.groovy.util.Maps;
 import org.assertj.core.util.Arrays;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -126,7 +126,7 @@ public class ActivitiGraphQLStarterIT {
         // Nothing
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
         authHeaders = keycloakTokenProducer.authorizationHeaders();

@@ -24,8 +24,8 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -48,7 +48,7 @@ public class AuditConsumerChannelHandlerImplTest {
     @Mock
     private APIEventToEntityConverters converters;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

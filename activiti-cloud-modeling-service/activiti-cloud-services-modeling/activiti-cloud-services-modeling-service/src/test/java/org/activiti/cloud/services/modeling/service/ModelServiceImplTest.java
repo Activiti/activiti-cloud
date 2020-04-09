@@ -31,8 +31,8 @@ import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
@@ -70,7 +70,7 @@ public class ModelServiceImplTest {
     @Mock
     private FlowElement flowElementOne;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

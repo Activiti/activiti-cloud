@@ -46,7 +46,8 @@ import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggr
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -136,7 +137,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         }
     }
 
-    @Test(timeout = 20000)
+    @Test
+    @Timeout(20000)
     public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JsonProcessingException {
         // given
         String messageEventName = "start";
@@ -182,7 +184,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(peek()).isNull();
     }
 
-    @Test(timeout = 20000)
+    @Test
+    @Timeout(20000)
     public void shouldProcessMessageEventsConcurrentlyInReversedOrder() throws InterruptedException, JsonProcessingException {
         // given
         String messageEventName = "start";

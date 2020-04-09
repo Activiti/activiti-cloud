@@ -32,7 +32,7 @@ import org.activiti.cloud.services.audit.jpa.events.MessageAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.MessageReceivedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.MessageSentAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.MessageWaitingAuditEventEntity;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MessageEventConverterTest {
 
