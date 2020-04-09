@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
@@ -46,18 +47,20 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationErrorReceivedEvent integrationEvent = CloudIntegrationErrorReceivedEvent.class.cast(event);
 
-        IntegrationContextEntity entity = findOrCreateIntegrationContextEntity(integrationEvent);
+        Optional<IntegrationContextEntity> result = findOrCreateIntegrationContextEntity(integrationEvent);
 
-        entity.setErrorDate(new Date(integrationEvent.getTimestamp()));
-        entity.setStatus(IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
-        entity.setErrorMessage(integrationEvent.getErrorMessage());
-        entity.setErrorClassName(integrationEvent.getErrorClassName());
-        entity.setStackTraceElements(integrationEvent.getStackTraceElements());
-        entity.setInboundVariables(integrationEvent.getEntity().getInBoundVariables());
-        entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
+        result.ifPresent(entity -> {
+            entity.setErrorDate(new Date(integrationEvent.getTimestamp()));
+            entity.setStatus(IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
+            entity.setErrorMessage(integrationEvent.getErrorMessage());
+            entity.setErrorClassName(integrationEvent.getErrorClassName());
+            entity.setStackTraceElements(integrationEvent.getStackTraceElements());
+            entity.setInboundVariables(integrationEvent.getEntity().getInBoundVariables());
+            entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
-        BPMNActivityEntity bpmnActivityEntity = entity.getBpmnActivity();
-        bpmnActivityEntity.setStatus(BPMNActivityStatus.ERROR);
+            BPMNActivityEntity bpmnActivityEntity = entity.getBpmnActivity();
+            bpmnActivityEntity.setStatus(BPMNActivityStatus.ERROR);
+        });
     }
 
     @Override
