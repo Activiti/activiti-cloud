@@ -21,6 +21,7 @@ import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.BPMNError;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -451,7 +452,7 @@ public class ConnectorAuditProducerIT {
     }
 
     @Test
-    public void shouldProduceIntegrationCloudBpmnErrorEventsForCloudBpmnErrorEndEventProcess() {
+    public void shouldProduceIntegrationCloudBpmnErrorEventsForCloudBpmnTerminateEndEventProcess() {
 
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("cloudBpmnErrorEndEventProcess",
@@ -535,7 +536,7 @@ public class ConnectorAuditProducerIT {
 
             assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
                     RuntimeEvent::getProcessInstanceId)
-                    .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
+                    .contains(tuple(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED, startProcessEntity.getBody().getId()));
         });
     }
 

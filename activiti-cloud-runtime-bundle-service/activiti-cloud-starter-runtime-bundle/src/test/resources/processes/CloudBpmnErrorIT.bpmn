@@ -57,6 +57,7 @@
     </bpmn:userTask>
     <bpmn:endEvent id="EndEvent_0k0x5is">
       <bpmn:incoming>SequenceFlow_0unae7l</bpmn:incoming>
+      <bpmn:terminateEventDefinition />
     </bpmn:endEvent>
   </bpmn:process>
   <bpmn:process id="cloudBpmnErrorEventSubprocessProcess" isExecutable="true">
@@ -316,15 +317,15 @@
         <di:waypoint x="1248" y="636" />
         <di:waypoint x="1302" y="636" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="EndEvent_184b0xx_di" bpmnElement="EndEvent_0k0x5is">
-        <dc:Bounds x="1355" y="282" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0unae7l_di" bpmnElement="SequenceFlow_0unae7l">
         <di:waypoint x="1221" y="300" />
         <di:waypoint x="1355" y="300" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="UserTask_0q5e1bx_di" bpmnElement="Task_03qcwv4">
         <dc:Bounds x="1121" y="260" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0he6g0o_di" bpmnElement="EndEvent_0k0x5is">
+        <dc:Bounds x="1355" y="282" width="36" height="36" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
