@@ -61,7 +61,7 @@ import java.util.stream.Collectors;
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class SignalAuditProducerIT {
 
@@ -69,7 +69,7 @@ public class SignalAuditProducerIT {
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
-    
+
     @Autowired
     private RuntimeService runtimeService;
 
@@ -127,7 +127,7 @@ public class SignalAuditProducerIT {
                                                                                 .singleResult()
                                                                                 .getId())
                                                       .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
-            
+
             List<CloudBPMNSignalReceivedEvent> signalReceivedEvents = receivedEvents
                     .stream()
                     .filter(CloudBPMNSignalReceivedEvent.class::isInstance)
@@ -151,8 +151,8 @@ public class SignalAuditProducerIT {
                             tuple(SIGNAL_RECEIVED,
                                   processWithSignalStart.getId(),
                                   startedBySignalProcessInstanceId,
-                                  processWithSignalStart.getKey(), 
-                                  processWithSignalStart.getVersion(), 
+                                  processWithSignalStart.getKey(),
+                                  processWithSignalStart.getVersion(),
                                   processWithSignalStart.getId(),
                                   startedBySignalProcessInstanceId,
                                   "theStart",
@@ -209,7 +209,7 @@ public class SignalAuditProducerIT {
                                                           .map(CloudRuntimeEvent::getProcessInstanceId)
                                                           .findFirst()
                                                           .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
-            
+
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
             assertThat(receivedEvents)

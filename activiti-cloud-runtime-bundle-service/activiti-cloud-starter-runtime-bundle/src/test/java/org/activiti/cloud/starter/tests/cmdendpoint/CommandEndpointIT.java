@@ -73,7 +73,7 @@ import java.util.Map;
 @ActiveProfiles(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @Import({CommandEndPointITStreamHandler.class,
         ProcessInstanceRestTemplate.class,
         TaskRestTemplate.class})
@@ -152,7 +152,7 @@ public class CommandEndpointIT {
         Task task = tasks.iterator().next();
 
         setProcessVariables(processInstanceId);
-        
+
         claimTask(task);
 
         releaseTask(task);

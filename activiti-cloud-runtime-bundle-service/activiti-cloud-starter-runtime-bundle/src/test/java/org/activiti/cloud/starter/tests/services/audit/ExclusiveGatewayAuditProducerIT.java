@@ -69,7 +69,7 @@ import java.util.*;
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class ExclusiveGatewayAuditProducerIT {
 

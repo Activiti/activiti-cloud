@@ -53,7 +53,7 @@ import java.util.Iterator;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 public class ProcessDefinitionIT {
 
     @Autowired
@@ -261,7 +261,7 @@ public class ProcessDefinitionIT {
 
     private <T> T executeRequest(String url,
                                   HttpMethod method,
-                                  String contentType, 
+                                  String contentType,
                                   Class<T> javaType) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", contentType);
@@ -272,7 +272,7 @@ public class ProcessDefinitionIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         return response.getBody();
     }
-    
+
     private String executeRequest(String url,
                                   HttpMethod method,
                                   String contentType) {
