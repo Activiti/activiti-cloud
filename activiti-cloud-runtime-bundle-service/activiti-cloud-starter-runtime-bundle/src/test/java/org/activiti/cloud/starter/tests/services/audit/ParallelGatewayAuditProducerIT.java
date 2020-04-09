@@ -49,7 +49,7 @@ import java.util.List;
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class ParallelGatewayAuditProducerIT {
 
@@ -78,7 +78,7 @@ public class ParallelGatewayAuditProducerIT {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-      
+
             assertThat(receivedEvents)
                     .extracting(CloudRuntimeEvent::getEventType,
                                 CloudRuntimeEvent::getProcessInstanceId,
@@ -153,11 +153,11 @@ public class ParallelGatewayAuditProducerIT {
                                     processInstanceId,
                                     processInstanceId)
                     );
-            
-            
+
+
             assertThat(receivedEvents)
             .filteredOn(event -> (event.getEventType().equals(ACTIVITY_STARTED) ||
-                                  event.getEventType().equals(ACTIVITY_COMPLETED)) && 
+                                  event.getEventType().equals(ACTIVITY_COMPLETED)) &&
                                  ((BPMNActivity) event.getEntity()).getActivityType().equals("parallelGateway"))
             .extracting(CloudRuntimeEvent::getEventType,
                         event -> ((BPMNActivity) event.getEntity()).getActivityType(),
@@ -168,14 +168,14 @@ public class ParallelGatewayAuditProducerIT {
                       tuple(ACTIVITY_COMPLETED,
                             "parallelGateway",
                             processInstanceId)
-                      
+
             );
-           
+
 
         });
-        
-        
-       
+
+
+
 
     }
 

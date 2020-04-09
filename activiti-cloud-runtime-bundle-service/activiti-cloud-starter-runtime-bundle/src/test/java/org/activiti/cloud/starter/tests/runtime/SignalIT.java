@@ -60,7 +60,7 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = RuntimeITConfiguration.class)
 public class SignalIT {
 
@@ -95,15 +95,15 @@ public class SignalIT {
         //when
         runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess");
         runtimeService.startProcessInstanceByKey("broadcastSignalEventProcess");
-        
+
         await("Broadcast Signals").untilAsserted(() -> {
             List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery().processDefinitionKey("broadcastSignalCatchEventProcess").list();
-            assertThat(processInstances).isEmpty();    
-            
+            assertThat(processInstances).isEmpty();
+
             processInstances = runtimeService.createProcessInstanceQuery().processDefinitionKey("broadcastSignalEventProcess").list();
-            assertThat(processInstances).isEmpty();    
+            assertThat(processInstances).isEmpty();
         });
-       
+
     }
 
     @Test

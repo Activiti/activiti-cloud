@@ -76,7 +76,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = RuntimeITConfiguration.class)
 public class MessageEventsIT {
 
@@ -91,50 +91,50 @@ public class MessageEventsIT {
 
     @Autowired
     private ProcessEngineChannels processEngineChannels;
-    
+
     @SpyBean
     private BpmnMessageReceivedEventMessageProducer bpmnMessageReceivedEventMessageProducer;
 
     @SpyBean
     private BpmnMessageSentEventMessageProducer bpmnMessageSentEventMessageProducer;
-    
+
     @SpyBean
     private BpmnMessageWaitingEventMessageProducer bpmnMessageWaitingEventMessageProducer;
-    
+
     @SpyBean
-    private StartMessageCmdExecutor startMessageСmdExecutor; 
+    private StartMessageCmdExecutor startMessageСmdExecutor;
 
     @SpyBean
     private ReceiveMessageCmdExecutor receiveMessageCmdExecutor;
-    
+
     @SpyBean
-    private MessageSubscriptionCancelledEventMessageProducer messageSubscriptionCancelledEventMessageProducer; 
-    
+    private MessageSubscriptionCancelledEventMessageProducer messageSubscriptionCancelledEventMessageProducer;
+
     @SpyBean(reset = MockReset.NONE)
     private StartMessageDeployedEventMessageProducer startMessageDeployedEventMessageProducer;
-    
+
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
-    
+
     @Test
     public void shouldProduceStartMessageDeployedEvents() {
         // given
         String expectedStartEventNames[] = {
             "BpmnMessage"
         };
-        
+
         // when
         ArgumentCaptor<StartMessageDeployedEvent> argumentCaptor = ArgumentCaptor.forClass(StartMessageDeployedEvent.class);
-        
+
         // then
         verify(startMessageDeployedEventMessageProducer, atLeast(expectedStartEventNames.length)).onEvent(argumentCaptor.capture());
-        
+
         assertThat(argumentCaptor.getAllValues()).extracting(StartMessageDeployedEvent::getEntity)
                                                  .extracting(StartMessageDeploymentDefinition::getMessageSubscription)
                                                  .extracting(StartMessageSubscription::getEventName)
                                                  .contains(expectedStartEventNames);
     }
-    
+
     @Test
     public void testIntermdiateThrowMessageEvent() {
         //given
@@ -152,7 +152,7 @@ public class MessageEventsIT {
         assertThat(runtimeService.createProcessInstanceQuery()
                                  .processDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
                                  .list()).isEmpty();
-        
+
         verify(bpmnMessageSentEventMessageProducer, times(1)).onEvent(ArgumentMatchers.<BPMNMessageSentEvent>any());
         verify(bpmnMessageWaitingEventMessageProducer, never()).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
         verify(bpmnMessageReceivedEventMessageProducer, never()).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
@@ -160,7 +160,7 @@ public class MessageEventsIT {
         verify(receiveMessageCmdExecutor, never()).execute(ArgumentMatchers.<ReceiveMessagePayload>any());
         verify(startMessageСmdExecutor, never()).execute(ArgumentMatchers.<StartMessagePayload>any());
     }
-    
+
     @Test
     public void testIntermediateCatchMessageEvent() {
         //given
@@ -181,25 +181,25 @@ public class MessageEventsIT {
         });
 
         verify(bpmnMessageWaitingEventMessageProducer, times(1)).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
-        
+
         // given
         ReceiveMessagePayload receivePayload = MessagePayloadBuilder.receive("BpmnMessage")
                                                                     .withCorrelationKey(BUSINESS_KEY)
                                                                     .withVariable("key", "value")
                                                                     .build();
-        
+
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                       .build();
-        // when                                                                     
+        // when
         processEngineChannels.commandConsumer().send(receiveMessage);
-        
+
         // then
         Awaitility.await().untilAsserted(() -> {
             assertThat(runtimeService.createProcessInstanceQuery()
                                      .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
                                      .list()).isEmpty();
         });
-        
+
         verify(bpmnMessageReceivedEventMessageProducer, times(1)).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
         verify(bpmnMessageSentEventMessageProducer, never()).onEvent(ArgumentMatchers.<BPMNMessageSentEvent>any());
 
@@ -214,12 +214,12 @@ public class MessageEventsIT {
                                                                   .withBusinessKey(BUSINESS_KEY)
                                                                   .withVariable("key", "value")
                                                                   .build();
-        
+
         Message<StartMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                     .build();
-        
 
-        // when                                                                     
+
+        // when
         processEngineChannels.commandConsumer().send(receiveMessage);
 
         // then
@@ -228,11 +228,11 @@ public class MessageEventsIT {
                                      .processDefinitionKey("StartMessageProcess")
                                      .list()).isEmpty();
         });
-        
+
         verify(startMessageСmdExecutor).execute(ArgumentMatchers.<StartMessagePayload>any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
     }
-    
+
     @Test
     public void testEndMessageEvent() {
         //given
@@ -254,7 +254,7 @@ public class MessageEventsIT {
         });
 
         verify(bpmnMessageSentEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageSentEvent>any());
-    }    
+    }
 
     @Test
     public void testBoundaryTaskMessageEvent() {
@@ -278,16 +278,16 @@ public class MessageEventsIT {
             verify(bpmnMessageWaitingEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
         });
 
-        
+
         // given
         ReceiveMessagePayload receivePayload = MessagePayloadBuilder.receive("BpmnMessage")
                                                                     .withCorrelationKey(BUSINESS_KEY)
                                                                     .withVariable("key", "value")
                                                                     .build();
-        
+
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                       .build();
-        // when                                                                     
+        // when
         processEngineChannels.commandConsumer().send(receiveMessage);
 
         // then
@@ -296,11 +296,11 @@ public class MessageEventsIT {
                                      .processDefinitionKey("BoundaryTaskMessageProcess")
                                      .list()).isEmpty();
         });
-        
+
         verify(receiveMessageCmdExecutor).execute(ArgumentMatchers.<ReceiveMessagePayload>any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
     }
-    
+
     @Test
     public void testEventGatewayMessageEvent() {
         //given
@@ -323,16 +323,16 @@ public class MessageEventsIT {
             verify(bpmnMessageWaitingEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
         });
 
-        
+
         // given
         ReceiveMessagePayload receivePayload = MessagePayloadBuilder.receive("BpmnMessage")
                                                                     .withCorrelationKey(BUSINESS_KEY)
                                                                     .withVariable("key", "value")
                                                                     .build();
-        
+
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                       .build();
-        // when                                                                     
+        // when
         processEngineChannels.commandConsumer().send(receiveMessage);
 
         // then
@@ -341,11 +341,11 @@ public class MessageEventsIT {
                                      .processDefinitionKey("EventGatewayMessageEventProcess")
                                      .list()).isEmpty();
         });
-        
+
         verify(receiveMessageCmdExecutor).execute(ArgumentMatchers.<ReceiveMessagePayload>any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
-    }    
-    
+    }
+
     @Test
     public void testEventSubprocessStartMessageEvent() {
         //given
@@ -368,16 +368,16 @@ public class MessageEventsIT {
             verify(bpmnMessageWaitingEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
         });
 
-        
+
         // given
         ReceiveMessagePayload receivePayload = MessagePayloadBuilder.receive("BpmnMessage")
                                                                     .withCorrelationKey(BUSINESS_KEY)
                                                                     .withVariable("key", "value")
                                                                     .build();
-        
+
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                       .build();
-        // when                                                                     
+        // when
         processEngineChannels.commandConsumer().send(receiveMessage);
 
         // then
@@ -386,11 +386,11 @@ public class MessageEventsIT {
                                      .processDefinitionKey("EventSubprocessStartMessageEventProcess")
                                      .list()).isEmpty();
         });
-        
+
         verify(receiveMessageCmdExecutor).execute(ArgumentMatchers.<ReceiveMessagePayload>any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
     }
-    
+
     @Test
     public void testEventSubprocessStartMessageEventNonInterrupting() {
         //given
@@ -412,16 +412,16 @@ public class MessageEventsIT {
 
             verify(bpmnMessageWaitingEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
         });
-        
+
         // given
         ReceiveMessagePayload receivePayload = MessagePayloadBuilder.receive("BpmnMessage")
                                                                     .withCorrelationKey(BUSINESS_KEY)
                                                                     .withVariable("key", "value")
                                                                     .build();
-        
+
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                       .build();
-        // when                                                                     
+        // when
         processEngineChannels.commandConsumer().send(receiveMessage);
 
         // then
@@ -429,14 +429,14 @@ public class MessageEventsIT {
             verify(receiveMessageCmdExecutor).execute(ArgumentMatchers.<ReceiveMessagePayload>any());
             verify(bpmnMessageReceivedEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
         });
-        
+
         assertThat(runtimeService.createProcessInstanceQuery()
                                  .processDefinitionKey("EventSubprocessStartMessageEventNonInterruptingProcess")
                                  .list()).hasSize(1);
-        
+
         processInstanceRestTemplate.delete(response);
-    }    
-    
+    }
+
     @Test
     public void testBoundaryTaskMessageEventNonInterrupting() {
         //given
@@ -458,16 +458,16 @@ public class MessageEventsIT {
 
             verify(bpmnMessageWaitingEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
         });
-        
+
         // given
         ReceiveMessagePayload receivePayload = MessagePayloadBuilder.receive("BpmnMessage")
                                                                     .withCorrelationKey(BUSINESS_KEY)
                                                                     .withVariable("key", "value")
                                                                     .build();
-        
+
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                       .build();
-        // when                                                                     
+        // when
         processEngineChannels.commandConsumer().send(receiveMessage);
 
         // then
@@ -475,14 +475,14 @@ public class MessageEventsIT {
             verify(receiveMessageCmdExecutor).execute(ArgumentMatchers.<ReceiveMessagePayload>any());
             verify(bpmnMessageReceivedEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
         });
-        
+
         assertThat(runtimeService.createProcessInstanceQuery()
                                  .processDefinitionKey("BoundaryTaskMessageEventNonInterruptingProcess")
                                  .list()).hasSize(1);
-        
+
         processInstanceRestTemplate.delete(response);
-    }    
-    
+    }
+
     @Test
     public void testBoundarySubprocessMessageEvent() {
         //given
@@ -504,16 +504,16 @@ public class MessageEventsIT {
 
             verify(bpmnMessageWaitingEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
         });
-        
+
         // given
         ReceiveMessagePayload receivePayload = MessagePayloadBuilder.receive("BpmnMessage")
                                                                     .withCorrelationKey(BUSINESS_KEY)
                                                                     .withVariable("key", "value")
                                                                     .build();
-        
+
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                       .build();
-        // when                                                                     
+        // when
         processEngineChannels.commandConsumer().send(receiveMessage);
 
         // then
@@ -525,9 +525,9 @@ public class MessageEventsIT {
 
         verify(receiveMessageCmdExecutor).execute(ArgumentMatchers.<ReceiveMessagePayload>any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
-    }    
-          
-    
+    }
+
+
     @Test
     public void testBoundarySubprocessMessageEventNonInterrupting() {
         //given
@@ -549,16 +549,16 @@ public class MessageEventsIT {
 
             verify(bpmnMessageWaitingEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
         });
-        
+
         // given
         ReceiveMessagePayload receivePayload = MessagePayloadBuilder.receive("BpmnMessage")
                                                                     .withCorrelationKey(BUSINESS_KEY)
                                                                     .withVariable("key", "value")
                                                                     .build();
-        
+
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                       .build();
-        // when                                                                     
+        // when
         processEngineChannels.commandConsumer().send(receiveMessage);
 
         // then
@@ -566,15 +566,15 @@ public class MessageEventsIT {
             verify(receiveMessageCmdExecutor).execute(ArgumentMatchers.<ReceiveMessagePayload>any());
             verify(bpmnMessageReceivedEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
         });
-        
+
         assertThat(runtimeService.createProcessInstanceQuery()
                                  .processDefinitionKey("BoundarySubprocessMessageEventNonInterruptingProcess")
                                  .list()).hasSize(1);
-        
+
         processInstanceRestTemplate.delete(response);
-        
-    }    
-              
+
+    }
+
     @Test
     public void shouldCancelWaitingMessageSubscription() {
         // given
@@ -595,7 +595,7 @@ public class MessageEventsIT {
                                  .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
                                  .list()).hasSize(processInstances);
 
-        verify(bpmnMessageWaitingEventMessageProducer, 
+        verify(bpmnMessageWaitingEventMessageProducer,
                times(processInstances)).onEvent(ArgumentMatchers.<BPMNMessageWaitingEvent>any());
 
         // when
@@ -607,32 +607,32 @@ public class MessageEventsIT {
         assertThat(runtimeService.createProcessInstanceQuery()
                                  .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
                                  .list()).isEmpty();
-        
-        verify(messageSubscriptionCancelledEventMessageProducer, 
+
+        verify(messageSubscriptionCancelledEventMessageProducer,
                times(processInstances)).onEvent(ArgumentMatchers.<MessageSubscriptionCancelledEvent>any());
     }
-    
+
     @Test
     public void shouldThrowCatchMessageWithCorrelationKeyAndMappedPayloads() {
         // given
         StartProcessPayload throwMsg = ProcessPayloadBuilder.start()
                                                             .withProcessDefinitionKey("process-be954b8b-b412-4fcb-9fc5-bf1d096d249f")
                                                             .build();
-        
+
         // when
         ResponseEntity<CloudProcessInstance> throwMsgInstance = processInstanceRestTemplate.startProcess(throwMsg);
- 
+
         // then
         assertThat(throwMsgInstance.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(throwMsgInstance.getBody()).isNotNull();
         assertThat(runtimeService.createProcessInstanceQuery()
                                  .processDefinitionKey("process-be954b8b-b412-4fcb-9fc5-bf1d096d249f")
                                  .list()).isEmpty();
-        
+
         ArgumentCaptor<BPMNMessageSentEvent> throwArgumentCaptor = ArgumentCaptor.forClass(BPMNMessageSentEvent.class);
-        
+
         verify(bpmnMessageSentEventMessageProducer).onEvent(throwArgumentCaptor.capture());
-        
+
         MessageEventPayload messageEventPayload = throwArgumentCaptor.getValue()
                                                                      .getEntity()
                                                                      .getMessagePayload();
@@ -640,18 +640,18 @@ public class MessageEventsIT {
         assertThat(messageEventPayload.getCorrelationKey()).isEqualTo("corr");
         assertThat(messageEventPayload.getVariables()).contains(entry("stringvar", "string"),
                                                                 entry("variablevar", "default"));
-                                                    
-        // and given 
+
+        // and given
         StartProcessPayload catchMsg = ProcessPayloadBuilder.start()
                                                             .withProcessDefinitionKey("process-bf064b4f-5cf7-440c-b6b1-e55ac532e56c")
                                                             .build();
         ResponseEntity<CloudProcessInstance> catchMsgInstance = processInstanceRestTemplate.startProcess(catchMsg);
-        
+
         ReceiveMessagePayload receivePayload = MessagePayloadBuilder.receive(messageEventPayload.getName())
                                                                     .withCorrelationKey(messageEventPayload.getCorrelationKey())
                                                                     .withVariables(messageEventPayload.getVariables())
                                                                     .build();
-        
+
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
                                                                       .build();
         // when
@@ -660,7 +660,7 @@ public class MessageEventsIT {
         // then
         Awaitility.await().untilAsserted(() -> {
             ResponseEntity<Resources<CloudVariableInstance>> variables = processInstanceRestTemplate.getVariables(catchMsgInstance);
-            
+
             assertThat(variables.getBody().getContent()).extracting(VariableInstance::getName,
                                                                     VariableInstance::getValue)
                                                         .contains(tuple("string", "string"),
@@ -669,9 +669,9 @@ public class MessageEventsIT {
 
         verify(receiveMessageCmdExecutor).execute(ArgumentMatchers.<ReceiveMessagePayload>any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(ArgumentMatchers.<BPMNMessageReceivedEvent>any());
-        
+
         processInstanceRestTemplate.delete(catchMsgInstance);
-        
-    }  
-    
+
+    }
+
 }
