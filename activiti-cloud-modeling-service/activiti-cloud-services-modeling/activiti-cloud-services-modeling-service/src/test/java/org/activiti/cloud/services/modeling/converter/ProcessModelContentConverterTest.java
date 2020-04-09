@@ -11,20 +11,20 @@ import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ProcessModelContentConverterTest {
 
     private ProcessModelContentConverter processModelContentConverter;
+
     @Mock
     private ProcessModelType processModelType;
+
     @Mock
     private BpmnXMLConverter bpmnXMLConverter;
 
@@ -36,6 +36,7 @@ public class ProcessModelContentConverterTest {
 
     @Before
     public void setUp() {
+        initMocks(this);
         processModelContentConverter = new ProcessModelContentConverter(processModelType, bpmnXMLConverter);
     }
 

@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,13 +16,11 @@ import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ProjectServiceImplTest {
 
     @InjectMocks
@@ -38,6 +37,11 @@ public class ProjectServiceImplTest {
 
     @Mock
     private UserTask taskTwo;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+    }
 
     @Test
     public void should_getUsersAndGroupsBelongingToAProject_when_getProcessAccessControl() {
