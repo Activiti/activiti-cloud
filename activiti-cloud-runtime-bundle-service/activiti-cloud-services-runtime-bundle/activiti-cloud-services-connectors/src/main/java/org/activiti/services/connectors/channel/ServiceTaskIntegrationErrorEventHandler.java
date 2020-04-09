@@ -98,8 +98,12 @@ public class ServiceTaskIntegrationErrorEventHandler {
                         cloudBpmnError.setStackTrace(integrationError.getStackTraceElements()
                                                                      .toArray(new StackTraceElement[] {}));
 
-                        managementService.executeCommand(new PropagateCloudBpmnErrorCmd(cloudBpmnError,
-                                                                                        execution));
+                        try {
+                            managementService.executeCommand(new PropagateCloudBpmnErrorCmd(cloudBpmnError,
+                                                                                            execution));
+                        } catch(Throwable cause) {
+                            LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
+                        }
                     } else {
                         LOGGER.warn("Could not find matching activityId '{}' for integration error '{}' with executionId '{}'",
                                      clientId,
