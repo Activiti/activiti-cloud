@@ -54,12 +54,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessDefinitionAdminController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,

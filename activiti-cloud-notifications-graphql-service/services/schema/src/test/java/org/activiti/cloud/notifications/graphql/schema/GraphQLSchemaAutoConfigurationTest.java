@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.stereotype.Component;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaConfigurer;
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLShemaRegistration;
@@ -36,13 +35,12 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.NONE)
 public class GraphQLSchemaAutoConfigurationTest {
-    
+
     @Autowired
     private GraphQLSchema graphQLSchema;
-    
+
     @SpringBootApplication
     static class Application {
 
@@ -59,12 +57,12 @@ public class GraphQLSchemaAutoConfigurationTest {
                                 .dataFetcher(environment -> {
                                     return "world";
                                 }))
-                        .build(); 
-                
+                        .build();
+
                 GraphQLSchema graphQLSchema = GraphQLSchema.newSchema()
                         .query(query)
-                        .build();                
-                
+                        .build();
+
                 registry.register(graphQLSchema);
             }
         }
@@ -77,11 +75,11 @@ public class GraphQLSchemaAutoConfigurationTest {
 
         // when
         Map<String, Object> result = graphQL.execute("{hello}").getData();
-        
+
         // then
         assertThat(result.toString()).isEqualTo("{hello=world}");
     }
-    
+
 
 
 }

@@ -54,9 +54,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
@@ -110,7 +108,7 @@ public class QueryTaskEntityVariablesIT {
         task = taskEventContainedBuilder.aCreatedTask("Created task",
                                                       runningProcessInstance);
         standAloneTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("StandAlone task");
-        
+
     }
 
     @After
@@ -164,7 +162,7 @@ public class QueryTaskEntityVariablesIT {
                                     false)
                     );
         });
-        
+
     }
 
     @Test
@@ -204,10 +202,10 @@ public class QueryTaskEntityVariablesIT {
         });
     }
 
-    
+
     @Test
     public void shouldNotSeeAdminVariables() {
-    
+
         //when
         ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_VARIABLES_URL,
                              HttpMethod.GET,
@@ -249,7 +247,7 @@ public class QueryTaskEntityVariablesIT {
 
         });
     }
-    
+
     @Test
     public void shouldGetTaskVariablesAfterTaskCompleted() {
         //given
@@ -258,7 +256,7 @@ public class QueryTaskEntityVariablesIT {
                                                               "value",
                                                               null);
         var.setTaskId(task.getId());
-        
+
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
 
         eventsAggregator.sendAll();
@@ -281,7 +279,7 @@ public class QueryTaskEntityVariablesIT {
                                    false)
                     );
         });
-        
+
         ((TaskImpl)task).setStatus(Task.TaskStatus.COMPLETED);
         eventsAggregator.addEvents(new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
         eventsAggregator.sendAll();
@@ -304,9 +302,9 @@ public class QueryTaskEntityVariablesIT {
                                    false)
                     );
         });
-        
+
     }
-    
+
 
     @Test
     public void shouldNotCreateTaskVariableWithSameName() {
@@ -317,7 +315,7 @@ public class QueryTaskEntityVariablesIT {
                                                               null);
         var.setTaskId(task.getId());
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
-     
+
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
@@ -345,9 +343,9 @@ public class QueryTaskEntityVariablesIT {
                 null);
         var.setTaskId(task.getId());
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
-        
+
         eventsAggregator.sendAll();
-        
+
         await().untilAsserted(() -> {
           //when
           ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity1 = getTaskVariables(task.getId());
@@ -365,10 +363,10 @@ public class QueryTaskEntityVariablesIT {
                                  false)
                   );
         });
-        
+
     }
 
-    
+
     @Test
     public void shouldReCreateVariableAfterItWasDeleted() {
         //given
@@ -377,9 +375,9 @@ public class QueryTaskEntityVariablesIT {
                                                               "value",
                                                               null);
         var.setTaskId(task.getId());
-        
+
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
-     
+
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
@@ -400,7 +398,7 @@ public class QueryTaskEntityVariablesIT {
                                    false)
                     );
         });
-        
+
         producer.send(new CloudVariableDeletedEventImpl(var));
 
         await().untilAsserted(() -> {
@@ -419,7 +417,7 @@ public class QueryTaskEntityVariablesIT {
                 null);
         var.setTaskId(task.getId());
         producer.send(new CloudVariableCreatedEventImpl(var));
-        
+
         await().untilAsserted(() -> {
             //when
             ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
@@ -437,10 +435,10 @@ public class QueryTaskEntityVariablesIT {
                                    false)
                     );
         });
-        
+
     }
 
-    
+
     public  ResponseEntity<PagedResources<TaskVariableEntity>> getTaskVariables(String taskId) {
         return testRestTemplate.exchange(VARIABLES_URL,
                                          HttpMethod.GET,

@@ -65,10 +65,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = TaskVariableAdminControllerImpl.class, secure = false)
 @EnableSpringDataWebSupport()
 @AutoConfigureMockMvc(secure = false)
@@ -93,13 +91,13 @@ public class TaskVariableAdminControllerImplIT {
 
     @MockBean
     private RepositoryService repositoryService;
-    
+
     @MockBean
     private TaskAdminRuntime taskRuntime;
 
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
-    
+
     @SpyBean
     private TaskVariableInstanceResourceAssembler variableInstanceResourceAssembler;
 

@@ -68,10 +68,8 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -93,25 +91,25 @@ public class ProcessInstanceVariableControllerImplIT {
 
     @MockBean
     private ProcessRuntime processRuntime;
-    
+
     @MockBean
     private RepositoryService repositoryService;
-    
+
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
-    
+
     @MockBean
     private MessageChannel commandResults;
-    
+
     @MockBean
     private DateFormatterProvider dateFormatterProvider;
 
     @Autowired
     private ObjectMapper mapper;
-    
+
     @SpyBean
     private ResourcesAssembler resourcesAssembler;
 
@@ -167,7 +165,7 @@ public class ProcessInstanceVariableControllerImplIT {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("1");
         processInstance.setProcessDefinitionKey("1");
-   
+
         given(processRuntime.processInstance(any()))
         .willReturn(processInstance);
 

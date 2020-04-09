@@ -62,10 +62,8 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -87,7 +85,7 @@ public class ProcessInstanceTasksControllerImplIT {
 
     @MockBean
     private RepositoryService repositoryService;
-    
+
     @MockBean
     private TaskRuntime taskRuntime;
 
@@ -96,13 +94,13 @@ public class ProcessInstanceTasksControllerImplIT {
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
-    
+
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
-    
+
     @MockBean
     private MessageChannel commandResults;
 

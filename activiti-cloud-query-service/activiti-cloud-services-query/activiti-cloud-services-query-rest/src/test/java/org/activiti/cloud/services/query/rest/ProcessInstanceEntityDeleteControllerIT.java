@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
@@ -45,7 +44,6 @@ import java.util.List;
 import java.util.UUID;
 
 @TestPropertySource(properties="activiti.rest.enable-deletion=true")
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceDeleteController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,

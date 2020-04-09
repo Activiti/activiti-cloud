@@ -86,12 +86,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = TaskControllerImpl.class, secure = false)
-
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
@@ -115,7 +112,7 @@ public class TaskControllerImplIT {
 
     @MockBean
     private RepositoryService repositoryService;
-    
+
     @MockBean
     private SecurityManager securityManager;
 
@@ -221,8 +218,8 @@ public class TaskControllerImplIT {
     @Test
     public void saveTask() throws Exception {
         SaveTaskPayload saveTask = TaskPayloadBuilder.save().withTaskId("1").withVariable("name", "value").build();
-        
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/save", 
+
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/save",
                                   1)
                              .contentType(MediaType.APPLICATION_JSON)
                              .content(mapper.writeValueAsString(saveTask)))
@@ -231,7 +228,7 @@ public class TaskControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/save",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
-    
+
     @Test
     public void deleteTask() throws Exception {
         given(taskRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
@@ -355,7 +352,7 @@ public class TaskControllerImplIT {
                                 links(halLinks(),
                                       linkWithRel("self").ignored().optional())));
     }
-    
+
     @Test
     public void updateTask() throws Exception {
         given(taskRuntime.update(any())).willReturn(buildDefaultAssignedTask());
@@ -364,7 +361,7 @@ public class TaskControllerImplIT {
                 .withName("update-task")
                 .withDescription("update-description")
                 .build();
-        
+
         this.mockMvc.perform(put("/v1/tasks/{taskId}",
                                  1).contentType(MediaType.APPLICATION_JSON)
                                  .content(mapper.writeValueAsString(updateTaskCmd)))

@@ -48,7 +48,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -56,7 +55,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(TaskVariableAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -75,19 +73,19 @@ public class VariableEntityAdminControllerIT {
 
     @MockBean
     private TaskVariableRepository variableRepository;
-    
+
     @MockBean
     private UserGroupManager userGroupManager;
-    
-    @MockBean
-    private SecurityManager securityManager;    
 
     @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;    
+    private SecurityManager securityManager;
 
     @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;    
-    
+    private SecurityPoliciesManager securityPoliciesManager;
+
+    @MockBean
+    private SecurityPoliciesProperties securityPoliciesProperties;
+
     @Test
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
@@ -117,7 +115,7 @@ public class VariableEntityAdminControllerIT {
                                            pageRequest,
                                            12));
 
-        //when 
+        //when
         MvcResult result = mockMvc.perform(get("/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10",
                                                variableEntity.getTaskId())
                                                    .accept(MediaType.APPLICATION_JSON))

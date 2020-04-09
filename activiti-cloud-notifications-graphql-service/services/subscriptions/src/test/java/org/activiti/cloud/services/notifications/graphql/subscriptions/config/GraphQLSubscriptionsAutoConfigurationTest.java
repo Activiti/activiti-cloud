@@ -27,10 +27,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class GraphQLSubscriptionsAutoConfigurationTest {
 
     @Autowired
@@ -41,7 +39,7 @@ public class GraphQLSubscriptionsAutoConfigurationTest {
 
     @Autowired
     private EngineEventsPublisherDataFetcher stompRelayDataFetcher;
-    
+
     @EnableAutoConfiguration
     @Configuration
     static class GraphQLSubscriptionSchemaTestApplication {
@@ -58,8 +56,8 @@ public class GraphQLSubscriptionsAutoConfigurationTest {
         assertThat(properties.getGraphqls()).isEqualTo("classpath:activiti.graphqls");
         assertThat(properties.getSubscriptionFieldName()).isEqualTo("engineEvents");
         assertThat(properties.getSubscriptionArgumentNames()).isEqualTo(new String[]{
-                                                                                "serviceName", 
-                                                                                "appName", 
+                                                                                "serviceName",
+                                                                                "appName",
                                                                                 "eventType",
                                                                                 "processDefinitionKey",
                                                                                 "processInstanceId",

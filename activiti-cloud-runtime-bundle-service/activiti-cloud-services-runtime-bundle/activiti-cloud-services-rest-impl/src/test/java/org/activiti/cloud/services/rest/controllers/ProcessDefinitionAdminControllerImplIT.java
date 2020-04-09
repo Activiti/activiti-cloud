@@ -66,11 +66,9 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(value = ProcessDefinitionAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -93,22 +91,22 @@ public class ProcessDefinitionAdminControllerImplIT {
 
     @MockBean
     private RepositoryService repositoryService;
-    
+
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
 
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
-    
+
     @MockBean
     private ProcessEngineChannels processEngineChannels;
-    
+
     @MockBean
     private TaskService taskService;
 
     @MockBean
     private SecurityManager securityManager;
-    
+
     @MockBean
     private MessageChannel commandResults;
 
@@ -149,7 +147,7 @@ public class ProcessDefinitionAdminControllerImplIT {
                                 links(selfLink())
                 ));
     }
-    
+
     private ProcessDefinition buildProcessDefinition(String processDefinitionId,
                                                      String name,
                                                      String description,

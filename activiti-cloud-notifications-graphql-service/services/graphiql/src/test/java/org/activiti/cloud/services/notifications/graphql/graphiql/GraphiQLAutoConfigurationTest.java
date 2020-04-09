@@ -22,24 +22,22 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class GraphiQLAutoConfigurationTest {
-    
+
     @Autowired
     private KeycloakJsonController keycloakJsonController;
 
     @Autowired
     private GraphiQLConfigController graphiQLConfigController;
-    
-    
+
+
     @SpringBootApplication
     static class Application {
-        // 
+        //
     }
-    
+
     @Test
     public void contextLoads() {
         assertThat(keycloakJsonController.get().getBody()).isNotNull();
@@ -56,6 +54,6 @@ public class GraphiQLAutoConfigurationTest {
         assertThat(graphiQLConfigController.appendSegmentToPath("/default-app/","/graphql")).isEqualTo("/default-app/graphql");
         assertThat(graphiQLConfigController.appendSegmentToPath("/default-app","graphql")).isEqualTo("/default-app/graphql");
     }
-    
-    
+
+
 }

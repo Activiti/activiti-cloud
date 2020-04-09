@@ -48,11 +48,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ConnectorDefinitionControllerImpl.class)
 @Import({ConnectorsAutoConfiguration.class,
         ConnectorAutoConfiguration.class,
@@ -70,10 +68,10 @@ public class ConnectorDefinitionControllerImplIT {
 
     @MockBean
     private ProcessExtensionService processExtensionService;
-    
-    @MockBean 
+
+    @MockBean
     private ProcessEngineChannels processEngineChannels;
-    
+
     @MockBean
     private RepositoryService repositoryService;
 

@@ -17,17 +17,14 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
 import java.util.UUID;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 @EnableAutoConfiguration
 public class RestrictTaskEntityQueryIT {
@@ -172,7 +169,7 @@ public class RestrictTaskEntityQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
         when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
-        
+
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);

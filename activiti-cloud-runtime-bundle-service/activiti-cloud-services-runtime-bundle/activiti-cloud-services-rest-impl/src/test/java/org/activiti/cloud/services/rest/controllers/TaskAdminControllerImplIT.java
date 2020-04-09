@@ -49,7 +49,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
@@ -70,7 +69,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = TaskAdminControllerImpl.class, secure = true)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -94,7 +92,7 @@ public class TaskAdminControllerImplIT {
 
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
-    
+
     @MockBean
     private RepositoryService repositoryService;
 
@@ -129,7 +127,7 @@ public class TaskAdminControllerImplIT {
                                 pagedTasksFields()
                                 ));
     }
-    
+
 
     @Test
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
@@ -144,7 +142,7 @@ public class TaskAdminControllerImplIT {
                                 pageRequestParameters(),
                                 pagedResourcesResponseFields()));
     }
-    
+
     @Test
     public void deleteTask() throws Exception {
         given(taskAdminRuntime.delete(any())).willReturn(buildDefaultAssignedTask());

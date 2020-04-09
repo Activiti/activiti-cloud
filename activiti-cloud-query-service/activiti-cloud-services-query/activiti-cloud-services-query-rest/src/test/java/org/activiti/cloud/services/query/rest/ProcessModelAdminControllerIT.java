@@ -44,12 +44,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessModelAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -66,18 +64,18 @@ public class ProcessModelAdminControllerIT {
 
     @MockBean
     private ProcessModelRepository processModelRepository;
-    
+
     @MockBean
     private UserGroupManager userGroupManager;
-    
-    @MockBean
-    private SecurityManager securityManager;    
 
     @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;    
+    private SecurityManager securityManager;
 
     @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;        
+    private SecurityPoliciesManager securityPoliciesManager;
+
+    @MockBean
+    private SecurityPoliciesProperties securityPoliciesProperties;
 
     @MockBean
     private EntityFinder entityFinder;

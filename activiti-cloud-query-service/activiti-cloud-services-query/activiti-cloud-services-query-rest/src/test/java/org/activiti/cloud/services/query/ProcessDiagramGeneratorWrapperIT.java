@@ -31,12 +31,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Integration tests for ProcessDiagramGeneratorWrapper
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestPropertySource("classpath:test-process-diagram.properties")
 public class ProcessDiagramGeneratorWrapperIT {
@@ -48,13 +46,13 @@ public class ProcessDiagramGeneratorWrapperIT {
 
     @SpyBean
     private ProcessInstanceDiagramController processInstanceDiagramController;
-    
+
     @Value("classpath:/processes/SimpleProcess.bpmn20.xml")
     private Resource simpleProcess;
 
     @Value("classpath:/processes/SubProcessTest.fixSystemFailureProcess.bpmn20.xml")
     private Resource subProcessTest;
-    
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 

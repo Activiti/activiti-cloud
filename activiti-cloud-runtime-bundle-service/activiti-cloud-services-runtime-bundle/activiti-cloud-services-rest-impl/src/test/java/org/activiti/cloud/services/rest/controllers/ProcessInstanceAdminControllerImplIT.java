@@ -75,11 +75,9 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -100,19 +98,19 @@ public class ProcessInstanceAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
-    
+
     @Autowired
     private ObjectMapper mapper;
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
-    
+
     @MockBean
     private RepositoryService repositoryService;
-    
+
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
-    
+
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
@@ -143,7 +141,7 @@ public class ProcessInstanceAdminControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 pagedProcessInstanceFields()));
     }
-    
+
     @Test
     public void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
 
@@ -175,7 +173,7 @@ public class ProcessInstanceAdminControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/resume",
                         pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
-    
+
     @Test
     public void suspend() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
@@ -188,7 +186,7 @@ public class ProcessInstanceAdminControllerImplIT {
                .andDo(document(DOCUMENTATION_IDENTIFIER + "/suspend",
                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
-    
+
     @Test
     public void deleteProcessInstance() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
@@ -200,13 +198,13 @@ public class ProcessInstanceAdminControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
-    
+
     @Test
     public void update() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.update(any())).thenReturn(defaultProcessInstance());
-        
+
         UpdateProcessPayload cmd = ProcessPayloadBuilder.update()
                 .withProcessInstanceId("1")
                 .withBusinessKey("businessKey")
@@ -219,7 +217,7 @@ public class ProcessInstanceAdminControllerImplIT {
                                      .content(mapper.writeValueAsString(cmd)))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/update"));
-        
+
     }
 
     @Test
@@ -230,7 +228,7 @@ public class ProcessInstanceAdminControllerImplIT {
                                                        .build();
 
         when(processAdminRuntime.start(any(StartMessagePayload.class))).thenReturn(defaultProcessInstance());
-        
+
         this.mockMvc.perform(post("/admin/v1/process-instances/message")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd)))

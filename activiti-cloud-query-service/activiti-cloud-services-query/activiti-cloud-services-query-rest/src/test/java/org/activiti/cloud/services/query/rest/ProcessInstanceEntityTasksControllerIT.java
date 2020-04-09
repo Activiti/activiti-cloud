@@ -53,11 +53,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceTasksController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -76,18 +74,18 @@ public class ProcessInstanceEntityTasksControllerIT {
 
     @MockBean
     private TaskRepository taskRepository;
-    
+
     @MockBean
     private UserGroupManager userGroupManager;
-    
-    @MockBean
-    private SecurityManager securityManager;    
 
     @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;    
+    private SecurityManager securityManager;
 
     @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;        
+    private SecurityPoliciesManager securityPoliciesManager;
+
+    @MockBean
+    private SecurityPoliciesProperties securityPoliciesProperties;
 
     @Test
     public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {

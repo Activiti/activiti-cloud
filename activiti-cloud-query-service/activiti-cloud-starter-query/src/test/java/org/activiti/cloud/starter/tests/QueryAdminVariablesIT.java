@@ -48,9 +48,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test-admin.properties")
 @DirtiesContext
@@ -58,7 +56,7 @@ public class QueryAdminVariablesIT {
 
     private static final String ADMIN_PROCESS_VARIABLES_URL = "/admin/v1/process-instances/{processInstanceId}/variables";
     private static final String ADMIN_TASK_VARIABLES_URL = "/admin/v1/tasks/{taskId}/variables";
-    
+
     private static final ParameterizedTypeReference<PagedResources<ProcessVariableEntity>> PAGED_PROCESSVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessVariableEntity>>() {
     };
     private static final ParameterizedTypeReference<PagedResources<TaskVariableEntity>> PAGED_TASKVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<TaskVariableEntity>>() {
@@ -78,7 +76,7 @@ public class QueryAdminVariablesIT {
 
     @Autowired
     private VariableRepository processVariableRepository;
-    
+
     @Autowired
     private TaskVariableRepository taskVariableRepository;
 
@@ -232,14 +230,14 @@ public class QueryAdminVariablesIT {
                     );
         });
     }
-  
+
     @Test
     public void shouldFilterOnTaskVariableName() {
 
         //given
         Task task = taskEventContainedBuilder.aCreatedTask("Created task",
                                                            runningProcessInstance);
-        
+
         variableEventContainedBuilder.aCreatedVariable("var1",
                                                        "v1",
                                                        "string")
@@ -276,7 +274,7 @@ public class QueryAdminVariablesIT {
                     );
         });
     }
-    
+
     //Test a case when a processInstance and a task have variable with the same name
     @Test
     public void shouldFilterOnProcessAndTaskVariableName() {
@@ -286,15 +284,15 @@ public class QueryAdminVariablesIT {
                                                        "pv1",
                                                        "string")
                 .onProcessInstance(runningProcessInstance);
-        
+
         variableEventContainedBuilder.aCreatedVariable("var2",
                                                        "pv2",
                                                        "string")
                 .onProcessInstance(runningProcessInstance);
-        
+
         Task task = taskEventContainedBuilder.aCreatedTask("Created task",
                                                            runningProcessInstance);
-        
+
         //One of task variables has same name like processInstance variable
         variableEventContainedBuilder.aCreatedVariable("var1",
                                                        "tv1",
@@ -330,7 +328,7 @@ public class QueryAdminVariablesIT {
                             tuple("var1",
                                    "tv1")
                     );
-            
+
             //when
             ResponseEntity<PagedResources<ProcessVariableEntity>> processResponseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
                                                                                                       HttpMethod.GET,
