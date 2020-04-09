@@ -203,12 +203,9 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void startCreatedProcess() throws Exception {
-        StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
         when(processRuntime.startCreatedProcess("1")).thenReturn(defaultProcessInstance());
 
-        mockMvc.perform(post("/v1/process-instances/{processInstanceId}/start", 1)
-            .contentType(APPLICATION_JSON)
-            .content(mapper.writeValueAsString(cmd)))
+        mockMvc.perform(post("/v1/process-instances/{processInstanceId}/start", 1))
             .andExpect(status().isOk())
             .andDo(document(DOCUMENTATION_IDENTIFIER + "/startCreated"));
     }
