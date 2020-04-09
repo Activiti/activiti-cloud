@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -33,6 +32,5 @@ public class EngineEventsConsumerAutoConfigurationTest {
     public void contextLoads() {
         // success
     }
-
 
 }

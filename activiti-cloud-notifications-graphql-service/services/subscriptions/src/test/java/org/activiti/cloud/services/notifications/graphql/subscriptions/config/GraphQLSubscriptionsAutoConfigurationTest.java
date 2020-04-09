@@ -21,7 +21,6 @@ import org.activiti.cloud.services.notifications.graphql.subscriptions.GraphQLSu
 import org.activiti.cloud.services.notifications.graphql.subscriptions.GraphQLSubscriptionSchemaProperties;
 import org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher.EngineEventsPublisherDataFetcher;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
