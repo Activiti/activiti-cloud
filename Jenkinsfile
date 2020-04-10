@@ -190,7 +190,7 @@ pipeline {
 
             for (chart in charts) {
               dir("$chart") {
-                def name = chart.substring(module.lastIndexOf('/') + 1)
+                def name = chart.substring(chart.lastIndexOf('/') + 1)
                 sh "echo $name"
                 sh "rm -rf requirements.lock"
                 sh "rm -rf charts"
