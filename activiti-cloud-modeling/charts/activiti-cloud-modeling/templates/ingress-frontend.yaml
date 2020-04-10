@@ -1,0 +1,27 @@
+{{- template "common.ingress" (list . "activiti.frontend.ingress") -}}
+{{- define "activiti.frontend.ingress" -}}
+metadata:
+  annotations:
+    {{- include "common.ingress-annotations" . | indent 4 }}
+    {{- range $key, $value := .Values.ingress.frontend.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    {{- if include "common.ingress-host" . }}
+    - host: {{ template "common.ingress-host" . }}
+      http:
+    {{- else }}
+    - http:
+    {{- end }}
+        paths:
+          - path: {{ template "activiti-cloud-modeling.ingress-path-frontend" . }}{{ .Values.ingress.frontend.suffix }}
+            backend:
+            {{- if .Values.service.name }}
+              serviceName: {{ .Values.service.name }}
+            {{- else }}
+              serviceName: {{ template "fullname" . }}
+            {{- end }}
+              servicePort: {{ .Values.service.frontend.externalPort }}
+
+{{- end -}}

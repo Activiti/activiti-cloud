@@ -131,6 +131,7 @@ pipeline {
           script {
             def charts = ["activiti-cloud-query/charts/activiti-cloud-query",
                           "example-runtime-bundle/charts/runtime-bundle",
+                          "activiti-cloud-modeling/charts/activiti-cloud-modeling",
                           "example-cloud-connector/charts/activiti-cloud-connector"]
 
             for (chart in charts) {
@@ -139,7 +140,7 @@ pipeline {
                   def name = chart.substring(chart.lastIndexOf('/') + 1)
 
                   sh """sed -i -e "s/version:.*/version: $VERSION/" Chart.yaml"""
-                  sh """sed -i -e "s|repository: .*|repository: $DOCKER_REGISTRY/$ORG/$chart|" values.yaml"""
+                  sh """sed -i -e "s|repository: .*|repository: $DOCKER_REGISTRY/$ORG/$name|" values.yaml"""
                   sh """sed -i -e "s/tag: .*/tag: $VERSION/" values.yaml"""
                 }
               }
@@ -152,6 +153,7 @@ pipeline {
 
             def modules = ["activiti-cloud-query",
                            "example-runtime-bundle",
+                           "activiti-cloud-modeling",
                            "example-cloud-connector"]
 
             for (module in modules) {
@@ -181,13 +183,14 @@ pipeline {
         container('maven') {
           script {
 
-            def modules = ["activiti-cloud-query/charts/activiti-cloud-query",
+            def charts = ["activiti-cloud-query/charts/activiti-cloud-query",
                            "example-runtime-bundle/charts/runtime-bundle",
+                           "activiti-cloud-modeling/charts/activiti-cloud-modeling",
                            "example-cloud-connector/charts/activiti-cloud-connector"]
 
-            for (module in modules) {
-              dir("$module") {
-                def name = module.substring(module.lastIndexOf('/') + 1)
+            for (chart in charts) {
+              dir("$chart") {
+                def name = chart.substring(module.lastIndexOf('/') + 1)
                 sh "echo $name"
                 sh "rm -rf requirements.lock"
                 sh "rm -rf charts"
@@ -252,17 +255,14 @@ pipeline {
       }
       steps {
         container('maven') {
-          script {
-            def modeling_version = modeling_version()
-            echo "modeling version:: $modeling_version"
-            sh '''updatebot --dry push-version --kind helm activiti-cloud-dependencies $VERSION \
+          sh '''updatebot --dry push-version --kind helm activiti-cloud-dependencies $VERSION \
                         runtime-bundle $VERSION \
                         activiti-cloud-connector $VERSION \
                         activiti-cloud-query $VERSION \
-                        activiti-cloud-modeling $modeling_version
+                        activiti-cloud-modeling $VERSION
                   '''
 
-            sh """cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+          sh """cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
                     rm -rf requirements.lock && \
                     rm -rf charts && \
                     rm -rf *.tgz && \
@@ -273,17 +273,14 @@ pipeline {
                     helm dependency build && \
                     helm lint && \
                     helm package . """
-            sh """echo "-------------------------------------" """
-            sh """cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+          sh """cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
             helm upgrade $PREVIEW_NAMESPACE . \
             --install \
             --set global.gateway.domain=$GLOBAL_GATEWAY_DOMAIN \
             --namespace $PREVIEW_NAMESPACE \
             --debug \
             --wait """
-            sh """echo "-------------------------------------" """
-            sh "sleep 30"
-          }
+          sh "sleep 30"
         }
       }
     }
@@ -361,9 +358,8 @@ pipeline {
       steps {
         container('maven') {
           script {
-            def modeling_version = modeling_version()
             def activiti_cloud_version = activiti_cloud_version()
-            echo "modeling version:: $modeling_version  -  activiti cloud version:: $activiti_cloud_version"
+            echo "activiti cloud version:: $activiti_cloud_version"
 
             retry(5) {
               sh '''updatebot push-version --kind maven \
@@ -386,7 +382,7 @@ pipeline {
                         runtime-bundle $VERSION \
                         activiti-cloud-connector $VERSION \
                         activiti-cloud-query $VERSION \
-                        activiti-cloud-modeling $modeling_version
+                        activiti-cloud-modeling $VERSION
                   '''
 
               sh '''updatebot push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $VERSION'''
@@ -442,11 +438,6 @@ def hel_version() {
   }
 }
 
-def modeling_version() {
-  container('maven') {
-    return sh(script: 'grep -oPm1 "(?<=<activiti-cloud-modeling.version>)[^<]+" "activiti-cloud-dependencies/dependencies-tests/pom.xml"', returnStdout: true).trim()
-  }
-}
 
 def activiti_cloud_version() {
   container('maven') {

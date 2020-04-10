@@ -30,6 +30,7 @@ branches:
 stages:
   - name: example-runtime-bundle
   - name: activiti-cloud-query
+  - name: activiti-cloud-modeling
   - name: example-cloud-connector
   - name: activiti-cloud-acceptance-scenarios
   - name: activiti-cloud-dependencies
@@ -46,6 +47,11 @@ jobs:
       stage: activiti-cloud-query
       script:
         - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query/pom.xml
+
+    - name: activiti-cloud-modeling
+      stage: activiti-cloud-modeling
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling/pom.xml
 
     - name: example-cloud-connector
       stage: example-cloud-connector

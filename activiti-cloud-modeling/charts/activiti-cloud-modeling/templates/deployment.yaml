@@ -1,0 +1,205 @@
+{{ include "common.deployment.head"  .}}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        draft: {{ default "draft-app" .Values.draft }}
+        app: {{ template "fullname" . }}
+        release: "{{ .Release.Name }}"
+{{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+      initContainers:
+      {{- if .Values.postgres.enabled }}
+      - name: wait-for-postgresql
+        image: "{{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}"
+        imagePullPolicy: {{ .Values.init.image.pullPolicy }}
+        command:
+          - sh
+          - -c
+          - |
+            until printf "." && nc -z -w 2 {{ .Release.Name }}-{{ .Values.postgres.name }} {{ .Values.postgres.port }}; do
+                sleep 2;
+            done;
+            echo 'PostgreSQL OK ✓'
+      {{- end }}
+      {{- if .Values.extraInitContainers }}
+      {{ tpl .Values.extraInitContainers . | indent 8 }}
+      {{- end }}
+{{- if include "common.registry-pull-secrets" . }}
+      imagePullSecrets:
+      {{- include "common.registry-pull-secrets" . | indent 6 }}
+{{- end }}
+      containers:
+      - name: {{ .Chart.Name }}-service
+        image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+        resources:
+{{ toYaml .Values.backend.resources | indent 10 }}
+        env:
+        - name: JAVA_OPTS
+          value: "-Xmx{{ .Values.backend.javaOpts.xmx }} -Xms{{ .Values.backend.javaOpts.xms }} {{ .Values.backend.javaOpts.other}}"
+        - name: SPRING_APPLICATION_NAME
+{{- if .Values.service.name }}
+          value: {{ .Values.service.name }}-service
+{{- else }}
+          value: {{ template "fullname" . }}-service
+{{- end }}
+{{- if .Values.ingress.enabled }}
+        - name: SERVER_SERVLET_CONTEXT_PATH
+          value: {{ include "activiti-cloud-modeling.ingress-path-backend" .|quote }}
+{{- end }}
+        - name: SERVER_PORT
+          value: "{{ .Values.service.backend.internalPort }}"
+        - name: ACT_KEYCLOAK_URL
+          value: {{ include "common.keycloak-url" . | quote }}
+        - name: ACT_KEYCLOAK_REALM
+          value: {{ include "common.keycloak-realm" . | quote }}
+        - name: ACT_KEYCLOAK_RESOURCE
+          value: {{ include "common.keycloak-resource" . | quote }}
+        - name: ACTIVITI_CLOUD_MODELING_URL
+          value: "localhost:{{ .Values.service.backend.internalPort }}"
+{{- if .Values.postgres.enabled }}
+        - name: SPRING_DATASOURCE_URL
+          {{- if .Values.postgres.uri }}
+          value: {{ .Values.postgres.uri | quote }}
+          {{- else }}
+          value: "jdbc:postgresql://{{ .Release.Name }}-{{ .Values.postgres.name }}:{{ .Values.postgres.port }}/postgres"
+          {{- end }}
+        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+          value: {{ default "org.postgresql.Driver" .Values.postgres.driver | quote }}
+        - name: SPRING_DATASOURCE_USERNAME
+          value: {{ default "postgres" .Values.postgres.username | quote }}
+        - name: SPRING_DATASOURCE_PASSWORD
+          {{- if .Values.postgres.password }}
+          value: {{ .Values.postgres.password | quote }}
+          {{- else }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-{{ .Values.postgres.name }}
+              key: postgresql-password
+          {{- end }}
+        - name: SPRING_JPA_DATABASE_PLATFORM
+          value: {{ default "org.hibernate.dialect.PostgreSQLDialect" .Values.postgres.platform | quote }}
+        - name: SPRING_JPA_GENERATE_DDL
+          value: {{ default  "true"  .Values.postgres.generateDdl | quote }}
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: {{ default "update"  .Values.postgres.ddlAuto | quote}}
+{{- else }}
+          {{- if .Values.db.uri }}
+        - name: SPRING_DATASOURCE_URL
+          value: {{ .Values.db.uri | quote }}
+          {{- end }}
+          {{- if .Values.db.driver }}
+        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+          value: {{ .Values.db.driver | quote }}
+          {{- end }}
+          {{- if .Values.db.username }}
+        - name: SPRING_DATASOURCE_USERNAME
+          value: {{ .Values.db.username | quote }}
+          {{- end }}
+          {{- if .Values.db.password}}
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: {{ .Values.db.password | quote }}
+          {{- end }}
+          {{- if .Values.db.platform }}
+        - name: SPRING_JPA_DATABASE_PLATFORM
+          value: {{ .Values.db.platform | quote }}
+          {{- end }}
+          {{- if .Values.db.generateDdl}}
+        - name: SPRING_JPA_GENERATE_DDL
+          value: {{ .Values.db.generateDdl | quote }}
+          {{- end }}
+          {{- if .Values.db.ddlAuto}}
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: {{ default "update"  .Values.db.ddlAuto | quote }}
+          {{- end }}
+{{- end }}
+{{ include "activiti-cloud-modeling.extra-env-backend" . | indent 8 }}
+        imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.backend.internalPort }}
+        livenessProbe:
+          httpGet:
+            path: {{ tpl .Values.backend.probePath . }}
+            port: {{ .Values.service.backend.internalPort }}
+          initialDelaySeconds: {{ .Values.backend.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.backend.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.backend.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.backend.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.backend.livenessProbe.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: {{ tpl .Values.backend.probePath . }}
+            port: {{ .Values.service.backend.internalPort }}
+          initialDelaySeconds: {{ .Values.backend.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.backend.readinessProbe.periodSeconds }}
+          successThreshold: {{ .Values.backend.readinessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.backend.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.backend.readinessProbe.failureThreshold }}
+{{- if .Values.extraVolumeMounts }}
+        volumeMounts:
+{{- with .Values.extraVolumeMounts }}
+{{ tpl . $ | indent 10 }}
+{{- end }}
+{{- end }}
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+        env:
+        - name: APP_CONFIG_OAUTH2_HOST
+          value: {{ include "common.keycloak-url" . }}/realms/{{ include "common.keycloak-realm" . }}
+        - name: APP_CONFIG_IDENTITY_HOST
+          value: {{ include "common.keycloak-url" . }}/admin/realms/{{ include "common.keycloak-realm" . }}
+        - name: APP_CONFIG_OAUTH2_CLIENTID
+          value: {{ include "common.keycloak-client" .| quote }}
+        - name: APP_CONFIG_BPM_HOST
+{{- if .Values.backend.url }}
+          value: {{ tpl .Values.backend.url .|quote }}
+{{- else }}
+          value: {{ include "common.gateway-url" . }}
+{{- end }}
+{{- if .Values.frontend.basepath }}
+        - name: BASE_PATH
+          value: "/{{ tpl .Values.frontend.basepath .}}/"
+        - name: APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI
+          value: "{{ include "common.gateway-url" . }}/{{ .Values.frontend.basepath }}/assets/silent-refresh.html"
+        - name: APP_CONFIG_OAUTH2_REDIRECT_LOGIN
+          value: "/{{ tpl .Values.frontend.basepath .}}"
+        - name: APP_CONFIG_OAUTH2_REDIRECT_LOGOUT
+          value: "/{{ tpl .Values.frontend.basepath .}}"
+{{- end }}
+        - name: API_PATH_PREFIX
+          value: "{{ .Values.backend.prefix }}"
+{{ include "activiti-cloud-modeling.extra-env-frontend" . | indent 8 }}
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.frontend.internalPort }}
+        livenessProbe:
+          httpGet:
+            path: {{ tpl .Values.frontend.probePath . }}
+            port: {{ .Values.service.frontend.internalPort }}
+          initialDelaySeconds: {{ .Values.frontend.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.frontend.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.frontend.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.frontend.livenessProbe.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: {{ tpl .Values.frontend.probePath . }}
+            port: {{ .Values.service.frontend.internalPort }}
+          initialDelaySeconds: {{ .Values.frontend.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.readinessProbe.periodSeconds }}
+          successThreshold: {{ .Values.frontend.readinessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.frontend.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.frontend.readinessProbe.failureThreshold }}
+        resources:
+{{ toYaml .Values.frontend.resources | indent 12 }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+{{- if .Values.extraVolumes }}
+      volumes:
+{{- with .Values.extraVolumes }}
+{{ tpl . $ | indent 8 }}
+{{- end }}
+{{- end }}

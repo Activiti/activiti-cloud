@@ -15,6 +15,7 @@
     <module>example-runtime-bundle</module>
     <module>activiti-cloud-query</module>
     <module>example-cloud-connector</module>
+    <module>activiti-cloud-modeling</module>
     <module>activiti-cloud-acceptance-scenarios</module>
     <module>activiti-cloud-dependencies</module>
   </modules>

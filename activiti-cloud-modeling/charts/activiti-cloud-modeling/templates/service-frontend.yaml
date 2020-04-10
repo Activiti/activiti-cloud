@@ -1,0 +1,12 @@
+{{- template "common.service" (list . "activiti.frontend.service") -}}
+{{- define "activiti.frontend.service" -}}
+spec:
+  ports:
+    - port: {{ .Values.service.frontend.externalPort }}
+      targetPort: {{ .Values.service.frontend.internalPort }}
+      {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.nodePort))) }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+      protocol: TCP
+      name: http
+{{- end -}}

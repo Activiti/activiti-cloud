@@ -1,0 +1,173 @@
+# Default values for Maven projects.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+global:
+  rabbitmq:
+    host:
+      value: ""
+    username:
+      value: guest
+    password:
+      value: guest
+  keycloak:
+    url: ""
+    name: keycloak
+    realm: activiti
+    client: activiti
+    service:
+      type: http
+      port: 80
+  gateway:
+    host: ""
+db:
+  uri:
+  username:
+  password:
+  driver:
+  platform:
+  generateDdl:
+  ddlAuto:
+
+init:
+  image:
+    repository: alpine
+    tag: 3.8
+    pullPolicy: IfNotPresent
+postgres:
+  enabled: true
+  name: postgres
+  port: 5432
+  username: postgres
+  password:
+
+service:
+  type: ClusterIP
+  backend:
+    externalPort: 80
+    internalPort: 8080
+  frontend:
+    externalPort: 80
+    internalPort: 80
+  annotations:
+    fabric8.io/expose: "false"
+    fabric8.io/ingress.annotations: "kubernetes.io/ingress.class: nginx"
+
+# only set this variable if a private registry secret is needed to pull the image
+#registryPullSecrets: private-registry-secret
+
+frontend:
+#if behind gateway or ingress should be gw path
+  basepath: "modeling"
+  ## Allows the specification of additional environment variables
+  extraEnv: |
+  # - name: ACT_KEYCLOAK_URL
+  #   valueFrom:
+  #     configMapKeyRef:
+  #       name: {{ .Release.Name }}-keycloak-http
+  #       key: expose-keycloak-service-key
+  image:
+    repository: activiti/activiti-modeling-app
+    tag: 0.0.326
+    pullPolicy: Always
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1024Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  probePath: /
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    successThreshold: 1
+    timeoutSeconds: 4
+    failureThreshold: 40
+  readinessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 15
+    successThreshold: 1
+    timeoutSeconds: 3
+    failureThreshold: 5
+
+## Add additional volumes and mounts
+extraVolumes: |
+extraVolumeMounts: |
+extraEnv: |
+extraInitContainers: |
+
+backend:
+  # if not using gateway then external host and http method to reach backend here
+  url: ""
+  prefix: "modeling-service"
+  javaOpts:
+    xmx: 1024m
+    xms: 512m
+    other: -XX:+UnlockExperimentalVMOptions -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
+  ## Allows the specification of additional environment variables
+  extraEnv: |
+  # - name: ACT_KEYCLOAK_URL
+  #   valueFrom:
+  #     configMapKeyRef:
+  #       name: {{ .Release.Name }}-keycloak-http
+  #       key: expose-keycloak-service-key
+  image:
+    repository: activiti/activiti-cloud-modeling
+    tag: 7.1.0.M1
+    pullPolicy: Always
+  resources:
+    limits:
+      memory: 1024Mi
+    requests:
+      cpu: 400m
+      memory: 512Mi
+  probePath: '{{ if .Values.ingress.enabled }} {{ include "activiti-cloud-modeling.ingress-path-backend" . }}{{ end }}/actuator/health' #for ingress
+
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    successThreshold: 1
+    timeoutSeconds: 4
+    failureThreshold: 40
+  readinessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 15
+    successThreshold: 1
+    timeoutSeconds: 3
+    failureThreshold: 5
+
+terminationGracePeriodSeconds: 20
+
+ingress:
+  enabled: true
+  
+  path: # configure base path for frontend and backend ingresses "/{{ .Release.Namespace }}"
+  
+  backend:
+    path: "/modeling-service"
+    annotations: {}
+    #nginx.ingress.kubernetes.io/rewrite-target: /
+
+  ## Set to override global.gateway.host value, i.e. "modeler.{{ include \"common.gateway-domain\" . }}"
+  hostName: 
+
+  annotations: {}
+
+  ## Set to true to enable websockets
+  ws:
+    enabled: false
+
+  frontend:
+    path: "/modeling"
+#    suffix: "" #old version nginx
+    suffix: "/?(.*)" #new versions nginx
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: "/$1" #new version of nginx
+#      nginx.ingress.kubernetes.io/rewrite-target: "/" #old version nginx
+
+  ## Set this to true in order to enable TLS on the ingress record, i.e. true | false
+  tls: 
+
+  ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
+  tlsSecret: 
