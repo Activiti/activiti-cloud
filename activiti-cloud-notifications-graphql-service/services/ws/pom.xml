@@ -9,17 +9,11 @@
     <relativePath>..</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql-ws</artifactId>
-
   <name>Activiti Cloud Notifications :: Services :: GraphQL WebSockets </name>
-
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud.notifications.graphql</groupId>
       <artifactId>activiti-cloud-services-notifications-graphql-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-annotation</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

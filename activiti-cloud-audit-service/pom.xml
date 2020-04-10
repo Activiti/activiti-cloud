@@ -25,8 +25,6 @@
     <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
     <activiti-cloud-audit-service.version>${project.version}</activiti-cloud-audit-service.version>
-    <json-unit.version>1.24.0</json-unit.version>
-    <testcontainers.version>1.12.0</testcontainers.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -43,12 +41,6 @@
         <version>${activiti-cloud-service-common.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>net.javacrumbs.json-unit</groupId>
-        <artifactId>json-unit-fluent</artifactId>
-        <version>${json-unit.version}</version>
-        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

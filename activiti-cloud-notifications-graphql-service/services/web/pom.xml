@@ -9,9 +9,7 @@
     <relativePath>..</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql-web</artifactId>
-
   <name>Activiti Cloud Notifications :: Services :: GraphQL Web</name>
-
   <dependencies>
     <dependency>
       <groupId>com.introproventures</groupId>
@@ -32,10 +30,6 @@
     <dependency>
       <groupId>com.graphql-java</groupId>
       <artifactId>graphql-java</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-test</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
