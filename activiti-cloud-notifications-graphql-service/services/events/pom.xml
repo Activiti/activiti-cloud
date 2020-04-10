@@ -9,9 +9,7 @@
     <relativePath>..</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql-events</artifactId>
-
   <name>Activiti Cloud Notifications :: Services :: GraphQL Events</name>
-
   <dependencies>
     <dependency>
       <groupId>org.springframework</groupId>
