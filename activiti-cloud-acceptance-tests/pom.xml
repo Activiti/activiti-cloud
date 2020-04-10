@@ -14,7 +14,6 @@
   <name>Activiti Cloud :: Acceptance Tests</name>
   <packaging>pom</packaging>
   <modules>
-
     <module>activiti-cloud-acceptance-tests-dependencies</module>
     <module>activiti-cloud-acceptance-tests-shared</module>
     <module>activiti-cloud-acceptance-tests-core</module>
