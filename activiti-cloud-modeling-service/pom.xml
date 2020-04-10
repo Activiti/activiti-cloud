@@ -88,10 +88,4 @@
       <type>pom</type>
     </dependency>
   </dependencies>
-  <repositories>
-    <repository>
-      <id>alfresco</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
 </project>
