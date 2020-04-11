@@ -12,16 +12,25 @@
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
     <junit-jupiter.version>5.5.2</junit-jupiter.version>
+    <h2.version>1.4.199</h2.version>
     <spring-cloud.version>Greenwich.SR5</spring-cloud.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <!-- override spring-boot-dependencies to have @Timeout annotation -->
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
         <version>${junit-jupiter.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- override spring-boot-dependencies to fix https://github.com/hibernate/hibernate-orm/pull/3093 -->
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>${h2.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
