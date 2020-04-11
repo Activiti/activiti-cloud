@@ -49,7 +49,6 @@ import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -124,7 +123,7 @@ public class ProcessInstanceEntityControllerIT {
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(),
                                                                               eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
         given(processInstanceRepository.findAll(eq(restrictedPredicate),
-                                                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                                                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
                                                                                                              PageRequest.of(1,
                                                                                                                             10),
                                                                                                              11));
@@ -149,7 +148,7 @@ public class ProcessInstanceEntityControllerIT {
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(),
                                                                               eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
         given(processInstanceRepository.findAll(eq(restrictedPredicate),
-                                                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                                                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
                                                                                                              PageRequest.of(1,
                                                                                                                             10),
                                                                                                              11));

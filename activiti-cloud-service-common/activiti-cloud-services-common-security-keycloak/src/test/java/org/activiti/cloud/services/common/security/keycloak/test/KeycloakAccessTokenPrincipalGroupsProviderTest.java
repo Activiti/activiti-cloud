@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.common.security.keycloak.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalGroupsProvider;
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -63,8 +63,8 @@ public class KeycloakAccessTokenPrincipalGroupsProviderTest {
     @Test
     public void testGetGroups() {
         // given
-        when(keycloakSecurityContextProvider.accessToken(ArgumentMatchers.any())).thenReturn(Optional.of(accessToken));
-        when(keycloakAccessTokenValidator.isValid(ArgumentMatchers.any())).thenReturn(true);
+        when(keycloakSecurityContextProvider.accessToken(any())).thenReturn(Optional.of(accessToken));
+        when(keycloakAccessTokenValidator.isValid(any())).thenReturn(true);
         when(accessToken.getOtherClaims()).thenReturn(Collections.singletonMap("groups",
                                                                                Arrays.asList("group1",
                                                                                              "group2")));
@@ -80,8 +80,8 @@ public class KeycloakAccessTokenPrincipalGroupsProviderTest {
     @Test
     public void testGetGroupsInvalidToken() {
         // given
-        when(keycloakSecurityContextProvider.accessToken(ArgumentMatchers.any())).thenReturn(Optional.of(accessToken));
-        when(keycloakAccessTokenValidator.isValid(ArgumentMatchers.any())).thenReturn(false);
+        when(keycloakSecurityContextProvider.accessToken(any())).thenReturn(Optional.of(accessToken));
+        when(keycloakAccessTokenValidator.isValid(any())).thenReturn(false);
 
         // when
         List<String> result = subject.getGroups(keycloakPrincipal);

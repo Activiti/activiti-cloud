@@ -42,7 +42,6 @@ import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -113,7 +112,7 @@ public class ProcessInstanceEntityAdminControllerIT {
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         given(processInstanceRepository.findAll(any(),
-                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
                 PageRequest.of(1,
                         10),
                 11));
@@ -134,10 +133,9 @@ public class ProcessInstanceEntityAdminControllerIT {
     @Test
     public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
-        given(processInstanceRepository.findAll(any(),
-                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                PageRequest.of(1,
-                        10),
+        given(processInstanceRepository.findAll(any(), any(Pageable.class)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                PageRequest.of(1, 10),
                 11));
 
 
@@ -149,7 +147,6 @@ public class ProcessInstanceEntityAdminControllerIT {
                 .andDo(document(PROCESS_INSTANCE_IDENTIFIER + "/list",
                                 pageLinks(),
                                 pagedProcessInstanceFields()
-
                 ));
     }
 

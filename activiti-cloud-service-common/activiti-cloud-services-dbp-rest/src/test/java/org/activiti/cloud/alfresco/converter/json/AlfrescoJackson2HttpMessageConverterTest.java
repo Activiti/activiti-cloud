@@ -25,7 +25,6 @@ import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,6 +36,7 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -125,7 +125,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     @Test
     public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource() throws Exception {
         //given
-        doNothing().when(httpMessageConverter).defaultWriteInternal(ArgumentMatchers.<EntryResponseContent<?>>any(),
+        doNothing().when(httpMessageConverter).defaultWriteInternal(any(),
                                                                     eq(type),
                                                                     eq(outputMessage));
 

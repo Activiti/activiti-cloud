@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.events.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -37,7 +38,6 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecremen
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -72,7 +72,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
         //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
         //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
@@ -114,7 +114,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
         //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
@@ -135,7 +135,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
         //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
@@ -156,7 +156,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
         //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
@@ -177,6 +177,6 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
         //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 }

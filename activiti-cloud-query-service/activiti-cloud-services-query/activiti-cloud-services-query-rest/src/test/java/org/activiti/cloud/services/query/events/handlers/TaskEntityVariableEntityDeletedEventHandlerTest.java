@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Optional;
@@ -39,7 +40,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
 public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
@@ -75,7 +75,7 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
         taskEntity.setStatus(TaskStatus.CREATED);
         Optional<TaskEntity> optional = Optional.of(taskEntity);
 
-        Mockito.when(taskRepository.findById(anyString())).thenReturn(optional);
+        when(taskRepository.findById(anyString())).thenReturn(optional);
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
 
         //when

@@ -33,12 +33,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -71,7 +71,7 @@ public class ProcessVariableEntityDeletedHandlerTest {
         Optional<ProcessInstanceEntity> optional = Optional.of(processInstanceEntity);
         ProcessVariableEntity variableEntity = new ProcessVariableEntity();
 
-        Mockito.when(processInstanceRepository.findById(anyString())).thenReturn(optional);
+        when(processInstanceRepository.findById(anyString())).thenReturn(optional);
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
 
         //when

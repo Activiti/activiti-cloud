@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -40,7 +41,6 @@ import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -71,7 +71,7 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
         CloudBPMNMessageEventAssert.assertThat(cloudEvent)
                                    .hasEntity(entity);
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
         CloudBPMNMessageEventAssert.assertThat(cloudEvent)
                                    .hasEntity(entity);
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
         CloudBPMNMessageEventAssert.assertThat(cloudEvent)
                                    .hasEntity(entity);
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
                   entity.getProcessInstanceId(),
                   entity.getBusinessKey());
 
-         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
 

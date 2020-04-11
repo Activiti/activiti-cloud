@@ -34,7 +34,6 @@ import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFac
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -90,7 +89,7 @@ public class CloudProcessDeployedProducerTest {
                                                                                                          "content1"),
                                                                             new ProcessDeployedEventImpl(def2,
                                                                                                          "content2"));
-        given(messageBuilderAppenderChain.withPayload(ArgumentMatchers.<CloudRuntimeEvent<?, ?>[]>any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
+        given(messageBuilderAppenderChain.withPayload(any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
 
         //when
         processDeployedProducer.sendProcessDeployedEvents(new ProcessDeployedEvents(processDeployedEventList));

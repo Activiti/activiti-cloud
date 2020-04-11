@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -47,7 +48,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -119,7 +119,7 @@ public class MessageProducerCommandContextCloseListenerTest {
 
         when(producer.auditProducer()).thenReturn(auditChannel);
 
-        processEngineEventsAggregator = Mockito.spy(new ProcessEngineEventsAggregator(closeListener));
+        processEngineEventsAggregator = spy(new ProcessEngineEventsAggregator(closeListener));
 
         when(processEngineEventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
 

@@ -18,6 +18,8 @@ package org.activiti.cloud.services.common.security.keycloak.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,9 +29,7 @@ import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRol
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.KeycloakPrincipal;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.security.Principal;
@@ -58,8 +58,8 @@ public class KeycloakPrincipalRolesProviderChainTest {
     public void testGetRoles() {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
-        when(provider1.getRoles(Mockito.any())).thenReturn(null);
-        when(provider2.getRoles(Mockito.any())).thenReturn(Arrays.asList("role1",
+        when(provider1.getRoles(any())).thenReturn(null);
+        when(provider2.getRoles(any())).thenReturn(Arrays.asList("role1",
                                                                          "role2"));
 
         // when
@@ -70,8 +70,8 @@ public class KeycloakPrincipalRolesProviderChainTest {
                           .containsExactly("role1",
                                            "role2");
 
-        verify(provider1).getRoles(ArgumentMatchers.eq(principal));
-        verify(provider2).getRoles(ArgumentMatchers.eq(principal));
+        verify(provider1).getRoles(eq(principal));
+        verify(provider2).getRoles(eq(principal));
 
     }
 
@@ -79,8 +79,8 @@ public class KeycloakPrincipalRolesProviderChainTest {
     public void testGetRolesSecurityException() {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
-        when(provider1.getRoles(Mockito.any())).thenReturn(null);
-        when(provider2.getRoles(Mockito.any())).thenReturn(null);
+        when(provider1.getRoles(any())).thenReturn(null);
+        when(provider2.getRoles(any())).thenReturn(null);
 
         // when
         Throwable thrown = catchThrowable(() -> { subject.getRoles(principal); });
@@ -88,8 +88,8 @@ public class KeycloakPrincipalRolesProviderChainTest {
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
 
-        verify(provider1).getRoles(ArgumentMatchers.eq(principal));
-        verify(provider2).getRoles(ArgumentMatchers.eq(principal));
+        verify(provider1).getRoles(eq(principal));
+        verify(provider2).getRoles(eq(principal));
     }
 
 }

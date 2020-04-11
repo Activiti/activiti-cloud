@@ -47,7 +47,6 @@ import org.activiti.services.connectors.message.IntegrationContextMessageBuilder
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -105,7 +104,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
         when(executionQuery.list()).thenReturn(Collections.emptyList());
-        when(messageBuilderFactory.create(ArgumentMatchers.any())).thenReturn(new MessageBuilderAppenderChain());
+        when(messageBuilderFactory.create(any())).thenReturn(new MessageBuilderAppenderChain());
     }
 
     @Test

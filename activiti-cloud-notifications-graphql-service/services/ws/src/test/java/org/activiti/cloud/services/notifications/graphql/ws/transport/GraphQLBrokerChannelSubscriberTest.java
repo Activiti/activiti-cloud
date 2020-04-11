@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -34,7 +35,6 @@ import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageTy
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -89,7 +89,7 @@ public class GraphQLBrokerChannelSubscriberTest {
         testSubject.onSubscribe(subscription);
 
         // then
-        verify(subscription).request(ArgumentMatchers.eq(1L));
+        verify(subscription).request(eq(1L));
     }
 
     @Test

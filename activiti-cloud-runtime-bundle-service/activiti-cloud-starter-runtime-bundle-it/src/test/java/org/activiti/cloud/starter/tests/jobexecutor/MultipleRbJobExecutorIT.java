@@ -2,7 +2,9 @@ package org.activiti.cloud.starter.tests.jobexecutor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
@@ -23,8 +25,6 @@ import org.h2.tools.Server;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
@@ -34,7 +34,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 
 public class MultipleRbJobExecutorIT {
@@ -66,7 +65,7 @@ public class MultipleRbJobExecutorIT {
 
                 @Override
                 public MessageHandler create(ProcessEngineConfigurationImpl configuration) {
-                    return Mockito.spy(new JobMessageHandler(configuration));
+                    return spy(new JobMessageHandler(configuration));
                 }
             };
         }
@@ -142,10 +141,10 @@ public class MultipleRbJobExecutorIT {
                                                .count()).isEqualTo(0);
                                                                                    });
         // rb1 message handler is invoked
-        verify(jobMessageHandler1, atLeastOnce()).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler1, atLeastOnce()).handleMessage(any());
 
         // rb2 message handler is invoked
-        verify(jobMessageHandler2, atLeastOnce()).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler2, atLeastOnce()).handleMessage(any());
     }
 
     abstract class AbstractActvitiEventListener implements ActivitiEventListener {

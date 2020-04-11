@@ -44,7 +44,6 @@ import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -135,11 +134,9 @@ public class ProcessDefinitionControllerIT {
         Predicate predicate = mock(Predicate.class);
         given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
                 .willReturn(predicate);
-        given(processDefinitionRepository.findAll(eq(predicate),
-                                                  ArgumentMatchers.<Pageable>any()))
+        given(processDefinitionRepository.findAll(eq(predicate), any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           PageRequest.of(1,
-                                                                                    10),
+                                           PageRequest.of(1,10),
                                            11));
 
         //when

@@ -3,6 +3,7 @@ package org.activiti.cloud.services.query.rest;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.resourcesResponseFields;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +28,6 @@ import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -92,7 +92,7 @@ public class TaskEntityDeleteControllerIT {
 
         //given
         List<TaskEntity> taskEntities = Collections.singletonList(buildDefaultTask());
-        given(taskRepository.findAll(ArgumentMatchers.<Predicate>any()))
+        given(taskRepository.findAll(any(Predicate.class)))
                 .willReturn(taskEntities);
 
         //when

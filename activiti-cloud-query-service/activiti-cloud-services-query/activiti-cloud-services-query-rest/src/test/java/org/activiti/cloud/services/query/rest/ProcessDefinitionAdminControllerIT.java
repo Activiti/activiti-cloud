@@ -40,7 +40,6 @@ import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -122,11 +121,9 @@ public class ProcessDefinitionAdminControllerIT {
     @Test
     public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat() throws Exception {
         //given
-        given(processDefinitionRepository.findAll(any(),
-                                                  ArgumentMatchers.<Pageable>any()))
+        given(processDefinitionRepository.findAll(any(), any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           PageRequest.of(1,
-                                                                                    10),
+                                           PageRequest.of(1,10),
                                            11));
 
         //when

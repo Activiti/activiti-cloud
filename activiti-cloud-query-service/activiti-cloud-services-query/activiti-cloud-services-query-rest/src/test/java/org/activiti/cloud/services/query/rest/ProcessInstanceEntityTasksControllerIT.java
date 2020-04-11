@@ -40,7 +40,6 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -92,7 +91,7 @@ public class ProcessInstanceEntityTasksControllerIT {
         TaskEntity taskEntity = buildDefaultTask();
 
         given(taskRepository.findAll(any(),
-                                     ArgumentMatchers.<Pageable>any()))
+                                     any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(taskEntity),
                                            new AlfrescoPageRequest(11, 10, PageRequest.of(0,
                                                           10)),

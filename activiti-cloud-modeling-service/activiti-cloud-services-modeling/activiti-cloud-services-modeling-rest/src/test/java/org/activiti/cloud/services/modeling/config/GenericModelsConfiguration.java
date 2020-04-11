@@ -11,7 +11,6 @@ import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.graphql.web;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,7 +30,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -72,10 +72,10 @@ public class ActivitiGraphQLControllerTest {
      */
     @BeforeEach
     public void setUp() {
-        when(executor.execute(Mockito.anyString()))
+        when(executor.execute(any()))
             .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
 
-        when(executor.execute(Mockito.anyString(),Mockito.any()))
+        when(executor.execute(any(), any()))
             .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
 
     }

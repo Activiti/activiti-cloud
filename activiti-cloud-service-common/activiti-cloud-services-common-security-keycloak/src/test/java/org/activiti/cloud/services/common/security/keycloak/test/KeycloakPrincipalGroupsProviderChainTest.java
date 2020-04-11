@@ -18,6 +18,8 @@ package org.activiti.cloud.services.common.security.keycloak.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,9 +29,7 @@ import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGro
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.KeycloakPrincipal;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.security.Principal;
@@ -58,8 +58,8 @@ public class KeycloakPrincipalGroupsProviderChainTest {
     public void testGetGroups() {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
-        when(provider1.getGroups(Mockito.any())).thenReturn(null);
-        when(provider2.getGroups(Mockito.any())).thenReturn(Arrays.asList("group1",
+        when(provider1.getGroups(any())).thenReturn(null);
+        when(provider2.getGroups(any())).thenReturn(Arrays.asList("group1",
                                                                           "group2"));
 
         // when
@@ -70,16 +70,16 @@ public class KeycloakPrincipalGroupsProviderChainTest {
                           .containsExactly("group1",
                                            "group2");
 
-        verify(provider1).getGroups(ArgumentMatchers.eq(principal));
-        verify(provider2).getGroups(ArgumentMatchers.eq(principal));
+        verify(provider1).getGroups(eq(principal));
+        verify(provider2).getGroups(eq(principal));
     }
 
     @Test
     public void testGetGropusSecurityException() {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
-        when(provider1.getGroups(Mockito.any())).thenReturn(null);
-        when(provider2.getGroups(Mockito.any())).thenReturn(null);
+        when(provider1.getGroups(any())).thenReturn(null);
+        when(provider2.getGroups(any())).thenReturn(null);
 
         // when
         Throwable thrown = catchThrowable(() -> { subject.getGroups(principal); });
@@ -87,8 +87,8 @@ public class KeycloakPrincipalGroupsProviderChainTest {
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
 
-        verify(provider1).getGroups(ArgumentMatchers.eq(principal));
-        verify(provider2).getGroups(ArgumentMatchers.eq(principal));
+        verify(provider1).getGroups(eq(principal));
+        verify(provider2).getGroups(eq(principal));
 
     }
 }

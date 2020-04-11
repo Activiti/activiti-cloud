@@ -1,6 +1,8 @@
 package org.activiti.cloud.connectors.starter.channels;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -11,7 +13,6 @@ import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.MessageChannel;
 
@@ -35,9 +36,9 @@ public class IntegrationResultChannelResolverImplTest {
         initMocks(this);
 
         when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
-        when(resolver.resolveDestination(Mockito.anyString())).thenReturn(messageChannel);
+        when(resolver.resolveDestination(anyString())).thenReturn(messageChannel);
 
-        builder = Mockito.spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
+        builder = spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
 
         subject = new IntegrationResultChannelResolverImpl(resolver,
                                                      builder);

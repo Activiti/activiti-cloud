@@ -21,6 +21,10 @@ import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestCon
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
@@ -32,7 +36,6 @@ import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -94,10 +97,10 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
                                                                     stringModel.getBytes()))
                 .andExpect(status().isNoContent());
 
-        Mockito.verify(genericJsonContentUpdateListener,
-                       Mockito.times(1))
-                .execute(Mockito.argThat(model -> model.getId().equals(genericJsonModel.getId())),
-                         Mockito.argThat(content -> new String(content.getFileContent()).equals(stringModel)));
+        verify(genericJsonContentUpdateListener,
+                       times(1))
+                .execute(argThat(model -> model.getId().equals(genericJsonModel.getId())),
+                         argThat(content -> new String(content.getFileContent()).equals(stringModel)));
     }
 
     @Test
@@ -115,9 +118,9 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
                                                                     stringModel.getBytes()))
                 .andExpect(status().isNoContent());
 
-        Mockito.verify(genericNonJsonContentUpdateListener,
-                       Mockito.times(0))
-                .execute(Mockito.any(),
-                         Mockito.any());
+        verify(genericNonJsonContentUpdateListener,
+                       times(0))
+                .execute(any(),
+                         any());
     }
 }

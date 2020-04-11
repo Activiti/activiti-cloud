@@ -16,6 +16,7 @@
 package org.activiti.services.connectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -45,7 +46,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -210,7 +210,7 @@ public class IntegrationRequestSenderTest {
 
         //then
         verify(auditProducer,
-               never()).send(ArgumentMatchers.any());
+               never()).send(any());
     }
 
     @Test

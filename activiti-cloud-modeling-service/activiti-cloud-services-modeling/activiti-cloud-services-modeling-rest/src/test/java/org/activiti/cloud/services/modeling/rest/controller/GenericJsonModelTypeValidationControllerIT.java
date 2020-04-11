@@ -21,7 +21,11 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetu
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.hamcrest.Matchers.isEmptyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,7 +43,6 @@ import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -98,8 +101,8 @@ public class GenericJsonModelTypeValidationControllerIT {
                 .singletonList(genericJsonContentValidator.createModelValidationError("Content invalid",
                                                                                       "The content is invalid!!")));
 
-        doThrow(exception).when(genericJsonContentValidator).validateModelContent(Mockito.any(byte[].class),
-                                                                                  Mockito.any(ValidationContext.class));
+        doThrow(exception).when(genericJsonContentValidator).validateModelContent(any(byte[].class),
+                                                                                  any(ValidationContext.class));
     }
 
     private void validateInvalidExtensions() {
@@ -107,8 +110,8 @@ public class GenericJsonModelTypeValidationControllerIT {
                 .singletonList(genericJsonContentValidator.createModelValidationError("Extensions invalid",
                                                                                       "The extensions are invalid!!")));
 
-        doThrow(exception).when(genericJsonExtensionsValidator).validateModelExtensions(Mockito.any(byte[].class),
-                                                                                        Mockito.any(ValidationContext.class));
+        doThrow(exception).when(genericJsonExtensionsValidator).validateModelExtensions(any(byte[].class),
+                                                                                        any(ValidationContext.class));
     }
 
     @Test
@@ -123,15 +126,15 @@ public class GenericJsonModelTypeValidationControllerIT {
                       genericJsonModel.getId())
                 .then().expect(status().isNoContent()).body(isEmptyString());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-                       Mockito.times(0))
-                .validateModelExtensions(Mockito.any(),
-                                         Mockito.any());
+        verify(genericJsonExtensionsValidator,
+                       times(0))
+                .validateModelExtensions(any(),
+                                         any());
 
-        Mockito.verify(genericJsonContentValidator,
-                       Mockito.times(1))
-                .validateModelContent(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                      Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonContentValidator,
+                       times(1))
+                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                                      argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -146,15 +149,15 @@ public class GenericJsonModelTypeValidationControllerIT {
                       genericJsonModel.getId())
                 .then().expect(status().isNoContent()).body(isEmptyString());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-                       Mockito.times(0))
-                .validateModelExtensions(Mockito.any(),
-                                         Mockito.any());
+        verify(genericJsonExtensionsValidator,
+                       times(0))
+                .validateModelExtensions(any(),
+                                         any());
 
-        Mockito.verify(genericJsonContentValidator,
-                       Mockito.times(1))
-                .validateModelContent(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                      Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonContentValidator,
+                       times(1))
+                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                                      argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -171,15 +174,15 @@ public class GenericJsonModelTypeValidationControllerIT {
                       genericJsonModel.getId())
                 .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Content invalid");
 
-        Mockito.verify(genericJsonExtensionsValidator,
-                       Mockito.times(0))
-                .validateModelExtensions(Mockito.any(),
-                                         Mockito.any());
+        verify(genericJsonExtensionsValidator,
+                       times(0))
+                .validateModelExtensions(any(),
+                                         any());
 
-        Mockito.verify(genericJsonContentValidator,
-                       Mockito.times(1))
-                .validateModelContent(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                      Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonContentValidator,
+                       times(1))
+                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                                      argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -194,15 +197,15 @@ public class GenericJsonModelTypeValidationControllerIT {
                       genericJsonModel.getId())
                 .then().expect(status().isNoContent()).body(isEmptyString());
 
-        Mockito.verify(genericJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -217,15 +220,15 @@ public class GenericJsonModelTypeValidationControllerIT {
                       genericJsonModel.getId())
                 .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found");
 
-        Mockito.verify(genericJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> !context.isEmpty()));
     }
 
 
@@ -241,15 +244,15 @@ public class GenericJsonModelTypeValidationControllerIT {
                 genericJsonModel.getId())
             .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found", "required key [name] not found");
 
-        Mockito.verify(genericJsonContentValidator,
-            Mockito.times(0))
-            .validateModelContent(Mockito.any(),
-                Mockito.any());
+        verify(genericJsonContentValidator,
+            times(0))
+            .validateModelContent(any(),
+                any());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-            Mockito.times(1))
-            .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonExtensionsValidator,
+            times(1))
+            .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -264,15 +267,15 @@ public class GenericJsonModelTypeValidationControllerIT {
                 genericJsonModel.getId())
             .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("string [!@#$%^&*()] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
 
-        Mockito.verify(genericJsonContentValidator,
-            Mockito.times(0))
-            .validateModelContent(Mockito.any(),
-                Mockito.any());
+        verify(genericJsonContentValidator,
+            times(0))
+            .validateModelContent(any(),
+                any());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-            Mockito.times(1))
-            .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonExtensionsValidator,
+            times(1))
+            .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -288,15 +291,15 @@ public class GenericJsonModelTypeValidationControllerIT {
             .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors(
                 "expected maxLength: 26, actual: 35", "string [alfresco-adf-app-deployment-develop] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
 
-        Mockito.verify(genericJsonContentValidator,
-            Mockito.times(0))
-            .validateModelContent(Mockito.any(),
-                Mockito.any());
+        verify(genericJsonContentValidator,
+            times(0))
+            .validateModelContent(any(),
+                any());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-            Mockito.times(1))
-            .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonExtensionsValidator,
+            times(1))
+            .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -312,15 +315,15 @@ public class GenericJsonModelTypeValidationControllerIT {
             .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors(
                 "expected minLength: 1, actual: 0", "string [] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
 
-        Mockito.verify(genericJsonContentValidator,
-            Mockito.times(0))
-            .validateModelContent(Mockito.any(),
-                Mockito.any());
+        verify(genericJsonContentValidator,
+            times(0))
+            .validateModelContent(any(),
+                any());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-            Mockito.times(1))
-            .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonExtensionsValidator,
+            times(1))
+            .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -336,15 +339,15 @@ public class GenericJsonModelTypeValidationControllerIT {
                 .then().expect(status().isBadRequest())).isSyntacticValidationException()
                         .hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
 
-        Mockito.verify(genericJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -359,15 +362,15 @@ public class GenericJsonModelTypeValidationControllerIT {
                       genericJsonModel.getId())
                 .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("expected type: String, found: Boolean");
 
-        Mockito.verify(genericJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -384,14 +387,14 @@ public class GenericJsonModelTypeValidationControllerIT {
                       genericJsonModel.getId())
                 .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Extensions invalid");
 
-        Mockito.verify(genericJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> !context.isEmpty()));
     }
 }
