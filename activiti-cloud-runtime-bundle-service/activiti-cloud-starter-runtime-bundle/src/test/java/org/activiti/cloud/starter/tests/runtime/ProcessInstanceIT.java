@@ -40,10 +40,8 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
-import org.junit.Before;
-import org.junit.ComparisonFailure;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,12 +51,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext
@@ -89,7 +85,7 @@ public class ProcessInstanceIT {
     @Autowired
     private RuntimeBundleProperties runtimeBundleProperties;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         keycloakTestUser = "hruser";
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
@@ -223,8 +219,8 @@ public class ProcessInstanceIT {
         //testuser does not have access to SIMPLE_PROCESS according to access-control.properties
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
-        assertThatExceptionOfType(ComparisonFailure.class).isThrownBy(() ->
-                                                                                processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+            processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
     }
 
     @Test
@@ -547,8 +543,8 @@ public class ProcessInstanceIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
 
-        assertThatExceptionOfType(ComparisonFailure.class).isThrownBy(() ->
-        processInstanceRestTemplate.getProcessInstance(processEntity));
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+            processInstanceRestTemplate.getProcessInstance(processEntity));
     }
 
     @Test
@@ -571,7 +567,7 @@ public class ProcessInstanceIT {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        assertThatExceptionOfType(ComparisonFailure.class).isThrownBy(() ->
-        processInstanceRestTemplate.getProcessInstance(processEntity));
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+            processInstanceRestTemplate.getProcessInstance(processEntity));
     }
 }

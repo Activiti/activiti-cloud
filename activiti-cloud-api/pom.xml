@@ -29,12 +29,6 @@
     <module>activiti-cloud-api-task-model-impl</module>
     <module>activiti-cloud-api-events</module>
   </modules>
-  <repositories>
-    <repository>
-      <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
   <dependencyManagement>
     <dependencies>
       <dependency>

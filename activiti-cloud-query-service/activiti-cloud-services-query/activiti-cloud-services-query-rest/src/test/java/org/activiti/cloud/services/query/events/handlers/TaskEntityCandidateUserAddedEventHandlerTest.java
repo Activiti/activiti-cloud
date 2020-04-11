@@ -23,8 +23,8 @@ import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -41,7 +41,7 @@ public class TaskEntityCandidateUserAddedEventHandlerTest {
     @Mock
     private TaskCandidateUserRepository taskCandidateRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

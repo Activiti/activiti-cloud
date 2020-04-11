@@ -67,15 +67,8 @@
     </dependency>
   </dependencies>
   <modules>
-
     <module>dependencies</module>
     <module>services</module>
     <module>starter</module>
   </modules>
-  <repositories>
-    <repository>
-      <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
 </project>

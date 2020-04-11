@@ -40,7 +40,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.subsecti
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
@@ -72,9 +71,8 @@ import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -86,12 +84,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = TaskControllerImpl.class, secure = false)
-
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
@@ -115,7 +110,7 @@ public class TaskControllerImplIT {
 
     @MockBean
     private RepositoryService repositoryService;
-    
+
     @MockBean
     private SecurityManager securityManager;
 
@@ -134,7 +129,7 @@ public class TaskControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         assertThat(springPageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
@@ -150,7 +145,6 @@ public class TaskControllerImplIT {
         when(taskRuntime.tasks(any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/v1/tasks?page=10&size=10").accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 pagedTasksFields()
@@ -213,7 +207,6 @@ public class TaskControllerImplIT {
         this.mockMvc.perform(post("/v1/tasks/{taskId}/complete",
                                   1))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/complete",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
@@ -221,24 +214,22 @@ public class TaskControllerImplIT {
     @Test
     public void saveTask() throws Exception {
         SaveTaskPayload saveTask = TaskPayloadBuilder.save().withTaskId("1").withVariable("name", "value").build();
-        
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/save", 
+
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/save",
                                   1)
                              .contentType(MediaType.APPLICATION_JSON)
                              .content(mapper.writeValueAsString(saveTask)))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/save",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
-    
+
     @Test
     public void deleteTask() throws Exception {
         given(taskRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(delete("/v1/tasks/{taskId}",
                                     1))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
@@ -350,12 +341,11 @@ public class TaskControllerImplIT {
         this.mockMvc.perform(get("/v1/tasks/{taskId}/subtasks",
                                  "parentTaskId").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/subtasks/get",
                                 links(halLinks(),
                                       linkWithRel("self").ignored().optional())));
     }
-    
+
     @Test
     public void updateTask() throws Exception {
         given(taskRuntime.update(any())).willReturn(buildDefaultAssignedTask());
@@ -364,12 +354,11 @@ public class TaskControllerImplIT {
                 .withName("update-task")
                 .withDescription("update-description")
                 .build();
-        
+
         this.mockMvc.perform(put("/v1/tasks/{taskId}",
                                  1).contentType(MediaType.APPLICATION_JSON)
                                  .content(mapper.writeValueAsString(updateTaskCmd)))
-                .andExpect(status().isOk())
-                .andDo(print());
+                .andExpect(status().isOk());
     }
 
 }

@@ -8,7 +8,7 @@ import org.activiti.cloud.services.modeling.validation.JsonSchemaFlattener;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 public class JsonSchemaFlattenerTest {

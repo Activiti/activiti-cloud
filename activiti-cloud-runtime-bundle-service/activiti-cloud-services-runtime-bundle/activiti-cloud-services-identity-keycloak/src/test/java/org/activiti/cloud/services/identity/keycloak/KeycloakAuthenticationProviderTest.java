@@ -3,8 +3,8 @@ package org.activiti.cloud.services.identity.keycloak;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.spi.KeycloakAccount;
@@ -22,7 +22,7 @@ public class KeycloakAuthenticationProviderTest {
     private KeycloakAuthenticationToken token;
     private RefreshableKeycloakSecurityContext keycloakSecurityContext;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         keycloakSecurityContext = mock(RefreshableKeycloakSecurityContext.class);
         KeycloakPrincipal principal = new KeycloakPrincipal("bob",

@@ -21,8 +21,8 @@ import java.util.UUID;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -41,7 +41,7 @@ public class VariableEntityDeletedEventHandlerTest {
     @Mock
     private TaskVariableDeletedEventHandler taskVariableDeletedEventHandler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

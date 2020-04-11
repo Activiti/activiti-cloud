@@ -7,8 +7,8 @@ import org.activiti.bpmn.model.CallActivity;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.bpmn.model.UserTask;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -16,7 +16,7 @@ public class ReferenceIdOverriderTest {
 
     private ReferenceIdOverrider referenceIdOverrider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Map<String, String> map = new HashMap<>();
         map.put("oldFormKey", "newFormKey");

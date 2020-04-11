@@ -37,10 +37,9 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTo
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -51,9 +50,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
@@ -61,7 +58,7 @@ public class QueryProcessInstancesEntityIT {
 
     private static final String PROC_URL = "/v1/process-instances";
     private static final String ADMIN_PROC_URL = "/admin/v1/process-instances";
-    
+
     private static final ParameterizedTypeReference<PagedResources<ProcessInstanceEntity>> PAGED_PROCESS_INSTANCE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessInstanceEntity>>() {
     };
 
@@ -81,13 +78,13 @@ public class QueryProcessInstancesEntityIT {
 
     private ProcessInstanceEventContainedBuilder processInstanceBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processInstanceRepository.deleteAll();
     }
@@ -144,15 +141,15 @@ public class QueryProcessInstancesEntityIT {
                                            ProcessInstance.ProcessInstanceStatus.COMPLETED));
         });
     }
-    
+
     @Test
     public void shouldGetProcessWithUpdatedInfo() {
         //given
         ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
 
-        
+
         eventsAggregator.sendAll();
-        
+
         await().untilAsserted(() -> {
 
             //when
@@ -169,18 +166,18 @@ public class QueryProcessInstancesEntityIT {
                     .contains(tuple(process.getId(),
                                     ProcessInstance.ProcessInstanceStatus.RUNNING));
         });
-        
+
         //when
         ProcessInstanceImpl updatedProcess = new ProcessInstanceImpl();
         updatedProcess.setId(process.getId());
         updatedProcess.setBusinessKey("businessKey");
         updatedProcess.setName("name");
-        
-        
+
+
         producer.send(new CloudProcessUpdatedEventImpl(updatedProcess));
 
         await().untilAsserted(() -> {
-     
+
              ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
                                                                             HttpMethod.GET,
                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
@@ -190,7 +187,7 @@ public class QueryProcessInstancesEntityIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getId()).isNotNull();
-            
+
             ProcessInstance responseProcess = responseEntity.getBody();
             assertThat(responseProcess.getBusinessKey()).isEqualTo(updatedProcess.getBusinessKey());
             assertThat(responseProcess.getName()).isEqualTo(updatedProcess.getName());
@@ -198,19 +195,19 @@ public class QueryProcessInstancesEntityIT {
         });
     }
 
-    
+
     @Test
     public void shouldGetAdminProcessInfo() {
         //given
         ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
 
-        
+
         eventsAggregator.sendAll();
-        
-  
+
+
         await().untilAsserted(() -> {
              keycloakTokenProducer.setKeycloakTestUser("hradmin");
-     
+
              ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "/" + process.getId(),
                                                                             HttpMethod.GET,
                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
@@ -220,13 +217,13 @@ public class QueryProcessInstancesEntityIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getId()).isNotNull();
-            
+
             ProcessInstance responseProcess = responseEntity.getBody();
             assertThat(responseProcess.getId()).isEqualTo(process.getId());
 
         });
     }
-    
+
     @Test
     public void shouldGetProcessDefinitionVersion() {
         //given
@@ -236,15 +233,15 @@ public class QueryProcessInstancesEntityIT {
         process.setProcessDefinitionKey("process-definition-key");
         process.setProcessDefinitionId("process-definition-id");
         process.setProcessDefinitionVersion(10);
-        
+
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
                                    new CloudProcessStartedEventImpl(process,
                                                        null,
                                                        null));
-        
-        
+
+
         eventsAggregator.sendAll();
-        
+
         await().untilAsserted(() -> {
 
             //when
@@ -258,11 +255,11 @@ public class QueryProcessInstancesEntityIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
-            
-  
+
+
         });
     }
-    
+
     @Test
     public void shouldSuspendResumeProcess() {
         //given
@@ -272,15 +269,15 @@ public class QueryProcessInstancesEntityIT {
         process.setProcessDefinitionKey("process-definition-key");
         process.setProcessDefinitionId("process-definition-id");
         process.setProcessDefinitionVersion(10);
-        
+
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
                                    new CloudProcessStartedEventImpl(process,
                                                        null,
                                                        null));
-        
-        
+
+
         eventsAggregator.sendAll();
-        
+
         await().untilAsserted(() -> {
 
             //when
@@ -294,13 +291,13 @@ public class QueryProcessInstancesEntityIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
-            
+
         });
-        
+
         eventsAggregator.addEvents(new CloudProcessSuspendedEventImpl(process));
-        
+
         eventsAggregator.sendAll();
-        
+
         await().untilAsserted(() -> {
 
             //when
@@ -316,13 +313,13 @@ public class QueryProcessInstancesEntityIT {
             assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
             assertThat(responseEntity.getBody().getProcessDefinitionKey()).isEqualTo("process-definition-key");
             assertThat(responseEntity.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.SUSPENDED);
-            
+
         });
-        
+
         eventsAggregator.addEvents(new CloudProcessResumedEventImpl(process));
-        
+
         eventsAggregator.sendAll();
-        
+
         await().untilAsserted(() -> {
 
             //when
@@ -338,11 +335,11 @@ public class QueryProcessInstancesEntityIT {
             assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
             assertThat(responseEntity.getBody().getProcessDefinitionKey()).isEqualTo("process-definition-key");
             assertThat(responseEntity.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.RUNNING);
-            
+
         });
 
     }
-    
+
     @Test
     public void shouldGetProcessInstancesFilteredByNameDescription() {
         //given
@@ -412,7 +409,7 @@ public class QueryProcessInstancesEntityIT {
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
-    
+
     private ResponseEntity<PagedResources<ProcessInstanceEntity>> executeRequestGetProcInstancesFiltered(String name,String description) {
         String url=PROC_URL;
         boolean add = false;
@@ -428,7 +425,7 @@ public class QueryProcessInstancesEntityIT {
                 }
                 url += "description=" + description;
             }
-            
+
         }
         return testRestTemplate.exchange(url,
                                          HttpMethod.GET,

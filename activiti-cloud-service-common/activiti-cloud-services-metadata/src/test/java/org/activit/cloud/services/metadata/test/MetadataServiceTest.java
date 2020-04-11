@@ -2,8 +2,8 @@ package org.activit.cloud.services.metadata.test;
 
 import org.activiti.cloud.services.metadata.MetadataProperties;
 import org.activiti.cloud.services.metadata.MetadataService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -24,7 +24,7 @@ public class MetadataServiceTest {
     private MetadataProperties metadataProperties;
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 

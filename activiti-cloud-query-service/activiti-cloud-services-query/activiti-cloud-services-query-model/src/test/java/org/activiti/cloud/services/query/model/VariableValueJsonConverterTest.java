@@ -19,8 +19,8 @@ package org.activiti.cloud.services.query.model;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -40,7 +40,7 @@ public class VariableValueJsonConverterTest {
     private static final VariableValue<Integer> ENTITY_REPRESENTATION = new VariableValue<>(10);
     private static final String JSON_REPRESENTATION = "{\"value\": 10}";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

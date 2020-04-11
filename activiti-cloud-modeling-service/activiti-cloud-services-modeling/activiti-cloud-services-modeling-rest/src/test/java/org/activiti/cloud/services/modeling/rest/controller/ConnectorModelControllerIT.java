@@ -33,14 +33,12 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -48,7 +46,6 @@ import org.springframework.web.context.WebApplicationContext;
  * Integration tests for models rest api dealing with connector models
  */
 @ActiveProfiles("test")
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -67,7 +64,7 @@ public class ConnectorModelControllerIT {
     @Autowired
     private ModelRepository modelRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
     }
@@ -186,7 +183,7 @@ public class ConnectorModelControllerIT {
                 .body(objectMapper.writeValueAsString(connectorModel("updated-connector-name")))
                 .put("/v1/models/{modelId}",
                      connectorModel.getId())
-                .then().log().all().expect(status().isOk())
+                .then().expect(status().isOk())
                 .body("name",
                       equalTo("updated-connector-name"));
     }

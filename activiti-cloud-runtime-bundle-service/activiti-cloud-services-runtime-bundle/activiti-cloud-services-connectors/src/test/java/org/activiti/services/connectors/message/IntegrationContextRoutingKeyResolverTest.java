@@ -20,13 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Map;
 
 import org.activiti.cloud.services.events.message.RuntimeBundleInfoMessageHeaders;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
- 
+
 public class IntegrationContextRoutingKeyResolverTest {
 
     private IntegrationContextRoutingKeyResolver subject = new IntegrationContextRoutingKeyResolver();
-    
+
     @Test
     public void testResolveRoutingKeyFromValidHeadersInAnyOrder() {
         // given
@@ -37,12 +37,12 @@ public class IntegrationContextRoutingKeyResolverTest {
                                                 .with(IntegrationContextMessageHeaders.BUSINESS_KEY, "business-key");
         // when
         String routingKey = subject.resolve(headers);
-        
+
         // then
         assertThat(routingKey).isEqualTo("integrationContext.service-name.app-name.connector-type.process-instance-id.business-key");
-                
+
     }
-    
+
     private static class MapBuilder<K, V> extends java.util.HashMap<K, V> {
         private static final long serialVersionUID = 1L;
 
@@ -58,6 +58,6 @@ public class IntegrationContextRoutingKeyResolverTest {
         public static <K, V> MapBuilder<K, V> emptyMap() {
             return new MapBuilder<K, V>();
         }
-        
-    }    
+
+    }
 }

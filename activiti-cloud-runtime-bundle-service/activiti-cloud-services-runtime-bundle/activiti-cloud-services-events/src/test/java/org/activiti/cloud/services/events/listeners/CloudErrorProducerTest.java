@@ -26,8 +26,8 @@ import org.activiti.api.runtime.model.impl.BPMNErrorImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEventImpl;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -35,14 +35,14 @@ public class CloudErrorProducerTest {
 
     @InjectMocks
     private CloudErrorReceivedProducer cloudErrorReceivedProducer;
-    
+
     @Mock
     private ToCloudProcessRuntimeEventConverter eventConverter;
-    
+
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -52,12 +52,12 @@ public class CloudErrorProducerTest {
 
         BPMNErrorReceivedEvent eventFired = new BPMNErrorReceivedEventImpl(new BPMNErrorImpl());
         CloudBPMNErrorReceivedEvent cloudEventFired = new CloudBPMNErrorReceivedEventImpl();
-        
+
         given(eventConverter.from(eventFired)).willReturn(cloudEventFired);
-        
+
         cloudErrorReceivedProducer.onEvent(eventFired);
 
         verify(eventsAggregator).add(cloudEventFired);
-    }    
-    
+    }
+
 }

@@ -27,7 +27,6 @@
     <activiti-cloud-acceptance-tests.version>${project.version}</activiti-cloud-acceptance-tests.version>
     <activiti-cloud-modeling-service.version>${project.version}</activiti-cloud-modeling-service.version>
     <everit-json-schema.version>1.12.1</everit-json-schema.version>
-    <json.version>20180813</json.version>
     <commons-collections4.version>4.1</commons-collections4.version>
   </properties>
   <dependencyManagement>
@@ -89,10 +88,4 @@
       <type>pom</type>
     </dependency>
   </dependencies>
-  <repositories>
-    <repository>
-      <id>alfresco</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
 </project>

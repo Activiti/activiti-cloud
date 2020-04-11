@@ -19,7 +19,7 @@ package org.activiti.cloud.starter.messages.test.redis;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -35,10 +35,10 @@ public class RedisMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
     @SpringBootApplication
     static class MessagesApplication {
-        
+
     }
-    
-    @TestConfiguration 
+
+    @TestConfiguration
     static class Configuration {
 
         @Bean
@@ -46,7 +46,7 @@ public class RedisMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
           return new PseudoTransactionManager();
         }
     }
-    
+
     @Test
     public void testMessageStore() throws Exception {
         assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(RedisMessageStore.class);

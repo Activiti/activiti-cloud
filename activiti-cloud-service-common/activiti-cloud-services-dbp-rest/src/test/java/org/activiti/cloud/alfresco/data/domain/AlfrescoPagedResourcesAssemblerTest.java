@@ -19,8 +19,8 @@ package org.activiti.cloud.alfresco.data.domain;
 import java.util.Collections;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -51,7 +51,7 @@ public class AlfrescoPagedResourcesAssemblerTest {
     @Mock
     private Page<String> page;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }

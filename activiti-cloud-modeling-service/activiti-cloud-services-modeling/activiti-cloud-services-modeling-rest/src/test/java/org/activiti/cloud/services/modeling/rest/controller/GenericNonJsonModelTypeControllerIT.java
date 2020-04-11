@@ -36,14 +36,12 @@ import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -55,7 +53,6 @@ import java.util.Map;
  * Integration tests for models rest api dealing with a non JSON models
  */
 @ActiveProfiles(profiles = { "test", "generic" })
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -81,7 +78,7 @@ public class GenericNonJsonModelTypeControllerIT {
 
     private static final String GENERIC_PROJECT_NAME = "project-with-generic-model";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
     }
@@ -189,7 +186,7 @@ public class GenericNonJsonModelTypeControllerIT {
                                                                                                          genericNonJsonModelType.getName())))
                 .put("/v1/models/{modelId}",
                      genericNonJsonModel.getId())
-                .then().log().all().expect(status().isOk()).body("name",
+                .then().expect(status().isOk()).body("name",
                                                                  equalTo("updated-connector-name"));
     }
 

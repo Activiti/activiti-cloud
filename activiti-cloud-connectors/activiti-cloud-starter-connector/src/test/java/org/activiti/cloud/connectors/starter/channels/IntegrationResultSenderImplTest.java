@@ -24,8 +24,8 @@ import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.messaging.Message;
@@ -39,11 +39,11 @@ public class IntegrationResultSenderImplTest {
 
     @Mock
     private IntegrationResultChannelResolver resolver;
-    
+
     @Mock
     private MessageChannel messageChannel;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }
@@ -60,7 +60,7 @@ public class IntegrationResultSenderImplTest {
         integrationRequest.setServiceVersion("1.0");
         IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
                 integrationRequest.getIntegrationContext());
-        
+
         given(resolver.resolveDestination(integrationRequest)).willReturn(messageChannel);
 
         Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();

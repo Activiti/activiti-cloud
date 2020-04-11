@@ -19,7 +19,7 @@ package org.activiti.cloud.starter.messages.test.hazelcast;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -30,15 +30,15 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
 public class HazelcastMessageStoreTests extends AbstractMessagesCoreIntegrationTests {
-    
+
     @SpringBootApplication
     static class MessagesApplication {
-        
+
     }
-    
+
     @TestConfiguration
     static class HazelcastConfiguration {
-        
+
         @Bean
         public HazelcastInstance hazelcastInstance(Config hazelcastConfig) {
             return Hazelcast.newHazelcastInstance(hazelcastConfig);

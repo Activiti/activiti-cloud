@@ -22,8 +22,8 @@ import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -42,7 +42,7 @@ public class ProcessStartedEventConverterTest {
     @Mock
     private EventContextInfoAppender eventContextInfoAppender;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -54,7 +54,7 @@ public class ProcessStartedEventConverterTest {
 
         //when
         ProcessStartedAuditEventEntity auditEventEntity = eventConverter.createEventEntity(event);
-     
+
         //then
         assertThat(auditEventEntity).isNotNull();
         assertThat(auditEventEntity.getEventId()).isEqualTo(event.getId());
@@ -103,12 +103,12 @@ public class ProcessStartedEventConverterTest {
     public void createAPIEventShouldSetAllNonProcessContextRelatedFields() {
         //given
         CloudProcessStartedEventImpl cloudAuditEventEntity = buildProcessStartedEvent();
-        
+
         ProcessStartedAuditEventEntity auditEventEntity = new ProcessStartedAuditEventEntity(cloudAuditEventEntity);
-  
+
         //when
         ProcessStartedEventConverter converter = new ProcessStartedEventConverter(new EventContextInfoAppender());
-        
+
         CloudProcessStartedEventImpl apiEvent = (CloudProcessStartedEventImpl)converter.convertToAPI(auditEventEntity);
         assertThat(apiEvent)
                 .isNotNull()

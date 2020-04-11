@@ -19,6 +19,9 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -51,12 +54,10 @@ import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -90,7 +90,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
@@ -174,14 +173,14 @@ public class JobExecutorIT {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         reset(jobMessageHandler);
 
         processEngineConfiguration = ProcessEngines.getProcessEngine("default").getProcessEngineConfiguration();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processEngineConfiguration.getClock().reset();
     }
@@ -239,10 +238,10 @@ public class JobExecutorIT {
         assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should complete all jobs")
                                                             .isTrue();
         // message is sent
-        verify(jobMessageProducer, times(jobCount)).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()),
-                                                                ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer, times(jobCount)).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                                                any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler, times(jobCount)).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler, times(jobCount)).handleMessage(any(Message.class));
     }
 
     @Test
@@ -309,10 +308,10 @@ public class JobExecutorIT {
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish application event")
                                                              .isTrue();
         // message is sent
-        verify(jobMessageProducer).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()),
-                                               ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                               any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler).handleMessage(any(Message.class));
     }
 
     @Test
@@ -351,10 +350,10 @@ public class JobExecutorIT {
             });
 
         // message is sent
-        verify(jobMessageProducer, times(retryCount)).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()),
-                                                                  ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer, times(retryCount)).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                                                  any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler, times(retryCount)).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
     }
 
     @Test
@@ -393,10 +392,10 @@ public class JobExecutorIT {
             });
 
         // timer job message is sent with 2 retries
-        verify(jobMessageProducer, times(retryCount)).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()),
-                                                                  ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer, times(retryCount)).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                                                  any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler, times(retryCount)).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
     }
     @Test
     public void testStartTimeEvent() throws InterruptedException {
@@ -463,10 +462,10 @@ public class JobExecutorIT {
                                                              .isTrue();
 
         // message is sent
-        verify(jobMessageProducer).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()),
-                                               ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                               any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler).handleMessage(any(Message.class));
     }
 
     @Test
@@ -527,10 +526,10 @@ public class JobExecutorIT {
         assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should complete job")
                                                             .isTrue();
         // message is sent
-        verify(jobMessageProducer).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()),
-                                               ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                               any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler).handleMessage(any(Message.class));
     }
 
     @Test
@@ -542,7 +541,7 @@ public class JobExecutorIT {
         applicationContext.addApplicationListener(new CountDownLatchApplicationEventListener<JobMessageFailedEvent>(eventPublished));
 
         doReturn(false).when(spyJobMessageChannel)
-                       .send(ArgumentMatchers.<Message<?>>any());
+                       .send(any(Message.class));
 
         // when
         new TransactionTemplate(transactionManager).execute(new TransactionCallbackWithoutResult() {
@@ -563,8 +562,8 @@ public class JobExecutorIT {
     public void shouldFailIfNoActiveTransactionSynchronization() {
         // when
         Throwable throwable = catchThrowable(
-                () -> jobMessageProducer.sendMessage(ArgumentMatchers.anyString(),
-                                                     ArgumentMatchers.any(Job.class))
+                () -> jobMessageProducer.sendMessage(anyString(),
+                                                     any(Job.class))
         );
 
         //then
@@ -583,7 +582,7 @@ public class JobExecutorIT {
         applicationContext.addApplicationListener(new CountDownLatchApplicationEventListener<JobMessageSentEvent>(eventPublished));
 
         doReturn(true).when(spyJobMessageChannel)
-                       .send(ArgumentMatchers.<Message<?>>any());
+                       .send(any(Message.class));
 
         // when
         new TransactionTemplate(transactionManager).execute(new TransactionCallbackWithoutResult() {
@@ -618,7 +617,7 @@ public class JobExecutorIT {
                                                     .withExceptionMessage("exceptionMessage")
                                                     ;
         doReturn(true).when(spyJobMessageChannel)
-                       .send(ArgumentMatchers.<Message<?>>any());
+                       .send(any(Message.class));
 
         // when
         new TransactionTemplate(transactionManager).execute(new TransactionCallbackWithoutResult() {
