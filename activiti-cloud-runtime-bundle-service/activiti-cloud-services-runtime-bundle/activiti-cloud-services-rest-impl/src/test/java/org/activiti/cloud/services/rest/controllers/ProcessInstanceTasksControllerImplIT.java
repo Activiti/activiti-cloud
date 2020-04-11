@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
@@ -124,7 +123,6 @@ public class ProcessInstanceTasksControllerImplIT {
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10",
                                  1,
                                  1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 processInstanceIdParameter(),

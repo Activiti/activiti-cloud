@@ -186,7 +186,7 @@ public class GenericNonJsonModelTypeControllerIT {
                                                                                                          genericNonJsonModelType.getName())))
                 .put("/v1/models/{modelId}",
                      genericNonJsonModel.getId())
-                .then().log().all().expect(status().isOk()).body("name",
+                .then().expect(status().isOk()).body("name",
                                                                  equalTo("updated-connector-name"));
     }
 

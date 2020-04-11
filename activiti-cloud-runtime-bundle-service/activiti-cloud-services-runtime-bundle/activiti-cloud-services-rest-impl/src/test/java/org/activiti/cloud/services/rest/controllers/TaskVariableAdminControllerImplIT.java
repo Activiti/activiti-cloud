@@ -28,7 +28,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
@@ -140,7 +139,6 @@ public class TaskVariableAdminControllerImplIT {
                                                                      age));
         this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/variables",
                                  TASK_ID).accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 taskIdParameter(),

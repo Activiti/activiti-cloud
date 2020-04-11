@@ -27,7 +27,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
@@ -110,7 +109,6 @@ public class EventsEngineEventsAdminControllerIT {
                         "10")
                 .param("sort",
                         "asc"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                         responseFields(
@@ -197,7 +195,6 @@ public class EventsEngineEventsAdminControllerIT {
 
         mockMvc.perform(head("/admin/{version}/events",
                 "v1"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/head/list"));
     }
@@ -221,7 +218,6 @@ public class EventsEngineEventsAdminControllerIT {
                 "v1")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/head/list"));
     }
 }

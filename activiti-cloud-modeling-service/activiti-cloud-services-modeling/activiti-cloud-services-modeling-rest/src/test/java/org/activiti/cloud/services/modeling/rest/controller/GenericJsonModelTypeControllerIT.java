@@ -195,7 +195,7 @@ public class GenericJsonModelTypeControllerIT {
                                                                                                          genericJsonModelType.getName())))
                 .put("/v1/models/{modelId}",
                      genericJsonModel.getId())
-                .then().log().all().expect(status().isOk()).body("name",
+                .then().expect(status().isOk()).body("name",
                                                                  equalTo("updated-connector-name"));
     }
 

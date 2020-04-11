@@ -31,7 +31,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
@@ -135,7 +134,6 @@ public class ProcessInstanceAdminControllerImplIT {
 
         this.mockMvc.perform(get("/admin/v1/process-instances?page=0&size=10")
                              .accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 pagedProcessInstanceFields()));
@@ -167,8 +165,6 @@ public class ProcessInstanceAdminControllerImplIT {
         this.mockMvc.perform(RestDocumentationRequestBuilders.post("/admin/v1/process-instances/{processInstanceId}/resume",
                 1))
                 .andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print())
-
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/resume",
                         pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
@@ -181,7 +177,6 @@ public class ProcessInstanceAdminControllerImplIT {
         this.mockMvc.perform(RestDocumentationRequestBuilders.post("/admin/v1/process-instances/{processInstanceId}/suspend",
                1))
                .andExpect(status().isOk())
-               .andDo(MockMvcResultHandlers.print())
                .andDo(document(DOCUMENTATION_IDENTIFIER + "/suspend",
                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }

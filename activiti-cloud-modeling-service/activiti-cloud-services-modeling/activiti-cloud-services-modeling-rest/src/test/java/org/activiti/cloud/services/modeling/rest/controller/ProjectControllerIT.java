@@ -47,7 +47,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -119,7 +118,6 @@ public class ProjectControllerIT {
 
         mockMvc.perform(get("{version}/projects",
                             RepositoryRestConfig.API_VERSION))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
@@ -137,7 +135,6 @@ public class ProjectControllerIT {
 
         mockMvc.perform(get("{version}/projects?name=project1",
                             RepositoryRestConfig.API_VERSION))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(1)))
@@ -154,7 +151,6 @@ public class ProjectControllerIT {
 
         mockMvc.perform(get("{version}/projects?name=main",
                             RepositoryRestConfig.API_VERSION))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
@@ -173,7 +169,6 @@ public class ProjectControllerIT {
 
         mockMvc.perform(get("{version}/projects?name=MAIN",
                 RepositoryRestConfig.API_VERSION))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                         hasSize(2)))
@@ -405,7 +400,6 @@ public class ProjectControllerIT {
                 get("{version}/projects/{projectId}/validate",
                     API_VERSION,
                     project.getId()))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
     }
@@ -419,7 +413,6 @@ public class ProjectControllerIT {
                 get("{version}/projects/{projectId}/validate",
                     API_VERSION,
                     project.getId()))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -457,7 +450,6 @@ public class ProjectControllerIT {
                 get("{version}/projects/{projectId}/validate",
                         API_VERSION,
                         project.getId()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -777,7 +769,6 @@ public class ProjectControllerIT {
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.entry.name",
                                     is("application-xy")));
@@ -794,7 +785,6 @@ public class ProjectControllerIT {
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(is("No valid project entry found to import: project-xy-invalid.zip")));
     }
@@ -810,7 +800,6 @@ public class ProjectControllerIT {
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(containsString("Error importing model : Error reading XML")));
     }
@@ -826,7 +815,7 @@ public class ProjectControllerIT {
 
         mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
-                .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is(overridingName)));
     }
 
@@ -839,7 +828,7 @@ public class ProjectControllerIT {
 
         mockMvc.perform(multipart("{version}/projects/import?name=",
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
-                .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
 
@@ -854,7 +843,7 @@ public class ProjectControllerIT {
 
         mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
-                .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
 

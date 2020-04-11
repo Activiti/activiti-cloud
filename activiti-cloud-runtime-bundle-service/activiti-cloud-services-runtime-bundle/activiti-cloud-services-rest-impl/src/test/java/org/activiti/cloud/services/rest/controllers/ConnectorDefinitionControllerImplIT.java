@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -96,7 +95,6 @@ public class ConnectorDefinitionControllerImplIT {
     public void getAllConnectorDefinitions() throws Exception {
 
         this.mockMvc.perform(get("/v1/connector-definitions/").accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content[0].links[0].rel", is("self")))
                 .andExpect(jsonPath("content[0].id", is("id1")))
@@ -107,7 +105,6 @@ public class ConnectorDefinitionControllerImplIT {
     public void getOneSpecificConnectorDefinition() throws Exception {
 
         this.mockMvc.perform(get("/v1/connector-definitions/id1").accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("links[0].rel", is("self")))
                 .andExpect(jsonPath("links[0].href", containsString("v1/connector-definitions/id1")))
@@ -118,7 +115,6 @@ public class ConnectorDefinitionControllerImplIT {
     public void getConnectorDefinitionNotFound() throws Exception {
 
         this.mockMvc.perform(get("/v1/connector-definitions/idNotFound").accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isNotFound());
     }
 

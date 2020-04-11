@@ -40,7 +40,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.subsecti
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
@@ -146,7 +145,6 @@ public class TaskControllerImplIT {
         when(taskRuntime.tasks(any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/v1/tasks?page=10&size=10").accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 pagedTasksFields()
@@ -209,7 +207,6 @@ public class TaskControllerImplIT {
         this.mockMvc.perform(post("/v1/tasks/{taskId}/complete",
                                   1))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/complete",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
@@ -223,7 +220,6 @@ public class TaskControllerImplIT {
                              .contentType(MediaType.APPLICATION_JSON)
                              .content(mapper.writeValueAsString(saveTask)))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/save",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
@@ -234,7 +230,6 @@ public class TaskControllerImplIT {
         this.mockMvc.perform(delete("/v1/tasks/{taskId}",
                                     1))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
@@ -346,7 +341,6 @@ public class TaskControllerImplIT {
         this.mockMvc.perform(get("/v1/tasks/{taskId}/subtasks",
                                  "parentTaskId").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/subtasks/get",
                                 links(halLinks(),
                                       linkWithRel("self").ignored().optional())));
@@ -364,8 +358,7 @@ public class TaskControllerImplIT {
         this.mockMvc.perform(put("/v1/tasks/{taskId}",
                                  1).contentType(MediaType.APPLICATION_JSON)
                                  .content(mapper.writeValueAsString(updateTaskCmd)))
-                .andExpect(status().isOk())
-                .andDo(print());
+                .andExpect(status().isOk());
     }
 
 }

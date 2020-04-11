@@ -30,7 +30,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.subsecti
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.api.process.model.BPMNMessage;
@@ -139,7 +138,6 @@ public class AuditEventsControllerImplIT {
                                        "10")
                                 .param("sort",
                                        "asc"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 responseFields(
@@ -229,7 +227,6 @@ public class AuditEventsControllerImplIT {
 
         mockMvc.perform(head("{version}/events",
                              "/v1"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/head/list"));
     }
@@ -253,7 +250,6 @@ public class AuditEventsControllerImplIT {
                              "/v1")
                                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/head/list"));
     }
 
@@ -267,7 +263,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
                                 pathParameters(parameterWithName("id").description("The event id"),
@@ -311,7 +306,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()).accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/get",
                                 pathParameters(parameterWithName("id").description("The event id"),
@@ -344,7 +338,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(head("{version}/events/{id}",
                              "/v1",
                              eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/head"));
     }
@@ -372,7 +365,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -404,7 +396,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -418,7 +409,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -432,7 +422,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -446,7 +435,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
     }
 

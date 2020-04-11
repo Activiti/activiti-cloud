@@ -183,7 +183,7 @@ public class ConnectorModelControllerIT {
                 .body(objectMapper.writeValueAsString(connectorModel("updated-connector-name")))
                 .put("/v1/models/{modelId}",
                      connectorModel.getId())
-                .then().log().all().expect(status().isOk())
+                .then().expect(status().isOk())
                 .body("name",
                       equalTo("updated-connector-name"));
     }

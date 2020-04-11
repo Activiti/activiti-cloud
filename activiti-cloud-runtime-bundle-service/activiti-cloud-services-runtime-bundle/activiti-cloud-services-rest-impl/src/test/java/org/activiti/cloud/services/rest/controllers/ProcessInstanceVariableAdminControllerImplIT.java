@@ -61,7 +61,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessInstanceVariableAdminControllerImpl.class)
@@ -159,7 +158,6 @@ public class ProcessInstanceVariableAdminControllerImplIT {
                 .content(mapper.writeValueAsString(ProcessPayloadBuilder.removeVariables().withVariableNames(Arrays.asList("varName1",
                         "varName2"))
                         .build())))
-                .andDo(print())
                 .andExpect(status().isOk());
         verify(processAdminRuntime).removeVariables(any());
     }

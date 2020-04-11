@@ -122,7 +122,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("extraneous key [icon] is not permitted",
@@ -145,7 +145,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSyntacticValidationException()
                 .hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
@@ -164,7 +164,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSyntacticValidationException()
                 .hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
@@ -183,7 +183,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("expected maxLength: 26, actual: 27",
@@ -203,7 +203,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("expected minLength: 1, actual: 0",
@@ -223,7 +223,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("string [name_with_underscore] does not match pattern " + DNS_LABEL_REGEX);
@@ -242,7 +242,7 @@ public class ConnectorValidationControllerIT {
                     .post("/v1/models/{modelId}/validate",
                         connectorModel.getId())
                     .then()
-                    .log().all()
+
                     .expect(status().isBadRequest()))
             .isSemanticValidationException()
             .hasValidationErrors("string [NameWithUppercase] does not match pattern " + DNS_LABEL_REGEX);

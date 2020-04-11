@@ -193,7 +193,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              APPLICATION_OCTET_STREAM_VALUE)
                 .post("/v1/models/{modelId}/validate",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Content invalid");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Content invalid");
 
         Mockito.verify(genericNonJsonExtensionsValidator,
                        Mockito.times(0))
@@ -239,7 +239,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found");
 
         Mockito.verify(genericNonJsonContentValidator,
                        Mockito.times(0))
@@ -262,7 +262,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSyntacticValidationException().hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
+                .then().expect(status().isBadRequest())).isSyntacticValidationException().hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
 
         Mockito.verify(genericNonJsonContentValidator,
                        Mockito.times(0))
@@ -285,7 +285,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("expected type: String, found: Boolean");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("expected type: String, found: Boolean");
 
         Mockito.verify(genericNonJsonContentValidator,
                        Mockito.times(0))
@@ -310,7 +310,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Extensions invalid");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Extensions invalid");
 
         Mockito.verify(genericNonJsonContentValidator,
                        Mockito.times(0))

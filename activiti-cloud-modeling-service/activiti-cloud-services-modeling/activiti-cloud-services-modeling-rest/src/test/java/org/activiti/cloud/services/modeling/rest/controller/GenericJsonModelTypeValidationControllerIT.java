@@ -169,7 +169,7 @@ public class GenericJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate",
                       genericJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Content invalid");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Content invalid");
 
         Mockito.verify(genericJsonExtensionsValidator,
                        Mockito.times(0))
@@ -215,7 +215,7 @@ public class GenericJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found");
 
         Mockito.verify(genericJsonContentValidator,
                        Mockito.times(0))
@@ -239,7 +239,7 @@ public class GenericJsonModelTypeValidationControllerIT {
             "application/json")
             .post("/v1/models/{modelId}/validate/extensions",
                 genericJsonModel.getId())
-            .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found", "required key [name] not found");
+            .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found", "required key [name] not found");
 
         Mockito.verify(genericJsonContentValidator,
             Mockito.times(0))
@@ -262,7 +262,7 @@ public class GenericJsonModelTypeValidationControllerIT {
             "application/json")
             .post("/v1/models/{modelId}/validate/extensions",
                 genericJsonModel.getId())
-            .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("string [!@#$%^&*()] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
+            .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("string [!@#$%^&*()] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
 
         Mockito.verify(genericJsonContentValidator,
             Mockito.times(0))
@@ -285,7 +285,7 @@ public class GenericJsonModelTypeValidationControllerIT {
             "application/json")
             .post("/v1/models/{modelId}/validate/extensions",
                 genericJsonModel.getId())
-            .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors(
+            .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors(
                 "expected maxLength: 26, actual: 35", "string [alfresco-adf-app-deployment-develop] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
 
         Mockito.verify(genericJsonContentValidator,
@@ -309,7 +309,7 @@ public class GenericJsonModelTypeValidationControllerIT {
             "application/json")
             .post("/v1/models/{modelId}/validate/extensions",
                 genericJsonModel.getId())
-            .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors(
+            .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors(
                 "expected minLength: 1, actual: 0", "string [] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
 
         Mockito.verify(genericJsonContentValidator,
@@ -333,7 +333,7 @@ public class GenericJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSyntacticValidationException()
+                .then().expect(status().isBadRequest())).isSyntacticValidationException()
                         .hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
 
         Mockito.verify(genericJsonContentValidator,
@@ -357,7 +357,7 @@ public class GenericJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("expected type: String, found: Boolean");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("expected type: String, found: Boolean");
 
         Mockito.verify(genericJsonContentValidator,
                        Mockito.times(0))
@@ -382,7 +382,7 @@ public class GenericJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Extensions invalid");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Extensions invalid");
 
         Mockito.verify(genericJsonContentValidator,
                        Mockito.times(0))

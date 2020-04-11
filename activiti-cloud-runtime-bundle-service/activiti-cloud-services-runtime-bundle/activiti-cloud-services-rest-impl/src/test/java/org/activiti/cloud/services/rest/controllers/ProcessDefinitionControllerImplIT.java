@@ -34,7 +34,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -143,7 +142,6 @@ public class ProcessDefinitionControllerImplIT {
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
-        .andDo(print())
         .andExpect(status().isOk())
         .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                         pagedProcessDefinitionFields(),
