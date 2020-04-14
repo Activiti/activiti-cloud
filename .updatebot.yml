@@ -8,10 +8,12 @@ github:
     - name: alfresco
       repositories:
         - name: alfresco-process-parent
+          branch: develop
           useSinglePullRequest: true
         - name: alfresco-process-application-oracle-kafka
           useSinglePullRequest: true
         - name: alfresco-process-application-deployment
+          branch: develop
           useSinglePullRequest: true
         - name: alfresco-process-springboot-service-deployment
           useSinglePullRequest: true
