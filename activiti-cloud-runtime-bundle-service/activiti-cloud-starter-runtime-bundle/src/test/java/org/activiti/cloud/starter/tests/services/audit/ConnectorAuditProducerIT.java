@@ -37,7 +37,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,7 +87,7 @@ public class ConnectorAuditProducerIT {
     @Value("integrationError_${spring.application.name}")
     private String integrationErrorDestination;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         streamHandler.clear();
     }
