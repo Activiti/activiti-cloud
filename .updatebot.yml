@@ -5,6 +5,3 @@ github:
         - name: activiti-cloud-application
           branch: develop
           useSinglePullRequest: true
-        - name: activiti-cloud-modeling
-          branch: master
-          useSinglePullRequest: true
