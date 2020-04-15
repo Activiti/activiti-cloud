@@ -232,11 +232,11 @@ pipeline {
       steps {
         container('maven') {
           dir("activiti-cloud-acceptance-scenarios") {
-            sh "mvn clean deplpy -DskipTests"
+            sh "mvn clean deploy -DskipTests"
           }
 
           dir("activiti-cloud-dependencies") {
-            sh "mvn clean deplpy -DskipTests"
+            sh "mvn clean deploy -DskipTests"
           }
         }
       }
