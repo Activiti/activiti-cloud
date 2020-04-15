@@ -232,11 +232,11 @@ pipeline {
       steps {
         container('maven') {
           dir("activiti-cloud-acceptance-scenarios") {
-            sh "mvn clean install -DskipTests"
+            sh "mvn clean deplpy -DskipTests"
           }
 
           dir("activiti-cloud-dependencies") {
-            sh "mvn clean install -DskipTests"
+            sh "mvn clean deplpy -DskipTests"
           }
         }
       }
@@ -255,6 +255,7 @@ pipeline {
       }
       steps {
         container('maven') {
+
           sh '''updatebot --dry push-version --kind helm activiti-cloud-dependencies $VERSION \
                         runtime-bundle $VERSION \
                         activiti-cloud-connector $VERSION \
