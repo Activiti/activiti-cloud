@@ -58,8 +58,8 @@ import org.springframework.test.context.TestPropertySource;
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class ConnectorAuditProducerIT {
 
-    public static final String ROUTING_KEY_HEADER = "routingKey";
-    public static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
+    private static final String ROUTING_KEY_HEADER = "routingKey";
+    private static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
     public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS)
                                                               .flatMap(Stream::of)
                                                               .toArray(String[]::new);
@@ -146,18 +146,7 @@ public class ConnectorAuditProducerIT {
 
         });
 
-        MessageChannel resultsChannel = channelResolver.resolveDestination(integrationResultDestination);
-
-        // complete cloud connector tasks
-        integrationRequestedEvents.stream()
-                                  .map(request -> {
-                                      return new IntegrationResultImpl(new IntegrationRequestImpl(request.getEntity()),
-                                                                       request.getEntity());
-                                  })
-                                  .map(payload -> MessageBuilder.withPayload(payload)
-                                                                .build())
-                                  .forEach(resultsChannel::send);
-
+        sendIntegrationResultFor(integrationRequestedEvents);
 
         //then
         await()
@@ -328,19 +317,7 @@ public class ConnectorAuditProducerIT {
 
         });
 
-        MessageChannel errorChannel = channelResolver.resolveDestination(integrationErrorDestination);
-
-        CloudBpmnError error = new CloudBpmnError("CLOUD_BPMN_ERROR");
-
-        // when throw error in cloud connector
-        integrationRequestedEvents.stream()
-                                  .map(request -> {
-                                      return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()),
-                                                                      error);
-                                  })
-                                  .map(payload -> MessageBuilder.withPayload(payload)
-                                                                .build())
-                                  .forEach(errorChannel::send);
+        sendIntegrationErrorFor(integrationRequestedEvents);
         //then
         await()
             .untilAsserted(() -> {
@@ -410,18 +387,7 @@ public class ConnectorAuditProducerIT {
 
         });
 
-        MessageChannel resultsChannel = channelResolver.resolveDestination(integrationResultDestination);
-
-        // complete cloud connector tasks
-        integrationRequestedEvents.stream()
-                                  .map(request -> {
-                                      return new IntegrationResultImpl(new IntegrationRequestImpl(request.getEntity()),
-                                                                       request.getEntity());
-                                  })
-                                  .map(payload -> MessageBuilder.withPayload(payload)
-                                                                .build())
-                                  .forEach(resultsChannel::send);
-
+        sendIntegrationResultFor(integrationRequestedEvents);
 
         //then
         await()
@@ -476,19 +442,7 @@ public class ConnectorAuditProducerIT {
 
         });
 
-        MessageChannel errorChannel = channelResolver.resolveDestination(integrationErrorDestination);
-
-        CloudBpmnError error = new CloudBpmnError("CLOUD_BPMN_ERROR");
-
-        // when throw error in cloud connector
-        integrationRequestedEvents.stream()
-                                  .map(request -> {
-                                      return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()),
-                                                                      error);
-                                  })
-                                  .map(payload -> MessageBuilder.withPayload(payload)
-                                                                .build())
-                                  .forEach(errorChannel::send);
+        sendIntegrationErrorFor(integrationRequestedEvents);
         //then
         await()
             .untilAsserted(() -> {
@@ -571,19 +525,7 @@ public class ConnectorAuditProducerIT {
 
         });
 
-        MessageChannel errorChannel = channelResolver.resolveDestination(integrationErrorDestination);
-
-        CloudBpmnError error = new CloudBpmnError("CLOUD_BPMN_ERROR");
-
-        // when throw error in cloud connector
-        integrationRequestedEvents.stream()
-                                  .map(request -> {
-                                      return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()),
-                                                                      error);
-                                  })
-                                  .map(payload -> MessageBuilder.withPayload(payload)
-                                                                .build())
-                                  .forEach(errorChannel::send);
+        sendIntegrationErrorFor(integrationRequestedEvents);
         //then
         await()
             .untilAsserted(() -> {
@@ -653,18 +595,7 @@ public class ConnectorAuditProducerIT {
 
         });
 
-        MessageChannel resultsChannel = channelResolver.resolveDestination(integrationResultDestination);
-
-        // complete cloud connector tasks
-        integrationRequestedEvents.stream()
-                                  .map(request -> {
-                                      return new IntegrationResultImpl(new IntegrationRequestImpl(request.getEntity()),
-                                                                       request.getEntity());
-                                  })
-                                  .map(payload -> MessageBuilder.withPayload(payload)
-                                                                .build())
-                                  .forEach(resultsChannel::send);
-
+        sendIntegrationResultFor(integrationRequestedEvents);
 
         //then
         await()
@@ -689,6 +620,22 @@ public class ConnectorAuditProducerIT {
                     RuntimeEvent::getProcessInstanceId)
                     .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
         });
+    }
+
+    private void sendIntegrationResultFor(
+        List<CloudIntegrationRequestedEvent> integrationRequestedEvents) {
+        MessageChannel resultsChannel = channelResolver
+            .resolveDestination(integrationResultDestination);
+
+        // complete cloud connector tasks
+        integrationRequestedEvents.stream()
+            .map(request -> {
+                return new IntegrationResultImpl(new IntegrationRequestImpl(request.getEntity()),
+                    request.getEntity());
+            })
+            .map(payload -> MessageBuilder.withPayload(payload)
+                .build())
+            .forEach(resultsChannel::send);
     }
 
     @Test
@@ -725,19 +672,7 @@ public class ConnectorAuditProducerIT {
 
         });
 
-        MessageChannel errorChannel = channelResolver.resolveDestination(integrationErrorDestination);
-
-        CloudBpmnError error = new CloudBpmnError("CLOUD_BPMN_ERROR");
-
-        // when throw error in cloud connector
-        integrationRequestedEvents.stream()
-                                  .map(request -> {
-                                      return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()),
-                                                                      error);
-                                  })
-                                  .map(payload -> MessageBuilder.withPayload(payload)
-                                                                .build())
-                                  .forEach(errorChannel::send);
+        sendIntegrationErrorFor(integrationRequestedEvents);
         //then
         await()
             .untilAsserted(() -> {
@@ -793,6 +728,23 @@ public class ConnectorAuditProducerIT {
                     RuntimeEvent::getProcessInstanceId)
                     .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
         });
+    }
+
+    private void sendIntegrationErrorFor(
+        List<CloudIntegrationRequestedEvent> integrationRequestedEvents) {
+        CloudBpmnError error = new CloudBpmnError("CLOUD_BPMN_ERROR");
+
+        MessageChannel errorChannel = channelResolver
+            .resolveDestination(integrationErrorDestination);
+
+        integrationRequestedEvents.stream()
+            .map(request -> {
+                return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()),
+                    error);
+            })
+            .map(payload -> MessageBuilder.withPayload(payload)
+                .build())
+            .forEach(errorChannel::send);
     }
 
     private List<CloudRuntimeEvent<?, ?>> getProcessInstanceEvents(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
