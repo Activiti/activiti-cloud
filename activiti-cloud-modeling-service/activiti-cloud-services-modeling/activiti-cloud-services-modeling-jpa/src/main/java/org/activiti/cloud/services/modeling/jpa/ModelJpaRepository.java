@@ -76,11 +76,11 @@ public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, 
     }
 
 
-    @Override
-    @Transactional
-    default ModelEntity saveWithNoVersion(ModelEntity versionedEntity) {
-        return save(versionedEntity);
-    }
+//    @Override
+//    @Transactional
+//    default ModelEntity save(ModelEntity versionedEntity, boolean updateVersion) {
+//        return save(versionedEntity);
+//    }
 
     @Override
     default ModelEntity updateModel(ModelEntity modelToBeUpdated,
@@ -95,7 +95,7 @@ public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, 
     @Override
     default ModelEntity updateModelContent(ModelEntity modelToBeUpdated,
                                            FileContent fileContent) {
-        return saveWithNoVersion(modelToBeUpdated);
+        return saveAndFlush(modelToBeUpdated);
     }
 
     @Override

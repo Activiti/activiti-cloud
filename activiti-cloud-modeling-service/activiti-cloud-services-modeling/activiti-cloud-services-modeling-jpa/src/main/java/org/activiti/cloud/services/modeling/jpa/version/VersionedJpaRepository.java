@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.modeling.jpa.version;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -25,6 +26,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 @NoRepositoryBean
 public interface VersionedJpaRepository<T extends VersionedEntity, K, V extends VersionEntity>
         extends JpaRepository<T, K> {
-    public <S extends T> S saveWithNoVersion(S versionedEntity);
+
 
 }

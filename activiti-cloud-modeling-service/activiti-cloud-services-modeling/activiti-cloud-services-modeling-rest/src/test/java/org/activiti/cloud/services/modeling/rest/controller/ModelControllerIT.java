@@ -964,6 +964,28 @@ public class ModelControllerIT {
     }
 
     @Test
+    public void should_returnCorrectVersion_when_creatingProcess() throws Exception {
+
+        Model processModel=modelRepository.createModel(processModel("Process Model 3"));
+        System.out.println(processModel.getVersion());
+
+
+        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
+            API_VERSION,
+            processModel.getId())
+
+            .file("file",
+                "create-process.xml",
+                CONTENT_TYPE_XML,
+                resourceAsByteArray("process/create-process.xml")).param("type",
+                PROCESS))
+            .andExpect(status().isNoContent());
+        ModelEntity modelEntity=(ModelEntity)modelRepository.findModelById(processModel.getId()).get();
+        assertThat(modelEntity.getVersion().endsWith("0.0.1"));
+
+    }
+
+    @Test
     public void should_returnStatusOk_when_updatingConnectorTemplate() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("Connector With Template"));
 

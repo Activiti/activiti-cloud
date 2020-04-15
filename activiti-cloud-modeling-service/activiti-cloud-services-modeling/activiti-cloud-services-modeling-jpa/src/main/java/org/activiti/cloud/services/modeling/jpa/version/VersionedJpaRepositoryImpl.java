@@ -59,18 +59,35 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
      * @param <S> the versionedEntity type
      * @return the saved entity
      */
-    @Override
-    @Transactional
-    public <S extends T> S save(S versionedEntity) {
-        generateNextVersion(versionedEntity);
-        return super.save(versionedEntity);
-    }
 
     @Override
     @Transactional
-    public <S extends T> S saveWithNoVersion(S versionedEntity) {
+    public <S extends T> S saveAndFlush(S versionedEntity) {
+
         return super.save(versionedEntity);
     }
+
+    /**
+     * Add a new version before any save.
+     * @param versionedEntity the entity to save
+     * @param <S> the versionedEntity type
+     * @return the saved entity
+     */
+
+    @Override
+    @Transactional
+    public <S extends T> S save(S versionedEntity) {
+
+            generateNextVersion(versionedEntity);
+
+        return super.save(versionedEntity);
+    }
+//
+//    @Override
+//    @Transactional
+//    public <S extends T> S saveWithNoVersion(S versionedEntity) {
+//        return super.save(versionedEntity);
+//    }
 
     /**
      * Generate and add a new version to a given version entity.
