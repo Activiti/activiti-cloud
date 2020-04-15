@@ -364,11 +364,11 @@ pipeline {
 
             retry(5) {
               sh '''updatebot push-version --kind maven \
+                  org.activiti.cloud.dependencies:activiti-cloud-dependencies $VERSION \
                   org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $activiti_cloud_version \
                   org.activiti.cloud.audit:activiti-cloud-audit-dependencies $activiti_cloud_version \
                   org.activiti.cloud.api:activiti-cloud-api-dependencies $activiti_cloud_version \
                   org.activiti.cloud.build:activiti-cloud-parent $activiti_cloud_version \
-                  org.activiti.cloud.build:activiti-cloud-dependencies-parent $activiti_cloud_version\
                   org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $activiti_cloud_version \
                   org.activiti.cloud.messages:activiti-cloud-messages-dependencies $activiti_cloud_version \
                   org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $activiti_cloud_version \
