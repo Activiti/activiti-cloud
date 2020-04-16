@@ -46,7 +46,8 @@ public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
                   M newModel);
 
     M updateModelContent(M modelToBeUpdate,
-                         FileContent fileContent);
+                         FileContent fileContent,
+                         boolean updateVersion);
 
     void deleteModel(M model);
 

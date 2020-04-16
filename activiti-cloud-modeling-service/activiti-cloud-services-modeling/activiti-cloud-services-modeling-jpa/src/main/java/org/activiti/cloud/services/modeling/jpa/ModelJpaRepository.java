@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.modeling.jpa;
 
 import java.util.Optional;
-
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -28,7 +27,6 @@ import org.activiti.cloud.services.modeling.jpa.version.VersionedJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * JPA Repository for {@link ModelEntity} entity
@@ -75,13 +73,6 @@ public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, 
         return save(model);
     }
 
-
-//    @Override
-//    @Transactional
-//    default ModelEntity save(ModelEntity versionedEntity, boolean updateVersion) {
-//        return save(versionedEntity);
-//    }
-
     @Override
     default ModelEntity updateModel(ModelEntity modelToBeUpdated,
                                     ModelEntity newModel) {
@@ -94,8 +85,14 @@ public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, 
 
     @Override
     default ModelEntity updateModelContent(ModelEntity modelToBeUpdated,
-                                           FileContent fileContent) {
-        return saveAndFlush(modelToBeUpdated);
+        FileContent fileContent,
+        boolean updateVersion) {
+
+        if (updateVersion) {
+            return save(modelToBeUpdated);
+        } else {
+            return saveAndFlush(modelToBeUpdated);
+        }
     }
 
     @Override

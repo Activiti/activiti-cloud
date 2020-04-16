@@ -302,7 +302,7 @@ public class ProjectServiceImpl implements ProjectService {
                 modelJsonFile.getModelType(),
                 modelJsonFile.getFileContent());
 
-        modelService.updateModelContent(createdModel, modelJsonFile.getFileContent());
+        modelService.updateModelContent(createdModel, modelJsonFile.getFileContent(), true);
 
         projectHolder.getModelExtension(createdModel)
                 .ifPresent(fileMetadata -> {
@@ -332,7 +332,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void updateModelProcessImported(ProjectHolder projectHolder, Model createdModel, FileContent fileContent) {
-        modelService.updateModelContent(createdModel, fileContent);
+        modelService.updateModelContent(createdModel, fileContent, true);
 
         projectHolder.getModelExtension(createdModel)
                 .ifPresent(fileMetadata -> {

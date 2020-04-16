@@ -53,7 +53,8 @@ public interface ModelService {
     FileContent exportModel(Model model);
 
     Model updateModelContent(Model modelToBeUpdate,
-                             FileContent fileContent);
+                             FileContent fileContent,
+                             boolean updateVersion);
 
     FileContent overrideModelContentId(Model model,
                                        FileContent fileContent);

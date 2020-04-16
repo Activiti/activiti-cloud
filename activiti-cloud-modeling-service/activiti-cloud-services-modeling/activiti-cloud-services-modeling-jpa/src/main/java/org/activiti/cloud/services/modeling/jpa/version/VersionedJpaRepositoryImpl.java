@@ -55,8 +55,9 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
 
     /**
      * Add a new version before any save.
+     *
      * @param versionedEntity the entity to save
-     * @param <S> the versionedEntity type
+     * @param <S>             the versionedEntity type
      * @return the saved entity
      */
 
@@ -69,8 +70,9 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
 
     /**
      * Add a new version before any save.
+     *
      * @param versionedEntity the entity to save
-     * @param <S> the versionedEntity type
+     * @param <S>             the versionedEntity type
      * @return the saved entity
      */
 
@@ -78,7 +80,7 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
     @Transactional
     public <S extends T> S save(S versionedEntity) {
 
-            generateNextVersion(versionedEntity);
+        generateNextVersion(versionedEntity);
 
         return super.save(versionedEntity);
     }
