@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
@@ -48,11 +49,13 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationRequestedEvent integrationEvent = CloudIntegrationRequestedEvent.class.cast(event);
 
-        IntegrationContextEntity entity = findOrCreateIntegrationContextEntity(integrationEvent);
+        Optional<IntegrationContextEntity> result = findOrCreateIntegrationContextEntity(integrationEvent);
 
-        entity.setRequestDate(new Date(integrationEvent.getTimestamp()));
-        entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
-        entity.setInboundVariables(integrationEvent.getEntity().getInBoundVariables());
+        result.ifPresent(entity -> {
+            entity.setRequestDate(new Date(integrationEvent.getTimestamp()));
+            entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
+            entity.setInboundVariables(integrationEvent.getEntity().getInBoundVariables());
+        });
     }
 
     @Override

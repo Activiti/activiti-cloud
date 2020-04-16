@@ -18,17 +18,23 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
+import javax.persistence.EntityManager;
+
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity.BPMNActivityStatus;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
-    public BPMNActivityStartedEventHandler(BPMNActivityRepository activitiyRepository) {
-        super(activitiyRepository);
+    public BPMNActivityStartedEventHandler(BPMNActivityRepository activitiyRepository,
+                                           EntityManager entityManager) {
+        super(activitiyRepository,
+              entityManager);
     }
 
     @Override
@@ -40,10 +46,6 @@ public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandle
         // Activity can be cyclical, so we just update the status and started date anyways
         bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));
         bpmnActivityEntity.setStatus(BPMNActivityStatus.STARTED);
-
-        persistIntoDatabase(event,
-                            bpmnActivityEntity);
-
     }
 
     @Override

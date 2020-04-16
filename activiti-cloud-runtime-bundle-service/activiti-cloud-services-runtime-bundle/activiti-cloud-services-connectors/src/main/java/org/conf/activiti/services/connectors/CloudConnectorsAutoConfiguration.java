@@ -19,6 +19,7 @@ package org.conf.activiti.services.connectors;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
@@ -74,12 +75,14 @@ public class CloudConnectorsAutoConfiguration {
     public ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
                                                                                            IntegrationContextService integrationContextService,
                                                                                            ProcessEngineChannels processEngineChannels,
+                                                                                           ManagementService managementService,
                                                                                            RuntimeBundleProperties runtimeBundleProperties,
                                                                                            RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                                                            IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         return new ServiceTaskIntegrationErrorEventHandler(runtimeService,
                                                            integrationContextService,
                                                            processEngineChannels.auditProducer(),
+                                                           managementService,
                                                            runtimeBundleProperties,
                                                            runtimeBundleInfoAppender,
                                                            messageBuilderFactory);

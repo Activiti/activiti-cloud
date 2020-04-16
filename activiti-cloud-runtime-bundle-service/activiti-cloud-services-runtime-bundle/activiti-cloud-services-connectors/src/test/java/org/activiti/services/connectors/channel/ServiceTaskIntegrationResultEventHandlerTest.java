@@ -41,6 +41,7 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderAppenderChain;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
@@ -121,7 +122,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         given(integrationContextService.findById(ENTITY_ID))
                 .willReturn(integrationContextEntity);
-        given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
+        given(executionQuery.list()).willReturn(Collections.singletonList(mock(ExecutionEntity.class)));
         given(executionQuery.list().get(0).getActivityId()).willReturn(CLIENT_ID);
         Map<String, Object> variables = Collections.singletonMap("var1",
                 "v");

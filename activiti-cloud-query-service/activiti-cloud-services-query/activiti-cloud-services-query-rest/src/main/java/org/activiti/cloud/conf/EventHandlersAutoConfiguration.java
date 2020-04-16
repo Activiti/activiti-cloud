@@ -244,20 +244,26 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BPMNActivityStartedEventHandler bpmnActivityStartedEventHandler(BPMNActivityRepository bpmnActivityRepository) {
-        return new BPMNActivityStartedEventHandler(bpmnActivityRepository);
+    public BPMNActivityStartedEventHandler bpmnActivityStartedEventHandler(BPMNActivityRepository bpmnActivityRepository,
+                                                                           EntityManager entityManager) {
+        return new BPMNActivityStartedEventHandler(bpmnActivityRepository,
+                                                   entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public BPMNActivityCompletedEventHandler bpmnActivityCompletedEventHandler(BPMNActivityRepository bpmnActivityRepository) {
-        return new BPMNActivityCompletedEventHandler(bpmnActivityRepository);
+    public BPMNActivityCompletedEventHandler bpmnActivityCompletedEventHandler(BPMNActivityRepository bpmnActivityRepository,
+                                                                               EntityManager entityManager) {
+        return new BPMNActivityCompletedEventHandler(bpmnActivityRepository,
+                                                     entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public BPMNActivityCancelledEventHandler bpmnActivityCancelledEventHandler(BPMNActivityRepository bpmnActivityRepository) {
-        return new BPMNActivityCancelledEventHandler(bpmnActivityRepository);
+    public BPMNActivityCancelledEventHandler bpmnActivityCancelledEventHandler(BPMNActivityRepository bpmnActivityRepository,
+                                                                               EntityManager entityManager) {
+        return new BPMNActivityCancelledEventHandler(bpmnActivityRepository,
+                                                     entityManager);
     }
 
     @Bean
