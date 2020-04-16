@@ -445,7 +445,7 @@ public class ConnectorAuditProducerIT {
         //then
         await()
             .untilAsserted(() -> {
-            List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);;
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
 
             assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
                     RuntimeEvent::getProcessInstanceId)
