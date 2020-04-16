@@ -987,7 +987,7 @@ public class ModelControllerIT {
             processModel.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.version",
-            equalTo("0.0.1")));;
+            equalTo("0.0.1")));
 
         //version should get incremented here
         mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
