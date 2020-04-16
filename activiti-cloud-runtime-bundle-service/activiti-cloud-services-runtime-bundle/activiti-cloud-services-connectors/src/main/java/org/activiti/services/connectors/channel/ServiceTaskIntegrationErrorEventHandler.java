@@ -90,7 +90,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                         ", flow node id `" + clientId +
                         "`. The integration error for the integration context `" + integrationContext.getId() + "` is {}";
 
-                LOGGER.error(message, integrationError);
+                LOGGER.info(message, integrationError);
 
                 if(CloudBpmnError.class.getName().equals(errorClassName)) {
                     if(execution.getActivityId().equals(clientId)) {
