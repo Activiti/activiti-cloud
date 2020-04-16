@@ -16,24 +16,21 @@
 
 package org.activiti.cloud.modeling;
 
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 
 
 /**
  * Test for modeling rest services
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingApplication.class)
 @DirtiesContext
 public class ModelingRestIT {
@@ -41,16 +38,11 @@ public class ModelingRestIT {
     @Autowired
     private WebApplicationContext context;
 
-    @Before
-    public void setUp() {
-        RestAssuredMockMvc.webAppContextSetup(context);
-    }
-
     @Test
     public void testGetModels() throws Exception {
-        given()
-                .get("/v1/projects")
-                .then().expect(status().isOk());
-       
+        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+        mockMvc.perform(get("/v1/projects"))
+            .andExpect(status().isOk());
+
     }
 }

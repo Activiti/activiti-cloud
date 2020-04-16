@@ -16,25 +16,18 @@
 
 package org.activiti.cloud.examples;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import org.activiti.cloud.examples.connectors.CustomPojo;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(SpringRunner.class)
 @SpringBootTest
-@TestPropertySource("classpath:application-test.properties")
 public class CloudConnectorAppIT {
 
     @Autowired
@@ -51,14 +44,13 @@ public class CloudConnectorAppIT {
         //then
         assertThat(context).isNotNull();
         assertThat(appName).isNotEmpty();
-
     }
 
     @Test
     public void shouldConvertExpectedJsonToPojo() throws IOException {
         String json = "{ \"test-json-variable-element1\":\"test-json-variable-value1\"}";
-        Object jsonValue = objectMapper.readValue(json,Object.class);
-        CustomPojo customPojo = objectMapper.convertValue(jsonValue,CustomPojo.class);
+        Object jsonValue = objectMapper.readValue(json, Object.class);
+        CustomPojo customPojo = objectMapper.convertValue(jsonValue, CustomPojo.class);
         assertThat(customPojo).isNotNull();
     }
 

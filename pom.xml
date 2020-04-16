@@ -10,7 +10,6 @@
   <version>7.1.0-SNAPSHOT</version>
   <description>Activiti Cloud Apps Mono :: Aggregator</description>
   <url>http://activiti.org</url>
-
   <modules>
     <module>example-runtime-bundle</module>
     <module>activiti-cloud-query</module>
@@ -19,5 +18,4 @@
     <module>activiti-cloud-acceptance-scenarios</module>
     <module>activiti-cloud-dependencies</module>
   </modules>
-
 </project>
