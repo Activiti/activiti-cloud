@@ -965,7 +965,7 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void should_returnCorrectVersion_when_creatingProcess() throws Exception {
+    public void shouldOnlyUpdateVersionOnceWhenCreatingProcess() throws Exception {
 
         Model processModel=modelRepository.createModel(processModel("Process Model 3"));
 
@@ -978,18 +978,18 @@ public class ModelControllerIT {
                 "create-process.xml",
                 CONTENT_TYPE_XML,
                 resourceAsByteArray("process/create-process.xml")).param("type",
-                PROCESS).param(UPDATE_MODEL_VERSION,"true"))
+                PROCESS))
             .andExpect(status().isNoContent());
 
-        // //version should  get incremented here
+        // //version should not get incremented here
         mockMvc.perform(get("{version}/models/{modelId}",
             API_VERSION,
             processModel.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.version",
-            equalTo("0.0.2")));;
+            equalTo("0.0.1")));;
 
-        //version should not get incremented here
+        //version should get incremented here
         mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
             API_VERSION,
             processModel.getId())
@@ -997,7 +997,7 @@ public class ModelControllerIT {
                 "create-process.xml",
                 CONTENT_TYPE_XML,
                 resourceAsByteArray("process/create-process.xml")).param("type",
-                PROCESS))
+                PROCESS).param(UPDATE_MODEL_VERSION,"true"))
             .andExpect(status().isNoContent());
 
         mockMvc.perform(get("{version}/models/{modelId}",
@@ -1005,7 +1005,7 @@ public class ModelControllerIT {
             processModel.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.version",
-                equalTo("0.0.2")));;
+                equalTo("0.0.2")));
 
 
     }
