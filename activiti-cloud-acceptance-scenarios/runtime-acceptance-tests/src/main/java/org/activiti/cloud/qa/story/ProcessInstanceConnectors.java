@@ -23,6 +23,10 @@ import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
 
+import org.activiti.api.process.model.BPMNError;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.BPMNErrorReceivedEvent.ErrorEvents;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
@@ -31,6 +35,7 @@ import org.activiti.cloud.acc.shared.steps.VariableBufferSteps;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.jbehave.core.annotations.Given;
@@ -149,6 +154,69 @@ public class ProcessInstanceConnectors {
                                            "java.lang.RuntimeException"
                                      ));
         });
+    }
+
+    @Then("cloud bpmn error event is emitted for the process")
+    public void verifyErrorEventsForProcesses() throws Exception {
+
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await().untilAsserted(() -> {
+            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByProcessInstanceId(processId);
+
+            assertThat(events)
+                    .filteredOn(CloudBPMNErrorReceivedEvent.class::isInstance)
+                    .isNotEmpty()
+                    .extracting(CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getProcessDefinitionId,
+                                CloudRuntimeEvent::getProcessInstanceId,
+                                CloudRuntimeEvent::getProcessDefinitionKey,
+                                CloudRuntimeEvent::getBusinessKey,
+                                event -> bpmnError(event).getProcessDefinitionId(),
+                                event -> bpmnError(event).getProcessInstanceId(),
+                                event -> bpmnError(event).getErrorCode(),
+                                event -> bpmnError(event).getErrorId()
+                    )
+                    .containsExactly(
+                                     tuple(ErrorEvents.ERROR_RECEIVED,
+                                           processInstance.getProcessDefinitionId(),
+                                           processInstance.getId(),
+                                           processInstance.getProcessDefinitionKey(),
+                                           processInstance.getBusinessKey(),
+                                           processInstance.getProcessDefinitionId(),
+                                           processInstance.getId(),
+                                           "CLOUD_BPMN_ERROR",
+                                           "CLOUD_BPMN_ERROR"
+                                     ));
+
+            assertThat(events).filteredOn(CloudIntegrationErrorReceivedEvent.class::isInstance)
+                              .isNotEmpty()
+                              .extracting("eventType",
+                                          "errorMessage",
+                                          "errorClassName")
+                              .containsExactly(
+                                               tuple(INTEGRATION_ERROR_RECEIVED,
+                                                     "CLOUD_BPMN_ERROR",
+                                                     "org.activiti.cloud.api.process.model.CloudBpmnError"));
+
+        });
+    }
+
+    private BPMNError bpmnError(CloudRuntimeEvent<?,?> event) {
+        return CloudBPMNErrorReceivedEvent.class.cast(event).getEntity();
+    }
+
+    @Then("the status of the process is changed to cancelled")
+    public void verifyProcessInstanceIsDeleted() throws Exception {
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+
+        processRuntimeBundleSteps.checkProcessInstanceNotFound(processId);
+
+        processQuerySteps.checkProcessInstanceStatus(processId,
+                                                     ProcessInstance.ProcessInstanceStatus.CANCELLED);
+
+        auditSteps.checkProcessInstanceEvent(processId,
+                                             ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED);
     }
 
 }

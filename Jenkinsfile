@@ -24,6 +24,7 @@ pipeline {
     GITHUB_HELM_REPO_URL = "https://activiti.github.io/activiti-cloud-helm-charts/"
     GITHUB_CHARTS_BRANCH = "gh-pages"
     PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase().replaceAll("[\\-\\+\\.\\^:,]", "");
+    PREVIEW_VERSION = "7.1.0-$BRANCH_NAME-$BUILD_NUMBER";
     GLOBAL_GATEWAY_DOMAIN = "35.242.205.159.nip.io"
     GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
     SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
@@ -47,7 +48,7 @@ pipeline {
             branch 'PR-*'
           }
           environment {
-            VERSION = "$PREVIEW_NAMESPACE"
+            VERSION = "$PREVIEW_VERSION"
           }
           steps {
             container('maven') {

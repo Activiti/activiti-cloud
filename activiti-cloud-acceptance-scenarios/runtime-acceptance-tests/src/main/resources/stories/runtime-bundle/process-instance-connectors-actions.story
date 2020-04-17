@@ -28,3 +28,10 @@ Given the user is authenticated as testuser
 And the user provides a variable named var with value test
 When the user starts an instance of process called testErrorConnectorProcess with the provided variables
 Then integration error event is emitted for the process
+
+Scenario: Propagate cloud bpmn error for a process containing cloud connector to audit
+Given the user is authenticated as testuser
+And the user provides a variable named var with value test
+When the user starts an instance of process called testBpmnErrorConnectorProcess with the provided variables
+Then cloud bpmn error event is emitted for the process
+And the status of the process is changed to cancelled
