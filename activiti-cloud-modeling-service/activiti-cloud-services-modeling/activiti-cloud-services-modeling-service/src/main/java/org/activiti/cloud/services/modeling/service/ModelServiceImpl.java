@@ -220,8 +220,7 @@ public class ModelServiceImpl implements ModelService{
 
     @Override
     public Model updateModelContent(Model modelToBeUpdate,
-                                    FileContent fileContent,
-                                    boolean updateVersion) {
+                                    FileContent fileContent) {
         FileContent fixedFileContent = this.modelIdentifiers.isEmpty()
                 ? fileContent
                 : overrideModelContentId(modelToBeUpdate,
@@ -242,8 +241,7 @@ public class ModelServiceImpl implements ModelService{
                                                                                                                                              fixedFileContent));
 
         return modelRepository.updateModelContent(modelToBeUpdate,
-            fixedFileContent,
-            updateVersion);
+            fixedFileContent);
     }
 
     @Override
@@ -269,7 +267,7 @@ public class ModelServiceImpl implements ModelService{
                                        modelType,
                                        fileContent);
         model = this.updateModelContent(model,
-                                       fileContent, false);
+                                       fileContent);
         this.cleanModelIdList();
         return model;
     }

@@ -96,7 +96,6 @@ public interface ModelRestApi {
 
     String MODEL_TYPE_PARAM_NAME = "type";
 
-    String UPDATE_MODEL_VERSION="version";
 
     @ApiOperation(
             tags = MODELS,
@@ -154,8 +153,7 @@ public interface ModelRestApi {
             @ApiParam(value = UPDATE_MODEL_ID_PARAM_DESCR,required = true)
             @PathVariable String modelId,
             @ApiParam(UPDATE_MODEL_FILE_PARAM_DESCR)
-            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
-            @RequestParam(name=UPDATE_MODEL_VERSION,required=false) String version) throws IOException;
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
 
     @ApiOperation(
             tags = MODELS,

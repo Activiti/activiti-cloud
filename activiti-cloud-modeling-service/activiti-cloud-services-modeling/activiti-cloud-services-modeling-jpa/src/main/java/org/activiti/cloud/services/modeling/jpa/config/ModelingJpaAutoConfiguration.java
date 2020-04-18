@@ -1,6 +1,9 @@
 package org.activiti.cloud.services.modeling.jpa.config;
 
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.modeling.repository.ModelRepository;
+import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
+import org.activiti.cloud.services.modeling.jpa.ModelRepositoryImpl;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditorAwareImpl;
 import org.activiti.cloud.services.modeling.jpa.version.ExtendedJpaRepositoryFactoryBean;
 import org.activiti.cloud.services.modeling.jpa.version.VersionGenerator;
@@ -27,5 +30,14 @@ public class ModelingJpaAutoConfiguration {
     public VersionGenerator VersionGenerator() {
         return new VersionGenerator();
     }
+
+    @Bean
+    public ModelRepository ModelRepository(ModelJpaRepository modelJpaRepository){
+
+        return new ModelRepositoryImpl(modelJpaRepository);
+    }
+
+
+
 
 }

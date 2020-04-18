@@ -28,7 +28,6 @@ import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isDateEqu
 import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isIntegerEquals;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.*;
 import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuilder.putMultipart;
-import static org.activiti.cloud.services.modeling.rest.api.ModelRestApi.UPDATE_MODEL_VERSION;
 import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -967,8 +966,7 @@ public class ModelControllerIT {
     @Test
     public void shouldOnlyUpdateVersionOnceWhenCreatingProcess() throws Exception {
 
-        Model processModel=modelRepository.createModel(processModel("Process Model 3"));
-
+        Model processModel = modelRepository.createModel(processModel("Process Model 3"));
 
         mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
             API_VERSION,
@@ -987,25 +985,7 @@ public class ModelControllerIT {
             processModel.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.version",
-            equalTo("0.0.1")));
-
-        //version should get incremented here
-        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
-            API_VERSION,
-            processModel.getId())
-            .file("file",
-                "create-process.xml",
-                CONTENT_TYPE_XML,
-                resourceAsByteArray("process/create-process.xml")).param("type",
-                PROCESS).param(UPDATE_MODEL_VERSION,"true"))
-            .andExpect(status().isNoContent());
-
-        mockMvc.perform(get("{version}/models/{modelId}",
-            API_VERSION,
-            processModel.getId()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.version",
-                equalTo("0.0.2")));
+                equalTo("0.0.1")));
 
 
     }
