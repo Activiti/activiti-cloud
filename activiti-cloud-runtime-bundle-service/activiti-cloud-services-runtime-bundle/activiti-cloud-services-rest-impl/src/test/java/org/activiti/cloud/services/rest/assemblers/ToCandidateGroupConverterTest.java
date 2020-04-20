@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -13,7 +13,7 @@ public class ToCandidateGroupConverterTest {
 
     private ToCandidateGroupConverter toCandidateGroupConverter;
 
-    @Before
+    @BeforeEach
     public void setUp(){
         toCandidateGroupConverter = new ToCandidateGroupConverter();
     }

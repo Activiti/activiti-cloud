@@ -47,7 +47,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -68,21 +67,18 @@ import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -109,7 +105,7 @@ public class ProjectControllerIT {
     @Autowired
     private ObjectMapper mapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
@@ -122,7 +118,6 @@ public class ProjectControllerIT {
 
         mockMvc.perform(get("{version}/projects",
                             RepositoryRestConfig.API_VERSION))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
@@ -140,7 +135,6 @@ public class ProjectControllerIT {
 
         mockMvc.perform(get("{version}/projects?name=project1",
                             RepositoryRestConfig.API_VERSION))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(1)))
@@ -157,7 +151,6 @@ public class ProjectControllerIT {
 
         mockMvc.perform(get("{version}/projects?name=main",
                             RepositoryRestConfig.API_VERSION))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
@@ -176,7 +169,6 @@ public class ProjectControllerIT {
 
         mockMvc.perform(get("{version}/projects?name=MAIN",
                 RepositoryRestConfig.API_VERSION))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                         hasSize(2)))
@@ -408,7 +400,6 @@ public class ProjectControllerIT {
                 get("{version}/projects/{projectId}/validate",
                     API_VERSION,
                     project.getId()))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
     }
@@ -422,7 +413,6 @@ public class ProjectControllerIT {
                 get("{version}/projects/{projectId}/validate",
                     API_VERSION,
                     project.getId()))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -460,7 +450,6 @@ public class ProjectControllerIT {
                 get("{version}/projects/{projectId}/validate",
                         API_VERSION,
                         project.getId()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -629,6 +618,31 @@ public class ProjectControllerIT {
     }
 
     @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessWithInValidMessagePayload() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("message-project"));
+        Model processModel = modelService.importSingleModel(project,
+                                                      processModelType,
+                                                      processFileContent("Process_hg2itgWRj",
+                                                                         resourceAsByteArray("process/message-payload.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("Process_hg2itgWRj",
+                                                               extensions(resourceAsByteArray("process-extensions/message-payload-extension.json"))));
+
+        assertThatResponse(
+            mockMvc.perform(
+                get("{version}/projects/{projectId}/validate",
+                    API_VERSION,
+                    project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn())
+            .isSemanticValidationException()
+            .hasValidationErrorMessages(
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name 'my-message-payload'",
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name 'wrong-payload'",
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name '123abc'");
+    }
+
+    @Test
     public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownConnectorParameterMapping() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
@@ -755,7 +769,6 @@ public class ProjectControllerIT {
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.entry.name",
                                     is("application-xy")));
@@ -772,7 +785,6 @@ public class ProjectControllerIT {
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(is("No valid project entry found to import: project-xy-invalid.zip")));
     }
@@ -788,7 +800,6 @@ public class ProjectControllerIT {
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(containsString("Error importing model : Error reading XML")));
     }
@@ -804,7 +815,7 @@ public class ProjectControllerIT {
 
         mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
-                .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is(overridingName)));
     }
 
@@ -817,7 +828,7 @@ public class ProjectControllerIT {
 
         mockMvc.perform(multipart("{version}/projects/import?name=",
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
-                .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
 
@@ -832,7 +843,7 @@ public class ProjectControllerIT {
 
         mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
-                .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
 

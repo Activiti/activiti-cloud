@@ -18,7 +18,7 @@ package org.activiti.cloud.alfresco.converter.json;
 
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadata;
 import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.PagedResources;
 
 import static org.activiti.test.Assertions.assertThat;

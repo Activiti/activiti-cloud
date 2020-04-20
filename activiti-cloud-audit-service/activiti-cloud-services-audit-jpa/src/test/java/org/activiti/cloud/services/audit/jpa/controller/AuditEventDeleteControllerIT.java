@@ -21,9 +21,8 @@ import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteContro
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,14 +32,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @TestPropertySource(properties="activiti.rest.enable-deletion=true")
-@RunWith(SpringRunner.class)
 @WebMvcTest(AuditEventsDeleteController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -66,7 +63,7 @@ public class AuditEventDeleteControllerIT {
     @MockBean
     private UserGroupManager userGroupManager;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("admin");
         assertThat(userGroupManager).isNotNull();

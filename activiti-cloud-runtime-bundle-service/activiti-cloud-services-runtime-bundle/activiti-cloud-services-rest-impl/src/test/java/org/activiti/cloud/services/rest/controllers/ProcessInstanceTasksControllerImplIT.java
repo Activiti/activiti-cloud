@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
@@ -48,9 +47,8 @@ import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -62,10 +60,8 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -87,7 +83,7 @@ public class ProcessInstanceTasksControllerImplIT {
 
     @MockBean
     private RepositoryService repositoryService;
-    
+
     @MockBean
     private TaskRuntime taskRuntime;
 
@@ -96,20 +92,20 @@ public class ProcessInstanceTasksControllerImplIT {
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
-    
+
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
-    
+
     @MockBean
     private MessageChannel commandResults;
 
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
@@ -127,7 +123,6 @@ public class ProcessInstanceTasksControllerImplIT {
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10",
                                  1,
                                  1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 processInstanceIdParameter(),

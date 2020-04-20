@@ -20,8 +20,8 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -37,7 +37,7 @@ public class QueryConsumerChannelHandlerTest {
     @Mock
     private QueryEventHandlerContext eventHandlerContext;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

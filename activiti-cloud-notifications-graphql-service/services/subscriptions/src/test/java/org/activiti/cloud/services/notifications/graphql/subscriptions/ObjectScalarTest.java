@@ -22,7 +22,7 @@ import graphql.language.StringValue;
 import graphql.language.Value;
 import graphql.language.VariableReference;
 import graphql.schema.Coercing;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ObjectScalarTest {
 
@@ -43,31 +43,31 @@ public class ObjectScalarTest {
         assertThat(coercing.parseLiteral(mkArrayValue(new ArrayList<Value>() {{ add(mkStringValue("s")); add(mkIntValue(BigInteger.valueOf(666))); }}), variables))
                             .asList()
                             .containsExactly("s",BigInteger.valueOf(666));
-         
+
     }
 
     @SuppressWarnings({"serial", "rawtypes"})
     @Test
     public void testASTObjectParsing() {
         Map<String, Value> input = new LinkedHashMap<String, Value>();
-        
+
         input.put("fld1", mkStringValue("s"));
         input.put("fld2", mkIntValue(BigInteger.valueOf(666)));
-        input.put("fld3", mkObjectValue(new LinkedHashMap<String, Value>() {{ 
+        input.put("fld3", mkObjectValue(new LinkedHashMap<String, Value>() {{
             put("childFld1", mkStringValue("child1"));
             put("childFl2", mkVarRef("varRef1"));
         }}));
 
 
         Map<String, Object> expected = new LinkedHashMap<String, Object>();
-        
+
         expected.put("fld1", "s");
         expected.put("fld2", BigInteger.valueOf(666));
-        expected.put("fld3", new LinkedHashMap<String, Object>() {{ 
+        expected.put("fld3", new LinkedHashMap<String, Object>() {{
             put("childFld1", "child1");
             put("childFl2", "value1");
         }});
-        
+
         assertThat(coercing.parseLiteral(mkObjectValue(input), variables)).isEqualTo(expected);
     }
 
@@ -85,7 +85,7 @@ public class ObjectScalarTest {
 
     ObjectValue mkObjectValue(Map<String, Value> fields) {
         List<ObjectField> list = new ArrayList<>();
-        
+
         for (String key : fields.keySet()) {
             list.add(new ObjectField(key, fields.get(key)));
         }

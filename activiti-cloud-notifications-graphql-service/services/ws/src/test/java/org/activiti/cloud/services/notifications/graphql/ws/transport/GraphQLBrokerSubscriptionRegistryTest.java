@@ -23,15 +23,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubscriptionRegistry.SessionSubscriptionInfo;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 
 public class GraphQLBrokerSubscriptionRegistryTest {
 
     private GraphQLBrokerSubscriptionRegistry testSubject;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         this.testSubject = new GraphQLBrokerSubscriptionRegistry();
     }

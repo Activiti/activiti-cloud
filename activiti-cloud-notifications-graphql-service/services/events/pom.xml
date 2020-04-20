@@ -6,12 +6,9 @@
     <groupId>org.activiti.cloud.notifications.graphql</groupId>
     <artifactId>activiti-cloud-services-notifications-graphql</artifactId>
     <version>7.1.0-SNAPSHOT</version>
-    <relativePath>..</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql-events</artifactId>
-  
   <name>Activiti Cloud Notifications :: Services :: GraphQL Events</name>
-
   <dependencies>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -72,26 +69,8 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

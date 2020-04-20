@@ -6,8 +6,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.process.model.payloads.ResumeProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -19,7 +19,7 @@ public class ActivateProcessInstanceCmdExecutorTest {
     @Mock
     private ProcessAdminRuntime processAdminRuntime;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

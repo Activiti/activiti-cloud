@@ -40,8 +40,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.SignalRestTemplate;
 import org.activiti.engine.RuntimeService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +48,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,11 +55,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class SignalAuditProducerIT {
 
@@ -69,7 +66,7 @@ public class SignalAuditProducerIT {
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
-    
+
     @Autowired
     private RuntimeService runtimeService;
 
@@ -127,7 +124,7 @@ public class SignalAuditProducerIT {
                                                                                 .singleResult()
                                                                                 .getId())
                                                       .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
-            
+
             List<CloudBPMNSignalReceivedEvent> signalReceivedEvents = receivedEvents
                     .stream()
                     .filter(CloudBPMNSignalReceivedEvent.class::isInstance)
@@ -151,8 +148,8 @@ public class SignalAuditProducerIT {
                             tuple(SIGNAL_RECEIVED,
                                   processWithSignalStart.getId(),
                                   startedBySignalProcessInstanceId,
-                                  processWithSignalStart.getKey(), 
-                                  processWithSignalStart.getVersion(), 
+                                  processWithSignalStart.getKey(),
+                                  processWithSignalStart.getVersion(),
                                   processWithSignalStart.getId(),
                                   startedBySignalProcessInstanceId,
                                   "theStart",
@@ -209,7 +206,7 @@ public class SignalAuditProducerIT {
                                                           .map(CloudRuntimeEvent::getProcessInstanceId)
                                                           .findFirst()
                                                           .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
-            
+
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
             assertThat(receivedEvents)

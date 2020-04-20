@@ -29,10 +29,9 @@ import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -43,9 +42,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
@@ -76,7 +73,7 @@ public class QueryProcessInstanceEntityVariablesIT {
 
     private ProcessInstance runningProcessInstance;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(myProducer);
         ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
@@ -85,7 +82,7 @@ public class QueryProcessInstanceEntityVariablesIT {
         runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance("process with variables");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         variableRepository.deleteAll();
         processInstanceRepository.deleteAll();

@@ -33,7 +33,6 @@ import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -117,7 +116,7 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
             Map<String, Constant> taskConstants,
             ValidationContext validationContext) {
 
-        List<TaskMapping> taskMappings = toTaskMappings(processId,
+        List<MappingModel> taskMappings = toTaskMappings(processId,
                                                         task,
                                                         taskMappingsMap);
         return taskMappingsValidators
@@ -127,12 +126,12 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
                                                                      validationContext));
     }
 
-    private List<TaskMapping> toTaskMappings(String processId,
-                                             FlowNode task,
-                                             Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMappingsMap) {
+    private List<MappingModel> toTaskMappings(String processId,
+                                              FlowNode task,
+                                              Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMappingsMap) {
         return taskMappingsMap.entrySet()
                 .stream()
-                .map(taskMappingEntry -> new TaskMapping(processId,
+                .map(taskMappingEntry -> new MappingModel(processId,
                                                          task,
                                                          taskMappingEntry.getKey(),
                                                          taskMappingEntry.getValue()))

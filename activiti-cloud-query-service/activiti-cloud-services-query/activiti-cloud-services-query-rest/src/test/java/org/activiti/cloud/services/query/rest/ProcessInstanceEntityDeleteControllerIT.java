@@ -3,6 +3,7 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.resourcesResponseFields;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,10 +24,8 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,7 +35,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
@@ -45,7 +43,6 @@ import java.util.List;
 import java.util.UUID;
 
 @TestPropertySource(properties="activiti.rest.enable-deletion=true")
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceDeleteController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,
@@ -83,7 +80,7 @@ public class ProcessInstanceEntityDeleteControllerIT {
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("admin");
         assertThat(entityFinder).isNotNull();
@@ -98,7 +95,7 @@ public class ProcessInstanceEntityDeleteControllerIT {
 
         //given
         List<ProcessInstanceEntity> processInstanceEntities = Collections.singletonList(buildDefaultProcessInstance());
-        given(processInstanceRepository.findAll(ArgumentMatchers.<Predicate>any()))
+        given(processInstanceRepository.findAll(any(Predicate.class)))
                 .willReturn(processInstanceEntities);
 
         //when

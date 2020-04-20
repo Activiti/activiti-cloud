@@ -48,10 +48,9 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTo
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.awaitility.Duration;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -60,14 +59,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
 public class QueryProcessDiagramIT {
-    
+
     private static final String PROC_URL = "/v1/process-instances";
 
     @Autowired
@@ -87,25 +84,25 @@ public class QueryProcessDiagramIT {
 
     @Autowired
     private BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
-    
+
     @Autowired
     private MyProducer producer;
-    
+
     @Autowired
     private TestRestTemplate testRestTemplate;
-    
+
     private String processDefinitionId = UUID.randomUUID().toString();
 
     private String processDefinitionId2 = UUID.randomUUID().toString();
-    
+
     private EventsAggregator eventsAggregator;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         keycloakTokenProducer.setKeycloakTestUser("hruser");
-        
+
         eventsAggregator = new EventsAggregator(producer);
-        
+
         //given
         ProcessDefinitionImpl firstProcessDefinition = new ProcessDefinitionImpl();
         firstProcessDefinition.setId(processDefinitionId);
@@ -124,12 +121,12 @@ public class QueryProcessDiagramIT {
         CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(secondProcessDefinition);
         secondProcessDeployedEvent.setProcessModelContent(new String(Files.readAllBytes(Paths.get("src/test/resources/parse-for-test/SimpleProcessWithoutDiagram.bpmn20.xml")),
                                                                      StandardCharsets.UTF_8));
-        
+
         producer.send(firstProcessDeployedEvent,
                       secondProcessDeployedEvent);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();
@@ -142,16 +139,16 @@ public class QueryProcessDiagramIT {
     public void shouldGetProcessInstanceDiagram() throws InterruptedException {
         //given
         ProcessInstanceImpl process = startSimpleProcessInstance();
-        
+
         //when
         eventsAggregator.sendAll();
-        
+
         //then
         await().untilAsserted(() -> {
             assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
-        
+
         await().atMost(Duration.ONE_MINUTE).untilAsserted(() -> {
 
             //when
@@ -162,24 +159,24 @@ public class QueryProcessDiagramIT {
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody()).contains("<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'");              
+            assertThat(responseEntity.getBody()).contains("<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'");
         });
     }
-    
+
     @Test
     public void shouldGetProcessInstanceGeneratedDiagram() throws InterruptedException {
         //given
         ProcessInstanceImpl process = startAnotherProcessInstance();
-        
+
         //when
         eventsAggregator.sendAll();
-        
+
         //then
         await().untilAsserted(() -> {
             assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
-        
+
         await().atMost(Duration.ONE_MINUTE).untilAsserted(() -> {
 
             //when
@@ -191,10 +188,10 @@ public class QueryProcessDiagramIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             System.out.println(responseEntity.getBody());
-            assertThat(responseEntity.getBody()).contains("<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'");              
+            assertThat(responseEntity.getBody()).contains("<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'");
         });
     }
-    
+
     @Test
     public void shouldHandleBPMNDiagramEvents() throws InterruptedException {
         //given
@@ -204,7 +201,7 @@ public class QueryProcessDiagramIT {
         process.setProcessDefinitionKey("mySimpleProcess2");
         process.setProcessDefinitionId(processDefinitionId2);
         process.setProcessDefinitionVersion(1);
-        
+
         BPMNActivityImpl startActivity = new BPMNActivityImpl("startEvent1", "", "startEvent");
         startActivity.setProcessDefinitionId(process.getProcessDefinitionId());
         startActivity.setProcessInstanceId(process.getId());
@@ -212,11 +209,11 @@ public class QueryProcessDiagramIT {
         BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sid-68945AF1-396F-4B8A-B836-FC318F62313F", "startEvent1", "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94");
         sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
         sequenceFlow.setProcessInstanceId(process.getId());
-        
+
         BPMNActivityImpl taskActivity = new BPMNActivityImpl("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask");
         taskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
         taskActivity.setProcessInstanceId(process.getId());
-        
+
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
                                    new CloudProcessStartedEventImpl(process, null, null),
                                    new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
@@ -224,27 +221,27 @@ public class QueryProcessDiagramIT {
                                    new CloudSequenceFlowTakenEventImpl(sequenceFlow),
                                    new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId())
         );
-        
+
         //when
         eventsAggregator.sendAll();
-        
+
         //then
         await().untilAsserted(() -> {
             List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
-            
+
             assertThat(activities).hasSize(2);
             assertThat(activities).extracting(BPMNActivityEntity::getElementId, BPMNActivityEntity::getActivityType,  BPMNActivityEntity::getStatus)
                                   .containsExactly(tuple(startActivity.getElementId(),startActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.COMPLETED),
                                                    tuple(taskActivity.getElementId(),taskActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.STARTED));
-            
-            List<BPMNSequenceFlowEntity> sequenceFlows = bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId()); 
-            
+
+            List<BPMNSequenceFlowEntity> sequenceFlows = bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId());
+
             assertThat(sequenceFlows).hasSize(1);
             assertThat(sequenceFlows).extracting(BPMNSequenceFlowEntity::getElementId, BPMNSequenceFlowEntity::getSourceActivityElementId, BPMNSequenceFlowEntity::getTargetActivityElementId)
                                      .containsExactly(tuple(sequenceFlow.getElementId(),sequenceFlow.getSourceActivityElementId(),sequenceFlow.getTargetActivityElementId()));
         });
-    }    
-    
+    }
+
     protected ProcessInstanceImpl startSimpleProcessInstance() {
         ProcessInstanceImpl process = new ProcessInstanceImpl();
         process.setId(UUID.randomUUID().toString());
@@ -252,19 +249,21 @@ public class QueryProcessDiagramIT {
         process.setProcessDefinitionKey("mySimpleProcess");
         process.setProcessDefinitionId(processDefinitionId);
         process.setProcessDefinitionVersion(1);
-        
+
         BPMNActivityImpl startActivity = new BPMNActivityImpl("startEvent1", "", "startEvent");
         startActivity.setProcessDefinitionId(process.getProcessDefinitionId());
         startActivity.setProcessInstanceId(process.getId());
+        startActivity.setExecutionId(UUID.randomUUID().toString());
 
         BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sid-68945AF1-396F-4B8A-B836-FC318F62313F", "startEvent1", "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94");
         sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
         sequenceFlow.setProcessInstanceId(process.getId());
-        
+
         BPMNActivityImpl taskActivity = new BPMNActivityImpl("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask");
         taskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
         taskActivity.setProcessInstanceId(process.getId());
-        
+        taskActivity.setExecutionId(UUID.randomUUID().toString());
+
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
                                    new CloudProcessStartedEventImpl(process, null, null),
                                    new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
@@ -272,11 +271,11 @@ public class QueryProcessDiagramIT {
                                    new CloudSequenceFlowTakenEventImpl(sequenceFlow),
                                    new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId())
         );
-        
+
         return process;
-        
-    }    
-    
+
+    }
+
     protected ProcessInstanceImpl startAnotherProcessInstance() {
         ProcessInstanceImpl process = new ProcessInstanceImpl();
         process.setId(UUID.randomUUID().toString());
@@ -284,19 +283,21 @@ public class QueryProcessDiagramIT {
         process.setProcessDefinitionKey("mySimpleProcess2");
         process.setProcessDefinitionId(processDefinitionId2);
         process.setProcessDefinitionVersion(1);
-        
+
         BPMNActivityImpl startActivity = new BPMNActivityImpl("startEvent1", "", "startEvent");
         startActivity.setProcessDefinitionId(process.getProcessDefinitionId());
         startActivity.setProcessInstanceId(process.getId());
+        startActivity.setExecutionId(UUID.randomUUID().toString());
 
         BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sid-68945AF1-396F-4B8A-B836-FC318F62313F", "startEvent1", "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94");
         sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
         sequenceFlow.setProcessInstanceId(process.getId());
-        
+
         BPMNActivityImpl taskActivity = new BPMNActivityImpl("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask");
         taskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
         taskActivity.setProcessInstanceId(process.getId());
-        
+        taskActivity.setExecutionId(UUID.randomUUID().toString());
+
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
                                    new CloudProcessStartedEventImpl(process, null, null),
                                    new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
@@ -304,8 +305,8 @@ public class QueryProcessDiagramIT {
                                    new CloudSequenceFlowTakenEventImpl(sequenceFlow),
                                    new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId())
         );
-        
+
         return process;
-        
-    }    
+
+    }
 }

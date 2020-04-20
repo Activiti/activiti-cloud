@@ -16,18 +16,20 @@
 
 package org.activiti.cloud.connectors.starter.test.it;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-
-import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.cloud.api.process.model.IntegrationError;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.junit.rabbit.RabbitTestSupport;
@@ -36,12 +38,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.await;
-
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
@@ -60,7 +57,7 @@ public class ActivitiCloudConnectorServiceIT {
     private final static String PROCESS_DEFINITION_ID = "myProcessDefinitionId";
     private final static String INTEGRATION_ID = "integrationId-" + UUID.randomUUID().toString();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         streamHandler.setIntegrationId(INTEGRATION_ID);
     }
@@ -104,6 +101,71 @@ public class ActivitiCloudConnectorServiceIT {
                 .untilAsserted(() ->
                                        assertThat(streamHandler.getIntegrationResultEventsCounter().get()).isGreaterThanOrEqualTo(1)
                 );
+    }
+
+    @Test
+    public void integrationErrorShouldBeProducedByConnectorRuntimeExceptionMock() throws Exception {
+        //given
+        streamHandler.isIntegrationErrorEventProduced().set(false);
+
+        IntegrationRequest integrationRequest = mockIntegrationRequest();
+
+        Message<IntegrationRequest> message = MessageBuilder.withPayload((IntegrationRequest) integrationRequest)
+                                                            .setHeader("type",
+                                                                       "RuntimeException")
+                                                            .build();
+        integrationEventsProducer.send(message);
+
+        await("Should produce RuntimeException integration error")
+                .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+
+        IntegrationError integrationError = streamHandler.getIntegrationError();
+
+        assertThat(integrationError.getErrorClassName()).isEqualTo("java.lang.RuntimeException");
+        assertThat(integrationError.getErrorMessage()).isEqualTo("Mock RuntimeException");
+        assertThat(integrationError.getStackTraceElements()).asList().isNotEmpty();
+        assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
+    }
+
+    @Test
+    public void integrationErrorShouldBeProducedByConnectorErrorMock() throws Exception {
+        //given
+        streamHandler.isIntegrationErrorEventProduced().set(false);
+
+        IntegrationRequest integrationRequest = mockIntegrationRequest();
+
+        Message<IntegrationRequest> message = MessageBuilder.withPayload((IntegrationRequest) integrationRequest)
+                                                            .setHeader("type",
+                                                                       "Error")
+                                                            .build();
+        integrationEventsProducer.send(message);
+
+        await("Should produce Error integration error")
+                .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+
+        IntegrationError integrationError = streamHandler.getIntegrationError();
+
+        assertThat(integrationError.getErrorClassName()).isEqualTo("java.lang.Error");
+        assertThat(integrationError.getErrorMessage()).isEqualTo("Mock Error");
+        assertThat(integrationError.getStackTraceElements()).asList().isNotEmpty();
+        assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
+
+    }
+
+    private IntegrationRequest mockIntegrationRequest() {
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setId(INTEGRATION_ID);
+        integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
+        integrationContext.setProcessDefinitionId(PROCESS_DEFINITION_ID);
+
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+        integrationRequest.setAppName("mock-rb");
+        integrationRequest.setServiceFullName("mock-rb");
+        integrationRequest.setServiceType("runtime-bundle");
+        integrationRequest.setServiceVersion("1");
+        integrationRequest.setAppVersion("1");
+
+        return integrationRequest;
     }
 }
 

@@ -52,7 +52,6 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
-import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -67,9 +66,8 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RuntimeService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -85,13 +83,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class AuditProducerIT {
 
@@ -129,7 +125,7 @@ public class AuditProducerIT {
     @Autowired
     private RuntimeService runtimeService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -190,6 +186,7 @@ public class AuditProducerIT {
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(PROCESS_CREATED.name(),
                             VARIABLE_CREATED.name(),
+                            PROCESS_UPDATED.name(),
                             PROCESS_STARTED.name(),
                             ACTIVITY_STARTED.name()/*start event*/,
                             BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*start event*/,
@@ -666,7 +663,8 @@ public class AuditProducerIT {
                             CloudRuntimeEvent::getProcessInstanceId,
                             CloudRuntimeEvent::getParentProcessInstanceId,
                             CloudRuntimeEvent::getProcessDefinitionKey)
-                    .containsExactly(tuple(PROCESS_CREATED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                        .containsExactly(tuple(PROCESS_CREATED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(PROCESS_UPDATED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                             tuple(PROCESS_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                             tuple(ACTIVITY_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                             tuple(ACTIVITY_COMPLETED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),

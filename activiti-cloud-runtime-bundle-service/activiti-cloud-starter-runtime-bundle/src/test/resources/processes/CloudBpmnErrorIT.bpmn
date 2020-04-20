@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:activiti="http://activiti.org/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1kzq71p" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Activiti Modeler" exporterVersion="3.0.0-beta">
+  <bpmn:error id="Error_116gnbk" name="Cloud Bpmn Business Error" errorCode="CLOUD_BPMN_ERROR" />
+  <bpmn:collaboration id="Collaboration_1tv8flb">
+    <bpmn:participant id="Participant_1chz6y3" name="cloudBpmnErrorCloudConnectorProcess" processRef="cloudBpmnErrorCloudConnectorProcess" />
+    <bpmn:participant id="Participant_0zr7vvn" name="cloudBpmnErrorEndEventProcess" processRef="cloudBpmnErrorEndEventProcess" />
+    <bpmn:participant id="Participant_075otk4" name="cloudBpmnErrorEventSubprocessProcess" processRef="cloudBpmnErrorEventSubprocessProcess" />
+    <bpmn:participant id="Participant_0fnqwdo" name="cloudBpmnErrorBoundarySubprocessEventProcess" processRef="cloudBpmnErrorBoundarySubprocessEventProcess" />
+  </bpmn:collaboration>
+  <bpmn:process id="cloudBpmnErrorCloudConnectorProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_0zioauh</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_08o6dag">
+      <bpmn:incoming>SequenceFlow_18yia5b</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Task_1rhcxhq" name="Correct Business Error" activiti:assignee="hruser">
+      <bpmn:incoming>SequenceFlow_03boqs3</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1gzrhyf</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="performBusinessTaskCloudConnector" name="Perfrom Business Task" implementation="perfromBusinessTask">
+      <bpmn:incoming>SequenceFlow_0zioauh</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1gzrhyf</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_18yia5b</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent_0w05ccr" attachedToRef="performBusinessTaskCloudConnector">
+      <bpmn:outgoing>SequenceFlow_03boqs3</bpmn:outgoing>
+      <bpmn:errorEventDefinition errorRef="Error_116gnbk" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1gzrhyf" sourceRef="Task_1rhcxhq" targetRef="performBusinessTaskCloudConnector" />
+    <bpmn:sequenceFlow id="SequenceFlow_03boqs3" sourceRef="BoundaryEvent_0w05ccr" targetRef="Task_1rhcxhq" />
+    <bpmn:sequenceFlow id="SequenceFlow_18yia5b" sourceRef="performBusinessTaskCloudConnector" targetRef="EndEvent_08o6dag" />
+    <bpmn:sequenceFlow id="SequenceFlow_0zioauh" sourceRef="StartEvent_1" targetRef="performBusinessTaskCloudConnector" />
+  </bpmn:process>
+  <bpmn:process id="cloudBpmnErrorEndEventProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_0tjz9q2">
+      <bpmn:outgoing>SequenceFlow_01ow8v0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="performBusinessTaskCloudConnector2" name="Perform Business Task" implementation="perfromBusinessTask">
+      <bpmn:incoming>SequenceFlow_01ow8v0</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0i7fciu</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent_0xwjcuo" attachedToRef="performBusinessTaskCloudConnector2">
+      <bpmn:outgoing>SequenceFlow_0eeyehk</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0t5wxoj" errorRef="Error_116gnbk" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0eeyehk" sourceRef="BoundaryEvent_0xwjcuo" targetRef="Task_03qcwv4" />
+    <bpmn:sequenceFlow id="SequenceFlow_0i7fciu" sourceRef="performBusinessTaskCloudConnector2" targetRef="EndEvent_0bv5owk" />
+    <bpmn:sequenceFlow id="SequenceFlow_01ow8v0" sourceRef="StartEvent_0tjz9q2" targetRef="performBusinessTaskCloudConnector2" />
+    <bpmn:endEvent id="EndEvent_0bv5owk">
+      <bpmn:incoming>SequenceFlow_0i7fciu</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0unae7l" sourceRef="Task_03qcwv4" targetRef="EndEvent_0k0x5is" />
+    <bpmn:userTask id="Task_03qcwv4" name="Handle Business Error" activiti:assignee="hruser">
+      <bpmn:incoming>SequenceFlow_0eeyehk</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0unae7l</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_0k0x5is">
+      <bpmn:incoming>SequenceFlow_0unae7l</bpmn:incoming>
+      <bpmn:terminateEventDefinition />
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmn:process id="cloudBpmnErrorEventSubprocessProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_046yf6x">
+      <bpmn:outgoing>SequenceFlow_1vnw95d</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_18hszu4">
+      <bpmn:incoming>SequenceFlow_1ehcmle</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess_0kv70cv">
+      <bpmn:incoming>SequenceFlow_1vnw95d</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1ehcmle</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent_13ynzce">
+        <bpmn:outgoing>SequenceFlow_0iv3jrg</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:endEvent id="EndEvent_181buds">
+        <bpmn:incoming>SequenceFlow_1td99rs</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="performBusinessTaskCloudConnector3" name="Perform Task" implementation="perfromBusinessTask">
+        <bpmn:incoming>SequenceFlow_0iv3jrg</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1td99rs</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_1td99rs" sourceRef="performBusinessTaskCloudConnector3" targetRef="EndEvent_181buds" />
+      <bpmn:sequenceFlow id="SequenceFlow_0iv3jrg" sourceRef="StartEvent_13ynzce" targetRef="performBusinessTaskCloudConnector3" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess_15lkmkd" triggeredByEvent="true">
+      <bpmn:startEvent id="StartEvent_07pa616">
+        <bpmn:outgoing>SequenceFlow_1wf5ejr</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_0cjxwcz" errorRef="Error_116gnbk" />
+      </bpmn:startEvent>
+      <bpmn:endEvent id="EndEvent_0ocvrtk">
+        <bpmn:incoming>SequenceFlow_0xg8t7x</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:userTask id="UserTask_17k2lmm" name="Handle Business Error" activiti:assignee="hruser">
+        <bpmn:incoming>SequenceFlow_1wf5ejr</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0xg8t7x</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0xg8t7x" sourceRef="UserTask_17k2lmm" targetRef="EndEvent_0ocvrtk" />
+      <bpmn:sequenceFlow id="SequenceFlow_1wf5ejr" sourceRef="StartEvent_07pa616" targetRef="UserTask_17k2lmm" />
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="SequenceFlow_1ehcmle" sourceRef="SubProcess_0kv70cv" targetRef="EndEvent_18hszu4" />
+    <bpmn:sequenceFlow id="SequenceFlow_1vnw95d" sourceRef="StartEvent_046yf6x" targetRef="SubProcess_0kv70cv" />
+  </bpmn:process>
+  <bpmn:process id="cloudBpmnErrorBoundarySubprocessEventProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1dgvyhk">
+      <bpmn:outgoing>SequenceFlow_0iuovd0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_1b3pqn9">
+      <bpmn:incoming>SequenceFlow_0k03hfm</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask_1atu9zc" name="Correct Business Error" activiti:assignee="hruser">
+      <bpmn:incoming>SequenceFlow_1c0yubl</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_005ojtd</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="SubProcess_0ny8j0a">
+      <bpmn:incoming>SequenceFlow_005ojtd</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0iuovd0</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0k03hfm</bpmn:outgoing>
+      <bpmn:endEvent id="EndEvent_1w1me8v">
+        <bpmn:incoming>SequenceFlow_1wo85z0</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:startEvent id="StartEvent_160p7w1">
+        <bpmn:outgoing>SequenceFlow_05td236</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="performBusinessTaskCloudConnector4" name="Perform Task" implementation="perfromBusinessTask">
+        <bpmn:incoming>SequenceFlow_05td236</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1wo85z0</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_05td236" sourceRef="StartEvent_160p7w1" targetRef="performBusinessTaskCloudConnector4" />
+      <bpmn:sequenceFlow id="SequenceFlow_1wo85z0" sourceRef="performBusinessTaskCloudConnector4" targetRef="EndEvent_1w1me8v" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="BoundaryEvent_1hr7c7l" attachedToRef="SubProcess_0ny8j0a">
+      <bpmn:outgoing>SequenceFlow_1c0yubl</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0oq5exf" errorRef="Error_116gnbk" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_005ojtd" sourceRef="UserTask_1atu9zc" targetRef="SubProcess_0ny8j0a" />
+    <bpmn:sequenceFlow id="SequenceFlow_1c0yubl" sourceRef="BoundaryEvent_1hr7c7l" targetRef="UserTask_1atu9zc" />
+    <bpmn:sequenceFlow id="SequenceFlow_0k03hfm" sourceRef="SubProcess_0ny8j0a" targetRef="EndEvent_1b3pqn9" />
+    <bpmn:sequenceFlow id="SequenceFlow_0iuovd0" sourceRef="StartEvent_1dgvyhk" targetRef="SubProcess_0ny8j0a" />
+  </bpmn:process>
+  <bpmn:error id="Error_0u2691d" name="End error event" errorCode="END_BPMN_ERROR" />
+  <bpmn:signal id="Signal_0ywe5jt" name="END_SIGNAL" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1tv8flb">
+      <bpmndi:BPMNShape id="Participant_1chz6y3_di" bpmnElement="Participant_1chz6y3" isHorizontal="true">
+        <dc:Bounds x="156" y="77" width="662" height="334" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="206" y="300" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_08o6dag_di" bpmnElement="EndEvent_08o6dag">
+        <dc:Bounds x="552" y="300" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_0f3upj2_di" bpmnElement="Task_1rhcxhq">
+        <dc:Bounds x="353" y="97" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1du2cks_di" bpmnElement="performBusinessTaskCloudConnector">
+        <dc:Bounds x="353" y="278" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0yo1kn3_di" bpmnElement="BoundaryEvent_0w05ccr">
+        <dc:Bounds x="435" y="260" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1gzrhyf_di" bpmnElement="SequenceFlow_1gzrhyf">
+        <di:waypoint x="353" y="137" />
+        <di:waypoint x="307" y="137" />
+        <di:waypoint x="307" y="241" />
+        <di:waypoint x="355" y="283" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_03boqs3_di" bpmnElement="SequenceFlow_03boqs3">
+        <di:waypoint x="465" y="265" />
+        <di:waypoint x="497" y="229" />
+        <di:waypoint x="497" y="137" />
+        <di:waypoint x="453" y="137" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_18yia5b_di" bpmnElement="SequenceFlow_18yia5b">
+        <di:waypoint x="453" y="318" />
+        <di:waypoint x="552" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0zioauh_di" bpmnElement="SequenceFlow_0zioauh">
+        <di:waypoint x="242" y="318" />
+        <di:waypoint x="353" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Participant_0zr7vvn_di" bpmnElement="Participant_0zr7vvn" isHorizontal="true">
+        <dc:Bounds x="863" y="85" width="668" height="321" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_075otk4_di" bpmnElement="Participant_075otk4" isHorizontal="true">
+        <dc:Bounds x="156" y="459" width="657" height="587" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_0fnqwdo_di" bpmnElement="Participant_0fnqwdo" isHorizontal="true">
+        <dc:Bounds x="863" y="459" width="666" height="583" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0tjz9q2_di" bpmnElement="StartEvent_0tjz9q2">
+        <dc:Bounds x="999" y="147" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0bv5owk_di" bpmnElement="EndEvent_0bv5owk">
+        <dc:Bounds x="1355" y="147" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1bpxgc4_di" bpmnElement="performBusinessTaskCloudConnector2">
+        <dc:Bounds x="1109" y="125" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_046yf6x_di" bpmnElement="StartEvent_046yf6x">
+        <dc:Bounds x="206" y="624" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_18hszu4_di" bpmnElement="EndEvent_18hszu4">
+        <dc:Bounds x="705" y="624" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_0kv70cv_di" bpmnElement="SubProcess_0kv70cv" isExpanded="true">
+        <dc:Bounds x="289" y="510" width="356" height="264" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_15lkmkd_di" bpmnElement="SubProcess_15lkmkd" isExpanded="true">
+        <dc:Bounds x="277" y="801" width="371" height="182" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_0ny8j0a_di" bpmnElement="SubProcess_0ny8j0a" isExpanded="true">
+        <dc:Bounds x="1020" y="492" width="344" height="279" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1dgvyhk_di" bpmnElement="StartEvent_1dgvyhk">
+        <dc:Bounds x="931" y="615" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1b3pqn9_di" bpmnElement="EndEvent_1b3pqn9">
+        <dc:Bounds x="1439" y="615" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_1atu9zc_di" bpmnElement="UserTask_1atu9zc">
+        <dc:Bounds x="1156" y="836" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0xwjcuo_di" bpmnElement="BoundaryEvent_0xwjcuo">
+        <dc:Bounds x="1153" y="187" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1hr7c7l_di" bpmnElement="BoundaryEvent_1hr7c7l">
+        <dc:Bounds x="1300" y="754" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0eeyehk_di" bpmnElement="SequenceFlow_0eeyehk">
+        <di:waypoint x="1171" y="223" />
+        <di:waypoint x="1171" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0i7fciu_di" bpmnElement="SequenceFlow_0i7fciu">
+        <di:waypoint x="1209" y="165" />
+        <di:waypoint x="1355" y="165" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_01ow8v0_di" bpmnElement="SequenceFlow_01ow8v0">
+        <di:waypoint x="1035" y="165" />
+        <di:waypoint x="1109" y="165" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ehcmle_di" bpmnElement="SequenceFlow_1ehcmle">
+        <di:waypoint x="645" y="642" />
+        <di:waypoint x="705" y="642" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vnw95d_di" bpmnElement="SequenceFlow_1vnw95d">
+        <di:waypoint x="242" y="642" />
+        <di:waypoint x="289" y="642" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_005ojtd_di" bpmnElement="SequenceFlow_005ojtd">
+        <di:waypoint x="1156" y="876" />
+        <di:waypoint x="1099" y="876" />
+        <di:waypoint x="1099" y="772" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1c0yubl_di" bpmnElement="SequenceFlow_1c0yubl">
+        <di:waypoint x="1318" y="790" />
+        <di:waypoint x="1318" y="876" />
+        <di:waypoint x="1256" y="876" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0k03hfm_di" bpmnElement="SequenceFlow_0k03hfm">
+        <di:waypoint x="1364" y="633" />
+        <di:waypoint x="1439" y="633" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0iuovd0_di" bpmnElement="SequenceFlow_0iuovd0">
+        <di:waypoint x="967" y="633" />
+        <di:waypoint x="1020" y="633" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_13ynzce_di" bpmnElement="StartEvent_13ynzce">
+        <dc:Bounds x="328" y="628" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_181buds_di" bpmnElement="EndEvent_181buds">
+        <dc:Bounds x="569" y="628" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1vtie9d_di" bpmnElement="performBusinessTaskCloudConnector3">
+        <dc:Bounds x="415" y="606" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_07pa616_di" bpmnElement="StartEvent_07pa616">
+        <dc:Bounds x="310" y="865" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0ocvrtk_di" bpmnElement="EndEvent_0ocvrtk">
+        <dc:Bounds x="562" y="865" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_17k2lmm_di" bpmnElement="UserTask_17k2lmm">
+        <dc:Bounds x="401" y="843" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1w1me8v_di" bpmnElement="EndEvent_1w1me8v">
+        <dc:Bounds x="1302" y="618" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_160p7w1_di" bpmnElement="StartEvent_160p7w1">
+        <dc:Bounds x="1053" y="618" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_07exfbz_di" bpmnElement="performBusinessTaskCloudConnector4">
+        <dc:Bounds x="1148" y="596" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1td99rs_di" bpmnElement="SequenceFlow_1td99rs">
+        <di:waypoint x="515" y="646" />
+        <di:waypoint x="569" y="646" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0iv3jrg_di" bpmnElement="SequenceFlow_0iv3jrg">
+        <di:waypoint x="364" y="646" />
+        <di:waypoint x="415" y="646" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0xg8t7x_di" bpmnElement="SequenceFlow_0xg8t7x">
+        <di:waypoint x="501" y="883" />
+        <di:waypoint x="562" y="883" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1wf5ejr_di" bpmnElement="SequenceFlow_1wf5ejr">
+        <di:waypoint x="346" y="883" />
+        <di:waypoint x="401" y="883" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_05td236_di" bpmnElement="SequenceFlow_05td236">
+        <di:waypoint x="1089" y="636" />
+        <di:waypoint x="1148" y="636" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1wo85z0_di" bpmnElement="SequenceFlow_1wo85z0">
+        <di:waypoint x="1248" y="636" />
+        <di:waypoint x="1302" y="636" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0unae7l_di" bpmnElement="SequenceFlow_0unae7l">
+        <di:waypoint x="1221" y="300" />
+        <di:waypoint x="1355" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_0q5e1bx_di" bpmnElement="Task_03qcwv4">
+        <dc:Bounds x="1121" y="260" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0he6g0o_di" bpmnElement="EndEvent_0k0x5is">
+        <dc:Bounds x="1355" y="282" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -22,11 +22,9 @@
   <properties>
 	  <project.scm.repository>activiti-cloud-query-service</project.scm.repository>
     <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
-    <activiti-dependencies.version>7.1.198</activiti-dependencies.version>
+    <activiti-dependencies.version>7.1.208</activiti-dependencies.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
-    <json-unit.version>1.24.0</json-unit.version>
-    <testcontainers.version>1.12.0</testcontainers.version>
   </properties>
   <!-- BoM Marker Dependencies -->
   <dependencies>
@@ -74,18 +72,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>net.javacrumbs.json-unit</groupId>
-        <artifactId>json-unit-fluent</artifactId>
-        <version>${json-unit.version}</version>
-        <scope>test</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
-  <repositories>
-    <repository>
-      <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
 </project>

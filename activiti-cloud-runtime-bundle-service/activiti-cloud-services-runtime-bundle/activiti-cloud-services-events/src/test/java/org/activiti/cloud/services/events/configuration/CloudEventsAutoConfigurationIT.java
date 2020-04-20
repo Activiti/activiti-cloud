@@ -23,15 +23,12 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class CloudEventsAutoConfigurationIT {
 
@@ -45,7 +42,7 @@ public class CloudEventsAutoConfigurationIT {
 
         @MockBean
         private ManagementService managementService;
-        
+
         @MockBean
         private TaskService taskService;
 
@@ -61,7 +58,7 @@ public class CloudEventsAutoConfigurationIT {
         @MockBean
         private ProcessSecurityPoliciesManager processSecurityPoliciesManager;
     }
-    
+
     @Test
     public void contextLoads() {
         // success

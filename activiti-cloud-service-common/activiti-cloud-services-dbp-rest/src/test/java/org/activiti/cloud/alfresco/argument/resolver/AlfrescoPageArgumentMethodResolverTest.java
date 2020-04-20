@@ -19,8 +19,8 @@ package org.activiti.cloud.alfresco.argument.resolver;
 import java.util.Collections;
 
 import org.activiti.test.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.core.MethodParameter;
@@ -47,7 +47,7 @@ public class AlfrescoPageArgumentMethodResolverTest {
     @Mock
     private PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }

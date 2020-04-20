@@ -16,14 +16,6 @@
 
 package org.activiti.cloud.api.process.model.impl.conf;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.jsontype.NamedType;
-import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
@@ -38,11 +30,13 @@ import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinition;
+import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.CloudStartMessageDeploymentDefinitionImpl;
+import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
@@ -59,6 +53,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFailedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
@@ -74,6 +69,15 @@ import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEv
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @Configuration
 public class CloudProcessModelAutoConfiguration {
@@ -116,7 +120,9 @@ public class CloudProcessModelAutoConfiguration {
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED.name()));
         module.registerSubtypes(new NamedType(CloudIntegrationResultReceivedEventImpl.class,
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name()));
-        
+        module.registerSubtypes(new NamedType(CloudIntegrationErrorReceivedEventImpl.class,
+                                              IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()));
+
         module.registerSubtypes(new NamedType(CloudBPMNTimerFiredEventImpl.class,
                                               BPMNTimerEvent.TimerEvents.TIMER_FIRED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNTimerScheduledEventImpl.class,
@@ -129,17 +135,17 @@ public class CloudProcessModelAutoConfiguration {
                                               BPMNTimerEvent.TimerEvents.TIMER_RETRIES_DECREMENTED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNTimerCancelledEventImpl.class,
                                               BPMNTimerEvent.TimerEvents.TIMER_CANCELLED.name()));
-        
+
         module.registerSubtypes(new NamedType(CloudBPMNMessageReceivedEventImpl.class,
                                               BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNMessageSentEventImpl.class,
                                               BPMNMessageEvent.MessageEvents.MESSAGE_SENT.name()));
         module.registerSubtypes(new NamedType(CloudBPMNMessageWaitingEventImpl.class,
                                               BPMNMessageEvent.MessageEvents.MESSAGE_WAITING.name()));
-        
+
         module.registerSubtypes(new NamedType(CloudBPMNErrorReceivedEventImpl.class,
                                               BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name()));
-        
+
         module.registerSubtypes(new NamedType(CloudMessageSubscriptionCancelledEventImpl.class,
                                               MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name()));
 
@@ -156,6 +162,7 @@ public class CloudProcessModelAutoConfiguration {
 
         resolver.addMapping(IntegrationRequest.class, IntegrationRequestImpl.class);
         resolver.addMapping(IntegrationResult.class, IntegrationResultImpl.class);
+        resolver.addMapping(IntegrationError.class, IntegrationErrorImpl.class);
 
         resolver.addMapping(CloudProcessDefinition.class,
                             CloudProcessDefinitionImpl.class);

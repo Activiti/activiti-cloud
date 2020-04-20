@@ -46,8 +46,8 @@ import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggr
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -67,7 +67,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -78,7 +77,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Tests for the Message Connector Aggregator Processor.
  *
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
@@ -93,11 +91,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class AbstractMessagesCoreIntegrationTests {
 
     protected ObjectMapper objectMapper = new ObjectMapper();
-    
+
     @Autowired
     protected MessageConnectorProcessor channels;
-    
-    @Autowired 
+
+    @Autowired
     protected MessageCollector collector;
 
     @Autowired
@@ -105,32 +103,32 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @Autowired
     protected MessageConnectorAggregator aggregatingMessageHandler;
-    
+
     @Autowired
     protected QueueChannel errorQueue;
 
     @Autowired
     protected QueueChannel discardQueue;
-    
+
     @Autowired
     protected ControlBusGateway controlBus;
-    
+
     @Autowired
     protected PlatformTransactionManager transactionManager;
-    
+
     @Autowired
     protected AbstractMessageChannel output;
-    
+
     @TestConfiguration
     static class TestConfigurationContext {
-        
+
         @Bean
         @BridgeFrom("errorChannel")
         MessageChannel errorQueue() {
             return MessageChannels.queue()
                                   .get();
         }
-        
+
         @Bean
         @BridgeFrom("discardChannel")
         MessageChannel discardQueue() {
@@ -138,8 +136,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                   .get();
         }
     }
-    
-    @Test(timeout = 20000)
+
+    @Test
+    @Timeout(20000)
     public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JsonProcessingException {
         // given
         String messageEventName = "start";
@@ -152,13 +151,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(startMessage);
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-        
+
         // when
         final CountDownLatch start = new CountDownLatch(1);
         final CountDownLatch sent = new CountDownLatch(count);
-        
+
         ExecutorService exec = Executors.newSingleThreadExecutor();
-        
+
         IntStream.range(0, count)
                  .forEach(i -> sendAsync(messageSentEvent(messageEventName),
                                          start,
@@ -177,29 +176,30 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         IntStream.range(0, count)
                  .mapToObj(i -> Try.call(() -> poll(1, TimeUnit.SECONDS)))
                  .forEach(out -> assertThat(out).isNotNull());
-        
+
         exec.shutdownNow();
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-        
+
         assertThat(peek()).isNull();
     }
-    
-    @Test(timeout = 20000)
+
+    @Test
+    @Timeout(20000)
     public void shouldProcessMessageEventsConcurrentlyInReversedOrder() throws InterruptedException, JsonProcessingException {
         // given
         String messageEventName = "start";
         Integer count = 100;
         Message<?> startMessage = startMessageDeployedEvent(messageEventName);
         String correlationId = correlationId(startMessage);
-        
+
         removeMessageGroup(correlationId);
-        
+
         final CountDownLatch start = new CountDownLatch(1);
         final CountDownLatch sent = new CountDownLatch(count);
-        
+
         ExecutorService exec = Executors.newSingleThreadExecutor();
-        
+
         IntStream.range(0, count)
                  .forEach(i -> sendAsync(messageSentEvent(messageEventName),
                                          start,
@@ -215,7 +215,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         }
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(count);
-        
+
         // when
         send(startMessage);
 
@@ -225,14 +225,14 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                  .forEach(out ->
                      assertThat(out).isNotNull()
                  );
-        
+
         exec.shutdownNow();
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-        
+
         assertThat(peek()).isNull();
     }
-    
+
     @Test
     public void testStartMessageBeforeSent() throws Exception {
         // given
@@ -240,23 +240,23 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         Message<?> startMessage = startMessageDeployedEvent(messageName);
         String correlationId = correlationId(startMessage);
         removeMessageGroup(correlationId);
-        
+
         send(startMessage);
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-        
+
         // when
         send(messageSentEvent(messageName, null, "sent1"));
-        
+
         // then
         Message<?> out = poll(0, TimeUnit.SECONDS);
-        
+
         assertThat(peek()).isNull();
 
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("name", "variables")
-                       .contains("start1", 
+                       .contains("start1",
                                  singletonMap("key", "sent1"));
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1)
@@ -266,7 +266,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                                              .containsOnly(messageName);
         // when
         send(messageSentEvent(messageName, null, "sent2"));
-        
+
         // then
         out = poll(0, TimeUnit.SECONDS);
 
@@ -275,7 +275,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("name", "variables")
-                       .contains("start1", 
+                       .contains("start1",
                                  singletonMap("key", "sent2"));
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1)
@@ -295,13 +295,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         messageGroupStore.removeMessageGroup(correlationId);
 
         send(messageSentEvent);
-        
+
         // when
         send(startMessageDeployedEvent(messageName));
-        
+
         // then
         Message<?> out = poll(0, TimeUnit.SECONDS);
-        
+
         assertThat(peek()).isNull();
 
         assertThat(out).isNotNull()
@@ -317,7 +317,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         // when
         send(messageSentEvent(messageName, null, "sent2"));
-        
+
         // then
         out = poll(0, TimeUnit.SECONDS);
 
@@ -334,7 +334,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                                              .extracting("name")
                                                              .containsOnly("start2");
     }
-    
+
     @Test
     public void testSentMessagesWithBuffer() throws Exception {
         // given
@@ -346,14 +346,14 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         messageGroupStore.removeMessageGroup(correlationId);
 
         send(messageSentEvent);
-        
+
         // when
         send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
         send(messageWaitingEvent(messageName, correlationKey, "waiting2"));
-        
+
         // then
         Message<?> out = poll(0, TimeUnit.SECONDS);
-        
+
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("variables")
@@ -365,15 +365,15 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                        .extracting(Message::getPayload)
                                        .asList()
                                        .extracting("variables")
-                                       .containsOnly(singletonMap("key", "waiting1"), 
+                                       .containsOnly(singletonMap("key", "waiting1"),
                                                      singletonMap("key", "waiting2"));
-        
+
         // when
         send(messageReceivedEvent(messageName, correlationKey));
 
         // then
         assertThat(peek()).isNull();
-        
+
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1)
                                                              .extracting(Message::getPayload)
                                                              .asList()
@@ -398,7 +398,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                                              .asList()
                                                              .extracting("variables")
                                                              .containsOnly(singletonMap("key", "waiting2"));
-        
+
         // then
         send(messageReceivedEvent(messageName, correlationKey));
 
@@ -406,7 +406,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         assertThat(messageGroup(correlationId).getMessages()).isEmpty();
     }
-    
+
     @Test
     public void testReceiveMessagePayload() throws Exception {
         // given
@@ -419,13 +419,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         messageGroupStore.removeMessageGroup(correlationId);
 
         send(messageSentEvent);
-        
+
         // when
         send(messageWaitingEvent(messageName, correlationKey, businessKey));
-        
+
         // then
         Message<?> out = poll(0, TimeUnit.SECONDS);
-        
+
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("name", "correlationKey", "variables")
@@ -437,7 +437,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         messageGroupStore.removeMessageGroup(correlationId);
 
     }
-    
+
     @Test
     public void testStartMessagePayload() throws Exception {
         // given
@@ -450,13 +450,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         messageGroupStore.removeMessageGroup(correlationId);
 
         send(startMessageDeployedEvent);
-        
+
         // when
         send(messageSentEvent(messageName, correlationKey, businessKey));
-        
+
         // then
         Message<?> out = poll(0, TimeUnit.SECONDS);
-        
+
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("name", "businessKey", "variables")
@@ -469,7 +469,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     }
 
-    
+
     @Test
     public void testSentMessagesWithBufferInDifferentOrder() throws Exception {
         // given
@@ -481,32 +481,32 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         send(messageSentEvent(messageName, correlationKey, "sent1"));
         send(messageSentEvent(messageName, correlationKey, "sent2"));
-        
+
         // when
         send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
-        
+
         // then
         Message<?> out = poll(0, TimeUnit.SECONDS);
-        
+
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("variables")
                        .contains(singletonMap("key", "sent1"));
 
         assertThat(peek()).isNull();
-        
+
         assertThat(messageGroup(correlationId).getMessages()).hasSize(2)
                                                              .extracting(Message::getPayload)
                                                              .asList()
                                                              .extracting("variables")
                                                              .contains(singletonMap("key", "sent2"),
                                                                        singletonMap("key", "waiting1"));
-        // when 
+        // when
         send(messageReceivedEvent(messageName, correlationKey, "received1"));
 
         // then
         assertThat(peek()).isNull();
-        
+
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1)
                                                              .extracting(Message::getPayload)
                                                              .asList()
@@ -530,7 +530,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                                              .asList()
                                                              .extracting("variables")
                                                              .containsOnly(singletonMap("key", "waiting2"));
-        
+
         // when
         send(messageReceivedEvent(messageName, correlationKey, "received2"));
 
@@ -539,8 +539,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         assertThat(messageGroup(correlationId).getMessages()).isEmpty();
     }
-    
-    
+
+
     @Test
     public void testSubscriptionCancelled() throws Exception {
         // given
@@ -548,23 +548,23 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         String correlationKey = "1";
         Message<?> subscriptionCancelled = subscriptionCancelledEvent(messageName, correlationKey);
         String groupName = correlationId(subscriptionCancelled);
-        
+
         messageGroupStore.removeMessageGroup(groupName);
 
         send(messageWaitingEvent(messageName, correlationKey));
         send(messageWaitingEvent(messageName, correlationKey));
 
         assertThat(messageGroup(groupName).getMessages()).hasSize(2);
-        
+
         // when
         send(subscriptionCancelled);
-        
+
         // then
         assertThat(peek()).isNull();
 
         assertThat(messageGroup(groupName).getMessages()).isEmpty();
     }
-    
+
 
     @Test
     public void testIdempotentMessageInterceptor() throws Exception {
@@ -575,8 +575,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         String correlationId = correlationId(waitingMessage);
 
         messageGroupStore.removeMessageGroup(correlationId);
-        
-        // when                                      
+
+        // when
         send(waitingMessage);
         send(waitingMessage);
 
@@ -589,19 +589,19 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                                              .hasSize(1);
         // given
         Message<MessageEventPayload> receivedMessage = messageReceivedEvent(messageName, correlationKey);
-        
+
         // when
         send(receivedMessage);
         send(receivedMessage);
-        
-        // then 
+
+        // then
         assertThat(peek()).isNull();
 
         assertThat(errorQueue.receive(0)).isNotNull();
-        
+
         assertThat(messageGroup(correlationId).getMessages()).hasSize(0);
-    }        
-    
+    }
+
 
     @Test
     public void testMessageFilterDiscardChannel() throws Exception {
@@ -609,18 +609,18 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         Message<String> invalidMessage = MessageBuilder.withPayload("message")
                                                        .setHeader(CONTENT_TYPE, "text/plain")
                                                        .build();
-        // when                                      
+        // when
         this.channels.input().send(invalidMessage);
 
         // then
         assertThat(peek()).isNull();
-        
+
         Message<?> out = discardQueue.receive(0);
-        
+
         assertThat(out.getPayload()).isEqualTo("message");
-        
-    }  
-    
+
+    }
+
     @Test
     public void testInvalidMessagePayloadDiscardChannel() throws Exception {
         // given
@@ -635,14 +635,14 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         // then
         assertThat(peek()).isNull();
-        
+
         Message<?> out = errorQueue.receive(0);
 
         assertThat(out).isNull();
         assertThat(thrown).isInstanceOf(MessageTransformationException.class);
-        
-    }     
- 
+
+    }
+
     @Test
     public void testControlBusStartStopComponents() throws Exception {
         String messageName = "test";
@@ -652,13 +652,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         Throwable thrown = catchThrowable(() -> {
             send(messageSentEvent(messageName, null, "error"));
         });
-        
+
         assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
-        
+
         this.controlBus.send("@aggregator.start()");
     }
 
-    
+
     @Test
     public void testTransactionException() throws Exception {
         // given
@@ -668,9 +668,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         removeMessageGroup(correlationId);
 
         send(startMessage);
-        
+
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-        
+
         // when
         ChannelInterceptor assertionInterceptor =
                 new ChannelInterceptor() {
@@ -680,33 +680,33 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                         throw new RuntimeException("transaction failed");
                     }
 
-                };        
+                };
 
-        output.addInterceptor(assertionInterceptor);    
-        
+        output.addInterceptor(assertionInterceptor);
+
         Throwable thrown = catchThrowable(() -> {
             send(messageSentEvent(messageName, null, "error"));
         });
 
-        output.removeInterceptor(assertionInterceptor);    
-        
+        output.removeInterceptor(assertionInterceptor);
+
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
         assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
     }
-    
+
     protected MessageBuilder<MessageEventPayload> messageBuilder(String messageName) {
         return messageBuilder(messageName,
                               null,
                               null);
     }
-    
+
     protected MessageBuilder<MessageEventPayload> messageBuilder(String messageName,
                                                                  String correlationKey) {
         return messageBuilder(messageName,
                               correlationKey,
                               null);
     }
-    
+
     protected MessageBuilder<MessageEventPayload> messageBuilder(String messageName,
                                                                  String correlationKey,
                                                                  String businessKey) {
@@ -725,7 +725,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     protected Message<MessageEventPayload> startMessageDeployedEvent(String messageName) {
         return messageBuilder(messageName,
-                              null).setHeader(MESSAGE_EVENT_TYPE, 
+                              null).setHeader(MESSAGE_EVENT_TYPE,
                                               MessageDefinitionEvents.START_MESSAGE_DEPLOYED.name())
                                    .build();
     }
@@ -734,55 +734,55 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         return messageSentEvent(messageName,
                                 null);
     }
-    
-    protected Message<MessageEventPayload> messageSentEvent(String messageName, 
+
+    protected Message<MessageEventPayload> messageSentEvent(String messageName,
                                                             String correlationKey) {
         return messageSentEvent(messageName,
                                 correlationKey,
                                 null);
     }
 
-    protected Message<MessageEventPayload> messageSentEvent(String messageName, 
+    protected Message<MessageEventPayload> messageSentEvent(String messageName,
                                                             String correlationKey,
                                                             String businessKey) {
         return messageBuilder(messageName,
                               correlationKey,
-                              businessKey).setHeader(MESSAGE_EVENT_TYPE, 
+                              businessKey).setHeader(MESSAGE_EVENT_TYPE,
                                                         MessageEvents.MESSAGE_SENT.name())
                                              .build();
     }
-    
+
     protected Message<MessageEventPayload> messageWaitingEvent(String messageName) {
         return messageWaitingEvent(messageName,
                                    null);
     }
 
-    protected Message<MessageEventPayload> messageWaitingEvent(String messageName, 
+    protected Message<MessageEventPayload> messageWaitingEvent(String messageName,
                                                                String correlationKey,
                                                                String businessKey) {
         return messageBuilder(messageName,
                               correlationKey,
-                              businessKey).setHeader(MESSAGE_EVENT_TYPE, 
-                                                        MessageEvents.MESSAGE_WAITING.name())
-                                             .build();
-    }
-    
-    protected Message<MessageEventPayload> messageWaitingEvent(String messageName, 
-                                                               String correlationKey) {
-        return messageBuilder(messageName,
-                              correlationKey).setHeader(MESSAGE_EVENT_TYPE, 
+                              businessKey).setHeader(MESSAGE_EVENT_TYPE,
                                                         MessageEvents.MESSAGE_WAITING.name())
                                              .build();
     }
 
-    protected Message<MessageEventPayload> messageReceivedEvent(String messageName, 
+    protected Message<MessageEventPayload> messageWaitingEvent(String messageName,
+                                                               String correlationKey) {
+        return messageBuilder(messageName,
+                              correlationKey).setHeader(MESSAGE_EVENT_TYPE,
+                                                        MessageEvents.MESSAGE_WAITING.name())
+                                             .build();
+    }
+
+    protected Message<MessageEventPayload> messageReceivedEvent(String messageName,
                                                                 String correlationKey) {
         return messageReceivedEvent(messageName,
                                     correlationKey,
                                     null);
     }
 
-    protected Message<MessageEventPayload> messageReceivedEvent(String messageName, 
+    protected Message<MessageEventPayload> messageReceivedEvent(String messageName,
                                                                 String correlationKey,
                                                                 String businessKey) {
         return messageBuilder(messageName,
@@ -791,11 +791,11 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                                      MessageEvents.MESSAGE_RECEIVED.name())
                                           .build();
     }
-    
-    protected Message<MessageEventPayload> subscriptionCancelledEvent(String messageName, 
+
+    protected Message<MessageEventPayload> subscriptionCancelledEvent(String messageName,
                                                                       String correlationKey) {
         return messageBuilder(messageName,
-                              correlationKey).setHeader(MESSAGE_EVENT_TYPE, 
+                              correlationKey).setHeader(MESSAGE_EVENT_TYPE,
                                                         MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name())
                                              .build();
     }
@@ -807,13 +807,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        
+
         this.channels.input()
                      .send(MessageBuilder.withPayload(json)
                                          .copyHeaders(message.getHeaders())
-                                         .build());        
+                                         .build());
     }
- 
+
     @SuppressWarnings("unchecked")
     protected <T> Message<T> poll(long timeout, TimeUnit unit) throws InterruptedException {
         return (Message<T>) this.collector.forChannel(this.channels.output())
@@ -825,20 +825,20 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         return (Message<T>) this.collector.forChannel(this.channels.output())
                                           .peek();
     }
- 
+
     protected MessageGroup messageGroup(String groupName) {
         return aggregatingMessageHandler.getMessageStore()
                                         .getMessageGroup(groupName);
     }
 
-    protected String correlationId(Message<?> message) { 
+    protected String correlationId(Message<?> message) {
         return Correlations.getCorrelationId(message);
     }
 
     protected void removeMessageGroup(String correlationId) {
         messageGroupStore.removeMessageGroup(correlationId);
     }
-    
+
     protected void sendAsync(final Message<?> message,
                              final CountDownLatch start,
                              final CountDownLatch sent,
@@ -849,13 +849,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            
+
             Try.run(() -> send(message));
-            
+
             sent.countDown();
         });
     }
-    
+
     static class Try {
 
         @FunctionalInterface
@@ -889,11 +889,11 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                 throw wrapper.wrap(e);
             }
         }
-        
+
         @SuppressWarnings("unchecked")
         private static <T extends Throwable> void sneakyThrow(Throwable t) throws T {
             throw (T) t;
         }
     }
-    
+
 }

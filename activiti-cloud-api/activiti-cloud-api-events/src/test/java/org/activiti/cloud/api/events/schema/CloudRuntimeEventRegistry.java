@@ -40,6 +40,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFailedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
@@ -85,6 +86,7 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudBPMNMessageSentEventImpl());
         eventImplementations.add(new CloudIntegrationRequestedEventImpl());
         eventImplementations.add(new CloudIntegrationResultReceivedEventImpl());
+        eventImplementations.add(new CloudIntegrationErrorReceivedEventImpl());
         eventImplementations.add(new CloudProcessDeployedEventImpl());
         eventImplementations.add(new CloudProcessCreatedEventImpl());
         eventImplementations.add(new CloudProcessStartedEventImpl());

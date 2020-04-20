@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.alfresco.converter.json;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -33,9 +34,12 @@ import org.springframework.lang.Nullable;
 public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2HttpMessageConverter {
 
     private final PagedResourcesConverter pagedResourcesConverter;
+    private final ObjectMapper objectMapper;
 
-    public AlfrescoJackson2HttpMessageConverter(PagedResourcesConverter pagedResourcesConverter) {
+    public AlfrescoJackson2HttpMessageConverter(PagedResourcesConverter pagedResourcesConverter, ObjectMapper objectMapper) {
+        super(objectMapper);
         this.pagedResourcesConverter = pagedResourcesConverter;
+        this.objectMapper = objectMapper;
         setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
     }
 

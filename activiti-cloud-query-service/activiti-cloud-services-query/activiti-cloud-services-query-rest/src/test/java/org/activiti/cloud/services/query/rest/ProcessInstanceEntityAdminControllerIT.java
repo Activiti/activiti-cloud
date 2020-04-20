@@ -40,10 +40,8 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -56,14 +54,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceAdminController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,
@@ -102,7 +98,7 @@ public class ProcessInstanceEntityAdminControllerIT {
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
         assertThat(entityFinder).isNotNull();
@@ -116,7 +112,7 @@ public class ProcessInstanceEntityAdminControllerIT {
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         given(processInstanceRepository.findAll(any(),
-                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
                 PageRequest.of(1,
                         10),
                 11));
@@ -137,10 +133,9 @@ public class ProcessInstanceEntityAdminControllerIT {
     @Test
     public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
-        given(processInstanceRepository.findAll(any(),
-                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                PageRequest.of(1,
-                        10),
+        given(processInstanceRepository.findAll(any(), any(Pageable.class)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                PageRequest.of(1, 10),
                 11));
 
 
@@ -152,7 +147,6 @@ public class ProcessInstanceEntityAdminControllerIT {
                 .andDo(document(PROCESS_INSTANCE_IDENTIFIER + "/list",
                                 pageLinks(),
                                 pagedProcessInstanceFields()
-
                 ));
     }
 

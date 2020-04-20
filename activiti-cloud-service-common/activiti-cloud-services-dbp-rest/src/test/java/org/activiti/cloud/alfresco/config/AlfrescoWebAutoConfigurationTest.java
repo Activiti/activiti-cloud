@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.hateoas.MediaTypes;
@@ -43,7 +43,7 @@ public class AlfrescoWebAutoConfigurationTest {
     @Mock
     private PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         configurer = new AlfrescoWebAutoConfiguration(pageableHandlerMethodArgumentResolver, 100);

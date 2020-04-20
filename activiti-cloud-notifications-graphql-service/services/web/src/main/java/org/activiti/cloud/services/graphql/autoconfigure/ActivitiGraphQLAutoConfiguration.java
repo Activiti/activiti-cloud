@@ -15,12 +15,20 @@
  */
 package org.activiti.cloud.services.graphql.autoconfigure;
 
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonInclude.Value;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
 import graphql.GraphQL;
@@ -39,6 +47,16 @@ public class ActivitiGraphQLAutoConfiguration {
      */
     @Configuration
     public static class DefaultActivitiGraphQLJpaConfiguration {
+
+        /**
+         * This is needed because the graphql spec says that null values should be present
+         */
+        @Autowired
+        public void configureObjectMapper(ObjectMapper objectMapper) {
+            objectMapper.configOverride(Map.class)
+                        .setInclude(Value.construct(JsonInclude.Include.ALWAYS,
+                                                    JsonInclude.Include.ALWAYS));
+        }
 
         @Bean
         @ConditionalOnMissingBean(GraphQLExecutor.class)

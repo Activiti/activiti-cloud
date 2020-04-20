@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class AbstractDestinationResolverTest {
@@ -17,9 +17,9 @@ public class AbstractDestinationResolverTest {
         List<String> c = Arrays.asList("c","d");
         List<String> d = Arrays.asList("e","f");
         List<String> e = Arrays.asList("*");
-        
+
         List<List<String>> product = AbstractDestinationResolver.crossJoin(Arrays.asList(a,b,c,d,e));
-        
+
         assertThat(product).hasSize(8);
         assertThat(product).containsOnly(Arrays.asList("*","a","c","e","*"),
                                          Arrays.asList("*","a","c","f","*"),

@@ -2,8 +2,8 @@ package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.hateoas.Link;
@@ -22,7 +22,7 @@ public class ProcessInstanceResourceAssemblerTest {
     @Mock
     private ToCloudProcessInstanceConverter toCloudProcessInstanceConverter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

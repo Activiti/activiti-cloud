@@ -12,20 +12,17 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Collections;
 import java.util.Iterator;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @TestPropertySource("classpath:test-application.properties")
 @SpringBootTest
 @EnableAutoConfiguration
@@ -43,7 +40,7 @@ public class RestrictProcessInstanceEntityQueryIT {
     @MockBean
     private UserGroupManager userGroupManager;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("15");

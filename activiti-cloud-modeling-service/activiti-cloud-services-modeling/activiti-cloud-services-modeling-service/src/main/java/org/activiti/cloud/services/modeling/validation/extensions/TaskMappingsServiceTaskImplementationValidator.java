@@ -63,7 +63,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
     }
 
     @Override
-    public Stream<ModelValidationError> validateTaskMappings(List<TaskMapping> taskMappings,
+    public Stream<ModelValidationError> validateTaskMappings(List<MappingModel> taskMappings,
                                                              Map<String, Constant> taskConstants,
                                                              ValidationContext validationContext) {
         Map<String, ConnectorModelFeature> availableConnectorActions = getAvailableConnectorActions(validationContext);
@@ -73,14 +73,14 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                                                             availableConnectorActions));
     }
 
-    private Stream<ModelValidationError> validateTaskMapping(TaskMapping taskMapping,
-                                                            Map<String, ConnectorModelFeature> availableConnectorActions) {
+    private Stream<ModelValidationError> validateTaskMapping(MappingModel taskMapping,
+                                                             Map<String, ConnectorModelFeature> availableConnectorActions) {
         return taskMapping
                 .getProcessVariableMappings()
                 .entrySet()
                 .stream()
                 .map(variableMappingEntry -> validateTaskMappings(taskMapping.getProcessId(),
-                                                                  taskMapping.getTask(),
+                                                                  taskMapping.getFlowNode(),
                                                                   taskMapping.getAction(),
                                                                   variableMappingEntry.getKey(),
                                                                   variableMappingEntry.getValue(),

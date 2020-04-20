@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.activiti</groupId>
+  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-mono-aggregator</artifactId>
   <packaging>pom</packaging>
   <name>Activiti Cloud Mono :: Parent</name>
@@ -29,14 +28,12 @@
     <module>activiti-cloud-notifications-graphql-service</module>
     <module>activiti-cloud-connectors</module>
   </modules>
-
   <repositories>
     <repository>
       <id>activiti-releases</id>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
     </repository>
   </repositories>
-
   <licenses>
     <license>
       <name>Apache v2</name>
@@ -212,7 +209,7 @@
             <executions>
               <execution>
                 <id>sign-artifacts</id>
-                <phase>deploy</phase>
+                <phase>verify</phase>
                 <goals>
                   <goal>sign</goal>
                 </goals>

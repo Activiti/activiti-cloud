@@ -26,10 +26,15 @@ public interface RuntimeMockStreams {
 
     String INTEGRATION_RESULT_CONSUMER = "integrationResultsConsumer";
     String INTEGRATION_EVENT_PRODUCER = "integrationEventsProducer";
+    String INTEGRATION_ERROR_CONSUMER = "integrationErrorConsumer";
 
     @Input(INTEGRATION_RESULT_CONSUMER)
     SubscribableChannel integrationResultsConsumer();
 
     @Output(INTEGRATION_EVENT_PRODUCER)
     MessageChannel integrationEventsProducer();
+
+    @Input(INTEGRATION_ERROR_CONSUMER)
+    SubscribableChannel integrationErrorConsumer();
+
 }

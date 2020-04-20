@@ -25,8 +25,8 @@ import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.persistence.entity.DeploymentEntity;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -45,27 +45,27 @@ public class ExecutionContextMessageBuilderAppenderTest {
     private static final String MOCK_PROCESS_INSTANCE_ID = "mockProcessInstanceId";
     private static final String MOCK_BUSINESS_KEY = "mockBusinessKey";
     private static final int MOCK_APP_VERSION = 1;
-    
+
     private ExecutionContextMessageBuilderAppender subject;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ExecutionContext context = mockExecutionContext();
-        
+
         subject = new ExecutionContextMessageBuilderAppender(context);
     }
-    
+
     @Test
     public void testApply() {
         // given
         MessageBuilder<CloudRuntimeEvent<?,?>> request = MessageBuilder.withPayload(new IgnoredRuntimeEvent());
-        
+
         // when
         subject.apply(request);
-        
+
         // then
         Message<CloudRuntimeEvent<?,?>> message = request.build();
-        
+
         assertThat(message.getHeaders())
                 .containsEntry(ExecutionContextMessageHeaders.BUSINESS_KEY, MOCK_BUSINESS_KEY)
                 .containsEntry(ExecutionContextMessageHeaders.PROCESS_INSTANCE_ID, MOCK_PROCESS_INSTANCE_ID)
@@ -79,7 +79,7 @@ public class ExecutionContextMessageBuilderAppenderTest {
                 .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_ID, MOCK_DEPLOYMENT_ID)
                 .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, MOCK_DEPLOYMENT_NAME)
                 .containsEntry(ExecutionContextMessageHeaders.APP_VERSION, MOCK_APP_VERSION);
-        
+
     }
 
     private ExecutionContext mockExecutionContext() {
@@ -105,7 +105,7 @@ public class ExecutionContextMessageBuilderAppenderTest {
         when(superExectuion.getProcessInstance()).thenReturn(parentProcessInstance);
         when(parentProcessInstance.getId()).thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
         when(parentProcessInstance.getName()).thenReturn(MOCK_PARENT_PROCESS_NAME);
-        
+
         when(processDefinition.getId()).thenReturn(MOCK_PROCESS_DEFINITION_ID);
         when(processDefinition.getKey()).thenReturn(MOCK_PROCESS_DEFINITION_KEY);
         when(processDefinition.getVersion()).thenReturn(MOCK_PROCESS_DEFINITION_VERSION);
@@ -117,6 +117,6 @@ public class ExecutionContextMessageBuilderAppenderTest {
 
         return context;
     }
-    
-    
+
+
 }
