@@ -939,6 +939,33 @@ public class ModelControllerIT {
     }
 
     @Test
+    public void shouldOnlyUpdateVersionOnceWhenCreatingProcess() throws Exception {
+
+        Model processModel = modelRepository.createModel(processModel("Process Model 3"));
+
+        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
+            API_VERSION,
+            processModel.getId())
+
+            .file("file",
+                "create-process.xml",
+                CONTENT_TYPE_XML,
+                resourceAsByteArray("process/create-process.xml")).param("type",
+                PROCESS))
+            .andExpect(status().isNoContent());
+
+        // //version should not get incremented here
+        mockMvc.perform(get("{version}/models/{modelId}",
+            API_VERSION,
+            processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.version",
+                equalTo("0.0.1")));
+
+
+    }
+
+    @Test
     public void should_returnStatusOk_when_updatingConnectorTemplate() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("Connector With Template"));
 
