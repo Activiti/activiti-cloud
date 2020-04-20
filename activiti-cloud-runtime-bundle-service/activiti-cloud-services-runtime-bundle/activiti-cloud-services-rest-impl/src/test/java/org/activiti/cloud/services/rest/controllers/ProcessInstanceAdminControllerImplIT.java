@@ -16,20 +16,14 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedProcessInstanceFields;
 import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,7 +57,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -72,14 +65,11 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 @WebMvcTest(ProcessInstanceAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
@@ -89,10 +79,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
         AlfrescoWebAutoConfiguration.class})
 @EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessInstanceAdminControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "process-instance-admin";
-
-    private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "process-instance-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -134,9 +120,7 @@ public class ProcessInstanceAdminControllerImplIT {
 
         this.mockMvc.perform(get("/admin/v1/process-instances?page=0&size=10")
                              .accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                pagedProcessInstanceFields()));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -148,10 +132,7 @@ public class ProcessInstanceAdminControllerImplIT {
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstancePage);
 
         this.mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                        pageRequestParameters(),
-                        pagedResourcesResponseFields()));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -162,11 +143,9 @@ public class ProcessInstanceAdminControllerImplIT {
 
         when(processAdminRuntime.resume(any())).thenReturn(defaultProcessInstance());
 
-        this.mockMvc.perform(RestDocumentationRequestBuilders.post("/admin/v1/process-instances/{processInstanceId}/resume",
+        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/resume",
                 1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/resume",
-                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -174,11 +153,8 @@ public class ProcessInstanceAdminControllerImplIT {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.suspend(any())).thenReturn(defaultProcessInstance());
-        this.mockMvc.perform(RestDocumentationRequestBuilders.post("/admin/v1/process-instances/{processInstanceId}/suspend",
-               1))
-               .andExpect(status().isOk())
-               .andDo(document(DOCUMENTATION_IDENTIFIER + "/suspend",
-                       pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/suspend", 1))
+               .andExpect(status().isOk());
     }
 
     @Test
@@ -188,9 +164,7 @@ public class ProcessInstanceAdminControllerImplIT {
         when(processAdminRuntime.delete(any())).thenReturn(defaultProcessInstance());
         this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}",
                                     1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -209,8 +183,7 @@ public class ProcessInstanceAdminControllerImplIT {
                                  1)
                                      .contentType(MediaType.APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(cmd)))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/update"));
+                .andExpect(status().isOk());
 
     }
 
@@ -226,8 +199,7 @@ public class ProcessInstanceAdminControllerImplIT {
         this.mockMvc.perform(post("/admin/v1/process-instances/message")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd)))
-                    .andExpect(status().isOk())
-                    .andDo(document(DOCUMENTATION_IDENTIFIER + "/message"));
+                    .andExpect(status().isOk());
     }
 
     @Test
@@ -240,8 +212,7 @@ public class ProcessInstanceAdminControllerImplIT {
         this.mockMvc.perform(put("/admin/v1/process-instances/message")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd)))
-                    .andExpect(status().isOk())
-                    .andDo(document(DOCUMENTATION_IDENTIFIER + "/message"));
+                    .andExpect(status().isOk());
     }
 
 }

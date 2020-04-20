@@ -17,13 +17,10 @@
 package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
@@ -38,7 +35,6 @@ import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -57,15 +53,12 @@ import java.util.UUID;
 @WebMvcTest(TaskVariableAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({
     QueryRestWebMvcAutoConfiguration.class,
     CommonModelAutoConfiguration.class,
     AlfrescoWebAutoConfiguration.class
 })
 public class VariableEntityAdminControllerIT {
-
-    private static final String VARIABLE_ALFRESCO_IDENTIFIER = "variable-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -120,11 +113,6 @@ public class VariableEntityAdminControllerIT {
                                                    .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk())
-                .andDo(document(VARIABLE_ALFRESCO_IDENTIFIER + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()
-
-                ))
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())

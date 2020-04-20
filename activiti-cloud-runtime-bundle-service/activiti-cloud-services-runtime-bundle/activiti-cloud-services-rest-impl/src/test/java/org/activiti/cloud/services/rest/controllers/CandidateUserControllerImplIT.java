@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,18 +36,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.resourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedCandidateUsers;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CandidateUserControllerImpl.class, secure = true)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -58,10 +53,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class})
 public class CandidateUserControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "candidate-user";
-
-    private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "candidate-user-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -98,8 +89,6 @@ public class CandidateUserControllerImplIT {
         MvcResult result = this.mockMvc.perform(get("/v1/tasks/{taskId}/candidate-users",
                                                     1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                                resourcesResponseFields()))
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
@@ -120,8 +109,6 @@ public class CandidateUserControllerImplIT {
         MvcResult result = this.mockMvc.perform(get("/v1/tasks/{taskId}/candidate-users",
                                                     1).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                unpagedCandidateUsers()))
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())

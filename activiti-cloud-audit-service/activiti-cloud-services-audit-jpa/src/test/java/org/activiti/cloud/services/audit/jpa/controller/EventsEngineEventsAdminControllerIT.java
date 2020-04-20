@@ -17,15 +17,10 @@
 package org.activiti.cloud.services.audit.jpa.controller;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,7 +39,6 @@ import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -63,16 +57,12 @@ import java.util.List;
 @WebMvcTest(AuditEventsAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({
     AuditAPIAutoConfiguration.class,
     AuditJPAAutoConfiguration.class,
     AlfrescoWebAutoConfiguration.class
 })
 public class EventsEngineEventsAdminControllerIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "events-admin";
-    private static final String DOCUMENTATION_ALFRESCO_IDENTIFIER = "events-admin-alfresco";
 
     @MockBean
     private EventsRepository eventsRepository;
@@ -101,23 +91,11 @@ public class EventsEngineEventsAdminControllerIT {
 
         given(eventsRepository.findAll(any(PageRequest.class))).willReturn(eventsPage);
 
-        mockMvc.perform(get("/admin/{version}/events",
-                "v1")
-                .param("page",
-                        "1")
-                .param("size",
-                        "10")
-                .param("sort",
-                        "asc"))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                        responseFields(
-                                subsectionWithPath("_embedded.events").description("A list of events "),
-                                subsectionWithPath("_links.self").description("Resource Self Link"),
-                                subsectionWithPath("_links.first").description("Pagination First Link"),
-                                subsectionWithPath("_links.prev").description("Pagination Prev Link"),
-                                subsectionWithPath("_links.last").description("Pagination Last Link"),
-                                subsectionWithPath("page").description("Pagination details."))));
+        mockMvc.perform(get("/admin/{version}/events", "v1")
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort", "asc"))
+                .andExpect(status().isOk());
     }
 
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {
@@ -169,10 +147,6 @@ public class EventsEngineEventsAdminControllerIT {
                 "v1")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/list",
-                        pageRequestParameters(),
-                        pagedResourcesResponseFields()
-                ))
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
@@ -195,8 +169,7 @@ public class EventsEngineEventsAdminControllerIT {
 
         mockMvc.perform(head("/admin/{version}/events",
                 "v1"))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/head/list"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -217,7 +190,6 @@ public class EventsEngineEventsAdminControllerIT {
         mockMvc.perform(head("/admin/{version}/events?skipCount=11&maxItems=10",
                 "v1")
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/head/list"));
+                .andExpect(status().isOk());
     }
 }

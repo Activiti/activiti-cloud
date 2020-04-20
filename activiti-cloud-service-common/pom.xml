@@ -21,7 +21,6 @@
     <module>activiti-cloud-services-logging</module>
     <module>activiti-cloud-services-metadata</module>
     <module>activiti-cloud-services-dbp-rest</module>
-    <module>activiti-cloud-services-rest-docs</module>
     <module>activiti-cloud-services-common-security-keycloak</module>
     <module>activiti-cloud-services-common-identity-keycloak</module>
     <module>activiti-cloud-services-auditable</module>
@@ -52,7 +51,6 @@
     <springfox.version>2.8.0</springfox.version>
     <swagger.version>1.5.14</swagger.version>
     <xstream.version>1.4.11.1</xstream.version>
-    <asciidoctor.version>1.5.6</asciidoctor.version>
     <json-unit.version>1.24.0</json-unit.version>
     <javax.annotation.version>1.3.2</javax.annotation.version>
   </properties>
