@@ -14,6 +14,9 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: BOM (Bill of Materials) Parent</name>
   <properties>
+    <java.release>11</java.release>
+    <java.version>1.${java.release}</java.version>
+    <maven.compiler.release>${java.release}</maven.compiler.release>
     <project.scm.repository>activiti-cloud-dependencies</project.scm.repository>
     <activiti-cloud-build.version>7.1.450</activiti-cloud-build.version>
     <activiti-cloud-api.version>7.1.450</activiti-cloud-api.version>

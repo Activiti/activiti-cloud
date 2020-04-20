@@ -18,4 +18,9 @@
     <module>activiti-cloud-acceptance-scenarios</module>
     <module>activiti-cloud-dependencies</module>
   </modules>
+  <properties>
+    <java.release>11</java.release>
+    <java.version>1.${java.release}</java.version>
+    <maven.compiler.release>${java.release}</maven.compiler.release>
+  </properties>
 </project>
