@@ -28,9 +28,6 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
     extends SimpleJpaRepository<T, K>
     implements VersionedJpaRepository<T, K, V> {
 
-
-    private final VersionGenerator versionGenerator = new VersionGenerator();
-
     private final VersionGenerationHelper<T, V> versionGenerationHelper;
 
     /**
