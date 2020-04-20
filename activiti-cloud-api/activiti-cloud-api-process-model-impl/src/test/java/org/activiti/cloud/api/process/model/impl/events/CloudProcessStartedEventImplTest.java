@@ -17,7 +17,7 @@
 package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

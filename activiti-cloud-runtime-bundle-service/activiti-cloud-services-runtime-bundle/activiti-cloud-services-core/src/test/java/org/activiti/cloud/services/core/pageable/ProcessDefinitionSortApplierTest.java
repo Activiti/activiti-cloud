@@ -20,15 +20,14 @@ import org.activiti.engine.impl.ProcessDefinitionQueryProperty;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.cloud.services.core.pageable.sort.ProcessDefinitionSortApplier;
 import org.activiti.cloud.services.core.utils.MockUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -37,10 +36,7 @@ public class ProcessDefinitionSortApplierTest {
     @InjectMocks
     private ProcessDefinitionSortApplier sortApplier;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }
@@ -97,11 +93,9 @@ public class ProcessDefinitionSortApplierTest {
                                                  Sort.by(invalidProperty));
 
         //then
-        expectedException.expect(ActivitiIllegalArgumentException.class);
-        expectedException.expectMessage("invalidProperty");
-
         //when
-        sortApplier.applySort(query,
-                              pageRequest);
+        assertThatExceptionOfType(ActivitiIllegalArgumentException.class)
+            .isThrownBy(() -> sortApplier.applySort(query, pageRequest))
+            .withMessageContaining("invalidProperty");
     }
 }

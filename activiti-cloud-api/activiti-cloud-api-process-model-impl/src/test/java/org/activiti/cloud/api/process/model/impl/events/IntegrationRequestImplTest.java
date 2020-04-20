@@ -2,8 +2,8 @@ package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.*;
@@ -15,7 +15,7 @@ public class IntegrationRequestImplTest {
     @Mock
     private IntegrationContext integrationContext;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

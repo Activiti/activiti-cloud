@@ -47,10 +47,8 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -63,14 +61,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,
@@ -112,7 +108,7 @@ public class ProcessInstanceEntityControllerIT {
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
         assertThat(processDefinitionRepository).isNotNull();
@@ -127,7 +123,7 @@ public class ProcessInstanceEntityControllerIT {
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(),
                                                                               eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
         given(processInstanceRepository.findAll(eq(restrictedPredicate),
-                                                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                                                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
                                                                                                              PageRequest.of(1,
                                                                                                                             10),
                                                                                                              11));
@@ -152,7 +148,7 @@ public class ProcessInstanceEntityControllerIT {
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(),
                                                                               eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
         given(processInstanceRepository.findAll(eq(restrictedPredicate),
-                                                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                                                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
                                                                                                              PageRequest.of(1,
                                                                                                                             10),
                                                                                                              11));

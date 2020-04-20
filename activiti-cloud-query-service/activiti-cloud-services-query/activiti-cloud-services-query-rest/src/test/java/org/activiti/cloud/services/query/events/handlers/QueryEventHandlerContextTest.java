@@ -23,8 +23,8 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +40,7 @@ public class QueryEventHandlerContextTest {
     @Mock
     private QueryEventHandler handler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         doReturn(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name()).when(handler).getHandledEvent();

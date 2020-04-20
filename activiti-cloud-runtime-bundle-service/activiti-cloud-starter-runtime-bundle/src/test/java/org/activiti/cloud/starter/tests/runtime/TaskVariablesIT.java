@@ -29,9 +29,8 @@ import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.cloud.starter.tests.util.VariablesUtil;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -44,7 +43,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collection;
 import java.util.Date;
@@ -52,10 +50,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = RuntimeITConfiguration.class)
 public class TaskVariablesIT {
 
@@ -67,18 +64,18 @@ public class TaskVariablesIT {
 
     @Autowired
     private TaskRestTemplate taskRestTemplate;
-    
+
     @Autowired
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
-    
+
     @Autowired
     private  VariablesUtil variablesUtil;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
-    
-    @Before
+
+    @BeforeEach
     public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
@@ -100,9 +97,9 @@ public class TaskVariablesIT {
         ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
-      
+
         taskRestTemplate.claim(taskId);
-        
+
         taskRestTemplate.createVariable(taskId, "var2", "test2");
 
         //when
@@ -124,8 +121,8 @@ public class TaskVariablesIT {
 
         // give
         taskRestTemplate.updateVariable(taskId, "var2", "test2-update" );
-        
-        
+
+
         taskRestTemplate.createVariable(taskId, "var3", "test3" );
 
 
@@ -137,7 +134,7 @@ public class TaskVariablesIT {
         assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent())).isTrue();
-        
+
         //given
         taskRestTemplate.updateVariable(taskId, "var3", "test3-update");
 
@@ -152,7 +149,7 @@ public class TaskVariablesIT {
 
 
     }
-    
+
     @Test
     public void adminShouldSetGetUpdateTaskVariables() {
         //given
@@ -164,7 +161,7 @@ public class TaskVariablesIT {
         ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
-        
+
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
         taskRestTemplate.adminCreateVariable(taskId, "var2", "test2");
 
@@ -176,7 +173,7 @@ public class TaskVariablesIT {
         assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
 
-    
+
         //given
         taskRestTemplate.adminUpdateVariable(taskId, "var2","test2-update");
         taskRestTemplate.adminCreateVariable(taskId, "var3","test3");
@@ -189,7 +186,7 @@ public class TaskVariablesIT {
         assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent())).isTrue();
-        
+
         //given
         taskRestTemplate.adminUpdateVariable(taskId, "var3", "test3-update");
 
@@ -202,20 +199,20 @@ public class TaskVariablesIT {
         assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var3","test3-update",variablesResponse.getBody().getContent())).isTrue();
     }
-    
+
     @Test
     public void should_Change_Date_When_CreateUpdateTaskVariables() throws Exception{
         //given
         Date date = new Date();
-  
+
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
                                                                                                       null);
         ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
-      
+
         taskRestTemplate.claim(taskId);
-        
+
         taskRestTemplate.createVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
         taskRestTemplate.createVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
 
@@ -234,23 +231,23 @@ public class TaskVariablesIT {
 
         // when
         variablesResponse = taskRestTemplate.getVariables(taskId);
-        
-        processInstanceRestTemplate.delete(startResponse); 
+
+        processInstanceRestTemplate.delete(startResponse);
     }
-    
+
     @Test
     public void admin_Should_Change_Date_When_CreateUpdateTaskVariables() throws Exception{
         //given
         Date date = new Date();
-  
+
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
                                                                                                       null);
         ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
-        
+
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
-        
+
         taskRestTemplate.adminCreateVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
         taskRestTemplate.adminCreateVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
 
@@ -269,10 +266,10 @@ public class TaskVariablesIT {
 
         // when
         variablesResponse = taskRestTemplate.adminGetVariables(taskId);
-        
-        processInstanceRestTemplate.delete(startResponse); 
+
+        processInstanceRestTemplate.delete(startResponse);
     }
-    
+
     private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection){
         Iterator<CloudVariableInstance> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
@@ -283,7 +280,7 @@ public class TaskVariablesIT {
                     assertThat("String").isEqualTo(variable.getValue().getClass().getSimpleName());
                 } else {
                     assertThat(type).isEqualToIgnoringCase(variable.getValue().getClass().getSimpleName());
-                }                
+                }
                 return true;
             }
         }

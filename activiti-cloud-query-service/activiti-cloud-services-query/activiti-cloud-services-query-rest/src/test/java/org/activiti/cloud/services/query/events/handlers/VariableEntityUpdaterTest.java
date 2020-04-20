@@ -22,8 +22,8 @@ import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -44,7 +44,7 @@ public class VariableEntityUpdaterTest {
     private VariableRepository variableRepository;
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

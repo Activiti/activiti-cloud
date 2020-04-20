@@ -14,7 +14,6 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Service Common Parent</name>
   <modules>
-
     <module>activiti-cloud-service-common-dependencies</module>
     <module>activiti-cloud-services-test</module>
     <module>activiti-cloud-services-monitoring</module>
@@ -37,26 +36,25 @@
     <project.scm.repository>activiti-cloud-service-common</project.scm.repository>
     <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-core-common.version>7.1.206</activiti-core-common.version>
+    <activiti-core-common.version>7.1.208</activiti-core-common.version>
     <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <commons-io.version>2.6</commons-io.version>
+    <guava.version>23.0</guava.version>
     <java-semver.version>0.9.0</java-semver.version>
     <keycloak.version>4.8.3.Final</keycloak.version>
-    <keycloak-spring-boot.version>4.8.3.Final</keycloak-spring-boot.version>
     <logstash.version>4.11</logstash.version>
     <querydsl.version>4.1.4</querydsl.version>
     <resteasy.version>3.0.21.Final</resteasy.version>
     <springfox.version>2.8.0</springfox.version>
-    <swagger.version>1.5.10</swagger.version>
+    <swagger.version>1.5.14</swagger.version>
     <xstream.version>1.4.11.1</xstream.version>
     <asciidoctor.version>1.5.6</asciidoctor.version>
     <json-unit.version>1.24.0</json-unit.version>
     <javax.annotation.version>1.3.2</javax.annotation.version>
-    <testcontainers.version>1.12.2</testcontainers.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -84,7 +82,7 @@
       <dependency>
         <groupId>org.keycloak.bom</groupId>
         <artifactId>keycloak-adapter-bom</artifactId>
-        <version>${keycloak-spring-boot.version}</version>
+        <version>${keycloak.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -164,7 +162,12 @@
       <dependency>
         <groupId>io.swagger</groupId>
         <artifactId>swagger-annotations</artifactId>
-        <version>1.5.14</version>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
       </dependency>
       <!-- Querydsl dependencies http://www.querydsl.com -->
       <dependency>
@@ -231,10 +234,4 @@
       <type>pom</type>
     </dependency>
   </dependencies>
-  <repositories>
-    <repository>
-      <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
 </project>

@@ -20,7 +20,7 @@ import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.BPMNElement;
 import org.activiti.cloud.services.audit.jpa.converters.json.ActivityJpaJsonConverter;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;

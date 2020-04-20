@@ -3,8 +3,8 @@ package org.activiti.cloud.services.identity.basic;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -26,7 +26,7 @@ public class BasicAuthenticationProviderTest {
     @Mock
     private UserDetailsService userDetailsService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }

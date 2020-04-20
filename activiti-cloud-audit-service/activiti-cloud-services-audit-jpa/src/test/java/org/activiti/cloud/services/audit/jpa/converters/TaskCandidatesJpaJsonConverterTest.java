@@ -24,7 +24,7 @@ import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateGroupJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TaskCandidatesJpaJsonConverterTest {
 
@@ -35,7 +35,7 @@ public class TaskCandidatesJpaJsonConverterTest {
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
         //given
         TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl("user-id","task-id");
-     
+
         //when
         String jsonRepresentation = converterCandidateUser.convertToDatabaseColumn(candidateUser);
 
@@ -43,10 +43,10 @@ public class TaskCandidatesJpaJsonConverterTest {
         assertThatJson(jsonRepresentation)
                 .node("userId").isEqualTo("user-id")
                 .node("taskId").isEqualTo("task-id");
-        
+
         //given
         TaskCandidateGroupImpl candidateGroup = new TaskCandidateGroupImpl("group-id","task-id");
-     
+
         //when
         jsonRepresentation = converterCandidateGroup.convertToDatabaseColumn(candidateGroup);
 
@@ -71,11 +71,11 @@ public class TaskCandidatesJpaJsonConverterTest {
         assertThat(candidateUser)
                 .isNotNull()
                 .hasUserId("user-id");
-        
+
         jsonRepresentation =
                 "{\"taskId\":\"task-id\"," +
                         "\"groupId\":\"group-id\"}";
-        
+
         jsonRepresentation =
                 "{\"groupId\":\"group-id\"}";
 

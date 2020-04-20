@@ -42,10 +42,8 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -58,12 +56,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessDefinitionController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,
@@ -99,7 +95,7 @@ public class ProcessDefinitionControllerIT {
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
         assertThat(securityPoliciesManager).isNotNull();
@@ -138,11 +134,9 @@ public class ProcessDefinitionControllerIT {
         Predicate predicate = mock(Predicate.class);
         given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
                 .willReturn(predicate);
-        given(processDefinitionRepository.findAll(eq(predicate),
-                                                  ArgumentMatchers.<Pageable>any()))
+        given(processDefinitionRepository.findAll(eq(predicate), any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           PageRequest.of(1,
-                                                                                    10),
+                                           PageRequest.of(1,10),
                                            11));
 
         //when

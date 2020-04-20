@@ -1,6 +1,8 @@
 package org.activiti.cloud.connectors.starter.channels;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -8,15 +10,14 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.MessageChannel;
 
 public class IntegrationResultChannelResolverImplTest {
-    
+
     private IntegrationResultChannelResolver subject;
 
     @Mock
@@ -26,20 +27,20 @@ public class IntegrationResultChannelResolverImplTest {
 
     @Mock
     private ConnectorProperties connectorProperties;
-    
+
     @Mock
     private MessageChannel messageChannel;
-    
-    @Before
+
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
-        
+
         when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
-        when(resolver.resolveDestination(Mockito.anyString())).thenReturn(messageChannel);
-        
-        builder = Mockito.spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
-        
-        subject = new IntegrationResultChannelResolverImpl(resolver, 
+        when(resolver.resolveDestination(anyString())).thenReturn(messageChannel);
+
+        builder = spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
+
+        subject = new IntegrationResultChannelResolverImpl(resolver,
                                                      builder);
     }
 
@@ -56,7 +57,7 @@ public class IntegrationResultChannelResolverImplTest {
 
         // when
         MessageChannel resut = subject.resolveDestination(integrationRequest);
-        
+
         // then
         assertThat(resut).isEqualTo(messageChannel);
 

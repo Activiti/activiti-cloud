@@ -32,9 +32,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -43,34 +42,32 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class ErrorAuditProducerIT {
 
     private static final String ERROR_START_EVENT_SUBPROCESS = "errorStartEventSubProcess";
-    
+
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
-    
+
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         streamHandler.clear();
     }
 
     @Test
     public void should_produceBpmnErrorEvents_when_processIsExecuted() {
-        
+
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(new StartProcessPayloadBuilder()
                                                                                                             .withProcessDefinitionKey(ERROR_START_EVENT_SUBPROCESS)
                                                                                                             .withName("processInstanceName")
@@ -78,7 +75,7 @@ public class ErrorAuditProducerIT {
                                                                                                             .build());
 
         assertThat(startProcessEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        
+
         CloudProcessInstance processInstance = startProcessEntity.getBody();
 
         await().untilAsserted(() -> {
@@ -105,7 +102,7 @@ public class ErrorAuditProducerIT {
                             "startEvent",
                             "subStart1",
                             processInstance.getId()));
-            
+
             assertThat(receivedEvents)
                     .filteredOn(CloudBPMNErrorReceivedEvent.class::isInstance)
                     .extracting(CloudRuntimeEvent::getEventType,
@@ -124,24 +121,24 @@ public class ErrorAuditProducerIT {
                     )
                     .containsExactly(
                             tuple(ERROR_RECEIVED,
-                                  processInstance.getProcessDefinitionId(), 
+                                  processInstance.getProcessDefinitionId(),
                                   processInstance.getId(),
                                   processInstance.getProcessDefinitionKey(),
                                   processInstance.getProcessDefinitionVersion(),
                                   processInstance.getBusinessKey(),
                                   "subStart1",
-                                  processInstance.getProcessDefinitionId(), 
+                                  processInstance.getProcessDefinitionId(),
                                   processInstance.getId(),
                                   "123",
                                   "errorId",
                                   null,
                                   null
-                            )                            
+                            )
                     );
        });
-        
+
     }
-    
+
     private BPMNError bpmnError(CloudRuntimeEvent<?,?> event) {
         return CloudBPMNErrorReceivedEvent.class.cast(event).getEntity();
     }

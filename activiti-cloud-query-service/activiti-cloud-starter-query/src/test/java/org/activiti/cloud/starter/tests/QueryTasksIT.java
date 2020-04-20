@@ -50,10 +50,9 @@ import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -64,9 +63,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
@@ -74,7 +71,7 @@ public class QueryTasksIT {
 
     private static final String TASKS_URL = "/v1/tasks";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks";
-    
+
     private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {};
 
     private static final ParameterizedTypeReference<Task> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {};
@@ -108,7 +105,7 @@ public class QueryTasksIT {
 
     private TaskEventContainedBuilder taskEventContainedBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
@@ -116,7 +113,7 @@ public class QueryTasksIT {
         runningProcessInstance = processInstanceBuilder.aRunningProcessInstance("My running instance");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
@@ -339,7 +336,7 @@ public class QueryTasksIT {
                     .containsExactly(rootTask.getId());
         });
     }
-    
+
     @Test
     public void shouldGetAvailableStandaloneTasksWithStatus() {
         //given
@@ -439,7 +436,7 @@ public class QueryTasksIT {
         assertCanRetrieveTask(taskWithCandidate);
     }
 
-    
+
 
     @Test
     public void shouldGetAdminTask() {
@@ -466,12 +463,12 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getId()).isNotNull();
             assertThat(responseEntity.getBody().getId()).isEqualTo(createdTask.getId());
-         
+
         });
- 
-    
+
+
     }
-    
+
     private void assertCanRetrieveTask(Task task) {
        await().untilAsserted(() -> {
 
@@ -684,7 +681,7 @@ public class QueryTasksIT {
                 runningProcessInstance,
                 yesterday,
                 now);
-        
+
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
@@ -708,7 +705,7 @@ public class QueryTasksIT {
         });
 
     }
-    
+
     private void assertCannotSeeTask(Task task) {
         await().untilAsserted(() -> {
 
@@ -741,14 +738,14 @@ public class QueryTasksIT {
                 }
                 url += "description=" + description;
             }
-            
+
         }
         return testRestTemplate.exchange(url,
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
-    
+
     private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
                                          HttpMethod.GET,
@@ -782,11 +779,11 @@ public class QueryTasksIT {
     @Test
     public void shouldFilterTaskByCreatedDateFromTo(){
         //given
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"); 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-        Date now = new Date();   
+        Date now = new Date();
         Date start1,complete1,start2,complete2,start3,complete3;
-     
+
 
         complete1 = now;
         start1 = new Date(now.getTime() - 86400000);
@@ -794,21 +791,21 @@ public class QueryTasksIT {
                 runningProcessInstance,
                 start1,
                 complete1);
-        
+
         complete2 = new Date(now.getTime() - 86400000);
         start2 = new Date(now.getTime() - (2*86400000));
         Task task2 = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task 2",
                 runningProcessInstance,
                 start2,
                 complete2);
-        
+
         complete3 = new Date(now.getTime() - (3*86400000));
         start3 = new Date(now.getTime() - (4*86400000));
         Task task3 = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task 3",
                 runningProcessInstance,
                 start3,
                 complete3);
-        
+
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
@@ -827,7 +824,7 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks.size()).isEqualTo(2);
-            
+
             //when
             //set check date 1 hour after start2: we expect 1 task
             checkDate=new Date(start2.getTime() + 3600000);
@@ -842,7 +839,7 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             tasks = responseEntity.getBody().getContent();
             assertThat(tasks.size()).isEqualTo(1);
-            
+
             //when
             //set check date for createdTo 1 hour after start2: we expect 2 tasks
             checkDate=new Date(start2.getTime() + 3600000);
@@ -857,14 +854,14 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             tasks = responseEntity.getBody().getContent();
             assertThat(tasks.size()).isEqualTo(2);
-            
+
             //when
             //set check date for createdFrom 1 hour before start2
             //set check date for createdTo 1 hour after start2
             //we expect 1 task
             checkDate=new Date(start2.getTime() - 3600000);
             Date checkDate1=new Date(start2.getTime() + 3600000);
-                    
+
             responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdFrom="+sdf.format(checkDate)+"&createdTo="+sdf.format(checkDate1),
                                                  HttpMethod.GET,
                                                  keycloakTokenProducer.entityWithAuthorizationHeader(),
@@ -905,7 +902,7 @@ public class QueryTasksIT {
         });
 
     }
-    
+
     @Test
     public void shouldGetAvailableStandaloneTasksFilteredByNameDescription() {
       //given
@@ -913,7 +910,7 @@ public class QueryTasksIT {
                                                             runningProcessInstance);
         Task task2 = taskEventContainedBuilder.aCreatedTask("Task 2 not filter",
                                                             null);
-        
+
         Task task3 = taskEventContainedBuilder.aCreatedTask("Task 3 for filter standalone",
                                                             null);
 
@@ -944,7 +941,7 @@ public class QueryTasksIT {
                               tuple(task4.getId(),
                                     Task.TaskStatus.CREATED));
         });
-        
+
         await().untilAsserted(() -> {
 
             //when
@@ -962,9 +959,9 @@ public class QueryTasksIT {
                     .contains(tuple(task4.getId(),
                                     Task.TaskStatus.CREATED));
         });
-        
+
     }
-    
+
     @Test
     public void shouldSetProcessDefinitionVersionAndBusinessKeyOnTaskWhenThisInformationIsAvailableInTheEvent() {
       //given
@@ -974,7 +971,7 @@ public class QueryTasksIT {
         CloudTaskCreatedEventImpl task1Created = new CloudTaskCreatedEventImpl(task1);
         task1Created.setProcessDefinitionVersion(10);
         task1Created.setBusinessKey("businessKey");
-        
+
         eventsAggregator.addEvents(task1Created);
 
         //event with process definition unset
@@ -1029,9 +1026,9 @@ public class QueryTasksIT {
                     .extracting(Task::getId)
                     .containsExactly(task1.getId());
         });
-        
+
     }
-    
+
     @Test
     public void should_getTask_when_queryFilteredByTaskDefinitionKey() {
         //given
@@ -1085,7 +1082,7 @@ public class QueryTasksIT {
                     .extracting(Task::getId)
                     .containsExactly(task1Created.getEntity().getId());
         });
-        
+
     }
 
     private CloudTaskCreatedEventImpl buildTaskCreatedEvent(String taskName,
@@ -1115,9 +1112,9 @@ public class QueryTasksIT {
         Task task = taskEventContainedBuilder.aTaskWithGroupCandidate("task with group candidate",
                                                                       "testgroup",
                                                                       runningProcessInstance);
-        
+
         eventsAggregator.sendAll();
-        
+
         await().untilAsserted(() -> {
             //when
             ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
@@ -1131,14 +1128,14 @@ public class QueryTasksIT {
             assertThat(response.getBody()).containsExactly("testgroup");
             assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
         });
-        
+
         keycloakTokenProducer.setKeycloakTestUser("testuser");
-        
+
         ((TaskImpl)task).setAssignee("testuser");
         ((TaskImpl)task).setStatus(Task.TaskStatus.ASSIGNED);
         eventsAggregator.addEvents(new CloudTaskAssignedEventImpl(task));
         eventsAggregator.sendAll();
-        
+
         await().untilAsserted(() -> {
             //when
             ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
@@ -1156,11 +1153,11 @@ public class QueryTasksIT {
         ((TaskImpl)task).setStatus(Task.TaskStatus.COMPLETED);
         eventsAggregator.addEvents(new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
         eventsAggregator.sendAll();
-        
+
         TaskCandidateGroupImpl candidateGroup = new TaskCandidateGroupImpl("hrgroup",
                                                                            task.getId());
         producer.send(new CloudTaskCandidateGroupRemovedEventImpl(candidateGroup));
-        
+
         await().untilAsserted(() -> {
             //when
             ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
@@ -1174,9 +1171,9 @@ public class QueryTasksIT {
             assertThat(response.getBody()).containsExactly("testgroup");
             assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
         });
-      
+
     }
-    
+
     @Test
     public void shouldGetTaskUserCandidatesAfterTaskCompleted() {
         //given
@@ -1199,13 +1196,13 @@ public class QueryTasksIT {
         assertThat(responseEntity.getBody()).containsExactly("testuser");
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
-        
-        //when  
+
+        //when
         ((TaskImpl)task).setAssignee("testuser");
         ((TaskImpl)task).setStatus(Task.TaskStatus.ASSIGNED);
         eventsAggregator.addEvents(new CloudTaskAssignedEventImpl(task));
         eventsAggregator.sendAll();
-        
+
         responseEntity = getCandidateUsers(task.getId());
         taskResponseEntity = executeRequestGetTasksById(task.getId());
 
@@ -1217,12 +1214,12 @@ public class QueryTasksIT {
         assertThat(responseEntity.getBody()).containsExactly("testuser");
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
-        
+
 
         ((TaskImpl)task).setStatus(Task.TaskStatus.COMPLETED);
         eventsAggregator.addEvents(new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
         eventsAggregator.sendAll();
-   
+
         TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl("testuser",
                                                                         task.getId());
         producer.send(new CloudTaskCandidateUserRemovedEventImpl(candidateUser));

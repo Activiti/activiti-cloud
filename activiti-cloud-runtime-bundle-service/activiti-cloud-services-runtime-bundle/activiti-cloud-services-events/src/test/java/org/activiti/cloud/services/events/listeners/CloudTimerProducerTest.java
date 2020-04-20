@@ -26,8 +26,8 @@ import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -35,7 +35,7 @@ public class CloudTimerProducerTest {
 
     @InjectMocks
     private CloudTimerFiredProducer cloudTimerFiredProducer;
-    
+
     @InjectMocks
     private CloudTimerScheduledProducer cloudTimerScheduledProducer;
 
@@ -44,7 +44,7 @@ public class CloudTimerProducerTest {
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -60,11 +60,11 @@ public class CloudTimerProducerTest {
 
         //then
         verify(eventsAggregator).add(cloudEventFired);
-        
+
         BPMNTimerScheduledEventImpl eventScheduled = new BPMNTimerScheduledEventImpl(new BPMNTimerImpl());
         CloudBPMNTimerScheduledEventImpl cloudEventScheduled = new CloudBPMNTimerScheduledEventImpl();
         given(eventConverter.from(eventScheduled)).willReturn(cloudEventScheduled);
-        
+
         //when
         cloudTimerScheduledProducer.onEvent(eventScheduled);
 

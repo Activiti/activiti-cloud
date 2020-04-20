@@ -41,16 +41,16 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderAppenderChain;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -100,7 +100,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Mock
     private ExecutionQuery executionQuery;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
@@ -108,7 +108,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
         when(executionQuery.list()).thenReturn(Collections.emptyList());
-        when(messageBuilderFactory.create(ArgumentMatchers.any())).thenReturn(new MessageBuilderAppenderChain());
+        when(messageBuilderFactory.create(any())).thenReturn(new MessageBuilderAppenderChain());
     }
 
     @Test
@@ -122,7 +122,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         given(integrationContextService.findById(ENTITY_ID))
                 .willReturn(integrationContextEntity);
-        given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
+        given(executionQuery.list()).willReturn(Collections.singletonList(mock(ExecutionEntity.class)));
         given(executionQuery.list().get(0).getActivityId()).willReturn(CLIENT_ID);
         Map<String, Object> variables = Collections.singletonMap("var1",
                 "v");

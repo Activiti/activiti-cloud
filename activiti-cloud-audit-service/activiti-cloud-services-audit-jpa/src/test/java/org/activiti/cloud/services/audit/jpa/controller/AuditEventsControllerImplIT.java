@@ -30,7 +30,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.subsecti
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.api.process.model.BPMNMessage;
@@ -65,9 +64,8 @@ import org.activiti.cloud.services.audit.jpa.events.TimerFiredAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.security.config.AuditJPASecurityAutoConfiguration;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -79,7 +77,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -87,7 +84,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(AuditEventsControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
@@ -103,7 +99,7 @@ public class AuditEventsControllerImplIT {
     private static final String DOCUMENTATION_IDENTIFIER = "events";
     private static final String DOCUMENTATION_ALFRESCO_IDENTIFIER = "events-alfresco";
 
-    @MockBean 
+    @MockBean
     private EventsRepository eventsRepository;
 
     @Autowired
@@ -114,11 +110,11 @@ public class AuditEventsControllerImplIT {
 
     @MockBean
     private SecurityPoliciesProperties securityPoliciesProperties;
-    
+
     @MockBean
     private UserGroupManager userGroupManager;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
     }
@@ -142,7 +138,6 @@ public class AuditEventsControllerImplIT {
                                        "10")
                                 .param("sort",
                                        "asc"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 responseFields(
@@ -169,7 +164,7 @@ public class AuditEventsControllerImplIT {
 
     private AuditEventEntity buildAuditEventEntity(long id) {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
-        
+
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setId(id);
@@ -232,7 +227,6 @@ public class AuditEventsControllerImplIT {
 
         mockMvc.perform(head("{version}/events",
                              "/v1"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/head/list"));
     }
@@ -256,7 +250,6 @@ public class AuditEventsControllerImplIT {
                              "/v1")
                                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(print())
                 .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/head/list"));
     }
 
@@ -270,7 +263,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
                                 pathParameters(parameterWithName("id").description("The event id"),
@@ -314,7 +306,6 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()).accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/get",
                                 pathParameters(parameterWithName("id").description("The event id"),
@@ -343,11 +334,10 @@ public class AuditEventsControllerImplIT {
         AuditEventEntity event = new ActivityStartedAuditEventEntity();
         event.setEventId("eventId");
         event.setTimestamp(System.currentTimeMillis());
-        
+
         mockMvc.perform(head("{version}/events/{id}",
                              "/v1",
                              eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/head"));
     }
@@ -360,9 +350,9 @@ public class AuditEventsControllerImplIT {
                                                   null));
 
         SignalReceivedAuditEventEntity eventEntity = new SignalReceivedAuditEventEntity();
-        
+
         eventEntity.setEventId("eventId");
-        eventEntity.setTimestamp(System.currentTimeMillis());    
+        eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setId(1L);
         eventEntity.setServiceName("rb-my-app");
         eventEntity.setEventType(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name());
@@ -375,18 +365,17 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
     }
-    
+
     @Test
     public void shouldGetTimerEventById() throws Exception {
 
         BPMNTimerImpl timer = new BPMNTimerImpl("elementId");
         timer.setProcessDefinitionId("processDefinitionId");
-        timer.setProcessInstanceId("processInstanceId"); 
+        timer.setProcessInstanceId("processInstanceId");
         timer.setTimerPayload(createTimerPayload());
-        
+
         TimerFiredAuditEventEntity eventEntity = new TimerFiredAuditEventEntity();
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
@@ -401,73 +390,69 @@ public class AuditEventsControllerImplIT {
         eventEntity.setMessageId("message-id");
         eventEntity.setSequenceNumber(0);
         eventEntity.setTimer(timer);
-        
+
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
     }
-    
+
     @Test
     public void shouldGetMessageSentEventById() throws Exception {
         MessageAuditEventEntity eventEntity = messageAuditEventEntity(MessageSentAuditEventEntity.class,
                                                                       BPMNMessageEvent.MessageEvents.MESSAGE_SENT);
-        
+
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
-    }    
+    }
 
     @Test
     public void shouldGetMessageWaitingEventById() throws Exception {
         MessageAuditEventEntity eventEntity = messageAuditEventEntity(MessageWaitingAuditEventEntity.class,
                                                                       BPMNMessageEvent.MessageEvents.MESSAGE_WAITING);
-        
+
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
-    }    
-    
+    }
+
     @Test
     public void shouldGetMessageReceivedEventById() throws Exception {
         MessageAuditEventEntity eventEntity = messageAuditEventEntity(MessageReceivedAuditEventEntity.class,
                                                                       BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED);
-        
+
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
-    }       
-    
+    }
+
     private TimerPayload createTimerPayload() {
         TimerPayload timerPayload = new TimerPayload();
         timerPayload.setRetries(5);
         timerPayload.setMaxIterations(2);
         timerPayload.setRepeat("repeat");
         timerPayload.setExceptionMessage("Any message");
-        
-        return timerPayload;     
+
+        return timerPayload;
     }
-    
+
     private MessageAuditEventEntity messageAuditEventEntity(Class<? extends MessageAuditEventEntity> clazz,
                                                             BPMNMessageEvent.MessageEvents eventType) throws Exception {
-        
+
         MessageAuditEventEntity eventEntity = clazz.newInstance();
-        
+
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setEventType(eventType.name());
@@ -481,21 +466,21 @@ public class AuditEventsControllerImplIT {
         eventEntity.setMessageId("message-id");
         eventEntity.setSequenceNumber(0);
         eventEntity.setMessage(createBPMNMessage());
-        
+
         return eventEntity;
     }
-    
-    
+
+
     private BPMNMessage createBPMNMessage() {
         BPMNMessageImpl message = new BPMNMessageImpl("elementId");
         message.setProcessDefinitionId("processDefinitionId");
-        message.setProcessInstanceId("processInstanceId"); 
-        message.setMessagePayload(createMessagePayload());        
-        
+        message.setProcessInstanceId("processInstanceId");
+        message.setMessagePayload(createMessagePayload());
+
         return message;
     }
-    
-    
+
+
     private MessageEventPayload createMessagePayload() {
         MessageEventPayload messageEventPayload = MessagePayloadBuilder.event("messageName")
                                                                        .withBusinessKey("businessId")
