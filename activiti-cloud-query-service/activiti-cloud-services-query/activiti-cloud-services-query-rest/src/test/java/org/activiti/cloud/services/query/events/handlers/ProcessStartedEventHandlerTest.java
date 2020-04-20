@@ -68,6 +68,7 @@ public class ProcessStartedEventHandlerTest {
         verify(processInstanceRepository).save(currentProcessInstanceEntity);
         verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
         verify(currentProcessInstanceEntity).setName(event.getEntity().getName());
+        verify(currentProcessInstanceEntity).setStartDate(event.getEntity().getStartDate());
     }
 
     @Test
