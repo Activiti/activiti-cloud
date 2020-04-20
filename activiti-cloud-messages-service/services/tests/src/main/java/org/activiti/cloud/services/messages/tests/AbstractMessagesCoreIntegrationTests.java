@@ -46,6 +46,8 @@ import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggr
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -357,7 +359,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("variables")
-                       .contains(singletonMap("key", "sent1"));
+                       .asInstanceOf(InstanceOfAssertFactories.MAP)
+                       .containsEntry("key", "sent1");
 
         assertThat(peek()).isNull();
 
@@ -389,7 +392,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("variables")
-                       .contains(singletonMap("key", "sent2"));
+                       .asInstanceOf(InstanceOfAssertFactories.MAP)
+                       .containsEntry("key", "sent2");
 
         assertThat(peek()).isNull();
 
@@ -469,7 +473,6 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     }
 
-
     @Test
     public void testSentMessagesWithBufferInDifferentOrder() throws Exception {
         // given
@@ -491,7 +494,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("variables")
-                       .contains(singletonMap("key", "sent1"));
+                       .asInstanceOf(InstanceOfAssertFactories.MAP)
+                       .containsEntry("key", "sent1");
 
         assertThat(peek()).isNull();
 
@@ -523,7 +527,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
                        .extracting("variables")
-                       .contains(singletonMap("key", "sent2"));
+                       .asInstanceOf(InstanceOfAssertFactories.MAP)
+                       .containsEntry("key", "sent2");
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1)
                                                              .extracting(Message::getPayload)

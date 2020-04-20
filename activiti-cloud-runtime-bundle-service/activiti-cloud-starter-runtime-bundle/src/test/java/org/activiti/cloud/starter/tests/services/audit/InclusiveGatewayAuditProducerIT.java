@@ -262,7 +262,7 @@ public class InclusiveGatewayAuditProducerIT {
         });
 
         tasks = processInstanceRestTemplate.getTasks(processInstance).getBody().getContent().iterator();
-        assertThat(tasks).hasSize(1);
+        assertThat(tasks).toIterable().hasSize(1);
 
         streamHandler.getAllReceivedEvents().clear();
 
