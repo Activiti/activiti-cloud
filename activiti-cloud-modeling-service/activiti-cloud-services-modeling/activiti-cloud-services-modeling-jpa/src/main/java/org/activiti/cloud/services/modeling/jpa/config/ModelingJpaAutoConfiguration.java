@@ -32,7 +32,7 @@ public class ModelingJpaAutoConfiguration {
     }
 
     @Bean
-    public ModelRepository ModelRepository(ModelJpaRepository modelJpaRepository){
+    public ModelRepository modelRepository(ModelJpaRepository modelJpaRepository){
 
         return new ModelRepositoryImpl(modelJpaRepository);
     }
