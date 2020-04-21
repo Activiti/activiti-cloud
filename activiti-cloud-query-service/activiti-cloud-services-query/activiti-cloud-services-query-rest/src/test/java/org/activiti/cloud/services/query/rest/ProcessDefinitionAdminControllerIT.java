@@ -16,17 +16,12 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.alfrescoPagedProcessDefinitions;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedProcessDefinitionFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.selfLink;
 import static org.activiti.cloud.services.query.rest.ProcessDefinitionBuilder.buildDefaultProcessDefinition;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,7 +36,6 @@ import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesPr
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -64,11 +58,7 @@ import java.util.Collections;
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 public class ProcessDefinitionAdminControllerIT {
-
-    private static final String PROCESS_DEFINITION_IDENTIFIER = "admin-process-definition";
-    private static final String ALFRESCO_PROCESS_DEFINITION_IDENTIFIER = "admin-process-definition-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -111,10 +101,7 @@ public class ProcessDefinitionAdminControllerIT {
         mockMvc.perform(get("/admin/v1/process-definitions?page=0&size=10")
                                 .accept(MediaTypes.HAL_JSON_VALUE))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(PROCESS_DEFINITION_IDENTIFIER + "/list",
-                                links(selfLink()),
-                                pagedProcessDefinitionFields()));
+                .andExpect(status().isOk());
 
     }
 
@@ -130,10 +117,7 @@ public class ProcessDefinitionAdminControllerIT {
         mockMvc.perform(get("/admin/v1/process-definitions?skipCount=10&maxItems=10")
                                 .accept(MediaType.APPLICATION_JSON))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(ALFRESCO_PROCESS_DEFINITION_IDENTIFIER + "/list",
-                                alfrescoPagedProcessDefinitions()));
-
+                .andExpect(status().isOk());
     }
 
 }

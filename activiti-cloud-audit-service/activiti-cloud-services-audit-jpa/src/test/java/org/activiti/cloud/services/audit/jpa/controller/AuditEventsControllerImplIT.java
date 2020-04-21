@@ -17,18 +17,11 @@
 package org.activiti.cloud.services.audit.jpa.controller;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -67,7 +60,6 @@ import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesPr
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -87,7 +79,6 @@ import java.util.Optional;
 @WebMvcTest(AuditEventsControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({
     AuditAPIAutoConfiguration.class,
     AuditJPAAutoConfiguration.class,
@@ -95,9 +86,6 @@ import java.util.Optional;
     AlfrescoWebAutoConfiguration.class
 })
 public class AuditEventsControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "events";
-    private static final String DOCUMENTATION_ALFRESCO_IDENTIFIER = "events-alfresco";
 
     @MockBean
     private EventsRepository eventsRepository;
@@ -138,15 +126,7 @@ public class AuditEventsControllerImplIT {
                                        "10")
                                 .param("sort",
                                        "asc"))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                responseFields(
-                                        subsectionWithPath("_embedded.events").description("A list of events "),
-                                        subsectionWithPath("_links.self").description("Resource Self Link"),
-                                        subsectionWithPath("_links.first").description("Pagination First Link"),
-                                        subsectionWithPath("_links.prev").description("Pagination Prev Link"),
-                                        subsectionWithPath("_links.last").description("Pagination Last Link"),
-                                        subsectionWithPath("page").description("Pagination details."))));
+                .andExpect(status().isOk());
     }
 
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {
@@ -200,10 +180,6 @@ public class AuditEventsControllerImplIT {
                                                "/v1")
                                                    .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()
-                ))
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
@@ -227,8 +203,7 @@ public class AuditEventsControllerImplIT {
 
         mockMvc.perform(head("{version}/events",
                              "/v1"))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/head/list"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -249,8 +224,7 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(head("{version}/events?skipCount=11&maxItems=10",
                              "/v1")
                                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/head/list"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -263,37 +237,7 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
-                                pathParameters(parameterWithName("id").description("The event id"),
-                                               parameterWithName("version").description("The API version")),
-                                responseFields(
-                                        subsectionWithPath("id").description("The event id"),
-                                        subsectionWithPath("_links").description("<<resources-index-links,Links>> to other resources"),
-                                        subsectionWithPath("timestamp").description("The event timestamp"),
-                                        subsectionWithPath("eventType").description("The event type"),
-                                        subsectionWithPath("appName").description("The application name"),
-                                        subsectionWithPath("serviceFullName").description("The full service name"),
-                                        subsectionWithPath("appVersion").description("The application version"),
-                                        subsectionWithPath("serviceVersion").description("The version of the service"),
-                                        subsectionWithPath("serviceType").description("The type of the service"),
-                                        subsectionWithPath("nestedProcessDefinitionId").description("Nested process definition id"),
-                                        subsectionWithPath("nestedProcessInstanceId").description("Nested process instance id"),
-                                        subsectionWithPath("serviceName").description("The service name"),
-                                        subsectionWithPath("entityId").description("the entity idCloudProcessSuspendedEventImpl"),
-                                        subsectionWithPath("entity").description("the process instance entity"),
-                                        subsectionWithPath("entity.processDefinitionId").description("The process definition id"),
-                                        subsectionWithPath("entity.id").description("The associated entity id"),
-                                        subsectionWithPath("processInstanceId").description("The process instance id"),
-                                        subsectionWithPath("processDefinitionId").description("The process definition id"),
-                                        subsectionWithPath("processDefinitionKey").description("The process definition key"),
-                                        subsectionWithPath("processDefinitionVersion").description("The process definition version"),
-                                        subsectionWithPath("businessKey").description("The businessKey"),
-                                        subsectionWithPath("parentProcessInstanceId").description("The parent process instance id"),
-                                        subsectionWithPath("messageId").description("The transaction id coming from received message"),
-                                        subsectionWithPath("sequenceNumber").description("The position of the event within the transaction")
-
-                                )));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -306,22 +250,7 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(get("{version}/events/{id}",
                             "/v1",
                             eventEntity.getId()).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/get",
-                                pathParameters(parameterWithName("id").description("The event id"),
-                                               parameterWithName("version").description("The API version")),
-                                responseFields(
-                                        subsectionWithPath("entry").ignored(),
-                                        subsectionWithPath("entry.id").description("The event id"),
-                                        subsectionWithPath("entry.timestamp").description("The event timestamp"),
-                                        subsectionWithPath("entry.eventType").description("The event type"),
-                                        subsectionWithPath("entry.entity.processDefinitionId").description("The process definition id"),
-                                        subsectionWithPath("entry.entity.id").description("The process instance id"),
-                                        subsectionWithPath("entry.serviceName").description("The service name"),
-                                        subsectionWithPath("entry.messageId").description("The transaction id coming from received message"),
-                                        subsectionWithPath("entry.sequenceNumber").description("The position of the event within the transaction")
-
-                                )));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -338,8 +267,7 @@ public class AuditEventsControllerImplIT {
         mockMvc.perform(head("{version}/events/{id}",
                              "/v1",
                              eventEntity.getId()))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/head"));
+                .andExpect(status().isOk());
     }
 
     @Test

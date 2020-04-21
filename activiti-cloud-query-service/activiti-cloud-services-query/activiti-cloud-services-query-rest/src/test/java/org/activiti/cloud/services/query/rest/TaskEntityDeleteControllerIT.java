@@ -1,14 +1,12 @@
 package org.activiti.cloud.services.query.rest;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.resourcesResponseFields;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
@@ -29,7 +27,6 @@ import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesPr
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -48,7 +45,6 @@ import org.springframework.test.web.servlet.MockMvc;
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 public class TaskEntityDeleteControllerIT {
 
     private static final String TASK_ADMIN_ALFRESCO_IDENTIFIER = "task-admin-alfresco";
@@ -99,10 +95,7 @@ public class TaskEntityDeleteControllerIT {
         mockMvc.perform(delete("/admin/v1/tasks")
                 .accept(MediaType.APPLICATION_JSON))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(TASK_ADMIN_ALFRESCO_IDENTIFIER + "/list",
-                        resourcesResponseFields()
-                ));
+                .andExpect(status().isOk());
 
         verify(taskRepository).deleteAll(taskEntities);
     }

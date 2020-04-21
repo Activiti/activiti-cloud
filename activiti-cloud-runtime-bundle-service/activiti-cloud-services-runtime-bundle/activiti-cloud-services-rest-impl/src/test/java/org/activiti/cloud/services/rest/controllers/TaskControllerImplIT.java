@@ -16,9 +16,6 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedTasksFields;
 import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildStandAloneTask;
@@ -28,17 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -75,7 +64,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -89,7 +77,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers = TaskControllerImpl.class, secure = false)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -99,8 +86,6 @@ import org.springframework.test.web.servlet.MockMvc;
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class})
 public class TaskControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "task";
 
     @Autowired
     private MockMvc mockMvc;
@@ -145,10 +130,7 @@ public class TaskControllerImplIT {
         when(taskRuntime.tasks(any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/v1/tasks?page=10&size=10").accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                pagedTasksFields()
-                                ));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -159,10 +141,7 @@ public class TaskControllerImplIT {
         when(taskRuntime.tasks(any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -171,9 +150,7 @@ public class TaskControllerImplIT {
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}",
                                  1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -183,9 +160,7 @@ public class TaskControllerImplIT {
 
         this.mockMvc.perform(post("/v1/tasks/{taskId}/claim",
                                   1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/claim",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -196,9 +171,7 @@ public class TaskControllerImplIT {
 
         this.mockMvc.perform(post("/v1/tasks/{taskId}/release",
                                   1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/release",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -206,9 +179,7 @@ public class TaskControllerImplIT {
         given(taskRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(post("/v1/tasks/{taskId}/complete",
                                   1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/complete",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -219,9 +190,7 @@ public class TaskControllerImplIT {
                                   1)
                              .contentType(MediaType.APPLICATION_JSON)
                              .content(mapper.writeValueAsString(saveTask)))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/save",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -229,9 +198,7 @@ public class TaskControllerImplIT {
         given(taskRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(delete("/v1/tasks/{taskId}",
                                     1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -240,9 +207,7 @@ public class TaskControllerImplIT {
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}",
                                  "not-existent-task"))
-                .andExpect(status().isNotFound())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -256,31 +221,7 @@ public class TaskControllerImplIT {
         this.mockMvc.perform(post("/v1/tasks/",
                                   1).contentType(MediaType.APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(createTask)))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/new",
-                                links(linkWithRel("self").ignored(),
-                                      linkWithRel("claim").description("Link to the claim task resource"),
-                                      linkWithRel("home").description("Link to the home resource")
-                                ),
-                                responseFields(
-                                        subsectionWithPath("id").description("The task id."),
-                                        subsectionWithPath("owner").description("The task owner."),
-                                        subsectionWithPath("createdDate").description("The date where the task task was created."),
-                                        subsectionWithPath("claimedDate").description("The date where task was claimed."),
-                                        subsectionWithPath("dueDate").description("The date where task is due."),
-                                        subsectionWithPath("name").description("The task name."),
-                                        subsectionWithPath("description").description("Task description."),
-                                        subsectionWithPath("priority").description("Task priority. Can have values between 0 and 100."),
-                                        subsectionWithPath("status").description("Task status (can be " + Arrays.asList(Task.TaskStatus.values()) + ")"),
-                                        subsectionWithPath("appName").description("The application name"),
-                                        subsectionWithPath("appVersion").description("The application version"),
-                                        subsectionWithPath("serviceName").description("The service name"),
-                                        subsectionWithPath("serviceFullName").description("The full service name"),
-                                        subsectionWithPath("serviceType").description("The service type"),
-                                        subsectionWithPath("serviceVersion").description("The service version"),
-                                        subsectionWithPath("standalone").description("The task can be standalone or not"),
-                                        subsectionWithPath("_links").ignored()
-                                )));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -297,33 +238,7 @@ public class TaskControllerImplIT {
         this.mockMvc.perform(post("/v1/tasks/",
                                   parentTaskId).contentType(MediaType.APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(createTaskCmd)))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/subtasks/get",
-                                links(linkWithRel("self").ignored(),
-                                      linkWithRel("claim").description("Link to the claim task resource"),
-                                      linkWithRel("home").description("Link to the home resource"),
-                                      linkWithRel("parent").description("Link to the parent task")
-                                ),
-                                responseFields(
-                                        subsectionWithPath("id").description("The task id."),
-                                        subsectionWithPath("owner").description("The task owner."),
-                                        subsectionWithPath("createdDate").description("The date where the task task was created."),
-                                        subsectionWithPath("claimedDate").description("The date where task was claimed."),
-                                        subsectionWithPath("dueDate").description("The date where task is due."),
-                                        subsectionWithPath("parentTaskId").description("The parent task id"),
-                                        subsectionWithPath("name").description("The task name."),
-                                        subsectionWithPath("description").description("Task description."),
-                                        subsectionWithPath("priority").description("Task priority. Can have values between 0 and 100."),
-                                        subsectionWithPath("status").description("Task status (can be " + Arrays.asList(Task.TaskStatus.values()) + ")"),
-                                        subsectionWithPath("appName").description("The application name"),
-                                        subsectionWithPath("appVersion").description("The application version"),
-                                        subsectionWithPath("serviceName").description("The service name"),
-                                        subsectionWithPath("serviceFullName").description("The full service name"),
-                                        subsectionWithPath("serviceType").description("The service type"),
-                                        subsectionWithPath("serviceVersion").description("The service version"),
-                                        subsectionWithPath("standalone").description("The task can be standalone or not"),
-                                        subsectionWithPath("_links").ignored()
-                                )));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -340,10 +255,7 @@ public class TaskControllerImplIT {
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}/subtasks",
                                  "parentTaskId").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/subtasks/get",
-                                links(halLinks(),
-                                      linkWithRel("self").ignored().optional())));
+                .andExpect(status().isOk());
     }
 
     @Test

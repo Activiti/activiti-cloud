@@ -191,11 +191,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
-      <artifactId>activiti-cloud-services-rest-docs</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>net.javacrumbs.json-unit</groupId>
       <artifactId>json-unit-fluent</artifactId>
       <scope>test</scope>
@@ -211,10 +206,6 @@
       <plugin>
         <groupId>com.mysema.maven</groupId>
         <artifactId>apt-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.asciidoctor</groupId>
-        <artifactId>asciidoctor-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

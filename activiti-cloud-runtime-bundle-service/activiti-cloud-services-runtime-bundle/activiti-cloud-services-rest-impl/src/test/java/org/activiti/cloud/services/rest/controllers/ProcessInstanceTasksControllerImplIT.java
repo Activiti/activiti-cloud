@@ -16,16 +16,11 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedTasksFields;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
@@ -50,7 +45,6 @@ import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -65,7 +59,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
@@ -73,10 +66,6 @@ import org.springframework.test.web.servlet.MockMvc;
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class})
 public class ProcessInstanceTasksControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "process-instance-tasks";
-
-    private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "process-instance-tasks-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -120,14 +109,9 @@ public class ProcessInstanceTasksControllerImplIT {
 
         when(taskRuntime.tasks(any(),any())).thenReturn(tasks);
 
-        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10",
-                                 1,
-                                 1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                processInstanceIdParameter(),
-                                pagedTasksFields()
-                                ));
+        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10", 1, 1)
+                .accept(MediaTypes.HAL_JSON_VALUE))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -143,10 +127,7 @@ public class ProcessInstanceTasksControllerImplIT {
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?skipCount=10&maxItems=10",
                                  task.getProcessInstanceId(),
                                  1).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                                processInstanceIdParameter(),
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()));
+                .andExpect(status().isOk());
     }
+
 }
