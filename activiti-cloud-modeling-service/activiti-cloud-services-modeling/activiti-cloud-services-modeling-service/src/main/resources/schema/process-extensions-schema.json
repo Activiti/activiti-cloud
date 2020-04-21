@@ -49,7 +49,8 @@
             "integer",
             "boolean",
             "json",
-            "file"
+            "file",
+            "folder"
           ]
         },
         "required": {
@@ -190,6 +191,25 @@
                 "type": "object",
                 "message": {
                   "type": "Mismatch value type - {{name}}({{id}}). Expected type is file"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "folder"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "object",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is folder"
                 }
               }
             }
