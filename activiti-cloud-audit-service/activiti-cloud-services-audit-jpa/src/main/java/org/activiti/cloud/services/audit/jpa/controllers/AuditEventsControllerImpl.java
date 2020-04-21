@@ -20,14 +20,14 @@ import static java.util.stream.Collectors.joining;
 
 import java.util.Arrays;
 import org.activiti.api.runtime.shared.NotFoundException;
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
+import org.activiti.cloud.services.audit.api.assembler.EventRepresentationModelAssembler;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
-import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
+import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventSpecificationsBuilder;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
@@ -43,8 +43,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,16 +59,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @RestController
-@RequestMapping(value = "/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public class AuditEventsControllerImpl implements AuditEventsController {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AuditEventsAdminControllerImpl.class);
 
     private final EventsRepository eventsRepository;
 
-    private final EventResourceAssembler eventResourceAssembler;
+    private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
 
-    private final AlfrescoPagedResourcesAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedResourcesAssembler;
+    private final AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler;
 
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
@@ -76,19 +76,19 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
     @Autowired
     public AuditEventsControllerImpl(EventsRepository eventsRepository,
-                                     EventResourceAssembler eventResourceAssembler,
+                                     EventRepresentationModelAssembler eventRepresentationModelAssembler,
                                      APIEventToEntityConverters eventConverters,
                                      SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
-                                     AlfrescoPagedResourcesAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedResourcesAssembler) {
+                                     AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler) {
         this.eventsRepository = eventsRepository;
-        this.eventResourceAssembler = eventResourceAssembler;
+        this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
         this.eventConverters = eventConverters;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.securityPoliciesApplicationService = securityPoliciesApplicationService;
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
-    public Resource<CloudRuntimeEvent<?, CloudRuntimeEventType>> findById(@PathVariable String eventId) {
+    public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findById(@PathVariable String eventId) {
         Optional<AuditEventEntity> findResult = eventsRepository.findByEventId(eventId);
         if (!findResult.isPresent()) {
             throw new NotFoundException("Unable to find event for the given id:'" + eventId + "'");
@@ -100,11 +100,11 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         }
 
         CloudRuntimeEvent cloudRuntimeEvent = eventConverters.getConverterByEventTypeName(auditEventEntity.getEventType()).convertToAPI(auditEventEntity);
-        return eventResourceAssembler.toResource(cloudRuntimeEvent);
+        return eventRepresentationModelAssembler.toModel(cloudRuntimeEvent);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<Resource<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(@RequestParam(value = "search", required = false) String search,
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(@RequestParam(value = "search", required = false) String search,
                                                  Pageable pageable) {
 
         Specification<AuditEventEntity> spec = createSearchSpec(search);
@@ -125,11 +125,11 @@ public class AuditEventsControllerImpl implements AuditEventsController {
             }
         }
 
-        return pagedResourcesAssembler.toResource(pageable,
+        return pagedCollectionModelAssembler.toModel(pageable,
                                                   new PageImpl<>(events,
                                                                  pageable,
                                                                  allAuditInPage.getTotalElements()),
-                                                  eventResourceAssembler);
+                                                  eventRepresentationModelAssembler);
     }
 
     private Specification<AuditEventEntity> createSearchSpec(String search) {

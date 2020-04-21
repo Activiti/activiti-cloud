@@ -131,7 +131,7 @@ public class ModelControllerIT {
         mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
                              project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel("process-model"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name",
@@ -149,7 +149,7 @@ public class ModelControllerIT {
         mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
                              project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(connectorModel("connector-model"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name",
@@ -177,7 +177,7 @@ public class ModelControllerIT {
         mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
                              project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.extensions.process-model-extensions.properties",
@@ -223,7 +223,7 @@ public class ModelControllerIT {
         mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
                              project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(formModel)))
                 .andExpect(status().isBadRequest());
     }
@@ -237,7 +237,7 @@ public class ModelControllerIT {
         mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
                              project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel("process-model"))))
                 .andExpect(status().isConflict());
     }
@@ -389,7 +389,7 @@ public class ModelControllerIT {
         mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
                              parentProject.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel("process-model"))))
                 .andExpect(status().isCreated());
     }
@@ -401,7 +401,7 @@ public class ModelControllerIT {
         mockMvc.perform(put("{version}/models/{modelId}",
                             API_VERSION,
                             processModel.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel("new-process-model"))))
                 .andExpect(status().isOk());
 
@@ -424,7 +424,7 @@ public class ModelControllerIT {
         mockMvc.perform(put("{version}/models/{modelId}",
                             API_VERSION,
                             processModel.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(newModel)))
                 .andExpect(status().isOk());
     }

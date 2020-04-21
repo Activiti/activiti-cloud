@@ -20,7 +20,7 @@ import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ProcessDefinitionRestTemplate {
 
     private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
-    private static final ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> PAGED_DEFINITIONS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
+    private static final ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> PAGED_DEFINITIONS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
     };
 
     private TestRestTemplate testRestTemplate;
@@ -40,14 +40,14 @@ public class ProcessDefinitionRestTemplate {
         this.testRestTemplate = testRestTemplate;
     }
 
-    public ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(PROCESS_DEFINITIONS_URL,
+    public ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(PROCESS_DEFINITIONS_URL,
                                          HttpMethod.GET,
                                          null,
                                          PAGED_DEFINITIONS_RESPONSE_TYPE);
-        
+
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
- 
+
 }

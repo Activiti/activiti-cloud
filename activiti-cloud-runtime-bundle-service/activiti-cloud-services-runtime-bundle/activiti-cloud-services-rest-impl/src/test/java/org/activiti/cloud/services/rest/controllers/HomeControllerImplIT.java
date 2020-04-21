@@ -28,7 +28,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(HomeControllerImpl.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 public class HomeControllerImplIT {
 
     @Autowired

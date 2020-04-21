@@ -20,20 +20,20 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
-import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,40 +48,40 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     private final ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
-    private final ProcessDefinitionResourceAssembler resourceAssembler;
+    private final ProcessDefinitionRepresentationModelAssembler representationModelAssembler;
 
     private final ProcessRuntime processRuntime;
 
-    private final AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler;
+    private final AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler;
 
     private final SpringPageConverter pageConverter;
 
     @Autowired
     public ProcessDefinitionControllerImpl(RepositoryService repositoryService,
                                            ProcessDiagramGeneratorWrapper processDiagramGenerator,
-                                           ProcessDefinitionResourceAssembler resourceAssembler,
+                                           ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
                                            ProcessRuntime processRuntime,
-                                           AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler,
+                                           AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
                                            SpringPageConverter pageConverter) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
-        this.resourceAssembler = resourceAssembler;
+        this.representationModelAssembler = representationModelAssembler;
         this.processRuntime = processRuntime;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
     }
 
     @Override
-    public PagedResources<Resource<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable) {
+    public PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable) {
         Page<ProcessDefinition> page = processRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
-        return pagedResourcesAssembler.toResource(pageable,
+        return pagedCollectionModelAssembler.toModel(pageable,
                                                   pageConverter.toSpringPage(pageable, page),
-                                                  resourceAssembler);
+                                                  representationModelAssembler);
     }
 
     @Override
-    public Resource<CloudProcessDefinition> getProcessDefinition(@PathVariable String id) {
-        return resourceAssembler.toResource(processRuntime.processDefinition(id));
+    public EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable String id) {
+        return representationModelAssembler.toModel(processRuntime.processDefinition(id));
     }
 
     @Override

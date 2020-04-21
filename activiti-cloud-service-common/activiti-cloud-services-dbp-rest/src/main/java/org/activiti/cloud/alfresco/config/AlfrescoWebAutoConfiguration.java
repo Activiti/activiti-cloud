@@ -24,8 +24,8 @@ import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodR
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageParameterParser;
 import org.activiti.cloud.alfresco.converter.json.AlfrescoJackson2HttpMessageConverter;
 import org.activiti.cloud.alfresco.converter.json.PageMetadataConverter;
-import org.activiti.cloud.alfresco.converter.json.PagedResourcesConverter;
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.converter.json.PagedModelConverter;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -75,7 +75,7 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
 
     @Bean
     public <T> AlfrescoJackson2HttpMessageConverter<T> alfrescoJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-        return new AlfrescoJackson2HttpMessageConverter<>(new PagedResourcesConverter(new PageMetadataConverter()), objectMapper);
+        return new AlfrescoJackson2HttpMessageConverter<>(new PagedModelConverter(new PageMetadataConverter()), objectMapper);
     }
 
     @Bean
@@ -84,10 +84,10 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public <T> AlfrescoPagedResourcesAssembler<T> alfrescoPagedResourcesAssembler(@Autowired(required = false) HateoasPageableHandlerMethodArgumentResolver resolver,
+    public <T> AlfrescoPagedModelAssembler<T> alfrescoPagedModelAssembler(@Autowired(required = false) HateoasPageableHandlerMethodArgumentResolver resolver,
                                                                                   @Autowired(required = false) UriComponents baseUri,
                                                                                   ExtendedPageMetadataConverter extendedPageMetadataConverter){
-        return new AlfrescoPagedResourcesAssembler<>(resolver, baseUri, extendedPageMetadataConverter);
+        return new AlfrescoPagedModelAssembler<>(resolver, baseUri, extendedPageMetadataConverter);
     }
 
 }

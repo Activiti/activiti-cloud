@@ -92,7 +92,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -126,10 +126,10 @@ public class AuditServiceIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSameSizeAs(coveredEvents);
             for (CloudRuntimeEvent coveredEvent : coveredEvents) {
 
@@ -155,11 +155,11 @@ public class AuditServiceIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("processInstanceId",
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("processInstanceId",
                                                                                                                                              "4"));
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(2);
             for (CloudRuntimeEvent event : retrievedEvents) {
                 CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityEvent) event;
@@ -182,10 +182,10 @@ public class AuditServiceIT {
                         "4");
             filters.put("eventType",
                         BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name());
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(2);
             for (CloudRuntimeEvent event : retrievedEvents) {
                 CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStartedEvent) event;
@@ -209,11 +209,11 @@ public class AuditServiceIT {
             filters.put("eventType",
                         TaskRuntimeEvent.TaskEvents.TASK_CREATED.name());
 
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
 
             //then
-            assertThat(eventsPagedResources).isNotNull();
-            assertThat(eventsPagedResources.getBody())
+            assertThat(eventsPagedModel).isNotNull();
+            assertThat(eventsPagedModel.getBody())
                 .isNotEmpty()
                 .filteredOn(event -> ((CloudTaskCreatedEvent)event).getEntity().getTaskDefinitionKey().equals("taskDefinitionKey"))
                 .extracting(event -> event.getEventType(),
@@ -240,10 +240,10 @@ public class AuditServiceIT {
                         "25");
 
 
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSameSizeAs(coveredEvents);
             for (CloudRuntimeEvent coveredEvent : coveredEvents) {
 
@@ -295,10 +295,10 @@ public class AuditServiceIT {
             filters.put("entityId",
                         "1234-abc-5678-def");
 
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(3);
             for (CloudRuntimeEvent e : retrievedEvents) {
                 assertThat(e.getEntityId()).isEqualTo("1234-abc-5678-def");
@@ -315,11 +315,11 @@ public class AuditServiceIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
                                                                                                                                              TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name()));
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
             CloudTaskAssignedEvent cloudTaskAssignedEvent = (CloudTaskAssignedEvent) retrievedEvents.iterator().next();
             assertThat(cloudTaskAssignedEvent.getEventType()).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED);
@@ -337,11 +337,11 @@ public class AuditServiceIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
                                                                                                                                              BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name()));
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(3);
             for (CloudRuntimeEvent event : retrievedEvents) {
                 CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStartedEvent) event;
@@ -360,12 +360,12 @@ public class AuditServiceIT {
 
             //when
 
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("entityId",
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("entityId",
                                                                                                                                              "1234-abc-5678-def"));
             //then
-            assertThat(eventsPagedResources.getBody()).isNotNull();
+            assertThat(eventsPagedModel.getBody()).isNotNull();
 
-            assertThat(eventsPagedResources.getBody().getContent())
+            assertThat(eventsPagedModel.getBody().getContent())
                     .extracting(CloudRuntimeEvent::getEntityId)
                     .containsOnly("1234-abc-5678-def");
         });
@@ -380,11 +380,11 @@ public class AuditServiceIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
                                                                                                                                              TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name()));
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
             CloudTaskCancelledEvent cloudBPMNTaskCancelled = (CloudTaskCancelledEvent) retrievedEvents.iterator().next();
             assertThat(cloudBPMNTaskCancelled.getEventType()).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED);
@@ -456,10 +456,10 @@ public class AuditServiceIT {
 
         await().untilAsserted(() -> {
             //then
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFindAll();
-            assertThat(eventsPagedResources.getBody()).isNotEmpty();
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
+            assertThat(eventsPagedModel.getBody()).isNotEmpty();
 
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
             CloudRuntimeEvent event = retrievedEvents.iterator().next();
             //when
@@ -482,10 +482,10 @@ public class AuditServiceIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
              //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(2);
 
             CloudRuntimeEvent e= retrievedEvents.iterator().next();
@@ -509,10 +509,10 @@ public class AuditServiceIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             List <CloudRuntimeEvent> retrievedEventsList = new ArrayList<>(retrievedEvents);
 
             assertThat(retrievedEvents).hasSameSizeAs(testEvents);
@@ -535,10 +535,10 @@ public class AuditServiceIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             List <CloudRuntimeEvent> retrievedEventsList = new ArrayList<>(retrievedEvents);
 
             assertThat(retrievedEvents).hasSameSizeAs(testEvents);
@@ -587,10 +587,10 @@ public class AuditServiceIT {
             filters.put("entityId",
                         "signalId");
 
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
 
             assertThat(retrievedEvents)
@@ -657,10 +657,10 @@ public class AuditServiceIT {
             filters.put("eventType",
                         BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name());
 
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
 
             assertThat(retrievedEvents)
@@ -721,10 +721,10 @@ public class AuditServiceIT {
             filters.put("eventType",
                         BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name());
 
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
 
             assertThat(retrievedEvents)
@@ -782,10 +782,10 @@ public class AuditServiceIT {
             filters.put("eventType",
                         MessageSubscriptionCancelledEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name());
 
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
 
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
 
             assertThat(retrievedEvents)

@@ -16,25 +16,18 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import org.activiti.api.model.shared.model.ActivitiErrorMessage;
-import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
+import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
-
 @RestController
 @ExposesResourceFor(ProcessModelEntity.class)
-@RequestMapping(
-        value = "/v1/process-definitions/{processDefinitionId}/model")
+@RequestMapping("/v1/process-definitions/{processDefinitionId}/model")
 public class ProcessModelController {
 
     private ProcessModelRepository processModelRepository;

@@ -18,19 +18,19 @@ package org.activiti.cloud.services.query.rest;
 
 import java.util.Optional;
 
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
-import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionResourceAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
-import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,32 +51,32 @@ public class ProcessDefinitionController {
 
     private ProcessDefinitionRepository repository;
 
-    private AlfrescoPagedResourcesAssembler<ProcessDefinitionEntity> pagedResourcesAssembler;
+    private AlfrescoPagedModelAssembler<ProcessDefinitionEntity> pagedCollectionModelAssembler;
 
-    private ProcessDefinitionResourceAssembler processDefinitionResourceAssembler;
+    private ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler;
 
     private ProcessDefinitionRestrictionService processDefinitionRestrictionService;
 
     public ProcessDefinitionController(ProcessDefinitionRepository repository,
-                                       AlfrescoPagedResourcesAssembler<ProcessDefinitionEntity> pagedResourcesAssembler,
-                                       ProcessDefinitionResourceAssembler processDefinitionResourceAssembler,
+                                       AlfrescoPagedModelAssembler<ProcessDefinitionEntity> pagedCollectionModelAssembler,
+                                       ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler,
                                        ProcessDefinitionRestrictionService processDefinitionRestrictionService) {
         this.repository = repository;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
-        this.processDefinitionResourceAssembler = processDefinitionResourceAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
+        this.processDefinitionRepresentationModelAssembler = processDefinitionRepresentationModelAssembler;
         this.processDefinitionRestrictionService = processDefinitionRestrictionService;
     }
 
     @GetMapping
-    public PagedResources<Resource<CloudProcessDefinition>> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
+    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
                                                                     Pageable pageable) {
-        
+
         Predicate extendedPredicate = processDefinitionRestrictionService.restrictProcessDefinitionQuery(Optional.ofNullable(predicate)
                                                                                                                  .orElseGet(BooleanBuilder::new),
                                                                                                          SecurityPolicyAccess.READ);
-        return pagedResourcesAssembler.toResource(pageable,
+        return pagedCollectionModelAssembler.toModel(pageable,
                                                   repository.findAll(extendedPredicate,
                                                                      pageable),
-                                                  processDefinitionResourceAssembler);
+                                                  processDefinitionRepresentationModelAssembler);
     }
 }

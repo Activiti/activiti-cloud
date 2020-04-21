@@ -57,7 +57,7 @@ import java.util.Collections;
         AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 public class ProcessDefinitionAdminControllerIT {
 
     @Autowired

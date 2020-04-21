@@ -49,9 +49,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -87,7 +87,7 @@ public class TasksIT {
     public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
@@ -106,7 +106,7 @@ public class TasksIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = taskRestTemplate.getTasks();
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = taskRestTemplate.getTasks();
 
         //then
         assertThat(responseEntity).isNotNull();
@@ -121,7 +121,7 @@ public class TasksIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = taskRestTemplate.getTasks();
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = taskRestTemplate.getTasks();
 
         //then
         assertThat(responseEntity).isNotNull();
@@ -133,7 +133,7 @@ public class TasksIT {
     public void shouldUpdateNameDescription() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = processInstanceRestTemplate.getTasks(processInstanceEntity);
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = processInstanceRestTemplate.getTasks(processInstanceEntity);
         assertThat(responseEntity).isNotNull();
         Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         CloudTask task = tasks.iterator().next();
@@ -173,7 +173,7 @@ public class TasksIT {
     public void adminShouldUpdateNameDescription() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = processInstanceRestTemplate.getTasks(processInstanceEntity);
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = processInstanceRestTemplate.getTasks(processInstanceEntity);
         assertThat(responseEntity).isNotNull();
         Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         CloudTask task = tasks.iterator().next();
@@ -225,7 +225,7 @@ public class TasksIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
         //when
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = taskRestTemplate.getTasks();
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = taskRestTemplate.getTasks();
 
         //then
         assertThat(responseEntity).isNotNull();
@@ -241,7 +241,7 @@ public class TasksIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = taskRestTemplate.adminGetTasks();
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = taskRestTemplate.adminGetTasks();
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -257,7 +257,7 @@ public class TasksIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
         //when
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = taskRestTemplate.adminGetTasks();
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = taskRestTemplate.adminGetTasks();
 
         //then
         assertThat(responseEntity).isNotNull();
@@ -272,7 +272,7 @@ public class TasksIT {
         ResponseEntity<CloudProcessInstance> startProcessResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<CloudTask>> tasksEntity = processInstanceRestTemplate.getTasks(startProcessResponse);
+        ResponseEntity<PagedModel<CloudTask>> tasksEntity = processInstanceRestTemplate.getTasks(startProcessResponse);
 
         //then
         assertThat(tasksEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -289,7 +289,7 @@ public class TasksIT {
         CloudTask subTask = taskRestTemplate.createTask(createSubTask);
 
         //when
-        PagedResources<CloudTask> subTasks = taskRestTemplate.getSubTasks(parentTask);
+        PagedModel<CloudTask> subTasks = taskRestTemplate.getSubTasks(parentTask);
 
         //then
         assertThat(subTasks.getContent()).extracting(CloudTask::getId).containsExactly(subTask.getId());
@@ -467,13 +467,13 @@ public class TasksIT {
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //then check that we have one candidate
-        ResponseEntity<Resources<Resource<CandidateUser>>> userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+        ResponseEntity<CollectionModel<EntityModel<CandidateUser>>> userCandidates = taskRestTemplate.getUserCandidates(task.getId());
         assertThat(userCandidates).isNotNull();
         assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(userCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
         taskRestTemplate.claim(task);
@@ -497,7 +497,7 @@ public class TasksIT {
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(2);
         assertThat(userCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser",
                           "testuser");
@@ -523,13 +523,13 @@ public class TasksIT {
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //then check that we have one candidate
-        ResponseEntity<Resources<Resource<CandidateUser>>> userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+        ResponseEntity<CollectionModel<EntityModel<CandidateUser>>> userCandidates = taskRestTemplate.getUserCandidates(task.getId());
         assertThat(userCandidates).isNotNull();
         assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(userCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
 
@@ -555,7 +555,7 @@ public class TasksIT {
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(2);
         assertThat(userCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser",
                           "testuser");
@@ -579,7 +579,7 @@ public class TasksIT {
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(userCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
 
@@ -592,13 +592,13 @@ public class TasksIT {
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //then check that we have no group candidate
-        ResponseEntity<Resources<Resource<CandidateGroup>>> groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
+        ResponseEntity<CollectionModel<EntityModel<CandidateGroup>>> groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
         assertThat(groupCandidates).isNotNull();
         assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(groupCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateGroup::getGroup)
         ).containsExactly("hr");
 
@@ -636,7 +636,7 @@ public class TasksIT {
         assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(groupCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateGroup::getGroup)
         ).containsExactly("hr");
 
@@ -674,7 +674,7 @@ public class TasksIT {
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
         // when
-        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(task.getId());
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(task.getId());
 
         // then
         assertThat(variablesResponse).isNotNull();

@@ -17,17 +17,17 @@
 package org.activiti.cloud.services.modeling.rest.config;
 
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
-import org.activiti.cloud.services.modeling.rest.assembler.ModelResourceAssembler;
-import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeRelProvider;
-import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeResourceAssembler;
+import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationModelAssembler;
+import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeLinkRelationProvider;
+import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.PagedModelTypeAssembler;
-import org.activiti.cloud.services.modeling.rest.assembler.ProjectResourceAssembler;
-import org.activiti.cloud.services.modeling.rest.assembler.ValidationErrorResourceAssembler;
+import org.activiti.cloud.services.modeling.rest.assembler.ProjectRepresentationModelAssembler;
+import org.activiti.cloud.services.modeling.rest.assembler.ValidationErrorRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
-import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -61,18 +61,18 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
     }
 
     @Bean
-    public ModelResourceAssembler ModelResourceAssembler() {
-        return new ModelResourceAssembler();
+    public ModelRepresentationModelAssembler ModelRepresentationModelAssembler() {
+        return new ModelRepresentationModelAssembler();
     }
 
     @Bean
-    public ModelTypeRelProvider modelTypeRelProvider() {
-        return new ModelTypeRelProvider();
+    public ModelTypeLinkRelationProvider modelTypeRelProvider() {
+        return new ModelTypeLinkRelationProvider();
     }
 
     @Bean
-    public ModelTypeResourceAssembler modelTypeResourceAssembler() {
-        return new ModelTypeResourceAssembler();
+    public ModelTypeRepresentationModelAssembler modelTypeRepresentationModelAssembler() {
+        return new ModelTypeRepresentationModelAssembler();
     }
 
     @Bean
@@ -85,12 +85,12 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
     }
 
     @Bean
-    public ProjectResourceAssembler projectResourceAssembler() {
-        return new ProjectResourceAssembler();
+    public ProjectRepresentationModelAssembler projectRepresentationModelAssembler() {
+        return new ProjectRepresentationModelAssembler();
     }
 
     @Bean
-    public ValidationErrorResourceAssembler ValidationErrorResourceAssembler() {
-        return new ValidationErrorResourceAssembler();
+    public ValidationErrorRepresentationModelAssembler ValidationErrorRepresentationModelAssembler() {
+        return new ValidationErrorRepresentationModelAssembler();
     }
 }

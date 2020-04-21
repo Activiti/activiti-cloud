@@ -35,14 +35,14 @@ import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.util.StreamUtils;
 
 import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.HttpUtils.HEADER_ATTACHEMNT_FILENAME;
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.Link.REL_SELF;
+import static org.springframework.hateoas.IanaLinkRelations.SELF;
 
 /**
  * Modeling context steps
@@ -57,8 +57,8 @@ public abstract class ModelingContextSteps<M> {
     @Autowired
     private ModelingTestsConfigurationProperties config;
 
-    protected Resource<M> create(M m) {
-        Resource<M> model = modelingContextHandler
+    protected EntityModel<M> create(M m) {
+        EntityModel<M> model = modelingContextHandler
                 .getCurrentModelingContext()
                 .flatMap(this::getRelUri)
                 .map(this::modelingUri)
@@ -84,7 +84,7 @@ public abstract class ModelingContextSteps<M> {
                 .getContent()
                 .stream()
                 .filter(resource -> identifier.test(resource.getContent()))
-                .map(resource -> resource.getLink(REL_SELF))
+                .map(resource -> resource.getLink(SELF).get())
                 .map(Link::getHref)
                 .map(this::modelingUri)
                 .collect(Collectors.toList())
@@ -97,9 +97,10 @@ public abstract class ModelingContextSteps<M> {
                                   service().findAll().getContent());
     }
 
-    protected Optional<String> getRelUri(Resource<?> resource) {
+    protected Optional<String> getRelUri(EntityModel<?> entityModel) {
         return getRel()
-                .map(resource::getLink)
+                .map(entityModel::getLink)
+                .map(Optional::get)
                 .map(Link::getHref)
                 .map(this::cutQueryParams);
     }
@@ -116,29 +117,29 @@ public abstract class ModelingContextSteps<M> {
     protected void updateCurrentModelingObject() {
         modelingContextHandler
                 .getCurrentModelingContext()
-                .map(resource -> resource.getLink(REL_SELF))
+                .map(resource -> resource.getLink(SELF).get())
                 .map(Link::getHref)
                 .map(this::modelingUri)
                 .map(this::findByUri)
                 .ifPresent(modelingContextHandler::setCurrentModelingObject);
     }
 
-    protected Resource<M> checkAndGetCurrentContext(Class<M> expectedCurrentContextClass) {
-        Optional<Resource<?>> optionalModelingContext = modelingContextHandler.getCurrentModelingContext();
+    protected EntityModel<M> checkAndGetCurrentContext(Class<M> expectedCurrentContextClass) {
+        Optional<EntityModel<?>> optionalModelingContext = modelingContextHandler.getCurrentModelingContext();
         assertThat(optionalModelingContext
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .filter(expectedCurrentContextClass::isInstance)
                            .map(expectedCurrentContextClass::cast)).isNotEmpty();
-        return (Resource<M>) optionalModelingContext.get();
+        return (EntityModel<M>) optionalModelingContext.get();
     }
 
     @Step
     public void openModelingObject(ModelingIdentifier<M> identifier) {
-        Optional<Resource<M>> currentModelingObject = getAvailableModelingObjects()
+        Optional<EntityModel<M>> currentModelingObject = getAvailableModelingObjects()
                 .stream()
                 .filter(modelingObject -> identifier.test(modelingObject.getContent()))
                 .findFirst()
-                .map(resource -> resource.getLink("self"))
+                .map(resource -> resource.getLink(SELF).get())
                 .map(Link::getHref)
                 .map(this::modelingUri)
                 .map(this::findByUri);
@@ -147,12 +148,12 @@ public abstract class ModelingContextSteps<M> {
         modelingContextHandler.setCurrentModelingObject(currentModelingObject.get());
     }
 
-    protected Collection<Resource<M>> getAvailableModelingObjects() {
+    protected Collection<EntityModel<M>> getAvailableModelingObjects() {
         return modelingContextHandler
                 .getCurrentModelingContext()
                 .flatMap(this::getRelUri)
                 .map(this::findAllByUri)
-                .map(PagedResources::getContent)
+                .map(PagedModel::getContent)
                 .orElseGet(() -> findAll().getContent());
     }
 
@@ -162,37 +163,37 @@ public abstract class ModelingContextSteps<M> {
                 .getCurrentModelingContext()
                 .flatMap(this::getRelUri)
                 .map(this::findAllByUri)
-                .map(PagedResources::getContent)
+                .map(PagedModel::getContent)
                 .map(resources -> existsInCollection(identifier,
                                                      resources))
                 .orElse(false);
     }
 
     protected boolean existsInCollection(ModelingIdentifier<M> identifier,
-                                         Collection<Resource<M>> modelingObjects) {
+                                         Collection<EntityModel<M>> modelingObjects) {
         return modelingObjects
                 .stream()
-                .map(Resource::getContent)
+                .map(EntityModel::getContent)
                 .filter(Objects::nonNull)
                 .filter(identifier)
                 .findFirst()
                 .isPresent();
     }
 
-    protected Resource<M> dirty(Resource<M> resource) {
-        dirtyContextHandler.dirty(modelingUri(resource.getLink("self").getHref()));
+    protected EntityModel<M> dirty(EntityModel<M> resource) {
+        dirtyContextHandler.dirty(modelingUri(resource.getLink(SELF).get().getHref()));
         return resource;
     }
 
-    protected Resource<M> findByUri(String uri) {
+    protected EntityModel<M> findByUri(String uri) {
         return service().findByUri(uri);
     }
 
-    protected PagedResources<Resource<M>> findAllByUri(String uri) {
+    protected PagedModel<EntityModel<M>> findAllByUri(String uri) {
         return service().findAllByUri(modelingUri(uri));
     }
 
-    protected PagedResources<Resource<M>> findAll() {
+    protected PagedModel<EntityModel<M>> findAll() {
         return service().findAll();
     }
 

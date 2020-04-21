@@ -46,7 +46,7 @@ import com.introproventures.graphql.jpa.query.web.GraphQLController;
 import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import graphql.ExecutionResultImpl;
 
-@WebMvcTest(controllers = GraphQLController.class)
+@WebMvcTest(GraphQLController.class)
 public class ActivitiGraphQLControllerTest {
 
     public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql";

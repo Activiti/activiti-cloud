@@ -4,13 +4,13 @@ import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
+import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,28 +31,28 @@ public class TaskDeleteController {
 
     private final TaskRepository taskRepository;
 
-    private TaskResourceAssembler taskResourceAssembler;
+    private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
     @Autowired
     public TaskDeleteController(TaskRepository taskRepository,
-                                TaskResourceAssembler taskResourceAssembler) {
+                                TaskRepresentationModelAssembler taskRepresentationModelAssembler) {
         this.taskRepository = taskRepository;
-        this.taskResourceAssembler = taskResourceAssembler;
+        this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
-    public Resources<Resource<CloudTask>> deleteTasks (@QuerydslPredicate(root = TaskEntity.class) Predicate predicate) {
+    public CollectionModel<EntityModel<CloudTask>> deleteTasks (@QuerydslPredicate(root = TaskEntity.class) Predicate predicate) {
 
-        Collection <Resource<CloudTask>> result = new ArrayList<>();
+        Collection <EntityModel<CloudTask>> result = new ArrayList<>();
         Iterable <TaskEntity> iterable = taskRepository.findAll(predicate);
 
         for(TaskEntity entity : iterable){
-            result.add(taskResourceAssembler.toResource(entity));
+            result.add(taskRepresentationModelAssembler.toModel(entity));
         }
 
         taskRepository.deleteAll(iterable);
 
-        return new Resources<>(result);
+        return new CollectionModel<>(result);
     }
 
 }

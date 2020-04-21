@@ -11,12 +11,11 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@TestPropertySource("classpath:propstest.properties")
+@TestPropertySource("classpath:application-test.properties")
 public class MetadataServiceIT {
 
     @Autowired
     private MetadataService metadataService;
-
 
     @Test
     public void shouldGetMetaData() throws Exception {

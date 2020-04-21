@@ -16,11 +16,11 @@ import org.activiti.cloud.services.api.model.ProcessDefinitionServiceTask;
 import org.activiti.cloud.services.api.model.ProcessDefinitionUserTask;
 import org.activiti.cloud.services.api.model.ProcessDefinitionVariable;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionMetaController;
-import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaRepresentationModelAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,17 +28,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProcessDefinitionMetaControllerImpl implements ProcessDefinitionMetaController {
 
     private final RepositoryService repositoryService;
-    private final ProcessDefinitionMetaResourceAssembler resourceAssembler;
+    private final ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler;
 
     @Autowired
     public ProcessDefinitionMetaControllerImpl(RepositoryService repositoryService,
-                                               ProcessDefinitionMetaResourceAssembler resourceAssembler) {
+                                               ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler) {
         this.repositoryService = repositoryService;
-        this.resourceAssembler = resourceAssembler;
+        this.representationModelAssembler = representationModelAssembler;
     }
 
     @Override
-    public Resource<ProcessDefinitionMeta> getProcessDefinitionMetadata(@PathVariable String id) {
+    public EntityModel<ProcessDefinitionMeta> getProcessDefinitionMetadata(@PathVariable String id) {
         org.activiti.engine.repository.ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(id)
                 .singleResult();
@@ -74,7 +74,7 @@ public class ProcessDefinitionMetaControllerImpl implements ProcessDefinitionMet
             }
         }
 
-        return resourceAssembler.toResource(new ProcessDefinitionMeta(processDefinition.getId(),
+        return representationModelAssembler.toModel(new ProcessDefinitionMeta(processDefinition.getId(),
                                                                       processDefinition.getName(),
                                                                       processDefinition.getDescription(),
                                                                       processDefinition.getVersion(),

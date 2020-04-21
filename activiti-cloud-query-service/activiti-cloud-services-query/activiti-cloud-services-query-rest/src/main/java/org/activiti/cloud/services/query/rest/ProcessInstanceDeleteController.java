@@ -4,13 +4,13 @@ import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,28 +31,28 @@ public class ProcessInstanceDeleteController {
 
     private final ProcessInstanceRepository processInstanceRepository;
 
-    private ProcessInstanceResourceAssembler processInstanceResourceAssembler;
+    private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
     @Autowired
     public ProcessInstanceDeleteController(ProcessInstanceRepository processInstanceRepository,
-                                           ProcessInstanceResourceAssembler processInstanceResourceAssembler) {
+                                           ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler) {
         this.processInstanceRepository = processInstanceRepository;
-        this.processInstanceResourceAssembler = processInstanceResourceAssembler;
+        this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
-    public Resources<Resource<CloudProcessInstance>> deleteProcessInstances (@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate) {
+    public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances (@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate) {
 
-        Collection<Resource<CloudProcessInstance>> result = new ArrayList<>();
+        Collection<EntityModel<CloudProcessInstance>> result = new ArrayList<>();
         Iterable <ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
 
         for(ProcessInstanceEntity entity : iterable){
-            result.add(processInstanceResourceAssembler.toResource(entity));
+            result.add(processInstanceRepresentationModelAssembler.toModel(entity));
         }
 
         processInstanceRepository.deleteAll(iterable);
 
-        return new Resources<>(result);
+        return new CollectionModel<>(result);
     }
 
 

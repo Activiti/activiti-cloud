@@ -20,7 +20,7 @@ import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class BaseProcessDefinitionRestTemplate {
 
-    private static final ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> PAGED_PROCESS_DEFINITION_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
+    private static final ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> PAGED_PROCESS_DEFINITION_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
     };
 
     private TestRestTemplate testRestTemplate;
@@ -44,8 +44,8 @@ public abstract class BaseProcessDefinitionRestTemplate {
 
     protected abstract String getProcessDefinitionsURL();
 
-    public ResponseEntity<PagedResources<CloudProcessDefinition>> getProcDefinitions() {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(getProcessDefinitionsURL(),
+    public ResponseEntity<PagedModel<CloudProcessDefinition>> getProcDefinitions() {
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(getProcessDefinitionsURL(),
                                                                                                           HttpMethod.GET,
                                                                                                           keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                           PAGED_PROCESS_DEFINITION_RESPONSE_TYPE);
@@ -62,8 +62,8 @@ public abstract class BaseProcessDefinitionRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<PagedResources<CloudProcessDefinition>> getProcDefinitionsFilteredOnKey(String key) {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(getProcessDefinitionsURL() + "?key={key}",
+    public ResponseEntity<PagedModel<CloudProcessDefinition>> getProcDefinitionsFilteredOnKey(String key) {
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(getProcessDefinitionsURL() + "?key={key}",
                                                                                                           HttpMethod.GET,
                                                                                                           keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                           PAGED_PROCESS_DEFINITION_RESPONSE_TYPE,

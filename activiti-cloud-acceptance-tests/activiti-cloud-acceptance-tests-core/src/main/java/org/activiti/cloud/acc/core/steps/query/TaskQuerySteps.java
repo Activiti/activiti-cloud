@@ -12,8 +12,8 @@ import org.activiti.cloud.acc.core.services.query.TaskQueryService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 
 import java.util.Collection;
 import java.util.List;
@@ -58,7 +58,7 @@ public class TaskQuerySteps {
     }
 
     @Step
-    public PagedResources<CloudTask> getAllTasks(){
+    public PagedModel<CloudTask> getAllTasks(){
         return taskQueryService.getTasks();
     }
 
@@ -90,36 +90,36 @@ public class TaskQuerySteps {
     }
 
     @Step
-    public PagedResources<CloudTask> getTasksByProcessInstance(String processInstanceId){
+    public PagedModel<CloudTask> getTasksByProcessInstance(String processInstanceId){
         return taskQueryService.getTasksByProcessInstance(processInstanceId);
     }
-    
+
     @Step
-    public PagedResources<CloudTask> getRootTasksByProcessInstance(String processInstanceId){
+    public PagedModel<CloudTask> getRootTasksByProcessInstance(String processInstanceId){
         return taskQueryService.getRootTasksByProcessInstance(processInstanceId);
     }
-    
+
     @Step
-    public PagedResources<CloudTask> getStandaloneTasks(){
+    public PagedModel<CloudTask> getStandaloneTasks(){
         return taskQueryService.getStandaloneTasks();
     }
 
     @Step
-    public PagedResources<CloudTask> getNonStandaloneTasks(){
+    public PagedModel<CloudTask> getNonStandaloneTasks(){
         return taskQueryService.getNonStandaloneTasks();
     }
 
     @Step
-    public PagedResources<CloudTask> getTasksByNameAndDescription(String taskName, String taskDescription){
+    public PagedModel<CloudTask> getTasksByNameAndDescription(String taskName, String taskDescription){
         return taskQueryService.getTasksByNameAndDescription(taskName,
                                                                 taskDescription);
     }
 
     @Step
-    public Resources<CloudVariableInstance> getVariables(String taskId){
+    public CollectionModel<CloudVariableInstance> getVariables(String taskId){
         return taskQueryService.getVariables(taskId);
     }
-    
+
     @Step
     public List<String> getCandidateGroups(String taskId){
         return taskQueryService.getTaskCandidateGroups(taskId);
@@ -129,5 +129,5 @@ public class TaskQuerySteps {
     public List<String> getCandidateUsers(String taskId){
         return taskQueryService.getTaskCandidateUsers(taskId);
     }
-    
+
 }

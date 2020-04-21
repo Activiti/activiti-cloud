@@ -40,8 +40,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -84,7 +84,7 @@ public class TaskVariableMappingIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
             //then
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
@@ -99,7 +99,7 @@ public class TaskVariableMappingIT {
                                         "outputmap1Value"));
         });
 
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
         assertThat(tasks.getBody()).isNotNull();
         assertThat(tasks.getBody().getContent())
                 .extracting(CloudTask::getName)
@@ -108,7 +108,7 @@ public class TaskVariableMappingIT {
         String taskId = tasks.getBody().getContent().iterator().next().getId();
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = taskRestTemplate.getVariables(taskId);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = taskRestTemplate.getVariables(taskId);
             //then
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
@@ -127,7 +127,7 @@ public class TaskVariableMappingIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
             //then
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
@@ -158,7 +158,7 @@ public class TaskVariableMappingIT {
         //Check default process variables
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
             //then
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
@@ -179,13 +179,13 @@ public class TaskVariableMappingIT {
         });
 
         //Check mapped task variables
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
         assertThat(tasks.getBody()).isNotNull();
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = taskRestTemplate.getVariables(taskId);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = taskRestTemplate.getVariables(taskId);
             //then
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
@@ -218,7 +218,7 @@ public class TaskVariableMappingIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
             //then
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())

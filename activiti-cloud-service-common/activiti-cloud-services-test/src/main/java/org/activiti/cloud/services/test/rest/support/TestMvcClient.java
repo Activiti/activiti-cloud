@@ -24,9 +24,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.Optional;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.LinkDiscoverers;
+import org.springframework.hateoas.client.LinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.*;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -36,7 +37,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * Helper methods for rest api web integration testing from spring-data-rest-tests-core module
- * 
+ *
  */
 public class TestMvcClient {
 
@@ -48,7 +49,7 @@ public class TestMvcClient {
 
     /**
      * Creates a new {@link TestMvcClient} for the given {@link MockMvc} and {@link LinkDiscoverers}.
-     * 
+     *
      * @param mvc must not be {@literal null}.
      * @param discoverers must not be {@literal null}.
      */
@@ -63,8 +64,8 @@ public class TestMvcClient {
 
     /**
      * Set base path uri. Default value is "/"
-     * 
-     * @param uri basePath 
+     *
+     * @param uri basePath
      * @return TestMvcClient instance
      */
     public TestMvcClient setBasePath(String uri) {
@@ -195,7 +196,7 @@ public class TestMvcClient {
 
     /**
      * Follow URL supplied as a string with a specific Accept header.
-     * 
+     *
      * @param href
      * @param accept
      * @return
@@ -218,7 +219,7 @@ public class TestMvcClient {
 
     /**
      * Discover single URI associated with a rel, starting at the root node ("/")
-     * 
+     *
      * @param rel
      * @return
      * @throws Exception
@@ -232,7 +233,7 @@ public class TestMvcClient {
 
     /**
      * Traverses the given link relations from the root.
-     * 
+     *
      * @param rels
      * @return
      * @throws Exception
@@ -267,7 +268,7 @@ public class TestMvcClient {
                                               andReturn().getResponse();
 
         String s = response.getContentAsString();
-        return getDiscoverer(response).findLinksWithRel(rel, s);
+        return getDiscoverer(response).findLinksWithRel(rel, s).toList();
     }
 
     /**
@@ -315,13 +316,13 @@ public class TestMvcClient {
     public Link assertHasLinkWithRel(String rel, MockHttpServletResponse response) throws Exception {
 
         String content = response.getContentAsString();
-        Link link = getDiscoverer(response).findLinkWithRel(rel, content);
+        Optional<Link> link = getDiscoverer(response).findLinkWithRel(rel, content);
 
         assertThat(link)
             .describedAs("Expected to find link with rel " + rel + " but found none in " + content + "!")
-            .isNotNull();
+            .isPresent();
 
-        return link;
+        return link.get();
     }
 
     /**
@@ -351,17 +352,17 @@ public class TestMvcClient {
      * Using the servlet response's content type, find the corresponding link discoverer.
      *
      * @param response
-     * @return {@link org.springframework.hateoas.LinkDiscoverer}
+     * @return {@link org.springframework.hateoas.client.LinkDiscoverer}
      */
     public LinkDiscoverer getDiscoverer(MockHttpServletResponse response) {
 
         String contentType = response.getContentType();
-        LinkDiscoverer linkDiscovererFor = discoverers.getLinkDiscovererFor(contentType);
+        Optional<LinkDiscoverer> linkDiscovererFor = discoverers.getLinkDiscovererFor(contentType);
 
         assertThat(linkDiscovererFor)
             .describedAs("Did not find a LinkDiscoverer for returned media type " + contentType + "!")
-            .isNotNull();
+            .isPresent();
 
-        return linkDiscovererFor;
+        return linkDiscovererFor.get();
     }
 }

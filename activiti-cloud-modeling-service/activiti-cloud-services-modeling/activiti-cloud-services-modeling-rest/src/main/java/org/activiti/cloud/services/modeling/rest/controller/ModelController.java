@@ -28,21 +28,21 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import io.swagger.annotations.ApiParam;
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.rest.api.ModelRestApi;
-import org.activiti.cloud.services.modeling.rest.assembler.ModelResourceAssembler;
-import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeResourceAssembler;
+import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationModelAssembler;
+import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.PagedModelTypeAssembler;
 import org.activiti.cloud.services.modeling.service.ModelTypeService;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,11 +64,11 @@ public class ModelController implements ModelRestApi {
 
     private final ModelTypeService modelTypeService;
 
-    private final ModelResourceAssembler resourceAssembler;
+    private final ModelRepresentationModelAssembler representationModelAssembler;
 
-    private final AlfrescoPagedResourcesAssembler<Model> pagedResourcesAssembler;
+    private final AlfrescoPagedModelAssembler<Model> pagedCollectionModelAssembler;
 
-    private final ModelTypeResourceAssembler modelTypeAssembler;
+    private final ModelTypeRepresentationModelAssembler modelTypeAssembler;
 
     private final PagedModelTypeAssembler pagedModelTypeAssembler;
 
@@ -76,57 +76,57 @@ public class ModelController implements ModelRestApi {
 
     public ModelController(ModelService modelService,
                            ModelTypeService modelTypeService,
-                           ModelResourceAssembler resourceAssembler,
-                           AlfrescoPagedResourcesAssembler<Model> pagedResourcesAssembler,
-                           ModelTypeResourceAssembler modelTypeAssembler,
+                           ModelRepresentationModelAssembler representationModelAssembler,
+                           AlfrescoPagedModelAssembler<Model> pagedCollectionModelAssembler,
+                           ModelTypeRepresentationModelAssembler modelTypeAssembler,
                            PagedModelTypeAssembler pagedModelTypeAssembler,
                            ProjectController projectController) {
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
-        this.resourceAssembler = resourceAssembler;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.representationModelAssembler = representationModelAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.modelTypeAssembler = modelTypeAssembler;
         this.pagedModelTypeAssembler = pagedModelTypeAssembler;
         this.projectController = projectController;
     }
 
     @Override
-    public PagedResources<Resource<Model>> getModels(
+    public PagedModel<EntityModel<Model>> getModels(
             @PathVariable String projectId,
             @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             Pageable pageable) {
         Project project = projectController.findProjectById(projectId);
-        return pagedResourcesAssembler.toResource(
+        return pagedCollectionModelAssembler.toModel(
                 pageable,
                 modelService.getModels(project,
                                        findModelType(type),
                                        pageable),
-                resourceAssembler);
+                representationModelAssembler);
     }
 
     @Override
-    public Resource<Model> getModel(
+    public EntityModel<Model> getModel(
             @PathVariable String modelId) {
-        return resourceAssembler.toResource(findModelById(modelId));
+        return representationModelAssembler.toModel(findModelById(modelId));
     }
 
     @Override
-    public Resource<Model> createModel(
+    public EntityModel<Model> createModel(
             @PathVariable String projectId,
             @Valid @RequestBody Model model) {
         Project project = projectController.findProjectById(projectId);
-        return resourceAssembler.toResource(
+        return representationModelAssembler.toModel(
                 modelService.createModel(project,
                                          model));
     }
 
     @Override
-    public Resource<Model> updateModel(
+    public EntityModel<Model> updateModel(
             @PathVariable String modelId,
             @Valid @RequestBody Model model) {
         Model modelToUpdate = findModelById(modelId);
         model.setId(modelId);
-        return resourceAssembler.toResource(
+        return representationModelAssembler.toModel(
                 modelService.updateModel(modelToUpdate,
                                          model));
     }
@@ -169,12 +169,12 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
-    public Resource<Model> importModel(
+    public EntityModel<Model> importModel(
             @PathVariable String projectId,
             @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
         Project project = projectController.findProjectById(projectId);
-        return resourceAssembler.toResource(
+        return representationModelAssembler.toModel(
                 modelService.importSingleModel(project,
                                          findModelType(type),
                                          multipartToFileContent(file)));
@@ -194,8 +194,8 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
-    public PagedResources<Resource<ModelType>> getModelTypes(Pageable pageable) {
-        return pagedModelTypeAssembler.toResource(pageable,
+    public PagedModel<EntityModel<ModelType>> getModelTypes(Pageable pageable) {
+        return pagedModelTypeAssembler.toModel(pageable,
                                                   modelTypeService.getModelTypeNames(pageable),
                                                   modelTypeAssembler);
     }

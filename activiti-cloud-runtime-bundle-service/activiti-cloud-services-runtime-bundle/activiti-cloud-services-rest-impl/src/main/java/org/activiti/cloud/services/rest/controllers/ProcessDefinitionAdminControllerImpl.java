@@ -18,46 +18,46 @@ package org.activiti.cloud.services.rest.controllers;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionAdminController;
-import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAdminController {
 
 
-    private final ProcessDefinitionResourceAssembler resourceAssembler;
+    private final ProcessDefinitionRepresentationModelAssembler representationModelAssembler;
 
     private final ProcessAdminRuntime processAdminRuntime;
 
-    private final AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler;
+    private final AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler;
 
     private final SpringPageConverter pageConverter;
 
     @Autowired
     public ProcessDefinitionAdminControllerImpl(ProcessAdminRuntime processAdminRuntime,
-                                                ProcessDefinitionResourceAssembler resourceAssembler,
-                                                AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler,
+                                                ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
+                                                AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
                                                 SpringPageConverter pageConverter) {
         this.processAdminRuntime = processAdminRuntime;
-        this.resourceAssembler = resourceAssembler;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.representationModelAssembler = representationModelAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
     }
 
     @Override
-    public PagedResources<Resource<CloudProcessDefinition>> getAllProcessDefinitions(Pageable pageable) {
+    public PagedModel<EntityModel<CloudProcessDefinition>> getAllProcessDefinitions(Pageable pageable) {
         Page<ProcessDefinition> page = processAdminRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
-        return pagedResourcesAssembler.toResource(pageable,
+        return pagedCollectionModelAssembler.toModel(pageable,
                 pageConverter.toSpringPage(pageable, page),
-                resourceAssembler);
+                representationModelAssembler);
     }
 
 }

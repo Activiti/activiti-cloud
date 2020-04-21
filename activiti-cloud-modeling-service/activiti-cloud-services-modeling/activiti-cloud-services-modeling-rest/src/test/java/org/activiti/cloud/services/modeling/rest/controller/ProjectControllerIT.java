@@ -194,7 +194,7 @@ public class ProjectControllerIT {
     public void should_returnStatusCreatedAndProjectDetails_when_creatingProject() throws Exception {
         mockMvc.perform(post("{version}/projects",
                              API_VERSION)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(projectWithDescription("new-project",
                                                                                           "Project description"))))
                 .andExpect(status().isCreated())
@@ -210,7 +210,7 @@ public class ProjectControllerIT {
 
         mockMvc.perform(post("{version}/projects",
                              API_VERSION)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("existing-project"))))
                 .andExpect(status().isConflict());
     }
@@ -222,7 +222,7 @@ public class ProjectControllerIT {
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("updated-project-name"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
@@ -242,7 +242,7 @@ public class ProjectControllerIT {
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("existing-project"))))
                 .andExpect(status().isConflict());
     }
@@ -254,7 +254,7 @@ public class ProjectControllerIT {
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(projectWithDescription(null,
                                                                                           "New Description"))))
                 .andExpect(status().isOk());
@@ -267,7 +267,7 @@ public class ProjectControllerIT {
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project(""))))
                 .andExpect(status().isBadRequest());
     }
@@ -279,7 +279,7 @@ public class ProjectControllerIT {
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("_1-invalid-name"))))
                 .andExpect(status().isBadRequest());
     }
@@ -291,7 +291,7 @@ public class ProjectControllerIT {
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("too-long-name-1234567890-1234567890"))))
                 .andExpect(status().isBadRequest());
     }

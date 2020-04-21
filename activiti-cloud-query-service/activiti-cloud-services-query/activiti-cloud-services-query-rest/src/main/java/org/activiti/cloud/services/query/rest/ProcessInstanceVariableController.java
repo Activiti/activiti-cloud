@@ -18,19 +18,19 @@ package org.activiti.cloud.services.query.rest;
 
 import java.util.Optional;
 
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
-import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableResourceAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,46 +52,46 @@ public class ProcessInstanceVariableController {
 
     private final VariableRepository variableRepository;
 
-    private ProcessInstanceVariableResourceAssembler variableResourceAssembler;
+    private ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler;
 
-    private AlfrescoPagedResourcesAssembler<ProcessVariableEntity> pagedResourcesAssembler;
-    
+    private AlfrescoPagedModelAssembler<ProcessVariableEntity> pagedCollectionModelAssembler;
+
     @Autowired
-    public ProcessInstanceVariableController(ProcessInstanceVariableResourceAssembler variableResourceAssembler,
+    public ProcessInstanceVariableController(ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
                                              VariableRepository variableRepository,
-                                             AlfrescoPagedResourcesAssembler<ProcessVariableEntity> pagedResourcesAssembler) {
+                                             AlfrescoPagedModelAssembler<ProcessVariableEntity> pagedCollectionModelAssembler) {
         this.variableRepository = variableRepository;
-        this.variableResourceAssembler = variableResourceAssembler;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
     @RequestMapping(value = "/variables", method = RequestMethod.GET)
-    public PagedResources<Resource<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId,
+    public PagedModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId,
                                                                         @QuerydslPredicate(root = ProcessVariableEntity.class) Predicate predicate,
                                                                         Pageable pageable) {
 
         predicate = Optional.ofNullable(predicate)
                             .orElseGet(BooleanBuilder::new);
-        
+
         QProcessVariableEntity variable = QProcessVariableEntity.processVariableEntity;
-        
-        //We will show only not deleted variables 
-        BooleanExpression expression = variable.processInstanceId.eq(processInstanceId);  
+
+        //We will show only not deleted variables
+        BooleanExpression expression = variable.processInstanceId.eq(processInstanceId);
 
         if (predicate != null) {
             expression = expression.and(predicate);
         }
-        
-        Predicate extendedPredicate = expression;  
-        
+
+        Predicate extendedPredicate = expression;
+
 
         Page<ProcessVariableEntity> variables = variableRepository.findAll(extendedPredicate,
                                                                     pageable);
 
-        return pagedResourcesAssembler.toResource(pageable,
+        return pagedCollectionModelAssembler.toModel(pageable,
                                                   variables,
-                                                  variableResourceAssembler);
+                                                  variableRepresentationModelAssembler);
     }
-    
-    
+
+
 }

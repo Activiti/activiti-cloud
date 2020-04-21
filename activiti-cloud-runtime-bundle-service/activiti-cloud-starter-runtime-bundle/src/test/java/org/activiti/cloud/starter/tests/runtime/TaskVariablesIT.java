@@ -35,8 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,7 +79,7 @@ public class TaskVariablesIT {
     public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
@@ -94,7 +94,7 @@ public class TaskVariablesIT {
                       "test1");
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
                                                                                                       variables);
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
 
@@ -103,7 +103,7 @@ public class TaskVariablesIT {
         taskRestTemplate.createVariable(taskId, "var2", "test2");
 
         //when
-        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(taskId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(taskId);
 
         //then
         assertThat(variablesResponse).isNotNull();
@@ -158,7 +158,7 @@ public class TaskVariablesIT {
                       "test1");
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
                                                                                                       variables);
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
 
@@ -166,7 +166,7 @@ public class TaskVariablesIT {
         taskRestTemplate.adminCreateVariable(taskId, "var2", "test2");
 
         //when
-        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(taskId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(taskId);
 
         //then
         assertThat(variablesResponse).isNotNull();
@@ -207,7 +207,7 @@ public class TaskVariablesIT {
 
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
                                                                                                       null);
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
 
@@ -217,7 +217,7 @@ public class TaskVariablesIT {
         taskRestTemplate.createVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
 
         //when
-        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(taskId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(taskId);
 
         //then
         assertThat(variablesResponse).isNotNull();
@@ -242,7 +242,7 @@ public class TaskVariablesIT {
 
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
                                                                                                       null);
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
 
@@ -252,7 +252,7 @@ public class TaskVariablesIT {
         taskRestTemplate.adminCreateVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
 
         //when
-        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(taskId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(taskId);
 
         //then
         assertThat(variablesResponse).isNotNull();
@@ -287,8 +287,8 @@ public class TaskVariablesIT {
         return false;
     }
 
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
+    private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
                                      HttpMethod.GET,

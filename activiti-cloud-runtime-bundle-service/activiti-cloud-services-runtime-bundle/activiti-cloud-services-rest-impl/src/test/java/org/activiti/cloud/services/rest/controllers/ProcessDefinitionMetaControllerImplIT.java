@@ -16,8 +16,13 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaRepresentationModelAssembler;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
@@ -33,15 +38,10 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ProcessDefinitionMetaControllerImpl.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
-@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
+@AutoConfigureMockMvc
+@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessDefinitionMetaControllerImplIT {
 
     @Autowired
@@ -51,7 +51,7 @@ public class ProcessDefinitionMetaControllerImplIT {
     private RepositoryService repositoryService;
 
     @MockBean
-    private ProcessDefinitionMetaResourceAssembler resourceAssembler;
+    private ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler;
 
     @Test
     public void getProcessDefinitionMetadata() throws Exception {

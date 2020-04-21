@@ -18,7 +18,7 @@ import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 @EnableRuntimeFeignContext
 public class ProcessQuerySteps {
@@ -47,7 +47,7 @@ public class ProcessQuerySteps {
     }
 
     @Step
-    public PagedResources<CloudProcessInstance> getAllProcessInstances() {
+    public PagedModel<CloudProcessInstance> getAllProcessInstances() {
         return processQueryService.getProcessInstances();
     }
 
@@ -108,7 +108,7 @@ public class ProcessQuerySteps {
     }
 
     @Step
-    public PagedResources<ProcessDefinition> getProcessDefinitions() {
+    public PagedModel<ProcessDefinition> getProcessDefinitions() {
         return processQueryService.getProcessDefinitions();
     }
 
@@ -118,12 +118,12 @@ public class ProcessQuerySteps {
     }
 
     @Step
-    public PagedResources<CloudProcessInstance> getProcessInstancesByName(String processName) {
+    public PagedModel<CloudProcessInstance> getProcessInstancesByName(String processName) {
         return processQueryService.getProcessInstancesByName(processName);
     }
 
     @Step
-    public PagedResources<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(
+    public PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(
         String processDefinitionKey) {
         return processQueryService.getProcessInstancesByProcessDefinitionKey(processDefinitionKey);
     }

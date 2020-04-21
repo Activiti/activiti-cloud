@@ -9,10 +9,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.querydsl.core.types.Predicate;
 import java.util.Collections;
 import java.util.List;
-
-import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -36,7 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-@TestPropertySource(properties="activiti.rest.enable-deletion=true")
+@TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @WebMvcTest(TaskDeleteController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,
@@ -44,7 +43,7 @@ import org.springframework.test.web.servlet.MockMvc;
         AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 public class TaskEntityDeleteControllerIT {
 
     private static final String TASK_ADMIN_ALFRESCO_IDENTIFIER = "task-admin-alfresco";

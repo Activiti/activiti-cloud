@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,17 +49,17 @@ public class EventsRestTemplate {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    public ResponseEntity<PagedResources<CloudRuntimeEvent>> executeFindAll() {
-        ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(RELATIVE_EVENTS_ENDPOINT,
+    public ResponseEntity<PagedModel<CloudRuntimeEvent>> executeFindAll() {
+        ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(RELATIVE_EVENTS_ENDPOINT,
                                                                                                  HttpMethod.GET,
                                                                                                  keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                 new ParameterizedTypeReference<PagedResources<CloudRuntimeEvent>>() {
+                                                                                                 new ParameterizedTypeReference<PagedModel<CloudRuntimeEvent>>() {
                                                                                                  });
         assertThat(eventsResponse).hasStatusCode(HttpStatus.OK);
         return eventsResponse;
     }
 
-    public ResponseEntity<PagedResources<CloudRuntimeEvent>> executeFind(Map<String, Object> filters) {
+    public ResponseEntity<PagedModel<CloudRuntimeEvent>> executeFind(Map<String, Object> filters) {
 
         StringBuilder endPointBuilder = new StringBuilder(RELATIVE_EVENTS_ENDPOINT).append("?search=");
         for (String filter : filters.keySet()) {
@@ -70,10 +70,10 @@ public class EventsRestTemplate {
                     .append(",");
         }
 
-        ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(endPointBuilder.toString(),
+        ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(endPointBuilder.toString(),
                                                                                                  HttpMethod.GET,
                                                                                                  keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                 new ParameterizedTypeReference<PagedResources<CloudRuntimeEvent>>() {
+                                                                                                 new ParameterizedTypeReference<PagedModel<CloudRuntimeEvent>>() {
                                                                                                  },
                                                                                                  filters);
         assertThat(eventsResponse).hasStatusCode(HttpStatus.OK);

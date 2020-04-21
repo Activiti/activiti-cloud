@@ -51,7 +51,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ProcessInstanceTasksController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({
     QueryRestWebMvcAutoConfiguration.class,
     CommonModelAutoConfiguration.class,

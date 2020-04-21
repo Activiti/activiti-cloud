@@ -44,7 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +59,7 @@ public class QueryProcessInstancesEntityIT {
     private static final String PROC_URL = "/v1/process-instances";
     private static final String ADMIN_PROC_URL = "/admin/v1/process-instances";
 
-    private static final ParameterizedTypeReference<PagedResources<ProcessInstanceEntity>> PAGED_PROCESS_INSTANCE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessInstanceEntity>>() {
+    private static final ParameterizedTypeReference<PagedModel<ProcessInstanceEntity>> PAGED_PROCESS_INSTANCE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessInstanceEntity>>() {
     };
 
     @Autowired
@@ -100,7 +100,7 @@ public class QueryProcessInstancesEntityIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -123,7 +123,7 @@ public class QueryProcessInstancesEntityIT {
 
             //and filter by status
             //when
-            ResponseEntity<PagedResources<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(PROC_URL + "?status={status}",
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(PROC_URL + "?status={status}",
                                                                                                                      HttpMethod.GET,
                                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                                      PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
@@ -153,7 +153,7 @@ public class QueryProcessInstancesEntityIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -351,7 +351,7 @@ public class QueryProcessInstancesEntityIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstancesFiltered("for filter",null);
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstancesFiltered("for filter",null);
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -379,10 +379,10 @@ public class QueryProcessInstancesEntityIT {
         keycloakTokenProducer.setKeycloakTestUser("hradmin");
         await().untilAsserted(() -> {
 
-            ResponseEntity<PagedResources<CloudProcessInstance>> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "?page=0&size=10",
+            ResponseEntity<PagedModel<CloudProcessInstance>> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "?page=0&size=10",
                                                                                        HttpMethod.GET,
                                                                                        keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<PagedResources<CloudProcessInstance>>() {
+                                                                                       new ParameterizedTypeReference<PagedModel<CloudProcessInstance>>() {
                                                                                        });
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -402,7 +402,7 @@ public class QueryProcessInstancesEntityIT {
         });
     }
 
-    private ResponseEntity<PagedResources<ProcessInstanceEntity>> executeRequestGetProcInstances() {
+    private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstances() {
 
         return testRestTemplate.exchange(PROC_URL,
                                          HttpMethod.GET,
@@ -410,7 +410,7 @@ public class QueryProcessInstancesEntityIT {
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
 
-    private ResponseEntity<PagedResources<ProcessInstanceEntity>> executeRequestGetProcInstancesFiltered(String name,String description) {
+    private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstancesFiltered(String name,String description) {
         String url=PROC_URL;
         boolean add = false;
         if (name != null || description != null) {

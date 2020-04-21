@@ -24,8 +24,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.modeling.api.Project;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -94,7 +94,7 @@ public interface ProjectRestApi {
                     "Minimal information for each project is returned.",
             produces = APPLICATION_JSON_VALUE)
     @GetMapping(path = "/projects")
-    PagedResources<Resource<Project>> getProjects(Pageable pageable,
+    PagedModel<EntityModel<Project>> getProjects(Pageable pageable,
                                                   @ApiParam(PROJECT_NAME_PARAM_DESCR)
                                                   @RequestParam(
                                                           name = PROJECT_NAME_PARAM_NAME,
@@ -105,7 +105,7 @@ public interface ProjectRestApi {
             value = "Create new project")
     @PostMapping(path = "/projects")
     @ResponseStatus(CREATED)
-    Resource<Project> createProject(
+    EntityModel<Project> createProject(
             @ApiParam(CREATE_PROJECT_PARAM_DESCR)
             @RequestBody Project project);
 
@@ -113,7 +113,7 @@ public interface ProjectRestApi {
             tags = PROJECTS,
             value = "Get project")
     @GetMapping(path = "/projects/{projectId}")
-    Resource<Project> getProject(
+    EntityModel<Project> getProject(
             @ApiParam(value = GET_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId);
 
@@ -121,7 +121,7 @@ public interface ProjectRestApi {
             tags = PROJECTS,
             value = "Update project details")
     @PutMapping(path = "/projects/{projectId}")
-    Resource<Project> updateProject(
+    EntityModel<Project> updateProject(
             @ApiParam(value = UPDATE_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(UPDATE_PROJECT_PARAM_DESCR)
@@ -142,7 +142,7 @@ public interface ProjectRestApi {
             notes = "Allows a zip file to be uploaded containing an project definition and any number of included models.")
     @PostMapping(path = "/projects/import", consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(CREATED)
-    Resource<Project> importProject(
+    EntityModel<Project> importProject(
             @ApiParam(IMPORT_PROJECT_FILE_PARAM_DESCR)
             @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
             @ApiParam(PROJECT_NAME_OVERRIDE_DESCR)

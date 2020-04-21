@@ -9,6 +9,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -33,12 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-@TestPropertySource(properties="activiti.rest.enable-deletion=true")
+@TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @WebMvcTest(ProcessInstanceDeleteController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,
@@ -46,7 +45,7 @@ import java.util.UUID;
         AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 public class ProcessInstanceEntityDeleteControllerIT {
 
     @Autowired

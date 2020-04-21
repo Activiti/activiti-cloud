@@ -17,12 +17,12 @@
 package org.activiti.cloud.conf;
 
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.services.query.rest.QueryRelProvider;
-import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionResourceAssembler;
-import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
-import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableResourceAssembler;
-import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
-import org.activiti.cloud.services.query.rest.assembler.TaskVariableResourceAssembler;
+import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
+import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
 import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
@@ -44,45 +44,45 @@ public class QueryRestWebMvcAutoConfiguration  {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDefinitionResourceAssembler processDefinitionResourceAssembler() {
-        return new ProcessDefinitionResourceAssembler();
-    }
-    
-    @Bean
-    @ConditionalOnMissingBean
-    public ProcessInstanceResourceAssembler processInstanceResourceAssembler() {
-        return new ProcessInstanceResourceAssembler();
+    public ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler() {
+        return new ProcessDefinitionRepresentationModelAssembler();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessInstanceVariableResourceAssembler processInstanceVariableResourceAssembler() {
-        return new ProcessInstanceVariableResourceAssembler();
+    public ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler() {
+        return new ProcessInstanceRepresentationModelAssembler();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
-    public TaskResourceAssembler taskResourceAssembler() {
-        return new TaskResourceAssembler();
-    }    
-    
-    @Bean
-    @ConditionalOnMissingBean
-    public TaskVariableResourceAssembler taskVariableResourceAssembler() {
-        return new TaskVariableResourceAssembler();
-    }        
-    
-    @Bean
-    @ConditionalOnMissingBean
-    public QueryRelProvider processDefinitionRelProvider() {
-        return new QueryRelProvider();
+    public ProcessInstanceVariableRepresentationModelAssembler processInstanceVariableRepresentationModelAssembler() {
+        return new ProcessInstanceVariableRepresentationModelAssembler();
     }
-    
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TaskRepresentationModelAssembler taskRepresentationModelAssembler() {
+        return new TaskRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TaskVariableRepresentationModelAssembler taskVariableRepresentationModelAssembler() {
+        return new TaskVariableRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public QueryLinkRelationProvider processDefinitionRelProvider() {
+        return new QueryLinkRelationProvider();
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public TaskLookupRestrictionService taskLookupRestrictionService(SecurityManager securityManager) {
         return new TaskLookupRestrictionService(securityManager);
-    }    
+    }
 
     @Bean
     @ConditionalOnMissingBean

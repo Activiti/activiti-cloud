@@ -22,9 +22,9 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -33,12 +33,12 @@ import org.springframework.lang.Nullable;
 
 public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2HttpMessageConverter {
 
-    private final PagedResourcesConverter pagedResourcesConverter;
+    private final PagedModelConverter pagedCollectionModelConverter;
     private final ObjectMapper objectMapper;
 
-    public AlfrescoJackson2HttpMessageConverter(PagedResourcesConverter pagedResourcesConverter, ObjectMapper objectMapper) {
+    public AlfrescoJackson2HttpMessageConverter(PagedModelConverter pagedCollectionModelConverter, ObjectMapper objectMapper) {
         super(objectMapper);
-        this.pagedResourcesConverter = pagedResourcesConverter;
+        this.pagedCollectionModelConverter = pagedCollectionModelConverter;
         this.objectMapper = objectMapper;
         setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
     }
@@ -48,14 +48,14 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
                                  @Nullable Type type,
                                  HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         Object transformedObject = object;
-        if (object instanceof PagedResources) {
-            transformedObject = pagedResourcesConverter.pagedResourcesToListResponseContent((PagedResources<Resource<T>>)object);
+        if (object instanceof PagedModel) {
+            transformedObject = pagedCollectionModelConverter.pagedCollectionModelToListResponseContent((PagedModel<EntityModel<T>>)object);
         }
-        else if (object instanceof Resources){
-            transformedObject = pagedResourcesConverter.resourcesToListResponseContent((Resources<Resource<T>>) object);
+        else if (object instanceof CollectionModel){
+            transformedObject = pagedCollectionModelConverter.resourcesToListResponseContent((CollectionModel<EntityModel<T>>) object);
         }
-        else if (object instanceof Resource) {
-            transformedObject = new EntryResponseContent<>(((Resource<T>) object).getContent());
+        else if (object instanceof EntityModel) {
+            transformedObject = new EntryResponseContent<>(((EntityModel<T>) object).getContent());
         }
         defaultWriteInternal(transformedObject,
                              type,

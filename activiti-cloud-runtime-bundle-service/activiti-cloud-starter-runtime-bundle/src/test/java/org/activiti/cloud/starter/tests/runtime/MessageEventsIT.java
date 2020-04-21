@@ -59,7 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
@@ -653,7 +653,7 @@ public class MessageEventsIT {
 
         // then
         await().untilAsserted(() -> {
-            ResponseEntity<Resources<CloudVariableInstance>> variables = processInstanceRestTemplate.getVariables(catchMsgInstance);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variables = processInstanceRestTemplate.getVariables(catchMsgInstance);
 
             assertThat(variables.getBody().getContent()).extracting(VariableInstance::getName,
                                                                     VariableInstance::getValue)

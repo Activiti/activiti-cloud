@@ -17,9 +17,9 @@
 package org.activiti.cloud.alfresco.data.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
-public class ExtendedPageMetadata extends PagedResources.PageMetadata {
+public class ExtendedPageMetadata extends PagedModel.PageMetadata {
 
     @JsonIgnore
     private long skipCount;

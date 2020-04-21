@@ -43,7 +43,7 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
-import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.engine.RepositoryService;
@@ -64,7 +64,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({CommonModelAutoConfiguration.class,
         ProcessModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -101,7 +101,7 @@ public class ProcessInstanceVariableControllerImplIT {
     private ObjectMapper mapper;
 
     @SpyBean
-    private ResourcesAssembler resourcesAssembler;
+    private CollectionModelAssembler resourcesAssembler;
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;

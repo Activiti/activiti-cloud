@@ -61,7 +61,7 @@ import java.util.UUID;
         AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 public class TaskEntityVariableEntityControllerIT {
 
     @Autowired

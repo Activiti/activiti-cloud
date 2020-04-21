@@ -4,36 +4,36 @@ import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.activiti.cloud.services.rest.api.CandidateGroupController;
-import org.activiti.cloud.services.rest.assemblers.GroupCandidatesResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
+import org.activiti.cloud.services.rest.assemblers.GroupCandidatesRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ToCandidateGroupConverter;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class CandidateGroupControllerImpl implements CandidateGroupController {
 
     private final TaskRuntime taskRuntime;
 
-    private final ResourcesAssembler resourcesAssembler;
+    private final CollectionModelAssembler resourcesAssembler;
 
-    private final GroupCandidatesResourceAssembler groupCandidatesResourceAssembler;
+    private final GroupCandidatesRepresentationModelAssembler groupCandidatesRepresentationModelAssembler;
 
     private final ToCandidateGroupConverter toCandidateGroupConverter;
 
     public CandidateGroupControllerImpl(TaskRuntime taskRuntime,
-                                        ResourcesAssembler resourcesAssembler,
-                                        GroupCandidatesResourceAssembler groupCandidatesResourceAssembler,
+                                        CollectionModelAssembler resourcesAssembler,
+                                        GroupCandidatesRepresentationModelAssembler groupCandidatesRepresentationModelAssembler,
                                         ToCandidateGroupConverter toCandidateGroupConverter) {
         this.taskRuntime = taskRuntime;
         this.resourcesAssembler = resourcesAssembler;
-        this.groupCandidatesResourceAssembler = groupCandidatesResourceAssembler;
+        this.groupCandidatesRepresentationModelAssembler = groupCandidatesRepresentationModelAssembler;
         this.toCandidateGroupConverter = toCandidateGroupConverter;
     }
 
@@ -56,12 +56,12 @@ public class CandidateGroupControllerImpl implements CandidateGroupController {
     }
 
     @Override
-    public Resources<Resource<CandidateGroup>> getGroupCandidates(@PathVariable String taskId) {
-        groupCandidatesResourceAssembler.setTaskId(taskId);
-        return resourcesAssembler.toResources(toCandidateGroupConverter.from(taskRuntime.groupCandidates(taskId)),
-                                              groupCandidatesResourceAssembler,
+    public CollectionModel<EntityModel<CandidateGroup>> getGroupCandidates(@PathVariable String taskId) {
+        groupCandidatesRepresentationModelAssembler.setTaskId(taskId);
+        return resourcesAssembler.toCollectionModel(toCandidateGroupConverter.from(taskRuntime.groupCandidates(taskId)),
+                                              groupCandidatesRepresentationModelAssembler,
                                               linkTo(methodOn(this.getClass())
-                                                             .getGroupCandidates(groupCandidatesResourceAssembler.getTaskId()))
+                                                             .getGroupCandidates(groupCandidatesRepresentationModelAssembler.getTaskId()))
                                                       .withSelfRel());
     }
 

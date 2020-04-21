@@ -8,7 +8,7 @@ import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.ProcessVariablesRuntimeService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 
 @EnableRuntimeFeignContext
@@ -21,16 +21,16 @@ public class ProcessVariablesRuntimeBundleSteps {
     public void checkServicesHealth() {
         assertThat(processVariablesRuntimeService.isServiceUp()).isTrue();
     }
-    
+
     @Step
-    public Resources<CloudVariableInstance> getVariables(String id) {
+    public CollectionModel<CloudVariableInstance> getVariables(String id) {
         return processVariablesRuntimeService.getVariables(id);
     }
-    
+
     @Step
     public ResponseEntity<Void> setVariables(String id,
                                       SetProcessVariablesPayload setProcessVariablesPayload) {
         return processVariablesRuntimeService.setVariables(id, setProcessVariablesPayload);
     }
-    
+
 }

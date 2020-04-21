@@ -52,8 +52,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -108,7 +108,7 @@ public class CommandEndpointIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
         // Get Available Process Definitions
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
@@ -138,7 +138,7 @@ public class CommandEndpointIT {
         // Get Tasks
 
         //when
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = getTasks(processInstanceId);
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = getTasks(processInstanceId);
 
         //then
         assertThat(responseEntity).isNotNull();
@@ -167,10 +167,10 @@ public class CommandEndpointIT {
         Thread.sleep(1000);
         await().untilAsserted(() -> {
             // Checking that the process is finished
-            ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "?page={page}&size={size}",
+            ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "?page={page}&size={size}",
                                                                                                          HttpMethod.GET,
                                                                                                          null,
-                                                                                                         new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
+                                                                                                         new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {
                                                                                                          },
                                                                                                          "0",
                                                                                                          "2");
@@ -218,7 +218,7 @@ public class CommandEndpointIT {
 
         await("Variable to be set").untilTrue(streamHandler.getSetProcessVariablesAck());
 
-        ResponseEntity<Resources<CloudVariableInstance>> retrievedVars = processInstanceRestTemplate.getVariables(proInstanceId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> retrievedVars = processInstanceRestTemplate.getVariables(proInstanceId);
         assertThat(retrievedVars.getBody().getContent())
                 .extracting(VariableInstance::getName,
                             VariableInstance::getValue)
@@ -319,7 +319,7 @@ public class CommandEndpointIT {
         return processInstance;
     }
 
-    private ResponseEntity<PagedResources<CloudTask>> getTasks(String processInstanceId) {
+    private ResponseEntity<PagedModel<CloudTask>> getTasks(String processInstanceId) {
         return processInstanceRestTemplate.getTasks(processInstanceId);
     }
 
@@ -333,8 +333,8 @@ public class CommandEndpointIT {
         return responseEntity;
     }
 
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
+    private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
@@ -356,7 +356,7 @@ public class CommandEndpointIT {
         await("signal to be sent")
                 .untilTrue(streamHandler.getSendSignalAck());
 
-        ResponseEntity<PagedResources<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
+        ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
     }
 }

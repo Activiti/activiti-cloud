@@ -50,7 +50,7 @@ import java.util.UUID;
 
 @WebMvcTest(ProcessModelController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({
     QueryRestWebMvcAutoConfiguration.class,
     CommonModelAutoConfiguration.class,

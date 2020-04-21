@@ -16,14 +16,14 @@
 
 package org.activiti.cloud.acc.shared.rest;
 
-import static org.springframework.hateoas.Link.REL_SELF;
+import static org.springframework.hateoas.IanaLinkRelations.SELF;
 
 import feign.Headers;
 import feign.RequestLine;
 import feign.gson.GsonEncoder;
 import net.serenitybdd.core.Serenity;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 
 /**
  * Dirty context handler
@@ -34,8 +34,8 @@ public class DirtyContextHandler {
 
     private static final String DIRTY_CONTEXT_DELIMITER = ";";
 
-    public <M> Resource<M> dirty(Resource<M> resource) {
-        dirty(resource.getLink(REL_SELF).getHref());
+    public <M> EntityModel<M> dirty(EntityModel<M> resource) {
+        dirty(resource.getLink(SELF).get().getHref());
         return resource;
     }
 

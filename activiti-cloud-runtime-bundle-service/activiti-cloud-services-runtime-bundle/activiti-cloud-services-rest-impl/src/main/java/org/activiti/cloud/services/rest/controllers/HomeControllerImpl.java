@@ -17,18 +17,18 @@ package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.services.rest.api.HomeController;
 import org.activiti.cloud.services.rest.api.resources.HomeResource;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 public class HomeControllerImpl implements HomeController {
 
     @Override
-    public Resource<HomeResource> getHomeInfo() {
+    public EntityModel<HomeResource> getHomeInfo() {
 
-        return new Resource<>(new HomeResource(),
+        return new EntityModel<>(new HomeResource(),
                               linkTo(ProcessDefinitionControllerImpl.class).withRel("process-definitions"),
                               linkTo(ProcessInstanceControllerImpl.class).withRel("process-instances"),
                               linkTo(TaskControllerImpl.class).withRel("tasks"));

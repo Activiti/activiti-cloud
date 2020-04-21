@@ -29,8 +29,8 @@ import java.util.List;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
+import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
@@ -62,7 +62,7 @@ public class ConnectorDefinitionControllerImplIT {
     private MockMvc mockMvc;
 
     @SpyBean
-    private ResourcesAssembler resourceAssembler;
+    private CollectionModelAssembler representationModelAssembler;
 
     @MockBean
     private ProcessExtensionService processExtensionService;
@@ -86,7 +86,7 @@ public class ConnectorDefinitionControllerImplIT {
         connectorDefinitions.add(connectorDefinition2);
 
         this.mockMvc = MockMvcBuilders
-                .standaloneSetup(new ConnectorDefinitionControllerImpl(connectorDefinitions, new ConnectorDefinitionResourceAssembler(), resourceAssembler))
+                .standaloneSetup(new ConnectorDefinitionControllerImpl(connectorDefinitions, new ConnectorDefinitionRepresentationModelAssembler(), representationModelAssembler))
                 .setControllerAdvice(new RuntimeBundleExceptionHandler())
                 .build();
     }

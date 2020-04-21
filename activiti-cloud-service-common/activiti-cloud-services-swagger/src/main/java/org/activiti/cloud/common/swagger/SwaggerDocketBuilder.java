@@ -28,9 +28,9 @@ import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.springframework.core.Ordered;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.AlternateTypeBuilder;
 import springfox.documentation.builders.AlternateTypePropertyBuilder;
@@ -80,14 +80,14 @@ public class SwaggerDocketBuilder {
     }
 
     public Docket buildAlfrescoAPIDocket() {
-        ResolvedType resourceTypeWithWildCard = typeResolver.resolve(Resource.class,
+        ResolvedType resourceTypeWithWildCard = typeResolver.resolve(EntityModel.class,
                                                                      WildcardType.class);
         return baseDocket()
-                .alternateTypeRules(newRule(typeResolver.resolve(Resources.class,
+                .alternateTypeRules(newRule(typeResolver.resolve(CollectionModel.class,
                                                                  resourceTypeWithWildCard),
                                             typeResolver.resolve(ListResponseContent.class,
                                                                  WildcardType.class)))
-                .alternateTypeRules(newRule(typeResolver.resolve(PagedResources.class,
+                .alternateTypeRules(newRule(typeResolver.resolve(PagedModel.class,
                                                                  resourceTypeWithWildCard),
                                             typeResolver.resolve(ListResponseContent.class,
                                                                  WildcardType.class)))

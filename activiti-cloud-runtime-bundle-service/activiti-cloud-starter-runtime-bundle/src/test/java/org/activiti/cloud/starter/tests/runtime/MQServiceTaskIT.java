@@ -41,8 +41,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -180,7 +180,7 @@ public class MQServiceTaskIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
 
             //then
             assertThat(responseEntity.getBody()).isNotNull();
@@ -209,7 +209,7 @@ public class MQServiceTaskIT {
 
         });
 
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
         assertThat(tasks.getBody()).isNotNull();
         assertThat(tasks.getBody().getContent())
                 .extracting(CloudTask::getName)
@@ -227,7 +227,7 @@ public class MQServiceTaskIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
 
             //then
             assertThat(responseEntity.getBody()).isNotNull();
@@ -264,7 +264,7 @@ public class MQServiceTaskIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
 
             //then
             assertThat(responseEntity.getBody()).isNotNull();
@@ -276,7 +276,7 @@ public class MQServiceTaskIT {
                                         "fromConnector"));//kept unchanging because no connector output is updating it
         });
 
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
         assertThat(tasks.getBody()).isNotNull();
         assertThat(tasks.getBody().getContent())
                 .extracting(CloudTask::getName)
@@ -284,7 +284,7 @@ public class MQServiceTaskIT {
     }
 
     private CloudTask getTaskToExecute(ResponseEntity<CloudProcessInstance> processInstanceResponseEntity) {
-        ResponseEntity<PagedResources<CloudTask>> availableTasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        ResponseEntity<PagedModel<CloudTask>> availableTasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
         assertThat(availableTasks).isNotNull();
         assertThat(availableTasks.getBody()).isNotEmpty();
         return availableTasks.getBody().getContent().iterator().next();

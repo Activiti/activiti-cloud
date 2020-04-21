@@ -6,37 +6,37 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.activiti.cloud.api.process.model.impl.CandidateUser;
 import org.activiti.cloud.services.rest.api.CandidateUserAdminController;
-import org.activiti.cloud.services.rest.assemblers.GroupCandidatesResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
+import org.activiti.cloud.services.rest.assemblers.GroupCandidatesRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ToCandidateGroupConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCandidateUserConverter;
-import org.activiti.cloud.services.rest.assemblers.UserCandidatesResourceAssembler;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.activiti.cloud.services.rest.assemblers.UserCandidatesRepresentationModelAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class CandidateUserAdminControllerImpl implements CandidateUserAdminController {
 
     private final TaskAdminRuntime taskAdminRuntime;
 
-    private final UserCandidatesResourceAssembler userCandidatesResourceAssembler;
+    private final UserCandidatesRepresentationModelAssembler userCandidatesRepresentationModelAssembler;
 
     private final ToCandidateUserConverter toCandidateUserConverter;
 
-    private final ResourcesAssembler resourcesAssembler;
+    private final CollectionModelAssembler resourcesAssembler;
 
     public CandidateUserAdminControllerImpl(TaskAdminRuntime taskAdminRuntime,
-                                            UserCandidatesResourceAssembler userCandidatesResourceAssembler,
+                                            UserCandidatesRepresentationModelAssembler userCandidatesRepresentationModelAssembler,
                                             ToCandidateUserConverter toCandidateUserConverter,
-                                            ResourcesAssembler resourcesAssembler) {
+                                            CollectionModelAssembler resourcesAssembler) {
         this.taskAdminRuntime = taskAdminRuntime;
-        this.userCandidatesResourceAssembler = userCandidatesResourceAssembler;
+        this.userCandidatesRepresentationModelAssembler = userCandidatesRepresentationModelAssembler;
         this.toCandidateUserConverter = toCandidateUserConverter;
         this.resourcesAssembler = resourcesAssembler;
     }
@@ -61,12 +61,12 @@ public class CandidateUserAdminControllerImpl implements CandidateUserAdminContr
     }
 
     @Override
-    public Resources<Resource<CandidateUser>> getUserCandidates(@PathVariable String taskId) {
-        userCandidatesResourceAssembler.setTaskId(taskId);
-        return resourcesAssembler.toResources(toCandidateUserConverter.from(taskAdminRuntime.userCandidates(taskId)),
-                                              userCandidatesResourceAssembler,
+    public CollectionModel<EntityModel<CandidateUser>> getUserCandidates(@PathVariable String taskId) {
+        userCandidatesRepresentationModelAssembler.setTaskId(taskId);
+        return resourcesAssembler.toCollectionModel(toCandidateUserConverter.from(taskAdminRuntime.userCandidates(taskId)),
+                                              userCandidatesRepresentationModelAssembler,
                                               linkTo(methodOn(this.getClass())
-                                                             .getUserCandidates(userCandidatesResourceAssembler.getTaskId()))
+                                                             .getUserCandidates(userCandidatesRepresentationModelAssembler.getTaskId()))
                                                              .withSelfRel());
     }
 

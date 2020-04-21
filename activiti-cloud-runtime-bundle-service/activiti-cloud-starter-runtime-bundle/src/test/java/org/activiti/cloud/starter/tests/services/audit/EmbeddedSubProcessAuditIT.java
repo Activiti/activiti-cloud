@@ -49,7 +49,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -160,7 +160,7 @@ public class EmbeddedSubProcessAuditIT {
 
         });
 
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstance);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstance);
         Task task = tasks.getBody().iterator().next();
 
         //when
@@ -273,7 +273,7 @@ public class EmbeddedSubProcessAuditIT {
 
         });
 
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstance);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstance);
         Task task = tasks.getBody().iterator().next();
 
         String subProcessInstanceId = task.getProcessInstanceId();
@@ -306,7 +306,7 @@ public class EmbeddedSubProcessAuditIT {
         // when
 
 
-        ResponseEntity<PagedResources<ProcessInstance>> processes = processInstanceRestTemplate.getSubprocesses(processInstanceId);
+        ResponseEntity<PagedModel<ProcessInstance>> processes = processInstanceRestTemplate.getSubprocesses(processInstanceId);
 
         assertThat(processes.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(processes.getBody()).isNotNull();
@@ -604,8 +604,8 @@ public class EmbeddedSubProcessAuditIT {
 
     }
 
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
+    private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,

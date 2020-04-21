@@ -3,8 +3,8 @@ package org.activiti.cloud.services.rest.api;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +24,6 @@ public interface CandidateGroupAdminController {
                                @RequestBody CandidateGroupsPayload candidateGroupsPayload);
 
     @RequestMapping(method = RequestMethod.GET)
-    Resources<Resource<CandidateGroup>> getGroupCandidates(@PathVariable("taskId") String taskId);
+    CollectionModel<EntityModel<CandidateGroup>> getGroupCandidates(@PathVariable("taskId") String taskId);
 
 }

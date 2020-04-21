@@ -52,7 +52,7 @@ import java.util.UUID;
 
 @WebMvcTest(TaskVariableAdminController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({
     QueryRestWebMvcAutoConfiguration.class,
     CommonModelAutoConfiguration.class,

@@ -18,11 +18,11 @@ package org.activiti.cloud.alfresco.converter.json;
 
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadata;
 import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 public class PageMetadataConverter {
 
-    public PaginationMetadata toAlfrescoPageMetadata(PagedResources.PageMetadata basePageMetadata,
+    public PaginationMetadata toAlfrescoPageMetadata(PagedModel.PageMetadata basePageMetadata,
                                                      long count) {
         long skipCount = basePageMetadata.getNumber() * basePageMetadata.getSize();
         if (basePageMetadata instanceof ExtendedPageMetadata) {

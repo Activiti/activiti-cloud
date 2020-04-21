@@ -34,7 +34,7 @@ import java.util.Arrays;
  * This is present in case of a future scenario where we need to filter task or process instance variables more generally rather than per task or per proc.
  */
 @SpringBootTest
-@TestPropertySource("classpath:test-application.properties")
+@TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration
 public class RestrictVariableEntityQueryIT {
 

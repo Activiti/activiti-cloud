@@ -18,18 +18,18 @@ package org.activiti.cloud.services.query.rest;
 
 import java.util.Optional;
 
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,43 +50,43 @@ public class ProcessInstanceAdminController {
 
     private final ProcessInstanceRepository processInstanceRepository;
 
-    private ProcessInstanceResourceAssembler processInstanceResourceAssembler;
+    private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
-    private AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler;
-    
+    private AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
+
     private EntityFinder entityFinder;
 
     @Autowired
     public ProcessInstanceAdminController(ProcessInstanceRepository processInstanceRepository,
-                                          ProcessInstanceResourceAssembler processInstanceResourceAssembler,
-                                          AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler,
+                                          ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+                                          AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
                                           EntityFinder entityFinder) {
         this.processInstanceRepository = processInstanceRepository;
-        this.processInstanceResourceAssembler = processInstanceResourceAssembler;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.entityFinder=entityFinder;
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<Resource<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
+    public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                                   Pageable pageable) {
 
         predicate = Optional.ofNullable(predicate)
                             .orElseGet(BooleanBuilder::new);
-        
-        return pagedResourcesAssembler.toResource(pageable,
+
+        return pagedCollectionModelAssembler.toModel(pageable,
                                                   processInstanceRepository.findAll(predicate,
                                                                                     pageable),
-                                                  processInstanceResourceAssembler);
+                                                  processInstanceRepresentationModelAssembler);
     }
-    
+
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public Resource<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
+    public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
 
         ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
                                                                             processInstanceId,
                                                                             "Unable to find task for the given id:'" + processInstanceId + "'");
-        return processInstanceResourceAssembler.toResource(processInstanceEntity);
+        return processInstanceRepresentationModelAssembler.toModel(processInstanceEntity);
     }
 
 

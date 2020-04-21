@@ -8,8 +8,8 @@ import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,19 +22,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public interface ProcessInstanceController {
 
     @RequestMapping(method = RequestMethod.GET)
-    PagedResources<Resource<CloudProcessInstance>> getProcessInstances(Pageable pageable);
+    PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(Pageable pageable);
 
     @RequestMapping(method = RequestMethod.POST)
-    Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload cmd);
+    EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload cmd);
 
     @RequestMapping(value = "/{processInstanceId}/start",method = RequestMethod.POST)
-    Resource<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId);
+    EntityModel<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/create",method = RequestMethod.POST)
-    Resource<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload cmd);
+    EntityModel<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload cmd);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    Resource<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId);
+    EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/{processInstanceId}/model",
             method = RequestMethod.GET,
@@ -46,25 +46,25 @@ public interface ProcessInstanceController {
     ResponseEntity<Void> sendSignal(@RequestBody SignalPayload signalPayload);
 
     @RequestMapping(value = "/message", method = RequestMethod.POST)
-    Resource<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload);
+    EntityModel<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload);
 
     @RequestMapping(value = "/message", method = RequestMethod.PUT)
     ResponseEntity<Void> receive(@RequestBody ReceiveMessagePayload receiveMessagePayload);
 
     @RequestMapping(value = "{processInstanceId}/suspend", method = RequestMethod.POST)
-    Resource<CloudProcessInstance> suspend(@PathVariable String processInstanceId);
+    EntityModel<CloudProcessInstance> suspend(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "{processInstanceId}/resume", method = RequestMethod.POST)
-    Resource<CloudProcessInstance> resume(@PathVariable String processInstanceId);
+    EntityModel<CloudProcessInstance> resume(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
-    Resource<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId);
+    EntityModel<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)
-    Resource<CloudProcessInstance> updateProcess(@PathVariable("processInstanceId") String processInstanceId,
+    EntityModel<CloudProcessInstance> updateProcess(@PathVariable("processInstanceId") String processInstanceId,
                                     @RequestBody UpdateProcessPayload payload);
 
     @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
-    PagedResources<Resource<CloudProcessInstance>> subprocesses(@PathVariable("processInstanceId") String processInstanceId,
+    PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable("processInstanceId") String processInstanceId,
                                                          Pageable pageable);
 }

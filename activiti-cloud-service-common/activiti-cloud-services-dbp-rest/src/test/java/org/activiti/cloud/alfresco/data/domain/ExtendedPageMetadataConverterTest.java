@@ -17,7 +17,7 @@
 package org.activiti.cloud.alfresco.data.domain;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +28,7 @@ public class ExtendedPageMetadataConverterTest {
     @Test
     public void getMetadataShouldReturnTotalPagesAsDivisionOfTotalElementsByPageSizeWhenNoRemainder() throws Exception {
         //given
-        PagedResources.PageMetadata basePageMetadata = new PagedResources.PageMetadata(10,
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
                                                                                        1,
                                                                                        30);
         //when
@@ -42,7 +42,7 @@ public class ExtendedPageMetadataConverterTest {
     @Test
     public void getMetadataShouldReturnTotalPagesAsDivisionOfTotalElementsByPageSizePlusOneWhenThereIsRemainder() throws Exception {
         //given
-        PagedResources.PageMetadata basePageMetadata = new PagedResources.PageMetadata(10,
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
                                                                                        1,
                                                                                        31);
 
@@ -57,7 +57,7 @@ public class ExtendedPageMetadataConverterTest {
     @Test
     public void getMetadataShouldIncreaseTotalPagesByOneWhenSkipCountIsNotDivisibleAndTotalElementsIsDivisible() throws Exception {
         //given
-        PagedResources.PageMetadata basePageMetadata = new PagedResources.PageMetadata(10,
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
                                                                                        1,
                                                                                        30);
         //when
@@ -78,7 +78,7 @@ public class ExtendedPageMetadataConverterTest {
     @Test
     public void getMetadataShouldNotChangeTotalPagesWhenTotalElementsRemainderIsLowerThanOrEqualsToSkipCountRemainder() throws Exception {
         //given
-        PagedResources.PageMetadata basePageMetadata = new PagedResources.PageMetadata(10,
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
                                                                                        1,
                                                                                        31);
 
@@ -100,7 +100,7 @@ public class ExtendedPageMetadataConverterTest {
     @Test
     public void getMetadataShouldIncreaseTotalPagesByOneWhenTotalElementsRemainderIsGreaterThanSkipCountRemainder() throws Exception {
         //given
-        PagedResources.PageMetadata basePageMetadata = new PagedResources.PageMetadata(10,
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
                                                                                        1,
                                                                                        32);
         //when

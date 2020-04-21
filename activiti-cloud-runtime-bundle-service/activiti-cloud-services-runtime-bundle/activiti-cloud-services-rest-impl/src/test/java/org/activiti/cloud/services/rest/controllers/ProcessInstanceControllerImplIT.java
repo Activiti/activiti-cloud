@@ -83,9 +83,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = ProcessInstanceControllerImpl.class, secure = false)
+@WebMvcTest(ProcessInstanceControllerImpl.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({CommonModelAutoConfiguration.class,
         ProcessModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -94,8 +94,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+        AlfrescoWebAutoConfiguration.class})
 public class ProcessInstanceControllerImplIT {
 
     @Autowired

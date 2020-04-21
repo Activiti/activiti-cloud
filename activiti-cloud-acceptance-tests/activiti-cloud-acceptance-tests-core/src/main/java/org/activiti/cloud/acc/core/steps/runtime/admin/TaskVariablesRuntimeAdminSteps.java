@@ -22,7 +22,7 @@ import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskVariablesRuntimeAdminService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 
 @EnableRuntimeFeignContext
 public class TaskVariablesRuntimeAdminSteps {
@@ -52,7 +52,7 @@ public class TaskVariablesRuntimeAdminSteps {
     }
 
     @Step
-    public Resources<CloudVariableInstance> getVariables(String taskId) {
+    public CollectionModel<CloudVariableInstance> getVariables(String taskId) {
         return taskRuntimeService.getVariables(taskId);
     }
 

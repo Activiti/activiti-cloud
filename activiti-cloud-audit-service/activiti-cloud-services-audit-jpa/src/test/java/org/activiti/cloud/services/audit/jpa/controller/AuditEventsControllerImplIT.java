@@ -78,7 +78,7 @@ import java.util.Optional;
 
 @WebMvcTest(AuditEventsControllerImpl.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({
     AuditAPIAutoConfiguration.class,
     AuditJPAAutoConfiguration.class,

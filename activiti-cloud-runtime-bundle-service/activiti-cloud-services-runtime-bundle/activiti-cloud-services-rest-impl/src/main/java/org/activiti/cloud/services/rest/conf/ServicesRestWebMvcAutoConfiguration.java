@@ -19,29 +19,29 @@ package org.activiti.cloud.services.rest.conf;
 import java.util.List;
 
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
-import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.GroupCandidatesResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.GroupCandidatesRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ToCandidateGroupConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCandidateUserConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCloudProcessDefinitionConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCloudProcessInstanceConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCloudTaskConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCloudVariableInstanceConverter;
-import org.activiti.cloud.services.rest.assemblers.UserCandidatesResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
-import org.activiti.cloud.services.rest.controllers.RuntimeBundleRelProvider;
+import org.activiti.cloud.services.rest.assemblers.UserCandidatesRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
+import org.activiti.cloud.services.rest.controllers.RuntimeBundleLinkRelationProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -58,43 +58,43 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public ResourcesAssembler resourcesAssembler() {
-        return new ResourcesAssembler();
+    public CollectionModelAssembler resourcesAssembler() {
+        return new CollectionModelAssembler();
     }
 
     @Bean
-    public ConnectorDefinitionResourceAssembler connectorDefinitionResourceAssembler() {
-        return new ConnectorDefinitionResourceAssembler();
+    public ConnectorDefinitionRepresentationModelAssembler connectorDefinitionRepresentationModelAssembler() {
+        return new ConnectorDefinitionRepresentationModelAssembler();
     }
 
     @Bean
-    public ProcessDefinitionMetaResourceAssembler processDefinitionMetaResourceAssembler() {
-        return new ProcessDefinitionMetaResourceAssembler();
+    public ProcessDefinitionMetaRepresentationModelAssembler processDefinitionMetaRepresentationModelAssembler() {
+        return new ProcessDefinitionMetaRepresentationModelAssembler();
     }
 
     @Bean
-    public ProcessInstanceResourceAssembler processInstanceResourceAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
-        return new ProcessInstanceResourceAssembler(new ToCloudProcessInstanceConverter(runtimeBundleInfoAppender));
+    public ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new ProcessInstanceRepresentationModelAssembler(new ToCloudProcessInstanceConverter(runtimeBundleInfoAppender));
     }
 
     @Bean
-    public ProcessDefinitionResourceAssembler processDefinitionResourceAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
-        return new ProcessDefinitionResourceAssembler(new ToCloudProcessDefinitionConverter(runtimeBundleInfoAppender));
+    public ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new ProcessDefinitionRepresentationModelAssembler(new ToCloudProcessDefinitionConverter(runtimeBundleInfoAppender));
     }
 
     @Bean
-    public TaskResourceAssembler taskResourceAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
-        return new TaskResourceAssembler(new ToCloudTaskConverter(runtimeBundleInfoAppender));
+    public TaskRepresentationModelAssembler taskRepresentationModelAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new TaskRepresentationModelAssembler(new ToCloudTaskConverter(runtimeBundleInfoAppender));
     }
 
     @Bean
-    public UserCandidatesResourceAssembler userCandidatesResourceAssembler(){
-        return new UserCandidatesResourceAssembler();
+    public UserCandidatesRepresentationModelAssembler userCandidatesRepresentationModelAssembler(){
+        return new UserCandidatesRepresentationModelAssembler();
     }
 
     @Bean
-    public GroupCandidatesResourceAssembler groupCandidatesResourceAssembler(){
-        return new GroupCandidatesResourceAssembler();
+    public GroupCandidatesRepresentationModelAssembler groupCandidatesRepresentationModelAssembler(){
+        return new GroupCandidatesRepresentationModelAssembler();
     }
 
     @Bean
@@ -113,13 +113,13 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public ProcessInstanceVariableResourceAssembler processInstanceVariableResourceAssembler(ToCloudVariableInstanceConverter converter) {
-        return new ProcessInstanceVariableResourceAssembler(converter);
+    public ProcessInstanceVariableRepresentationModelAssembler processInstanceVariableRepresentationModelAssembler(ToCloudVariableInstanceConverter converter) {
+        return new ProcessInstanceVariableRepresentationModelAssembler(converter);
     }
 
     @Bean
-    public TaskVariableInstanceResourceAssembler taskVariableInstanceResourceAssembler(ToCloudVariableInstanceConverter converter) {
-        return new TaskVariableInstanceResourceAssembler(converter);
+    public TaskVariableInstanceRepresentationModelAssembler taskVariableInstanceRepresentationModelAssembler(ToCloudVariableInstanceConverter converter) {
+        return new TaskVariableInstanceRepresentationModelAssembler(converter);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnMissingBean
-    public RuntimeBundleRelProvider runtimeBundleRelProvider() {
-        return new RuntimeBundleRelProvider();
+    public RuntimeBundleLinkRelationProvider runtimeBundleRelProvider() {
+        return new RuntimeBundleLinkRelationProvider();
     }
 }

@@ -73,9 +73,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -127,7 +127,7 @@ public class AuditProducerIT {
 
     @BeforeEach
     public void setUp() {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody()).isNotNull();
@@ -268,7 +268,7 @@ public class AuditProducerIT {
         });
 
         //given
-        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
         Task task = tasks.getBody().iterator().next();
 
         //when
@@ -506,12 +506,12 @@ public class AuditProducerIT {
             assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getUserId()).isEqualTo("testuser");
         });
 
-        ResponseEntity<Resources<Resource<CandidateUser>>>  userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+        ResponseEntity<CollectionModel<EntityModel<CandidateUser>>>  userCandidates = taskRestTemplate.getUserCandidates(task.getId());
         assertThat(userCandidates).isNotNull();
         assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser",
                           "testuser");
@@ -545,7 +545,7 @@ public class AuditProducerIT {
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(userCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
 
@@ -562,7 +562,7 @@ public class AuditProducerIT {
         CloudTask task = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("task2").withDescription(
                 "test task description").withAssignee("hruser").build());
 
-        ResponseEntity<Resources<Resource<CandidateGroup>>> groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
+        ResponseEntity<CollectionModel<EntityModel<CandidateGroup>>> groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
         assertThat(groupCandidates).isNotNull();
         assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(0);
@@ -596,7 +596,7 @@ public class AuditProducerIT {
         assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(groupCandidates.getBody().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .map(CandidateGroup::getGroup)
         ).containsExactly("hr");
 
@@ -1007,8 +1007,8 @@ public class AuditProducerIT {
         });
     }
 
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
+    private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,

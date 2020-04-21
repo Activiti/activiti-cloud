@@ -22,7 +22,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thucydides.core.annotations.Step;
@@ -46,11 +46,11 @@ public class ProcessRuntimeBundleSteps {
     public void checkServicesHealth() {
         assertThat(processRuntimeService.isServiceUp()).isTrue();
     }
-    
+
     @Step
     public CloudProcessInstance startProcess(StartProcessPayload payload) {
         return dirtyContextHandler.dirty(processRuntimeService.startProcess(payload));
-    }    
+    }
 
     @Step
     public CloudProcessInstance startProcess(String process, boolean variables, String businessKey) throws IOException {
@@ -70,7 +70,7 @@ public class ProcessRuntimeBundleSteps {
 
         return startProcess(payload.build());
     }
-    
+
     @Step
     public CloudProcessInstance startProcess(String process, boolean variables) throws IOException {
         return startProcess(process, variables, "businessKey");
@@ -131,7 +131,7 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public PagedResources<CloudProcessInstance> getAllProcessInstances(){
+    public PagedModel<CloudProcessInstance> getAllProcessInstances(){
         return processRuntimeService.getAllProcessInstances();
     }
 
@@ -141,12 +141,12 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public PagedResources<CloudProcessInstance> getSubProcesses(String parentId){
+    public PagedModel<CloudProcessInstance> getSubProcesses(String parentId){
         return processRuntimeService.getSubProcesses(parentId);
     }
 
     @Step
-    public PagedResources<ProcessDefinition> getProcessDefinitions(){
+    public PagedModel<ProcessDefinition> getProcessDefinitions(){
         return processRuntimeService.getProcessDefinitions();
     }
 
@@ -185,15 +185,15 @@ public class ProcessRuntimeBundleSteps {
                 ProcessPayloadBuilder.update().withName(processInstanceName).build());
 
     }
-    
+
     @Step
     public CloudProcessInstance message(StartMessagePayload payload) throws IOException {
         return dirtyContextHandler.dirty(processRuntimeService.message(payload));
     }
-    
+
     @Step
     public void message(ReceiveMessagePayload payload) throws IOException {
         processRuntimeService.message(payload);
     }
-    
+
 }

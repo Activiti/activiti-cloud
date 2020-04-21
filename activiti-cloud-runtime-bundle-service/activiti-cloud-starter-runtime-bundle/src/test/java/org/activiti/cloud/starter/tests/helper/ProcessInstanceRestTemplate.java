@@ -36,8 +36,8 @@ import org.activiti.engine.impl.util.IoUtil;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -230,37 +230,37 @@ public class ProcessInstanceRestTemplate {
         return  startProcessWithErrorResponse(PROCESS_INSTANCES_ADMIN_RELATIVE_URL, startProcess);
     }
 
-    public ResponseEntity<PagedResources<CloudTask>> getTasks(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
+    public ResponseEntity<PagedModel<CloudTask>> getTasks(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         return getTasks(processInstanceEntity.getBody().getId());
     }
 
-    public ResponseEntity<PagedResources<CloudTask>> getTasks(String processInstanceId) {
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/tasks",
+    public ResponseEntity<PagedModel<CloudTask>> getTasks(String processInstanceId) {
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/tasks",
                                                                                              HttpMethod.GET,
                                                                                              null,
-                                                                                             new ParameterizedTypeReference<PagedResources<CloudTask>>() {
+                                                                                             new ParameterizedTypeReference<PagedModel<CloudTask>>() {
                                                                                              });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<Resources<CloudVariableInstance>> getVariables(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
+    public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariables(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         return getVariables(processInstanceEntity.getBody().getId());
     }
 
-    public ResponseEntity<Resources<CloudVariableInstance>> getVariables(String processInstanceId) {
-        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = getVariablesNoReplyCheck(processInstanceId);
+    public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariables(String processInstanceId) {
+        ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = getVariablesNoReplyCheck(processInstanceId);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<Resources<CloudVariableInstance>> getVariablesNoReplyCheck(String processInstanceId) {
-        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
+    public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariablesNoReplyCheck(String processInstanceId) {
+        ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
                                                                                                     HttpMethod.GET,
                                                                                                     null,
-                                                                                                    new ParameterizedTypeReference<Resources<CloudVariableInstance>>() {
+                                                                                                    new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {
                                                                                                     });
         return responseEntity;
     }
@@ -489,12 +489,12 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<PagedResources<ProcessInstance>> getSubprocesses(String processInstanceId) {
-        ResponseEntity<PagedResources<ProcessInstance>> responseEntity = testRestTemplate.exchange(
+    public ResponseEntity<PagedModel<ProcessInstance>> getSubprocesses(String processInstanceId) {
+        ResponseEntity<PagedModel<ProcessInstance>> responseEntity = testRestTemplate.exchange(
                                                                                                    PROCESS_INSTANCES_RELATIVE_URL + processInstanceId+"/subprocesses",
                                                                                                    HttpMethod.GET,
                                                                                                    null,
-                                                                                                   new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
+                                                                                                   new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {
                                                                                                    });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
@@ -533,29 +533,29 @@ public class ProcessInstanceRestTemplate {
                                         });
     }
 
-    public ResponseEntity<PagedResources<ProcessInstance>> getPagedProcessInstances() {
+    public ResponseEntity<PagedModel<ProcessInstance>> getPagedProcessInstances() {
         return getPagedProcessInstances(null);
     }
 
-    public ResponseEntity<PagedResources<ProcessInstance>> getPagedProcessInstances(String pages) {
+    public ResponseEntity<PagedModel<ProcessInstance>> getPagedProcessInstances(String pages) {
         return getPagedProcessInstances(PROCESS_INSTANCES_RELATIVE_URL,pages);
     }
 
-    public ResponseEntity<PagedResources<ProcessInstance>> adminGetPagedProcessInstances() {
+    public ResponseEntity<PagedModel<ProcessInstance>> adminGetPagedProcessInstances() {
         return adminGetPagedProcessInstances(null);
     }
 
-    public ResponseEntity<PagedResources<ProcessInstance>> adminGetPagedProcessInstances(String pages) {
+    public ResponseEntity<PagedModel<ProcessInstance>> adminGetPagedProcessInstances(String pages) {
         return getPagedProcessInstances(PROCESS_INSTANCES_ADMIN_RELATIVE_URL,pages);
     }
 
-    public ResponseEntity<PagedResources<ProcessInstance>> getPagedProcessInstances(String baseURL,String pageFilters) {
+    public ResponseEntity<PagedModel<ProcessInstance>> getPagedProcessInstances(String baseURL,String pageFilters) {
         String pages = pageFilters != null ? pageFilters : "page=0&size=2";
-        ResponseEntity<PagedResources<ProcessInstance>> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<PagedModel<ProcessInstance>> responseEntity = testRestTemplate.exchange(
                                                                                         baseURL + "?" + pages,
                                                                                         HttpMethod.GET,
                                                                                         null,
-                                                                                        new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
+                                                                                        new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {
                                                                                         });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;

@@ -27,8 +27,8 @@ import feign.jackson.JacksonEncoder;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.Project;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 
 import java.io.File;
 
@@ -44,7 +44,7 @@ public interface ModelingProjectsService extends FeignRestDataClient<ModelingPro
 
     @RequestLine("GET ?name={name}")
     @Headers("Content-Type: application/json")
-    PagedResources<Resource<Project>> findAllByName(@Param("name") String name);
+    PagedModel<EntityModel<Project>> findAllByName(@Param("name") String name);
 
     @RequestLine("GET")
     @Headers("Content-Type: application/json")
@@ -56,7 +56,7 @@ public interface ModelingProjectsService extends FeignRestDataClient<ModelingPro
 
     @RequestLine("POST")
     @Headers("Content-Type: multipart/form-data")
-    Resource<Model> importProjectModel(@Param("file") File file);
+    EntityModel<Model> importProjectModel(@Param("file") File file);
 
     @Override
     default Class<ModelingProjectsService> getType() {
@@ -81,7 +81,7 @@ public interface ModelingProjectsService extends FeignRestDataClient<ModelingPro
                 .validateProject();
     }
 
-    default Resource<Model> importProjectModelByUri(String uri,
+    default EntityModel<Model> importProjectModelByUri(String uri,
                                                     File file) {
         return FeignRestDataClient
                 .builder(new FormEncoder(new JacksonEncoder()),

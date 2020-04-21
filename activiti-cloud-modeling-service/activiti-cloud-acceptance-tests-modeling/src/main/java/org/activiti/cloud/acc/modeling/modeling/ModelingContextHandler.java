@@ -22,7 +22,7 @@ import java.util.Optional;
 import net.serenitybdd.core.Serenity;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 
 /**
  * ModelingContext handler
@@ -35,11 +35,11 @@ public class ModelingContextHandler {
 
     private static final String MODELING_CURRENT_PROJECTS = "modelingCurrentProjects";
 
-    public Optional<Resource<?>> getCurrentModelingContext() {
+    public Optional<EntityModel<?>> getCurrentModelingContext() {
         return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_CONTEXT));
     }
 
-    public void setCurrentModelingObject(Resource<?> currentModelingObject) {
+    public void setCurrentModelingObject(EntityModel<?> currentModelingObject) {
         Serenity.setSessionVariable(MODELING_CURRENT_CONTEXT)
                 .to(currentModelingObject);
     }
@@ -53,11 +53,11 @@ public class ModelingContextHandler {
                 .to(fileContent);
     }
 
-    public void setCurrentProjects(Collection<Resource<Project>> projects) {
+    public void setCurrentProjects(Collection<EntityModel<Project>> projects) {
         Serenity.setSessionVariable(MODELING_CURRENT_PROJECTS).to(projects);
     }
 
-    public Optional<Collection<Resource<Project>>> getCurrentProjects() {
+    public Optional<Collection<EntityModel<Project>>> getCurrentProjects() {
         return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_PROJECTS));
     }
 

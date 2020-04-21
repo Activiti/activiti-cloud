@@ -18,18 +18,18 @@ package org.activiti.cloud.services.query.rest;
 
 import java.util.Optional;
 
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.activiti.cloud.services.query.rest.assembler.TaskVariableResourceAssembler;
+import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,47 +49,47 @@ import com.querydsl.core.types.dsl.BooleanExpression;
         })
 public class TaskVariableAdminController {
 
-    private AlfrescoPagedResourcesAssembler<TaskVariableEntity> pagedVariablesResourcesAssembler;
+    private AlfrescoPagedModelAssembler<TaskVariableEntity> pagedVariablesCollectionModelAssembler;
 
     private TaskVariableRepository variableRepository;
 
-    private TaskVariableResourceAssembler variableResourceAssembler;
-    
+    private TaskVariableRepresentationModelAssembler variableRepresentationModelAssembler;
+
 
     @Autowired
     public TaskVariableAdminController(TaskVariableRepository variableRepository,
-                                   TaskVariableResourceAssembler variableResourceAssembler,
-                                   AlfrescoPagedResourcesAssembler<TaskVariableEntity> pagedVariablesResourcesAssembler) {
+                                   TaskVariableRepresentationModelAssembler variableRepresentationModelAssembler,
+                                   AlfrescoPagedModelAssembler<TaskVariableEntity> pagedVariablesCollectionModelAssembler) {
         this.variableRepository = variableRepository;
-        this.variableResourceAssembler = variableResourceAssembler;
-        this.pagedVariablesResourcesAssembler = pagedVariablesResourcesAssembler;
+        this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
+        this.pagedVariablesCollectionModelAssembler = pagedVariablesCollectionModelAssembler;
     }
-    
+
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<Resource<CloudVariableInstance>> getVariables(@PathVariable String taskId,
+    public PagedModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String taskId,
                                                                         @QuerydslPredicate(root = TaskVariableEntity.class) Predicate predicate,
                                                                         Pageable pageable) {
 
         predicate = Optional.ofNullable(predicate)
                             .orElseGet(BooleanBuilder::new);
-        
+
         QTaskVariableEntity variable = QTaskVariableEntity.taskVariableEntity;
 
-        //We will show only not deleted variables 
-        BooleanExpression expression = variable.taskId.eq(taskId);  
+        //We will show only not deleted variables
+        BooleanExpression expression = variable.taskId.eq(taskId);
 
         if (predicate != null) {
             expression = expression.and(predicate);
         }
-        
-        Predicate extendedPredicated = expression;  
-          
-        return pagedVariablesResourcesAssembler.toResource(pageable,
+
+        Predicate extendedPredicated = expression;
+
+        return pagedVariablesCollectionModelAssembler.toModel(pageable,
                                                            variableRepository.findAll(extendedPredicated,
                                                                                       pageable),
-                                                           variableResourceAssembler); 
+                                                           variableRepresentationModelAssembler);
     }
-    
+
 }
 
 

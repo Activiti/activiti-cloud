@@ -20,7 +20,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.Collections;
 import java.util.Iterator;
 
-@TestPropertySource("classpath:test-application.properties")
+@TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
 @EnableAutoConfiguration
 public class RestrictEventQueryIT {

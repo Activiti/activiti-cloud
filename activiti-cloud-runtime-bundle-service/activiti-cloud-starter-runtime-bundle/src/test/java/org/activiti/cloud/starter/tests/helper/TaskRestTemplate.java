@@ -39,9 +39,9 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -57,11 +57,11 @@ public class TaskRestTemplate {
 
     private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudTask>() {
     };
-    private static final ParameterizedTypeReference<PagedResources<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudTask>>() {
+    private static final ParameterizedTypeReference<PagedModel<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudTask>>() {
     };
-    private static final ParameterizedTypeReference<Resources<Resource<CandidateUser>>> CANDIDATE_USERS_RESPONSE_TYPE = new ParameterizedTypeReference<Resources<Resource<CandidateUser>>> () {
+    private static final ParameterizedTypeReference<CollectionModel<EntityModel<CandidateUser>>> CANDIDATE_USERS_RESPONSE_TYPE = new ParameterizedTypeReference<CollectionModel<EntityModel<CandidateUser>>> () {
     };
-    private static final ParameterizedTypeReference<Resources<Resource<CandidateGroup>>> CANDIDATES_GROUPS_RESPONSE_TYPE = new ParameterizedTypeReference<Resources<Resource<CandidateGroup>>> () {
+    private static final ParameterizedTypeReference<CollectionModel<EntityModel<CandidateGroup>>> CANDIDATES_GROUPS_RESPONSE_TYPE = new ParameterizedTypeReference<CollectionModel<EntityModel<CandidateGroup>>> () {
     };
     private static final ParameterizedTypeReference<Void> VOID_RESPONSE_TYPE = new ParameterizedTypeReference<Void>() {
     };
@@ -81,7 +81,7 @@ public class TaskRestTemplate {
         return adminComplete(task,
                              null);
     }
-    
+
     public ResponseEntity<CloudTask> complete(Task task,CompleteTaskPayload completeTaskPayload) {
         return complete(task,
                         TASK_VAR_RELATIVE_URL,
@@ -93,7 +93,7 @@ public class TaskRestTemplate {
                         ADMIN_TASK_VAR_RELATIVE_URL,
                         completeTaskPayload);
     }
-    
+
 
     private ResponseEntity<CloudTask> complete(Task task,
                                                String baseURL,
@@ -106,12 +106,12 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
         return responseEntity;
     }
-    
+
     public ResponseEntity<CloudTask> delete(Task task) {
         return delete(task,
                       TASK_VAR_RELATIVE_URL);
     }
-    
+
     public ResponseEntity<CloudTask> adminDelete(Task task) {
         return delete(task,
                       ADMIN_TASK_VAR_RELATIVE_URL);
@@ -130,7 +130,7 @@ public class TaskRestTemplate {
     public ResponseEntity<CloudTask> claim(Task task) {
         return claim(task.getId());
     }
-    
+
     public ResponseEntity<CloudTask> claim(String taskId) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId + "/claim",
                                                                              HttpMethod.POST,
@@ -139,11 +139,11 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-    
+
     public ResponseEntity<CloudTask> release(Task task) {
         return release(task.getId());
     }
-    
+
     public ResponseEntity<CloudTask> release(String taskId) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId + "/release",
                                                                              HttpMethod.POST,
@@ -152,23 +152,23 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-    
+
     public ResponseEntity<CloudTask> adminAssignTask(AssignTaskPayload assignTask) {
         return testRestTemplate.exchange(ADMIN_TASK_VAR_RELATIVE_URL + assignTask.getTaskId() + "/assign",
                                          HttpMethod.POST,
                                          new HttpEntity<>(assignTask),
                                          TASK_RESPONSE_TYPE);
     }
-    
-    public ResponseEntity<Resources<Resource<CandidateUser>>> getUserCandidates(String taskId) {
-        ResponseEntity<Resources<Resource<CandidateUser>>> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId + "/candidate-users",
+
+    public ResponseEntity<CollectionModel<EntityModel<CandidateUser>>> getUserCandidates(String taskId) {
+        ResponseEntity<CollectionModel<EntityModel<CandidateUser>>> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId + "/candidate-users",
                                                                                                       HttpMethod.GET,
                                                                                                       null,
                                                                                                       CANDIDATE_USERS_RESPONSE_TYPE);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-    
+
     public ResponseEntity<Void> addUserCandidates(CandidateUsersPayload candidateUsers) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + candidateUsers.getTaskId()+"/candidate-users",
                                                                              HttpMethod.POST,
@@ -177,7 +177,7 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-    
+
     public ResponseEntity<Void> deleteUserCandidates(CandidateUsersPayload candidateUsers) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + candidateUsers.getTaskId()+"/candidate-users",
                                                                              HttpMethod.DELETE,
@@ -187,15 +187,15 @@ public class TaskRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Resources<Resource<CandidateGroup>>> getGroupCandidates(String taskId) {
-        ResponseEntity<Resources<Resource<CandidateGroup>>> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId + "/candidate-groups",
+    public ResponseEntity<CollectionModel<EntityModel<CandidateGroup>>> getGroupCandidates(String taskId) {
+        ResponseEntity<CollectionModel<EntityModel<CandidateGroup>>> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId + "/candidate-groups",
                                                                                                        HttpMethod.GET,
                                                                                                        null,
                                                                                                        CANDIDATES_GROUPS_RESPONSE_TYPE);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-    
+
     public ResponseEntity<Void> addGroupCandidates(CandidateGroupsPayload candidateGroups) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + candidateGroups.getTaskId()+"/candidate-groups",
                                                                              HttpMethod.POST,
@@ -204,7 +204,7 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-    
+
     public ResponseEntity<Void> deleteGroupCandidates(CandidateGroupsPayload candidateGroups) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + candidateGroups.getTaskId()+"/candidate-groups",
                                                                              HttpMethod.DELETE,
@@ -213,12 +213,12 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-    
-    public PagedResources<CloudTask> getSubTasks(CloudTask parentTask) {
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + parentTask.getId() + "/subtasks",
+
+    public PagedModel<CloudTask> getSubTasks(CloudTask parentTask) {
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + parentTask.getId() + "/subtasks",
                                                                                              HttpMethod.GET,
                                                                                              null,
-                                                                                             new ParameterizedTypeReference<PagedResources<CloudTask>>() {
+                                                                                             new ParameterizedTypeReference<PagedModel<CloudTask>>() {
                                                                                              });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity.getBody();
@@ -232,16 +232,16 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity.getBody();
     }
-    
-    public ResponseEntity<PagedResources<CloudTask>> getTasks() {
+
+    public ResponseEntity<PagedModel<CloudTask>> getTasks() {
         return getTasks(TASK_VAR_RELATIVE_URL);
     }
-    
-    public ResponseEntity<PagedResources<CloudTask>> adminGetTasks() {
+
+    public ResponseEntity<PagedModel<CloudTask>> adminGetTasks() {
         return getTasks(ADMIN_TASK_VAR_RELATIVE_URL);
     }
-    
-    private ResponseEntity<PagedResources<CloudTask>> getTasks(String baseURL) {
+
+    private ResponseEntity<PagedModel<CloudTask>> getTasks(String baseURL) {
         return testRestTemplate.exchange(baseURL,
                                          HttpMethod.GET,
                                          null,
@@ -251,11 +251,11 @@ public class TaskRestTemplate {
     public ResponseEntity<CloudTask> getTask(String taskId) {
         return getTask(taskId,TASK_VAR_RELATIVE_URL);
     }
-    
+
     public ResponseEntity<CloudTask> adminGetTask(String taskId) {
         return getTask(taskId,ADMIN_TASK_VAR_RELATIVE_URL);
     }
-    
+
     private ResponseEntity<CloudTask> getTask(String taskId,String baseURL) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(baseURL + taskId,
                                                                              HttpMethod.GET,
@@ -319,7 +319,7 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-    
+
 
     public ResponseEntity<Void> updateVariable(String taskId,
                                                String name,
@@ -337,14 +337,14 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-  
 
-    public ResponseEntity<Resources<CloudVariableInstance>> getVariables(String taskId) {
 
-        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/",
+    public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariables(String taskId) {
+
+        ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/",
                                                                                                     HttpMethod.GET,
                                                                                                     null,
-                                                                                                    new ParameterizedTypeReference<Resources<CloudVariableInstance>>() {
+                                                                                                    new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {
                                                                                                     });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
@@ -384,14 +384,14 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-        
-    
-    public ResponseEntity<Resources<CloudVariableInstance>> adminGetVariables(String taskId) {
 
-        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.ADMIN_TASK_VAR_RELATIVE_URL + taskId + "/variables/",
+
+    public ResponseEntity<CollectionModel<CloudVariableInstance>> adminGetVariables(String taskId) {
+
+        ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.ADMIN_TASK_VAR_RELATIVE_URL + taskId + "/variables/",
                                                                                                     HttpMethod.GET,
                                                                                                     null,
-                                                                                                    new ParameterizedTypeReference<Resources<CloudVariableInstance>>() {
+                                                                                                    new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {
                                                                                                     });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;

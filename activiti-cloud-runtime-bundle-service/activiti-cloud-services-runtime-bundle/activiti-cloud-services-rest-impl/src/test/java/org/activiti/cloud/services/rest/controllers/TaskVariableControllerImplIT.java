@@ -38,8 +38,8 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
-import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
-import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
@@ -57,9 +57,9 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = TaskVariableControllerImpl.class, secure = false)
+@WebMvcTest(TaskVariableControllerImpl.class)
 @EnableSpringDataWebSupport()
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -82,10 +82,10 @@ public class TaskVariableControllerImplIT {
     private TaskRuntime taskRuntime;
 
     @SpyBean
-    private TaskVariableInstanceResourceAssembler variableInstanceResourceAssembler;
+    private TaskVariableInstanceRepresentationModelAssembler variableInstanceRepresentationModelAssembler;
 
     @SpyBean
-    private ResourcesAssembler resourcesAssembler;
+    private CollectionModelAssembler resourcesAssembler;
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
@@ -103,7 +103,7 @@ public class TaskVariableControllerImplIT {
         //using it in the test we need to to declare it as @SpyBean so it get inject
         //in the controller
         assertThat(resourcesAssembler).isNotNull();
-        assertThat(variableInstanceResourceAssembler).isNotNull();
+        assertThat(variableInstanceRepresentationModelAssembler).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }

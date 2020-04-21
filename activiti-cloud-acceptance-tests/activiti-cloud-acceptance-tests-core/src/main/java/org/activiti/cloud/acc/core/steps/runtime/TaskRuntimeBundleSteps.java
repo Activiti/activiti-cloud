@@ -17,8 +17,8 @@ import org.activiti.cloud.acc.core.services.runtime.TaskRuntimeService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 
 import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
 import static org.assertj.core.api.Assertions.*;
@@ -105,7 +105,7 @@ public class TaskRuntimeBundleSteps {
         return taskRuntimeService.createTask(subTask);
     }
 
-    public Resources<CloudTask> getSubtasks(String parentTaskId) {
+    public CollectionModel<CloudTask> getSubtasks(String parentTaskId) {
         return taskRuntimeService.getSubtasks(parentTaskId);
     }
 
@@ -127,7 +127,7 @@ public class TaskRuntimeBundleSteps {
     }
 
     @Step
-    public PagedResources<CloudTask> getAllTasks(){
+    public PagedModel<CloudTask> getAllTasks(){
         return taskRuntimeService.getTasks();
     }
 
@@ -161,7 +161,7 @@ public class TaskRuntimeBundleSteps {
     }
 
     @Step
-    public Resources<CloudVariableInstance> getVariables(String taskId){
+    public CollectionModel<CloudVariableInstance> getVariables(String taskId){
         return taskRuntimeService.getVariables(taskId);
     }
 

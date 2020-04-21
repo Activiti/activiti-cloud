@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
  * Integration tests for ProcessDiagramGeneratorWrapper
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestProcessEngineConfiguration.class)
-@TestPropertySource("classpath:test-process-diagram.properties")
+@TestPropertySource("classpath:application-test-process-diagram.properties")
 public class ProcessDiagramGeneratorWrapperIT {
 
     private static final String DEFAULT_DIAGRAM_FONT_NAME = "Arial";
@@ -190,9 +190,6 @@ public class ProcessDiagramGeneratorWrapperIT {
     @Test
     public void testProcessDiagramFonts() {
         //GIVEN
-        //test-process-diagram.properties:
-        //activiti.engine.diagram.activity.font=Lucida
-        //activiti.engine.diagram.label.font=InvalidFont
         when(processDiagramGenerator.getAvailableFonts())
                 .thenReturn(new String[]{"Lucida"});
 

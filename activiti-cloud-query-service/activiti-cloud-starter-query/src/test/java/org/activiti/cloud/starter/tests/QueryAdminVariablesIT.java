@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,9 +56,9 @@ public class QueryAdminVariablesIT {
     private static final String ADMIN_PROCESS_VARIABLES_URL = "/admin/v1/process-instances/{processInstanceId}/variables";
     private static final String ADMIN_TASK_VARIABLES_URL = "/admin/v1/tasks/{taskId}/variables";
 
-    private static final ParameterizedTypeReference<PagedResources<ProcessVariableEntity>> PAGED_PROCESSVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessVariableEntity>>() {
+    private static final ParameterizedTypeReference<PagedModel<ProcessVariableEntity>> PAGED_PROCESSVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessVariableEntity>>() {
     };
-    private static final ParameterizedTypeReference<PagedResources<TaskVariableEntity>> PAGED_TASKVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<TaskVariableEntity>>() {
+    private static final ParameterizedTypeReference<PagedModel<TaskVariableEntity>> PAGED_TASKVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<TaskVariableEntity>>() {
     };
 
     @Autowired
@@ -124,7 +124,7 @@ public class QueryAdminVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL,
+            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL,
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
@@ -166,7 +166,7 @@ public class QueryAdminVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL,
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL,
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_TASKVARIABLE_RESPONSE_TYPE,
@@ -210,7 +210,7 @@ public class QueryAdminVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
+            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
@@ -255,7 +255,7 @@ public class QueryAdminVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL + "?name={varName}",
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL + "?name={varName}",
                                                                                                           HttpMethod.GET,
                                                                                                           keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                           PAGED_TASKVARIABLE_RESPONSE_TYPE,
@@ -311,7 +311,7 @@ public class QueryAdminVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> taskResponseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL + "?name={varName}",
+            ResponseEntity<PagedModel<TaskVariableEntity>> taskResponseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL + "?name={varName}",
                                                                                                           HttpMethod.GET,
                                                                                                           keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                           PAGED_TASKVARIABLE_RESPONSE_TYPE,
@@ -329,7 +329,7 @@ public class QueryAdminVariablesIT {
                     );
 
             //when
-            ResponseEntity<PagedResources<ProcessVariableEntity>> processResponseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
+            ResponseEntity<PagedModel<ProcessVariableEntity>> processResponseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_PROCESSVARIABLE_RESPONSE_TYPE,

@@ -27,16 +27,16 @@ import org.springframework.messaging.converter.MessageConversionException;
 public class StartMessagePayloadTransformer extends AbstractPayloadTransformer<MessageEventPayload, StartMessagePayload> {
 
     private static final StartMessagePayloadTransformer INSTANCE = new StartMessagePayloadTransformer();
-    
+
     public static StartMessagePayload from(Message<?> message) {
         try {
             return INSTANCE.doTransform(message);
         } catch (Exception cause) {
             throw new MessageConversionException(message, cause.getMessage());
         }
-    }    
+    }
     @Override
-    protected StartMessagePayload transformPayload(MessageEventPayload eventPayload) throws Exception {
+    protected StartMessagePayload transformPayload(MessageEventPayload eventPayload) {
         return MessagePayloadBuilder.start(eventPayload.getName())
                                     .withBusinessKey(eventPayload.getBusinessKey())
                                     .withVariables(eventPayload.getVariables())

@@ -11,9 +11,9 @@ import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 
 @EnableRuntimeFeignContext
 public class ProcessQueryAdminSteps {
@@ -26,19 +26,19 @@ public class ProcessQueryAdminSteps {
 
     @Autowired
     private ProcessQueryAdminDiagramService processQueryAdminDiagramService;
-    
+
     @Step
     public void checkServicesHealth() {
         assertThat(processQueryAdminService.isServiceUp()).isTrue();
     }
 
     @Step
-    public PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin(){
+    public PagedModel<CloudProcessInstance> getAllProcessInstancesAdmin(){
         return processQueryAdminService.getProcessInstances();
     }
 
     @Step
-    public PagedResources<CloudProcessDefinition> getAllProcessDefinitions(){
+    public PagedModel<CloudProcessDefinition> getAllProcessDefinitions(){
         return processQueryAdminService.getProcessDefinitions();
     }
 
@@ -48,12 +48,12 @@ public class ProcessQueryAdminSteps {
     }
 
     @Step
-    public PagedResources<CloudProcessDefinition> getProcessDefinitions(){
+    public PagedModel<CloudProcessDefinition> getProcessDefinitions(){
         return processQueryAdminService.getProcessDefinitions();
     }
 
     @Step
-    public Resources<Resource<CloudProcessInstance>> deleteProcessInstances(){
+    public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances(){
         return processQueryAdminService.deleteProcessInstances();
     }
     @Step

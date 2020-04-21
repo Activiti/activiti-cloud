@@ -22,15 +22,15 @@ import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskAdminController;
-import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,40 +40,40 @@ public class TaskAdminControllerImpl implements TaskAdminController {
 
     private final TaskAdminRuntime taskAdminRuntime;
 
-    private final TaskResourceAssembler taskResourceAssembler;
+    private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
-    private final AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
+    private final AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler;
 
     private final SpringPageConverter pageConverter;
 
     @Autowired
     public TaskAdminControllerImpl(TaskAdminRuntime taskAdminRuntime,
-                                   TaskResourceAssembler taskResourceAssembler,
-                                   AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
+                                   TaskRepresentationModelAssembler taskRepresentationModelAssembler,
+                                   AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
                                    SpringPageConverter pageConverter) {
         this.taskAdminRuntime = taskAdminRuntime;
-        this.taskResourceAssembler = taskResourceAssembler;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
     }
 
     @Override
-    public PagedResources<Resource<CloudTask>> getTasks(Pageable pageable) {
+    public PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable) {
         Page<Task> tasksPage = taskAdminRuntime.tasks(pageConverter.toAPIPageable(pageable));
-        return pagedResourcesAssembler.toResource(pageable,
+        return pagedCollectionModelAssembler.toModel(pageable,
                                                   pageConverter.toSpringPage(pageable,
                                                                              tasksPage),
-                                                  taskResourceAssembler);
+                                                  taskRepresentationModelAssembler);
     }
-    
+
     @Override
-    public Resource<CloudTask> getTaskById(@PathVariable String taskId) {
+    public EntityModel<CloudTask> getTaskById(@PathVariable String taskId) {
         Task task = taskAdminRuntime.task(taskId);
-        return taskResourceAssembler.toResource(task);
+        return taskRepresentationModelAssembler.toModel(task);
     }
-    
+
     @Override
-    public Resource<CloudTask> completeTask(@PathVariable String taskId,
+    public EntityModel<CloudTask> completeTask(@PathVariable String taskId,
                                             @RequestBody(required = false) CompleteTaskPayload completeTaskPayload) {
         if (completeTaskPayload == null) {
             completeTaskPayload = TaskPayloadBuilder
@@ -85,33 +85,33 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         }
 
         Task task = taskAdminRuntime.complete(completeTaskPayload);
-        return taskResourceAssembler.toResource(task);
+        return taskRepresentationModelAssembler.toModel(task);
     }
 
     @Override
-    public Resource<CloudTask> deleteTask(@PathVariable String taskId) {
+    public EntityModel<CloudTask> deleteTask(@PathVariable String taskId) {
         Task task = taskAdminRuntime.delete(TaskPayloadBuilder
                                            .delete()
                                            .withTaskId(taskId)
                                            .build());
-        return taskResourceAssembler.toResource(task);
+        return taskRepresentationModelAssembler.toModel(task);
     }
-    
+
     @Override
-    public Resource<CloudTask> updateTask(@PathVariable String taskId,
+    public EntityModel<CloudTask> updateTask(@PathVariable String taskId,
                                    @RequestBody UpdateTaskPayload updateTaskPayload) {
         if (updateTaskPayload != null) {
             updateTaskPayload.setTaskId(taskId);
         }
-        return taskResourceAssembler.toResource(taskAdminRuntime.update(updateTaskPayload));
+        return taskRepresentationModelAssembler.toModel(taskAdminRuntime.update(updateTaskPayload));
     }
 
     @Override
-    public Resource<CloudTask> assign(@PathVariable String taskId,
+    public EntityModel<CloudTask> assign(@PathVariable String taskId,
                                @RequestBody AssignTaskPayload assignTaskPayload) {
         if (assignTaskPayload!=null)
             assignTaskPayload.setTaskId(taskId);
- 
-        return taskResourceAssembler.toResource(taskAdminRuntime.assign(assignTaskPayload));
+
+        return taskRepresentationModelAssembler.toModel(taskAdminRuntime.assign(assignTaskPayload));
     }
 }

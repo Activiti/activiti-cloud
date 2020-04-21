@@ -18,20 +18,20 @@ package org.activiti.cloud.services.audit.api.controllers;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
-import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
+import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/admin/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public interface AuditEventsAdminController {
 
     @RequestMapping(method = RequestMethod.GET)
-    PagedResources<Resource<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable);
+    PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable);
 }

@@ -19,14 +19,14 @@ package org.activiti.cloud.acc.core.helper;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class Filters {
 
-    public static Collection<CloudProcessInstance> checkProcessInstances(PagedResources<CloudProcessInstance> resource, String processKey){
+    public static Collection<CloudProcessInstance> checkProcessInstances(PagedModel<CloudProcessInstance> resource, String processKey){
         Collection<CloudProcessInstance> rawCollection = resource.getContent();
         Collection<CloudProcessInstance> filteredCollection = new ArrayList<>();
         for(CloudProcessInstance e : rawCollection){

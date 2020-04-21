@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
-@TestPropertySource("classpath:test-application.properties")
+@TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
 public class ProcessDefinitionRestrictionServiceIT {
 

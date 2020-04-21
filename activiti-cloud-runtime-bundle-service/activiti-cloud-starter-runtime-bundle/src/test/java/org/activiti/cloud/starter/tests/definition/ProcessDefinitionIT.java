@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -81,7 +81,7 @@ public class ProcessDefinitionIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+        ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
 
         //then
         assertThat(entity).isNotNull();
@@ -95,7 +95,7 @@ public class ProcessDefinitionIT {
     }
 
     private ProcessDefinition getProcessDefinition(String name) {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
         Iterator<CloudProcessDefinition> it = processDefinitionsEntity.getBody().getContent().iterator();
         ProcessDefinition aProcessDefinition;
         do {
@@ -105,8 +105,8 @@ public class ProcessDefinitionIT {
         return aProcessDefinition;
     }
 
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions(String url) {
-        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
+    private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions(String url) {
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(url,
                                      HttpMethod.GET,
@@ -120,7 +120,7 @@ public class ProcessDefinitionIT {
         ParameterizedTypeReference<CloudProcessDefinition> responseType = new ParameterizedTypeReference<CloudProcessDefinition>() {
         };
 
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
         assertThat(processDefinitionsEntity).isNotNull();
         assertThat(processDefinitionsEntity.getBody()).isNotNull();
         assertThat(processDefinitionsEntity.getBody().getContent()).isNotEmpty();
@@ -287,7 +287,7 @@ public class ProcessDefinitionIT {
 
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+        ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
 
         //then - should only see process defs visible to this user (testuser)
         assertThat(entity).isNotNull();
@@ -320,7 +320,7 @@ public class ProcessDefinitionIT {
 
         //testadmin should see restricted set at non-admin endpoint
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+        ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
 
         assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).doesNotContain(
                 PROCESS_WITH_VARIABLES_2,

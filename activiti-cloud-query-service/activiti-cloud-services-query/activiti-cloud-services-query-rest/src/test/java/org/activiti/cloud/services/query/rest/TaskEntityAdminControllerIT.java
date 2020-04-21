@@ -64,7 +64,7 @@ import org.springframework.test.web.servlet.MvcResult;
         AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 public class TaskEntityAdminControllerIT {
 
     @Autowired

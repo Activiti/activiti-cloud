@@ -32,7 +32,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -59,9 +59,9 @@ public class TestConfiguration {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                          false);
-        
+
         mapper.registerModule(new Jackson2HalModule());
-        
+
         for (Module module : modules) {
             if (module.getModuleName().startsWith("map")) {
                 mapper.registerModule(module);
@@ -76,5 +76,5 @@ public class TestConfiguration {
                 jackson2HttpMessageConverter,
                 new StringHttpMessageConverter(StandardCharsets.UTF_8)).additionalInterceptors(keycloakTokenProducer);
     }
-    
+
 }

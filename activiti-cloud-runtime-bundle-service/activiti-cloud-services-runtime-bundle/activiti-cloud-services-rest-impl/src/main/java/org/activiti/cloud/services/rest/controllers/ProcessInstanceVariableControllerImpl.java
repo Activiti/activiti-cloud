@@ -20,11 +20,11 @@ import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
-import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
-import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,31 +34,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVariableController {
 
-    private final ProcessInstanceVariableResourceAssembler variableResourceAssembler;
+    private final ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler;
     private final ProcessRuntime processRuntime;
-    private final ResourcesAssembler resourcesAssembler;
-   
+    private final CollectionModelAssembler resourcesAssembler;
+
     @Autowired
-    public ProcessInstanceVariableControllerImpl(ProcessInstanceVariableResourceAssembler variableResourceAssembler,
+    public ProcessInstanceVariableControllerImpl(ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
                                                  ProcessRuntime processRuntime,
-                                                 ResourcesAssembler resourcesAssembler) {
-        this.variableResourceAssembler = variableResourceAssembler;
+                                                 CollectionModelAssembler resourcesAssembler) {
+        this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.processRuntime = processRuntime;
         this.resourcesAssembler = resourcesAssembler;
     }
 
     @Override
-    public Resources<Resource<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId) {
-        return resourcesAssembler.toResources(processRuntime.variables(ProcessPayloadBuilder.variables()
+    public CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId) {
+        return resourcesAssembler.toCollectionModel(processRuntime.variables(ProcessPayloadBuilder.variables()
                                                                                .withProcessInstanceId(processInstanceId)
                                                                                .build()),
-                                              variableResourceAssembler);
+                                              variableRepresentationModelAssembler);
     }
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
                                              @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
-        
+
         if (setProcessVariablesPayload != null) {
             setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
         }

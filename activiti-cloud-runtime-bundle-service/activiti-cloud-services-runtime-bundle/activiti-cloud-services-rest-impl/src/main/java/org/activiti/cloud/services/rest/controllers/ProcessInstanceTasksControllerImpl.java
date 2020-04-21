@@ -20,15 +20,15 @@ import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskRuntime;
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceTasksController;
-import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,33 +37,33 @@ public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksC
 
     private final TaskRuntime taskRuntime;
 
-    private final TaskResourceAssembler taskResourceAssembler;
+    private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
-    private final AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
+    private final AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler;
 
     private final SpringPageConverter pageConverter;
 
     @Autowired
     public ProcessInstanceTasksControllerImpl(TaskRuntime taskRuntime,
-                                              TaskResourceAssembler taskResourceAssembler,
-                                              AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
+                                              TaskRepresentationModelAssembler taskRepresentationModelAssembler,
+                                              AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
                                               SpringPageConverter pageConverter) {
         this.taskRuntime = taskRuntime;
-        this.taskResourceAssembler = taskResourceAssembler;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
     }
 
     @Override
-    public PagedResources<Resource<CloudTask>> getTasks(@PathVariable String processInstanceId,
+    public PagedModel<EntityModel<CloudTask>> getTasks(@PathVariable String processInstanceId,
                                                         Pageable pageable) {
         Page<Task> page = taskRuntime.tasks(pageConverter.toAPIPageable(pageable),
                                             TaskPayloadBuilder.tasks()
                                                                                                 .withProcessInstanceId(processInstanceId)
                                                                                                 .build());
-        return pagedResourcesAssembler.toResource(pageable,
+        return pagedCollectionModelAssembler.toModel(pageable,
                                                   pageConverter.toSpringPage(pageable,
                                                                              page),
-                                                  taskResourceAssembler);
+                                                  taskRepresentationModelAssembler);
     }
 }

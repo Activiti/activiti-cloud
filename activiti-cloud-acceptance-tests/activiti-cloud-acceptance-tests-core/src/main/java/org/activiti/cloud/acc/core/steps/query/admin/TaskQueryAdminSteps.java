@@ -7,9 +7,9 @@ import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.admin.TaskQueryAdminService;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 
 @EnableRuntimeFeignContext
 public class TaskQueryAdminSteps {
@@ -22,9 +22,9 @@ public class TaskQueryAdminSteps {
         assertThat(taskQueryAdminService.isServiceUp()).isTrue();
     }
 
- 
+
     @Step
-    public PagedResources<CloudTask> getAllTasks(){
+    public PagedModel<CloudTask> getAllTasks(){
         return taskQueryAdminService.getTasks();
     }
 
@@ -33,25 +33,25 @@ public class TaskQueryAdminSteps {
         return taskQueryAdminService.getTask(id);
     }
 
-    
+
     @Step
-    public PagedResources<CloudTask> getRootTasksByProcessInstance(String processInstanceId){
+    public PagedModel<CloudTask> getRootTasksByProcessInstance(String processInstanceId){
         return taskQueryAdminService.getRootTasksByProcessInstance(processInstanceId);
     }
-    
+
     @Step
-    public PagedResources<CloudTask> getStandaloneTasks(){
+    public PagedModel<CloudTask> getStandaloneTasks(){
         return taskQueryAdminService.getStandaloneTasks();
     }
 
     @Step
-    public PagedResources<CloudTask> getNonStandaloneTasks(){
+    public PagedModel<CloudTask> getNonStandaloneTasks(){
         return taskQueryAdminService.getNonStandaloneTasks();
     }
 
     @Step
-    public Resources<Resource<CloudTask>> deleteTasks(){
+    public CollectionModel<EntityModel<CloudTask>> deleteTasks(){
         return taskQueryAdminService.deleteTasks();
     }
-    
+
 }

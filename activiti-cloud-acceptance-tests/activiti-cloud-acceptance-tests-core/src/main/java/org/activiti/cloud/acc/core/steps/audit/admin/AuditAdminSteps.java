@@ -5,9 +5,9 @@ import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.audit.admin.AuditAdminService;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 
 import java.util.Collection;
 
@@ -31,12 +31,12 @@ public class AuditAdminSteps {
     }
 
     @Step
-    public Resources<Resource<CloudRuntimeEvent>> deleteEvents(){
+    public CollectionModel<EntityModel<CloudRuntimeEvent>> deleteEvents(){
         return auditAdminService.deleteEvents();
     }
 
     @Step
-    public PagedResources<CloudRuntimeEvent> getEventsAdmin(){
+    public PagedModel<CloudRuntimeEvent> getEventsAdmin(){
         return auditAdminService.getEvents();
     }
 }

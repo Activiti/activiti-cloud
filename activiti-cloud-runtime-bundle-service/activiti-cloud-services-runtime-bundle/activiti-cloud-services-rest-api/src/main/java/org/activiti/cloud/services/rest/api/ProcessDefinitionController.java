@@ -4,8 +4,8 @@ import io.swagger.annotations.ApiOperation;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public interface ProcessDefinitionController {
 
     @RequestMapping(method = RequestMethod.GET)
-    PagedResources<Resource<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable);
+    PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable);
 
 
     @RequestMapping(value = "/{id}",
             method = RequestMethod.GET)
-    Resource<CloudProcessDefinition> getProcessDefinition(@PathVariable String id);
+    EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable String id);
 
     @RequestMapping(value = "/{id}/model",
             method = RequestMethod.GET,

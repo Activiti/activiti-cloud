@@ -10,7 +10,7 @@ import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskRuntimeAdminService;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 @EnableRuntimeFeignContext
 public class TaskRuntimeAdminSteps {
@@ -23,7 +23,7 @@ public class TaskRuntimeAdminSteps {
         assertThat(taskRuntimeAdminService.isServiceUp()).isTrue();
     }
 
- 
+
     @Step
     public void completeTask(String id, CompleteTaskPayload completeTaskPayload) {
 
@@ -37,7 +37,7 @@ public class TaskRuntimeAdminSteps {
     }
 
     @Step
-    public PagedResources<CloudTask> getAllTasks(){
+    public PagedModel<CloudTask> getAllTasks(){
         return taskRuntimeAdminService.getTasks();
     }
 
@@ -47,7 +47,7 @@ public class TaskRuntimeAdminSteps {
                 taskId,
                 updateTaskPayload);
     }
-    
+
     @Step
     public CloudTask assignTask(String taskId, AssignTaskPayload assignTaskPayload){
         return taskRuntimeAdminService.assign(

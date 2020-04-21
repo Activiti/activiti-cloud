@@ -22,7 +22,7 @@ import feign.RequestLine;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 
 public interface TaskVariablesRuntimeAdminService {
 
@@ -38,6 +38,6 @@ public interface TaskVariablesRuntimeAdminService {
 
     @RequestLine("GET admin/v1/tasks/{taskId}/variables")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    Resources<CloudVariableInstance> getVariables(@Param("taskId") String taskId);
+    CollectionModel<CloudVariableInstance> getVariables(@Param("taskId") String taskId);
 
 }

@@ -48,7 +48,7 @@ import java.util.UUID;
 
 @WebMvcTest(ProcessModelAdminController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({
     QueryRestWebMvcAutoConfiguration.class,
     CommonModelAutoConfiguration.class,

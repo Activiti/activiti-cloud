@@ -7,13 +7,15 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.audit.api.config.AuditAPIAutoConfiguration;
-import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
+import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
 import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
@@ -31,13 +33,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@TestPropertySource(properties="activiti.rest.enable-deletion=true")
+@TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @WebMvcTest(AuditEventsDeleteController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({
     AuditAPIAutoConfiguration.class,
     AuditJPAAutoConfiguration.class,
@@ -74,7 +73,7 @@ public class AuditEventDeleteControllerIT {
                 .willReturn(list);
 
         //when
-        mockMvc.perform(delete("/admin/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL)
+        mockMvc.perform(delete("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL)
                 .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk());

@@ -4,18 +4,18 @@ import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 
 public interface AuditAdminService extends BaseService {
 
     @RequestLine("GET /admin/v1/events?search={search}&sort=timestamp,desc&sort=id,desc")
-    PagedResources<CloudRuntimeEvent> getEvents(@Param("search") String search);
+    PagedModel<CloudRuntimeEvent> getEvents(@Param("search") String search);
 
     @RequestLine("GET /admin/v1/events?sort=timestamp,desc&sort=id,desc")
-    PagedResources<CloudRuntimeEvent> getEvents();
+    PagedModel<CloudRuntimeEvent> getEvents();
 
     @RequestLine("DELETE /admin/v1/events")
-    Resources<Resource<CloudRuntimeEvent>> deleteEvents();
+    CollectionModel<EntityModel<CloudRuntimeEvent>> deleteEvents();
 }
