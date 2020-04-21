@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.build</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
-  <groupId>org.activiti.cloud.notifications.graphql</groupId>
+  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-notifications-service-graphql-parent</artifactId>
   <name>Activiti Cloud Notifications GraphQL Service :: Parent</name>
   <version>7.1.0-SNAPSHOT</version>
@@ -23,7 +23,7 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.build</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-dependencies-parent</artifactId>
         <version>${activiti-cloud-build.version}</version>
         <scope>import</scope>
@@ -37,7 +37,7 @@
         <type>pom</type>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-query-dependencies</artifactId>
         <version>${activiti-cloud-query-service.version}</version>
         <scope>import</scope>
@@ -48,7 +48,7 @@
   <!-- BoM Marker Dependencies -->
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.build</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-parent</artifactId>
       <version>${activiti-cloud-build.version}</version>
       <type>pom</type>
@@ -60,7 +60,7 @@
       <type>pom</type>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.query</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-query-dependencies</artifactId>
       <version>${activiti-cloud-query-service.version}</version>
       <type>pom</type>

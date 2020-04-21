@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.build</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
-  <groupId>org.activiti.cloud.rb</groupId>
+  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -22,7 +22,7 @@
   </modules>
   <properties>
 	<project.scm.repository>activiti-cloud-runtime-bundle-service</project.scm.repository>
-    <activiti-dependencies.version>7.1.213</activiti-dependencies.version>
+    <activiti-dependencies.version>7.1.0-SNAPSHOT</activiti-dependencies.version>
     <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
@@ -30,21 +30,21 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.build</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-dependencies-parent</artifactId>
         <version>${activiti-cloud-build.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.common</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-common-dependencies</artifactId>
         <version>${activiti-cloud-service-common.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>org.activiti.dependencies</groupId>
+        <groupId>org.activiti</groupId>
         <artifactId>activiti-dependencies</artifactId>
         <version>${activiti-dependencies.version}</version>
         <type>pom</type>
@@ -55,21 +55,21 @@
   <!-- Marker BoMs for dependency convergence tests -->
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.build</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-parent</artifactId>
       <version>${activiti-cloud-build.version}</version>
       <type>pom</type>
     </dependency>
     <!-- Activiti Cloud Common Dependencies -->
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-common-dependencies</artifactId>
       <version>${activiti-cloud-service-common.version}</version>
       <type>pom</type>
     </dependency>
     <!-- Activiti Core Dependencies -->
     <dependency>
-      <groupId>org.activiti.dependencies</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-dependencies</artifactId>
       <version>${activiti-dependencies.version}</version>
       <type>pom</type>

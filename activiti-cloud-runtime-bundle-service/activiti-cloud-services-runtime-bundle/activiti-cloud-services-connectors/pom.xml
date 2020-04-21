@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.rb</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-runtime-bundle</artifactId>
     <version>7.1.0-SNAPSHOT</version>
   </parent>
@@ -11,19 +11,19 @@
   <name>Activiti Cloud Services :: Connectors</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.rb</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-events</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-model-shared-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-process-model</artifactId>
     </dependency>
     <dependency>
@@ -56,7 +56,7 @@
       <artifactId>spring-data-commons</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.rb</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-api</artifactId>
     </dependency>
     <dependency>
@@ -82,15 +82,15 @@
       <artifactId>activiti-api-process-runtime-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.core.common</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-connector-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.core.common</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-spring-connector</artifactId>
     </dependency>
     <dependency>
@@ -104,7 +104,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.activiti.core.common</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-spring-security-policies</artifactId>
       <scope>test</scope>
     </dependency>
