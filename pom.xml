@@ -11,7 +11,14 @@
   <url>http://activiti.org</url>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.scm.repository>activiti-cloud</project.scm.repository>
+    <java.release>11</java.release>
+    <java.version>1.${java.release}</java.version>
+    <maven.compiler.release>${java.release}</maven.compiler.release>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
   </properties>
 
