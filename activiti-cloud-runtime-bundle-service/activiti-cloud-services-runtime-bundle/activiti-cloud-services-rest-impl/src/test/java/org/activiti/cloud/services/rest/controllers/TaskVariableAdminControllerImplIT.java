@@ -16,17 +16,12 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.taskIdParameter;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedVariableFields;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,7 +49,6 @@ import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -68,7 +62,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers = TaskVariableAdminControllerImpl.class, secure = false)
 @EnableSpringDataWebSupport()
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -78,8 +71,6 @@ import org.springframework.test.web.servlet.MockMvc;
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class})
 public class TaskVariableAdminControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "task-variable";
 
     @Autowired
     private MockMvc mockMvc;
@@ -139,11 +130,7 @@ public class TaskVariableAdminControllerImplIT {
                                                                      age));
         this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/variables",
                                  TASK_ID).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                taskIdParameter(),
-                                unpagedVariableFields()
-                ));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -153,9 +140,7 @@ public class TaskVariableAdminControllerImplIT {
                 mapper.writeValueAsString(TaskPayloadBuilder.createVariable().withTaskId(TASK_ID)
                                                   .withVariable("name",
                                                                 "Alice").build())))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/set",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
 
         verify(taskRuntime).createVariable(any());
     }

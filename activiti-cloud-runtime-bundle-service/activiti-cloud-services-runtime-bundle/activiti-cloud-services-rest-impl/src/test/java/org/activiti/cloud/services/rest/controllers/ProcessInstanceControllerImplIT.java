@@ -55,7 +55,6 @@ import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -67,9 +66,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedProcessInstanceFields;
 import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -80,12 +76,9 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -93,7 +86,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ProcessInstanceControllerImpl.class, secure = false)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({CommonModelAutoConfiguration.class,
         ProcessModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -105,10 +97,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         AlfrescoWebAutoConfiguration.class
 })
 public class ProcessInstanceControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "process-instance";
-
-    private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "process-instance-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -153,10 +141,7 @@ public class ProcessInstanceControllerImplIT {
         mockMvc.perform(get("/v1/process-instances?page=0&size=10")
                 .accept(MediaTypes.HAL_JSON_VALUE))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                pagedProcessInstanceFields()
-                ));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -168,10 +153,7 @@ public class ProcessInstanceControllerImplIT {
         when(processRuntime.processInstances(any())).thenReturn(processInstancePage);
 
         mockMvc.perform(get("/v1/process-instances?skipCount=10&maxItems=10").accept(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -182,8 +164,7 @@ public class ProcessInstanceControllerImplIT {
         mockMvc.perform(post("/v1/process-instances")
                                      .contentType(APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(cmd)))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/start"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -194,8 +175,7 @@ public class ProcessInstanceControllerImplIT {
         mockMvc.perform(post("/v1/process-instances/create")
             .contentType(APPLICATION_JSON)
             .content(mapper.writeValueAsString(cmd)))
-            .andExpect(status().isOk())
-            .andDo(document(DOCUMENTATION_IDENTIFIER + "/create"));
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -203,8 +183,7 @@ public class ProcessInstanceControllerImplIT {
         when(processRuntime.startCreatedProcess("1")).thenReturn(defaultProcessInstance());
 
         mockMvc.perform(post("/v1/process-instances/{processInstanceId}/start", 1))
-            .andExpect(status().isOk())
-            .andDo(document(DOCUMENTATION_IDENTIFIER + "/startCreated"));
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -241,11 +220,8 @@ public class ProcessInstanceControllerImplIT {
     public void getProcessInstanceById() throws Exception {
         when(processRuntime.processInstance("1")).thenReturn(defaultProcessInstance());
 
-        mockMvc.perform(get("/v1/process-instances/{processInstanceId}",
-                                 1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+        mockMvc.perform(get("/v1/process-instances/{processInstanceId}", 1))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -276,9 +252,7 @@ public class ProcessInstanceControllerImplIT {
 
         mockMvc.perform(get("/v1/process-instances/{processInstanceId}/model",
                                  1).contentType("image/svg+xml"))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -324,8 +298,7 @@ public class ProcessInstanceControllerImplIT {
 
         mockMvc.perform(post("/v1/process-instances/signal").contentType(APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(cmd)))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/signal"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -333,11 +306,8 @@ public class ProcessInstanceControllerImplIT {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.suspend(any())).thenReturn(defaultProcessInstance());
-        mockMvc.perform(post("/v1/process-instances/{processInstanceId}/suspend",
-                                 1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/suspend",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+        mockMvc.perform(post("/v1/process-instances/{processInstanceId}/suspend", 1))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -347,9 +317,7 @@ public class ProcessInstanceControllerImplIT {
         when(processRuntime.resume(any())).thenReturn(defaultProcessInstance());
         mockMvc.perform(post("/v1/process-instances/{processInstanceId}/resume",
                                  1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/resume",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -359,9 +327,7 @@ public class ProcessInstanceControllerImplIT {
         when(processRuntime.delete(any())).thenReturn(defaultProcessInstance());
         mockMvc.perform(delete("/v1/process-instances/{processInstanceId}",
                                     1))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -380,9 +346,7 @@ public class ProcessInstanceControllerImplIT {
                                  1)
                                      .contentType(APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(cmd)))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/update"));
-
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -411,8 +375,7 @@ public class ProcessInstanceControllerImplIT {
         mockMvc.perform(put("/v1/process-instances/message")
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd)))
-                    .andExpect(status().isOk())
-                    .andDo(document(DOCUMENTATION_IDENTIFIER + "/message"));
+                    .andExpect(status().isOk());
     }
 
     @Test
@@ -427,8 +390,7 @@ public class ProcessInstanceControllerImplIT {
         mockMvc.perform(post("/v1/process-instances/message")
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd)))
-                    .andExpect(status().isOk())
-                    .andDo(document(DOCUMENTATION_IDENTIFIER + "/message"));
+                    .andExpect(status().isOk());
     }
 
 }

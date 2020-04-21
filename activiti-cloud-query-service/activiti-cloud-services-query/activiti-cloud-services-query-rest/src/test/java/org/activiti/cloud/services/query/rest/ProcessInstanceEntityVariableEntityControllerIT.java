@@ -17,17 +17,11 @@
 package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pageLinks;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedVariablesFields;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
@@ -44,7 +38,6 @@ import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesPr
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -69,11 +62,7 @@ import java.util.UUID;
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 public class ProcessInstanceEntityVariableEntityControllerIT {
-
-    private static final String PROCESS_INSTANCE_VARIABLE_ALFRESCO_IDENTIFIER = "process-instance-variable-alfresco";
-    private static final String PROCESS_INSTANCE_VARIABLE_IDENTIFIER = "process-instance-variable";
 
     @Autowired
     private MockMvc mockMvc;
@@ -128,12 +117,6 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
                                                    .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk())
-                .andDo(document(PROCESS_INSTANCE_VARIABLE_ALFRESCO_IDENTIFIER + "/list",
-                                processInstanceIdParameter(),
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()
-
-                ))
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
@@ -163,14 +146,7 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
                                                variableEntity.getProcessInstanceId())
                                                    .accept(MediaTypes.HAL_JSON_VALUE))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(PROCESS_INSTANCE_VARIABLE_IDENTIFIER + "/list",
-                                processInstanceIdParameter(),
-                                pageLinks(),
-                                pagedVariablesFields()
-
-                ));
-
+                .andExpect(status().isOk());
     }
 
     private ProcessVariableEntity buildVariable() {
