@@ -39,8 +39,8 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud-acceptance-tests.version>7.1.450</activiti-cloud-acceptance-tests.version>
-    <activiti-cloud-modeling.version>7.1.450</activiti-cloud-modeling.version>
+    <activiti-cloud-acceptance-tests.version>7.1.454</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-modeling.version>7.1.454</activiti-cloud-modeling.version>
     <asm.version>7.0</asm.version>
     <awaitility.version>3.1.1</awaitility.version>
     <batik.version>1.10</batik.version>
