@@ -50,7 +50,8 @@
             "boolean",
             "json",
             "file",
-            "folder"
+            "folder",
+            "array"
           ]
         },
         "required": {
@@ -210,6 +211,25 @@
                 "type": "object",
                 "message": {
                   "type": "Mismatch value type - {{name}}({{id}}). Expected type is folder"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "array"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "array",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is array"
                 }
               }
             }
