@@ -48,7 +48,8 @@ public class RedisMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
     }
 
     @Test
-    public void testMessageStore() throws Exception {
+    public void testMessageStore() {
         assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(RedisMessageStore.class);
     }
+
 }

@@ -96,6 +96,7 @@ public interface ModelRestApi {
 
     String MODEL_TYPE_PARAM_NAME = "type";
 
+
     @ApiOperation(
             tags = MODELS,
             value = "List models for an project",

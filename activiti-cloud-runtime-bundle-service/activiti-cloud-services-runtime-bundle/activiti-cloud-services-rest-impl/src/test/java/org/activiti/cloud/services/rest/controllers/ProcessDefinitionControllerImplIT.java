@@ -17,12 +17,6 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefinitionFields;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefinitionIdParameter;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedProcessDefinitionFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.selfLink;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -31,9 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,7 +61,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -84,7 +75,6 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(value = ProcessDefinitionControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
@@ -94,10 +84,6 @@ import org.springframework.test.web.servlet.MvcResult;
         AlfrescoWebAutoConfiguration.class})
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessDefinitionControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "process-definition";
-
-    private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "process-definition-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -142,14 +128,7 @@ public class ProcessDefinitionControllerImplIT {
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
-        .andExpect(status().isOk())
-        .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                        pagedProcessDefinitionFields(),
-                        links(selfLink()
-                       )
-        ));
-
-
+        .andExpect(status().isOk());
     }
 
     private ProcessDefinition buildProcessDefinition(String processDefinitionId,
@@ -180,9 +159,6 @@ public class ProcessDefinitionControllerImplIT {
         //when
         MvcResult result = mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()))
                 .andReturn();
 
         //then
@@ -212,9 +188,7 @@ public class ProcessDefinitionControllerImplIT {
 
         mockMvc.perform(get("/v1/process-definitions/{id}",
                                  processId).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
-                                processDefinitionIdParameter()));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -229,11 +203,7 @@ public class ProcessDefinitionControllerImplIT {
         MvcResult result = mockMvc.perform(get("/v1/process-definitions/{id}",
                                                     procDefId).accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/get",
-                                processDefinitionIdParameter(),
-                                processDefinitionFields()
-                       )
-                ).andReturn();
+                .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
                 .node("entry.id").isEqualTo(procDefId)
@@ -255,9 +225,7 @@ public class ProcessDefinitionControllerImplIT {
         mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
                     processDefinitionId).accept(MediaType.APPLICATION_XML))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/model/get",
-                                processDefinitionIdParameter()));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -276,9 +244,7 @@ public class ProcessDefinitionControllerImplIT {
         mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
                     processDefinitionId).accept(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/bpmn-model/get",
-                                processDefinitionIdParameter()));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -295,9 +261,7 @@ public class ProcessDefinitionControllerImplIT {
         mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
                     processDefinitionId).accept("image/svg+xml"))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
-                                processDefinitionIdParameter()));
+                .andExpect(status().isOk());
     }
 
     @Test
