@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud</groupId>
-    <artifactId>activiti-cloud-parent</artifactId>
+    <artifactId>activiti-cloud-build-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
@@ -26,7 +26,7 @@
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-dependencies-parent</artifactId>
+        <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
         <version>${activiti-cloud-build.version}</version>
         <scope>import</scope>
         <type>pom</type>
@@ -43,7 +43,7 @@
   <dependencies>
      <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-parent</artifactId>
+      <artifactId>activiti-cloud-build-parent</artifactId>
       <version>${activiti-cloud-build.version}</version>
       <type>pom</type>
     </dependency>
