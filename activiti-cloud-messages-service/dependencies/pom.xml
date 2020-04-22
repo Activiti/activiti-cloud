@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.messages</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-messages-service-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
   </parent>
@@ -13,37 +13,37 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.messages</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-messages</artifactId>
         <version>${activiti-cloud-messages-service.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.messages</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-messages-core</artifactId>
         <version>${activiti-cloud-messages-service.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.messages</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-messages-tests</artifactId>
         <version>${activiti-cloud-messages-service.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.messages</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starters-messages</artifactId>
         <version>${activiti-cloud-messages-service.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.messages</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-messages-jdbc</artifactId>
         <version>${activiti-cloud-messages-service.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.messages</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-messages-redis</artifactId>
         <version>${activiti-cloud-messages-service.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.messages</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-messages-mongodb</artifactId>
         <version>${activiti-cloud-messages-service.version}</version>
       </dependency>

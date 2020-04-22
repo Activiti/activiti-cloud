@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.modeling</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-modeling-dependencies</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-modeling-dependencies</relativePath>
@@ -12,35 +12,35 @@
   <name>Activiti Cloud Starter :: Modeling</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-api-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-jpa</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-rest</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-service</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-swagger</artifactId>
     </dependency>
     <dependency>
@@ -106,7 +106,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-test</artifactId>
       <scope>test</scope>
     </dependency>
