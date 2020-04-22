@@ -42,6 +42,7 @@
     <activiti-cloud-acceptance-tests.version>7.1.455</activiti-cloud-acceptance-tests.version>
     <activiti-cloud-modeling.version>7.1.455</activiti-cloud-modeling.version>
     <asm.version>7.0</asm.version>
+    <assertj.version>3.13.2</assertj.version>
     <awaitility.version>3.1.1</awaitility.version>
     <batik.version>1.10</batik.version>
     <guava.version>23.6-jre</guava.version>
@@ -50,6 +51,11 @@
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>

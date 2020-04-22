@@ -68,7 +68,7 @@ public class ProcessInstanceTasks {
     private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
     @Steps
     private TaskRuntimeAdminSteps taskRuntimeAdminSteps;
-    
+
     @Steps
     private ProcessRuntimeAdminSteps processRuntimeAdminSteps;
 
@@ -90,7 +90,7 @@ public class ProcessInstanceTasks {
 
     private Task currentTask;
     private String processInstanceAdminDiagram;
-    
+
     private static int AUDIT_STEP_TIMEOUT = 60;
 
     @When("services are started")
@@ -177,7 +177,7 @@ public class ProcessInstanceTasks {
                         .withTaskId(currentTask.getId())
                         .build());
     }
-    
+
     @When("the user completes the task with variable $variableName set to $value")
     public void completeTask(String variableName, String value) throws Exception {
         taskRuntimeBundleSteps.completeTask(currentTask.getId(),
@@ -187,8 +187,8 @@ public class ProcessInstanceTasks {
                         .withVariable(variableName, value)
                         .build());
     }
-    
-    
+
+
     @When("the admin completes the task")
     public void adminCompleteTask() throws Exception {
         taskRuntimeAdminSteps.completeTask(currentTask.getId(),
@@ -222,7 +222,7 @@ public class ProcessInstanceTasks {
                                                           .withVariable(variableName, variableValue)
                                                           .build());
     }
-    
+
     @When("the status of the task is $taskStatus")
     public void checkTaskStatus(Task.TaskStatus taskStatus) throws Exception {
         taskRuntimeBundleSteps.checkTaskStatus(currentTask.getId(), taskStatus);
@@ -294,7 +294,7 @@ public class ProcessInstanceTasks {
     public void deleteCurrentProcessInstance() throws Exception {
         processRuntimeBundleSteps.deleteProcessInstance(processInstance.getId());
     }
-    
+
     @When("the admin deletes the process")
     public void adminDeleteCurrentProcessInstance() throws Exception {
         processRuntimeAdminSteps.deleteProcessInstance(processInstance.getId());
@@ -339,7 +339,7 @@ public class ProcessInstanceTasks {
     public void queryProcessInstanceDiagramAdmin() {
         processInstanceAdminDiagram = processQueryAdminSteps.getProcessInstanceDiagram(processInstance.getId());
     }
-    
+
     @Then("query the process diagram admin endpoint is unauthorized")
     public void queryProcessInstanceDiagramAdminUnauthorized() {
         try {
@@ -348,9 +348,9 @@ public class ProcessInstanceTasks {
             assertThat(expected.status()).isEqualTo(403);
             return;
         }
-        
+
         throw new AssertionError("fail");
-    }    
+    }
 
     @Then("the query diagram is shown in admin endpoint")
     public void checkQueryProcessInstanceDiagramAdmin() throws Exception {
@@ -361,7 +361,7 @@ public class ProcessInstanceTasks {
     public void checkQueryProcessInstanceNoDiagramAdmin() throws Exception {
         processQueryAdminSteps.checkProcessInstanceNoDiagram(processInstanceAdminDiagram);
     }
-    
+
     @Then("the query diagram is shown")
     public void checkQueryProcessInstanceDiagram() throws Exception {
         processQuerySteps.checkProcessInstanceDiagram(processInstanceDiagram);
@@ -371,7 +371,7 @@ public class ProcessInstanceTasks {
     public void checkQueryProcessInstanceNoDiagram() throws Exception {
         processQuerySteps.checkProcessInstanceNoDiagram(processInstanceDiagram);
     }
-    
+
     @When("activate the process")
     public void activateCurrentProcessInstance() {
         processRuntimeBundleSteps.resumeProcessInstance(processInstance.getId());
@@ -461,7 +461,7 @@ public class ProcessInstanceTasks {
                 .getProcessDefinitionByKey(processDefinitionKeyMatcher(processName));
         assertThat(processDefinition)
                 .extracting(field)
-                .contains(value);
+                .isEqualTo(value);
     }
 
     @Then("The user gets all the process definitions in admin endpoint")
