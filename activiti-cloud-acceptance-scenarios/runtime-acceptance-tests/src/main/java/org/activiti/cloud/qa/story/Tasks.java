@@ -17,6 +17,7 @@
 package org.activiti.cloud.qa.story;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -305,12 +306,13 @@ public class Tasks {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
         Collection<CloudTask> rootTasksCollection = taskQuerySteps.getRootTasksByProcessInstance(processInstanceId).getContent();
 
-        assertThat(rootTasksCollection).isNotNull();
-        assertThat(rootTasksCollection).isNotEmpty();
+        await().untilAsserted(() -> {
+            assertThat(rootTasksCollection).isNotEmpty();
 
-        rootTasksCollection.forEach(
+            rootTasksCollection.forEach(
                 task -> assertThat(task.getParentTaskId()).isNull()
-        );
+            );
+        });
     }
 
     @Then("the user will get only standalone tasks when quering for standalone tasks")
