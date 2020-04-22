@@ -86,7 +86,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
-import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.test.StepVerifier;
@@ -160,8 +159,7 @@ public class ActivitiGraphQLStarterIT {
                   .websocket(GRAPHQL_WS)
                   .uri(WS_GRAPHQL_URI)
                   .handle((i, o) -> {
-                      o.options(NettyPipeline.SendOptions::flushOnEach)
-                       .sendString(Mono.just(initMessage))
+                      o.sendString(Mono.just(initMessage))
                        .then()
                        .log("client-send")
                        .subscribe();
@@ -259,8 +257,7 @@ public class ActivitiGraphQLStarterIT {
 
        // start subscription
        client.handle((i, o) -> {
-              o.options(NettyPipeline.SendOptions::flushOnEach)
-               .sendString(Mono.just(startMessage))
+              o.sendString(Mono.just(startMessage))
                .then()
                .log("start")
                .subscribe();
@@ -352,8 +349,7 @@ public class ActivitiGraphQLStarterIT {
 
         // start subscription
         client.handle((i, o) -> {
-              o.options(NettyPipeline.SendOptions::flushOnEach)
-               .sendString(Mono.just(startMessage))
+              o.sendString(Mono.just(startMessage))
                .then()
                .log("start")
                .subscribe();
@@ -447,8 +443,7 @@ public class ActivitiGraphQLStarterIT {
 
         // start subscription
         client.handle((i, o) -> {
-              o.options(NettyPipeline.SendOptions::flushOnEach)
-               .sendString(Mono.just(startMessage))
+              o.sendString(Mono.just(startMessage))
                .then()
                .log("start")
                .subscribe();
@@ -545,8 +540,7 @@ public class ActivitiGraphQLStarterIT {
 
         // start subscription
         client.handle((i, o) -> {
-              o.options(NettyPipeline.SendOptions::flushOnEach)
-               .sendString(Mono.just(startMessage))
+              o.sendString(Mono.just(startMessage))
                .then()
                .log("start")
                .subscribe();
@@ -731,8 +725,7 @@ public class ActivitiGraphQLStarterIT {
 
         // start subscription
         client.handle((i, o) -> {
-              o.options(NettyPipeline.SendOptions::flushOnEach)
-               .sendString(Mono.just(startMessage))
+              o.sendString(Mono.just(startMessage))
                .then()
                .log("start")
                .subscribe();
@@ -896,8 +889,7 @@ public class ActivitiGraphQLStarterIT {
 
         // start subscription
         client.handle((i, o) -> {
-              o.options(NettyPipeline.SendOptions::flushOnEach)
-               .sendString(Mono.just(startMessage))
+              o.sendString(Mono.just(startMessage))
                .then()
                .log("start")
                .subscribe();
@@ -972,8 +964,7 @@ public class ActivitiGraphQLStarterIT {
                   .websocket(GRAPHQL_WS)
                   .uri(WS_GRAPHQL_URI)
                   .handle((i, o) -> {
-                      o.options(NettyPipeline.SendOptions::flushOnEach)
-                       .sendString(Mono.just(initMessage))
+                      o.sendString(Mono.just(initMessage))
                        .then()
                        .log("client-send")
                        .subscribe();
@@ -1009,8 +1000,7 @@ public class ActivitiGraphQLStarterIT {
                   .websocket(GRAPHQL_WS)
                   .uri(WS_GRAPHQL_URI)
                   .handle((i, o) -> {
-                      o.options(NettyPipeline.SendOptions::flushOnEach)
-                       .sendString(Mono.just(initMessage))
+                      o.sendString(Mono.just(initMessage))
                        .then()
                        .log("client-send")
                        .subscribe();
