@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -304,9 +303,10 @@ public class Tasks {
     @Then("the user will get only root tasks when quering for root tasks")
     public void checkRootTasks() {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
-        Collection<CloudTask> rootTasksCollection = taskQuerySteps.getRootTasksByProcessInstance(processInstanceId).getContent();
-
         await().untilAsserted(() -> {
+            Collection<CloudTask> rootTasksCollection = taskQuerySteps
+                .getRootTasksByProcessInstance(processInstanceId).getContent();
+
             assertThat(rootTasksCollection).isNotEmpty();
 
             rootTasksCollection.forEach(

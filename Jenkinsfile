@@ -113,13 +113,7 @@ pipeline {
       }
     }
 
-    stage('Build Releases for apps') {
-      when {
-        anyOf {
-          tag "$RELEASE_TAG_REGEX";
-          branch "$RELEASE_BRANCH";
-        }
-      }
+    stage('Build Docker images') {
 
       environment {
         VERSION = version()
@@ -147,11 +141,6 @@ pipeline {
               }
             }
 
-            sh "git add --all"
-            sh """git commit -m "release $VERSION" --allow-empty """
-            sh """git tag -fa v$VERSION -m "Release version $VERSION" """
-            sh "git push origin v$VERSION "
-
             def modules = ["activiti-cloud-query",
                            "example-runtime-bundle",
                            "activiti-cloud-modeling",
@@ -159,7 +148,7 @@ pipeline {
 
             for (module in modules) {
               dir("$module") {
-                sh "mvn clean deploy"
+                sh "mvn clean install"
                 sh "export VERSION=$VERSION && export APP_NAME=$module && skaffold build -f skaffold.yaml"
                 sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$module:$VERSION"
               }
@@ -169,13 +158,7 @@ pipeline {
       }
     }
 
-    stage('Promote to Environments') {
-      when {
-        anyOf {
-          tag "$RELEASE_TAG_REGEX";
-          branch "$RELEASE_BRANCH";
-        }
-      }
+    stage('Publish charts') {
 
       environment {
         VERSION = version()
@@ -233,23 +216,17 @@ pipeline {
       steps {
         container('maven') {
           dir("activiti-cloud-acceptance-scenarios") {
-            sh "mvn clean deploy -DskipTests"
+            sh "mvn clean install -DskipTests"
           }
 
           dir("activiti-cloud-dependencies") {
-            sh "mvn clean deploy -DskipTests"
+            sh "mvn clean install -DskipTests"
           }
         }
       }
     }
 
     stage('Build And Deploy Helm Chart') {
-      when {
-        anyOf {
-          tag "$RELEASE_TAG_REGEX";
-          branch "$RELEASE_BRANCH";
-        }
-      }
 
       environment {
         VERSION = version()
@@ -288,12 +265,6 @@ pipeline {
     }
 
     stage("Run Acceptance Scenarios") {
-      when {
-        anyOf {
-          tag "$RELEASE_TAG_REGEX";
-          branch "$RELEASE_BRANCH";
-        }
-      }
 
       environment {
         VERSION = version()
@@ -347,7 +318,7 @@ pipeline {
       }
     }
 
-    stage('Publish Helm Release') {
+    stage('Publish Releases') {
       when {
         anyOf {
           tag "$RELEASE_TAG_REGEX";
@@ -360,6 +331,14 @@ pipeline {
       steps {
         container('maven') {
           script {
+
+            sh "git add --all"
+            sh """git commit -m "release $VERSION" --allow-empty """
+            sh """git tag -fa v$VERSION -m "Release version $VERSION" """
+            sh "git push origin v$VERSION "
+
+            sh "mvn clean deploy -DskipTests"
+
             def activiti_cloud_version = activiti_cloud_version()
             echo "activiti cloud version:: $activiti_cloud_version"
 
