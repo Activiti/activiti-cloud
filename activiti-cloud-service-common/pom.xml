@@ -121,11 +121,6 @@
         <version>${commons-lang.version}</version>
         <scope>runtime</scope>
       </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>${commons-io.version}</version>
-      </dependency>
       <!-- SpringFox dependencies -->
       <dependency>
         <groupId>io.springfox</groupId>
