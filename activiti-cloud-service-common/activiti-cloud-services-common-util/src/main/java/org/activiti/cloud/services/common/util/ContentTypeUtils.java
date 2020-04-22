@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.common.util;
 
+import static java.util.Collections.singletonMap;
 import static org.springframework.boot.web.server.MimeMappings.DEFAULT;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -51,11 +51,7 @@ public final class ContentTypeUtils {
 
     private static final int NOT_FOUND = -1;
 
-
-    public static final Map<String, String> CONTENT_TYPES = new HashMap<String, String>() {{
-        put(DMN,
-            CONTENT_TYPE_XML);
-    }};
+    public static final Map<String, String> CONTENT_TYPES = singletonMap(DMN, CONTENT_TYPE_XML);
 
     /**
      * Get the content type corresponding to an extension.
