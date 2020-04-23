@@ -6,7 +6,7 @@
   <groupId>org.activiti</groupId>
   <artifactId>activiti-cloud-application</artifactId>
   <packaging>pom</packaging>
-  <name>Activiti Cloud Apps Mono :: Parent</name>
+  <name>Activiti Cloud Apps Mono :: Aggregator</name>
   <version>7.1.0-SNAPSHOT</version>
   <description>Activiti Cloud Apps Mono :: Aggregator</description>
   <url>http://activiti.org</url>
@@ -22,5 +22,6 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
+    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 </project>

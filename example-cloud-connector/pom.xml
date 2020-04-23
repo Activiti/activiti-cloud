@@ -13,6 +13,7 @@
   <version>7.1.0-SNAPSHOT</version>
   <name>Activiti Cloud :: Example Cloud Connector</name>
   <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>

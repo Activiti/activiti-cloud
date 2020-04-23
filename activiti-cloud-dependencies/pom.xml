@@ -119,4 +119,15 @@
     <module>dependencies-tests</module>
     <module>dependencies</module>
   </modules>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <deployAtEnd>false</deployAtEnd>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
