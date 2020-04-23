@@ -194,11 +194,11 @@ pipeline {
                   def archive = name + "-" + VERSION + ".tgz"
                   sh """cp $archive $GITHUB_CHARTS_DIR """
                   sh """ cd $GITHUB_CHARTS_DIR && \
+                         git pull --rebase && \
                          helm repo index . && \
                          git add . && \
                          git status && \
                          git commit -m "fix:(version) release $archive" && \
-                         git pull && \
                          git push origin "$GITHUB_CHARTS_BRANCH" """
                   sh "rm -rf $GITHUB_CHARTS_DIR"
                 }
