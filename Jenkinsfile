@@ -99,16 +99,15 @@ pipeline {
       }
     }
 
-    stage('Install artifacts') {
-
+    stage('Set version and install') {
       environment {
         VERSION = version()
       }
       steps {
         container('maven') {
           // ensure we're not on a detached head
-          sh "mvn install -DskipTests"
-
+          sh "mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$VERSION"
+          sh "mvn clean install -DskipTests"
         }
       }
     }
@@ -120,8 +119,6 @@ pipeline {
       }
       steps {
         container('maven') {
-          // ensure we're not on a detached head
-          sh "mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$VERSION"
 
           script {
             def charts = ["activiti-cloud-query/charts/activiti-cloud-query",
@@ -167,10 +164,15 @@ pipeline {
         container('maven') {
           script {
 
+            def GITHUB_CHARTS_DIR = "./target/charts_repo"
+
+            sh """git clone -b "$GITHUB_CHARTS_BRANCH" "$GITHUB_CHARTS_REPO" $GITHUB_CHARTS_DIR """
+
             def charts = ["activiti-cloud-query/charts/activiti-cloud-query",
-                           "example-runtime-bundle/charts/runtime-bundle",
-                           "activiti-cloud-modeling/charts/activiti-cloud-modeling",
-                           "example-cloud-connector/charts/activiti-cloud-connector"]
+                          "example-runtime-bundle/charts/runtime-bundle",
+                          "activiti-cloud-modeling/charts/activiti-cloud-modeling",
+                          "example-cloud-connector/charts/activiti-cloud-connector"]
+
 
             for (chart in charts) {
               dir("$chart") {
@@ -188,22 +190,19 @@ pipeline {
                 sh "helm install . --name $name --debug --dry-run"
                 sh "helm package ."
 
-                retry(5) {
-                  def GITHUB_CHARTS_DIR = sh(script: "echo \$(basename $GITHUB_CHARTS_REPO)", returnStdout: true).trim()
-                  sh """git clone -b "$GITHUB_CHARTS_BRANCH" "$GITHUB_CHARTS_REPO" $GITHUB_CHARTS_DIR """
-                  def archive = name + "-" + VERSION + ".tgz"
-                  sh """cp $archive $GITHUB_CHARTS_DIR """
-                  sh """ cd $GITHUB_CHARTS_DIR && \
-                         git pull --rebase && \
-                         helm repo index . && \
-                         git add . && \
-                         git status && \
-                         git commit -m "fix:(version) release $archive" && \
-                         git push origin "$GITHUB_CHARTS_BRANCH" """
-                  sh "rm -rf $GITHUB_CHARTS_DIR"
-                }
+                def archive = name + "-" + VERSION + ".tgz"
+                sh """cp $archive $GITHUB_CHARTS_DIR """
+
               }
             }
+
+            sh """cd $GITHUB_CHARTS_DIR && \
+                   helm repo index . && \
+                   git add . && \
+                   git commit -m "fix:(version) release $VERSION " && \
+                   git push origin "$GITHUB_CHARTS_BRANCH" """
+            sh "rm -rf $GITHUB_CHARTS_DIR"
+
           }
         }
       }
