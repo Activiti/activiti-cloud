@@ -25,6 +25,13 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import feign.FeignException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -51,14 +58,6 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ProcessInstanceTasks {
 
@@ -514,23 +513,29 @@ public class ProcessInstanceTasks {
     }
 
     @Then("the task has the completion fields set")
-    public void verifyTheCorrectCompletionFieldsAreSet(){
-        Task queriedTask = taskQuerySteps.getTaskById(currentTask.getId());
+    public void verifyTheCorrectCompletionFieldsAreSet() {
+        await().untilAsserted(() -> {
+                Task queriedTask = taskQuerySteps.getTaskById(currentTask.getId());
 
-        assertThat(queriedTask.getCompletedDate()).isNotNull();
-        assertThat(queriedTask.getDuration()).isNotNull();
+                assertThat(queriedTask.getCompletedDate()).isNotNull();
+                assertThat(queriedTask.getDuration()).isNotNull();
 
-        List <CloudRuntimeEvent> taskCompletedEvents = auditSteps.getEventsByEntityId(currentTask.getId())
-                .stream()
-                .filter(cloudRuntimeEvent -> cloudRuntimeEvent.getEventType().equals(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED))
-                .collect(Collectors.toList());
+                List<CloudRuntimeEvent> taskCompletedEvents = auditSteps
+                    .getEventsByEntityId(currentTask.getId())
+                    .stream()
+                    .filter(cloudRuntimeEvent -> cloudRuntimeEvent.getEventType()
+                        .equals(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED))
+                    .collect(Collectors.toList());
 
-        assertThat(taskCompletedEvents.get(0).getEventType())
-                .isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
-        assertThat(queriedTask.getCompletedDate().getTime())
-                .isEqualTo(taskCompletedEvents.get(0).getTimestamp());
-        assertThat(queriedTask.getDuration())
-                .isEqualTo(taskCompletedEvents.get(0).getTimestamp() - queriedTask.getCreatedDate().getTime());
+                assertThat(taskCompletedEvents.get(0).getEventType())
+                    .isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
+                assertThat(queriedTask.getCompletedDate().getTime())
+                    .isEqualTo(taskCompletedEvents.get(0).getTimestamp());
+                assertThat(queriedTask.getDuration())
+                    .isEqualTo(taskCompletedEvents.get(0).getTimestamp() - queriedTask.getCreatedDate()
+                        .getTime());
+            }
+        );
     }
 
     @Then("the generated events have sequence number set")
