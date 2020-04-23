@@ -8,7 +8,7 @@
     <version>2.1.12.RELEASE</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <groupId>org.activiti.cloud.examples</groupId>
+  <groupId>org.activiti.cloud</groupId>
   <artifactId>example-runtime-bundle</artifactId>
   <name>Activiti Cloud :: Runtime Bundle</name>
   <version>7.1.0-SNAPSHOT</version>
@@ -24,21 +24,21 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud-runtime-bundle-service.version>7.1.455</activiti-cloud-runtime-bundle-service.version>
-    <activiti-cloud-messages-service.version>7.1.455</activiti-cloud-messages-service.version>
+    <activiti-cloud-runtime-bundle-service.version>7.1.456</activiti-cloud-runtime-bundle-service.version>
+    <activiti-cloud-messages-service.version>7.1.456</activiti-cloud-messages-service.version>
     <docker-maven-plugin.version>0.32.0</docker-maven-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.rb</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
         <version>${activiti-cloud-runtime-bundle-service.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.messages</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-messages-dependencies</artifactId>
         <version>${activiti-cloud-messages-service.version}</version>
         <scope>import</scope>
@@ -48,7 +48,7 @@
   </dependencyManagement>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.rb</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
     </dependency>
     <dependency>
@@ -56,7 +56,7 @@
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.messages</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-starter-messages-jdbc</artifactId>
     </dependency>
     <dependency>
@@ -82,7 +82,7 @@
 
     <!-- Marker Pom for Dependency Conversion Validation  -->
     <dependency>
-      <groupId>org.activiti.cloud.rb</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
       <version>${activiti-cloud-runtime-bundle-service.version}</version>
       <type>pom</type>

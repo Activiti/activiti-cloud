@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.dependencies</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-dependencies-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
   </parent>
@@ -20,13 +20,13 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.examples</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-modeling</artifactId>
       <version>${activiti-cloud-modeling.version}</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
-          <groupId>org.activiti.cloud.modeling</groupId>
+          <groupId>org.activiti.cloud</groupId>
           <artifactId>activiti-cloud-starter-modeling</artifactId>
         </exclusion>
         <exclusion>
@@ -40,13 +40,13 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.examples</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>example-runtime-bundle</artifactId>
       <version>${example-runtime-bundle.version}</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
-          <groupId>org.activiti.cloud.rb</groupId>
+          <groupId>org.activiti.cloud</groupId>
           <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
         </exclusion>
         <exclusion>
@@ -68,13 +68,13 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.examples</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>example-cloud-connector</artifactId>
       <version>${example-cloud-connector.version}</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
-          <groupId>org.activiti.cloud.connector</groupId>
+          <groupId>org.activiti.cloud</groupId>
           <artifactId>activiti-cloud-starter-connector</artifactId>
         </exclusion>
         <exclusion>
@@ -84,7 +84,7 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.examples</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-query</artifactId>
       <version>${activiti-cloud-query.version}</version>
       <type>pom</type>
@@ -114,7 +114,7 @@
           <artifactId>reflections</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.activiti.cloud.query</groupId>
+          <groupId>org.activiti.cloud</groupId>
           <artifactId>activiti-cloud-starter-query</artifactId>
         </exclusion>
         <exclusion>

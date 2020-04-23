@@ -8,7 +8,7 @@
     <version>2.1.12.RELEASE</version>
     <relativePath />
   </parent>
-  <groupId>org.activiti.cloud.acc.scenarios</groupId>
+  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-acceptance-scenarios-parent</artifactId>
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -40,8 +40,8 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud-acceptance-tests.version>7.1.455</activiti-cloud-acceptance-tests.version>
-    <activiti-cloud-modeling.version>7.1.455</activiti-cloud-modeling.version>
+    <activiti-cloud-acceptance-tests.version>7.1.456</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-modeling.version>7.1.456</activiti-cloud-modeling.version>
     <asm.version>7.0</asm.version>
     <assertj.version>3.13.2</assertj.version>
     <awaitility.version>3.1.1</awaitility.version>
@@ -98,7 +98,7 @@
         <version>${batik.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.acc</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
         <version>${activiti-cloud-acceptance-tests.version}</version>
         <type>pom</type>
