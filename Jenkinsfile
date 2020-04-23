@@ -191,7 +191,7 @@ pipeline {
                 sh "helm package ."
 
                 def archive = name + "-" + VERSION + ".tgz"
-                sh """cp $archive $GITHUB_CHARTS_DIR """
+                sh """cp $archive ../../../$GITHUB_CHARTS_DIR """
 
               }
             }
