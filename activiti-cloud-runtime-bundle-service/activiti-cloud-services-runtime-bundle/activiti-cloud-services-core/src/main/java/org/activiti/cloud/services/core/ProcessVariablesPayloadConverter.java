@@ -17,9 +17,11 @@
 package org.activiti.cloud.services.core;
 
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
@@ -37,12 +39,19 @@ public class ProcessVariablesPayloadConverter {
     }
 
     public StartProcessPayload convert(StartProcessPayload from) {
+        if(from == null) {
+            return null;
+        }
+
+        Map<String, Object> variables = Optional.ofNullable(from.getVariables())
+                                                .orElseGet(Collections::emptyMap);
+
         return ProcessPayloadBuilder.start()
                                     .withBusinessKey(from.getBusinessKey())
                                     .withName(from.getName())
                                     .withProcessDefinitionId(from.getProcessDefinitionId())
                                     .withProcessDefinitionKey(from.getProcessDefinitionKey())
-                                    .withVariables(mapVariableValues(from.getVariables()))
+                                    .withVariables(mapVariableValues(variables))
                                     .build();
 
     }
