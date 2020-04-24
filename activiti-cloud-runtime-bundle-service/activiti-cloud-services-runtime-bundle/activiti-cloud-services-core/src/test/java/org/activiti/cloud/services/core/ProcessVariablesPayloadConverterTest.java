@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,12 +46,11 @@ public class ProcessVariablesPayloadConverterTest {
         input.put("longValue", new ProcessVariableValue("long", "10").toMap());
         input.put("booleanValue", new ProcessVariableValue("boolean", "true").toMap());
         input.put("doubleValue", new ProcessVariableValue("double", "10.00").toMap());
-        input.put("localDateValue", new ProcessVariableValue("LocalDate", "2020-04-20").toMap());
-        input.put("dateValue", new ProcessVariableValue("Date", DATE_1970_01_01T01_01_01_001Z).toMap());
+        input.put("localDateValue", new ProcessVariableValue("localdate", "2020-04-20").toMap());
+        input.put("dateValue", new ProcessVariableValue("date", DATE_1970_01_01T01_01_01_001Z).toMap());
         input.put("bigDecimalValue", new ProcessVariableValue("BigDecimal", "10.00").toMap());
-        input.put("jsonNodeValue", new ProcessVariableValue("JsonNode", "{}").toMap());
-        input.put("jsonNodeValue2", new ProcessVariableValue("JsonNode", "{}"));
-        input.put("mapValue", new ProcessVariableValue("Map", "{}").toMap());
+        input.put("jsonNodeValue", new ProcessVariableValue("json", "{}").toMap());
+        input.put("jsonNodeValue2", new ProcessVariableValue("json", "{}"));
 
         // when
         StartProcessPayload result = subject.convert(ProcessPayloadBuilder.start()
@@ -73,8 +71,7 @@ public class ProcessVariablesPayloadConverterTest {
                           .containsEntry("dateValue", dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z))
                           .containsEntry("bigDecimalValue", BigDecimal.valueOf(1000, 2))
                           .containsEntry("jsonNodeValue", JsonNodeFactory.instance.objectNode())
-                          .containsEntry("jsonNodeValue2", JsonNodeFactory.instance.objectNode())
-                          .containsEntry("mapValue", Collections.emptyMap());
+                          .containsEntry("jsonNodeValue2", JsonNodeFactory.instance.objectNode());
     }
 
 }
