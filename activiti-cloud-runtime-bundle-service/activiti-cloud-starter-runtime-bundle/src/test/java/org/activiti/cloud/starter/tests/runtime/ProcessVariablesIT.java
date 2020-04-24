@@ -20,18 +20,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.services.api.model.ProcessVariableValue;
+import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.VariablesUtil;
+import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,23 +61,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext
 @ContextConfiguration(classes = RuntimeITConfiguration.class)
 public class ProcessVariablesIT {
+    private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
 
     @Autowired
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
@@ -74,8 +83,15 @@ public class ProcessVariablesIT {
     @Autowired
     private VariablesUtil variablesUtil;
 
+    @Autowired
+    private ProcessRuntime processRuntime;
+
+    @Autowired
+    private DateFormatterProvider dateFormatterProvider;
+
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
+    private static final String SIMPLE_PROCESS= "SimpleProcess";
     private static final String PROCESS_WITH_VARIABLES2 = "ProcessWithVariables2";
     private static final String PROCESS_WITH_EXTENSION_VARIABLES = "ProcessWithExtensionVariables";
 
@@ -90,7 +106,7 @@ public class ProcessVariablesIT {
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getKey(),
-                    pd.getId());
+                                     pd.getId());
         }
     }
 
@@ -615,4 +631,93 @@ public class ProcessVariablesIT {
         assertThat(responseEntity.getBody().getMessage()).contains("variableDateTime");
     }
 
+    @Test
+    @WithMockKeycloakUser(username = "hruser", roles = "ACTIVITI_USER")
+    public void testStartProcessVariablesPayloadConverter() {
+        // given
+        StartProcessPayload startProcessPayload = testStartProcessPayload();
+
+        // when
+        CloudProcessInstance processInstance = processInstanceRestTemplate.startProcess(startProcessPayload)
+                                                                          .getBody();
+
+        // then
+        List<VariableInstance> variableInstances = processRuntime.variables(ProcessPayloadBuilder.variables()
+                                                                                                 .withProcessInstance(processInstance)
+                                                                                                 .build());
+        asserStartProcessPayloadVariablesAreConverted(variableInstances);
+
+        // cleanup
+        processRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
+    }
+
+    @Test
+    @WithMockKeycloakUser(username = "hruser", roles = "ACTIVITI_USER")
+    public void testAdminStartProcessVariablesPayloadConverter() {
+        // given
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hradmin");
+
+        StartProcessPayload startProcessPayload = testStartProcessPayload();
+
+        // when
+        CloudProcessInstance processInstance = processInstanceRestTemplate.adminStartProcess(startProcessPayload)
+                                                                          .getBody();
+        // then
+        List<VariableInstance> variableInstances = processRuntime.variables(ProcessPayloadBuilder.variables()
+                                                                                                 .withProcessInstance(processInstance)
+                                                                                                 .build());
+        asserStartProcessPayloadVariablesAreConverted(variableInstances);
+
+        // cleanup
+        processRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
+    }
+
+    private StartProcessPayload testStartProcessPayload() {
+        ProcessVariableValue jsonValue = new ProcessVariableValue("json", "{}");
+        Map<String, String> stringValue = new ProcessVariableValue("string", "name").toMap();
+        Map<String, String> intValue = new ProcessVariableValue("integer", "10").toMap();
+        Map<String, String> longValue = new ProcessVariableValue("long", "10").toMap();
+        Map<String, String> booleanValue = new ProcessVariableValue("boolean", "true").toMap();
+        Map<String, String> doubleValue = new ProcessVariableValue("double", "10.00").toMap();
+        Map<String, String> dateValue = new ProcessVariableValue("date", DATE_1970_01_01T01_01_01_001Z).toMap();
+        Map<String, String> bigDecimalValue = new ProcessVariableValue("BigDecimal", "10.00").toMap();
+
+        return ProcessPayloadBuilder.start()
+                                    .withProcessDefinitionKey(SIMPLE_PROCESS)
+                                    .withVariable("jsonValue", jsonValue)
+                                    .withVariable("stringValue", stringValue)
+                                    .withVariable("intValue", intValue)
+                                    .withVariable("longValue", longValue)
+                                    .withVariable("doubleValue", doubleValue)
+                                    .withVariable("booleanValue", booleanValue)
+                                    .withVariable("dateValue", dateValue)
+                                    .withVariable("bigDecimalValue", bigDecimalValue)
+                                    .withVariable("int", 10)
+                                    .withVariable("boolean", true)
+                                    .withVariable("double", 10.00)
+                                    .withVariable("string", "name")
+                                    .build();
+    }
+
+
+    private void asserStartProcessPayloadVariablesAreConverted(List<VariableInstance> variableInstances) {
+        assertThat(variableInstances).isNotNull()
+                                     .hasSize(12)
+                                     .extracting("name", "value")
+                                     .contains(tuple("jsonValue", JsonNodeFactory.instance.objectNode()),
+                                               tuple("stringValue", "name"),
+                                               tuple("intValue", 10),
+                                               tuple("longValue", 10L),
+                                               tuple("doubleValue", 10.00),
+                                               tuple("booleanValue", true),
+                                               tuple("dateValue",
+                                                     dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z)),
+                                               tuple("bigDecimalValue", BigDecimal.valueOf(1000, 2)),
+                                               tuple("int", 10),
+                                               tuple("double", 10.00),
+                                               tuple("boolean", true),
+                                               tuple("string", "name")
+                                     );
+
+    }
 }

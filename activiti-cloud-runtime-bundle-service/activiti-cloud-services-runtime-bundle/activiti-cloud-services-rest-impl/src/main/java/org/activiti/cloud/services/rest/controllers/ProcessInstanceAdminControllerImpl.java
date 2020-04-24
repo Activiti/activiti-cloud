@@ -25,6 +25,7 @@ import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceAdminController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
@@ -48,14 +49,18 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     private final SpringPageConverter pageConverter;
 
+    private final ProcessVariablesPayloadConverter variablesPayloadConverter;
+
     public ProcessInstanceAdminControllerImpl(ProcessInstanceResourceAssembler resourceAssembler,
                                               AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler,
                                               ProcessAdminRuntime processAdminRuntime,
-                                              SpringPageConverter pageConverter) {
+                                              SpringPageConverter pageConverter,
+                                              ProcessVariablesPayloadConverter variablesPayloadConverter) {
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.processAdminRuntime = processAdminRuntime;
         this.pageConverter = pageConverter;
+        this.variablesPayloadConverter = variablesPayloadConverter;
     }
 
     @Override
@@ -65,10 +70,12 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
                                                   pageConverter.toSpringPage(pageable, processInstancePage),
                                                   resourceAssembler);
     }
-   
+
     @Override
     public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        return resourceAssembler.toResource(processAdminRuntime.start(startProcessPayload));
+        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+
+        return resourceAssembler.toResource(processAdminRuntime.start(convertedStartProcessPayload));
     }
 
     @Override

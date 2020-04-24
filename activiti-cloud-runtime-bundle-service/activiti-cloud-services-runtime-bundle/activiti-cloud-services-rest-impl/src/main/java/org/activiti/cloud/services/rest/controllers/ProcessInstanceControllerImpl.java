@@ -32,6 +32,7 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
@@ -61,19 +62,23 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     private final SpringPageConverter pageConverter;
 
+    private final ProcessVariablesPayloadConverter variablesPayloadConverter;
+
     @Autowired
     public ProcessInstanceControllerImpl(RepositoryService repositoryService,
                                          ProcessDiagramGeneratorWrapper processDiagramGenerator,
                                          ProcessInstanceResourceAssembler resourceAssembler,
                                          AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler,
                                          ProcessRuntime processRuntime,
-                                         SpringPageConverter pageConverter) {
+                                         SpringPageConverter pageConverter,
+                                         ProcessVariablesPayloadConverter variablesPayloadConverter) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.processRuntime = processRuntime;
         this.pageConverter = pageConverter;
+        this.variablesPayloadConverter = variablesPayloadConverter;
     }
 
     @Override
@@ -86,7 +91,9 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        return resourceAssembler.toResource(processRuntime.start(startProcessPayload));
+        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+
+        return resourceAssembler.toResource(processRuntime.start(convertedStartProcessPayload));
     }
 
     @Override
@@ -96,7 +103,9 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public Resource<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload startProcessPayload) {
-        return resourceAssembler.toResource(processRuntime.create(startProcessPayload));
+        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+
+        return resourceAssembler.toResource(processRuntime.create(convertedStartProcessPayload));
     }
 
     @Override
