@@ -20,7 +20,7 @@ import java.util.Date;
 
 import org.activiti.common.util.DateFormatterProvider;
 
-public class ProcessVariableDateConverter implements SpringProcessVariableValueConverter<Date> {
+public class ProcessVariableDateConverter implements ProcessVariableValueSpringConverter<Date> {
 
     private final DateFormatterProvider provider;
 

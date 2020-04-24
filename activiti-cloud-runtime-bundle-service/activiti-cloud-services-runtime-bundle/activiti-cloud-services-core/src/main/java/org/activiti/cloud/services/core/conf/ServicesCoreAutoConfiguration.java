@@ -29,7 +29,7 @@ import org.activiti.cloud.services.core.ProcessVariableDateConverter;
 import org.activiti.cloud.services.core.ProcessVariableJsonNodeConverter;
 import org.activiti.cloud.services.core.ProcessVariableValueConverter;
 import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
-import org.activiti.cloud.services.core.SpringProcessVariableValueConverter;
+import org.activiti.cloud.services.core.ProcessVariableValueSpringConverter;
 import org.activiti.cloud.services.core.commands.ClaimTaskCmdExecutor;
 import org.activiti.cloud.services.core.commands.CommandEndpoint;
 import org.activiti.cloud.services.core.commands.CommandExecutor;
@@ -193,18 +193,18 @@ public class ServicesCoreAutoConfiguration {
     }
 
     @Bean
-    public SpringProcessVariableValueConverter<Date> processVariableDateConverter(DateFormatterProvider dateFormatterProvider) {
+    public ProcessVariableValueSpringConverter<Date> processVariableDateConverter(DateFormatterProvider dateFormatterProvider) {
         return new ProcessVariableDateConverter(dateFormatterProvider);
     }
 
     @Bean
-    public SpringProcessVariableValueConverter<JsonNode> processVariableJsonNodeConverter() {
+    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter() {
         return new ProcessVariableJsonNodeConverter();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessVariableValueConverter processVariableValueConverter(List<SpringProcessVariableValueConverter<?>> converters,
+    public ProcessVariableValueConverter processVariableValueConverter(List<ProcessVariableValueSpringConverter<?>> converters,
                                                                        DateFormatterProvider dateFormatterProvider) {
         FormattingConversionService conversionService = new ApplicationConversionService();
 

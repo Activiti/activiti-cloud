@@ -21,7 +21,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ProcessVariableJsonNodeConverter implements SpringProcessVariableValueConverter<JsonNode> {
+public class ProcessVariableJsonNodeConverter implements ProcessVariableValueSpringConverter<JsonNode> {
 
     private final ObjectMapper objectMapper;
 
