@@ -18,7 +18,7 @@
       <bpmn:incoming>SequenceFlow_1soj8mv</bpmn:incoming>
       <bpmn:terminateEventDefinition />
     </bpmn:endEvent>
-    <bpmn:serviceTask id="testErrorConnectorTask" name="testBpmnErrorConnector Task" implementation="testBpmnErrorConnector">
+    <bpmn:serviceTask id="testErrorConnectorTask" name="testBpmnErrorConnector Task" implementation="test-bpmn-error-connector.trowError">
       <bpmn:incoming>SequenceFlow_1jlub9t</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1udqjel</bpmn:outgoing>
     </bpmn:serviceTask>
