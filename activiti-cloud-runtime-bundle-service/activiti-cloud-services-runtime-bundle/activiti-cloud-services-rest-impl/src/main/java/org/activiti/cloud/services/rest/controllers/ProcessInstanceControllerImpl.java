@@ -91,9 +91,9 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+        startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
 
-        return resourceAssembler.toResource(processRuntime.start(convertedStartProcessPayload));
+        return resourceAssembler.toResource(processRuntime.start(startProcessPayload));
     }
 
     @Override
@@ -103,9 +103,9 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public Resource<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload startProcessPayload) {
-        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+        startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
 
-        return resourceAssembler.toResource(processRuntime.create(convertedStartProcessPayload));
+        return resourceAssembler.toResource(processRuntime.create(startProcessPayload));
     }
 
     @Override
@@ -119,11 +119,10 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
         return new String(processDiagramGenerator.generateDiagram(bpmnModel,
-                processRuntime
-                        .processInstanceMeta(processInstance.getId())
-                        .getActiveActivitiesIds(),
-                emptyList()),
-                StandardCharsets.UTF_8);
+                                                                  processRuntime.processInstanceMeta(processInstance.getId())
+                                                                                .getActiveActivitiesIds(),
+                                                                  emptyList()),
+                          StandardCharsets.UTF_8);
     }
 
     @Override
@@ -172,6 +171,8 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public Resource<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload) {
+        startMessagePayload = variablesPayloadConverter.convert(startMessagePayload);
+
         ProcessInstance processInstance = processRuntime.start(startMessagePayload);
 
         return resourceAssembler.toResource(processInstance);

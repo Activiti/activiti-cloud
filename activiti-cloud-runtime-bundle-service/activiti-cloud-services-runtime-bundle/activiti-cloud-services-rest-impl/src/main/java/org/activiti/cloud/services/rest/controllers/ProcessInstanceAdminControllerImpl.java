@@ -121,6 +121,8 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     @Override
     public Resource<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
+        startMessagePayload = variablesPayloadConverter.convert(startMessagePayload);
+
         ProcessInstance processInstance = processAdminRuntime.start(startMessagePayload);
 
         return resourceAssembler.toResource(processInstance);

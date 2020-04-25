@@ -17,13 +17,14 @@
 package org.activiti.cloud.services.core;
 
 import java.util.AbstractMap;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.springframework.util.Assert;
@@ -38,29 +39,35 @@ public class ProcessVariablesPayloadConverter {
         this.variableValueConverter = variableValueConverter;
     }
 
-    public StartProcessPayload convert(StartProcessPayload from) {
-        if(from == null) {
-            return null;
-        }
+    public StartProcessPayload convert(StartProcessPayload payload) {
+        return Optional.ofNullable(payload)
+                       .map(StartProcessPayload::getVariables)
+                       .map(variables -> ProcessPayloadBuilder.start()
+                                                              .withBusinessKey(payload.getBusinessKey())
+                                                              .withName(payload.getName())
+                                                              .withProcessDefinitionId(payload.getProcessDefinitionId())
+                                                              .withProcessDefinitionKey(payload.getProcessDefinitionKey())
+                                                              .withVariables(mapVariableValues(variables))
+                                                              .build())
+                       .orElse(payload);
+    }
 
-        Map<String, Object> variables = Optional.ofNullable(from.getVariables())
-                                                .orElseGet(Collections::emptyMap);
-
-        return ProcessPayloadBuilder.start()
-                                    .withBusinessKey(from.getBusinessKey())
-                                    .withName(from.getName())
-                                    .withProcessDefinitionId(from.getProcessDefinitionId())
-                                    .withProcessDefinitionKey(from.getProcessDefinitionKey())
-                                    .withVariables(mapVariableValues(variables))
-                                    .build();
-
+    public StartMessagePayload convert(StartMessagePayload payload) {
+        return Optional.ofNullable(payload)
+                       .map(StartMessagePayload::getVariables)
+                       .map(variables -> MessagePayloadBuilder.from(payload)
+                                                              .withVariables(mapVariableValues(variables))
+                                                              .build())
+                       .orElse(payload);
     }
 
     private Map<String, Object> mapVariableValues(Map<String, Object> input) {
         return input.entrySet()
                     .stream()
                     .map(this::parseValue)
-                    .collect(LinkedHashMap::new, (m,v)->m.put(v.getKey(), v.getValue()), HashMap::putAll);
+                    .collect(LinkedHashMap::new,
+                             (m,v)->m.put(v.getKey(), v.getValue()),
+                             HashMap::putAll);
     }
 
     private Map.Entry<String, Object> parseValue(Map.Entry<String, Object> entry) {
