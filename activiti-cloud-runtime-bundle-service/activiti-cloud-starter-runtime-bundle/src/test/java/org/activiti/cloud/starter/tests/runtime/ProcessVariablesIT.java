@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,8 +73,22 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 @DirtiesContext
 @ContextConfiguration(classes = RuntimeITConfiguration.class)
 public class ProcessVariablesIT {
+    private static final String LONG = "long";
+    private static final String INTEGER = "integer";
+    private static final String JSON = "json";
+    private static final String STRING = "string";
+    private static final String DOUBLE = "double";
+    private static final String BOOLEAN = "boolean";
+    private static final String INT = "int";
+    private static final String BIG_DECIMAL_VARIABLE = "bigDecimalVariable";
+    private static final String DATE_VARIABLE = "dateVariable";
+    private static final String BOOLEAN_VARIABLE = "booleanVariable";
+    private static final String DOUBLE_VARIABLE = "doubleVariable";
+    private static final String LONG_VARIABLE = "longVariable";
+    private static final String INT_VARIABLE = "intVariable";
+    private static final String STRING_VARIABLE = "stringVariable";
+    private static final String JSON_VARIABLE = "jsonVariable";
     private static final String START_MESSAGE = "startMessage";
-
     private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
 
     @Autowired
@@ -499,11 +514,11 @@ public class ProcessVariablesIT {
                     .extracting(CloudVariableInstance::getName,
                             CloudVariableInstance::getType)
                     .containsOnly(tuple("variableInt",
-                            "integer"),
+                            INTEGER),
                             tuple("variableStr",
-                                    "string"),
+                                    STRING),
                             tuple("variableBool",
-                                    "boolean"),
+                                    BOOLEAN),
                             tuple("variableDateTime",
                                     "date"),
                             tuple("variableDate",
@@ -576,13 +591,13 @@ public class ProcessVariablesIT {
                             CloudVariableInstance::getType,
                             CloudVariableInstance::getValue)
                     .contains(tuple("variableInt",
-                            "integer",
+                            INTEGER,
                             2),
                             tuple("variableStr",
-                                    "string",
+                                    STRING,
                                     "new value"),
                             tuple("variableBool",
-                                    "boolean",
+                                    BOOLEAN,
                                     false),
                             tuple("variableDateTime",
                                     "date",
@@ -645,9 +660,10 @@ public class ProcessVariablesIT {
         // given
         StartProcessPayload startProcessPayload = testStartProcessPayload();
 
+
         // when
-        CloudProcessInstance processInstance = processInstanceRestTemplate.startProcess(startProcessPayload)
-                                                                          .getBody();
+        ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(startProcessPayload);
+        CloudProcessInstance processInstance = processInstanceResponseEntity.getBody();
 
         // then
         List<VariableInstance> variableInstances = processRuntime.variables(ProcessPayloadBuilder.variables()
@@ -739,27 +755,29 @@ public class ProcessVariablesIT {
     private Map<String, Object> testProcessVariableValues() {
         Map<String, Object> variables = new LinkedHashMap<>();
 
-        ProcessVariableValue jsonValue = new ProcessVariableValue("json", "{}");
-        Map<String, String> stringValue = new ProcessVariableValue("string", "name").toMap();
-        Map<String, String> intValue = new ProcessVariableValue("integer", "10").toMap();
-        Map<String, String> longValue = new ProcessVariableValue("long", "10").toMap();
-        Map<String, String> booleanValue = new ProcessVariableValue("boolean", "true").toMap();
-        Map<String, String> doubleValue = new ProcessVariableValue("double", "10.00").toMap();
+        ProcessVariableValue jsonValue = new ProcessVariableValue(JSON, "{}");
+        Map<String, String> stringValue = new ProcessVariableValue(STRING, "name").toMap();
+        Map<String, String> intValue = new ProcessVariableValue(INTEGER, "10").toMap();
+        Map<String, String> longValue = new ProcessVariableValue(LONG, "10").toMap();
+        Map<String, String> booleanValue = new ProcessVariableValue(BOOLEAN, "true").toMap();
+        Map<String, String> doubleValue = new ProcessVariableValue(DOUBLE, "10.00").toMap();
         Map<String, String> dateValue = new ProcessVariableValue("date", DATE_1970_01_01T01_01_01_001Z).toMap();
-        Map<String, String> bigDecimalValue = new ProcessVariableValue("BigDecimal", "10.00").toMap();
+        Map<String, String> bigDecimalValue = new ProcessVariableValue("bigdecimal", "10.00").toMap();
 
-        variables.put("jsonValue", jsonValue);
-        variables.put("stringValue", stringValue);
-        variables.put("intValue", intValue);
-        variables.put("longValue", longValue);
-        variables.put("doubleValue", doubleValue);
-        variables.put("booleanValue", booleanValue);
-        variables.put("dateValue", dateValue);
-        variables.put("bigDecimalValue", bigDecimalValue);
-        variables.put("int", 10);
-        variables.put("boolean", true);
-        variables.put("double", 10.00);
-        variables.put("string", "name");
+        variables.put(JSON_VARIABLE, jsonValue);
+        variables.put(STRING_VARIABLE, stringValue);
+        variables.put(INT_VARIABLE, intValue);
+        variables.put(LONG_VARIABLE, longValue);
+        variables.put(DOUBLE_VARIABLE, doubleValue);
+        variables.put(BOOLEAN_VARIABLE, booleanValue);
+        variables.put(DATE_VARIABLE, dateValue);
+        variables.put(BIG_DECIMAL_VARIABLE, bigDecimalValue);
+        variables.put(INT, 10);
+        variables.put(INTEGER, 10);
+        variables.put(BOOLEAN, true);
+        variables.put(DOUBLE, 10.00);
+        variables.put(STRING, "name");
+        variables.put(JSON, Collections.singletonMap("key", "data"));
 
         return variables;
     }
@@ -767,19 +785,20 @@ public class ProcessVariablesIT {
     private void asserStartProcessPayloadVariablesAreConverted(List<VariableInstance> variableInstances) {
         assertThat(variableInstances).isNotNull()
                                      .extracting("name", "value")
-                                     .contains(tuple("jsonValue", JsonNodeFactory.instance.objectNode()),
-                                               tuple("stringValue", "name"),
-                                               tuple("intValue", 10),
-                                               tuple("longValue", 10L),
-                                               tuple("doubleValue", 10.00),
-                                               tuple("booleanValue", true),
-                                               tuple("dateValue",
-                                                     dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z)),
-                                               tuple("bigDecimalValue", BigDecimal.valueOf(1000, 2)),
-                                               tuple("int", 10),
-                                               tuple("double", 10.00),
-                                               tuple("boolean", true),
-                                               tuple("string", "name")
+                                     .contains(tuple(JSON_VARIABLE, JsonNodeFactory.instance.objectNode()),
+                                               tuple(STRING_VARIABLE, "name"),
+                                               tuple(INT_VARIABLE, 10),
+                                               tuple(LONG_VARIABLE, 10L),
+                                               tuple(DOUBLE_VARIABLE, 10.00),
+                                               tuple(BOOLEAN_VARIABLE, true),
+                                               tuple(DATE_VARIABLE, dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z)),
+                                               tuple(BIG_DECIMAL_VARIABLE, BigDecimal.valueOf(1000, 2)),
+                                               tuple(INT, 10),
+                                               tuple(INTEGER, 10),
+                                               tuple(DOUBLE, 10.00),
+                                               tuple(BOOLEAN, true),
+                                               tuple(STRING, "name"),
+                                               tuple(JSON, Collections.singletonMap("key", "data"))
                                      );
 
     }
