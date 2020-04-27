@@ -669,7 +669,7 @@ public class ProcessVariablesIT {
         List<VariableInstance> variableInstances = processRuntime.variables(ProcessPayloadBuilder.variables()
                                                                                                  .withProcessInstance(processInstance)
                                                                                                  .build());
-        asserStartProcessPayloadVariablesAreConverted(variableInstances);
+        assertStartProcessPayloadVariablesAreConverted(variableInstances);
 
         // cleanup
         processRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
@@ -690,7 +690,7 @@ public class ProcessVariablesIT {
         List<VariableInstance> variableInstances = processRuntime.variables(ProcessPayloadBuilder.variables()
                                                                                                  .withProcessInstance(processInstance)
                                                                                                  .build());
-        asserStartProcessPayloadVariablesAreConverted(variableInstances);
+        assertStartProcessPayloadVariablesAreConverted(variableInstances);
 
         // cleanup
         processRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
@@ -711,7 +711,7 @@ public class ProcessVariablesIT {
         List<VariableInstance> variableInstances = processRuntime.variables(ProcessPayloadBuilder.variables()
                                                                                                  .withProcessInstance(processInstance)
                                                                                                  .build());
-        asserStartProcessPayloadVariablesAreConverted(variableInstances);
+        assertStartProcessPayloadVariablesAreConverted(variableInstances);
 
         // cleanup
         processRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
@@ -732,7 +732,7 @@ public class ProcessVariablesIT {
         List<VariableInstance> variableInstances = processRuntime.variables(ProcessPayloadBuilder.variables()
                                                                                                  .withProcessInstance(processInstance)
                                                                                                  .build());
-        asserStartProcessPayloadVariablesAreConverted(variableInstances);
+        assertStartProcessPayloadVariablesAreConverted(variableInstances);
 
         // cleanup
         processRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
@@ -782,7 +782,7 @@ public class ProcessVariablesIT {
         return variables;
     }
 
-    private void asserStartProcessPayloadVariablesAreConverted(List<VariableInstance> variableInstances) {
+    private void assertStartProcessPayloadVariablesAreConverted(List<VariableInstance> variableInstances) {
         assertThat(variableInstances).isNotNull()
                                      .extracting("name", "value")
                                      .contains(tuple(JSON_VARIABLE, JsonNodeFactory.instance.objectNode()),
