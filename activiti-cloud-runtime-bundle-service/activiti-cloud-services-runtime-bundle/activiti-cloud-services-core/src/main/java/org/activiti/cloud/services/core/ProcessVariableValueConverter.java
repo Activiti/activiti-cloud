@@ -16,23 +16,20 @@
 
 package org.activiti.cloud.services.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.activiti.engine.ActivitiException;
-import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 public class ProcessVariableValueConverter  {
 
-    protected static Map<String, Class<?>> typeRegistry = new HashMap<>();
+    private static Map<String, Class<?>> typeRegistry = new HashMap<>();
 
     static {
         typeRegistry.put("string", String.class);
@@ -45,13 +42,9 @@ public class ProcessVariableValueConverter  {
         typeRegistry.put("localdate", LocalDate.class);
         typeRegistry.put("bigdecimal", BigDecimal.class);
         typeRegistry.put("json", JsonNode.class);
-    };
+    }
 
     private final ConversionService conversionService;
-
-    public ProcessVariableValueConverter() {
-        this(ApplicationConversionService.getSharedInstance());
-    }
 
     public ProcessVariableValueConverter(ConversionService conversionService) {
         Assert.notNull(conversionService, "ConversionService must not be null");
@@ -65,8 +58,7 @@ public class ProcessVariableValueConverter  {
 
         try {
             return (T) type.cast(this.conversionService.convert(value, type));
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             throw new ActivitiException("VariableValue conversion error", ex);
         }
     }

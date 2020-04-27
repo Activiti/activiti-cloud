@@ -66,7 +66,7 @@ public class ProcessVariablesPayloadConverter {
                     .stream()
                     .map(this::parseValue)
                     .collect(LinkedHashMap::new,
-                             (m,v)->m.put(v.getKey(), v.getValue()),
+                             (m,v) -> m.put(v.getKey(), v.getValue()),
                              HashMap::putAll);
     }
 
@@ -74,12 +74,12 @@ public class ProcessVariablesPayloadConverter {
         Object entryValue = entry.getValue();
 
         try {
-            if(Map.class.isInstance(entryValue)) {
+            if (Map.class.isInstance(entryValue)) {
                 Map<String, String> valuesMap = Map.class.cast(entryValue);
 
-                if(valuesMap.containsKey("type") && valuesMap.containsKey("value")) {
-                    String type = (String) valuesMap.get("type");
-                    String value = (String) valuesMap.get("value");
+                if (valuesMap.containsKey("type") && valuesMap.containsKey("value")) {
+                    String type = valuesMap.get("type");
+                    String value = valuesMap.get("value");
 
                     entryValue = variableValueConverter.convert(new ProcessVariableValue(type, value));
                 }
