@@ -25,10 +25,6 @@ public class ProcessVariableJsonNodeConverter implements ProcessVariableValueSpr
 
     private final ObjectMapper objectMapper;
 
-    public ProcessVariableJsonNodeConverter() {
-        this.objectMapper = new ObjectMapper();
-    }
-
     public ProcessVariableJsonNodeConverter(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }

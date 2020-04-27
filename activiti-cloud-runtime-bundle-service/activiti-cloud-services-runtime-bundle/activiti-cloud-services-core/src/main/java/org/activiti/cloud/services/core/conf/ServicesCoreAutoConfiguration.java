@@ -16,11 +16,12 @@
 
 package org.activiti.cloud.services.core.conf;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
@@ -28,8 +29,8 @@ import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariableDateConverter;
 import org.activiti.cloud.services.core.ProcessVariableJsonNodeConverter;
 import org.activiti.cloud.services.core.ProcessVariableValueConverter;
-import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.ProcessVariableValueSpringConverter;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.commands.ClaimTaskCmdExecutor;
 import org.activiti.cloud.services.core.commands.CommandEndpoint;
 import org.activiti.cloud.services.core.commands.CommandExecutor;
@@ -60,8 +61,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.support.FormattingConversionService;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 @Configuration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
@@ -198,8 +197,9 @@ public class ServicesCoreAutoConfiguration {
     }
 
     @Bean
-    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter() {
-        return new ProcessVariableJsonNodeConverter();
+    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter(
+        ObjectMapper objectMapper) {
+        return new ProcessVariableJsonNodeConverter(objectMapper);
     }
 
     @Bean
