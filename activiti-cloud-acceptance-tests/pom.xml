@@ -19,9 +19,6 @@
     <module>activiti-cloud-acceptance-tests-core</module>
   </modules>
   <properties>
-    <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
-    <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
-    <activiti-cloud-acceptance-tests.version>${project.version}</activiti-cloud-acceptance-tests.version>
     <serenity.version>1.9.45</serenity.version>
     <serenity-jbehave.version>1.44.0</serenity-jbehave.version>
     <feign-form.version>3.5.0</feign-form.version>
@@ -33,14 +30,14 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-dependencies</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -86,7 +83,7 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-dependencies</artifactId>
-      <version>${activiti-cloud-api.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>

@@ -20,12 +20,7 @@
     <module>activiti-cloud-acceptance-tests-modeling</module>
   </modules>
   <properties>
-    <project.scm.repository>activiti-cloud-modeling-service</project.scm.repository>
-    <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
-    <activiti-dependencies.version>7.1.218</activiti-dependencies.version>
-    <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-cloud-acceptance-tests.version>${project.version}</activiti-cloud-acceptance-tests.version>
-    <activiti-cloud-modeling-service.version>${project.version}</activiti-cloud-modeling-service.version>
+    <activiti.version>7.1.218</activiti.version>
     <everit-json-schema.version>1.12.1</everit-json-schema.version>
     <commons-collections4.version>4.1</commons-collections4.version>
   </properties>
@@ -34,28 +29,28 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
-        <version>${activiti-cloud-acceptance-tests.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti</groupId>
         <artifactId>activiti-dependencies</artifactId>
-        <version>${activiti-dependencies.version}</version>
+        <version>${activiti.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -66,25 +61,25 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-build-parent</artifactId>
-      <version>${activiti-cloud-build.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-dependencies</artifactId>
-      <version>${activiti-dependencies.version}</version>
+      <version>${activiti.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
-      <version>${activiti-cloud-acceptance-tests.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-      <version>${activiti-cloud-service-common.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>
