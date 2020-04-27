@@ -342,21 +342,21 @@ pipeline {
             echo "activiti cloud version:: $activiti_cloud_version"
 
             retry(5) {
-              sh '''updatebot push-version --kind maven \
-                  org.activiti.cloud.dependencies:activiti-cloud-dependencies $VERSION \
-                  org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $activiti_cloud_version \
-                  org.activiti.cloud.audit:activiti-cloud-audit-dependencies $activiti_cloud_version \
-                  org.activiti.cloud.api:activiti-cloud-api-dependencies $activiti_cloud_version \
-                  org.activiti.cloud.build:activiti-cloud-parent $activiti_cloud_version \
-                  org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $activiti_cloud_version \
-                  org.activiti.cloud.messages:activiti-cloud-messages-dependencies $activiti_cloud_version \
-                  org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $activiti_cloud_version \
-                  org.activiti.cloud.notifications.graphql:activiti-cloud-notifications-graphql-dependencies $activiti_cloud_version \
-                  org.activiti.cloud.query:activiti-cloud-query-dependencies $activiti_cloud_version \
-                  org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies $activiti_cloud_version \
-                  org.activiti.cloud.common:activiti-cloud-service-common-dependencies $activiti_cloud_version \
+              sh """updatebot push-version --kind maven \
+                  org.activiti.cloud:activiti-cloud-dependencies $VERSION \
+                  org.activiti.cloud:activiti-cloud-modeling-dependencies $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-audit-dependencies $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-api-dependencies $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-parent $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-connectors-dependencies $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-messages-dependencies $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-modeling-dependencies $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-query-dependencies $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies $activiti_cloud_version \
+                  org.activiti.cloud:activiti-cloud-service-common-dependencies $activiti_cloud_version \
                   --merge false
-                  '''
+                  """
 
               sh '''updatebot push-version --kind helm activiti-cloud-dependencies $VERSION \
                         runtime-bundle $VERSION \
