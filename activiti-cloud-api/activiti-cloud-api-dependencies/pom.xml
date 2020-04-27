@@ -15,37 +15,37 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-model-shared</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-model-shared-impl</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-process-model</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-task-model</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-process-model-impl</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-task-model-impl</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-events</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

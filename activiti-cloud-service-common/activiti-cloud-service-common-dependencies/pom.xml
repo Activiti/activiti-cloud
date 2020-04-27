@@ -15,87 +15,87 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-common-config</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-auditable</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-common-util</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-identity-basic</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-common-security</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-test-security-keycloak</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-test</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-monitoring</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-tracing</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-logging</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-dbp-rest</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-metadata</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-swagger</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-error-handlers</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

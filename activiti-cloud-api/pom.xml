@@ -14,12 +14,9 @@
   <name>Activiti Cloud :: Runtime API Parent</name>
   <packaging>pom</packaging>
   <properties>
-    <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
-    <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
-    <activiti-api.version>7.1.218</activiti-api.version>
+    <activiti.version>7.1.218</activiti.version>
   </properties>
   <modules>
-
     <module>activiti-cloud-api-dependencies</module>
     <module>activiti-cloud-api-model-shared</module>
     <module>activiti-cloud-api-model-shared-impl</module>
@@ -34,14 +31,14 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.activiti</groupId>
         <artifactId>activiti-api-dependencies</artifactId>
-        <version>${activiti-api.version}</version>
+        <version>${activiti.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -52,13 +49,13 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-build-parent</artifactId>
-      <version>${activiti-cloud-build.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-api-dependencies</artifactId>
-      <version>${activiti-api.version}</version>
+      <version>${activiti.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>

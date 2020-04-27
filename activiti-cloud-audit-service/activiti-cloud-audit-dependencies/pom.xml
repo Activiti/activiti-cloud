@@ -16,53 +16,53 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-audit-parent</artifactId>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-audit-jpa</artifactId>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-audit-mongo</artifactId>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-audit</artifactId>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-audit</artifactId>
         <classifier>api-docs</classifier>
         <type>json</type>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-audit</artifactId>
         <classifier>api-docs</classifier>
         <type>yaml</type>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-audit</artifactId>
         <classifier>api-docs-hal</classifier>
         <type>json</type>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-audit-api</artifactId>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -16,25 +16,19 @@
     <module>activiti-cloud-connectors-dependencies</module>
     <module>activiti-cloud-starter-connector</module>
   </modules>
-  <properties>
-    <project.scm.repository>activiti-cloud-connectors</project.scm.repository>
-    <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-cloud-connectors.version>${project.version}</activiti-cloud-connectors.version>
-  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -44,13 +38,13 @@
      <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-build-parent</artifactId>
-      <version>${activiti-cloud-build.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-      <version>${activiti-cloud-service-common.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>

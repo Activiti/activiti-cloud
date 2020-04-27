@@ -16,48 +16,48 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-query-parent</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-query-model</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-query-repo</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-query-rest</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-query</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-query</artifactId>
         <classifier>api-docs</classifier>
         <type>json</type>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-query</artifactId>
         <classifier>api-docs</classifier>
         <type>yaml</type>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-query</artifactId>
         <classifier>api-docs-hal</classifier>
         <type>json</type>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

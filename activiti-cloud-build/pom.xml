@@ -174,14 +174,12 @@
     <maven.compiler.target>${java.version}</maven.compiler.target>
 
     <!-- configuration properties for tests-->
-    <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions
-    </generated-assertions-folder>
+    <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
     <generated-assertions-package>org.activiti.test</generated-assertions-package>
 
     <!-- plugin versions -->
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
-    <assertj-assertions-generator-maven-plugin.version>2.0.0
-    </assertj-assertions-generator-maven-plugin.version>
+    <assertj-assertions-generator-maven-plugin.version>2.0.0</assertj-assertions-generator-maven-plugin.version>
     <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
     <docker-maven-plugin.version>0.32.0</docker-maven-plugin.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
