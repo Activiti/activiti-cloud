@@ -422,7 +422,7 @@ def hel_version() {
 
 def activiti_cloud_version() {
   container('maven') {
-    return sh(script: 'grep -oPm1 "(?<=<activiti-cloud-build.version>)[^<]+" "activiti-cloud-dependencies/pom.xml"', returnStdout: true).trim()
+    return sh(script: 'grep -oPm1 "(?<=<activiti-cloud.version>)[^<]+" "activiti-cloud-dependencies/pom.xml"', returnStdout: true).trim()
   }
 }
 

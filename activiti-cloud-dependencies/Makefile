@@ -3,7 +3,7 @@ ACTIVITI_CLOUD_QUERY_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-query.ve
 ACTIVITI_CLOUD_RB_VERSION := $(shell grep -oPm1 "(?<=<example-runtime-bundle.version>)[^<]+" "dependencies-tests/pom.xml")
 ACTIVITI_CLOUD_MODELING_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-modeling.version>)[^<]+" "dependencies-tests/pom.xml")
 
-ACTIVITI_CLOUD_VERSION_NUMBER := $(shell grep -oPm1 "(?<=<activiti-cloud-build.version>)[^<]+" "pom.xml")
+ACTIVITI_CLOUD_VERSION_NUMBER := $(shell grep -oPm1 "(?<=<activiti-cloud.version>)[^<]+" "pom.xml")
 
 
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.273
