@@ -23,10 +23,10 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.ActivitiException;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.exception.ActivitiImageException;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.InputStream;
@@ -90,7 +90,7 @@ public class ProcessDiagramGeneratorWrapper {
                                                                                      getAnnotationFontName(),
                                                                                      isGenerateDefaultDiagram(),
                                                                                      getDiagramImageFileName())) {
-            return IOUtils.toByteArray(imageStream);
+            return StreamUtils.copyToByteArray(imageStream);
         } catch (ActivitiImageException e) {
             throw e;
         } catch (Exception e) {
