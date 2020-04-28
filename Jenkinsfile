@@ -200,6 +200,7 @@ pipeline {
                    helm repo index . && \
                    git add . && \
                    git commit -m "fix:(version) release $VERSION " && \
+                   git pull --rebase && \
                    git push origin "$GITHUB_CHARTS_BRANCH" """
             sh "rm -rf $GITHUB_CHARTS_DIR"
 
