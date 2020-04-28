@@ -44,7 +44,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.awaitility.Duration;
+import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -136,7 +136,7 @@ public class QueryAdminProcessDiagramIT {
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
 
-        await().atMost(Duration.ONE_MINUTE).untilAsserted(() -> {
+        await().atMost(Durations.ONE_MINUTE).untilAsserted(() -> {
             //when
             ResponseEntity<String> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/diagram",
                                                                                        HttpMethod.GET,
@@ -165,7 +165,7 @@ public class QueryAdminProcessDiagramIT {
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
 
-        await().atMost(Duration.ONE_MINUTE).untilAsserted(() -> {
+        await().atMost(Durations.ONE_MINUTE).untilAsserted(() -> {
            //when
            ResponseEntity<Map<String,Object>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/diagram",
                                                                                          HttpMethod.GET,

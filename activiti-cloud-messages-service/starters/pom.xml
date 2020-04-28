@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.messages</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-messages-dependencies</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../dependencies</relativePath>
@@ -22,23 +22,23 @@
       <artifactId>spring-boot-starter-integration</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.messages</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-messages-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-metadata</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-tracing</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
     <dependency>
@@ -62,7 +62,7 @@
       <artifactId>spring-messaging</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.messages</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-messages-tests</artifactId>
       <scope>test</scope>
     </dependency>

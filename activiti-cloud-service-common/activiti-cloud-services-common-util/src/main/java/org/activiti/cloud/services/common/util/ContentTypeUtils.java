@@ -16,15 +16,11 @@
 
 package org.activiti.cloud.services.common.util;
 
-import java.util.HashMap;
+import static java.util.Collections.singletonMap;
+import static org.springframework.boot.web.server.MimeMappings.DEFAULT;
+
 import java.util.Map;
 import java.util.Optional;
-
-import org.apache.commons.io.FilenameUtils;
-
-import static org.apache.commons.io.FilenameUtils.EXTENSION_SEPARATOR;
-import static org.apache.commons.io.FilenameUtils.getExtension;
-import static org.springframework.boot.web.server.MimeMappings.DEFAULT;
 
 /**
  * Utils for handling content type
@@ -45,24 +41,33 @@ public final class ContentTypeUtils {
 
     public static final String CONTENT_TYPE_ZIP = "application/zip";
 
-    public static final Map<String, String> CONTENT_TYPES = new HashMap<String, String>() {{
-        put(DMN,
-            CONTENT_TYPE_XML);
-    }};
+    private static final String EMPTY_STRING = "";
+
+    public static final char EXTENSION_SEPARATOR = '.';
+
+    private static final char UNIX_SEPARATOR = '/';
+
+    private static final char WINDOWS_SEPARATOR = '\\';
+
+    private static final int NOT_FOUND = -1;
+
+    public static final Map<String, String> CONTENT_TYPES = singletonMap(DMN, CONTENT_TYPE_XML);
 
     /**
      * Get the content type corresponding to an extension.
+     *
      * @param extension the extension to search the content type for
      * @return the content type
      */
     public static Optional<String> getContentTypeByExtension(String extension) {
         return Optional.ofNullable(
-                Optional.ofNullable(DEFAULT.get(extension))
-                        .orElseGet(() -> CONTENT_TYPES.get(extension)));
+            Optional.ofNullable(DEFAULT.get(extension))
+                .orElseGet(() -> CONTENT_TYPES.get(extension)));
     }
 
     /**
      * Get the content type corresponding to a path.
+     *
      * @param path the path to search the content type for
      * @return the content type
      */
@@ -72,6 +77,7 @@ public final class ContentTypeUtils {
 
     /**
      * Check if a content type is json
+     *
      * @param contentType the content type to check
      * @return true if the the given content type is json
      */
@@ -81,27 +87,27 @@ public final class ContentTypeUtils {
 
     public static String toJsonFilename(String filename) {
         return setExtension(filename,
-                            JSON);
+            JSON);
     }
 
     public static String setExtension(String filename,
-                                      String extension) {
+        String extension) {
         return Optional.ofNullable(extension)
-                .map(ContentTypeUtils::fullExtension)
-                .filter(ext -> !filename.endsWith(ext))
-                .map(fullExtension -> FilenameUtils.removeExtension(filename) + fullExtension)
-                .orElse(filename);
+            .map(ContentTypeUtils::fullExtension)
+            .filter(ext -> !filename.endsWith(ext))
+            .map(fullExtension -> removeExtension(filename) + fullExtension)
+            .orElse(filename);
     }
 
     public static String removeExtension(String filename,
-                                         String extension) {
+        String extension) {
         return Optional.ofNullable(extension)
-                .map(ContentTypeUtils::fullExtension)
-                .filter(filename::endsWith)
-                .map(filename::lastIndexOf)
-                .map(extensionIndex -> filename.substring(0,
-                                                          extensionIndex))
-                .orElse(filename);
+            .map(ContentTypeUtils::fullExtension)
+            .filter(filename::endsWith)
+            .map(filename::lastIndexOf)
+            .map(extensionIndex -> filename.substring(0,
+                extensionIndex))
+            .orElse(filename);
     }
 
     public static String fullExtension(String extension) {
@@ -111,4 +117,41 @@ public final class ContentTypeUtils {
     private ContentTypeUtils() {
 
     }
+
+    static String getExtension(String fileName) {
+        if (fileName == null) {
+            return null;
+        }
+        final int index = getIndexOfExtension(fileName);
+        if (index == NOT_FOUND) {
+            return EMPTY_STRING;
+        }
+        return fileName.substring(index + 1);
+    }
+
+    private static int getIndexOfExtension(String path) {
+
+        int extensionPos = path.lastIndexOf(EXTENSION_SEPARATOR);
+        int lastUnixPos = path.lastIndexOf(UNIX_SEPARATOR);
+        int lastWindowsPos = path.lastIndexOf(WINDOWS_SEPARATOR);
+        int lastSeparator = Math.max(lastUnixPos, lastWindowsPos);
+
+        int index = lastSeparator > extensionPos ? NOT_FOUND : extensionPos;
+        return index;
+    }
+
+    static String removeExtension(final String fileName) {
+
+        if (fileName == null) {
+            return null;
+        }
+        final int index = getIndexOfExtension(fileName);
+        if (index == NOT_FOUND) {
+            return fileName;
+        }
+
+        return fileName.substring(0, index);
+
+    }
+
 }

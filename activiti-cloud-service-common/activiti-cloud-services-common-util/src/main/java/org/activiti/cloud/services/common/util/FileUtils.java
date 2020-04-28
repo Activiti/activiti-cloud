@@ -24,8 +24,8 @@ import java.net.URL;
 import java.util.Optional;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
 
-import static org.apache.commons.io.IOUtils.toByteArray;
 
 /**
  * Utils for handling files
@@ -40,7 +40,7 @@ public class FileUtils {
      */
     public static byte[] resourceAsByteArray(String path) throws IOException {
         try (InputStream inputStream = new FileInputStream(new ClassPathResource(path).getFile())) {
-            return toByteArray(inputStream);
+            return StreamUtils.copyToByteArray(inputStream);
         }
     }
 

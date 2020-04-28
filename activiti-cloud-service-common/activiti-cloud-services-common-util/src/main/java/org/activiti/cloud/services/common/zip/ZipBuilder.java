@@ -30,7 +30,7 @@ import java.util.zip.ZipOutputStream;
 import org.activiti.cloud.services.common.file.FileContent;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_ZIP;
-import static org.apache.commons.io.IOUtils.writeChunked;
+
 
 /**
  * Builder for zip content
@@ -44,6 +44,8 @@ public class ZipBuilder {
     private Set<String> entries = new TreeSet<>();
 
     private Map<String, byte[]> contentMap = new HashMap<>();
+
+    private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
     public ZipBuilder(String name) {
         this.name = name;
@@ -128,5 +130,20 @@ public class ZipBuilder {
         return new FileContent(name + ".zip",
                                CONTENT_TYPE_ZIP,
                                toZipBytes());
+    }
+
+    private void writeChunked(byte[] data, ZipOutputStream output) throws IOException {
+
+        if (data != null) {
+            int bytes = data.length;
+            int offset = 0;
+            while (bytes > 0) {
+                final int chunk = Math.min(bytes, DEFAULT_BUFFER_SIZE);
+                output.write(data, offset, chunk);
+                bytes -= chunk;
+                offset += chunk;
+            }
+        }
+
     }
 }

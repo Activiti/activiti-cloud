@@ -24,10 +24,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.springframework.util.StreamUtils;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.apache.commons.io.IOUtils.toByteArray;
+
 
 /**
  * Zip stream based on a {@link ZipInputStream}
@@ -90,9 +91,11 @@ public class ZipStream {
                        ZipInputStream zipInputStream) throws IOException {
             this.zipEntry = zipEntry;
             this.content = !zipEntry.isDirectory() ?
-                    Optional.of(toByteArray(zipInputStream)) :
+                    Optional.of(StreamUtils.copyToByteArray(zipInputStream)) :
                     Optional.empty();
             path = Paths.get(zipEntry.getName());
+
+
         }
 
         /**
