@@ -24,8 +24,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud-runtime-bundle-service.version>7.1.466</activiti-cloud-runtime-bundle-service.version>
-    <activiti-cloud-messages-service.version>7.1.466</activiti-cloud-messages-service.version>
+    <activiti-cloud.version>7.1.466</activiti-cloud.version>
     <docker-maven-plugin.version>0.32.0</docker-maven-plugin.version>
   </properties>
   <dependencyManagement>
@@ -33,14 +32,14 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <version>${activiti-cloud.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-messages-dependencies</artifactId>
-        <version>${activiti-cloud-messages-service.version}</version>
+        <version>${activiti-cloud.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -84,7 +83,7 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-      <version>${activiti-cloud-runtime-bundle-service.version}</version>
+      <version>${activiti-cloud.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>

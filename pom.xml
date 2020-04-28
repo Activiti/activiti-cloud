@@ -10,6 +10,12 @@
   <version>7.1.0-SNAPSHOT</version>
   <description>Activiti Cloud Apps Mono :: Aggregator</description>
   <url>http://activiti.org</url>
+  <scm>
+    <url>https://github.com/Activiti/${project.artifactId}</url>
+    <connection>scm:git:https://github.com/Activiti/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:https://github.com/Activiti/${project.artifactId}.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
   <modules>
     <module>example-runtime-bundle</module>
     <module>activiti-cloud-query</module>

@@ -15,70 +15,70 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-dependencies</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
-        <version>${activiti-cloud-acceptance-tests.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-modeling-dependencies</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-query-dependencies</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-messages-dependencies</artifactId>
-        <version>${activiti-cloud-messages-service.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
-        <version>${activiti-cloud-notifications-service-graphql.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-audit-dependencies</artifactId>
-        <version>${activiti-cloud-audit-service.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-connectors-dependencies</artifactId>
-        <version>${activiti-cloud-connectors.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

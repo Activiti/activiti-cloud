@@ -17,14 +17,14 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud-connectors.version>7.1.466</activiti-cloud-connectors.version>
+    <activiti-cloud.version>7.1.466</activiti-cloud.version>
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-connectors-dependencies</artifactId>
-        <version>${activiti-cloud-connectors.version}</version>
+        <version>${activiti-cloud.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-connectors-dependencies</artifactId>
-      <version>${activiti-cloud-connectors.version}</version>
+      <version>${activiti-cloud.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>

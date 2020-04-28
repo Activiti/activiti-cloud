@@ -19,12 +19,6 @@
     <module>apps-acceptance-tests</module>
     <module>security-policies-acceptance-tests</module>
   </modules>
-  <scm>
-    <url>https://github.com/Activiti/activiti-cloud-acceptance-tests</url>
-    <connection>scm:git:https://github.com/Activiti/activiti-cloud-acceptance-tests.git</connection>
-    <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-acceptance-tests.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
   <distributionManagement>
     <repository>
       <id>central-releases-staging</id>
@@ -35,13 +29,18 @@
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </snapshotRepository>
   </distributionManagement>
+  <repositories>
+    <repository>
+      <id>activiti-releases</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+    </repository>
+  </repositories>
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud-acceptance-tests-dependencies.version>7.1.466</activiti-cloud-acceptance-tests-dependencies.version>
-    <activiti-cloud-modeling-dependencies.version>7.1.466</activiti-cloud-modeling-dependencies.version>
+    <activiti-cloud.version>7.1.466</activiti-cloud.version>
     <asm.version>7.0</asm.version>
     <assertj.version>3.13.2</assertj.version>
     <awaitility.version>3.1.1</awaitility.version>
@@ -100,25 +99,19 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
-        <version>${activiti-cloud-acceptance-tests-dependencies.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-modeling-dependencies</artifactId>
-        <version>${activiti-cloud-modeling-dependencies.version}</version>
+        <version>${activiti-cloud.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <repositories>
-    <repository>
-      <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
   <build>
     <plugins>
       <plugin>

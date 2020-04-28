@@ -13,16 +13,12 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <enforceFail>true</enforceFail>
-    <activiti-cloud-modeling.version>${project.parent.version}</activiti-cloud-modeling.version>
-    <example-runtime-bundle.version>${project.parent.version}</example-runtime-bundle.version>
-    <example-cloud-connector.version>${project.parent.version}</example-cloud-connector.version>
-    <activiti-cloud-query.version>${project.parent.version}</activiti-cloud-query.version>
   </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-modeling</artifactId>
-      <version>${activiti-cloud-modeling.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
@@ -42,7 +38,7 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>example-runtime-bundle</artifactId>
-      <version>${example-runtime-bundle.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
@@ -70,7 +66,7 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>example-cloud-connector</artifactId>
-      <version>${example-cloud-connector.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
@@ -86,7 +82,7 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-query</artifactId>
-      <version>${activiti-cloud-query.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
