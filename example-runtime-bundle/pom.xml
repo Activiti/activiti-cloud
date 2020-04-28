@@ -24,8 +24,8 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud-runtime-bundle-service.version>7.1.465</activiti-cloud-runtime-bundle-service.version>
-    <activiti-cloud-messages-service.version>7.1.465</activiti-cloud-messages-service.version>
+    <activiti-cloud-runtime-bundle-service.version>7.1.466</activiti-cloud-runtime-bundle-service.version>
+    <activiti-cloud-messages-service.version>7.1.466</activiti-cloud-messages-service.version>
     <docker-maven-plugin.version>0.32.0</docker-maven-plugin.version>
   </properties>
   <dependencyManagement>
