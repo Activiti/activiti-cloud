@@ -1,5 +1,11 @@
 package org.activiti.cloud.services.rest.controllers;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,11 +22,9 @@ import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,24 +33,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.resourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedCandidateGroups;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = CandidateGroupAdminControllerImpl.class, secure = true)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -56,10 +48,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class})
 public class CandidateGroupAdminControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "candidate-group-admin";
-
-    private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "candidate-group-admin-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -79,7 +67,7 @@ public class CandidateGroupAdminControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
@@ -96,8 +84,6 @@ public class CandidateGroupAdminControllerImplIT {
         MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-groups",
                                                     1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                                resourcesResponseFields()))
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
@@ -118,8 +104,6 @@ public class CandidateGroupAdminControllerImplIT {
         MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-groups",
                                                     1).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                unpagedCandidateGroups()))
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())

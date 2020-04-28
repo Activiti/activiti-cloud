@@ -39,14 +39,17 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.message.MessageBuilderAppenderChain;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
-import org.junit.Before;
-import org.junit.Test;
+import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -63,7 +66,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private static final String CLIENT_ID = "entityId";
     private static final String CLIENT_NAME = "serviceTaskName";
     private static final String CLIENT_TYPE = ServiceTask.class.getSimpleName();
- 
+
     @InjectMocks
     private ServiceTaskIntegrationResultEventHandler handler;
 
@@ -88,13 +91,16 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Mock
     private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
 
+    @Mock
+    private IntegrationContextMessageBuilderFactory messageBuilderFactory;
+
     @Captor
     private ArgumentCaptor<Message<CloudRuntimeEvent<?, ?>[]>> messageCaptor;
 
     @Mock
     private ExecutionQuery executionQuery;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
@@ -102,6 +108,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
         when(executionQuery.list()).thenReturn(Collections.emptyList());
+        when(messageBuilderFactory.create(any())).thenReturn(new MessageBuilderAppenderChain());
     }
 
     @Test
@@ -115,7 +122,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         given(integrationContextService.findById(ENTITY_ID))
                 .willReturn(integrationContextEntity);
-        given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
+        given(executionQuery.list()).willReturn(Collections.singletonList(mock(ExecutionEntity.class)));
         given(executionQuery.list().get(0).getActivityId()).willReturn(CLIENT_ID);
         Map<String, Object> variables = Collections.singletonMap("var1",
                 "v");
@@ -184,12 +191,12 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(event.getEntity().getId()).isEqualTo(ENTITY_ID);
         assertThat(event.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(event.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
-        
-        
+
+
         assertThat(event.getEntity().getClientId()).isEqualTo(CLIENT_ID);
         assertThat(event.getEntity().getClientName()).isEqualTo(CLIENT_NAME);
         assertThat(event.getEntity().getClientType()).isEqualTo(CLIENT_TYPE);
-        
+
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(event);
     }
 
@@ -202,7 +209,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setClientId(CLIENT_ID);
         integrationContext.setClientName(CLIENT_NAME);
         integrationContext.setClientType(CLIENT_TYPE);
-        
+
         return integrationContext;
     }
 

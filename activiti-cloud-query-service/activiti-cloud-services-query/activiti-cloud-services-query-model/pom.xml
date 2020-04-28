@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.query</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-query</artifactId>
     <version>7.1.0-SNAPSHOT</version>
   </parent>
@@ -15,19 +15,19 @@
       <artifactId>javax.annotation-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-model-shared</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-task-model</artifactId>
     </dependency>
     <dependency>
@@ -59,7 +59,7 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-task-model</artifactId>
     </dependency>
     <dependency>
@@ -97,18 +97,18 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
+      <groupId>net.javacrumbs.json-unit</groupId>
+      <artifactId>json-unit-fluent</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

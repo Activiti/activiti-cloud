@@ -18,7 +18,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.activiti.test.Assertions.assertThat;
 

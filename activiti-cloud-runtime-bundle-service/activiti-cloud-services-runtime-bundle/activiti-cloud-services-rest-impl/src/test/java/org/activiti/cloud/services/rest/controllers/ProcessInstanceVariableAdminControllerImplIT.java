@@ -34,11 +34,9 @@ import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.activiti.spring.process.model.ProcessExtensionModel;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -47,7 +45,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -61,16 +58,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceVariableAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({CommonModelAutoConfiguration.class,
         ProcessModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -89,7 +83,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
 
     @MockBean
     private Map<String, ProcessExtensionModel> processExtensionModelMap;
-    
+
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
@@ -111,7 +105,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ProcessInstanceImpl processInstance;
         processInstance = new ProcessInstanceImpl();
@@ -162,7 +156,6 @@ public class ProcessInstanceVariableAdminControllerImplIT {
                 .content(mapper.writeValueAsString(ProcessPayloadBuilder.removeVariables().withVariableNames(Arrays.asList("varName1",
                         "varName2"))
                         .build())))
-                .andDo(print())
                 .andExpect(status().isOk());
         verify(processAdminRuntime).removeVariables(any());
     }

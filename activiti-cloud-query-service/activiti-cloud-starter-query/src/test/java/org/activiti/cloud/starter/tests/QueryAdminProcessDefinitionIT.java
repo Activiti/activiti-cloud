@@ -29,10 +29,9 @@ import org.activiti.cloud.services.query.test.ProcessDefinitionAdminRestTemplate
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -40,13 +39,11 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
@@ -70,12 +67,12 @@ public class QueryAdminProcessDefinitionIT {
     @Autowired
     private MyProducer producer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         keycloakTokenProducer.setKeycloakTestUser("hradmin");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();

@@ -1,12 +1,10 @@
 package org.activiti.cloud.services.audit.jpa.controller;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.resourcesResponseFields;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
@@ -21,11 +19,9 @@ import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteContro
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -33,18 +29,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @TestPropertySource(properties="activiti.rest.enable-deletion=true")
-@RunWith(SpringRunner.class)
 @WebMvcTest(AuditEventsDeleteController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({
     AuditAPIAutoConfiguration.class,
     AuditJPAAutoConfiguration.class,
@@ -66,7 +59,7 @@ public class AuditEventDeleteControllerIT {
     @MockBean
     private UserGroupManager userGroupManager;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("admin");
         assertThat(userGroupManager).isNotNull();
@@ -84,10 +77,7 @@ public class AuditEventDeleteControllerIT {
         mockMvc.perform(delete("/admin/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL)
                 .accept(MediaType.APPLICATION_JSON))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/list",
-                        resourcesResponseFields()
-                ));
+                .andExpect(status().isOk());
 
         verify(eventsRepository).deleteAll(list);
     }

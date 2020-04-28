@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.messages</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-starters-messages</artifactId>
     <version>7.1.0-SNAPSHOT</version>
   </parent>
@@ -32,10 +33,8 @@
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
         <property>
-          <name>skipITs</name>
-          <value>false</value>
+          <name>!skipITs</name>
         </property>
       </activation>
       <build>
@@ -55,7 +54,7 @@
                     </ports>
                     <env>
                       <ALLOW_EMPTY_PASSWORD>yes</ALLOW_EMPTY_PASSWORD>
-                    </env>  
+                    </env>
                     <wait>
                       <log>.*database system is ready to accept connections</log>
                       <time>45000</time>

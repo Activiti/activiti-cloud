@@ -42,9 +42,8 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -57,18 +56,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class InclusiveGatewayAuditProducerIT {
 
@@ -95,7 +92,7 @@ public class InclusiveGatewayAuditProducerIT {
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
         ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
@@ -265,7 +262,7 @@ public class InclusiveGatewayAuditProducerIT {
         });
 
         tasks = processInstanceRestTemplate.getTasks(processInstance).getBody().getContent().iterator();
-        assertThat(tasks).hasSize(1);
+        assertThat(tasks).toIterable().hasSize(1);
 
         streamHandler.getAllReceivedEvents().clear();
 

@@ -17,34 +17,19 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(HomeControllerImpl.class)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @AutoConfigureMockMvc(secure = false)
 public class HomeControllerImplIT {
-
-    private static final String DOCUMENTATION_IDENTIFIER = "home";
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,14 +38,7 @@ public class HomeControllerImplIT {
     public void getHomeInfo() throws Exception {
         this.mockMvc.perform(get("/v1/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Welcome to an instance of the Activiti Process Engine")))
-                .andDo(document(DOCUMENTATION_IDENTIFIER,
-                                links(halLinks(),
-                                        linkWithRel("process-definitions").description("The process-definitions"),
-                                        linkWithRel("process-instances").description("The process-instances"),
-                                        linkWithRel("tasks").description("Tasks")),
-                                responseFields(
-                                        fieldWithPath("welcome").type(JsonFieldType.STRING).description("The welcome message"),
-                                        subsectionWithPath("_links").description("Other resources"))));
+                .andExpect(content().string(containsString("Welcome to an instance of the Activiti Process Engine")));
     }
+
 }

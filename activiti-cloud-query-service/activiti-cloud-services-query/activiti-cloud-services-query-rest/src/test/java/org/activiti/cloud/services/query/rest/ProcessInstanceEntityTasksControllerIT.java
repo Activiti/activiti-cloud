@@ -17,14 +17,10 @@
 package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
@@ -39,11 +35,8 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -53,15 +46,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceTasksController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({
     QueryRestWebMvcAutoConfiguration.class,
     CommonModelAutoConfiguration.class,
@@ -69,25 +59,23 @@ import org.springframework.test.web.servlet.MvcResult;
 })
 public class ProcessInstanceEntityTasksControllerIT {
 
-    private static final String PROCESS_INSTANCE_TASK_ALFRESCO_IDENTIFIER = "process-instance-tasks-alfresco";
-
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private TaskRepository taskRepository;
-    
+
     @MockBean
     private UserGroupManager userGroupManager;
-    
-    @MockBean
-    private SecurityManager securityManager;    
 
     @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;    
+    private SecurityManager securityManager;
 
     @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;        
+    private SecurityPoliciesManager securityPoliciesManager;
+
+    @MockBean
+    private SecurityPoliciesProperties securityPoliciesProperties;
 
     @Test
     public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
@@ -95,7 +83,7 @@ public class ProcessInstanceEntityTasksControllerIT {
         TaskEntity taskEntity = buildDefaultTask();
 
         given(taskRepository.findAll(any(),
-                                     ArgumentMatchers.<Pageable>any()))
+                                     any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(taskEntity),
                                            new AlfrescoPageRequest(11, 10, PageRequest.of(0,
                                                           10)),
@@ -107,12 +95,6 @@ public class ProcessInstanceEntityTasksControllerIT {
                                                       .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk())
-                .andDo(document(PROCESS_INSTANCE_TASK_ALFRESCO_IDENTIFIER + "/list",
-                                processInstanceIdParameter(),
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()
-
-                ))
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())

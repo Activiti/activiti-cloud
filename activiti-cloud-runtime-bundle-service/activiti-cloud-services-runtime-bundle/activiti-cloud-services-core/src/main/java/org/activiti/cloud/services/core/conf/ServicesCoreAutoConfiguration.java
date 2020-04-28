@@ -16,12 +16,21 @@
 
 package org.activiti.cloud.services.core.conf;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
-
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
+import org.activiti.cloud.services.core.ProcessVariableDateConverter;
+import org.activiti.cloud.services.core.ProcessVariableJsonNodeConverter;
+import org.activiti.cloud.services.core.ProcessVariableValueConverter;
+import org.activiti.cloud.services.core.ProcessVariableValueSpringConverter;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.commands.ClaimTaskCmdExecutor;
 import org.activiti.cloud.services.core.commands.CommandEndpoint;
 import org.activiti.cloud.services.core.commands.CommandExecutor;
@@ -42,12 +51,16 @@ import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.core.pageable.sort.ProcessDefinitionSortApplier;
 import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
 import org.activiti.cloud.services.core.pageable.sort.TaskSortApplier;
+import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
+import org.springframework.format.support.FormattingConversionService;
 
 @Configuration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
@@ -57,13 +70,13 @@ public class ServicesCoreAutoConfiguration {
     public SpringPageConverter pageConverter(){
         return new SpringPageConverter();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ClaimTaskCmdExecutor claimTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
         return new ClaimTaskCmdExecutor(taskAdminRuntime);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CompleteTaskCmdExecutor completeTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
@@ -75,31 +88,31 @@ public class ServicesCoreAutoConfiguration {
     public CreateTaskVariableCmdExecutor createTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
         return new CreateTaskVariableCmdExecutor(taskAdminRuntime);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ReleaseTaskCmdExecutor releaseTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
         return new ReleaseTaskCmdExecutor(taskAdminRuntime);
-    }    
+    }
 
     @Bean
     @ConditionalOnMissingBean
     public UpdateTaskVariableCmdExecutor updateTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
         return new UpdateTaskVariableCmdExecutor(taskAdminRuntime);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public RemoveProcessVariablesCmdExecutor removeProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
         return new RemoveProcessVariablesCmdExecutor(processAdminRuntime);
-    }    
+    }
 
     @Bean
     @ConditionalOnMissingBean
     public ResumeProcessInstanceCmdExecutor resumeProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
         return new ResumeProcessInstanceCmdExecutor(processAdminRuntime);
-    }  
-    
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public SetProcessVariablesCmdExecutor setProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
@@ -111,7 +124,7 @@ public class ServicesCoreAutoConfiguration {
     public SignalCmdExecutor signalCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
         return new SignalCmdExecutor(processAdminRuntime);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public StartProcessInstanceCmdExecutor startProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
@@ -122,7 +135,7 @@ public class ServicesCoreAutoConfiguration {
     @ConditionalOnMissingBean
     public SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
         return new SuspendProcessInstanceCmdExecutor(processAdminRuntime);
-    }    
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -135,49 +148,79 @@ public class ServicesCoreAutoConfiguration {
     public ReceiveMessageCmdExecutor receiveMessageCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
         return new ReceiveMessageCmdExecutor(processAdminRuntime);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public DeleteProcessInstanceCmdExecutor deleteProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
         return new DeleteProcessInstanceCmdExecutor(processAdminRuntime);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
         return new CommandEndpoint<T>(cmdExecutors);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ProcessDefinitionSortApplier processDefinitionSortApplier() {
         return new ProcessDefinitionSortApplier();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ProcessInstanceSortApplier processInstanceSortApplier() {
         return new ProcessInstanceSortApplier();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public TaskSortApplier taskSortApplier() {
         return new TaskSortApplier();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ProcessDiagramGenerator processDiagramGenerator() {
         return new DefaultProcessDiagramGenerator();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(ProcessDiagramGenerator processDiagramGenerator) {
         return new ProcessDiagramGeneratorWrapper(processDiagramGenerator);
-        
     }
-    
 
+    @Bean
+    public ProcessVariableValueSpringConverter<Date> processVariableDateConverter(DateFormatterProvider dateFormatterProvider) {
+        return new ProcessVariableDateConverter(dateFormatterProvider);
+    }
+
+    @Bean
+    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter(
+        ObjectMapper objectMapper) {
+        return new ProcessVariableJsonNodeConverter(objectMapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessVariableValueConverter processVariableValueConverter(List<ProcessVariableValueSpringConverter<?>> converters,
+                                                                       DateFormatterProvider dateFormatterProvider) {
+        FormattingConversionService conversionService = new ApplicationConversionService();
+
+        converters.forEach(conversionService::addConverter);
+
+        DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+        registrar.setDateFormatter(DateTimeFormatter.ofPattern(dateFormatterProvider.getDateFormatPattern()));
+        registrar.setDateTimeFormatter(DateTimeFormatter.ofPattern(dateFormatterProvider.getDateFormatPattern()));
+        registrar.registerFormatters(conversionService);
+
+        return new ProcessVariableValueConverter(conversionService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessVariablesPayloadConverter processVariablesPayloadConverter(ProcessVariableValueConverter variableValueConverter) {
+        return new ProcessVariablesPayloadConverter(variableValueConverter);
+    }
 }

@@ -20,7 +20,7 @@ import static org.activiti.cloud.api.events.CloudRuntimeEventType.ACTIVITY_START
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CloudRuntimeEventRegistryTest {
 

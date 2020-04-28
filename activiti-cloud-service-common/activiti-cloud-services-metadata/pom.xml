@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-    <groupId>org.activiti.cloud.common</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
@@ -14,7 +14,7 @@
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
-    </dependency>       
+    </dependency>
     <dependency>
       <groupId>com.netflix.eureka</groupId>
       <artifactId>eureka-client</artifactId>
@@ -22,22 +22,17 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-autoconfigure</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

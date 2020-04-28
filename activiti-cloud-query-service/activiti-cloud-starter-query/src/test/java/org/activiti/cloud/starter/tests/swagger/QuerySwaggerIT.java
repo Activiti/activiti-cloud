@@ -16,25 +16,28 @@
 
 package org.activiti.cloud.starter.tests.swagger;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.hamcrest.Matchers.both;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.startsWith;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext
 public class QuerySwaggerIT {
 
     @Autowired
@@ -43,25 +46,24 @@ public class QuerySwaggerIT {
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
         mockMvc.perform(get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.paths").isNotEmpty())
-                .andExpect(jsonPath("$.definitions").isNotEmpty())
-                .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContentOf"))))
-                .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContentOf"))))
-                .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContentOf"))))
-                .andExpect(jsonPath("$.info.title").value("Activiti Cloud Query :: Starter :: Query ReST API"))
-                .andExpect(content().string(
-                        both(notNullValue(String.class))
-                                .and(CoreMatchers.not(containsString("ListResponseContent«")))
-                                .and(CoreMatchers.not(containsString("EntriesResponseContent«")))
-                                .and(CoreMatchers.not(containsString("EntryResponseContent«")))
-                                .and(CoreMatchers.not(containsString("PagedResources«")))
-                                .and(CoreMatchers.not(containsString("PagedResources«")))
-                                .and(CoreMatchers.not(containsString("Resources«Resource«")))
-                                .and(CoreMatchers.not(containsString("Resource«")))
-                                           ));
-
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.paths").isNotEmpty())
+            .andExpect(jsonPath("$.definitions").isNotEmpty())
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContentOf"))))
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContentOf"))))
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContentOf"))))
+            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Query :: Starter :: Query ReST API"))
+            .andExpect(content().string(
+                       both(notNullValue(String.class))
+                            .and(not(containsString("ListResponseContent«")))
+                            .and(not(containsString("EntriesResponseContent«")))
+                            .and(not(containsString("EntryResponseContent«")))
+                            .and(not(containsString("PagedResources«")))
+                            .and(not(containsString("PagedResources«")))
+                            .and(not(containsString("Resources«Resource«")))
+                            .and(not(containsString("Resource«")))
+                       ));
     }
 
 }

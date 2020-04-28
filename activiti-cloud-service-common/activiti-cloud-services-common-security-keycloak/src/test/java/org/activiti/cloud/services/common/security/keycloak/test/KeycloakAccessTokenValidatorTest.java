@@ -22,24 +22,24 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.keycloak.representations.AccessToken;
 
 
 public class KeycloakAccessTokenValidatorTest {
-    
+
     private KeycloakAccessTokenValidator subject = new KeycloakAccessTokenValidator() {};
 
     @Test
     public void testIsValidActive() {
         // given
         AccessToken accessToken = mock(AccessToken.class);
-        
+
         when(accessToken.isActive()).thenReturn(true);
-        
+
         // when
         Boolean result = subject.isValid(accessToken);
-        
+
         // then
         assertThat(result).isTrue();
     }
@@ -48,12 +48,12 @@ public class KeycloakAccessTokenValidatorTest {
     public void testIsValidNotActive() {
         // given
         AccessToken accessToken = mock(AccessToken.class);
-        
+
         when(accessToken.isActive()).thenReturn(false);
-        
+
         // when
         Boolean result = subject.isValid(accessToken);
-        
+
         // then
         assertThat(result).isFalse();
     }
@@ -62,12 +62,12 @@ public class KeycloakAccessTokenValidatorTest {
     public void testIsValidNull() {
         // given
         AccessToken accessToken = null;
-        
+
         // when
         Throwable result = catchThrowable(() -> { subject.isValid(accessToken); });
-        
+
         // then
         assertThat(result).isInstanceOf(SecurityException.class);
     }
-    
+
 }

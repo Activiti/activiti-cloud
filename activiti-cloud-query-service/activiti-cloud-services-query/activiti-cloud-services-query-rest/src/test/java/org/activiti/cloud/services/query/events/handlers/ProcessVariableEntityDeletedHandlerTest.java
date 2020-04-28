@@ -29,16 +29,16 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -49,14 +49,14 @@ public class ProcessVariableEntityDeletedHandlerTest {
 
     @Mock
     private VariableRepository variableRepository;
-    
+
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
 
     @Mock
     private EntityFinder entityFinder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -70,8 +70,8 @@ public class ProcessVariableEntityDeletedHandlerTest {
         processInstanceEntity.setStatus(ProcessInstanceStatus.CREATED);
         Optional<ProcessInstanceEntity> optional = Optional.of(processInstanceEntity);
         ProcessVariableEntity variableEntity = new ProcessVariableEntity();
-        
-        Mockito.when(processInstanceRepository.findById(anyString())).thenReturn(optional); 
+
+        when(processInstanceRepository.findById(anyString())).thenReturn(optional);
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
 
         //when

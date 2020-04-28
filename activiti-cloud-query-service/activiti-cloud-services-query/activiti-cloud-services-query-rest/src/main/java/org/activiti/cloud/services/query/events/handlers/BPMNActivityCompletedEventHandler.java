@@ -20,69 +20,32 @@ import java.util.Date;
 
 import javax.persistence.EntityManager;
 
-import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity.BPMNActivityStatus;
-import org.activiti.cloud.services.query.model.QueryException;
+import org.springframework.transaction.annotation.Transactional;
 
-public class BPMNActivityCompletedEventHandler implements QueryEventHandler {
-
-    private final BPMNActivityRepository bpmnActivitiyRepository;
-    private final EntityManager entityManager;
+@Transactional
+public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
     public BPMNActivityCompletedEventHandler(BPMNActivityRepository activitiyRepository,
-                                           EntityManager entityManager) {
-        this.bpmnActivitiyRepository = activitiyRepository;
-        this.entityManager = entityManager;
+                                             EntityManager entityManager) {
+        super(activitiyRepository,
+              entityManager);
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityCompletedEvent activityEvent = CloudBPMNActivityCompletedEvent.class.cast(event);
-        
-        BPMNActivity bpmnActivity = activityEvent.getEntity();
-        
-        BPMNActivityEntity bpmnActivityEntity = bpmnActivitiyRepository.findByProcessInstanceIdAndElementId(bpmnActivity.getProcessInstanceId(), 
-                                                                                                            bpmnActivity.getElementId());
 
-        // Let's create entity if does not exists
-        if(bpmnActivityEntity == null) {
-            bpmnActivityEntity = new BPMNActivityEntity(event.getServiceName(),
-                                                                           event.getServiceFullName(),
-                                                                           event.getServiceVersion(),
-                                                                           event.getAppName(),
-                                                                           event.getAppVersion());            
-            // Let use event id to persist activity id
-            bpmnActivityEntity.setId(event.getId());
-            bpmnActivityEntity.setElementId(bpmnActivity.getElementId());
-            bpmnActivityEntity.setActivityName(bpmnActivity.getActivityName());
-            bpmnActivityEntity.setActivityType(bpmnActivity.getActivityType());
-            bpmnActivityEntity.setProcessDefinitionId(bpmnActivity.getProcessDefinitionId());
-            bpmnActivityEntity.setProcessInstanceId(bpmnActivity.getProcessInstanceId());
-            bpmnActivityEntity.setProcessDefinitionKey(activityEvent.getProcessDefinitionKey());
-            bpmnActivityEntity.setProcessDefinitionVersion(activityEvent.getProcessDefinitionVersion());
-            bpmnActivityEntity.setBusinessKey(activityEvent.getBusinessKey());            
-        }
-        
+        BPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntity(event);
+
         bpmnActivityEntity.setCompletedDate(new Date(activityEvent.getTimestamp()));
         bpmnActivityEntity.setStatus(BPMNActivityStatus.COMPLETED);
 
-        persistIntoDatabase(event,
-                            bpmnActivityEntity);
-    }
-
-    private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                     BPMNActivityEntity entity) {
-        try {
-            bpmnActivitiyRepository.save(entity);
-        } catch (Exception cause) {
-            throw new QueryException("Error handling CloudBPMNActivityCompletedEvent[" + event + "]",
-                                     cause);
-        }
     }
 
     @Override

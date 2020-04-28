@@ -135,8 +135,9 @@ public class ModelController implements ModelRestApi {
     public void updateModelContent(
             @PathVariable String modelId,
             @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
+
         modelService.updateModelContent(findModelById(modelId),
-                                        multipartToFileContent(file));
+            multipartToFileContent(file));
     }
 
     @Override

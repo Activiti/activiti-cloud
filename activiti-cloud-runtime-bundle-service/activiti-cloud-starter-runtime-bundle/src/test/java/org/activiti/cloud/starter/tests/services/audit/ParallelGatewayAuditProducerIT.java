@@ -32,8 +32,7 @@ import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
@@ -41,15 +40,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class ParallelGatewayAuditProducerIT {
 
@@ -78,7 +75,7 @@ public class ParallelGatewayAuditProducerIT {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-      
+
             assertThat(receivedEvents)
                     .extracting(CloudRuntimeEvent::getEventType,
                                 CloudRuntimeEvent::getProcessInstanceId,
@@ -153,11 +150,11 @@ public class ParallelGatewayAuditProducerIT {
                                     processInstanceId,
                                     processInstanceId)
                     );
-            
-            
+
+
             assertThat(receivedEvents)
             .filteredOn(event -> (event.getEventType().equals(ACTIVITY_STARTED) ||
-                                  event.getEventType().equals(ACTIVITY_COMPLETED)) && 
+                                  event.getEventType().equals(ACTIVITY_COMPLETED)) &&
                                  ((BPMNActivity) event.getEntity()).getActivityType().equals("parallelGateway"))
             .extracting(CloudRuntimeEvent::getEventType,
                         event -> ((BPMNActivity) event.getEntity()).getActivityType(),
@@ -168,14 +165,14 @@ public class ParallelGatewayAuditProducerIT {
                       tuple(ACTIVITY_COMPLETED,
                             "parallelGateway",
                             processInstanceId)
-                      
+
             );
-           
+
 
         });
-        
-        
-       
+
+
+
 
     }
 

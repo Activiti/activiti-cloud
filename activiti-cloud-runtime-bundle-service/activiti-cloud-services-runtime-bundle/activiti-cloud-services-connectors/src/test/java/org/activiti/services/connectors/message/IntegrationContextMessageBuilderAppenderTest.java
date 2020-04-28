@@ -20,14 +20,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 
 public class IntegrationContextMessageBuilderAppenderTest {
-    
+
     private static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
     private static final String PROCESS_INSTANCE_ID = "processInstanceId";
     private static final int _1 = 1;
@@ -39,10 +39,10 @@ public class IntegrationContextMessageBuilderAppenderTest {
     private static final String APP_VERSION = "1";
 
     private IntegrationContextMessageBuilderAppender integrationBuilder;
-    
+
     private IntegrationContextImpl integrationContext;
-    
-    @Before
+
+    @BeforeEach
     public void setUp() {
         integrationContext = anIntegrationContext();
         integrationBuilder = new IntegrationContextMessageBuilderAppender(integrationContext);
@@ -52,13 +52,13 @@ public class IntegrationContextMessageBuilderAppenderTest {
     public void testApply() {
         // given
         MessageBuilder<IntegrationRequest> request = MessageBuilder.withPayload(new IntegrationRequestImpl());
-        
+
         // when
         integrationBuilder.apply(request);
-        
+
         // then
         Message<IntegrationRequest> message = request.build();
-        
+
         assertThat(message.getHeaders())
             .containsEntry(IntegrationContextMessageHeaders.CONNECTOR_TYPE, integrationContext.getConnectorType())
             .containsEntry(IntegrationContextMessageHeaders.BUSINESS_KEY, integrationContext.getBusinessKey())
@@ -69,13 +69,13 @@ public class IntegrationContextMessageBuilderAppenderTest {
             .containsEntry(IntegrationContextMessageHeaders.PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
             .containsEntry(IntegrationContextMessageHeaders.APP_VERSION, integrationContext.getAppVersion())
             .containsEntry(IntegrationContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
-                    
-        
+
+
     }
-    
+
     private IntegrationContextImpl anIntegrationContext() {
         integrationContext = new IntegrationContextImpl();
-        
+
         integrationContext.setId(ID);
         integrationContext.setBusinessKey(BUSINESS_KEY);
         integrationContext.setConnectorType(CONNECTOR_TYPE);
@@ -85,9 +85,9 @@ public class IntegrationContextMessageBuilderAppenderTest {
         integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
         integrationContext.setAppVersion(APP_VERSION);
         integrationContext.setParentProcessInstanceId(PARENT_PROCESS_INSTANCE_ID);
-        
+
         return integrationContext;
-        
+
     }
 
 }

@@ -241,7 +241,7 @@ public class ModelServiceImpl implements ModelService{
                                                                                                                                              fixedFileContent));
 
         return modelRepository.updateModelContent(modelToBeUpdate,
-                                                  fixedFileContent);
+            fixedFileContent);
     }
 
     @Override

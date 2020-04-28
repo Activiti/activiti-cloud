@@ -19,7 +19,7 @@ package org.activiti.cloud.services.common.security.keycloak.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.spi.KeycloakAccount;
@@ -36,7 +36,7 @@ import java.util.UUID;
 public class KeycloakSecurityContextPrincipalProviderTest {
 
     private KeycloakSecurityContextPrincipalProvider subject = new KeycloakSecurityContextPrincipalProvider();
-    
+
     @Test
     public void testGetCurrentPrincipal() {
         // given
@@ -50,17 +50,17 @@ public class KeycloakSecurityContextPrincipalProviderTest {
         SecurityContextHolder.getContext()
                              .setAuthentication(new KeycloakAuthenticationToken(account,
                                                                                 false));
-                
+
         // when
         Optional<Principal> result = subject.getCurrentPrincipal();
-        
+
         // then
         assertThat(result).isPresent()
                           .containsInstanceOf(KeycloakPrincipal.class)
                           .contains(principal);
-        
+
     }
-    
+
     @Test
     public void testGetCurrentPrincipalEmpty() {
         // given
@@ -68,7 +68,7 @@ public class KeycloakSecurityContextPrincipalProviderTest {
 
         // when
         Optional<Principal> result = subject.getCurrentPrincipal();
-        
+
         // then
         assertThat(result).isEmpty();
     }

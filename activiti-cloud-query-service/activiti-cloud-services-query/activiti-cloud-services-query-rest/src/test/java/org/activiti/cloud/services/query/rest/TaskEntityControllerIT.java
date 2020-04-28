@@ -17,12 +17,6 @@
 package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.taskFields;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.taskIdParameter;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pageLinks;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedTasksFields;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,8 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
@@ -53,11 +46,9 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -67,24 +58,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(TaskController.class)
 @Import({
-                QueryRestWebMvcAutoConfiguration.class,
-                CommonModelAutoConfiguration.class,
-                AlfrescoWebAutoConfiguration.class
-        })
+        QueryRestWebMvcAutoConfiguration.class,
+        CommonModelAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class
+})
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 public class TaskEntityControllerIT {
-
-    private static final String TASK_ALFRESCO_IDENTIFIER = "task-alfresco";
-    private static final String TASK_IDENTIFIER = "task";
 
     @Autowired
     private MockMvc mockMvc;
@@ -110,7 +95,7 @@ public class TaskEntityControllerIT {
     @MockBean
     private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         assertThat(securityManager).isNotNull();
         assertThat(securityPoliciesManager).isNotNull();
@@ -138,11 +123,6 @@ public class TaskEntityControllerIT {
                                                    .accept(MediaType.APPLICATION_JSON))
                                    //then
                                    .andExpect(status().isOk())
-                                   .andDo(document(TASK_ALFRESCO_IDENTIFIER + "/list",
-                                                   pageRequestParameters(),
-                                                   pagedResourcesResponseFields()
-
-                                                  ))
                                    .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
@@ -169,13 +149,7 @@ public class TaskEntityControllerIT {
         mockMvc.perform(get("/v1/tasks?page=1&size=10")
                                 .accept(MediaTypes.HAL_JSON_VALUE))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(TASK_IDENTIFIER + "/list",
-                                pageLinks(),
-                                pagedTasksFields()
-
-                               ));
-
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -195,12 +169,7 @@ public class TaskEntityControllerIT {
         this.mockMvc.perform(get("/v1/tasks/{taskId}",
                                  taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(TASK_ALFRESCO_IDENTIFIER + "/get",
-                                taskIdParameter(),
-                                taskFields()
-                               )
-                      );
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -223,11 +192,6 @@ public class TaskEntityControllerIT {
         MvcResult mvcResult = this.mockMvc.perform(get("/v1/tasks/{taskId}",
                                                        taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
                                       .andExpect(status().isOk())
-                                      .andDo(document(TASK_ALFRESCO_IDENTIFIER + "/get",
-                                                      taskIdParameter(),
-                                                      taskFields()
-                                                     )
-                                            )
                                       .andReturn();
 
         assertThatJson(mvcResult.getResponse().getContentAsString())

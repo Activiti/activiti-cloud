@@ -3,29 +3,25 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.build</groupId>
-    <artifactId>activiti-cloud-parent</artifactId>
+    <groupId>org.activiti.cloud</groupId>
+    <artifactId>activiti-cloud-build-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
-  <groupId>org.activiti.cloud.notifications.graphql</groupId>
+  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-notifications-service-graphql-parent</artifactId>
   <name>Activiti Cloud Notifications GraphQL Service :: Parent</name>
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <properties>
-    <project.scm.repository>activiti-cloud-notifications-service-graphql</project.scm.repository>
-    <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
-    <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
-    <activiti-cloud-notifications-service-graphql.version>${project.version}</activiti-cloud-notifications-service-graphql.version>
-    <graphql-jpa-query.version>0.4.1</graphql-jpa-query.version>
+    <graphql-jpa-query.version>0.4.6</graphql-jpa-query.version>
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.build</groupId>
-        <artifactId>activiti-cloud-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -37,9 +33,9 @@
         <type>pom</type>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-query-dependencies</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -48,9 +44,9 @@
   <!-- BoM Marker Dependencies -->
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.build</groupId>
-      <artifactId>activiti-cloud-parent</artifactId>
-      <version>${activiti-cloud-build.version}</version>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-build-parent</artifactId>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
@@ -60,22 +56,15 @@
       <type>pom</type>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.query</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-query-dependencies</artifactId>
-      <version>${activiti-cloud-query-service.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>
   <modules>
-
     <module>dependencies</module>
     <module>services</module>
     <module>starter</module>
   </modules>
-  <repositories>
-    <repository>
-      <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
 </project>

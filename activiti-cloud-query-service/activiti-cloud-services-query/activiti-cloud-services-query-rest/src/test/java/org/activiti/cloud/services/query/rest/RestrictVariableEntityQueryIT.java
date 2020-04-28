@@ -19,23 +19,20 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.security.ProcessVariableLookupRestrictionService;
 import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
 
 /**
  * This is present in case of a future scenario where we need to filter task or process instance variables more generally rather than per task or per proc.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 @TestPropertySource("classpath:test-application.properties")
 @EnableAutoConfiguration
@@ -67,13 +64,13 @@ public class RestrictVariableEntityQueryIT {
 
     @Autowired
     private TaskVariableRepository taskVariableRepository;
-    
-    @Before
+
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         taskCandidateUserRepository.deleteAll();
         variableRepository.deleteAll();

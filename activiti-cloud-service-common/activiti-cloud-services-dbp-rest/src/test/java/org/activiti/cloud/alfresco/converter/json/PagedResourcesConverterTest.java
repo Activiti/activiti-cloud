@@ -22,8 +22,8 @@ import java.util.List;
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.hateoas.PagedResources;
@@ -42,7 +42,7 @@ public class PagedResourcesConverterTest {
     @Mock
     private PageMetadataConverter pageMetadataConverter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

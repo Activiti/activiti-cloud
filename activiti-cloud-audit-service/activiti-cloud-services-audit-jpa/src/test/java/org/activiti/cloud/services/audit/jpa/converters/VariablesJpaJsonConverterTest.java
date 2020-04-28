@@ -21,7 +21,7 @@ import java.io.Serializable;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;

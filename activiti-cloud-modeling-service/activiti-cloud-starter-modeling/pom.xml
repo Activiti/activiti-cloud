@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.modeling</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-modeling-dependencies</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-modeling-dependencies</relativePath>
@@ -12,35 +12,35 @@
   <name>Activiti Cloud Starter :: Modeling</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-api-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-jpa</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-rest</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-service</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-swagger</artifactId>
     </dependency>
     <dependency>
@@ -96,16 +96,6 @@
       <artifactId>liquibase-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>test</scope>
@@ -116,28 +106,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.javacrumbs.json-unit</groupId>
-      <artifactId>json-unit-fluent</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -205,6 +175,7 @@
                     <include>**/*ITSupport.java</include>
                   </includes>
                   <skipTests>false</skipTests>
+                  <skipITs>false</skipITs>
                 </configuration>
               </execution>
             </executions>

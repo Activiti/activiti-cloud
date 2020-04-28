@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.connector</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-connectors-dependencies</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-connectors-dependencies</relativePath>
@@ -11,15 +11,15 @@
   <artifactId>activiti-cloud-starter-connector</artifactId>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
@@ -27,23 +27,23 @@
       <artifactId>activiti-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-metadata</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.activiti.cloud.common</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.activiti.cloud.common</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-tracing</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.activiti.cloud.common</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
     <dependency>
@@ -68,23 +68,13 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -96,6 +86,11 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-stream-binder-rabbit-test-support</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
     </dependency>
   </dependencies>
   <build>
@@ -139,10 +134,8 @@
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
         <property>
-          <name>skipITs</name>
-          <value>false</value>
+          <name>!skipITs</name>
         </property>
       </activation>
       <build>
@@ -183,14 +176,4 @@
       </build>
     </profile>
   </profiles>
-  <repositories>
-    <repository>
-      <id>activiti-snapshots</id>
-      <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
 </project>

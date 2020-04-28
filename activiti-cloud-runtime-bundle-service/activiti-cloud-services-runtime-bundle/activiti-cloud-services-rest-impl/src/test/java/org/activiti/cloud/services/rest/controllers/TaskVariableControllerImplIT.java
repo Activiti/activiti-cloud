@@ -16,19 +16,13 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.taskIdParameter;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedVariableFields;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
@@ -50,11 +44,9 @@ import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -63,14 +55,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = TaskVariableControllerImpl.class, secure = false)
 @EnableSpringDataWebSupport()
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
@@ -80,8 +69,6 @@ import org.springframework.test.web.servlet.MockMvc;
         ServicesRestWebMvcAutoConfiguration.class})
 public class TaskVariableControllerImplIT {
 
-    private static final String DOCUMENTATION_IDENTIFIER = "task-variable";
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -90,7 +77,7 @@ public class TaskVariableControllerImplIT {
 
     @MockBean
     private RepositoryService repositoryService;
-    
+
     @MockBean
     private TaskRuntime taskRuntime;
 
@@ -109,7 +96,7 @@ public class TaskVariableControllerImplIT {
     private static final String TASK_ID = UUID.randomUUID().toString();
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         //this assertion is not really necessary. It's only here to remove warning
         //telling that resourcesAssembler is never used. Even if we are not directly
@@ -137,12 +124,7 @@ public class TaskVariableControllerImplIT {
                                                                      age));
         this.mockMvc.perform(get("/v1/tasks/{taskId}/variables",
                                  TASK_ID).accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                taskIdParameter(),
-                                unpagedVariableFields()
-                       ));
+                .andExpect(status().isOk());
     }
 
 
@@ -152,9 +134,7 @@ public class TaskVariableControllerImplIT {
                                   TASK_ID).contentType(MediaType.APPLICATION_JSON).content(
                 mapper.writeValueAsString(TaskPayloadBuilder.createVariable().withTaskId(TASK_ID)
                                           .withVariable("name","Alice").build())))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/set",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
 
         verify(taskRuntime).createVariable(any());
     }

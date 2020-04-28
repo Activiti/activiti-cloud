@@ -40,7 +40,7 @@ public interface TaskMappingsValidator extends ModelValidationErrorProducer {
      * @param taskConstants the constants associated to the task
      * @return the stream of validation errors
      */
-    Stream<ModelValidationError> validateTaskMappings(List<TaskMapping> taskMappings,
+    Stream<ModelValidationError> validateTaskMappings(List<MappingModel> taskMappings,
                                                       Map<String, Constant> taskConstants,
                                                       ValidationContext validationContext);
 }

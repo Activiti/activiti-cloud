@@ -4,8 +4,8 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.api.task.model.impl.CloudTaskImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.hateoas.Link;
@@ -25,7 +25,7 @@ public class TaskResourceAssemblerTest {
     @Mock
     private ToCloudTaskConverter converter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

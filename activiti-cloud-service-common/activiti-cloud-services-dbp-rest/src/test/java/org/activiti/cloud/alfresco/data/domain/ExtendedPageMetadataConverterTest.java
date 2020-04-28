@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.alfresco.data.domain;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.PagedResources;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -1,16 +1,17 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.rb</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-runtime-bundle-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-runtime-bundle-it</artifactId>
-  
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.rb</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
       <scope>test</scope>
     </dependency>
@@ -23,15 +24,15 @@
       <groupId>org.awaitility</groupId>
       <artifactId>awaitility</artifactId>
       <scope>test</scope>
-    </dependency>        
+    </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -40,32 +41,12 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <failIfNoTests>false</failIfNoTests>
-          <trimStackTrace>false</trimStackTrace>
-          <excludes>
-            <exclude>**/*TestCase.java</exclude>
-            <exclude>**/*IT.java</exclude>
-          </excludes>
-          <runOrder>alphabetical</runOrder>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <profiles>
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
         <property>
-          <name>skipITs</name>
-          <value>false</value>
+          <name>!skipITs</name>
         </property>
       </activation>
       <build>
@@ -123,5 +104,5 @@
         </plugins>
       </build>
     </profile>
-  </profiles>  
+  </profiles>
 </project>

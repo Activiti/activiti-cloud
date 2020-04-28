@@ -19,22 +19,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import graphql.Scalars;
 import graphql.schema.GraphQLSchema;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @TestPropertySource("classpath:/hibernate.properties")
 public class ActivitiGraphQLSchemaAutoConfigurationTest {
-    
+
     @Autowired(required=false)
     private GraphQLSchema schema;
-    
+
     @SpringBootApplication
     static class TestApplication {
     }
@@ -43,7 +40,7 @@ public class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void contextLoads() {
         assertThat(schema).isNotNull();
     }
-    
+
     @Test
     public void correctlyDerivesSchemaFromGivenEntities() {
         //when
@@ -144,8 +141,8 @@ public class ActivitiGraphQLSchemaAutoConfigurationTest {
                          .getArguments())
                                          .describedAs("Ensure query has correct number of arguments")
                                          .hasSize(2);
-       
+
     }
-    
+
 
 }

@@ -1,32 +1,31 @@
 package org.activiti.cloud.connectors.starter.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
+@ConfigurationProperties("activiti.cloud.connector")
 public class ConnectorProperties {
 
-    @Value("${spring.application.name}")
     private String serviceName;
 
-    @Value("${activiti.cloud.service.type:}")
     private String serviceType;
 
-    @Value("${activiti.cloud.service.version:}")
     private String serviceVersion;
 
-    @Value("${activiti.cloud.application.name:}")
     private String appName;
 
-    @Value("${activiti.cloud.application.version:}")
     private String appVersion;
 
-    @Value("${activiti.cloud.mq.destination.separator:_}")
     private String mqDestinationSeparator;
+
+    private String resultDestinationOverride;
+
+    private String errorDestinationOverride;
 
     public String getServiceName() {
         return serviceName;
     }
 
-    public String getServiceFullName(){
+    public String getServiceFullName() {
         return serviceName;
     }
 
@@ -49,4 +48,45 @@ public class ConnectorProperties {
     public String getMqDestinationSeparator() {
         return mqDestinationSeparator;
     }
+
+    public String getResultDestinationOverride() {
+        return resultDestinationOverride;
+    }
+
+    public void setResultDestinationOverride(String resultDestinationOverride) {
+        this.resultDestinationOverride = resultDestinationOverride;
+    }
+
+    public String getErrorDestinationOverride() {
+        return errorDestinationOverride;
+    }
+
+    public void setErrorDestinationOverride(String errorDestinationOverride) {
+        this.errorDestinationOverride = errorDestinationOverride;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public void setServiceVersion(String serviceVersion) {
+        this.serviceVersion = serviceVersion;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
+    }
+
+    public void setMqDestinationSeparator(String mqDestinationSeparator) {
+        this.mqDestinationSeparator = mqDestinationSeparator;
+    }
+
 }

@@ -27,7 +27,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import org.activiti.cloud.services.notifications.graphql.ws.util.JsonConverter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class JsonConverterTest {

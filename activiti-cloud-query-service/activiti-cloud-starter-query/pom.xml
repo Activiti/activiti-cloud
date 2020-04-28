@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.query</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-query-dependencies</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-query-dependencies</relativePath>
@@ -12,43 +12,43 @@
   <name>Activiti Cloud Query :: Starter :: Query</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-metadata</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.core.common</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-spring-security-policies</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-tracing</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-swagger</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.query</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-query-rest</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-error-handlers</artifactId>
     </dependency>
     <dependency>
@@ -76,24 +76,8 @@
       <artifactId>spring-boot-starter-hateoas</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>rabbitmq</artifactId>
-      <version>${testcontainers.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.awaitility</groupId>
       <artifactId>awaitility</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -102,28 +86,13 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -155,10 +124,8 @@
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
         <property>
-          <name>skipITs</name>
-          <value>false</value>
+          <name>!skipITs</name>
         </property>
       </activation>
       <build>
@@ -241,6 +208,7 @@
                     <include>**/*ITSupport.java</include>
                   </includes>
                   <skipTests>false</skipTests>
+                  <skipITs>false</skipITs>
                 </configuration>
               </execution>
             </executions>

@@ -16,16 +16,11 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pageLinks;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedProcessInstanceFields;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.api.process.model.ProcessInstance;
@@ -40,12 +35,9 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -56,14 +48,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceAdminController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,
@@ -72,11 +62,7 @@ import java.util.UUID;
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 public class ProcessInstanceEntityAdminControllerIT {
-
-    private static final String PROCESS_INSTANCE_ALFRESCO_IDENTIFIER = "process-instance-alfresco";
-    private static final String PROCESS_INSTANCE_IDENTIFIER = "process-instance";
 
     @Autowired
     private MockMvc mockMvc;
@@ -102,7 +88,7 @@ public class ProcessInstanceEntityAdminControllerIT {
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
         assertThat(entityFinder).isNotNull();
@@ -116,7 +102,7 @@ public class ProcessInstanceEntityAdminControllerIT {
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         given(processInstanceRepository.findAll(any(),
-                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
                 PageRequest.of(1,
                         10),
                 11));
@@ -126,21 +112,15 @@ public class ProcessInstanceEntityAdminControllerIT {
         mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10")
                 .accept(MediaType.APPLICATION_JSON))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(PROCESS_INSTANCE_ALFRESCO_IDENTIFIER + "/list",
-                        pageRequestParameters(),
-                        pagedResourcesResponseFields()
-
-                ));
+                .andExpect(status().isOk());
     }
 
     @Test
     public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
-        given(processInstanceRepository.findAll(any(),
-                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                PageRequest.of(1,
-                        10),
+        given(processInstanceRepository.findAll(any(), any(Pageable.class)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                PageRequest.of(1, 10),
                 11));
 
 
@@ -148,12 +128,7 @@ public class ProcessInstanceEntityAdminControllerIT {
         mockMvc.perform(get("/admin/v1/process-instances?page=1&size=10")
                 .accept(MediaTypes.HAL_JSON_VALUE))
                 //then
-                .andExpect(status().isOk())
-                .andDo(document(PROCESS_INSTANCE_IDENTIFIER + "/list",
-                                pageLinks(),
-                                pagedProcessInstanceFields()
-
-                ));
+                .andExpect(status().isOk());
     }
 
 

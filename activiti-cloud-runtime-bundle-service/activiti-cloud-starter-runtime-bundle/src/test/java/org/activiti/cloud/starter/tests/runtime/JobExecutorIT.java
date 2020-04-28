@@ -19,6 +19,9 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -51,12 +54,10 @@ import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -90,15 +90,14 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "spring.activiti.asyncExecutorActivate=true",
         "spring.activiti.cloud.rb.job-executor.message-job-consumer.max-attempts=4" // customized
 })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ContextConfiguration(classes = {RuntimeITConfiguration.class, 
+@DirtiesContext
+@ContextConfiguration(classes = {RuntimeITConfiguration.class,
                                 JobExecutorIT.JobExecutorITProcessEngineConfigurer.class})
 public class JobExecutorIT {
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);
@@ -113,7 +112,7 @@ public class JobExecutorIT {
 
     @Autowired
     private RuntimeService runtimeService;
-    
+
     @Autowired
     private ManagementService managementService;
 
@@ -125,15 +124,15 @@ public class JobExecutorIT {
 
     @Autowired
     private MessageBasedJobManager messageBasedJobManager;
-    
+
     @Autowired
     private RuntimeBundleProperties runtimeBundleProperties;
-    
+
     @SpyBean
     private JobMessageProducer jobMessageProducer;
-    
+
     private ProcessEngineConfiguration processEngineConfiguration;
-    
+
     @Autowired
     private MessageHandler jobMessageHandler;
 
@@ -142,20 +141,20 @@ public class JobExecutorIT {
 
     @Captor
     private ArgumentCaptor<Message<String>> messageArgumentCaptor;
-    
+
     @Autowired
     private ConfigurableApplicationContext applicationContext;
 
     @Autowired
     private PlatformTransactionManager transactionManager;
-    
+
     @MockBean(name = "spyAsyncExecutorJobs")
     private SubscribableChannel spyJobMessageChannel;
-    
+
     @TestConfiguration
     @Profile(JOB_EXECUTOR_IT)
     static class JobExecutorITProcessEngineConfigurer implements ProcessEngineConfigurationConfigurer {
-        
+
         @Override
         public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
             processEngineConfiguration.setAsyncExecutorDefaultTimerJobAcquireWaitTime(500);
@@ -173,15 +172,15 @@ public class JobExecutorIT {
             };
         }
     }
-    
-    @Before
+
+    @BeforeEach
     public void setUp() {
         reset(jobMessageHandler);
 
         processEngineConfiguration = ProcessEngines.getProcessEngine("default").getProcessEngineConfiguration();
     }
-    
-    @After
+
+    @AfterEach
     public void tearDown() {
         processEngineConfiguration.getClock().reset();
     }
@@ -197,24 +196,24 @@ public class JobExecutorIT {
         assertThat(jobMessageHandler).as("should register JobMessageHandler bean")
                                      .isInstanceOf(JobMessageHandler.class);
     }
-    
+
     @Test
     public void shouldRegisterMessageBasedJobManagerBean() {
         assertThat(messageBasedJobManager).as("should register MessageBasedJobManager bean")
                                           .isInstanceOf(MessageBasedJobManager.class);
-        
+
         assertThat(messageBasedJobManager.getDestination()).as("should configure rb scoped destination")
                                                            .startsWith(runtimeBundleProperties.getServiceName());
     }
-    
+
     @Test
     public void testAsyncJobs() throws InterruptedException {
         int jobCount = 100;
         CountDownLatch jobsCompleted = new CountDownLatch(jobCount);
-        
-        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted), 
+
+        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
                                         ActivitiEventType.JOB_EXECUTION_SUCCESS );
-        
+
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
                                                       .processDefinitionKey(ASYNC_TASK)
                                                       .singleResult()
@@ -230,21 +229,21 @@ public class JobExecutorIT {
                 .untilAsserted(() -> {
                     assertThat(runtimeService.createExecutionQuery()
                                              .processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
-                    
+
                     assertThat(managementService.createJobQuery()
                                .processDefinitionId(processDefinitionId)
-                               .count()).isEqualTo(0); 
+                               .count()).isEqualTo(0);
                 });
 
         assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should complete all jobs")
                                                             .isTrue();
         // message is sent
-        verify(jobMessageProducer, times(jobCount)).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()), 
-                                                                ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer, times(jobCount)).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                                                any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler, times(jobCount)).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler, times(jobCount)).handleMessage(any(Message.class));
     }
-    
+
     @Test
     public void testCatchingTimerEvent() throws Exception {
         CountDownLatch jobsCompleted = new CountDownLatch(1);
@@ -253,7 +252,7 @@ public class JobExecutorIT {
         CountDownLatch eventPublished = new CountDownLatch(1);
 
         applicationContext.addApplicationListener(new CountDownLatchApplicationEventListener<JobMessageSentEvent>(eventPublished));
-        
+
         // Set the clock fixed
         Date startTime = new Date();
 
@@ -271,7 +270,7 @@ public class JobExecutorIT {
 
         // then
         assertThat(pi).isNotNull();
-        
+
         await("the timer job should be created")
             .untilAsserted(() -> {
                 assertThat(managementService.createTimerJobQuery()
@@ -285,14 +284,14 @@ public class JobExecutorIT {
         // timer event has been scheduled
         assertThat(timerScheduled.await(1, TimeUnit.MINUTES)).as("should schedule timer")
                                                              .isTrue();
-        
+
         // then
         await("the process instance should complete and no more jobs should exist")
            .untilAsserted(() -> {
                assertThat(runtimeService.createProcessInstanceQuery()
                                         .processDefinitionKey(pi.getProcessDefinitionKey())
                                         .count()).isEqualTo(0);
-               
+
                assertThat(managementService.createTimerJobQuery()
                                            .processInstanceId(pi.getId())
                                            .count()).isEqualTo(0);
@@ -309,10 +308,10 @@ public class JobExecutorIT {
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish application event")
                                                              .isTrue();
         // message is sent
-        verify(jobMessageProducer).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()), 
-                                               ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                               any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler).handleMessage(any(Message.class));
     }
 
     @Test
@@ -321,10 +320,10 @@ public class JobExecutorIT {
         RetryFailingDelegate.shallThrow = true;
         int retryCount = 5;
         CountDownLatch jobRetries = new CountDownLatch(retryCount);
-        
-        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobRetries), 
+
+        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobRetries),
                                         ActivitiEventType.JOB_EXECUTION_FAILURE );
-        
+
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
                                                       .processDefinitionKey(FAILED_JOB_RETRY)
                                                       .singleResult()
@@ -336,37 +335,37 @@ public class JobExecutorIT {
         // then
         assertThat(jobRetries.await(1, TimeUnit.MINUTES)).as("should retry failed jobs 5 times every 1 sec")
                                                          .isTrue();
-        
+
         await("the async executions should exists with job exception")
             .untilAsserted(() -> {
                 assertThat(runtimeService.createExecutionQuery()
                                          .processDefinitionId(processDefinitionId)
                                          .activityId("failingJobTask")
                                          .count()).isEqualTo(1);
-                
+
                 assertThat(managementService.createDeadLetterJobQuery()
                                             .processDefinitionId(processDefinitionId)
                                             .withException()
-                                            .count()).isEqualTo(1); 
+                                            .count()).isEqualTo(1);
             });
-        
+
         // message is sent
-        verify(jobMessageProducer, times(retryCount)).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()), 
-                                                                  ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer, times(retryCount)).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                                                  any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler, times(retryCount)).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
     }
-    
+
     @Test
     public void testTimerJobsFailRetry() throws InterruptedException {
         //given
         RetryFailingDelegate.shallThrow = true;
-        int retryCount = 3; 
+        int retryCount = 3;
         CountDownLatch jobRetries = new CountDownLatch(retryCount);
-        
-        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobRetries), 
+
+        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobRetries),
                                         ActivitiEventType.JOB_EXECUTION_FAILURE );
-        
+
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
                                                       .processDefinitionKey(FAILED_TIMER_JOB_RETRY)
                                                       .singleResult()
@@ -378,35 +377,35 @@ public class JobExecutorIT {
         // then
         assertThat(jobRetries.await(1, TimeUnit.MINUTES)).as("should retry failed jobs 2 times every 1 sec")
                                                          .isTrue();
-        
+
         await("the async executions should exists with job exception")
             .untilAsserted(() -> {
                 assertThat(runtimeService.createExecutionQuery()
                                          .processDefinitionId(processDefinitionId)
                                          .activityId("timerCatchEvent")
                                          .count()).isEqualTo(1);
-                
+
                 assertThat(managementService.createDeadLetterJobQuery()
                                             .processDefinitionId(processDefinitionId)
                                             .withException()
-                                            .count()).isEqualTo(1); 
+                                            .count()).isEqualTo(1);
             });
-        
+
         // timer job message is sent with 2 retries
-        verify(jobMessageProducer, times(retryCount)).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()), 
-                                                                  ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer, times(retryCount)).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                                                  any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler, times(retryCount)).handleMessage(ArgumentMatchers.<Message<?>>any());
-    }    
+        verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
+    }
     @Test
     public void testStartTimeEvent() throws InterruptedException {
         // given
         CountDownLatch jobCompleted = new CountDownLatch(1);
         CountDownLatch timerFired = new CountDownLatch(1);
         CountDownLatch eventPublished = new CountDownLatch(1);
-        
+
         applicationContext.addApplicationListener(new CountDownLatchApplicationEventListener<JobMessageSentEvent>(eventPublished));
-        
+
         // Set the clock fixed
         Date startTime = new Date();
 
@@ -427,7 +426,7 @@ public class JobExecutorIT {
                                            .singleResult();
         // then
         assertThat(pi).isNull();
-        
+
         await("the timer job should be created")
             .untilAsserted(() -> {
                 assertThat(managementService.createTimerJobQuery()
@@ -444,7 +443,7 @@ public class JobExecutorIT {
                assertThat(runtimeService.createProcessInstanceQuery()
                                         .processDefinitionId(processDefinitionId)
                                         .count()).isEqualTo(1);
-               
+
                assertThat(managementService.createTimerJobQuery()
                                            .processDefinitionId(processDefinitionId)
                                            .count()).isEqualTo(0);
@@ -457,18 +456,18 @@ public class JobExecutorIT {
         // job event has been completed
         assertThat(jobCompleted.await(1, TimeUnit.MINUTES)).as("should complete job")
                                                            .isTrue();
-        
+
         // job event has been published
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish application event")
                                                              .isTrue();
-        
+
         // message is sent
-        verify(jobMessageProducer).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()), 
-                                               ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                               any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler).handleMessage(any(Message.class));
     }
-    
+
     @Test
     public void testBoundaryTimerEvent() throws Exception {
         CountDownLatch jobsCompleted = new CountDownLatch(1);
@@ -492,7 +491,7 @@ public class JobExecutorIT {
 
         // then
         assertThat(pi).isNotNull();
-        
+
         await("the timer job should be created")
             .untilAsserted(() -> {
                 assertThat(managementService.createTimerJobQuery()
@@ -506,14 +505,14 @@ public class JobExecutorIT {
         // timer event has been scheduled
         assertThat(timerScheduled.await(1, TimeUnit.MINUTES)).as("should schedule timer")
                                                              .isTrue();
-        
+
         // then
         await("the process instance should complete and no more timer jobs should exist")
            .untilAsserted(() -> {
                assertThat(runtimeService.createProcessInstanceQuery()
                                         .processDefinitionKey(pi.getProcessDefinitionKey())
                                         .count()).isEqualTo(0);
-               
+
                assertThat(managementService.createTimerJobQuery()
                                            .processInstanceId(pi.getId())
                                            .count()).isEqualTo(0);
@@ -527,23 +526,23 @@ public class JobExecutorIT {
         assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should complete job")
                                                             .isTrue();
         // message is sent
-        verify(jobMessageProducer).sendMessage(ArgumentMatchers.eq(messageBasedJobManager.getDestination()), 
-                                               ArgumentMatchers.<Job>any());
+        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getDestination()),
+                                               any(Job.class));
         // message handler is invoked
-        verify(jobMessageHandler).handleMessage(ArgumentMatchers.<Message<?>>any());
+        verify(jobMessageHandler).handleMessage(any(Message.class));
     }
-    
+
     @Test
     public void shouldPublishJobMessageFailedEvent() throws InterruptedException {
         // given
         CountDownLatch eventPublished = new CountDownLatch(1);
         String destination = "spyAsyncExecutorJobs";
-        
+
         applicationContext.addApplicationListener(new CountDownLatchApplicationEventListener<JobMessageFailedEvent>(eventPublished));
-        
+
         doReturn(false).when(spyJobMessageChannel)
-                       .send(ArgumentMatchers.<Message<?>>any());
-        
+                       .send(any(Message.class));
+
         // when
         new TransactionTemplate(transactionManager).execute(new TransactionCallbackWithoutResult() {
 
@@ -553,18 +552,18 @@ public class JobExecutorIT {
             }
 
         });
-        
+
         // then
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish JobMessageFailedEvent")
                                                              .isTrue();
     }
-    
+
     @Test
     public void shouldFailIfNoActiveTransactionSynchronization() {
         // when
         Throwable throwable = catchThrowable(
-                () -> jobMessageProducer.sendMessage(ArgumentMatchers.anyString(), 
-                                                     ArgumentMatchers.any(Job.class))
+                () -> jobMessageProducer.sendMessage(anyString(),
+                                                     any(Job.class))
         );
 
         //then
@@ -573,18 +572,18 @@ public class JobExecutorIT {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("requires active transaction synchronization");
     }
-    
+
     @Test
     public void shouldPublishJobMessageSentEvent() throws InterruptedException {
         // given
         CountDownLatch eventPublished = new CountDownLatch(1);
         String destination = "spyAsyncExecutorJobs";
-        
+
         applicationContext.addApplicationListener(new CountDownLatchApplicationEventListener<JobMessageSentEvent>(eventPublished));
-        
+
         doReturn(true).when(spyJobMessageChannel)
-                       .send(ArgumentMatchers.<Message<?>>any());
-        
+                       .send(any(Message.class));
+
         // when
         new TransactionTemplate(transactionManager).execute(new TransactionCallbackWithoutResult() {
 
@@ -594,18 +593,18 @@ public class JobExecutorIT {
             }
 
         });
-        
+
         // then
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish JobMessageSentEvent")
                                                              .isTrue();
-    }    
+    }
 
     @Test
     public void shouldBuildJobMessage() throws InterruptedException {
         // given
         String destination = "spyAsyncExecutorJobs";
         String jobId = "jobId";
-        
+
         TestJobEntity job = new TestJobEntity(jobId).withDueDate(new Date())
                                                     .withExecutionId("executionId")
                                                     .withJobHandlerType("jobHandlerType")
@@ -618,8 +617,8 @@ public class JobExecutorIT {
                                                     .withExceptionMessage("exceptionMessage")
                                                     ;
         doReturn(true).when(spyJobMessageChannel)
-                       .send(ArgumentMatchers.<Message<?>>any());
-        
+                       .send(any(Message.class));
+
         // when
         new TransactionTemplate(transactionManager).execute(new TransactionCallbackWithoutResult() {
 
@@ -629,12 +628,12 @@ public class JobExecutorIT {
             }
 
         });
-        
+
         // then
         verify(spyJobMessageChannel).send(messageArgumentCaptor.capture());
-        
+
         Message<String> message = messageArgumentCaptor.getValue();
-                
+
         assertThat(message.getPayload()).as("should build job id as payload")
                                         .isEqualTo(jobId);
 
@@ -642,7 +641,7 @@ public class JobExecutorIT {
                                         .containsEntry("routingKey", destination)
                                         .containsEntry("messagePayloadType", String.class.getName())
                                         ;
-        
+
         assertThat(message.getHeaders()).as("should build runtime bundle properties as headers")
                                         .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, properties.getAppName())
                                         .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, properties.getServiceName())
@@ -661,12 +660,12 @@ public class JobExecutorIT {
                                         .containsEntry(JobMessageHeaders.JOB_HANDLER_CONFIGURATION, job.getJobHandlerConfiguration())
                                         .containsEntry(JobMessageHeaders.JOB_RETRIES, job.getRetries())
                                         ;
-        
+
     }
-    
-    
+
+
     abstract class AbstractActvitiEventListener implements ActivitiEventListener {
-        
+
         @Override
         public boolean isFailOnException() {
             return false;
@@ -674,37 +673,37 @@ public class JobExecutorIT {
     }
 
     class CountDownLatchActvitiEventListener extends AbstractActvitiEventListener {
-        
+
         private final CountDownLatch countDownLatch;
-           
+
         public CountDownLatchActvitiEventListener(CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
         }
-        
+
         @Override
         public void onEvent(ActivitiEvent arg0) {
             logger.info("Received Activiti Event: {}", arg0);
-            
+
             countDownLatch.countDown();
         }
     }
-    
+
     class CountDownLatchApplicationEventListener<E extends ApplicationEvent> implements ApplicationListener<E> {
-        
+
         private final CountDownLatch countDownLatch;
-           
+
         public CountDownLatchApplicationEventListener(CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
         }
-        
+
         @Override
         public void onApplicationEvent(E event) {
             logger.info("Received Activiti Event: {}", event);
-            
+
             countDownLatch.countDown();
         }
     }
-    
+
     static class TestJobEntity extends JobEntityImpl {
         private static final long serialVersionUID = 1L;
 
@@ -712,28 +711,28 @@ public class JobExecutorIT {
             super();
             setId(jobId);
         }
-        
+
         public TestJobEntity withExecutionId(String executionId) {
             setExecutionId(executionId);
-            
+
             return this;
         }
 
         public TestJobEntity withDueDate(Date dueDate) {
             setDuedate(dueDate);
-            
+
             return this;
         }
 
         public TestJobEntity withJobType(String jobType) {
             setJobType(jobType);
-            
+
             return this;
         }
 
         public TestJobEntity withJobHandlerType(String jobHandlerType) {
             setJobHandlerType(jobHandlerType);
-            
+
             return this;
         }
 
@@ -744,35 +743,35 @@ public class JobExecutorIT {
 
         public TestJobEntity withProcessDefinitionId(String processDefinitionId) {
             setProcessDefinitionId(processDefinitionId);
-            
+
             return this;
         }
 
         public TestJobEntity withProcessInstanceId(String processInstanceId) {
             setProcessInstanceId(processInstanceId);
-            
+
             return this;
         }
 
         public TestJobEntity withTenantId(String tenantId) {
             setTenantId(tenantId);
-            
+
             return this;
         }
-        
+
         public TestJobEntity withRetries(int retries) {
             setRetries(retries);
-            
+
             return this;
         }
 
         public TestJobEntity withExceptionMessage(String exceptionMessage) {
             setExceptionMessage(exceptionMessage);
-            
+
             return this;
         }
     }
-    
+
     public static class RetryFailingDelegate implements JavaDelegate {
 
         public static final String EXCEPTION_MESSAGE = "Expected exception.";
@@ -793,5 +792,5 @@ public class JobExecutorIT {
             throw new ActivitiException(EXCEPTION_MESSAGE);
           }
         }
-      }    
+      }
 }

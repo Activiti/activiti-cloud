@@ -36,11 +36,9 @@ import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -49,32 +47,22 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedTasksFields;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = TaskAdminControllerImpl.class, secure = true)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         TaskSamples.class,
@@ -84,8 +72,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         AlfrescoWebAutoConfiguration.class})
 public class TaskAdminControllerImplIT {
 
-    private static final String DOCUMENTATION_IDENTIFIER = "task-admin";
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -94,7 +80,7 @@ public class TaskAdminControllerImplIT {
 
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
-    
+
     @MockBean
     private RepositoryService repositoryService;
 
@@ -107,7 +93,7 @@ public class TaskAdminControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
@@ -123,13 +109,9 @@ public class TaskAdminControllerImplIT {
         when(taskAdminRuntime.tasks(any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/admin/v1/tasks?page=0&size=10").accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                pagedTasksFields()
-                                ));
+                .andExpect(status().isOk());
     }
-    
+
 
     @Test
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
@@ -139,21 +121,15 @@ public class TaskAdminControllerImplIT {
         when(taskAdminRuntime.tasks(any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()));
+                .andExpect(status().isOk());
     }
-    
+
     @Test
     public void deleteTask() throws Exception {
         given(taskAdminRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(delete("/admin/v1/tasks/{taskId}",
                                     1))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
     }
 
 
@@ -169,8 +145,7 @@ public class TaskAdminControllerImplIT {
         this.mockMvc.perform(put("/admin/v1/tasks/{taskId}",
                                  1).contentType(MediaType.APPLICATION_JSON)
                                  .content(mapper.writeValueAsString(updateTaskCmd)))
-                .andExpect(status().isOk())
-                .andDo(print());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -178,9 +153,7 @@ public class TaskAdminControllerImplIT {
         given(taskAdminRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete",
                                   1))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/complete",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                .andExpect(status().isOk());
     }
+
 }

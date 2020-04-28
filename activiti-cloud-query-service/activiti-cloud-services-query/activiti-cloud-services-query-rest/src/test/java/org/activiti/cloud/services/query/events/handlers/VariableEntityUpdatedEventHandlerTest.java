@@ -26,8 +26,8 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEvent
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.test.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -43,7 +43,7 @@ public class VariableEntityUpdatedEventHandlerTest {
     @Mock
     private TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

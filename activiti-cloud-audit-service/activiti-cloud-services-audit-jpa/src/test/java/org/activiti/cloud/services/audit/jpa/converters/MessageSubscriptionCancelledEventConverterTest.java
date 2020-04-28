@@ -24,7 +24,7 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.MessageSubscriptionCancelledAuditEventEntity;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MessageSubscriptionCancelledEventConverterTest {
 
@@ -38,16 +38,16 @@ public class MessageSubscriptionCancelledEventConverterTest {
 
         assertThatIsEqualTo(auditEventEntity, event);
     }
-    
+
     @Test
     public void should_convertToAPIErrorReceivedEvent() {
         //given
         MessageSubscriptionCancelledAuditEventEntity auditEventEntity = (MessageSubscriptionCancelledAuditEventEntity) eventConverter.convertToEntity(createMessageSubscriptionCancelledEvent());
-        
+
         CloudMessageSubscriptionCancelledEventImpl event= (CloudMessageSubscriptionCancelledEventImpl) eventConverter.convertToAPI(auditEventEntity);
         assertThatIsEqualTo(auditEventEntity, event);
     }
-    
+
     private CloudMessageSubscriptionCancelledEventImpl createMessageSubscriptionCancelledEvent() {
         //given
         ProcessInstanceImpl processInstanceStarted = new ProcessInstanceImpl();
@@ -56,7 +56,7 @@ public class MessageSubscriptionCancelledEventConverterTest {
         processInstanceStarted.setProcessDefinitionKey("processDefinitionKey");
         processInstanceStarted.setBusinessKey("businessKey");
         processInstanceStarted.setParentId("parentId");
-            
+
         MessageSubscription messageSubscription = MessageSubscriptionImpl.builder()
                                                     .withId("entityId")
                                                     .withEventName("messageName")
@@ -65,11 +65,11 @@ public class MessageSubscriptionCancelledEventConverterTest {
                                                     .withProcessInstanceId(processInstanceStarted.getId())
                                                     .withBusinessKey(processInstanceStarted.getBusinessKey())
                                                     .build();
-        
+
         CloudMessageSubscriptionCancelledEventImpl event = CloudMessageSubscriptionCancelledEventImpl.builder()
                                                                 .withEntity(messageSubscription)
                                                                 .build();
-        
+
         //Set explicitly to be sure
         event.setEntityId("entityId");
         event.setProcessInstanceId(processInstanceStarted.getId());
@@ -79,10 +79,10 @@ public class MessageSubscriptionCancelledEventConverterTest {
         event.setParentProcessInstanceId(processInstanceStarted.getParentId());
         event.setMessageId("message-id");
         event.setSequenceNumber(0);
-         
+
         return event;
     }
-    
+
     private void assertThatIsEqualTo(MessageSubscriptionCancelledAuditEventEntity auditEventEntity, CloudMessageSubscriptionCancelledEvent event) {
         assertThat(event).isNotNull();
         assertThat(auditEventEntity).isNotNull();

@@ -28,14 +28,13 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEve
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -50,10 +49,7 @@ public class ProcessCompletedEventHandlerTest {
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -88,11 +84,10 @@ public class ProcessCompletedEventHandlerTest {
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(QueryException.class);
-        expectedException.expectMessage("Unable to find process instance with the given id: ");
-
         //when
-        handler.handle(event);
+        assertThatExceptionOfType(QueryException.class)
+            .isThrownBy(() -> handler.handle(event))
+            .withMessageContaining("Unable to find process instance with the given id: ");
     }
 
     @Test

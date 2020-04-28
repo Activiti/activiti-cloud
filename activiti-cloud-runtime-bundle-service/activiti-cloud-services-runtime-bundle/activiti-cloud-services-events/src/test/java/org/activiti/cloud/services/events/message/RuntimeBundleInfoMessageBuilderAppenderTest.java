@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.conf.IgnoredRuntimeEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -33,31 +33,31 @@ public class RuntimeBundleInfoMessageBuilderAppenderTest {
     private static final String APP_NAME = "appName";
 
     private RuntimeBundleInfoMessageBuilderAppender subject;
-    
-    
-    @Before
+
+
+    @BeforeEach
     public void setUp() {
            RuntimeBundleProperties properties = new RuntimeBundleProperties();
-           
+
            properties.setAppName(APP_NAME);
            properties.setServiceType(SERVICE_TYPE);
            properties.setServiceVersion(SERVICE_VERSION);
            properties.setRbSpringAppName(SPRING_APP_NAME);
-           
+
            subject = new RuntimeBundleInfoMessageBuilderAppender(properties);
     }
-    
+
     @Test
     public void testApply() {
         // given
         MessageBuilder<CloudRuntimeEvent<?,?>> request = MessageBuilder.withPayload(new IgnoredRuntimeEvent());
-        
+
         // when
         subject.apply(request);
-        
+
         // then
         Message<CloudRuntimeEvent<?,?>> message = request.build();
-        
+
         assertThat(message.getHeaders())
                 .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, APP_NAME)
                 .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, SPRING_APP_NAME)
