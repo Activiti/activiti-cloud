@@ -32,7 +32,7 @@
     <module>activiti-cloud-services-test-security-keycloak</module>
   </modules>
   <properties>
-    <activiti.version>7.1.219</activiti.version>
+    <activiti.version>7.1.220</activiti.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
