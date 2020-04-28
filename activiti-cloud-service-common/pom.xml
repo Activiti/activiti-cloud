@@ -32,11 +32,7 @@
     <module>activiti-cloud-services-test-security-keycloak</module>
   </modules>
   <properties>
-    <project.scm.repository>activiti-cloud-service-common</project.scm.repository>
-    <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-core-common.version>7.1.216</activiti-core-common.version>
-    <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
+    <activiti.version>7.1.219</activiti.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
@@ -58,21 +54,21 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-dependencies</artifactId>
-        <version>${activiti-cloud-api.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti</groupId>
         <artifactId>activiti-core-common-dependencies</artifactId>
-        <version>${activiti-core-common.version}</version>
+        <version>${activiti.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -210,19 +206,19 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-build-parent</artifactId>
-      <version>${activiti-cloud-build.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-dependencies</artifactId>
-      <version>${activiti-cloud-api.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-core-common-dependencies</artifactId>
-      <version>${activiti-core-common.version}</version>
+      <version>${activiti.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>

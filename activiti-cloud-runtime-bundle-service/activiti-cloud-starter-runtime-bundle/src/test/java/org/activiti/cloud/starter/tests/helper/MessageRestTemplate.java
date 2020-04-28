@@ -45,11 +45,19 @@ public class MessageRestTemplate {
                                          });
     }
 
+    public ResponseEntity<CloudProcessInstance> adminMessage(StartMessagePayload payload) {
+        return testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_ADMIN_RELATIVE_URL + "/message",
+                                         HttpMethod.POST,
+                                         new HttpEntity<>(payload),
+                                         new ParameterizedTypeReference<CloudProcessInstance>() {
+                                         });
+    }
+
     public ResponseEntity<Void> message(ReceiveMessagePayload payload) {
         return testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/message",
                                          HttpMethod.PUT,
                                          new HttpEntity<>(payload),
                                          new ParameterizedTypeReference<Void>() {
                                          });
-    }     
+    }
 }

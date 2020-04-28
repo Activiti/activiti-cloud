@@ -16,7 +16,7 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-connector</artifactId>
-        <version>${activiti-cloud-connectors.version}</version>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

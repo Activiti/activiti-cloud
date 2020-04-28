@@ -13,32 +13,26 @@
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud Messages Service :: Parent</name>
-  <properties>
-    <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
-    <activiti-cloud-messages-service.version>${project.version}</activiti-cloud-messages-service.version>
-  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -49,21 +43,21 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-build-parent</artifactId>
-      <version>${activiti-cloud-build.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <!-- Activiti Cloud Common Dependencies -->
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-      <version>${activiti-cloud-service-common.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <!-- Activiti Cloud Runtime Bundle Dependencies -->
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-      <version>${activiti-cloud-runtime-bundle-service.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>

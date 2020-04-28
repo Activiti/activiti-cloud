@@ -15,71 +15,71 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-modeling-service-parent</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-modeling-core</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-modeling-jpa</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-modeling-rest</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-modeling-repository</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-modeling-api</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-modeling-api-impl</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-modeling-service</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-acceptance-tests-modeling</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-modeling</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-modeling</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
         <classifier>api-docs</classifier>
         <type>json</type>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-modeling</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
         <classifier>api-docs</classifier>
         <type>yaml</type>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-modeling</artifactId>
-        <version>${activiti-cloud-modeling-service.version}</version>
+        <version>${project.version}</version>
         <classifier>api-docs-hal</classifier>
         <type>json</type>
       </dependency>
