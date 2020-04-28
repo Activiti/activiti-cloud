@@ -18,7 +18,6 @@ updatebot/push-version:
 
 	@echo Doing updatebot push-version.....
 	updatebot push-version --kind maven \
-		org.activiti.cloud:activiti-cloud-modeling-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud:activiti-cloud-audit-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud:activiti-cloud-api-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud:activiti-cloud-parent $(RELEASE_VERSION) \
