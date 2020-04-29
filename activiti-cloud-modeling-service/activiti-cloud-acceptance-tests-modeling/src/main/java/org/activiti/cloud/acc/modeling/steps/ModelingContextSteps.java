@@ -33,11 +33,11 @@ import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.util.StreamUtils;
 
 import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.HttpUtils.HEADER_ATTACHEMNT_FILENAME;
@@ -216,7 +216,7 @@ public abstract class ModelingContextSteps<M> {
                 .orElseThrow(() -> new RuntimeException("No Content-Disposition header in feign response"));
         return new FileContent(filename,
                                contentType,
-                               IOUtils.toByteArray(response.body().asInputStream()));
+                               StreamUtils.copyToByteArray(response.body().asInputStream()));
     }
 
     protected String modelingUri(String uri) {
