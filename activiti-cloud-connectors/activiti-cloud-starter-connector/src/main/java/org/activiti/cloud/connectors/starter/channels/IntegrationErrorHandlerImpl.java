@@ -1,7 +1,7 @@
 package org.activiti.cloud.connectors.starter.channels;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
-
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
@@ -49,14 +47,14 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
         }
     }
 
-    protected boolean isIntegrationRequest(Message<?> message) {
+    private boolean isIntegrationRequest(Message<?> message) {
         return Optional.ofNullable(message)
                        .map(Message::getHeaders)
                        .map(headers -> headers.get(INTEGRATION_CONTEXT_ID))
                        .isPresent();
     }
 
-    protected void sendIntegrationError(ErrorMessage errorMessage) {
+    private void sendIntegrationError(ErrorMessage errorMessage) {
         byte[] data = (byte[]) errorMessage.getOriginalMessage()
                                            .getPayload();
         try {

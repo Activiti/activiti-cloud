@@ -86,13 +86,13 @@ public class ActivitiCloudConnectorServiceIT {
         integrationRequest.setServiceVersion("1");
         integrationRequest.setAppVersion("1");
 
-        Message<? extends IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
                 .setHeader("type",
                            "Mock")
                 .build();
         integrationEventsProducer.send(message);
 
-        message = MessageBuilder.withPayload((IntegrationRequest)integrationRequest)
+        message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
                 .setHeader("type",
                            "MockProcessRuntime")
                 .build();
