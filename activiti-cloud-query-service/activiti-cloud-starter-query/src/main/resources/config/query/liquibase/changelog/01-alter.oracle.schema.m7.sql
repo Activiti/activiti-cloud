@@ -41,7 +41,7 @@ alter table integration_context
     add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
 
 alter table bpmn_activity
-    add column execution_id varchar(255);
+    add execution_id varchar(255);
     
 alter table bpmn_activity
     drop constraint bpmn_activity_processInstance_elementId_idx;
