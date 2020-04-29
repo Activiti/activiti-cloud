@@ -34,11 +34,11 @@ import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.exception.ActivitiImageException;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -67,7 +67,7 @@ public class ProcessDiagramGeneratorWrapper {
 
     @Value("${activiti.diagram.font.default:Serif}")
     private String diagramDefaultFont;
-    
+
     @Autowired
     public ProcessDiagramGeneratorWrapper(ProcessDiagramGenerator processDiagramGenerator) {
         this.processDiagramGenerator = processDiagramGenerator;
@@ -102,7 +102,7 @@ public class ProcessDiagramGeneratorWrapper {
                                                                                      getAnnotationFontName(),
                                                                                      isGenerateDefaultDiagram(),
                                                                                      getDiagramImageFileName())) {
-            return IOUtils.toByteArray(imageStream);
+            return StreamUtils.copyToByteArray(imageStream);
         } catch (ActivitiImageException e) {
             throw e;
         } catch (Exception e) {
@@ -184,16 +184,16 @@ public class ProcessDiagramGeneratorWrapper {
         return getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
     }
 
-    
+
     public String getDiagramDefaultFont() {
         return diagramDefaultFont;
     }
 
-    
+
     public void setDiagramDefaultFont(String diagramDefaultFont) {
         this.diagramDefaultFont = diagramDefaultFont;
     }
-    
+
     public BpmnModel parseBpmnModelXml(InputStream inputStream) {
         InputStreamReader in = null;
 
@@ -217,7 +217,7 @@ public class ProcessDiagramGeneratorWrapper {
             XMLStreamReader xtr = xif.createXMLStreamReader(in);
 
             return new BpmnXMLConverter().convertToBpmnModel(xtr);
-            
+
         } catch (XMLStreamException e) {
             throw new XMLException("Error while reading the BPMN 2.0 XML", e);
         } finally {
@@ -229,7 +229,7 @@ public class ProcessDiagramGeneratorWrapper {
                 }
             }
         }
-        
+
     }
-    
+
 }

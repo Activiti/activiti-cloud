@@ -28,7 +28,6 @@ import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.test.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +42,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import org.springframework.util.StreamUtils;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -123,11 +123,11 @@ public class QueryProcessDefinitionIT {
         secondProcessDefinition.setKey("mySecondProcess");
         secondProcessDefinition.setName("My second Process");
         CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(firstProcessDefinition);
-        firstProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+        firstProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
                                                                                    StandardCharsets.UTF_8));
         CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(secondProcessDefinition);
-        secondProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+        secondProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
                 StandardCharsets.UTF_8));
         producer.send(firstProcessDeployedEvent,
@@ -219,11 +219,11 @@ public class QueryProcessDefinitionIT {
         processDefinition.setName("My First Process");
 
         CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
-        firstProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+        firstProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
                 StandardCharsets.UTF_8));
         CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
-        secondProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+        secondProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
                 StandardCharsets.UTF_8));
         producer.send(firstProcessDeployedEvent,

@@ -34,11 +34,11 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
-import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
+import org.springframework.util.StreamUtils;
 
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
@@ -151,7 +151,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     public void checkCurrentProjectValidationFails(String errorMessage) throws IOException {
         Response response = validateCurrentProject();
         assertThat(response.status()).isEqualTo(SC_BAD_REQUEST);
-        assertThat(IOUtils.toString(response.body().asInputStream(),
+        assertThat(StreamUtils.copyToString(response.body().asInputStream(),
                 StandardCharsets.UTF_8)).contains(errorMessage);
     }
 
