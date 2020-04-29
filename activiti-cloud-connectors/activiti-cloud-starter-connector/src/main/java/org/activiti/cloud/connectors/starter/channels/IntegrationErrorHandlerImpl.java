@@ -1,5 +1,7 @@
 package org.activiti.cloud.connectors.starter.channels;
 
+import java.util.Optional;
+
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
@@ -13,6 +15,8 @@ import org.springframework.messaging.support.ErrorMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
+    private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
+
     private static Logger logger = LoggerFactory.getLogger(IntegrationErrorHandlerImpl.class);
 
     private final IntegrationErrorSender integrationErrorSender;
@@ -32,25 +36,34 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
         logger.debug("Error Message exception occurred: {}", errorMessage);
 
         MessagingException throwablePayload = MessagingException.class.cast(errorMessage.getPayload());
-        Message<?> originalMessage= errorMessage.getOriginalMessage();
+        Optional<Message<?>> originalMessage = Optional.ofNullable(errorMessage.getOriginalMessage());
 
-        if(originalMessage == null) {
-            originalMessage = throwablePayload.getFailedMessage();
+        Optional<Message<?>> failedMessage = originalMessage.isPresent() ? originalMessage
+                                                                         : Optional.ofNullable(throwablePayload.getFailedMessage());
+        if (failedMessage.isPresent()) {
+            failedMessage.filter(this::isIntegrationRequest)
+                         .map(it -> new ErrorMessage(throwablePayload, it))
+                         .ifPresent(this::sendIntegrationError);
+        } else {
+            logger.warn("The originalMessage is empty");
         }
+    }
 
-        if (originalMessage != null) {
-            byte[] data = (byte[]) originalMessage.getPayload();
-            IntegrationRequest integrationRequest = null;
+    protected boolean isIntegrationRequest(Message<?> message) {
+        return Optional.ofNullable(message)
+                       .map(Message::getHeaders)
+                       .map(headers -> headers.get(INTEGRATION_CONTEXT_ID))
+                       .isPresent();
+    }
 
-            try {
-                integrationRequest = objectMapper.readValue(data, IntegrationRequest.class);
-            } catch (Throwable cause) {
-                logger.error("Error reading IntegrationRequest", cause);
-
-                throw new RuntimeException(cause);
-            }
-
-            Throwable cause = throwablePayload.getCause();
+    protected void sendIntegrationError(ErrorMessage errorMessage) {
+        byte[] data = (byte[]) errorMessage.getOriginalMessage()
+                                           .getPayload();
+        try {
+            IntegrationRequest integrationRequest = objectMapper.readValue(data,
+                                                                           IntegrationRequest.class);
+            Throwable cause = errorMessage.getPayload()
+                                          .getCause();
 
             Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
                                                                                  connectorProperties,
@@ -58,8 +71,8 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
                                                                        .buildMessage();
             integrationErrorSender.send(message);
 
-        } else {
-            logger.error("The originalMessage is empty");
+        } catch (Throwable cause) {
+            logger.error("Error sending IntegrationError for IntegrationRequest", cause);
         }
     }
 
