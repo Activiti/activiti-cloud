@@ -1,9 +1,9 @@
 alter table audit_event
-    add column integration_context CLOB;
+    add integration_context CLOB;
 alter table audit_event
-    add column error_message varchar(255);
+    add error_message varchar(255);
 alter table audit_event
-    add column error_class_name varchar(255);
+    add error_class_name varchar(255);
 alter table audit_event
-    add column stack_trace_elements CLOB;
+    add stack_trace_elements CLOB;
     
