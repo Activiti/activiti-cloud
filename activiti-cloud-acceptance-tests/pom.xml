@@ -21,7 +21,7 @@
   <properties>
     <serenity.version>1.9.45</serenity.version>
     <serenity-jbehave.version>1.44.0</serenity-jbehave.version>
-    <feign-form.version>3.5.0</feign-form.version>
+    <feign-form.version>3.8.0</feign-form.version>
     <batik.version>1.10</batik.version>
     <enforcer.skip>true</enforcer.skip>
   </properties>
