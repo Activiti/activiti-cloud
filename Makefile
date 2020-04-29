@@ -21,6 +21,7 @@ updatebot/push-version:
 		org.activiti.cloud:activiti-cloud-audit-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud:activiti-cloud-api-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud:activiti-cloud-parent $(RELEASE_VERSION) \
+		org.activiti.cloud:activiti-cloud-build-parent $(RELEASE_VERSION) \
 		org.activiti.cloud:activiti-cloud-build-dependencies-parent $(RELEASE_VERSION)\
 		org.activiti.cloud:activiti-cloud-connectors-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud:activiti-cloud-messages-dependencies $(RELEASE_VERSION) \
