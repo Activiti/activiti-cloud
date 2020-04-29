@@ -42,7 +42,7 @@
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>7.1.475</activiti-cloud.version>
     <assertj.version>3.13.2</assertj.version>
-    <serenity.version>1.9.45</serenity.version>
+    <serenity-maven-plugin.version>2.1.13</serenity-maven-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -91,7 +91,7 @@
       <plugin>
         <groupId>net.serenity-bdd.maven.plugins</groupId>
         <artifactId>serenity-maven-plugin</artifactId>
-        <version>${serenity.version}</version>
+        <version>${serenity-maven-plugin.version}</version>
         <executions>
           <execution>
             <phase>post-integration-test</phase>
