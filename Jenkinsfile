@@ -88,7 +88,7 @@ pipeline {
 
             sh "echo pushing with update using version \$(cat VERSION)"
 
-            sh "updatebot push-version --kind maven org.activiti.cloud.build:activiti-cloud-parent \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud:activiti-cloud-build-parent \$(cat VERSION)"
             sh "updatebot update-loop"
 
         //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
