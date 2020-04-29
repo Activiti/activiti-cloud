@@ -27,8 +27,8 @@ import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.ClassRule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,6 +43,8 @@ import org.springframework.test.context.ActiveProfiles;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
 public class ActivitiCloudConnectorServiceIT {
+
+    private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
 
     @Autowired
     private MessageChannel integrationEventsProducer;
@@ -84,13 +86,13 @@ public class ActivitiCloudConnectorServiceIT {
         integrationRequest.setServiceVersion("1");
         integrationRequest.setAppVersion("1");
 
-        Message<IntegrationRequest> message = MessageBuilder.withPayload((IntegrationRequest)integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
                 .setHeader("type",
                            "Mock")
                 .build();
         integrationEventsProducer.send(message);
 
-        message = MessageBuilder.withPayload((IntegrationRequest)integrationRequest)
+        message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
                 .setHeader("type",
                            "MockProcessRuntime")
                 .build();
@@ -110,7 +112,8 @@ public class ActivitiCloudConnectorServiceIT {
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder.withPayload((IntegrationRequest) integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
+                                                            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
                                                             .setHeader("type",
                                                                        "RuntimeException")
                                                             .build();
@@ -134,7 +137,8 @@ public class ActivitiCloudConnectorServiceIT {
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder.withPayload((IntegrationRequest) integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
+                                                            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
                                                             .setHeader("type",
                                                                        "Error")
                                                             .build();
