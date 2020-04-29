@@ -44,7 +44,7 @@
     <querydsl.version>4.1.4</querydsl.version>
     <resteasy.version>3.6.1.Final</resteasy.version>
     <springfox.version>2.9.2</springfox.version>
-    <swagger.version>1.5.14</swagger.version>
+    <swagger.version>1.5.20</swagger.version>
     <xstream.version>1.4.11.1</xstream.version>
     <json-unit.version>1.24.0</json-unit.version>
   </properties>
