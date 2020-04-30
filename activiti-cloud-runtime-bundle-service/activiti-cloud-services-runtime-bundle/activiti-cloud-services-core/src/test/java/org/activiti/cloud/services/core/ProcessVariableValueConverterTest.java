@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestProcessEngineConfiguration.class)
-@TestPropertySource("classpath:test-application.properties")
+@TestPropertySource("classpath:application-test.properties")
 public class ProcessVariableValueConverterTest {
 
     private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
