@@ -170,13 +170,9 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-<<<<<<< HEAD
-    public Resource<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload) {
+    public EntityModel<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload) {
         startMessagePayload = variablesPayloadConverter.convert(startMessagePayload);
 
-=======
-    public EntityModel<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload) {
->>>>>>> 0183e34ae... update to Spring HATEOAS 1.0 API and Spring Cloud Hoxton for Spring Boot 2.2
         ProcessInstance processInstance = processRuntime.start(startMessagePayload);
 
         return representationModelAssembler.toModel(processInstance);

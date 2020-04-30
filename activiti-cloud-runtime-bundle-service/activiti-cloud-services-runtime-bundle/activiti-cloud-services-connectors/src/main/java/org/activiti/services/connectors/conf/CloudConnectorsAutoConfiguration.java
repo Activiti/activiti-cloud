@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.conf.activiti.services.connectors;
+package org.activiti.services.connectors.conf;
 
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;

@@ -120,13 +120,9 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
     }
 
     @Override
-<<<<<<< HEAD
-    public Resource<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
+    public EntityModel<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
         startMessagePayload = variablesPayloadConverter.convert(startMessagePayload);
 
-=======
-    public EntityModel<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
->>>>>>> 0183e34ae... update to Spring HATEOAS 1.0 API and Spring Cloud Hoxton for Spring Boot 2.2
         ProcessInstance processInstance = processAdminRuntime.start(startMessagePayload);
 
         return representationModelAssembler.toModel(processInstance);
