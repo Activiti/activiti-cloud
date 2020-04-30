@@ -15,6 +15,7 @@
     <h2.version>1.4.199</h2.version>
     <junit-jupiter.version>5.5.2</junit-jupiter.version>
     <mockito.version>3.1.0</mockito.version>
+    <netty.version>4.1.46.Final</netty.version>
     <byte-buddy.version>1.10.8</byte-buddy.version>
     <spring-cloud.version>Greenwich.SR5</spring-cloud.version>
   </properties>
@@ -67,6 +68,14 @@
         <artifactId>h2</artifactId>
         <version>${h2.version}</version>
         <scope>test</scope>
+      </dependency>
+      <!-- override to fix vulnerability https://sca.analysiscenter.veracode.com/vulnerability-database/security/denial-of-service-dos-/java/sid-22967 -->
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>${netty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
