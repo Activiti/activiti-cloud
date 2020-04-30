@@ -22,14 +22,10 @@ import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegratio
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.integration.jdbc.store.JdbcMessageStore;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {
-        "spring.datasource.url=jdbc:postgresql://localhost:5432/postgres",
-        "spring.datasource.username=postgres",
-        "spring.datasource.password=",
-        "spring.datasource.platform=postgresql",
-})
+@ContextConfiguration(initializers = {PostgresApplicationInitializer.class})
 public class PostgresMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
     @SpringBootApplication
@@ -39,6 +35,7 @@ public class PostgresMessageStoreIT extends AbstractMessagesCoreIntegrationTests
 
     @Test
     public void testMessageStore() throws Exception {
-        assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(JdbcMessageStore.class);
+        assertThat(this.aggregatingMessageHandler.getMessageStore())
+            .isInstanceOf(JdbcMessageStore.class);
     }
 }

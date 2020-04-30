@@ -51,11 +51,15 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
 
     @Configuration
     @EnableWebSocket
-    public static class DefaultGraphQLWebSocketMessageBrokerConfiguration 
+    public static class DefaultGraphQLWebSocketMessageBrokerConfiguration
                             extends DelegatingWebSocketMessageBrokerConfiguration {
 
-        @Autowired
-        private GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties;
+        private final GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties;
+
+        public DefaultGraphQLWebSocketMessageBrokerConfiguration(
+            GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties) {
+            this.configurationProperties = configurationProperties;
+        }
 
         /**
          * A hook for subclasses to customize message broker configuration through the
@@ -111,23 +115,23 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
         public GraphQLBrokerSubProtocolHandler graphQLBrokerSubProtocolHandler() {
             return new GraphQLBrokerSubProtocolHandler(configurationProperties.getEndpoint());
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
         public GraphQLSubscriptionExecutor graphQLSubscriptionExecutor(GraphQLSchema graphQLSchema) {
             return new GraphQLSubscriptionExecutor(graphQLSchema);
         }
-        
+
         @Bean
         public ServletServerContainerFactoryBean createWebSocketContainer() {
             ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
             org.springframework.scheduling.concurrent.ConcurrentTaskExecutor f;
-            
+
             container.setMaxTextMessageBufferSize(1024*64);
             container.setMaxBinaryMessageBufferSize(1024*10);
             container.setMaxSessionIdleTimeout(30000L);
             return container;
         }
     }
-    
+
 }
