@@ -7,13 +7,17 @@ GROUP_ID := $(shell mvn help:evaluate -Dexpression=project.groupId -q -DforceStd
 ARTIFACT_ID := $(shell mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
 RELEASE_ARTIFACT := $(GROUP_ID):$(ARTIFACT_ID)
 
-ACTIVITI_CLOUD_FULL_CHART_VERSIONS := $(shell cat VERSION)
+ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(VERSION) activiti-cloud-connector $(VERSION) \
+    activiti-cloud-query $(VERSION)  \
+    activiti-cloud-modeling $(VERSION)
+charts := "activiti-cloud-query/charts/activiti-cloud-query" "example-runtime-bundle/charts/runtime-bundle" "example-cloud-connector/charts/activiti-cloud-connector" "activiti-cloud-modeling/charts/activiti-cloud-modeling/"
 
 updatebot/push:
 	@echo doing updatebot push $(RELEASE_VERSION)
 	updatebot push --ref $(RELEASE_VERSION)
 
 updatebot/push-version-dry:
+	echo $(VESION)
 	#updatebot --dry push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_SERVICES_VERSIONS)   --merge false
 	updatebot --dry push-version --kind helm activiti-cloud-dependencies $(RELEASE_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
 	#updatebot --dry push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
@@ -25,18 +29,18 @@ updatebot/push-version:
 
 	@echo Doing updatebot push-version.....
 	@echo updatebot push-version --dry --kind maven \
-		org.activiti.cloud:activiti-cloud-modeling-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-audit-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-api-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-parent $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-dependencies-parent $(RELEASE_VERSION)\
-		org.activiti.cloud:activiti-cloud-connectors-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-messages-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-modeling-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-query-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-service-common-dependencies $(RELEASE_VERSION)
+		org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.audit:activiti-cloud-audit-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.api:activiti-cloud-api-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.build:activiti-cloud-parent $(RELEASE_VERSION) \
+		org.activiti.cloud.build:activiti-cloud-dependencies-parent $(RELEASE_VERSION)\
+		org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.messages:activiti-cloud-messages-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.notifications.graphql:activiti-cloud-notifications-graphql-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.query:activiti-cloud-query-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.common:activiti-cloud-service-common-dependencies $(RELEASE_VERSION)
 
 updatebot/update:
 	@echo doing updatebot update $(RELEASE_VERSION)
@@ -66,7 +70,21 @@ run-helm-chart:
             		--install \
             		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
             		--namespace ${PREVIEW_NAMESPACE} \
-            		--debug \
             		--wait
-
-
+								
+update-version-in-example-charts:
+	@for chart in $(charts) ; do \
+		cd $$chart ; \
+		sed -i -e "s/version:.*/version: $$VERSION/" Chart.yaml; \
+		sed -i -e "s/tag: .*/tag: $$VERSION/" values.yaml ;\
+		cd - ; \
+	done 
+create-helm-charts-release-and-upload:
+	@for chart in $(charts) ; do \
+		cd $$chart ; \
+		make version; \
+		make build; \
+		make release; \
+		make github; \
+		cd - ; \
+	done 
