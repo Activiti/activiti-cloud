@@ -29,6 +29,7 @@ import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ProcessValidatorImpl;
 import org.activiti.validation.validator.ValidatorSetFactory;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,17 +45,17 @@ public class TestProcessEngineConfiguration {
     public TestProcessEngine testProcessEngine(ProcessEngine processEngine) {
         return new TestProcessEngine(processEngine);
     }
-    
+
     @Bean
     public MockMessageChannel mockMessageChannel() {
         return new MockMessageChannel();
     }
-    
+
     @Bean
     public MockProcessEngineChannels mockProcessEngineChannels() {
         return new MockProcessEngineChannels();
     }
-    
+
     @Bean
     public ProcessEngine processEngine() {
         return ProcessEngineConfiguration
@@ -72,7 +73,7 @@ public class TestProcessEngineConfiguration {
     public ManagementService managementService(ProcessEngine processEngine) {
         return processEngine.getManagementService();
     }
-    
+
     @Bean
     public RepositoryService repositoryService(ProcessEngine processEngine) {
         return processEngine.getRepositoryService();
