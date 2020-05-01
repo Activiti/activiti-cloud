@@ -22,7 +22,7 @@ ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(VERSION) activiti-cloud-c
     activiti-cloud-query $(VERSION)  \
     activiti-cloud-modeling $(VERSION)
 
-$(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\./-/'|rev))
+$(eval HELM_ACTIVITI_VERSION = $(or $(HELM_ACTIVITI_VERSION),$(shell cat VERSION |rev|sed 's/\./-/'|rev))														
 
 GITHUB_CHARTS_BRANCH := "gh-pages"
 
