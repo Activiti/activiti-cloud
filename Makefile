@@ -2,6 +2,8 @@ CURRENT=$(shell pwd)
 NAME := $(or $(APP_NAME),$(shell basename $(CURRENT)))
 OS := $(shell uname)
 
+$(eval HELM_ACTIVITI_VERSION = $(or $(HELM_ACTIVITI_VERSION),$(shell cat VERSION |rev|sed 's/\./-/'|rev)))
+
 RELEASE_VERSION := $(or $(shell cat VERSION), $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout))
 GROUP_ID := $(shell mvn help:evaluate -Dexpression=project.groupId -q -DforceStdout)
 ARTIFACT_ID := $(shell mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
@@ -75,13 +77,15 @@ run-helm-chart:
 update-version-in-example-charts:
 	@for chart in $(charts) ; do \
 		cd $$chart ; \
-		sed -i -e "s/version:.*/version: $$VERSION/" Chart.yaml; \
-		sed -i -e "s/tag: .*/tag: $$VERSION/" values.yaml ;\
+		sed -i -e "s/version:.*/version: $$HELM_ACTIVITI_VERSION/" Chart.yaml; \
+		sed -i -e "s/tag: .*/tag: $$HELM_ACTIVITI_VERSION/" values.yaml ; \
+		cat Chart.yaml; \
 		cd - ; \
 	done 
 create-helm-charts-release-and-upload:
 	@for chart in $(charts) ; do \
 		cd $$chart ; \
+		export VERSION=$$HELM_ACTIVITI_VERSION; \
 		make version; \
 		make build; \
 		make release; \
