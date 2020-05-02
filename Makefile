@@ -78,7 +78,7 @@ update-version-in-example-charts:
 	@for chart in $(charts) ; do \
 		cd $$chart ; \
 		sed -i -e "s/version:.*/version: $$HELM_ACTIVITI_VERSION/" Chart.yaml; \
-		sed -i -e "s/tag: .*/tag: $$HELM_ACTIVITI_VERSION/" values.yaml ; \
+		sed -i -e "s/tag: .*/tag: $$VERSION/" values.yaml ; \
 		cat Chart.yaml; \
 		cd - ; \
 	done 
@@ -86,7 +86,6 @@ create-helm-charts-release-and-upload:
 	@for chart in $(charts) ; do \
 		cd $$chart ; \
 		export VERSION=$$HELM_ACTIVITI_VERSION; \
-		make version; \
 		make build; \
 		make release; \
 		make github; \
