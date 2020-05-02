@@ -13,16 +13,19 @@ ACTIVITI_CLOUD_COMMON_HELM_CHART := 1.1.21
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
+$(eval HELM_ACTIVITI_VERSION = $(or $(HELM_ACTIVITI_VERSION),$(shell cat VERSION |rev|sed 's/\./-/'|rev)))	
+
+
 ACTIVITI_CLOUD_SERVICES_VERSIONS := org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies  $(ACTIVITI_CLOUD_VERSION_NUMBER) org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER) \
     org.activiti.cloud.query:activiti-cloud-query-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER) org.activiti.cloud.notifications.graphql:activiti-cloud-notifications-graphql-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER)  \
     org.activiti.cloud.audit:activiti-cloud-audit-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER) org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER) \
     org.activiti.cloud.messages:activiti-cloud-messages-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER)
 
-ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(VERSION) activiti-cloud-connector $(VERSION) \
-    activiti-cloud-query $(VERSION)  \
-    activiti-cloud-modeling $(VERSION)
+ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(HELM_ACTIVITI_VERSION) activiti-cloud-connector $(HELM_ACTIVITI_VERSION) \
+    activiti-cloud-query $(HELM_ACTIVITI_VERSION)  \
+    activiti-cloud-modeling $(HELM_ACTIVITI_VERSION)
 
-$(eval HELM_ACTIVITI_VERSION = $(or $(HELM_ACTIVITI_VERSION),$(shell cat VERSION |rev|sed 's/\./-/'|rev)))														
+													
 
 GITHUB_CHARTS_BRANCH := "gh-pages"
 
@@ -73,9 +76,7 @@ updatebot/push-version:
 	updatebot push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
 updatebot/push-version-dry:
-	#updatebot --dry push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_SERVICES_VERSIONS)   --merge false
 	updatebot --dry push-version --kind helm activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
-	#updatebot --dry push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
 replace-release-full-chart-names:
 	echo HELM_ACTIVITI_VERSION = $(HELM_ACTIVITI_VERSION)
