@@ -76,6 +76,7 @@ run-helm-chart:
 								
 update-version-in-example-charts:
 	@for chart in $(charts) ; do \
+		pwd; \
 		cd $$chart ; \
 		sed -i -e "s/version:.*/version: $$HELM_ACTIVITI_VERSION/" Chart.yaml; \
 		sed -i -e "s/tag: .*/tag: $$VERSION/" values.yaml ; \
