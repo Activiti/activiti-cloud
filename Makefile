@@ -79,7 +79,6 @@ update-version-in-example-charts:
 		cd $$chart ; \
 		sed -i -e "s/version:.*/version: $$HELM_ACTIVITI_VERSION/" Chart.yaml; \
 		sed -i -e "s/tag: .*/tag: $$VERSION/" values.yaml ; \
-		cat Chart.yaml; \
 		cd - ; \
 	done 
 create-helm-charts-release-and-upload:
