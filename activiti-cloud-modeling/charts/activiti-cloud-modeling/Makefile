@@ -3,7 +3,7 @@ NAME := activiti-cloud-modeling
 ORG := $(or $(ORG),activiti)
 APP_NAME := $(or $(APP_NAME),$(NAME))
 OS := $(shell uname)
-RELEASE_VERSION := $(shell cat ../../VERSION)
+RELEASE_VERSION := $(or $(RELEASE_VERSION),$(shell cat ../../VERSION))
 RELEASE_ARTIFACT := $(or $(RELEASE_ARTIFACT),$(APP_NAME))
 
 GITHUB_CHARTS_REPO := $(or $(GITHUB_CHARTS_REPO),$(shell git config --get remote.origin.url))
@@ -39,7 +39,7 @@ github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	[[ -d $(GITHUB_CHARTS_DIR) ]] ||git clone -b "$(GITHUB_CHARTS_BRANCH)" "$(GITHUB_CHARTS_REPO)" $(GITHUB_CHARTS_DIR)
 	cp "$(NAME)-$(RELEASE_VERSION).tgz" $(GITHUB_CHARTS_DIR)
-	cd $(GITHUB_CHARTS_DIR) && \
+Makefile update for release script	cd $(GITHUB_CHARTS_DIR) && \
 	   helm repo index . && \
 	   git add . && \
 	   git status && \
@@ -51,7 +51,7 @@ github:
 version: 
 	sed -i -e "s/version:.*/version: $(RELEASE_VERSION)/" Chart.yaml
 	sed -i -e "s|repository: .*|repository: $(DOCKER_REGISTRY)/$(ORG)/$(APP_NAME)|" values.yaml
-	sed -i -e "s/tag: .*/tag: $(RELEASE_VERSION)/" values.yaml
+	sed -i -e "s/tag: .*/tag: $(VERSION)/" values.yaml
 
 
 tag:
@@ -59,3 +59,5 @@ tag:
 	git commit -m "release $(RELEASE_VERSION)" --allow-empty # if first release then no verion update is performed
 	git tag -fa v$(RELEASE_VERSION) -m "Release version $(RELEASE_VERSION)"
 	git push origin v$(RELEASE_VERSION)
+
+	
