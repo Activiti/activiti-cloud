@@ -13,7 +13,7 @@ ACTIVITI_CLOUD_COMMON_HELM_CHART := 1.1.21
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
-$(eval HELM_ACTIVITI_VERSION = $(or $(HELM_ACTIVITI_VERSION),$(shell cat VERSION |rev|sed 's/\./-/'|rev)))	
+$(eval HELM_ACTIVITI_VERSION = $(or $(HELM_ACTIVITI_VERSION),$(shell cat VERSION |rev|sed 's/\./-/'|rev)))
 
 
 ACTIVITI_CLOUD_SERVICES_VERSIONS := org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies  $(ACTIVITI_CLOUD_VERSION_NUMBER) org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER) \
@@ -25,7 +25,7 @@ ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(HELM_ACTIVITI_VERSION) ac
     activiti-cloud-query $(HELM_ACTIVITI_VERSION)  \
     activiti-cloud-modeling $(HELM_ACTIVITI_VERSION)
 
-													
+
 
 GITHUB_CHARTS_BRANCH := "gh-pages"
 
@@ -149,7 +149,6 @@ run-helm-chart:
             		--install \
             		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
             		--namespace ${PREVIEW_NAMESPACE} \
-            		--wait
 
 delete:
 	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
