@@ -13,16 +13,13 @@ ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(VERSION) activiti-cloud-c
     activiti-cloud-query $(VERSION)  \
     activiti-cloud-modeling $(VERSION)
 charts := "activiti-cloud-query/charts/activiti-cloud-query" "example-runtime-bundle/charts/runtime-bundle" "example-cloud-connector/charts/activiti-cloud-connector" "activiti-cloud-modeling/charts/activiti-cloud-modeling/"
-
 updatebot/push:
 	@echo doing updatebot push $(RELEASE_VERSION)
 	updatebot push --ref $(RELEASE_VERSION)
 
 updatebot/push-version-dry:
 	echo $(VESION)
-	#updatebot --dry push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_SERVICES_VERSIONS)   --merge false
 	updatebot --dry push-version --kind helm activiti-cloud-dependencies $(RELEASE_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
-	#updatebot --dry push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
 
 updatebot/push-version:
@@ -73,7 +70,7 @@ run-helm-chart:
             		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
             		--namespace ${PREVIEW_NAMESPACE} \
             		--wait
-								
+
 update-version-in-example-charts:
 	@for chart in $(charts) ; do \
 		pwd; \
@@ -81,13 +78,12 @@ update-version-in-example-charts:
 		sed -i -e "s/version:.*/version: $$HELM_ACTIVITI_VERSION/" Chart.yaml; \
 		sed -i -e "s/tag: .*/tag: $$VERSION/" values.yaml ; \
 		cd - ; \
-	done 
+	done
 create-helm-charts-release-and-upload:
 	@for chart in $(charts) ; do \
-		cd $$chart ; \
-		export RELEASE_VERSION=$$HELM_ACTIVITI_VERSION; \
-		make build; \
-		make release; \
-		make github; \
+		cd $$chart && \
+		make build && \
+		make release && \
+		make github && \
 		cd - ; \
-	done 
+	done
