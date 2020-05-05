@@ -16,12 +16,7 @@
 
 package org.activiti.cloud.services.core.utils;
 
-import org.activiti.engine.ManagementService;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngineConfiguration;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
+import org.activiti.engine.*;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
@@ -29,9 +24,9 @@ import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ProcessValidatorImpl;
 import org.activiti.validation.validator.ValidatorSetFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
@@ -54,6 +49,11 @@ public class TestProcessEngineConfiguration {
     @Bean
     public MockProcessEngineChannels mockProcessEngineChannels() {
         return new MockProcessEngineChannels();
+    }
+
+    @Bean
+    public SubscribableChannel commandConsumer() {
+        return new MockSubscribableChannel();
     }
 
     @Bean
