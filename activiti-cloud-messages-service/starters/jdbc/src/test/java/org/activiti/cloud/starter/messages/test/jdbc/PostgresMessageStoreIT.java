@@ -35,7 +35,6 @@ public class PostgresMessageStoreIT extends AbstractMessagesCoreIntegrationTests
 
     @Test
     public void testMessageStore() throws Exception {
-        assertThat(this.aggregatingMessageHandler.getMessageStore())
-            .isInstanceOf(JdbcMessageStore.class);
+        assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(JdbcMessageStore.class);
     }
 }

@@ -94,9 +94,7 @@ public class MultipleRbJobExecutorIT {
         if (!keycloakContainer.isRunning() && !rabbitMQContainer.isRunning()) {
             Startables.deepStart(Stream.of(keycloakContainer, rabbitMQContainer)).join();
         }
-        System.setProperty("keycloak.auth-server-url",
-            "http://" + keycloakContainer.getContainerIpAddress()
-                + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
+        System.setProperty("keycloak.auth-server-url", "http://" + keycloakContainer.getContainerIpAddress() + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
 
         System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
         System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
@@ -141,39 +139,35 @@ public class MultipleRbJobExecutorIT {
         JobMessageHandler jobMessageHandler1 = rbCtx1.getBean(JobMessageHandler.class);
         JobMessageHandler jobMessageHandler2 = rbCtx2.getBean(JobMessageHandler.class);
 
-        rbCtx1.getBean(RuntimeService.class)
-            .addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
-                ActivitiEventType.JOB_EXECUTION_SUCCESS);
+        rbCtx1.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
+                                                              ActivitiEventType.JOB_EXECUTION_SUCCESS );
 
-        rbCtx2.getBean(RuntimeService.class)
-            .addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
-                ActivitiEventType.JOB_EXECUTION_SUCCESS);
+        rbCtx2.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
+                                                              ActivitiEventType.JOB_EXECUTION_SUCCESS );
 
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
-            .processDefinitionKey(ASYNC_TASK)
-            .singleResult()
-            .getId();
+                                                      .processDefinitionKey(ASYNC_TASK)
+                                                      .singleResult()
+                                                      .getId();
         //when
-        for (int i = 0; i < jobCount; i++) {
+        for(int i=0; i<jobCount; i++)
             runtimeService.createProcessInstanceBuilder()
-                .processDefinitionId(processDefinitionId)
-                .start();
-        }
+                          .processDefinitionId(processDefinitionId)
+                          .start();
 
         //then
-        assertThat(jobsCompleted.await(1, TimeUnit.MINUTES))
-            .as("should distribute and complete all jobs between rb replicas")
-            .isTrue();
+        assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should distribute and complete all jobs between rb replicas")
+                                                            .isTrue();
 
         await("the async executions should complete and no more jobs should exist")
             .untilAsserted(() -> {
-                assertThat(runtimeService.createExecutionQuery()
-                    .processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
+                   assertThat(runtimeService.createExecutionQuery()
+                                            .processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
 
-                assertThat(managementService.createJobQuery()
-                    .processDefinitionId(processDefinitionId)
-                    .count()).isEqualTo(0);
-            });
+                   assertThat(managementService.createJobQuery()
+                                               .processDefinitionId(processDefinitionId)
+                                               .count()).isEqualTo(0);
+                                                                                   });
         // rb1 message handler is invoked
         verify(jobMessageHandler1, atLeastOnce()).handleMessage(any());
 

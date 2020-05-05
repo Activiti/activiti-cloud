@@ -84,133 +84,98 @@ public class APIEventToEntityConvertersIT {
 
         EventToEntityConverter converter;
 
-        converter = eventConverters.getConverterByEventTypeName(
-            BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name());
+        converter = eventConverters.getConverterByEventTypeName(BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name());
         assertThat(converter).isNotNull().isInstanceOf(ActivityCancelledEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name());
+        converter = eventConverters.getConverterByEventTypeName(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name());
         assertThat(converter).isNotNull().isInstanceOf(ActivityCompletedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name());
+        converter = eventConverters.getConverterByEventTypeName(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name());
         assertThat(converter).isNotNull().isInstanceOf(ActivityStartedEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name());
+        converter = eventConverters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name());
         assertThat(converter).isNotNull().isInstanceOf(ProcessCancelledEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name());
+        converter = eventConverters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name());
         assertThat(converter).isNotNull().isInstanceOf(ProcessCompletedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name());
+        converter = eventConverters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name());
         assertThat(converter).isNotNull().isInstanceOf(ProcessCreatedEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name());
+        converter = eventConverters.getConverterByEventTypeName(ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name());
         assertThat(converter).isNotNull().isInstanceOf(ProcessDeployedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name());
+        converter = eventConverters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name());
         assertThat(converter).isNotNull().isInstanceOf(ProcessResumedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name());
+        converter = eventConverters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name());
         assertThat(converter).isNotNull().isInstanceOf(ProcessStartedEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name());
+        converter = eventConverters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name());
         assertThat(converter).isNotNull().isInstanceOf(ProcessSuspendedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name());
+        converter = eventConverters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name());
         assertThat(converter).isNotNull().isInstanceOf(ProcessUpdatedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name());
+        converter = eventConverters.getConverterByEventTypeName(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name());
         assertThat(converter).isNotNull().isInstanceOf(SignalReceivedEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name());
+        converter = eventConverters.getConverterByEventTypeName(SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name());
         assertThat(converter).isNotNull().isInstanceOf(SequenceFlowTakenEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name());
+        converter = eventConverters.getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name());
         assertThat(converter).isNotNull().isInstanceOf(TaskAssignedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name());
+        converter = eventConverters.getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name());
         assertThat(converter).isNotNull().isInstanceOf(TaskCancelledEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name());
+        converter = eventConverters.getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name());
         assertThat(converter).isNotNull().isInstanceOf(TaskCompletedEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name());
+        converter = eventConverters.getConverterByEventTypeName(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name());
         assertThat(converter).isNotNull().isInstanceOf(TaskCandidateGroupAddedEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name());
-        assertThat(converter).isNotNull()
-            .isInstanceOf(TaskCandidateGroupRemovedEventConverter.class);
+        converter = eventConverters.getConverterByEventTypeName(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(TaskCandidateGroupRemovedEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name());
+        converter = eventConverters.getConverterByEventTypeName(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name());
         assertThat(converter).isNotNull().isInstanceOf(TaskCandidateUserAddedEventConverter.class);
 
-        converter = eventConverters.getConverterByEventTypeName(
-            TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name());
-        assertThat(converter).isNotNull()
-            .isInstanceOf(TaskCandidateUserRemovedEventConverter.class);
+        converter = eventConverters.getConverterByEventTypeName(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(TaskCandidateUserRemovedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name());
+        converter = eventConverters.getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name());
         assertThat(converter).isNotNull().isInstanceOf(TaskCreatedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name());
+        converter = eventConverters.getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name());
         assertThat(converter).isNotNull().isInstanceOf(TaskSuspendedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name());
+        converter = eventConverters.getConverterByEventTypeName(TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name());
         assertThat(converter).isNotNull().isInstanceOf(TaskUpdatedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(VariableEvent.VariableEvents.VARIABLE_CREATED.name());
+        converter = eventConverters.getConverterByEventTypeName(VariableEvent.VariableEvents.VARIABLE_CREATED.name());
         assertThat(converter).isNotNull().isInstanceOf(VariableCreatedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(VariableEvent.VariableEvents.VARIABLE_DELETED.name());
+        converter = eventConverters.getConverterByEventTypeName(VariableEvent.VariableEvents.VARIABLE_DELETED.name());
         assertThat(converter).isNotNull().isInstanceOf(VariableDeletedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(VariableEvent.VariableEvents.VARIABLE_UPDATED.name());
+        converter = eventConverters.getConverterByEventTypeName(VariableEvent.VariableEvents.VARIABLE_UPDATED.name());
         assertThat(converter).isNotNull().isInstanceOf(VariableUpdatedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(BPMNTimerEvent.TimerEvents.TIMER_FIRED.name());
+        converter = eventConverters.getConverterByEventTypeName(BPMNTimerEvent.TimerEvents.TIMER_FIRED.name());
         assertThat(converter).isNotNull().isInstanceOf(TimerFiredEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name());
+        converter = eventConverters.getConverterByEventTypeName(BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name());
         assertThat(converter).isNotNull().isInstanceOf(TimerScheduledEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(IntegrationEvents.INTEGRATION_REQUESTED.name());
+        converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_REQUESTED.name());
         assertThat(converter).isNotNull().isInstanceOf(IntegrationRequestedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name());
-        assertThat(converter).isNotNull()
-            .isInstanceOf(IntegrationResultReceivedEventConverter.class);
+        converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(IntegrationResultReceivedEventConverter.class);
 
-        converter = eventConverters
-            .getConverterByEventTypeName(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name());
-        assertThat(converter).isNotNull()
-            .isInstanceOf(IntegrationErrorReceivedEventConverter.class);
+        converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(IntegrationErrorReceivedEventConverter.class);
 
 
     }

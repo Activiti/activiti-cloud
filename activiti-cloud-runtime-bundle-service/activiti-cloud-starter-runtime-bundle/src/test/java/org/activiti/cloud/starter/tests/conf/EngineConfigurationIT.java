@@ -54,8 +54,7 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveRequiredGroupsSetForAuditProducer() {
         //when
-        String requiredGroups = applicationContext.getEnvironment()
-            .getProperty("spring.cloud.stream.bindings.auditProducer.producer.required-groups");
+        String requiredGroups = applicationContext.getEnvironment().getProperty("spring.cloud.stream.bindings.auditProducer.producer.required-groups");
         //then
         assertThat(requiredGroups).isEqualTo("query,audit");
     }

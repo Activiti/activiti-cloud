@@ -6,8 +6,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.GenericContainer;
 
-public class RedisApplicationInitializer implements
-    ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class RedisApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final int CONTAINER_EXIT_CODE_OK = 0;
     private static final int AWAIT_INIT_REPLICA_SET_ATTEMPTS = 60;

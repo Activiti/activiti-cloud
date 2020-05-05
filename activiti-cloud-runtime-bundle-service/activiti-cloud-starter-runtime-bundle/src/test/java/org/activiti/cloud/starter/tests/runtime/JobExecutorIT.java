@@ -421,17 +421,14 @@ public class JobExecutorIT {
         CountDownLatch timerFired = new CountDownLatch(1);
         CountDownLatch eventPublished = new CountDownLatch(1);
 
-        applicationContext.addApplicationListener(
-            new CountDownLatchApplicationEventListener<JobMessageSentEvent>(eventPublished));
+        applicationContext.addApplicationListener(new CountDownLatchApplicationEventListener<JobMessageSentEvent>(eventPublished));
 
         // Set the clock fixed
         Date startTime = new Date();
 
-        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(timerFired),
-            ActivitiEventType.TIMER_FIRED);
+        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(timerFired), ActivitiEventType.TIMER_FIRED);
 
-        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobCompleted),
-            ActivitiEventType.JOB_EXECUTION_SUCCESS);
+        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobCompleted), ActivitiEventType.JOB_EXECUTION_SUCCESS);
 
         //when
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
@@ -495,14 +492,11 @@ public class JobExecutorIT {
         // Set the clock fixed
         Date startTime = new Date();
 
-        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(timerScheduled),
-            ActivitiEventType.TIMER_SCHEDULED);
+        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(timerScheduled), ActivitiEventType.TIMER_SCHEDULED);
 
-        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(timerFired),
-            ActivitiEventType.TIMER_FIRED);
+        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(timerFired), ActivitiEventType.TIMER_FIRED);
 
-        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
-            ActivitiEventType.JOB_EXECUTION_SUCCESS);
+        runtimeService.addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted), ActivitiEventType.JOB_EXECUTION_SUCCESS);
 
         // when
         ProcessInstance pi = runtimeService.startProcessInstanceByKey(TEST_BOUNDARY_TIMER_EVENT);
@@ -518,8 +512,7 @@ public class JobExecutorIT {
             });
 
         // After setting the clock to time '5 minutes and 5 seconds', the timer should fire
-        processEngineConfiguration.getClock()
-            .setCurrentTime(new Date(startTime.getTime() + ((5 * 60 * 1000) + 5000)));
+        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((5 * 60 * 1000) + 5000)));
 
         // timer event has been scheduled
         assertThat(timerScheduled.await(1, TimeUnit.MINUTES)).as("should schedule timer")
@@ -557,8 +550,7 @@ public class JobExecutorIT {
         CountDownLatch eventPublished = new CountDownLatch(1);
         String destination = "spyAsyncExecutorJobs";
 
-        applicationContext.addApplicationListener(
-            new CountDownLatchApplicationEventListener<JobMessageFailedEvent>(eventPublished));
+        applicationContext.addApplicationListener(new CountDownLatchApplicationEventListener<JobMessageFailedEvent>(eventPublished));
 
         doReturn(false).when(spyJobMessageChannel)
             .send(any(Message.class));
@@ -574,9 +566,8 @@ public class JobExecutorIT {
         });
 
         // then
-        assertThat(eventPublished.await(1, TimeUnit.SECONDS))
-            .as("should publish JobMessageFailedEvent")
-            .isTrue();
+        assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish JobMessageFailedEvent")
+                                                             .isTrue();
     }
 
     @Test
@@ -600,8 +591,7 @@ public class JobExecutorIT {
         CountDownLatch eventPublished = new CountDownLatch(1);
         String destination = "spyAsyncExecutorJobs";
 
-        applicationContext.addApplicationListener(
-            new CountDownLatchApplicationEventListener<JobMessageSentEvent>(eventPublished));
+        applicationContext.addApplicationListener(new CountDownLatchApplicationEventListener<JobMessageSentEvent>(eventPublished));
 
         doReturn(true).when(spyJobMessageChannel)
             .send(any(Message.class));
@@ -617,9 +607,8 @@ public class JobExecutorIT {
         });
 
         // then
-        assertThat(eventPublished.await(1, TimeUnit.SECONDS))
-            .as("should publish JobMessageSentEvent")
-            .isTrue();
+        assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish JobMessageSentEvent")
+                                                             .isTrue();
     }
 
     @Test
@@ -665,28 +654,23 @@ public class JobExecutorIT {
         ;
 
         assertThat(message.getHeaders()).as("should build runtime bundle properties as headers")
-            .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, properties.getAppName())
-            .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME,
-                properties.getServiceName())
-            .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE,
-                properties.getServiceType())
-            .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_VERSION,
-                properties.getServiceVersion())
-        ;
+                                        .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, properties.getAppName())
+                                        .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, properties.getServiceName())
+                                        .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE, properties.getServiceType())
+                                        .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_VERSION, properties.getServiceVersion())
+                                        ;
 
         assertThat(message.getHeaders()).as("should build job attributes as headers")
-            .containsEntry(JobMessageHeaders.JOB_ID, job.getId())
-            .containsEntry(JobMessageHeaders.JOB_TYPE, job.getJobType())
-            .containsEntry(JobMessageHeaders.JOB_HANDLER_TYPE, job.getJobHandlerType())
-            .containsEntry(JobMessageHeaders.JOB_EXCEPTION_MESSAGE, job.getExceptionMessage())
-            .containsEntry(JobMessageHeaders.JOB_PROCESS_DEFINITION_ID,
-                job.getProcessDefinitionId())
-            .containsEntry(JobMessageHeaders.JOB_EXECUTION_ID, job.getExecutionId())
-            .containsEntry(JobMessageHeaders.JOB_DUE_DATE, job.getDuedate())
-            .containsEntry(JobMessageHeaders.JOB_HANDLER_CONFIGURATION,
-                job.getJobHandlerConfiguration())
-            .containsEntry(JobMessageHeaders.JOB_RETRIES, job.getRetries())
-        ;
+                                        .containsEntry(JobMessageHeaders.JOB_ID, job.getId())
+                                        .containsEntry(JobMessageHeaders.JOB_TYPE, job.getJobType())
+                                        .containsEntry(JobMessageHeaders.JOB_HANDLER_TYPE, job.getJobHandlerType())
+                                        .containsEntry(JobMessageHeaders.JOB_EXCEPTION_MESSAGE, job.getExceptionMessage())
+                                        .containsEntry(JobMessageHeaders.JOB_PROCESS_DEFINITION_ID, job.getProcessDefinitionId())
+                                        .containsEntry(JobMessageHeaders.JOB_EXECUTION_ID, job.getExecutionId())
+                                        .containsEntry(JobMessageHeaders.JOB_DUE_DATE, job.getDuedate())
+                                        .containsEntry(JobMessageHeaders.JOB_HANDLER_CONFIGURATION, job.getJobHandlerConfiguration())
+                                        .containsEntry(JobMessageHeaders.JOB_RETRIES, job.getRetries())
+                                        ;
 
     }
 
@@ -715,8 +699,7 @@ public class JobExecutorIT {
         }
     }
 
-    class CountDownLatchApplicationEventListener<E extends ApplicationEvent> implements
-        ApplicationListener<E> {
+    class CountDownLatchApplicationEventListener<E extends ApplicationEvent> implements ApplicationListener<E> {
 
         private final CountDownLatch countDownLatch;
 

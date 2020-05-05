@@ -50,12 +50,10 @@ public class AuditSwaggerIT {
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.definitions").isNotEmpty())
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContent"))))
-            .andExpect(
-                jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey("CloudRuntimeEventModel")))
-            .andExpect(jsonPath("$.info.title")
-                .value("Activiti Cloud Audit :: Starter :: Audit ReST API"));
+            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Audit :: Starter :: Audit ReST API"));
 
     }
 

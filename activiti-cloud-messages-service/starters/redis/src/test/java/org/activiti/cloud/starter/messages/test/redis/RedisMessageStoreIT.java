@@ -16,9 +16,8 @@
 
 package org.activiti.cloud.starter.messages.test.redis;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -26,7 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.integration.redis.store.RedisMessageStore;
 import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @ContextConfiguration(initializers = RedisApplicationInitializer.class)
@@ -42,7 +40,7 @@ public class RedisMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
         @Bean
         public PlatformTransactionManager transactionManager() {
-          return new PseudoTransactionManager();
+            return new PseudoTransactionManager();
         }
     }
 
