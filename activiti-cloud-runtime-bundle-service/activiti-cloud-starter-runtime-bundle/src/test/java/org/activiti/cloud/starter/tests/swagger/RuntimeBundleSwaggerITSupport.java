@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import java.io.File;
 import java.nio.file.Files;
+import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.spring.ProcessDeployedEventProducer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +31,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class RuntimeBundleSwaggerITSupport {
 
     @Autowired
@@ -46,14 +49,15 @@ public class RuntimeBundleSwaggerITSupport {
     private ProcessDeployedEventProducer producer;
 
     /**
-     * This is not a test. It's actually generating the swagger.json and yaml definition of the service.
-     * It is used by maven generate-swagger profile build.
+     * This is not a test. It's actually generating the swagger.json and yaml definition of the
+     * service. It is used by maven generate-swagger profile build.
      */
     @Test
     public void generateSwagger() throws Exception {
         mockMvc.perform(get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
             .andDo((result) -> {
-                JsonNode jsonNodeTree = objectMapper.readTree(result.getResponse().getContentAsByteArray());
+                JsonNode jsonNodeTree = objectMapper
+                    .readTree(result.getResponse().getContentAsByteArray());
                 Files.write(new File("target/swagger.json").toPath(),
                     objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(jsonNodeTree));
                 Files.write(new File("target/swagger.yaml").toPath(),

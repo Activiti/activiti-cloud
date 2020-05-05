@@ -40,6 +40,7 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.activiti.cloud.starter.tests.helper.MessageRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.apache.groovy.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,10 +57,10 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = ServicesAuditITConfiguration.class)
+@ContextConfiguration(classes = ServicesAuditITConfiguration.class, initializers = ContainersApplicationInitializer.class)
 public class MessageAuditProducerIT {
-    private static final String CATCH_MESSAGE = "catchMessage";
 
+    private static final String CATCH_MESSAGE = "catchMessage";
 
     @Autowired
     private MessageRestTemplate messageRestTemplate;
@@ -79,183 +80,187 @@ public class MessageAuditProducerIT {
     public void shouldAuditBPMNEventsMessagesAreProduced() {
         //when
         ResponseEntity<CloudProcessInstance> startResponse =
-                messageRestTemplate.message(start("auditStartMessage").withBusinessKey("businessId")
-                                                                      .withVariable("correlationKey", "correlationId")
-                                                                      .build());
+            messageRestTemplate.message(start("auditStartMessage").withBusinessKey("businessId")
+                .withVariable("correlationKey", "correlationId")
+                .build());
 
         assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        assertThat(messageRestTemplate.message(receive("auditEventSubprocessMessage").withCorrelationKey("correlationId")
-                                                                                     .build())
-                                                                                     .getStatusCode())
-                                                                                     .isEqualTo(HttpStatus.OK);
+        assertThat(messageRestTemplate
+            .message(receive("auditEventSubprocessMessage").withCorrelationKey("correlationId")
+                .build())
+            .getStatusCode())
+            .isEqualTo(HttpStatus.OK);
 
-        assertThat(messageRestTemplate.message(receive("auditBoundaryMessage").withCorrelationKey("correlationId")
-                                                                              .withVariable("customerKey", "customerId")
-                                                                              .build())
-                                                                              .getStatusCode())
-                                                                              .isEqualTo(HttpStatus.OK);
+        assertThat(messageRestTemplate
+            .message(receive("auditBoundaryMessage").withCorrelationKey("correlationId")
+                .withVariable("customerKey", "customerId")
+                .build())
+            .getStatusCode())
+            .isEqualTo(HttpStatus.OK);
 
-        assertThat(messageRestTemplate.message(receive("auditInteremdiateCatchMessage").withCorrelationKey("customerId")
-                                                                                       .withVariable("invoiceKey", "invoiceId")
-                                                                                       .build())
-                                                                                       .getStatusCode())
-                                                                                       .isEqualTo(HttpStatus.OK);
+        assertThat(messageRestTemplate
+            .message(receive("auditInteremdiateCatchMessage").withCorrelationKey("customerId")
+                .withVariable("invoiceKey", "invoiceId")
+                .build())
+            .getStatusCode())
+            .isEqualTo(HttpStatus.OK);
 
         // then
         CloudProcessInstance processInstance = startResponse.getBody();
 
         await("Audit BPMNMessage Events").untilAsserted(() -> {
-            assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+            assertThat(streamHandler.getReceivedHeaders())
+                .containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
             assertThat(receivedEvents)
-                    .filteredOn(CloudBPMNMessageEvent.class::isInstance)
-                    .extracting(CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getProcessDefinitionId,
-                                CloudRuntimeEvent::getProcessInstanceId,
-                                CloudRuntimeEvent::getProcessDefinitionKey,
-                                CloudRuntimeEvent::getProcessDefinitionVersion,
-                                CloudRuntimeEvent::getBusinessKey,
-                                event -> bpmnMessage(event).getElementId(),
-                                event -> bpmnMessage(event).getProcessDefinitionId(),
-                                event -> bpmnMessage(event).getProcessInstanceId(),
-                                event -> bpmnMessage(event).getMessagePayload().getName(),
-                                event -> bpmnMessage(event).getMessagePayload().getCorrelationKey(),
-                                event -> bpmnMessage(event).getMessagePayload().getBusinessKey(),
-                                event -> bpmnMessage(event).getMessagePayload().getVariables()
+                .filteredOn(CloudBPMNMessageEvent.class::isInstance)
+                .extracting(CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessDefinitionId,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey,
+                    CloudRuntimeEvent::getProcessDefinitionVersion,
+                    CloudRuntimeEvent::getBusinessKey,
+                    event -> bpmnMessage(event).getElementId(),
+                    event -> bpmnMessage(event).getProcessDefinitionId(),
+                    event -> bpmnMessage(event).getProcessInstanceId(),
+                    event -> bpmnMessage(event).getMessagePayload().getName(),
+                    event -> bpmnMessage(event).getMessagePayload().getCorrelationKey(),
+                    event -> bpmnMessage(event).getMessagePayload().getBusinessKey(),
+                    event -> bpmnMessage(event).getMessagePayload().getVariables()
+                )
+                .containsExactly(
+                    tuple(MESSAGE_RECEIVED,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        "startMessageEvent",
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "auditStartMessage",
+                        null,
+                        processInstance.getBusinessKey(),
+                        Collections.singletonMap("correlationKey", "correlationId")
+                    ),
+                    tuple(MESSAGE_WAITING,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        "startMessageEventSubprocessEvent",
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "auditEventSubprocessMessage",
+                        "correlationId",
+                        processInstance.getBusinessKey(),
+                        null
+                    ),
+                    tuple(MESSAGE_SENT,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        "intermediateThrowMessageEvent",
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "auditIntermediateThrowMessage",
+                        "correlationId",
+                        processInstance.getBusinessKey(),
+                        Collections.singletonMap("correlationKey", "correlationId")
+                    ),
+                    tuple(MESSAGE_WAITING,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        "boundaryMessageEvent",
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "auditBoundaryMessage",
+                        "correlationId",
+                        processInstance.getBusinessKey(),
+                        null
+                    ),
+                    tuple(MESSAGE_RECEIVED,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        "startMessageEventSubprocessEvent",
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "auditEventSubprocessMessage",
+                        "correlationId",
+                        processInstance.getBusinessKey(),
+                        null
+                    ),
+                    tuple(MESSAGE_RECEIVED,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        "boundaryMessageEvent",
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "auditBoundaryMessage",
+                        "correlationId",
+                        processInstance.getBusinessKey(),
+                        Collections.singletonMap("customerKey", "customerId")
+                    ),
+                    tuple(MESSAGE_WAITING,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        "intermediateCatchMessageEvent",
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "auditInteremdiateCatchMessage",
+                        "customerId",
+                        processInstance.getBusinessKey(),
+                        null
+                    ),
+                    tuple(MESSAGE_RECEIVED,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        "intermediateCatchMessageEvent",
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "auditInteremdiateCatchMessage",
+                        "customerId",
+                        processInstance.getBusinessKey(),
+                        Collections.singletonMap("invoiceKey", "invoiceId")
+                    ),
+                    tuple(MESSAGE_SENT,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        "throwEndMessageEvent",
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "auditThrowEndMessage",
+                        "invoiceId",
+                        processInstance.getBusinessKey(),
+                        Maps.of("correlationKey", "correlationId",
+                            "customerKey", "customerId",
+                            "invoiceKey", "invoiceId")
                     )
-                    .containsExactly(
-                            tuple(MESSAGE_RECEIVED,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  "startMessageEvent",
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "auditStartMessage",
-                                  null,
-                                  processInstance.getBusinessKey(),
-                                  Collections.singletonMap("correlationKey", "correlationId")
-                            ),
-                            tuple(MESSAGE_WAITING,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  "startMessageEventSubprocessEvent",
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "auditEventSubprocessMessage",
-                                  "correlationId",
-                                  processInstance.getBusinessKey(),
-                                  null
-                            ),
-                            tuple(MESSAGE_SENT,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  "intermediateThrowMessageEvent",
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "auditIntermediateThrowMessage",
-                                  "correlationId",
-                                  processInstance.getBusinessKey(),
-                                  Collections.singletonMap("correlationKey", "correlationId")
-                            ),
-                            tuple(MESSAGE_WAITING,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  "boundaryMessageEvent",
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "auditBoundaryMessage",
-                                  "correlationId",
-                                  processInstance.getBusinessKey(),
-                                  null
-                            ),
-                            tuple(MESSAGE_RECEIVED,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  "startMessageEventSubprocessEvent",
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "auditEventSubprocessMessage",
-                                  "correlationId",
-                                  processInstance.getBusinessKey(),
-                                  null
-                            ),
-                            tuple(MESSAGE_RECEIVED,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  "boundaryMessageEvent",
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "auditBoundaryMessage",
-                                  "correlationId",
-                                  processInstance.getBusinessKey(),
-                                  Collections.singletonMap("customerKey", "customerId")
-                            ),
-                            tuple(MESSAGE_WAITING,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  "intermediateCatchMessageEvent",
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "auditInteremdiateCatchMessage",
-                                  "customerId",
-                                  processInstance.getBusinessKey(),
-                                  null
-                            ),
-                            tuple(MESSAGE_RECEIVED,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  "intermediateCatchMessageEvent",
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "auditInteremdiateCatchMessage",
-                                  "customerId",
-                                  processInstance.getBusinessKey(),
-                                  Collections.singletonMap("invoiceKey", "invoiceId")
-                            ),
-                            tuple(MESSAGE_SENT,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  "throwEndMessageEvent",
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "auditThrowEndMessage",
-                                  "invoiceId",
-                                  processInstance.getBusinessKey(),
-                                  Maps.of("correlationKey", "correlationId",
-                                          "customerKey", "customerId",
-                                          "invoiceKey", "invoiceId")
-                            )
-                    );
+                );
 
         });
 
@@ -264,101 +269,104 @@ public class MessageAuditProducerIT {
     @Test
     public void should_produceCloudMessageSubscriptionCancelledEvent_when_processIsDeleted() {
         //when
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
-                                                                           new StartProcessPayloadBuilder()
-                                                                                   .withProcessDefinitionKey(CATCH_MESSAGE)
-                                                                                   .withVariable("correlationKey", "foo")
-                                                                                   .withName("processInstanceName")
-                                                                                   .withBusinessKey("businessKey")
-                                                                                   .build());
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate
+            .startProcess(
+                new StartProcessPayloadBuilder()
+                    .withProcessDefinitionKey(CATCH_MESSAGE)
+                    .withVariable("correlationKey", "foo")
+                    .withName("processInstanceName")
+                    .withBusinessKey("businessKey")
+                    .build());
 
         assertThat(startProcessEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         CloudProcessInstance processInstance = startProcessEntity.getBody();
 
-
         await("Audit BPMNMessage Events").untilAsserted(() -> {
-            assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+            assertThat(streamHandler.getReceivedHeaders())
+                .containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
             assertThat(receivedEvents)
-                    .filteredOn(CloudBPMNMessageEvent.class::isInstance)
-                    .extracting(CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getProcessDefinitionId,
-                                CloudRuntimeEvent::getProcessInstanceId,
-                                CloudRuntimeEvent::getProcessDefinitionKey,
-                                CloudRuntimeEvent::getProcessDefinitionVersion,
-                                CloudRuntimeEvent::getBusinessKey,
-                                event -> bpmnMessage(event).getProcessDefinitionId(),
-                                event -> bpmnMessage(event).getProcessInstanceId(),
-                                event -> bpmnMessage(event).getMessagePayload().getName(),
-                                event -> bpmnMessage(event).getMessagePayload().getCorrelationKey(),
-                                event -> bpmnMessage(event).getMessagePayload().getBusinessKey()
-                    )
-                    .contains(
-                            tuple(MESSAGE_WAITING,
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  processInstance.getProcessDefinitionKey(),
-                                  1, // version
-                                  processInstance.getBusinessKey(),
-                                  processInstance.getProcessDefinitionId(),
-                                  processInstance.getId(),
-                                  "testMessage",
-                                  "foo",
-                                  processInstance.getBusinessKey())
-                    );
+                .filteredOn(CloudBPMNMessageEvent.class::isInstance)
+                .extracting(CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessDefinitionId,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey,
+                    CloudRuntimeEvent::getProcessDefinitionVersion,
+                    CloudRuntimeEvent::getBusinessKey,
+                    event -> bpmnMessage(event).getProcessDefinitionId(),
+                    event -> bpmnMessage(event).getProcessInstanceId(),
+                    event -> bpmnMessage(event).getMessagePayload().getName(),
+                    event -> bpmnMessage(event).getMessagePayload().getCorrelationKey(),
+                    event -> bpmnMessage(event).getMessagePayload().getBusinessKey()
+                )
+                .contains(
+                    tuple(MESSAGE_WAITING,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "testMessage",
+                        "foo",
+                        processInstance.getBusinessKey())
+                );
 
-            });
+        });
 
+        ResponseEntity<CloudProcessInstance> deleteProcessEntity = processInstanceRestTemplate
+            .delete(startProcessEntity);
+        assertThat(deleteProcessEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            ResponseEntity<CloudProcessInstance> deleteProcessEntity = processInstanceRestTemplate.delete(startProcessEntity);
-            assertThat(deleteProcessEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders())
+                .containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
-            await().untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+            assertThat(receivedEvents)
+                .filteredOn(CloudMessageSubscriptionCancelledEvent.class::isInstance)
+                .extracting(CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessDefinitionId,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey,
+                    CloudRuntimeEvent::getProcessDefinitionVersion,
+                    CloudRuntimeEvent::getBusinessKey,
+                    event -> messageSubscription(event).getProcessDefinitionId(),
+                    event -> messageSubscription(event).getProcessInstanceId(),
+                    event -> messageSubscription(event).getEventName(),
+                    event -> messageSubscription(event).getConfiguration(),
+                    event -> messageSubscription(event).getBusinessKey()
+                )
+                .contains(
+                    tuple(
+                        MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED,
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        processInstance.getProcessDefinitionKey(),
+                        1, // version
+                        processInstance.getBusinessKey(),
+                        processInstance.getProcessDefinitionId(),
+                        processInstance.getId(),
+                        "testMessage",
+                        "foo",
+                        processInstance.getBusinessKey())
+                );
 
-                assertThat(receivedEvents)
-                        .filteredOn(CloudMessageSubscriptionCancelledEvent.class::isInstance)
-                        .extracting(CloudRuntimeEvent::getEventType,
-                                    CloudRuntimeEvent::getProcessDefinitionId,
-                                    CloudRuntimeEvent::getProcessInstanceId,
-                                    CloudRuntimeEvent::getProcessDefinitionKey,
-                                    CloudRuntimeEvent::getProcessDefinitionVersion,
-                                    CloudRuntimeEvent::getBusinessKey,
-                                    event -> messageSubscription(event).getProcessDefinitionId(),
-                                    event -> messageSubscription(event).getProcessInstanceId(),
-                                    event -> messageSubscription(event).getEventName(),
-                                    event -> messageSubscription(event).getConfiguration(),
-                                    event -> messageSubscription(event).getBusinessKey()
-                        )
-                        .contains(
-                                tuple(MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED,
-                                      processInstance.getProcessDefinitionId(),
-                                      processInstance.getId(),
-                                      processInstance.getProcessDefinitionKey(),
-                                      1, // version
-                                      processInstance.getBusinessKey(),
-                                      processInstance.getProcessDefinitionId(),
-                                      processInstance.getId(),
-                                      "testMessage",
-                                      "foo",
-                                      processInstance.getBusinessKey())
-                        );
-
-            });
+        });
 
     }
 
 
-    private BPMNMessage bpmnMessage(CloudRuntimeEvent<?,?> event) {
+    private BPMNMessage bpmnMessage(CloudRuntimeEvent<?, ?> event) {
         return CloudBPMNMessageEvent.class.cast(event).getEntity();
     }
 
-    private MessageSubscription messageSubscription(CloudRuntimeEvent<?,?> event) {
+    private MessageSubscription messageSubscription(CloudRuntimeEvent<?, ?> event) {
         return CloudMessageSubscriptionCancelledEvent.class.cast(event).getEntity();
     }
 }

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import java.util.stream.Stream;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -38,11 +39,33 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.lifecycle.Startables;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
 public class ActivitiCloudConnectorServiceIT {
+
+//    static GenericContainer keycloakContainer = new GenericContainer("activiti/activiti-keycloak")
+//        .withExposedPorts(8180)
+//        .waitingFor(Wait.defaultWaitStrategy());
+
+    static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
+
+    static {
+
+        Startables.deepStart(Stream.of( rabbitMQContainer)).join();
+
+//        System.setProperty("keycloak.auth-server-url", "http://" + keycloakContainer.getContainerIpAddress() + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
+        System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
+        System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
+
+    }
+
+
 
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
 

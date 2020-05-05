@@ -23,17 +23,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.activiti.cloud.starter.audit.tests.it.ContainersApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class AuditSwaggerIT {
 
     @Autowired
@@ -47,10 +50,12 @@ public class AuditSwaggerIT {
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.definitions").isNotEmpty())
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContent"))))
-            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
+            .andExpect(
+                jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey("CloudRuntimeEventModel")))
-            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Audit :: Starter :: Audit ReST API"));
+            .andExpect(jsonPath("$.info.title")
+                .value("Activiti Cloud Audit :: Starter :: Audit ReST API"));
 
     }
 

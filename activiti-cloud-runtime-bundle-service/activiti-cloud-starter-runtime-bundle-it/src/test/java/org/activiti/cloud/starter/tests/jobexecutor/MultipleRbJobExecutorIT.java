@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import java.util.stream.Stream;
 import org.activiti.cloud.services.job.executor.JobMessageHandler;
 import org.activiti.cloud.services.job.executor.JobMessageHandlerFactory;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
@@ -30,13 +31,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.lifecycle.Startables;
 
 public class MultipleRbJobExecutorIT {
+
     private static final Logger logger = LoggerFactory.getLogger(MultipleRbJobExecutorIT.class);
 
     private static final String ASYNC_TASK = "asyncTask";
@@ -45,6 +54,14 @@ public class MultipleRbJobExecutorIT {
     private static ConfigurableApplicationContext rbCtx1;
     private static ConfigurableApplicationContext rbCtx2;
 
+    private static GenericContainer keycloakContainer = new GenericContainer(
+        "activiti/activiti-keycloak")
+        .withExposedPorts(8180)
+        .waitingFor(Wait.defaultWaitStrategy());
+
+    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer(
+        "rabbitmq:management");
+
     @Configuration
     @Profile("h2")
     static class H2Application {
@@ -52,13 +69,14 @@ public class MultipleRbJobExecutorIT {
         @Bean(initMethod = "start", destroyMethod = "stop")
         public Server inMemoryH2DatabaseaServer() throws SQLException {
             return Server.createTcpServer(
-              "-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
+                "-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
         }
     }
 
     @SpringBootApplication
     @ActivitiRuntimeBundle
     static class RbApplication {
+
         @Bean
         public JobMessageHandlerFactory jobMessageHandlerFactory() {
             return new JobMessageHandlerFactory() {
@@ -73,15 +91,27 @@ public class MultipleRbJobExecutorIT {
 
     @BeforeAll
     public static void setUp() {
+        if (!keycloakContainer.isRunning() && !rabbitMQContainer.isRunning()) {
+            Startables.deepStart(Stream.of(keycloakContainer, rabbitMQContainer)).join();
+        }
+        System.setProperty("keycloak.auth-server-url",
+            "http://" + keycloakContainer.getContainerIpAddress()
+                + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
+
+        System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
+        System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
+
         h2Ctx = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
-                                                                 .profiles("h2")
-                                                                 .run();
+            .profiles("h2")
+            .run();
 
         rbCtx1 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081")
-                                                                  .run();
+            .run();
 
         rbCtx2 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082")
-                                                                  .run();
+            .run();
+
+
     }
 
     @AfterAll
@@ -111,35 +141,39 @@ public class MultipleRbJobExecutorIT {
         JobMessageHandler jobMessageHandler1 = rbCtx1.getBean(JobMessageHandler.class);
         JobMessageHandler jobMessageHandler2 = rbCtx2.getBean(JobMessageHandler.class);
 
-        rbCtx1.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
-                                                              ActivitiEventType.JOB_EXECUTION_SUCCESS );
+        rbCtx1.getBean(RuntimeService.class)
+            .addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
+                ActivitiEventType.JOB_EXECUTION_SUCCESS);
 
-        rbCtx2.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
-                                                              ActivitiEventType.JOB_EXECUTION_SUCCESS );
+        rbCtx2.getBean(RuntimeService.class)
+            .addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
+                ActivitiEventType.JOB_EXECUTION_SUCCESS);
 
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
-                                                      .processDefinitionKey(ASYNC_TASK)
-                                                      .singleResult()
-                                                      .getId();
+            .processDefinitionKey(ASYNC_TASK)
+            .singleResult()
+            .getId();
         //when
-        for(int i=0; i<jobCount; i++)
+        for (int i = 0; i < jobCount; i++) {
             runtimeService.createProcessInstanceBuilder()
-                          .processDefinitionId(processDefinitionId)
-                          .start();
+                .processDefinitionId(processDefinitionId)
+                .start();
+        }
 
         //then
-        assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should distribute and complete all jobs between rb replicas")
-                                                            .isTrue();
+        assertThat(jobsCompleted.await(1, TimeUnit.MINUTES))
+            .as("should distribute and complete all jobs between rb replicas")
+            .isTrue();
 
         await("the async executions should complete and no more jobs should exist")
             .untilAsserted(() -> {
-                   assertThat(runtimeService.createExecutionQuery()
-                                            .processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
+                assertThat(runtimeService.createExecutionQuery()
+                    .processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
 
-                   assertThat(managementService.createJobQuery()
-                                               .processDefinitionId(processDefinitionId)
-                                               .count()).isEqualTo(0);
-                                                                                   });
+                assertThat(managementService.createJobQuery()
+                    .processDefinitionId(processDefinitionId)
+                    .count()).isEqualTo(0);
+            });
         // rb1 message handler is invoked
         verify(jobMessageHandler1, atLeastOnce()).handleMessage(any());
 
