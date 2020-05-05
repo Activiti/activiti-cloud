@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.notifications.graphql.starter;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,7 +30,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
@@ -62,6 +65,7 @@ import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageTy
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.apache.groovy.util.Maps;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,17 +82,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.ContextConfiguration;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.NettyPipeline;
@@ -97,7 +91,7 @@ import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.test.StepVerifier;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Testcontainers
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class ActivitiGraphQLStarterIT {
 
     private static final String WS_GRAPHQL_URI = "/ws/graphql";
@@ -108,16 +102,6 @@ public class ActivitiGraphQLStarterIT {
     private static final String TASK_NAME = "task1";
     private static final String GRAPHQL_URL = "/graphql";
     private static final Duration TIMEOUT = Duration.ofMillis(20000);
-
-    @Container
-    private GenericContainer keycloakContainer = new GenericContainer(
-        "activiti/activiti-keycloak")
-        .withExposedPorts(8180)
-        .waitingFor(Wait.defaultWaitStrategy());
-
-    @Container
-    private RabbitMQContainer rabbitMQContainer = new RabbitMQContainer(
-        "rabbitmq:management");
 
 
     @LocalServerPort
@@ -145,12 +129,6 @@ public class ActivitiGraphQLStarterIT {
 
     @BeforeEach
     public void setUp() {
-        System.setProperty("keycloak.auth-server-url",
-            "http://" + keycloakContainer.getContainerIpAddress()
-                + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
-
-        System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
-        System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
 
         keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
         authHeaders = keycloakTokenProducer.authorizationHeaders();
@@ -162,13 +140,11 @@ public class ActivitiGraphQLStarterIT {
     }
 
     @Test
-    public void testGraphqlWsSubprotocolConnectionInitXAuthorizationSupported()
-        throws JsonProcessingException {
+    public void testGraphqlWsSubprotocolConnectionInitXAuthorizationSupported() throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
         keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        final String accessToken = keycloakTokenProducer.authorizationHeaders()
-            .getFirst(AUTHORIZATION);
+        final String accessToken = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
 
         Map<String, Object> payload = new StringObjectMapBuilder().put("kaInterval", 1000)
             .put("X-Authorization", accessToken)
@@ -216,8 +192,7 @@ public class ActivitiGraphQLStarterIT {
 
 
     @Test
-    public void testGraphqlWsSubprotocolServerStartStopSubscription()
-        throws JsonProcessingException {
+    public void testGraphqlWsSubprotocolServerStartStopSubscription() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
 
         keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
@@ -227,13 +202,12 @@ public class ActivitiGraphQLStarterIT {
             .put("eventTypes", Arrays.array("PROCESS_CREATED", "PROCESS_STARTED"))
             .get();
 
-        Map<String, Object> payload = mapBuilder()
-            .put("query", "subscription($appName: String!, $eventTypes: [EngineEventType!]) { "
-                + "  engineEvents(appName: [$appName], eventType: $eventTypes) { "
-                + "    processInstanceId  "
-                + "    eventType "
-                + "  } "
-                + "}")
+        Map<String, Object> payload = mapBuilder().put("query", "subscription($appName: String!, $eventTypes: [EngineEventType!]) { "
+            + "  engineEvents(appName: [$appName], eventType: $eventTypes) { "
+            + "    processInstanceId  "
+            + "    eventType "
+            + "  } "
+            + "}")
             .put("variables", variables)
             .get();
 
@@ -338,13 +312,12 @@ public class ActivitiGraphQLStarterIT {
         Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app")
             .get();
 
-        Map<String, Object> payload = new StringObjectMapBuilder()
-            .put("query", "subscription($appName: String!) { "
-                + "  engineEvents(appName: [$appName], eventType: PROCESS_DEPLOYED) { "
-                + "    processDefinitionKey "
-                + "    eventType "
-                + "  } "
-                + "}")
+        Map<String, Object> payload = new StringObjectMapBuilder().put("query", "subscription($appName: String!) { "
+            + "  engineEvents(appName: [$appName], eventType: PROCESS_DEPLOYED) { "
+            + "    processDefinitionKey "
+            + "    eventType "
+            + "  } "
+            + "}")
             .put("variables", variables)
             .get();
         GraphQLMessage start = GraphQLMessage.builder()
@@ -356,8 +329,7 @@ public class ActivitiGraphQLStarterIT {
         String startMessage = objectMapper.writeValueAsString(start);
 
         // given
-        CloudProcessDeployedEvent event1 = new CloudProcessDeployedEventImpl("id",
-            new Date().getTime(), new ProcessDefinitionEntity()) {
+        CloudProcessDeployedEvent event1 = new CloudProcessDeployedEventImpl("id", new Date().getTime(), new ProcessDefinitionEntity()) {
             {
                 setAppName("default-app");
                 setServiceName("rb-my-app");
@@ -403,10 +375,9 @@ public class ActivitiGraphQLStarterIT {
 
         // then
         Map<String, Object> message = Maps.of("data",
-            Maps.of("engineEvents",
-                Arrays.array(mapBuilder().put("processDefinitionKey", "processDefinitionKey")
-                    .put("eventType", "PROCESS_DEPLOYED")
-                    .get()))
+            Maps.of("engineEvents", Arrays.array(mapBuilder().put("processDefinitionKey", "processDefinitionKey")
+                .put("eventType", "PROCESS_DEPLOYED")
+                .get()))
         );
 
         String dataMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
@@ -432,14 +403,13 @@ public class ActivitiGraphQLStarterIT {
             .put("eventType", "SIGNAL_RECEIVED")
             .get();
 
-        Map<String, Object> payload = new StringObjectMapBuilder()
-            .put("query", "subscription($appName: String!, $eventType: EngineEventType!) { "
-                + "  engineEvents(appName: [$appName], eventType: [$eventType]) { "
-                + "    processInstanceId "
-                + "    processDefinitionId "
-                + "    eventType "
-                + "  } "
-                + "}")
+        Map<String, Object> payload = new StringObjectMapBuilder().put("query", "subscription($appName: String!, $eventType: EngineEventType!) { "
+            + "  engineEvents(appName: [$appName], eventType: [$eventType]) { "
+            + "    processInstanceId "
+            + "    processDefinitionId "
+            + "    eventType "
+            + "  } "
+            + "}")
             .put("variables", variables)
             .get();
         GraphQLMessage start = GraphQLMessage.builder()
