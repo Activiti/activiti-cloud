@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.activiti.api.process.model.builders.MessageEventPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.MessageDefinitionEvent.MessageDefinitionEvents;
@@ -92,7 +93,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 })
 public abstract class AbstractMessagesCoreIntegrationTests {
 
-    protected ObjectMapper objectMapper = new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper()
+                                                  .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);;
 
     @Autowired
     protected MessageConnectorProcessor channels;
@@ -256,7 +258,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(peek()).isNull();
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("name", "variables")
                        .contains("start1",
                                  singletonMap("key", "sent1"));
@@ -275,7 +277,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(peek()).isNull();
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("name", "variables")
                        .contains("start1",
                                  singletonMap("key", "sent2"));
@@ -307,7 +309,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(peek()).isNull();
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("name", "businessKey", "variables")
                        .contains(messageName, "sent1", singletonMap("key", "sent1"));
 
@@ -326,7 +328,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(peek()).isNull();
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("name", "businessKey", "variables")
                        .contains(messageName, "sent2", singletonMap("key", "sent2"));
 
@@ -357,7 +359,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         Message<?> out = poll(0, TimeUnit.SECONDS);
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("variables")
                        .asInstanceOf(InstanceOfAssertFactories.MAP)
                        .containsEntry("key", "sent1");
@@ -390,7 +392,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         out = poll(1, TimeUnit.SECONDS);
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("variables")
                        .asInstanceOf(InstanceOfAssertFactories.MAP)
                        .containsEntry("key", "sent2");
@@ -398,7 +400,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(peek()).isNull();
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1)
-                                                             .extracting(Message::getPayload)
+                                                             .extracting(this::readValueFromMessageEventPayload)
                                                              .asList()
                                                              .extracting("variables")
                                                              .containsOnly(singletonMap("key", "waiting2"));
@@ -431,7 +433,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         Message<?> out = poll(0, TimeUnit.SECONDS);
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("name", "correlationKey", "variables")
                        .contains(messageName, correlationKey, singletonMap("key", businessKey));
 
@@ -462,7 +464,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         Message<?> out = poll(0, TimeUnit.SECONDS);
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("name", "businessKey", "variables")
                        .contains(messageName, businessKey, singletonMap("key", businessKey));
 
@@ -492,7 +494,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         Message<?> out = poll(0, TimeUnit.SECONDS);
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("variables")
                        .asInstanceOf(InstanceOfAssertFactories.MAP)
                        .containsEntry("key", "sent1");
@@ -500,7 +502,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(peek()).isNull();
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(2)
-                                                             .extracting(Message::getPayload)
+                                                             .extracting(this::readValueFromMessageEventPayload)
                                                              .asList()
                                                              .extracting("variables")
                                                              .contains(singletonMap("key", "sent2"),
@@ -512,7 +514,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(peek()).isNull();
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1)
-                                                             .extracting(Message::getPayload)
+                                                             .extracting(this::readValueFromMessageEventPayload)
                                                              .asList()
                                                              .extracting("variables")
                                                              .containsOnly(singletonMap("key", "sent2"));
@@ -525,13 +527,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(peek()).isNull();
 
         assertThat(out).isNotNull()
-                       .extracting(Message::getPayload)
+                       .extracting(this::readValueFromMessageEventPayload)
                        .extracting("variables")
                        .asInstanceOf(InstanceOfAssertFactories.MAP)
                        .containsEntry("key", "sent2");
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1)
-                                                             .extracting(Message::getPayload)
+                                                             .extracting(this::readValueFromMessageEventPayload)
                                                              .asList()
                                                              .extracting("variables")
                                                              .containsOnly(singletonMap("key", "waiting2"));
@@ -544,7 +546,6 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         assertThat(messageGroup(correlationId).getMessages()).isEmpty();
     }
-
 
     @Test
     public void testSubscriptionCancelled() throws Exception {
@@ -814,9 +815,10 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         }
 
         this.channels.input()
-                     .send(MessageBuilder.withPayload(json)
-                                         .copyHeaders(message.getHeaders())
-                                         .build());
+                .send(MessageBuilder.withPayload(json)
+                              .copyHeaders(message.getHeaders())
+                              .setHeader("contentType", "application/json")
+                              .build());
     }
 
     @SuppressWarnings("unchecked")
@@ -859,6 +861,19 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
             sent.countDown();
         });
+    }
+
+    private Object readValueFromMessageEventPayload(Message<?> message) {
+        Object payload = message.getPayload();
+        if (payload instanceof String) {
+            try {
+                return objectMapper.readValue((String) payload, MessageEventPayload.class);
+            } catch (JsonProcessingException e) {
+                //TODO: LOG
+                return payload;
+            }
+        }
+        return payload;
     }
 
     static class Try {
