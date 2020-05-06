@@ -16,8 +16,7 @@
 
 package org.activiti.cloud.services.query.model;
 
-import java.io.IOException;
-
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,9 +89,9 @@ public class VariableValueJsonConverterTest {
     @Test
     public void convertToEntityAttributeShouldThrowExceptionWhenExceptionOccursWhileReading() throws Exception {
         //given
-        IOException ioException = new IOException();
+        JsonMappingException exception = new JsonMappingException(null, "test");
         given(objectMapper.readValue(JSON_REPRESENTATION,
-                                     VariableValue.class)).willThrow(ioException);
+                                     VariableValue.class)).willThrow(exception);
 
         //when
         Throwable thrown = catchThrowable(() -> converter.convertToEntityAttribute(JSON_REPRESENTATION));
@@ -101,6 +100,6 @@ public class VariableValueJsonConverterTest {
         assertThat(thrown)
         .isInstanceOf(QueryException.class)
         .hasMessage("Unable to deserialize variable.")
-        .hasCause(ioException);
+        .hasCause(exception);
     }
 }
