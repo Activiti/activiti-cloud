@@ -104,7 +104,7 @@ public class ModelValidationControllerIT {
         generatedProcess.setContent(validContent);
         Model processModel = modelRepository.createModel(generatedProcess);
 
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+        mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
@@ -124,7 +124,7 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(generatedProcess);
 
         ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("/{version}/models/{model_id}/validate",
                                    API_VERSION,
                                    processModel.getId())
                                  .file(file));
@@ -155,7 +155,7 @@ public class ModelValidationControllerIT {
                                                                       "process-model"));
 
         mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("/{version}/models/{model_id}/validate",
                                    API_VERSION,
                                    processModel.getId())
                                  .file(file))
@@ -179,7 +179,7 @@ public class ModelValidationControllerIT {
                 processModel,
                 resourceAsByteArray("process-extensions/RankMovie-extensions.json"));
 
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate/extensions",
+        mockMvc.perform(multipart("/{version}/models/{model_id}/validate/extensions",
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
@@ -203,7 +203,7 @@ public class ModelValidationControllerIT {
                 processModel,
                 resourceAsByteArray("process-extensions/RankMovie-extensions-no-default-values.json"));
 
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate/extensions",
+        mockMvc.perform(multipart("/{version}/models/{model_id}/validate/extensions",
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
@@ -223,7 +223,7 @@ public class ModelValidationControllerIT {
                 processModel,
                 resourceAsByteArray("process-extensions/valid-extensions-with-message-payload-mapping.json"));
 
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate/extensions",
+        mockMvc.perform(multipart("/{version}/models/{model_id}/validate/extensions",
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
@@ -240,7 +240,7 @@ public class ModelValidationControllerIT {
         MockMultipartFile file = multipartProcessFile(processModel,
                                                       resourceAsByteArray("process/invalid-process-name.bpmn20.xml"));
 
-        final ResultActions resultActions = mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+        final ResultActions resultActions = mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
                                                                       API_VERSION,
                                                                       processModel.getId())
                                                                     .file(file));
@@ -272,7 +272,7 @@ public class ModelValidationControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate/extensions",
+                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
@@ -311,7 +311,7 @@ public class ModelValidationControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate/extensions",
+                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
@@ -341,7 +341,7 @@ public class ModelValidationControllerIT {
                                                                                     "Process-Model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate/extensions",
+                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
@@ -371,7 +371,7 @@ public class ModelValidationControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate/extensions",
+                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
@@ -401,7 +401,7 @@ public class ModelValidationControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate/extensions",
+                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
@@ -431,7 +431,7 @@ public class ModelValidationControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate/extensions",
+                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
@@ -456,7 +456,7 @@ public class ModelValidationControllerIT {
                                                        "diagram.bpm",
                                                        "text/plain",
                                                        "BPMN diagram".getBytes());
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+        mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
                                   API_VERSION,
                                   "model_id")
                                 .file(file))
@@ -475,7 +475,7 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+        mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
@@ -493,7 +493,7 @@ public class ModelValidationControllerIT {
         Model connectorModel = modelRepository.createModel(connectorModel(project,
                                                                           "connector-model"));
 
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+        mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
                                   API_VERSION,
                                   connectorModel.getId())
                                 .file(file))
@@ -512,7 +512,7 @@ public class ModelValidationControllerIT {
         Model connectorModel = modelRepository.createModel(connectorModel(project,
                                                                           "connector-model"));
 
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+        mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
                                   API_VERSION,
                                   connectorModel.getId())
                                 .file(file))
@@ -532,7 +532,7 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(generatedProcess);
 
         ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("/{version}/models/{model_id}/validate",
                                    API_VERSION,
                                    processModel.getId())
                                  .file(file));
@@ -562,7 +562,7 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(generatedProcess);
 
         ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("/{version}/models/{model_id}/validate",
                                    API_VERSION,
                                    processModel.getId())
                                  .file(file));
@@ -583,7 +583,7 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(generatedProcess);
 
         ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("/{version}/models/{model_id}/validate",
                                    API_VERSION,
                                    processModel.getId())
                                  .file(file));

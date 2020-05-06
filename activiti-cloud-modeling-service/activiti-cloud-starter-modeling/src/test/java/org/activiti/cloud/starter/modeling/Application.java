@@ -16,11 +16,12 @@
 
 package org.activiti.cloud.starter.modeling;
 
+import org.activiti.cloud.services.test.TestProducerAutoConfiguration;
 import org.activiti.cloud.starter.modeling.configuration.EnableActivitiModeling;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = TestProducerAutoConfiguration.class)
 @EnableActivitiModeling
 public class Application {
 
