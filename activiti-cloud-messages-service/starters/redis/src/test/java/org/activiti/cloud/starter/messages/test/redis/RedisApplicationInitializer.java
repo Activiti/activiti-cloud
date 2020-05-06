@@ -1,6 +1,5 @@
 package org.activiti.cloud.starter.messages.test.redis;
 
-import java.io.IOException;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;

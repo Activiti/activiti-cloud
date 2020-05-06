@@ -16,19 +16,10 @@
 
 package org.activiti.cloud.messages.integration.tests;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.StartMessageDeploymentDefinition;
@@ -62,7 +53,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.lifecycle.Startables;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
@@ -73,6 +70,12 @@ import org.testcontainers.lifecycle.Startables;
 @DirtiesContext
 @Testcontainers
 public class MessageEventsIT {
+
+    @Container
+    private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:10");
+
+    @Container
+    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
 
     private static final String BOUNDARY_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1 = "BoundarySubprocessThrowCatchMessageIT_Process1";
 
@@ -100,14 +103,8 @@ public class MessageEventsIT {
 
     }
 
-    @Container
-    private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:10");
-
-    @Container
-    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
-
     @BeforeAll
-    static void beforeAll() {
+    public static void beforeAll() {
         System.setProperty("spring.datasource.url", postgresContainer.getJdbcUrl());
         System.setProperty("spring.datasource.username", postgresContainer.getUsername());
         System.setProperty("spring.datasource.password", postgresContainer.getPassword());

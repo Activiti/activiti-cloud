@@ -37,17 +37,6 @@ public class MongodbApplicationInitializer implements ApplicationContextInitiali
 
     }
 
-
-    private void checkMongoNodeExitCodeAfterWaiting(final Container.ExecResult execResultWaitForMaster) {
-        if (execResultWaitForMaster.getExitCode() != CONTAINER_EXIT_CODE_OK) {
-            final String errorMessage = String.format(
-                "A single node replica set was not initialized in a set timeout: %d attempts",
-                AWAIT_INIT_REPLICA_SET_ATTEMPTS
-            );
-            throw new RuntimeException(errorMessage);
-        }
-    }
-
     private void initReplicaSet() throws IOException, InterruptedException {
         final ExecResult execResultInitRs = container.execInContainer(
             buildMongoEvalCommand("rs.initiate();")
@@ -60,6 +49,19 @@ public class MongodbApplicationInitializer implements ApplicationContextInitiali
 
         checkMongoNodeExitCodeAfterWaiting(execResultWaitForMaster);
     }
+
+
+
+    private void checkMongoNodeExitCodeAfterWaiting(final Container.ExecResult execResultWaitForMaster) {
+        if (execResultWaitForMaster.getExitCode() != CONTAINER_EXIT_CODE_OK) {
+            final String errorMessage = String.format(
+                "A single node replica set was not initialized in a set timeout: %d attempts",
+                AWAIT_INIT_REPLICA_SET_ATTEMPTS
+            );
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
 
     private void checkMongoNodeExitCode(final Container.ExecResult execResult) {
         if (execResult.getExitCode() != CONTAINER_EXIT_CODE_OK) {

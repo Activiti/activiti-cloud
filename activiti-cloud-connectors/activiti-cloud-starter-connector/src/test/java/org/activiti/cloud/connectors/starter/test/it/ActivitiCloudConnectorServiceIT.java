@@ -52,7 +52,7 @@ public class ActivitiCloudConnectorServiceIT {
     private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
 
     @BeforeAll
-    static void beforeAll() {
+    public static void beforeAll() {
 
         System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
         System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
