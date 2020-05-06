@@ -9,8 +9,7 @@ import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-public class MongodbApplicationInitializer implements
-    ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class MongodbApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final int CONTAINER_EXIT_CODE_OK = 0;
     private static final int AWAIT_INIT_REPLICA_SET_ATTEMPTS = 60;
@@ -23,19 +22,13 @@ public class MongodbApplicationInitializer implements
     @Override
     public void initialize(ConfigurableApplicationContext context) {
 
-        if (container.isRunning()) {
-            return;
-        }
-
         container.start();
 
         try {
             initReplicaSet();
 
-            String mongoUrl = "mongodb://" + container.getContainerIpAddress() + ":"
-                + container.getFirstMappedPort() + "/test";
             TestPropertyValues.of(
-                "spring.data.mongodb.uri=" + mongoUrl
+                "spring.data.mongodb.uri=mongodb://" + container.getContainerIpAddress() + ":" + container.getFirstMappedPort() + "/test"
             ).applyTo(context.getEnvironment());
 
         } catch (Exception e) {
@@ -51,7 +44,7 @@ public class MongodbApplicationInitializer implements
                 "A single node replica set was not initialized in a set timeout: %d attempts",
                 AWAIT_INIT_REPLICA_SET_ATTEMPTS
             );
-            throw new ReplicaSetInitializationException(errorMessage);
+            throw new RuntimeException(errorMessage);
         }
     }
 
@@ -70,9 +63,8 @@ public class MongodbApplicationInitializer implements
 
     private void checkMongoNodeExitCode(final Container.ExecResult execResult) {
         if (execResult.getExitCode() != CONTAINER_EXIT_CODE_OK) {
-            final String errorMessage = String
-                .format("An error occurred: %s", execResult.getStdout());
-            throw new ReplicaSetInitializationException(errorMessage);
+            final String errorMessage = String.format("An error occurred: %s", execResult.getStdout());
+            throw new RuntimeException(errorMessage);
         }
     }
 
@@ -95,10 +87,4 @@ public class MongodbApplicationInitializer implements
         return new String[]{"mongo", "--eval", command};
     }
 
-    public static class ReplicaSetInitializationException extends RuntimeException {
-
-        ReplicaSetInitializationException(final String errorMessage) {
-            super(errorMessage);
-        }
-    }
 }

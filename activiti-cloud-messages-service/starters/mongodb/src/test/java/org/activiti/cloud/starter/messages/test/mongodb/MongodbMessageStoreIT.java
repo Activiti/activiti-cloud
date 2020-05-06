@@ -25,8 +25,7 @@ import org.springframework.integration.mongodb.store.ConfigurableMongoDbMessageS
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-@ContextConfiguration(initializers = {MongodbApplicationInitializer.class})
-
+@ContextConfiguration(initializers = MongodbApplicationInitializer.class)
 public class MongodbMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
     @SpringBootApplication
@@ -35,8 +34,7 @@ public class MongodbMessageStoreIT extends AbstractMessagesCoreIntegrationTests 
     }
 
     @Test
-    public void testMessageStore() throws Exception {
-        assertThat(this.aggregatingMessageHandler.getMessageStore())
-            .isInstanceOf(ConfigurableMongoDbMessageStore.class);
+    public void testMessageStore() {
+        assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(ConfigurableMongoDbMessageStore.class);
     }
 }

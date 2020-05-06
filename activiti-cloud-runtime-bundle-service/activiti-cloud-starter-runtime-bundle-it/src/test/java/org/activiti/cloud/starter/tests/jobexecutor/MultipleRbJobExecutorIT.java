@@ -1,17 +1,8 @@
 package org.activiti.cloud.starter.tests.jobexecutor;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import java.util.stream.Stream;
 import org.activiti.cloud.services.job.executor.JobMessageHandler;
 import org.activiti.cloud.services.job.executor.JobMessageHandlerFactory;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
@@ -31,19 +22,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.lifecycle.Startables;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
+@Testcontainers
 public class MultipleRbJobExecutorIT {
 
     private static final Logger logger = LoggerFactory.getLogger(MultipleRbJobExecutorIT.class);
@@ -54,11 +50,13 @@ public class MultipleRbJobExecutorIT {
     private static ConfigurableApplicationContext rbCtx1;
     private static ConfigurableApplicationContext rbCtx2;
 
+    @Container
     private static GenericContainer keycloakContainer = new GenericContainer(
         "activiti/activiti-keycloak")
         .withExposedPorts(8180)
         .waitingFor(Wait.defaultWaitStrategy());
 
+    @Container
     private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer(
         "rabbitmq:management");
 
@@ -91,9 +89,9 @@ public class MultipleRbJobExecutorIT {
 
     @BeforeAll
     public static void setUp() {
-        if (!keycloakContainer.isRunning() && !rabbitMQContainer.isRunning()) {
-            Startables.deepStart(Stream.of(keycloakContainer, rabbitMQContainer)).join();
-        }
+//        if (!keycloakContainer.isRunning() && !rabbitMQContainer.isRunning()) {
+//            Startables.deepStart(Stream.of(keycloakContainer, rabbitMQContainer)).join();
+//        }
         System.setProperty("keycloak.auth-server-url", "http://" + keycloakContainer.getContainerIpAddress() + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
 
         System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
@@ -108,7 +106,6 @@ public class MultipleRbJobExecutorIT {
 
         rbCtx2 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082")
             .run();
-
 
     }
 

@@ -48,6 +48,7 @@ import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionC
 import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.activiti.engine.RuntimeService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,8 @@ import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.lifecycle.Startables;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -68,6 +71,7 @@ import org.testcontainers.lifecycle.Startables;
         "spring.jmx.enabled=false",
     })
 @DirtiesContext
+@Testcontainers
 public class MessageEventsIT {
 
     private static final String BOUNDARY_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1 = "BoundarySubprocessThrowCatchMessageIT_Process1";
@@ -96,20 +100,19 @@ public class MessageEventsIT {
 
     }
 
-    static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:10");
+    @Container
+    private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:10");
 
-    static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
+    @Container
+    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
 
-    static {
-
-        Startables.deepStart(Stream.of(postgresContainer, rabbitMQContainer)).join();
-
+    @BeforeAll
+    static void beforeAll() {
         System.setProperty("spring.datasource.url", postgresContainer.getJdbcUrl());
         System.setProperty("spring.datasource.username", postgresContainer.getUsername());
         System.setProperty("spring.datasource.password", postgresContainer.getPassword());
         System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
         System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
-
     }
 
     @Autowired
