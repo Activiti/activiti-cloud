@@ -38,6 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.activiti.api.process.model.builders.MessageEventPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.MessageDefinitionEvent.MessageDefinitionEvents;
@@ -50,6 +51,8 @@ import org.activiti.cloud.services.messages.core.correlation.Correlations;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -92,7 +95,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 })
 public abstract class AbstractMessagesCoreIntegrationTests {
 
-    protected ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMessagesCoreIntegrationTests.class);
+
+    protected ObjectMapper objectMapper = new ObjectMapper()
+                                                  .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Autowired
     protected MessageConnectorProcessor channels;
@@ -915,7 +921,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             try {
                 return objectMapper.readValue((String) payload, MessageEventPayload.class);
             } catch (JsonProcessingException e) {
-                //TODO: LOG
+                LOGGER.warn("The payload {} cannot be converted to MessageEventPayload, so it is returned as is: {}", payload, e);
                 return payload;
             }
         }
