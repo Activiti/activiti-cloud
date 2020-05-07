@@ -24,6 +24,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstanceMeta;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -53,6 +54,7 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -68,6 +70,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -169,8 +172,8 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void createProcess() throws Exception {
-        StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
-        when(processRuntime.create(any(StartProcessPayload.class))).thenReturn(defaultProcessInstance());
+        CreateProcessInstancePayload cmd = ProcessPayloadBuilder.create().withProcessDefinitionId("1").build();
+        when(processRuntime.create(any(CreateProcessInstancePayload.class))).thenReturn(defaultProcessInstance());
 
         mockMvc.perform(post("/v1/process-instances/create")
             .contentType(APPLICATION_JSON)
@@ -180,9 +183,12 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void startCreatedProcess() throws Exception {
-        when(processRuntime.startCreatedProcess("1")).thenReturn(defaultProcessInstance());
+        StartProcessPayload payload = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
+        when(processRuntime.startCreatedProcess(eq("1"), any(StartProcessPayload.class))).thenReturn(defaultProcessInstance());
 
-        mockMvc.perform(post("/v1/process-instances/{processInstanceId}/start", 1))
+        mockMvc.perform(post("/v1/process-instances/{processInstanceId}/start", 1)
+            .contentType(APPLICATION_JSON)
+            .content(mapper.writeValueAsString(payload)))
             .andExpect(status().isOk());
     }
 

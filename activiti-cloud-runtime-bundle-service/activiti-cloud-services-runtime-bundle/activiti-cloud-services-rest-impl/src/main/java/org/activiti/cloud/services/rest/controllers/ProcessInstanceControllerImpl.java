@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -97,15 +98,18 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public Resource<CloudProcessInstance> startCreatedProcess(String processInstanceId) {
-        return resourceAssembler.toResource(processRuntime.startCreatedProcess(processInstanceId));
+    public Resource<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId,
+                                                              @RequestBody(required = false) StartProcessPayload startProcessPayload) {
+        if (startProcessPayload == null) {
+            startProcessPayload = ProcessPayloadBuilder.start().build();
+        }
+        startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+        return resourceAssembler.toResource(processRuntime.startCreatedProcess(processInstanceId, startProcessPayload));
     }
 
     @Override
-    public Resource<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload startProcessPayload) {
-        startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
-
-        return resourceAssembler.toResource(processRuntime.create(startProcessPayload));
+    public Resource<CloudProcessInstance> createProcessInstance(@RequestBody CreateProcessInstancePayload createProcessInstancePayload) {
+        return resourceAssembler.toResource(processRuntime.create(createProcessInstancePayload));
     }
 
     @Override
