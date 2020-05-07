@@ -47,6 +47,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -62,6 +63,7 @@ import java.util.UUID;
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
+@WithMockUser
 public class ProcessInstanceEntityVariableEntityControllerIT {
 
     @Autowired
@@ -84,15 +86,6 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
 
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
-
-    @BeforeEach
-    public void setUp() {
-        assertThat(securityManager).isNotNull();
-        assertThat(securityPoliciesManager).isNotNull();
-        assertThat(processDefinitionRepository).isNotNull();
-        assertThat(securityPoliciesProperties).isNotNull();
-        assertThat(taskLookupRestrictionService).isNotNull();
-    }
 
     @Test
     public void getVariablesShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {

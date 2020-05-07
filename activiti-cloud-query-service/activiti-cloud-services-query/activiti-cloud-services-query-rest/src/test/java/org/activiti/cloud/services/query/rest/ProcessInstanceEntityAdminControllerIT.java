@@ -16,13 +16,6 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -35,7 +28,6 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,11 +40,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessInstanceAdminController.class)
 @Import({
@@ -62,6 +60,7 @@ import java.util.UUID;
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
+@WithMockUser
 public class ProcessInstanceEntityAdminControllerIT {
 
     @Autowired
@@ -87,16 +86,6 @@ public class ProcessInstanceEntityAdminControllerIT {
 
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
-
-    @BeforeEach
-    public void setUp() {
-        when(securityManager.getAuthenticatedUserId()).thenReturn("user");
-        assertThat(entityFinder).isNotNull();
-        assertThat(securityPoliciesManager).isNotNull();
-        assertThat(processDefinitionRepository).isNotNull();
-        assertThat(securityPoliciesProperties).isNotNull();
-        assertThat(taskLookupRestrictionService).isNotNull();
-    }
 
     @Test
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {

@@ -1,11 +1,10 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,7 +22,6 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,6 +30,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -44,6 +43,7 @@ import org.springframework.test.web.servlet.MockMvc;
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
+@WithMockUser("admin")
 public class TaskEntityDeleteControllerIT {
 
     private static final String TASK_ADMIN_ALFRESCO_IDENTIFIER = "task-admin-alfresco";
@@ -72,16 +72,6 @@ public class TaskEntityDeleteControllerIT {
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @BeforeEach
-    public void setUp() {
-        when(securityManager.getAuthenticatedUserId()).thenReturn("admin");
-        assertThat(entityFinder).isNotNull();
-        assertThat(securityPoliciesManager).isNotNull();
-        assertThat(processDefinitionRepository).isNotNull();
-        assertThat(securityPoliciesProperties).isNotNull();
-        assertThat(taskLookupRestrictionService).isNotNull();
-    }
-
     @Test
     public void deleteTasksShouldReturnAllTasksAndDeleteThem() throws Exception{
 
@@ -92,6 +82,7 @@ public class TaskEntityDeleteControllerIT {
 
         //when
         mockMvc.perform(delete("/admin/v1/tasks")
+                .with(csrf())
                 .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk());
