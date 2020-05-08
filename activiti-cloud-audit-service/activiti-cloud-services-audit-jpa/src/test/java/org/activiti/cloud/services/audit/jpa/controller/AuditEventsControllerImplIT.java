@@ -118,8 +118,8 @@ public class AuditEventsControllerImplIT {
         given(eventsRepository.findAll(any(),
                                        any(PageRequest.class))).willReturn(eventsPage);
 
-        mockMvc.perform(get("{version}/events",
-                            "/v1")
+        mockMvc.perform(get("/{version}/events",
+                            "v1")
                                 .param("page",
                                        "1")
                                 .param("size",
@@ -176,8 +176,8 @@ public class AuditEventsControllerImplIT {
                                            pageRequest,
                                            12));
 
-        MvcResult result = mockMvc.perform(get("{version}/events?skipCount=11&maxItems=10",
-                                               "/v1")
+        MvcResult result = mockMvc.perform(get("/{version}/events?skipCount=11&maxItems=10",
+                                               "v1")
                                                    .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -201,8 +201,8 @@ public class AuditEventsControllerImplIT {
         given(eventsRepository.findAll(any(),
                                        any(PageRequest.class))).willReturn(eventsPage);
 
-        mockMvc.perform(head("{version}/events",
-                             "/v1"))
+        mockMvc.perform(head("/{version}/events",
+                             "v1"))
                 .andExpect(status().isOk());
     }
 
@@ -221,8 +221,8 @@ public class AuditEventsControllerImplIT {
                                            pageRequest,
                                            12));
 
-        mockMvc.perform(head("{version}/events?skipCount=11&maxItems=10",
-                             "/v1")
+        mockMvc.perform(head("/{version}/events?skipCount=11&maxItems=10",
+                             "v1")
                                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -234,8 +234,8 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("{version}/events/{id}",
-                            "/v1",
+        mockMvc.perform(get("/{version}/events/{id}",
+                            "v1",
                             eventEntity.getId()))
                 .andExpect(status().isOk());
     }
@@ -247,8 +247,8 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("{version}/events/{id}",
-                            "/v1",
+        mockMvc.perform(get("/{version}/events/{id}",
+                            "v1",
                             eventEntity.getId()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -264,8 +264,8 @@ public class AuditEventsControllerImplIT {
         event.setEventId("eventId");
         event.setTimestamp(System.currentTimeMillis());
 
-        mockMvc.perform(head("{version}/events/{id}",
-                             "/v1",
+        mockMvc.perform(head("/{version}/events/{id}",
+                             "v1",
                              eventEntity.getId()))
                 .andExpect(status().isOk());
     }
@@ -290,8 +290,8 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("{version}/events/{id}",
-                            "/v1",
+        mockMvc.perform(get("/{version}/events/{id}",
+                            "v1",
                             eventEntity.getId()))
                 .andExpect(status().isOk());
     }
@@ -321,8 +321,8 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("{version}/events/{id}",
-                            "/v1",
+        mockMvc.perform(get("/{version}/events/{id}",
+                            "v1",
                             eventEntity.getId()))
                 .andExpect(status().isOk());
     }
@@ -334,8 +334,8 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("{version}/events/{id}",
-                            "/v1",
+        mockMvc.perform(get("/{version}/events/{id}",
+                            "v1",
                             eventEntity.getId()))
                 .andExpect(status().isOk());
     }
@@ -347,8 +347,8 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("{version}/events/{id}",
-                            "/v1",
+        mockMvc.perform(get("/{version}/events/{id}",
+                            "v1",
                             eventEntity.getId()))
                 .andExpect(status().isOk());
     }
@@ -360,8 +360,8 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("{version}/events/{id}",
-                            "/v1",
+        mockMvc.perform(get("/{version}/events/{id}",
+                            "v1",
                             eventEntity.getId()))
                 .andExpect(status().isOk());
     }
