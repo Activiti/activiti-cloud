@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
@@ -80,9 +81,8 @@ public class ProcessInstanceRestTemplate {
                                                               Map<String, Object> variables,
                                                               String businessKey) {
 
-        StartProcessPayload startProcess = ProcessPayloadBuilder.start()
+        CreateProcessInstancePayload startProcess = ProcessPayloadBuilder.create()
             .withProcessDefinitionId(processDefinitionId)
-            .withVariables(variables)
             .withProcessDefinitionKey(processDefinitionKey)
             .withBusinessKey(businessKey)
             .build();
@@ -129,7 +129,7 @@ public class ProcessInstanceRestTemplate {
         return startProcess(PROCESS_INSTANCES_RELATIVE_URL,startProcess);
     }
 
-    public ResponseEntity<CloudProcessInstance> createProcess(StartProcessPayload startPayload) {
+    public ResponseEntity<CloudProcessInstance> createProcess(CreateProcessInstancePayload startPayload) {
         return createProcess(PROCESS_INSTANCES_RELATIVE_URL + "create", startPayload);
     }
 
@@ -161,7 +161,7 @@ public class ProcessInstanceRestTemplate {
             });
     }
 
-    private ResponseEntity<CloudProcessInstance> createProcessWithoutCheck(String baseURL, StartProcessPayload payload) {
+    private ResponseEntity<CloudProcessInstance> createProcessWithoutCheck(String baseURL, CreateProcessInstancePayload payload) {
         return  testRestTemplate.exchange(baseURL,
             HttpMethod.POST,
             new HttpEntity<>(payload),
@@ -194,7 +194,7 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    private ResponseEntity<CloudProcessInstance> createProcess(String baseURL, StartProcessPayload startProcess) {
+    private ResponseEntity<CloudProcessInstance> createProcess(String baseURL, CreateProcessInstancePayload startProcess) {
         ResponseEntity<CloudProcessInstance> responseEntity = createProcessWithoutCheck(baseURL, startProcess);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);

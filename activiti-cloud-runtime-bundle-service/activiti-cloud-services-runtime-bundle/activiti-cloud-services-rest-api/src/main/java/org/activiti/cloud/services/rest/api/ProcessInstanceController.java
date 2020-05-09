@@ -1,5 +1,6 @@
 package org.activiti.cloud.services.rest.api;
 
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -27,11 +28,12 @@ public interface ProcessInstanceController {
     @RequestMapping(method = RequestMethod.POST)
     EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload cmd);
 
-    @RequestMapping(value = "/{processInstanceId}/start",method = RequestMethod.POST)
-    EntityModel<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId);
+    @RequestMapping(value = "/{processInstanceId}/start", method = RequestMethod.POST)
+    EntityModel<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId,
+                                                          @RequestBody(required = false) StartProcessPayload payload);
 
-    @RequestMapping(value = "/create",method = RequestMethod.POST)
-    EntityModel<CloudProcessInstance> createProcessInstance(@RequestBody StartProcessPayload cmd);
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    EntityModel<CloudProcessInstance> createProcessInstance(@RequestBody CreateProcessInstancePayload cmd);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId);
