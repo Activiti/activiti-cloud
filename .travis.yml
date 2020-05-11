@@ -52,12 +52,12 @@ jobs:
     - name: activiti-cloud-services
       stage: activiti-cloud-services
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml
-      - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml
-      - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml
-      - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml
-      - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling-service/pom.xml
-      - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
-      - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
+        - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml
+        - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml
+        - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml
+        - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling-service/pom.xml
+        - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
+        - script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
 
 # Send coverage data
 after_success:
