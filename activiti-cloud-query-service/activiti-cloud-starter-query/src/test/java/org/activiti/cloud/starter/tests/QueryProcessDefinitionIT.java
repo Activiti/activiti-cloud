@@ -37,6 +37,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 import java.io.File;
@@ -50,6 +51,7 @@ import org.springframework.util.StreamUtils;
 @Import({
     ProcessDefinitionRestTemplate.class
 })
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class QueryProcessDefinitionIT {
 
     @Autowired

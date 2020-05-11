@@ -95,12 +95,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @TestPropertySource("classpath:application.properties")
 @Import(EventsRestTemplate.class)
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class AuditServiceIT {
 
     @Autowired

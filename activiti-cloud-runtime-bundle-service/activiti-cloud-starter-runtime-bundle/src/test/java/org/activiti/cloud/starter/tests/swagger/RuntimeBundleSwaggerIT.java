@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.spring.ProcessDeployedEventProducer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +32,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class RuntimeBundleSwaggerIT {
 
     @Autowired
@@ -52,10 +55,13 @@ public class RuntimeBundleSwaggerIT {
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.definitions").isNotEmpty())
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContent"))))
-            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
+            .andExpect(
+                jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
-            .andExpect(jsonPath("$.definitions[\"SaveTaskPayload\"].properties").value(hasKey("payloadType")))
-            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Starter :: Runtime Bundle ReST API"));
+            .andExpect(jsonPath("$.definitions[\"SaveTaskPayload\"].properties")
+                .value(hasKey("payloadType")))
+            .andExpect(jsonPath("$.info.title")
+                .value("Activiti Cloud Starter :: Runtime Bundle ReST API"));
     }
 
 }

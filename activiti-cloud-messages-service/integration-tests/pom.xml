@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud</groupId>
@@ -40,72 +41,20 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>rabbitmq</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
-  <profiles>
-    <profile>
-      <id>integration-test</id>
-      <activation>
-        <property>
-          <name>!skipITs</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>io.fabric8</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <configuration>
-              <startParallel>true</startParallel>
-              <images>
-                <image>
-                  <name>bitnami/postgresql:10.7.0</name>
-                  <alias>postgres</alias>
-                  <run>
-                    <env>
-                      <ALLOW_EMPTY_PASSWORD>yes</ALLOW_EMPTY_PASSWORD>
-                    </env>
-                    <ports>
-                      <port>5432:5432</port>
-                    </ports>
-                    <wait>
-                      <log>.*database system is ready to accept connections</log>
-                      <time>45000</time>
-                      <shutdown>5000</shutdown>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-                <image>
-                  <name>rabbitmq:management</name>
-                  <alias>rabbitmq</alias>
-                  <run>
-                    <ports>
-                      <port>5672:5672</port>
-                      <port>15672:15672</port>
-                    </ports>
-                    <wait>
-                      <log>Server startup complete</log>
-                      <time>40000</time>
-                      <shutdown>3000</shutdown>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-               </images>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>start</goal>
-                  <goal>stop</goal>
-                  <goal>remove</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
