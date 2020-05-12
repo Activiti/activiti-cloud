@@ -39,7 +39,7 @@ jobs:
   include:
     - name: activiti-cloud-build
       stage: activiti-cloud-build
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-build/pom.xml
+      script: travis_wait 120 ${MAVEN_CMD} -N && ${MAVEN_CMD} -f activiti-cloud-build/pom.xml
 
     - name: activiti-cloud-api
       stage: activiti-cloud-api
