@@ -33,6 +33,7 @@ stages:
   - name: activiti-cloud-service-common
   - name: activiti-cloud-acceptance-tests
   - name: activiti-cloud-services
+  - name: activiti-cloud-messages-service
 
 jobs:
   include:
@@ -59,8 +60,6 @@ jobs:
     - stage: activiti-cloud-services
       name: activiti-cloud-runtime-bundle-service
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml
-    - name: activiti-cloud-messages-service
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml
     - name: activiti-cloud-query-service
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml
     - name: activiti-cloud-audit-service
@@ -71,6 +70,10 @@ jobs:
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
     - name: activiti-cloud-connectors
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
+
+    - name: activiti-cloud-messages-service
+      stage: activiti-cloud-messages-service
+      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml
 
 # Send coverage data
 after_success:
