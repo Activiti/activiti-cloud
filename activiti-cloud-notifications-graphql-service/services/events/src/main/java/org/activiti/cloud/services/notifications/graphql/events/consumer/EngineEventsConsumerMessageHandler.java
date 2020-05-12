@@ -44,25 +44,25 @@ public class EngineEventsConsumerMessageHandler {
         this.transformer = transformer;
     }
 
-    @StreamListener
-    public void receive(@Input(EngineEventsConsumerChannels.SOURCE)
-                            Flux<Message<List<Map<String,Object>>>> input) {
+    @StreamListener(EngineEventsConsumerChannels.SOURCE)
+    public void receive(Message<List<Map<String, Object>>> input) {
 
         // Let's process and transform message from input stream
-        input.flatMapSequential(message -> {
-            List<Map<String, Object>> events = message.getPayload();
-            String routingKey = (String) message.getHeaders().get("routingKey");
+        Flux.just(input)
+                .flatMapSequential(message -> {
+                    List<Map<String, Object>> events = message.getPayload();
+                    String routingKey = (String) message.getHeaders().get("routingKey");
 
-            logger.info("Recieved source message with routingKey: {}", routingKey);
+                    logger.info("Recieved source message with routingKey: {}", routingKey);
 
-            return Flux.fromIterable(transformer.transform(events))
-                       .collectList()
-                       .map(list -> MessageBuilder.<List<EngineEvent>> createMessage(list,
-                                                                                     message.getHeaders()));
-        })
-        .doOnNext(processorSink::next)
-        .doOnError(error -> logger.error("Error handling message ", error))
-        .retry()
-        .subscribe();
+                    return Flux.fromIterable(transformer.transform(events))
+                                   .collectList()
+                                   .map(list -> MessageBuilder.<List<EngineEvent>>createMessage(list,
+                                                                                                message.getHeaders()));
+                })
+                .doOnNext(processorSink::next)
+                .doOnError(error -> logger.error("Error handling message ", error))
+                .retry()
+                .subscribe();
     }
 }

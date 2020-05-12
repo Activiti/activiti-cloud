@@ -18,13 +18,11 @@ package org.activiti.cloud.services.notifications.qraphql.ws.security;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
+import org.springframework.context.annotation.*;
 
 @Configuration
 @ConditionalOnProperty(name="spring.activiti.cloud.services.notification.graphql.ws.security.enabled", matchIfMissing = true)
+@Import(WebSocketMessageBrokerSecurityConfigurer.class)
 public class WebSocketMessageBrokerSecurityAutoConfiguration {
 
     @Configuration
@@ -34,12 +32,6 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
     })
     public static class DefaultWebSocketMessageBrokerSecurityConfiguration {
 
-        @Bean
-        @ConditionalOnMissingBean
-        public WebSocketMessageBrokerSecurityConfigurer graphQLSecurityWebSocketMessageBrokerConfiguration() {
-            return new WebSocketMessageBrokerSecurityConfigurer();
-        }
-        
         @Bean
         @ConditionalOnMissingBean
         public JWSAuthenticationInterceptorConfigurer jwsTokenChannelSecurityContextConfigurer(JWSAuthenticationManager keycloakWebSocketAuthManager) {
