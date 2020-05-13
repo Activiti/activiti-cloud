@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.1.480</version>
+    <version>7.1.481</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud</groupId>
@@ -17,7 +17,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud.version>7.1.480</activiti-cloud.version>
+    <activiti-cloud.version>7.1.481</activiti-cloud.version>
   </properties>
   <repositories>
     <repository>
