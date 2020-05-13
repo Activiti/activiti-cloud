@@ -728,7 +728,7 @@ public class ActivitiGraphQLStarterIT {
 
         // start subscription
         client.handle((i, o) -> {
-            o.sendString(Mono.just(startMessage))git
+            o.sendString(Mono.just(startMessage))
                     .then()
                     .log("start")
                     .subscribe();
@@ -970,8 +970,7 @@ public class ActivitiGraphQLStarterIT {
                 .websocket(GRAPHQL_WS)
                 .uri(WS_GRAPHQL_URI)
                 .handle((i, o) -> {
-                    o.options(NettyPipeline.SendOptions::flushOnEach)
-                            .sendString(Mono.just(initMessage))
+                    o.sendString(Mono.just(initMessage))
                             .then()
                             .log("client-send")
                             .subscribe();
