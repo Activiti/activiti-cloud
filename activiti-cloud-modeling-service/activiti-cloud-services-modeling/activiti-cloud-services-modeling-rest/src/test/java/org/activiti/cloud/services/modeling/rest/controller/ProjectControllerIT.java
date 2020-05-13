@@ -814,7 +814,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy.zip"));
 
-        String overridingName = "overridingName";
+        String overridingName = "override";
 
         mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
