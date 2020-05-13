@@ -34,6 +34,7 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.cloud.starter.tests.util.VariablesUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class)
+@ContextConfiguration(classes = RuntimeITConfiguration.class,initializers = ContainersApplicationInitializer.class)
 public class TaskVariableMappingIT {
 
     @Autowired

@@ -16,18 +16,15 @@
 
 package org.activiti.cloud.connectors.starter.test.it;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.junit.ClassRule;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +35,30 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
+@Testcontainers
 public class ActivitiCloudConnectorServiceIT {
+
+
+    @Container
+    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
+
+    @BeforeAll
+    public static void beforeAll() {
+
+        System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
+        System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
+
+    }
+
 
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
 
@@ -69,10 +85,8 @@ public class ActivitiCloudConnectorServiceIT {
         //given
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("var1",
-                      "value1");
-        variables.put("var2",
-                      1L);
+        variables.put("var1", "value1");
+        variables.put("var2", 1L);
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setId(INTEGRATION_ID);
@@ -87,22 +101,19 @@ public class ActivitiCloudConnectorServiceIT {
         integrationRequest.setAppVersion("1");
 
         Message<IntegrationRequest> message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
-                .setHeader("type",
-                           "Mock")
-                .build();
+            .setHeader("type", "Mock")
+            .build();
         integrationEventsProducer.send(message);
 
         message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
-                .setHeader("type",
-                           "MockProcessRuntime")
-                .build();
+            .setHeader("type", "MockProcessRuntime")
+            .build();
         integrationEventsProducer.send(message);
 
-
         await("Should receive at least 2 integration results")
-                .untilAsserted(() ->
-                                       assertThat(streamHandler.getIntegrationResultEventsCounter().get()).isGreaterThanOrEqualTo(1)
-                );
+            .untilAsserted(() ->
+                assertThat(streamHandler.getIntegrationResultEventsCounter().get()).isGreaterThanOrEqualTo(1)
+            );
     }
 
     @Test
@@ -113,14 +124,13 @@ public class ActivitiCloudConnectorServiceIT {
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
         Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
-                                                            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
-                                                            .setHeader("type",
-                                                                       "RuntimeException")
-                                                            .build();
+            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+            .setHeader("type", "RuntimeException")
+            .build();
         integrationEventsProducer.send(message);
 
         await("Should produce RuntimeException integration error")
-                .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
@@ -138,14 +148,13 @@ public class ActivitiCloudConnectorServiceIT {
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
         Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
-                                                            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
-                                                            .setHeader("type",
-                                                                       "Error")
-                                                            .build();
+            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+            .setHeader("type", "Error")
+            .build();
         integrationEventsProducer.send(message);
 
         await("Should produce Error integration error")
-                .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 

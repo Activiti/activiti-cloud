@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.annotation.Validated;
 
-@ConfigurationProperties(prefix="spring.activiti.cloud.services.notifications.graphql.ws")
+@ConfigurationProperties(prefix = "spring.activiti.cloud.services.notifications.graphql.ws")
 @Validated
 public class GraphQLWebSocketMessageBrokerConfigurationProperties {
 
@@ -74,7 +74,7 @@ public class GraphQLWebSocketMessageBrokerConfigurationProperties {
 
     @Configuration
     @PropertySource("classpath:META-INF/graphql-ws.properties")
-    @PropertySource(value="classpath:graphql-ws.properties", ignoreResourceNotFound=true)
+    @PropertySource(value = "classpath:graphql-ws.properties", ignoreResourceNotFound = true)
     @EnableConfigurationProperties(GraphQLWebSocketMessageBrokerConfigurationProperties.class)
     public static class AutoConfiguration {
 

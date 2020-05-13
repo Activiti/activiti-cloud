@@ -22,10 +22,10 @@ import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegratio
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.integration.mongodb.store.ConfigurableMongoDbMessageStore;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {
-        "spring.data.mongodb.uri=mongodb://localhost:27017/test?maxPoolSize=100&minPoolSize=10"})
+@ContextConfiguration(initializers = MongodbApplicationInitializer.class)
 public class MongodbMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
     @SpringBootApplication
@@ -34,7 +34,7 @@ public class MongodbMessageStoreIT extends AbstractMessagesCoreIntegrationTests 
     }
 
     @Test
-    public void testMessageStore() throws Exception {
+    public void testMessageStore() {
         assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(ConfigurableMongoDbMessageStore.class);
     }
 }

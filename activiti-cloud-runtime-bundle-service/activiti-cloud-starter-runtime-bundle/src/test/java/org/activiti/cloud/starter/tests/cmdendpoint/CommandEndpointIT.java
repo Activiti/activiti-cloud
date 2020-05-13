@@ -45,6 +45,7 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Collection;
@@ -74,6 +76,7 @@ import java.util.Map;
 @Import({CommandEndPointITStreamHandler.class,
         ProcessInstanceRestTemplate.class,
         TaskRestTemplate.class})
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class CommandEndpointIT {
 
     @Autowired

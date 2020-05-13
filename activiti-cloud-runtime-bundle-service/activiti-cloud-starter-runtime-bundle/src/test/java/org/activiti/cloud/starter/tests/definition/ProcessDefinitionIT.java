@@ -26,6 +26,7 @@ import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
@@ -42,6 +43,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 import java.io.ByteArrayInputStream;
@@ -49,8 +51,10 @@ import java.io.InputStream;
 import java.util.Iterator;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
+@TestPropertySource({"classpath:application-test.properties",
+                     "classpath:access-control.properties"})
 @DirtiesContext
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class ProcessDefinitionIT {
 
     @Autowired
@@ -81,7 +85,8 @@ public class ProcessDefinitionIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
         //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+        ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(
+                PROCESS_DEFINITIONS_URL);
 
         //then
         assertThat(entity).isNotNull();
@@ -95,8 +100,10 @@ public class ProcessDefinitionIT {
     }
 
     private ProcessDefinition getProcessDefinition(String name) {
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
-        Iterator<CloudProcessDefinition> it = processDefinitionsEntity.getBody().getContent().iterator();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(
+                PROCESS_DEFINITIONS_URL);
+        Iterator<CloudProcessDefinition> it = processDefinitionsEntity.getBody().getContent()
+                                                      .iterator();
         ProcessDefinition aProcessDefinition;
         do {
             aProcessDefinition = it.next();
@@ -105,7 +112,8 @@ public class ProcessDefinitionIT {
         return aProcessDefinition;
     }
 
-    private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions(String url) {
+    private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions(
+            String url) {
         ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(url,
@@ -120,17 +128,19 @@ public class ProcessDefinitionIT {
         ParameterizedTypeReference<CloudProcessDefinition> responseType = new ParameterizedTypeReference<CloudProcessDefinition>() {
         };
 
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(
+                PROCESS_DEFINITIONS_URL);
         assertThat(processDefinitionsEntity).isNotNull();
         assertThat(processDefinitionsEntity.getBody()).isNotNull();
         assertThat(processDefinitionsEntity.getBody().getContent()).isNotEmpty();
         ProcessDefinition aProcessDefinition = processDefinitionsEntity.getBody().getContent().iterator().next();
 
         //when
-        ResponseEntity<CloudProcessDefinition> entity = restTemplate.exchange(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId(),
-                                                                         HttpMethod.GET,
-                                                                         null,
-                                                                         responseType);
+        ResponseEntity<CloudProcessDefinition> entity = restTemplate
+                                                                .exchange(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId(),
+                                                                          HttpMethod.GET,
+                                                                          null,
+                                                                          responseType);
 
         //then
         assertThat(entity).isNotNull();
@@ -206,9 +216,9 @@ public class ProcessDefinitionIT {
 
         //when
         JsonNode responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
-                                             HttpMethod.GET,
-                                             "application/json",
-                                             JsonNode.class);
+                                               HttpMethod.GET,
+                                               "application/json",
+                                               JsonNode.class);
 
         //then
         assertThat(responseData).isNotNull();
@@ -257,9 +267,9 @@ public class ProcessDefinitionIT {
     }
 
     private <T> T executeRequest(String url,
-                                  HttpMethod method,
-                                  String contentType,
-                                  Class<T> javaType) {
+                                 HttpMethod method,
+                                 String contentType,
+                                 Class<T> javaType) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", contentType);
         ResponseEntity<T> response = restTemplate.exchange(url,
@@ -283,7 +293,6 @@ public class ProcessDefinitionIT {
     public void shouldRetrieveDifferentListOfProcessDefinitionAccordingToUserPolicies() {
         //given
         //processes are automatically deployed from src/test/resources/processes
-
 
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
         //when
@@ -315,17 +324,18 @@ public class ProcessDefinitionIT {
         //given
         //processes are automatically deployed from src/test/resources/processes
 
-
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
         //testadmin should see restricted set at non-admin endpoint
         //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+        ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(
+                PROCESS_DEFINITIONS_URL);
 
-        assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).doesNotContain(
-                PROCESS_WITH_VARIABLES_2,
-                SIMPLE_PROCESS,
-                PROCESS_WITH_BOUNDARY_SIGNAL);
+        assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName)
+                .doesNotContain(
+                        PROCESS_WITH_VARIABLES_2,
+                        SIMPLE_PROCESS,
+                        PROCESS_WITH_BOUNDARY_SIGNAL);
 
         assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
                 PROCESS_WITH_VARIABLES,

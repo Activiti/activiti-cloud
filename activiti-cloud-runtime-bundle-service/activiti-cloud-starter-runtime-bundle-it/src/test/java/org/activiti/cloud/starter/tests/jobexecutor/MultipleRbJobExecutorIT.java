@@ -1,16 +1,8 @@
 package org.activiti.cloud.starter.tests.jobexecutor;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.activiti.cloud.services.job.executor.JobMessageHandler;
 import org.activiti.cloud.services.job.executor.JobMessageHandlerFactory;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
@@ -35,8 +27,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.MessageHandler;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
+@Testcontainers
 public class MultipleRbJobExecutorIT {
+
     private static final Logger logger = LoggerFactory.getLogger(MultipleRbJobExecutorIT.class);
 
     private static final String ASYNC_TASK = "asyncTask";
@@ -45,6 +50,16 @@ public class MultipleRbJobExecutorIT {
     private static ConfigurableApplicationContext rbCtx1;
     private static ConfigurableApplicationContext rbCtx2;
 
+    @Container
+    private static GenericContainer keycloakContainer = new GenericContainer(
+        "activiti/activiti-keycloak")
+        .withExposedPorts(8180)
+        .waitingFor(Wait.defaultWaitStrategy());
+
+    @Container
+    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer(
+        "rabbitmq:management");
+
     @Configuration
     @Profile("h2")
     static class H2Application {
@@ -52,13 +67,14 @@ public class MultipleRbJobExecutorIT {
         @Bean(initMethod = "start", destroyMethod = "stop")
         public Server inMemoryH2DatabaseaServer() throws SQLException {
             return Server.createTcpServer(
-              "-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
+                "-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
         }
     }
 
     @SpringBootApplication
     @ActivitiRuntimeBundle
     static class RbApplication {
+
         @Bean
         public JobMessageHandlerFactory jobMessageHandlerFactory() {
             return new JobMessageHandlerFactory() {
@@ -73,15 +89,24 @@ public class MultipleRbJobExecutorIT {
 
     @BeforeAll
     public static void setUp() {
+//        if (!keycloakContainer.isRunning() && !rabbitMQContainer.isRunning()) {
+//            Startables.deepStart(Stream.of(keycloakContainer, rabbitMQContainer)).join();
+//        }
+        System.setProperty("keycloak.auth-server-url", "http://" + keycloakContainer.getContainerIpAddress() + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
+
+        System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
+        System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
+
         h2Ctx = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
-                                                                 .profiles("h2")
-                                                                 .run();
+            .profiles("h2")
+            .run();
 
         rbCtx1 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081")
-                                                                  .run();
+            .run();
 
         rbCtx2 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082")
-                                                                  .run();
+            .run();
+
     }
 
     @AfterAll

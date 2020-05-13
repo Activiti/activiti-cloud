@@ -32,6 +32,7 @@ import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,7 +48,7 @@ import java.util.List;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = ServicesAuditITConfiguration.class)
+@ContextConfiguration(classes = ServicesAuditITConfiguration.class, initializers = ContainersApplicationInitializer.class)
 public class ParallelGatewayAuditProducerIT {
 
     private static final String PARALLEL_GATEWAY_PROCESS = "basicParallelGateway";

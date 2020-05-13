@@ -75,6 +75,7 @@ import reactor.test.StepVerifier;
 
 public class GraphQLBrokerMessageHandlerTest {
 
+
     private final static String destination = "/ws/graphql";
 
     private GraphQLBrokerMessageHandler messageHandler;
@@ -110,8 +111,7 @@ public class GraphQLBrokerMessageHandlerTest {
                                                               graphQLExecutor);
 
         this.messageHandler.setTaskScheduler(taskScheduler);
-        when(taskScheduler.scheduleWithFixedDelay(any(Runnable.class), anyLong())).thenReturn(
-                                                                                                              scheduledFuture);
+        when(taskScheduler.scheduleWithFixedDelay(any(Runnable.class), anyLong())).thenReturn(scheduledFuture);
 
         this.messageHandler.start();
 

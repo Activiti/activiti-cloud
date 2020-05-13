@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.starter.audit.tests.it;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
@@ -66,11 +64,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @TestPropertySource("classpath:application.properties")
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class APIEventToEntityConvertersIT {
 
     @Autowired
