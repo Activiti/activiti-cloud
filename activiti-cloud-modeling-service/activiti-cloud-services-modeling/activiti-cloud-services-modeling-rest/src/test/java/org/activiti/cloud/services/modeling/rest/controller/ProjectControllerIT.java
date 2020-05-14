@@ -877,7 +877,7 @@ public class ProjectControllerIT {
             "project/zip",
             resourceAsByteArray("project/e2e-ama-test-dmn-hit-policy-Sh9rw.zip"));
 
-        mockMvc.perform(multipart("{version}/projects/import",
+        mockMvc.perform(multipart("/{version}/projects/import",
             API_VERSION)
             .file(zipFile)
             .accept(APPLICATION_JSON_VALUE))
