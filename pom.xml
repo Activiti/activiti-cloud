@@ -2,6 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.activiti</groupId>
+    <artifactId>activiti-parent</artifactId>
+    <version>7.1.0-SNAPSHOT</version>
+  </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-mono-aggregator</artifactId>
   <packaging>pom</packaging>
@@ -9,8 +14,8 @@
   <version>7.1.0-SNAPSHOT</version>
   <description>Activiti Cloud Mono :: Aggregator</description>
   <url>http://activiti.org</url>
-
   <properties>
+    <activiti.version>${project.parent.version}</activiti.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.scm.repository>activiti-cloud</project.scm.repository>
@@ -21,7 +26,6 @@
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
   </properties>
-
   <modules>
     <module>activiti-cloud-build</module>
     <module>activiti-cloud-api</module>
