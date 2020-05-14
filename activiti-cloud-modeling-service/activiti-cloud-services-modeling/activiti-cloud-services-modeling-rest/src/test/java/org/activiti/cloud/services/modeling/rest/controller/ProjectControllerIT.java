@@ -15,6 +15,37 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.ModelValidationError;
+import org.activiti.cloud.modeling.api.ProcessModelType;
+import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.process.Extensions;
+import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
+import org.activiti.cloud.modeling.repository.ModelRepository;
+import org.activiti.cloud.modeling.repository.ProjectRepository;
+import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
+import org.activiti.cloud.services.modeling.entity.ProjectEntity;
+import org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig;
+import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.context.WebApplicationContext;
+
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
@@ -49,34 +80,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import java.util.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.modeling.api.ModelValidationError;
-import org.activiti.cloud.modeling.api.ProcessModelType;
-import org.activiti.cloud.modeling.api.Project;
-import org.activiti.cloud.modeling.api.process.Extensions;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
-import org.activiti.cloud.modeling.repository.ModelRepository;
-import org.activiti.cloud.modeling.repository.ProjectRepository;
-import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
-import org.activiti.cloud.services.modeling.entity.ProjectEntity;
-import org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig;
-import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.activiti.cloud.services.modeling.service.api.ModelService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
@@ -810,7 +813,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy.zip"));
 
-        String overridingName = "overridingName";
+        String overridingName = "override";
 
         mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
@@ -864,6 +867,21 @@ public class ProjectControllerIT {
                             API_VERSION,
                             project.getId()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void should_throwBadRequestException_when_importingProjectWithInvalidName() throws Exception {
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+            "e2e-ama-test-dmn-hit-policy-Sh9rw.zip",
+            "project/zip",
+            resourceAsByteArray("project/e2e-ama-test-dmn-hit-policy-Sh9rw.zip"));
+
+        mockMvc.perform(multipart("{version}/projects/import",
+            API_VERSION)
+            .file(zipFile)
+            .accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(status().reason(is("Validation errors found in project's models")));
     }
 
 }
