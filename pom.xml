@@ -2,11 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.activiti</groupId>
-    <artifactId>activiti-parent</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
-  </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-mono-aggregator</artifactId>
   <packaging>pom</packaging>
@@ -15,40 +10,14 @@
   <description>Activiti Cloud Mono :: Aggregator</description>
   <url>http://activiti.org</url>
   <inceptionYear>2017</inceptionYear>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <project.scm.repository>activiti-cloud</project.scm.repository>
-    <java.release>11</java.release>
-    <java.version>1.${java.release}</java.version>
-    <maven.compiler.release>${java.release}</maven.compiler.release>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
-    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-  </properties>
-  <modules>
-    <module>activiti-cloud-build</module>
-    <module>activiti-cloud-api</module>
-    <module>activiti-cloud-service-common</module>
-    <module>activiti-cloud-acceptance-tests</module>
-    <module>activiti-cloud-runtime-bundle-service</module>
-    <module>activiti-cloud-messages-service</module>
-    <module>activiti-cloud-query-service</module>
-    <module>activiti-cloud-audit-service</module>
-    <module>activiti-cloud-modeling-service</module>
-    <module>activiti-cloud-notifications-graphql-service</module>
-    <module>activiti-cloud-connectors</module>
-  </modules>
-  <repositories>
-    <repository>
-      <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
+  <organization>
+    <name>Alfresco Software, Ltd</name>
+    <url>https://www.alfresco.com</url>
+  </organization>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
-      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
   <developers>
@@ -179,27 +148,80 @@
       <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
   </developers>
+  <modules>
+    <module>activiti-cloud-build</module>
+    <module>activiti-cloud-api</module>
+    <module>activiti-cloud-service-common</module>
+    <module>activiti-cloud-acceptance-tests</module>
+    <module>activiti-cloud-runtime-bundle-service</module>
+    <module>activiti-cloud-messages-service</module>
+    <module>activiti-cloud-query-service</module>
+    <module>activiti-cloud-audit-service</module>
+    <module>activiti-cloud-modeling-service</module>
+    <module>activiti-cloud-notifications-graphql-service</module>
+    <module>activiti-cloud-connectors</module>
+  </modules>
   <scm>
     <url>http://github.com/Activiti/${project.scm.repository}</url>
     <connection>scm:git:git://github.com/Activiti/${project.scm.repository}.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/Activiti/${project.scm.repository}.git
-    </developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com/Activiti/${project.scm.repository}.git</developerConnection>
   </scm>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/${project.scm.organisation}/Activiti/issues</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Travis</system>
+    <url>https://travis-ci.com/${project.scm.organisation}/${project.scm.repository}</url>
+  </ciManagement>
+  <distributionManagement>
+    <site>
+      <id>${project.scm.repository}-site</id>
+      <url>https://${project.scm.organisation}.github.io/${project.scm.repository}</url>
+    </site>
+  </distributionManagement>
+  <properties>
+    <java.release>11</java.release>
+    <java.version>1.${java.release}</java.version>
+    <license-maven-plugin.version>3.0</license-maven-plugin.version>
+    <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+    <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+    <maven.compiler.release>${java.release}</maven.compiler.release>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <project.scm.repository>activiti-cloud</project.scm.repository>
+    <project.year>2020</project.year>
+  </properties>
+  <repositories>
+    <repository>
+      <id>activiti-releases</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+    </repository>
+  </repositories>
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M1</version>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>${license-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${maven-deploy-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
-
   <profiles>
     <!-- Profile to sign artifacts, triggered when releasing -->
     <profile>
