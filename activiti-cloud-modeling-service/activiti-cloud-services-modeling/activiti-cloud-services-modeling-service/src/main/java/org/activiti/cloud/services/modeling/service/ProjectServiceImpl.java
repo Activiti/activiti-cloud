@@ -400,7 +400,8 @@ public class ProjectServiceImpl implements ProjectService {
     public List<ModelValidationError> validateProjectName(Project project) {
         Optional<ProjectValidator> projectNameValidator = projectValidators.stream()
             .filter(projectValidator -> projectValidator instanceof ProjectNameValidator).findFirst();
-        return projectNameValidator.get().validate(project, null).collect(Collectors.toList());
+        return projectNameValidator.isPresent() ? projectNameValidator.get()
+            .validate(project, null).collect(Collectors.toList()) : Collections.emptyList();
     }
 
     @Override
