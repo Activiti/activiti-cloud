@@ -149,20 +149,20 @@
     </developer>
   </developers>
   <scm>
-    <url>http://github.com/Activiti/${project.scm.repository}</url>
-    <connection>scm:git:git://github.com/Activiti/${project.scm.repository}.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/Activiti/${project.scm.repository}.git
-    </developerConnection>
+    <url>http://github.com/${project.scm.organization}/${project.scm.repository}</url>
+    <connection>scm:git:git://github.com/${project.scm.organization}/${project.scm.repository}.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/${project.scm.organization}/${project.scm.repository}.git</developerConnection>
   </scm>
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/Activiti/Activiti/issues</url>
+    <url>https://github.com/${project.scm.organization}/Activiti/issues</url>
   </issueManagement>
   <ciManagement>
     <system>Travis</system>
-    <url>https://travis-ci.com/Activiti/${project.scm.repository}</url>
+    <url>https://travis-ci.com/${project.scm.organization}/${project.scm.repository}</url>
   </ciManagement>
   <properties>
+    <project.scm.organization>Activiti</project.scm.organization>
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
