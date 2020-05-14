@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.audit.jpa.converters;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +22,7 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.ErrorReceivedAuditEventEntity;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ErrorReceivedEventConverterTest {
 
@@ -37,16 +36,16 @@ public class ErrorReceivedEventConverterTest {
 
         assertThatIsEqualTo(auditEventEntity, event);
     }
-    
+
     @Test
     public void should_convertToAPIErrorReceivedEvent() {
         //given
         ErrorReceivedAuditEventEntity auditEventEntity = (ErrorReceivedAuditEventEntity) eventConverter.convertToEntity(createErrorReceivedEvent());
-        
+
         CloudBPMNErrorReceivedEventImpl event= (CloudBPMNErrorReceivedEventImpl) eventConverter.convertToAPI(auditEventEntity);
         assertThatIsEqualTo(auditEventEntity, event);
     }
-    
+
     private CloudBPMNErrorReceivedEventImpl createErrorReceivedEvent() {
         //given
         ProcessInstanceImpl processInstanceStarted = new ProcessInstanceImpl();
@@ -55,7 +54,7 @@ public class ErrorReceivedEventConverterTest {
         processInstanceStarted.setProcessDefinitionKey("processDefinitionKey");
         processInstanceStarted.setBusinessKey("businessKey");
         processInstanceStarted.setParentId("parentId");
-            
+
         BPMNErrorImpl error = new BPMNErrorImpl("entityId");
         error.setProcessDefinitionId(processInstanceStarted.getProcessDefinitionId());
         error.setProcessInstanceId(processInstanceStarted.getId());
@@ -67,7 +66,7 @@ public class ErrorReceivedEventConverterTest {
                                                                                     error,
                                                                                     error.getProcessDefinitionId(),
                                                                                     error.getProcessInstanceId());
-        
+
         //Set explicitly to be sure
         event.setEntityId("entityId");
         event.setProcessInstanceId(processInstanceStarted.getId());
@@ -77,10 +76,10 @@ public class ErrorReceivedEventConverterTest {
         event.setParentProcessInstanceId(processInstanceStarted.getParentId());
         event.setMessageId("message-id");
         event.setSequenceNumber(0);
-         
+
         return event;
     }
-    
+
     private void assertThatIsEqualTo(ErrorReceivedAuditEventEntity auditEventEntity, CloudBPMNErrorReceivedEvent event) {
         assertThat(event).isNotNull();
         assertThat(auditEventEntity).isNotNull();

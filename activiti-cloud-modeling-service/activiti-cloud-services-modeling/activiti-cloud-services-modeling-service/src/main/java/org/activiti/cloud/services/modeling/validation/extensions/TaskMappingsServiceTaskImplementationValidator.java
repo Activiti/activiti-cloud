@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.modeling.validation.extensions;
 
 import static java.lang.String.format;
@@ -63,7 +62,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
     }
 
     @Override
-    public Stream<ModelValidationError> validateTaskMappings(List<TaskMapping> taskMappings,
+    public Stream<ModelValidationError> validateTaskMappings(List<MappingModel> taskMappings,
                                                              Map<String, Constant> taskConstants,
                                                              ValidationContext validationContext) {
         Map<String, ConnectorModelFeature> availableConnectorActions = getAvailableConnectorActions(validationContext);
@@ -73,14 +72,14 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                                                             availableConnectorActions));
     }
 
-    private Stream<ModelValidationError> validateTaskMapping(TaskMapping taskMapping,
-                                                            Map<String, ConnectorModelFeature> availableConnectorActions) {
+    private Stream<ModelValidationError> validateTaskMapping(MappingModel taskMapping,
+                                                             Map<String, ConnectorModelFeature> availableConnectorActions) {
         return taskMapping
                 .getProcessVariableMappings()
                 .entrySet()
                 .stream()
                 .map(variableMappingEntry -> validateTaskMappings(taskMapping.getProcessId(),
-                                                                  taskMapping.getTask(),
+                                                                  taskMapping.getFlowNode(),
                                                                   taskMapping.getAction(),
                                                                   variableMappingEntry.getKey(),
                                                                   variableMappingEntry.getValue(),

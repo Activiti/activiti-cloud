@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.starter.tests.services.audit;
 
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
@@ -32,8 +31,8 @@ import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
@@ -41,16 +40,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ContextConfiguration(classes = ServicesAuditITConfiguration.class)
+@DirtiesContext
+@ContextConfiguration(classes = ServicesAuditITConfiguration.class, initializers = ContainersApplicationInitializer.class)
 public class ParallelGatewayAuditProducerIT {
 
     private static final String PARALLEL_GATEWAY_PROCESS = "basicParallelGateway";
@@ -78,7 +75,7 @@ public class ParallelGatewayAuditProducerIT {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-      
+
             assertThat(receivedEvents)
                     .extracting(CloudRuntimeEvent::getEventType,
                                 CloudRuntimeEvent::getProcessInstanceId,
@@ -153,11 +150,11 @@ public class ParallelGatewayAuditProducerIT {
                                     processInstanceId,
                                     processInstanceId)
                     );
-            
-            
+
+
             assertThat(receivedEvents)
             .filteredOn(event -> (event.getEventType().equals(ACTIVITY_STARTED) ||
-                                  event.getEventType().equals(ACTIVITY_COMPLETED)) && 
+                                  event.getEventType().equals(ACTIVITY_COMPLETED)) &&
                                  ((BPMNActivity) event.getEntity()).getActivityType().equals("parallelGateway"))
             .extracting(CloudRuntimeEvent::getEventType,
                         event -> ((BPMNActivity) event.getEntity()).getActivityType(),
@@ -168,14 +165,14 @@ public class ParallelGatewayAuditProducerIT {
                       tuple(ACTIVITY_COMPLETED,
                             "parallelGateway",
                             processInstanceId)
-                      
+
             );
-           
+
 
         });
-        
-        
-       
+
+
+
 
     }
 

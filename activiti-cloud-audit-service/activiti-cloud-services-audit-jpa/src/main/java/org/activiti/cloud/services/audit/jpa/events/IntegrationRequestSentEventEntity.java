@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,17 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.audit.jpa.events;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+
+import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 
 @Entity(name = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
 @DiscriminatorValue(value = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
 public class IntegrationRequestSentEventEntity extends IntegrationEventEntity {
 
     protected static final String INTEGRATION_REQUEST_SENT_EVENT = "IntegrationRequestSentEvent";
+
+    IntegrationRequestSentEventEntity() { }
+
+    public IntegrationRequestSentEventEntity(CloudIntegrationRequestedEvent event) {
+        super(event);
+    }
 
     @Override
     public int hashCode() {

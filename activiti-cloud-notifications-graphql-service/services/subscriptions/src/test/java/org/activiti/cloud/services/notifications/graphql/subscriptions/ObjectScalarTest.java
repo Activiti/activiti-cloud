@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017-2020 Alfresco Software, Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.cloud.services.notifications.graphql.subscriptions;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +37,7 @@ import graphql.language.StringValue;
 import graphql.language.Value;
 import graphql.language.VariableReference;
 import graphql.schema.Coercing;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ObjectScalarTest {
 
@@ -43,31 +58,31 @@ public class ObjectScalarTest {
         assertThat(coercing.parseLiteral(mkArrayValue(new ArrayList<Value>() {{ add(mkStringValue("s")); add(mkIntValue(BigInteger.valueOf(666))); }}), variables))
                             .asList()
                             .containsExactly("s",BigInteger.valueOf(666));
-         
+
     }
 
     @SuppressWarnings({"serial", "rawtypes"})
     @Test
     public void testASTObjectParsing() {
         Map<String, Value> input = new LinkedHashMap<String, Value>();
-        
+
         input.put("fld1", mkStringValue("s"));
         input.put("fld2", mkIntValue(BigInteger.valueOf(666)));
-        input.put("fld3", mkObjectValue(new LinkedHashMap<String, Value>() {{ 
+        input.put("fld3", mkObjectValue(new LinkedHashMap<String, Value>() {{
             put("childFld1", mkStringValue("child1"));
             put("childFl2", mkVarRef("varRef1"));
         }}));
 
 
         Map<String, Object> expected = new LinkedHashMap<String, Object>();
-        
+
         expected.put("fld1", "s");
         expected.put("fld2", BigInteger.valueOf(666));
-        expected.put("fld3", new LinkedHashMap<String, Object>() {{ 
+        expected.put("fld3", new LinkedHashMap<String, Object>() {{
             put("childFld1", "child1");
             put("childFl2", "value1");
         }});
-        
+
         assertThat(coercing.parseLiteral(mkObjectValue(input), variables)).isEqualTo(expected);
     }
 
@@ -85,7 +100,7 @@ public class ObjectScalarTest {
 
     ObjectValue mkObjectValue(Map<String, Value> fields) {
         List<ObjectField> list = new ArrayList<>();
-        
+
         for (String key : fields.keySet()) {
             list.add(new ObjectField(key, fields.get(key)));
         }

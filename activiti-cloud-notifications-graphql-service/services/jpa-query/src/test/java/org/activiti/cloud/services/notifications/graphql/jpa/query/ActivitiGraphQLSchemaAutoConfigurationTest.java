@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,22 +19,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import graphql.Scalars;
 import graphql.schema.GraphQLSchema;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @TestPropertySource("classpath:/hibernate.properties")
 public class ActivitiGraphQLSchemaAutoConfigurationTest {
-    
+
     @Autowired(required=false)
     private GraphQLSchema schema;
-    
+
     @SpringBootApplication
     static class TestApplication {
     }
@@ -43,7 +40,7 @@ public class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void contextLoads() {
         assertThat(schema).isNotNull();
     }
-    
+
     @Test
     public void correctlyDerivesSchemaFromGivenEntities() {
         //when
@@ -144,8 +141,8 @@ public class ActivitiGraphQLSchemaAutoConfigurationTest {
                          .getArguments())
                                          .describedAs("Ensure query has correct number of arguments")
                                          .hasSize(2);
-       
+
     }
-    
+
 
 }

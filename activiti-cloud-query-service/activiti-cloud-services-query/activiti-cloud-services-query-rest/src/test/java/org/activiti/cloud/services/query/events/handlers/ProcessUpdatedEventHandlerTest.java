@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.query.events.handlers;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -35,10 +35,8 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEvent
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -50,10 +48,7 @@ public class ProcessUpdatedEventHandlerTest {
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -90,15 +85,14 @@ public class ProcessUpdatedEventHandlerTest {
         //given
         CloudProcessUpdatedEvent event = buildProcessUpdatedEvent();
         String id = event.getEntity().getId();
-        
+
         given(processInstanceRepository.findById(id)).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(QueryException.class);
-        expectedException.expectMessage("Unable to find process instance with the given id: ");
-
         //when
-        handler.handle(event);
+        assertThatExceptionOfType(QueryException.class)
+            .isThrownBy(() -> handler.handle(event))
+            .withMessageContaining("Unable to find process instance with the given id: ");
     }
 
     @Test

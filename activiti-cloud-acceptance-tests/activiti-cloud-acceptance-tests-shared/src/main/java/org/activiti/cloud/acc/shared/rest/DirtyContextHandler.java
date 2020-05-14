@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.acc.shared.rest;
 
-import feign.Feign;
+import static org.springframework.hateoas.Link.REL_SELF;
+
 import feign.Headers;
-import feign.Logger;
 import feign.RequestLine;
 import feign.gson.GsonEncoder;
 import net.serenitybdd.core.Serenity;
-import org.activiti.cloud.acc.shared.rest.feign.OAuth2FeignRequestInterceptor;
+import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.springframework.hateoas.Resource;
-
-import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
  * Dirty context handler
@@ -73,11 +70,7 @@ public class DirtyContextHandler {
     }
 
     public void deleteByUri(String uri) {
-        Feign.builder()
-                .encoder(new GsonEncoder())
-                .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
-                .requestInterceptor(new OAuth2FeignRequestInterceptor())
+        FeignRestDataClient.builder(new GsonEncoder(), new feign.codec.Decoder.Default())
                 .target(DeleteByUriClient.class,
                         uri)
                 .delete();

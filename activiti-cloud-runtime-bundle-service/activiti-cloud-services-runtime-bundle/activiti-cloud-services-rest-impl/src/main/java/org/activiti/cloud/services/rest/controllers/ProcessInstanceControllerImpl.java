@@ -1,4 +1,19 @@
 /*
+ * Copyright 2017-2020 Alfresco Software, Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -32,6 +48,7 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
@@ -60,20 +77,24 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     private final ProcessRuntime processRuntime;
 
     private final SpringPageConverter pageConverter;
-    
+
+    private final ProcessVariablesPayloadConverter variablesPayloadConverter;
+
     @Autowired
     public ProcessInstanceControllerImpl(RepositoryService repositoryService,
                                          ProcessDiagramGeneratorWrapper processDiagramGenerator,
                                          ProcessInstanceResourceAssembler resourceAssembler,
                                          AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler,
                                          ProcessRuntime processRuntime,
-                                         SpringPageConverter pageConverter) {
+                                         SpringPageConverter pageConverter,
+                                         ProcessVariablesPayloadConverter variablesPayloadConverter) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.processRuntime = processRuntime;
         this.pageConverter = pageConverter;
+        this.variablesPayloadConverter = variablesPayloadConverter;
     }
 
     @Override
@@ -86,7 +107,24 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
+        startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+
         return resourceAssembler.toResource(processRuntime.start(startProcessPayload));
+    }
+
+    @Override
+    public Resource<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId,
+                                                              @RequestBody(required = false) StartProcessPayload startProcessPayload) {
+        if (startProcessPayload == null) {
+            startProcessPayload = ProcessPayloadBuilder.start().build();
+        }
+        startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+        return resourceAssembler.toResource(processRuntime.startCreatedProcess(processInstanceId, startProcessPayload));
+    }
+
+    @Override
+    public Resource<CloudProcessInstance> createProcessInstance(@RequestBody CreateProcessInstancePayload createProcessInstancePayload) {
+        return resourceAssembler.toResource(processRuntime.create(createProcessInstancePayload));
     }
 
     @Override
@@ -100,11 +138,10 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
         return new String(processDiagramGenerator.generateDiagram(bpmnModel,
-                processRuntime
-                        .processInstanceMeta(processInstance.getId())
-                        .getActiveActivitiesIds(),
-                emptyList()),
-                StandardCharsets.UTF_8);
+                                                                  processRuntime.processInstanceMeta(processInstance.getId())
+                                                                                .getActiveActivitiesIds(),
+                                                                  emptyList()),
+                          StandardCharsets.UTF_8);
     }
 
     @Override
@@ -152,7 +189,9 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public Resource<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
+    public Resource<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload) {
+        startMessagePayload = variablesPayloadConverter.convert(startMessagePayload);
+
         ProcessInstance processInstance = processRuntime.start(startMessagePayload);
 
         return resourceAssembler.toResource(processInstance);

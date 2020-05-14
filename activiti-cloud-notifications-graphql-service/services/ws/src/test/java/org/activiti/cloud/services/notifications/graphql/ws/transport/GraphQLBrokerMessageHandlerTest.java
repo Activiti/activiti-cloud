@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,10 @@
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -43,13 +47,12 @@ import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBro
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerMessageHandler;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubscriptionRegistry;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSubscriptionExecutor;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -71,6 +74,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 public class GraphQLBrokerMessageHandlerTest {
+
 
     private final static String destination = "/ws/graphql";
 
@@ -97,7 +101,7 @@ public class GraphQLBrokerMessageHandlerTest {
     @Captor
     private ArgumentCaptor<Message<GraphQLMessage>> messageCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
@@ -107,8 +111,7 @@ public class GraphQLBrokerMessageHandlerTest {
                                                               graphQLExecutor);
 
         this.messageHandler.setTaskScheduler(taskScheduler);
-        when(taskScheduler.scheduleWithFixedDelay(Mockito.any(Runnable.class), Mockito.anyLong())).thenReturn(
-                                                                                                              scheduledFuture);
+        when(taskScheduler.scheduleWithFixedDelay(any(Runnable.class), anyLong())).thenReturn(scheduledFuture);
 
         this.messageHandler.start();
 
@@ -119,7 +122,7 @@ public class GraphQLBrokerMessageHandlerTest {
         assertThat(this.messageHandler.isBrokerAvailable()).isTrue();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         //
     }
@@ -145,7 +148,7 @@ public class GraphQLBrokerMessageHandlerTest {
 
     @Test
     public void testStarInternal() {
-        verify(taskScheduler).scheduleWithFixedDelay(Mockito.any(Runnable.class), Mockito.anyLong());
+        verify(taskScheduler).scheduleWithFixedDelay(any(), anyLong());
     }
 
     @Test
@@ -154,7 +157,7 @@ public class GraphQLBrokerMessageHandlerTest {
         this.messageHandler.stop();
 
         // then
-        verify(scheduledFuture).cancel(Mockito.anyBoolean());
+        verify(scheduledFuture).cancel(anyBoolean());
     }
 
     @Test
@@ -206,7 +209,7 @@ public class GraphQLBrokerMessageHandlerTest {
 
         // Simulate stomp relay  subscription stream
         Flux<ExecutionResult> mockStompRelayObservable = Flux.interval(Duration.ZERO, Duration.ofMillis(20))
-                                                             .take(100)                   
+                                                             .take(100)
                                                              .map(i -> {
                                                                  Map<String, Object> data = new HashMap<>();
                                                                  data.put("key", i);
@@ -218,11 +221,10 @@ public class GraphQLBrokerMessageHandlerTest {
         StepVerifier observable = StepVerifier.create(mockStompRelayObservable)
                 .expectNextCount(100)
                 .expectComplete();
-        
+
         ExecutionResult executionResult = stubExecutionResult(mockStompRelayObservable, completeLatch);
 
-        when(graphQLExecutor.execute(Mockito.anyString(), Mockito.any()))
-                                                                         .thenReturn(executionResult);
+        when(graphQLExecutor.execute(anyString(), any())).thenReturn(executionResult);
 
         // when
         this.messageHandler.handleMessage(message);
@@ -230,7 +232,7 @@ public class GraphQLBrokerMessageHandlerTest {
         observable.verify(Duration.ofMinutes(2));
 
         assertThat(completeLatch.await(2000, TimeUnit.MILLISECONDS)).isTrue();
-        
+
         // then get last message
         verify(this.clientOutboundChannel, atLeast(99)).send(this.messageCaptor.capture());
 
@@ -245,7 +247,7 @@ public class GraphQLBrokerMessageHandlerTest {
         Message<GraphQLMessage> message = startMessage("id", "sess1");
 
         ExecutionResult executionResult = mock(ExecutionResult.class);
-        when(graphQLExecutor.execute(Mockito.anyString(), Mockito.any())).thenReturn(executionResult);
+        when(graphQLExecutor.execute(anyString(), any())).thenReturn(executionResult);
         when(executionResult.getErrors()).thenReturn(Collections.emptyList());
         when(executionResult.getData()).thenReturn(null);
 
@@ -267,7 +269,7 @@ public class GraphQLBrokerMessageHandlerTest {
         Message<GraphQLMessage> message = startMessage("id", "sess1");
 
         ExecutionResult executionResult = mock(ExecutionResult.class);
-        when(graphQLExecutor.execute(Mockito.anyString(), Mockito.any())).thenReturn(executionResult);
+        when(graphQLExecutor.execute(anyString(), any())).thenReturn(executionResult);
         when(executionResult.getErrors()).thenReturn(Collections.singletonList(mock(GraphQLError.class)));
         when(executionResult.getData()).thenReturn(null);
 
@@ -411,7 +413,7 @@ public class GraphQLBrokerMessageHandlerTest {
                                                                           null,
                                                                           null,
                                                                           null));
-        
+
         when(wsSession.getId()).thenReturn(sessionId);
         wsSession.initializeNativeSession(nativeSession);
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.query.rest;
 
 import static org.hamcrest.core.Is.is;
@@ -36,26 +35,21 @@ import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ProcessModelController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
-@AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({
     QueryRestWebMvcAutoConfiguration.class,
     CommonModelAutoConfiguration.class,
@@ -71,15 +65,15 @@ public class ProcessModelControllerIT {
 
     @MockBean
     private SecurityPoliciesManager securityPoliciesManager;
-    
-    @MockBean
-    private UserGroupManager userGroupManager;
-    
-    @MockBean
-    private SecurityManager securityManager;    
 
     @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;        
+    private UserGroupManager userGroupManager;
+
+    @MockBean
+    private SecurityManager securityManager;
+
+    @MockBean
+    private SecurityPoliciesProperties securityPoliciesProperties;
 
     @MockBean
     private EntityFinder entityFinder;

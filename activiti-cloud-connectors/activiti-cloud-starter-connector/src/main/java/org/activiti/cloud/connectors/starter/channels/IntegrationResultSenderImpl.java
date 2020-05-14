@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,35 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.connectors.starter.channels;
 
+import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 
 public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
-    @Value("${ACT_INT_RES_CONSUMER:}")
-    private String resultDestinationOverride;
+    private final IntegrationResultChannelResolver resolver;
 
-    private final BinderAwareChannelResolver resolver;
-
-    private final ConnectorProperties connectorProperties;
-
-    @Autowired
-    public IntegrationResultSenderImpl(BinderAwareChannelResolver resolver, ConnectorProperties connectorProperties) {
+    public IntegrationResultSenderImpl(IntegrationResultChannelResolver resolver) {
         this.resolver = resolver;
-        this.connectorProperties = connectorProperties;
     }
 
     @Override
     public void send(Message<IntegrationResult> message) {
-        String destination = (resultDestinationOverride == null || resultDestinationOverride.isEmpty())
-                ? "integrationResult" + connectorProperties.getMqDestinationSeparator() + message.getPayload().getIntegrationRequest().getServiceFullName() : resultDestinationOverride;
-        resolver.resolveDestination(destination).send(message);
+        IntegrationRequest request = message.getPayload().getIntegrationRequest();
+
+        MessageChannel destination = resolver.resolveDestination(request);
+
+        destination.send(message);
     }
 }

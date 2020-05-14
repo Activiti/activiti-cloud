@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuilder.putMultipart;
 import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -31,16 +34,13 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -49,7 +49,6 @@ import org.springframework.web.context.WebApplicationContext;
  * Integration tests for models rest api dealing with Json models
  */
 @ActiveProfiles(profiles = { "test", "generic" })
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -78,7 +77,7 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
 
     private static final String GENERIC_MODEL_NAME = "simple-model";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(context).build();
     }
@@ -96,10 +95,10 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
                                                                        resourceAsByteArray("generic/model-simple.bin")))
                 .andExpect(status().isNoContent());
 
-        Mockito.verify(genericJsonContentUpdateListener,
-                       Mockito.times(0))
-                .execute(Mockito.any(),
-                         Mockito.any());
+        verify(genericJsonContentUpdateListener,
+                       times(0))
+                .execute(any(),
+                         any());
 
     }
 
@@ -119,10 +118,10 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
                                                                        fileContent))
                 .andExpect(status().isNoContent());
 
-        Mockito.verify(genericNonJsonContentUpdateListener,
-                       Mockito.times(1))
-                .execute(Mockito.argThat(model -> model.getId().equals(genericNonJsonModel.getId())),
-                         Mockito.argThat(content -> new String(content.getFileContent()).equals(new String(fileContent))));
+        verify(genericNonJsonContentUpdateListener,
+                       times(1))
+                .execute(argThat(model -> model.getId().equals(genericNonJsonModel.getId())),
+                         argThat(content -> new String(content.getFileContent()).equals(new String(fileContent))));
 
     }
 }

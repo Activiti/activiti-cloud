@@ -1,11 +1,11 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.rest.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,19 +38,16 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.conf.ConnectorsAutoConfiguration;
 import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ConnectorDefinitionControllerImpl.class)
 @Import({ConnectorsAutoConfiguration.class,
         ConnectorAutoConfiguration.class,
@@ -70,14 +65,14 @@ public class ConnectorDefinitionControllerImplIT {
 
     @MockBean
     private ProcessExtensionService processExtensionService;
-    
-    @MockBean 
+
+    @MockBean
     private ProcessEngineChannels processEngineChannels;
-    
+
     @MockBean
     private RepositoryService repositoryService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         assertThat(processExtensionService).isNotNull();
 
@@ -99,7 +94,6 @@ public class ConnectorDefinitionControllerImplIT {
     public void getAllConnectorDefinitions() throws Exception {
 
         this.mockMvc.perform(get("/v1/connector-definitions/").accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content[0].links[0].rel", is("self")))
                 .andExpect(jsonPath("content[0].id", is("id1")))
@@ -110,7 +104,6 @@ public class ConnectorDefinitionControllerImplIT {
     public void getOneSpecificConnectorDefinition() throws Exception {
 
         this.mockMvc.perform(get("/v1/connector-definitions/id1").accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("links[0].rel", is("self")))
                 .andExpect(jsonPath("links[0].href", containsString("v1/connector-definitions/id1")))
@@ -121,7 +114,6 @@ public class ConnectorDefinitionControllerImplIT {
     public void getConnectorDefinitionNotFound() throws Exception {
 
         this.mockMvc.perform(get("/v1/connector-definitions/idNotFound").accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isNotFound());
     }
 

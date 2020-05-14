@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.modeling</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-modeling</artifactId>
     <version>7.1.0-SNAPSHOT</version>
   </parent>
@@ -11,11 +11,11 @@
   <name>Activiti Cloud Services :: Modeling API Impl</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-auditable</artifactId>
     </dependency>
     <dependency>

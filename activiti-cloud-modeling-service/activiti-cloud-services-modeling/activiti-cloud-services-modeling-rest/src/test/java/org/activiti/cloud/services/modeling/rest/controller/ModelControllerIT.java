@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
@@ -46,7 +45,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -65,17 +63,13 @@ import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -86,15 +80,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @WithMockModelerUser
 public class ModelControllerIT {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -105,7 +96,7 @@ public class ModelControllerIT {
     @Autowired
     private ModelRepository modelRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
@@ -141,7 +132,6 @@ public class ModelControllerIT {
                              project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel("process-model"))))
-                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name",
                                     equalTo("process-model")))
@@ -188,7 +178,6 @@ public class ModelControllerIT {
                              project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
-                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.extensions.process-model-extensions.properties",
                                     allOf(hasKey("variable1"),
@@ -235,7 +224,6 @@ public class ModelControllerIT {
                              project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(formModel)))
-                .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
@@ -250,7 +238,6 @@ public class ModelControllerIT {
                              project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel("process-model"))))
-                .andDo(print())
                 .andExpect(status().isConflict());
     }
 
@@ -261,7 +248,6 @@ public class ModelControllerIT {
         mockMvc.perform(get("{version}/models/{modelId}",
                             API_VERSION,
                             processModel.getId()))
-                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -278,7 +264,6 @@ public class ModelControllerIT {
         mockMvc.perform(get("{version}/models/{modelId}",
                             API_VERSION,
                             processModel.getId()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.extensions.process-model-with-extensions.properties",
                                     allOf(hasEntry(equalTo("stringVariable"),
@@ -566,8 +551,7 @@ public class ModelControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: #: only 0 subschema matches out of 2");
 
@@ -605,8 +589,7 @@ public class ModelControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -636,8 +619,7 @@ public class ModelControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -667,8 +649,7 @@ public class ModelControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -698,8 +679,7 @@ public class ModelControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -729,8 +709,7 @@ public class ModelControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -764,8 +743,7 @@ public class ModelControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -900,7 +878,6 @@ public class ModelControllerIT {
                                 .param("type",
                                        PROCESS)
                                 .accept(APPLICATION_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isCreated());
     }
 
@@ -921,7 +898,6 @@ public class ModelControllerIT {
                                 .param("type",
                                        PROCESS)
                                 .accept(APPLICATION_JSON_VALUE))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(is("Unexpected extension was found for file to import model of type PROCESS: x-19022")));
     }
@@ -942,7 +918,6 @@ public class ModelControllerIT {
                                 .file(zipFile)
                                 .param("type",
                                        "WRONG_TYPE"))
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(is("Unknown model type: WRONG_TYPE")));
     }
@@ -959,8 +934,34 @@ public class ModelControllerIT {
                                 .file(zipFile)
                                 .param("type",
                                        PROCESS))
-                .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldOnlyUpdateVersionOnceWhenCreatingProcess() throws Exception {
+
+        Model processModel = modelRepository.createModel(processModel("Process Model 3"));
+
+        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
+            API_VERSION,
+            processModel.getId())
+
+            .file("file",
+                "create-process.xml",
+                CONTENT_TYPE_XML,
+                resourceAsByteArray("process/create-process.xml")).param("type",
+                PROCESS))
+            .andExpect(status().isNoContent());
+
+        // //version should not get incremented here
+        mockMvc.perform(get("{version}/models/{modelId}",
+            API_VERSION,
+            processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.version",
+                equalTo("0.0.1")));
+
+
     }
 
     @Test
@@ -979,7 +980,6 @@ public class ModelControllerIT {
         mockMvc.perform(get("{version}/models/{modelId}",
                             API_VERSION,
                             connectorModel.getId()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.template",
                                     is("ConnectorTemplate")));
@@ -1001,7 +1001,6 @@ public class ModelControllerIT {
         mockMvc.perform(get("{version}/models/{modelId}",
                             API_VERSION,
                             connectorModel.getId()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.template").doesNotExist());
     }

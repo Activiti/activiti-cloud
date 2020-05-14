@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.build</groupId>
-    <artifactId>activiti-cloud-parent</artifactId>
+    <groupId>org.activiti.cloud</groupId>
+    <artifactId>activiti-cloud-build-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
-  <groupId>org.activiti.cloud.query</groupId>
+  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-query-service-parent</artifactId>
   <name>Activiti Cloud Query :: Parent</name>
   <version>7.1.0-SNAPSHOT</version>
@@ -20,32 +20,26 @@
     <module>activiti-cloud-starter-query</module>
   </modules>
   <properties>
-	  <project.scm.repository>activiti-cloud-query-service</project.scm.repository>
-    <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
-    <activiti-dependencies.version>7.1.200</activiti-dependencies.version>
-    <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
-    <json-unit.version>1.24.0</json-unit.version>
-    <testcontainers.version>1.12.0</testcontainers.version>
+    <activiti.version>7.1.224</activiti.version>
   </properties>
   <!-- BoM Marker Dependencies -->
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.build</groupId>
-      <artifactId>activiti-cloud-parent</artifactId>
-      <version>${activiti-cloud-build.version}</version>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-build-parent</artifactId>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-      <version>${activiti-cloud-service-common.version}</version>
+      <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
-      <groupId>org.activiti.dependencies</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-dependencies</artifactId>
-      <version>${activiti-dependencies.version}</version>
+      <version>${activiti.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>
@@ -54,38 +48,26 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.build</groupId>
-        <artifactId>activiti-cloud-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
+        <version>${project.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.common</groupId>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>org.activiti.dependencies</groupId>
+        <groupId>org.activiti</groupId>
         <artifactId>activiti-dependencies</artifactId>
-        <version>${activiti-dependencies.version}</version>
+        <version>${activiti.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>net.javacrumbs.json-unit</groupId>
-        <artifactId>json-unit-fluent</artifactId>
-        <version>${json-unit.version}</version>
-        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <repositories>
-    <repository>
-      <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-  </repositories>
 </project>

@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.api</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-api-dependencies</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-api-dependencies</relativePath>
@@ -12,15 +12,15 @@
   <name>Activiti Cloud API :: Model Event Schema</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-model-shared-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.api</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-task-model-impl</artifactId>
     </dependency>
     <dependency>
@@ -33,23 +33,13 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

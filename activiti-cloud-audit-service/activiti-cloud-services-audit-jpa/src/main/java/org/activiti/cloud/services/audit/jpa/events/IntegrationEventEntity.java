@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,41 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.audit.jpa.events;
 
 import java.util.Objects;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.MappedSuperclass;
+
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
+import org.activiti.cloud.services.audit.jpa.converters.json.IntegrationContextJpaJsonConverter;
 
 @MappedSuperclass
 public abstract class IntegrationEventEntity extends AuditEventEntity {
 
-    private String integrationContextId;
+    @Convert(converter = IntegrationContextJpaJsonConverter.class)
+    @Column(columnDefinition = "text")
+    private IntegrationContext integrationContext;
 
-    private String flowNodeId;
+    IntegrationEventEntity() { }
 
-    public String getIntegrationContextId() {
-        return integrationContextId;
+    public IntegrationEventEntity(CloudIntegrationEvent event) {
+        super(event);
+
+        this.integrationContext = event.getEntity();
     }
 
-    public void setIntegrationContextId(String integrationContextId) {
-        this.integrationContextId = integrationContextId;
-    }
 
-    public String getFlowNodeId() {
-        return flowNodeId;
-    }
-
-    public void setFlowNodeId(String flowNodeId) {
-        this.flowNodeId = flowNodeId;
+    public IntegrationContext getIntegrationContext() {
+        return integrationContext;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(flowNodeId, integrationContextId);
+        result = prime * result + Objects.hash(integrationContext);
         return result;
     }
 
@@ -63,17 +65,14 @@ public abstract class IntegrationEventEntity extends AuditEventEntity {
             return false;
         }
         IntegrationEventEntity other = (IntegrationEventEntity) obj;
-        return Objects.equals(flowNodeId, other.flowNodeId) 
-                && Objects.equals(integrationContextId, other.integrationContextId);
+        return Objects.equals(integrationContext, other.integrationContext);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("IntegrationEventEntity [integrationContextId=")
-               .append(integrationContextId)
-               .append(", flowNodeId=")
-               .append(flowNodeId)
+        builder.append("IntegrationEventEntity [integrationContext=")
+               .append(integrationContext)
                .append(", toString()=")
                .append(super.toString())
                .append("]");

@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,12 +21,12 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
 public class IntegrationContextMessageBuilderAppender implements MessageBuilderAppender {
-    
+
     private final IntegrationContext integrationContext;
 
     public IntegrationContextMessageBuilderAppender(IntegrationContext integrationContext) {
         Assert.notNull(integrationContext, "integrationContext must not be null");
-        
+
         this.integrationContext = integrationContext;
     }
 
@@ -37,6 +37,7 @@ public class IntegrationContextMessageBuilderAppender implements MessageBuilderA
                 .setHeader(IntegrationContextMessageHeaders.BUSINESS_KEY, integrationContext.getBusinessKey())
                 .setHeader(IntegrationContextMessageHeaders.INTEGRATION_CONTEXT_ID, integrationContext.getId())
                 .setHeader(IntegrationContextMessageHeaders.PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
+                .setHeader(IntegrationContextMessageHeaders.EXECUTION_ID, integrationContext.getExecutionId())
                 .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
                 .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
                 .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())

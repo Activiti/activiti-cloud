@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.starter.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,32 +27,30 @@ import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.test.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import org.springframework.util.StreamUtils;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
 @Import({
     ProcessDefinitionRestTemplate.class
 })
-
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
 public class QueryProcessDefinitionIT {
 
     @Autowired
@@ -71,12 +68,12 @@ public class QueryProcessDefinitionIT {
     @Autowired
     private MyProducer producer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         keycloakTokenProducer.setKeycloakTestUser("hruser");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();
@@ -127,11 +124,11 @@ public class QueryProcessDefinitionIT {
         secondProcessDefinition.setKey("mySecondProcess");
         secondProcessDefinition.setName("My second Process");
         CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(firstProcessDefinition);
-        firstProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+        firstProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
                                                                                    StandardCharsets.UTF_8));
         CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(secondProcessDefinition);
-        secondProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+        secondProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
                 StandardCharsets.UTF_8));
         producer.send(firstProcessDeployedEvent,
@@ -223,11 +220,11 @@ public class QueryProcessDefinitionIT {
         processDefinition.setName("My First Process");
 
         CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
-        firstProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+        firstProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
                 StandardCharsets.UTF_8));
         CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
-        secondProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+        secondProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
                 StandardCharsets.UTF_8));
         producer.send(firstProcessDeployedEvent,

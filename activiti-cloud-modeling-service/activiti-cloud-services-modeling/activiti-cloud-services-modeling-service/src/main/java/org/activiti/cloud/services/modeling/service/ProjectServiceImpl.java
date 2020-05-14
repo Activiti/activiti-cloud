@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.modeling.service;
 
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.transaction.Transactional;
-
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -48,6 +46,7 @@ import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
+import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +55,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
+
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 
 /**
  * Business logic related to {@link Project} entities
@@ -120,6 +124,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project createProject(Project project) {
         project.setId(null);
+        List<ModelValidationError> nameValidationErrors = validateProjectName(project);
+        if (!nameValidationErrors.isEmpty()) {
+            throw new SemanticModelValidationException("Validation errors found in project's models",
+                nameValidationErrors);
+        }
         return projectRepository.createProject(project);
     }
 
@@ -385,6 +394,13 @@ public class ProjectServiceImpl implements ProjectService {
                                    FileContent fileContent) {
         return !fileContent.isJson() || (!modelName.endsWith(modelType.getExtensionsFileSuffix())
                 && modelTypeService.isContentXML(modelType));
+    }
+
+    public List<ModelValidationError> validateProjectName(Project project) {
+        Optional<ProjectValidator> projectNameValidator = projectValidators.stream()
+            .filter(projectValidator -> projectValidator instanceof ProjectNameValidator).findFirst();
+        return projectNameValidator.isPresent() ? projectNameValidator.get()
+            .validate(project, null).collect(Collectors.toList()) : Collections.emptyList();
     }
 
     @Override

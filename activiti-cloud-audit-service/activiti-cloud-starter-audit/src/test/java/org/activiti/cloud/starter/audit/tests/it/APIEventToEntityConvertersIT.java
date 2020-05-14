@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.starter.audit.tests.it;
 
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
+import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
@@ -31,6 +31,9 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationErrorReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationRequestedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationResultReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCreatedEventConverter;
@@ -56,23 +59,19 @@ import org.activiti.cloud.services.audit.jpa.converters.TimerScheduledEventConve
 import org.activiti.cloud.services.audit.jpa.converters.VariableCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableDeletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConverter;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @TestPropertySource("classpath:application.properties")
-public class
-APIEventToEntityConvertersIT {
+@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
+public class APIEventToEntityConvertersIT {
 
     @Autowired
     private APIEventToEntityConverters eventConverters;
@@ -165,6 +164,15 @@ APIEventToEntityConvertersIT {
 
         converter = eventConverters.getConverterByEventTypeName(BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name());
         assertThat(converter).isNotNull().isInstanceOf(TimerScheduledEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_REQUESTED.name());
+        assertThat(converter).isNotNull().isInstanceOf(IntegrationRequestedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(IntegrationResultReceivedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(IntegrationErrorReceivedEventConverter.class);
 
 
     }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.modeling.validation.extensions;
 
 import static java.lang.String.format;
@@ -33,7 +32,6 @@ import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -117,7 +115,7 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
             Map<String, Constant> taskConstants,
             ValidationContext validationContext) {
 
-        List<TaskMapping> taskMappings = toTaskMappings(processId,
+        List<MappingModel> taskMappings = toTaskMappings(processId,
                                                         task,
                                                         taskMappingsMap);
         return taskMappingsValidators
@@ -127,12 +125,12 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
                                                                      validationContext));
     }
 
-    private List<TaskMapping> toTaskMappings(String processId,
-                                             FlowNode task,
-                                             Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMappingsMap) {
+    private List<MappingModel> toTaskMappings(String processId,
+                                              FlowNode task,
+                                              Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMappingsMap) {
         return taskMappingsMap.entrySet()
                 .stream()
-                .map(taskMappingEntry -> new TaskMapping(processId,
+                .map(taskMappingEntry -> new MappingModel(processId,
                                                          task,
                                                          taskMappingEntry.getKey(),
                                                          taskMappingEntry.getValue()))

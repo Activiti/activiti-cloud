@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.audit.jpa.converters;
 
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -22,8 +21,8 @@ import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -42,7 +41,7 @@ public class ProcessStartedEventConverterTest {
     @Mock
     private EventContextInfoAppender eventContextInfoAppender;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -54,7 +53,7 @@ public class ProcessStartedEventConverterTest {
 
         //when
         ProcessStartedAuditEventEntity auditEventEntity = eventConverter.createEventEntity(event);
-     
+
         //then
         assertThat(auditEventEntity).isNotNull();
         assertThat(auditEventEntity.getEventId()).isEqualTo(event.getId());
@@ -103,12 +102,12 @@ public class ProcessStartedEventConverterTest {
     public void createAPIEventShouldSetAllNonProcessContextRelatedFields() {
         //given
         CloudProcessStartedEventImpl cloudAuditEventEntity = buildProcessStartedEvent();
-        
+
         ProcessStartedAuditEventEntity auditEventEntity = new ProcessStartedAuditEventEntity(cloudAuditEventEntity);
-  
+
         //when
         ProcessStartedEventConverter converter = new ProcessStartedEventConverter(new EventContextInfoAppender());
-        
+
         CloudProcessStartedEventImpl apiEvent = (CloudProcessStartedEventImpl)converter.convertToAPI(auditEventEntity);
         assertThat(apiEvent)
                 .isNotNull()

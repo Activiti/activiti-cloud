@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
@@ -21,7 +20,11 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetu
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.hamcrest.Matchers.isEmptyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,16 +41,13 @@ import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -58,7 +58,6 @@ import java.util.Collections;
  * Integration tests for models rest api dealing with JSON models
  */
 @ActiveProfiles(profiles = { "test", "generic" })
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -90,7 +89,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
     private Model genericNonJsonModel;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
         genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
@@ -102,8 +101,8 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                 .singletonList(genericNonJsonContentValidator.createModelValidationError("Content invalid",
                                                                                          "The content is invalid!!")));
 
-        doThrow(exception).when(genericNonJsonContentValidator).validateModelContent(Mockito.any(byte[].class),
-                                                                                     Mockito.any(ValidationContext.class));
+        doThrow(exception).when(genericNonJsonContentValidator).validateModelContent(any(byte[].class),
+                                                                                     any(ValidationContext.class));
     }
 
     private void validateInvalidExtensions() {
@@ -111,8 +110,8 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                 .singletonList(genericNonJsonContentValidator.createModelValidationError("Extensions invalid",
                                                                                          "The extensions are invalid!!")));
 
-        doThrow(exception).when(genericNonJsonExtensionsValidator).validateModelExtensions(Mockito.any(byte[].class),
-                                                                                           Mockito.any(ValidationContext.class));
+        doThrow(exception).when(genericNonJsonExtensionsValidator).validateModelExtensions(any(byte[].class),
+                                                                                           any(ValidationContext.class));
     }
 
     @Test
@@ -127,15 +126,15 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                       genericNonJsonModel.getId())
                 .then().expect(status().isNoContent()).body(isEmptyString());
 
-        Mockito.verify(genericNonJsonExtensionsValidator,
-                       Mockito.times(0))
-                .validateModelExtensions(Mockito.any(),
-                                         Mockito.any());
+        verify(genericNonJsonExtensionsValidator,
+                       times(0))
+                .validateModelExtensions(any(),
+                                         any());
 
-        Mockito.verify(genericNonJsonContentValidator,
-                       Mockito.times(1))
-                .validateModelContent(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                      Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericNonJsonContentValidator,
+                       times(1))
+                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                                      argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -150,15 +149,15 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                       genericNonJsonModel.getId())
                 .then().expect(status().isNoContent()).body(isEmptyString());
 
-        Mockito.verify(genericNonJsonExtensionsValidator,
-                       Mockito.times(0))
-                .validateModelExtensions(Mockito.any(),
-                                         Mockito.any());
+        verify(genericNonJsonExtensionsValidator,
+                       times(0))
+                .validateModelExtensions(any(),
+                                         any());
 
-        Mockito.verify(genericNonJsonContentValidator,
-                       Mockito.times(1))
-                .validateModelContent(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                      Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericNonJsonContentValidator,
+                       times(1))
+                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                                      argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -173,15 +172,15 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                       genericNonJsonModel.getId())
                 .then().expect(status().isNoContent()).body(isEmptyString());
 
-        Mockito.verify(genericNonJsonExtensionsValidator,
-                       Mockito.times(0))
-                .validateModelExtensions(Mockito.any(),
-                                         Mockito.any());
+        verify(genericNonJsonExtensionsValidator,
+                       times(0))
+                .validateModelExtensions(any(),
+                                         any());
 
-        Mockito.verify(genericNonJsonContentValidator,
-                       Mockito.times(1))
-                .validateModelContent(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                      Mockito.argThat(context -> context.isEmpty()));
+        verify(genericNonJsonContentValidator,
+                       times(1))
+                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                                      argThat(context -> context.isEmpty()));
     }
 
     @Test
@@ -196,17 +195,17 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              APPLICATION_OCTET_STREAM_VALUE)
                 .post("/v1/models/{modelId}/validate",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Content invalid");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Content invalid");
 
-        Mockito.verify(genericNonJsonExtensionsValidator,
-                       Mockito.times(0))
-                .validateModelExtensions(Mockito.any(),
-                                         Mockito.any());
+        verify(genericNonJsonExtensionsValidator,
+                       times(0))
+                .validateModelExtensions(any(),
+                                         any());
 
-        Mockito.verify(genericNonJsonContentValidator,
-                       Mockito.times(1))
-                .validateModelContent(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                      Mockito.argThat(context -> !context.isEmpty()));
+        verify(genericNonJsonContentValidator,
+                       times(1))
+                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                                      argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -221,15 +220,15 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                       genericNonJsonModel.getId())
                 .then().expect(status().isNoContent()).body(isEmptyString());
 
-        Mockito.verify(genericNonJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericNonJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericNonJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> context.isEmpty()));
     }
 
     @Test
@@ -242,17 +241,17 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found");
 
-        Mockito.verify(genericNonJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericNonJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericNonJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> context.isEmpty()));
     }
 
     @Test
@@ -265,17 +264,17 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSyntacticValidationException().hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
+                .then().expect(status().isBadRequest())).isSyntacticValidationException().hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
 
-        Mockito.verify(genericNonJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericNonJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericNonJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> context.isEmpty()));
     }
 
     @Test
@@ -288,17 +287,17 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("expected type: String, found: Boolean");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("expected type: String, found: Boolean");
 
-        Mockito.verify(genericNonJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericNonJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericNonJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> context.isEmpty()));
     }
 
     @Test
@@ -313,17 +312,17 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                                              "application/json")
                 .post("/v1/models/{modelId}/validate/extensions",
                       genericNonJsonModel.getId())
-                .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Extensions invalid");
+                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Extensions invalid");
 
-        Mockito.verify(genericNonJsonContentValidator,
-                       Mockito.times(0))
-                .validateModelContent(Mockito.any(),
-                                      Mockito.any());
+        verify(genericNonJsonContentValidator,
+                       times(0))
+                .validateModelContent(any(),
+                                      any());
 
-        Mockito.verify(genericNonJsonExtensionsValidator,
-                       Mockito.times(1))
-                .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator,
+                       times(1))
+                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
+                                         argThat(context -> context.isEmpty()));
     }
 
 }

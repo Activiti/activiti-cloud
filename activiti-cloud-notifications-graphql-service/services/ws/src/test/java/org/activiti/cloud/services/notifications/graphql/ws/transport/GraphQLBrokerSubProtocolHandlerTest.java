@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -36,14 +38,12 @@ import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSes
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionDisconnectEvent;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionSubscribeEvent;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionUnsubscribeEvent;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
@@ -71,17 +71,17 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Captor
     private ArgumentCaptor<Message<GraphQLMessage>> messageCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         this.testSubject = new GraphQLBrokerSubProtocolHandler("/ws/graphql");
         this.testSubject.setApplicationEventPublisher(applicationEventPublisher);
 
-        when(outputChannel.send(Mockito.any(Message.class))).thenReturn(true);
+        when(outputChannel.send(any(Message.class))).thenReturn(true);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         // nothing
     }
@@ -102,7 +102,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
 
         // then
         verify(outputChannel).send(messageCaptor.capture());
-        verify(applicationEventPublisher).publishEvent(ArgumentMatchers.any(GraphQLSessionConnectEvent.class));
+        verify(applicationEventPublisher).publishEvent(any(GraphQLSessionConnectEvent.class));
 
         assertThat(messageCaptor.getValue().getPayload()).isInstanceOf(GraphQLMessage.class);
         assertThat(messageCaptor.getValue().getPayload().getId()).isEqualTo("1");
@@ -121,7 +121,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
 
         // then
         verify(outputChannel).send(messageCaptor.capture());
-        verify(applicationEventPublisher).publishEvent(ArgumentMatchers.any(GraphQLSessionSubscribeEvent.class));
+        verify(applicationEventPublisher).publishEvent(any(GraphQLSessionSubscribeEvent.class));
 
         assertThat(messageCaptor.getValue().getPayload()).isInstanceOf(GraphQLMessage.class);
         assertThat(messageCaptor.getValue().getPayload().getId()).isEqualTo("1");
@@ -140,7 +140,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
 
         // then
         verify(outputChannel).send(messageCaptor.capture());
-        verify(applicationEventPublisher).publishEvent(ArgumentMatchers.any(GraphQLSessionUnsubscribeEvent.class));
+        verify(applicationEventPublisher).publishEvent(any(GraphQLSessionUnsubscribeEvent.class));
 
         assertThat(messageCaptor.getValue().getPayload()).isInstanceOf(GraphQLMessage.class);
         assertThat(messageCaptor.getValue().getPayload().getId()).isEqualTo("1");
@@ -174,7 +174,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
         testSubject.handleMessageToClient(session, new GenericMessage<String>("Text Message"));
 
         // then
-        verify(session, never()).sendMessage(ArgumentMatchers.any());
+        verify(session, never()).sendMessage(any());
     }
 
     @Test
@@ -182,7 +182,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
         // given
         WebSocketSession session = spy(mockWebSocketSession("sess1"));
 
-        doNothing().when(session).sendMessage(ArgumentMatchers.any(TextMessage.class));
+        doNothing().when(session).sendMessage(any(TextMessage.class));
 
         Message<GraphQLMessage> message = connectionAckMessage("operationId", session);
 
@@ -190,7 +190,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
         testSubject.handleMessageToClient(session, message);
 
         // then
-        verify(session).sendMessage(ArgumentMatchers.any(TextMessage.class));
+        verify(session).sendMessage(any(TextMessage.class));
 
     }
 
@@ -198,7 +198,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     public void testHandleProtocolErrorMessageToClient() throws IOException {
         // given
         WebSocketSession session = spy(mockWebSocketSession("sess1"));
-        doThrow(RuntimeException.class).when(session).sendMessage(ArgumentMatchers.any(TextMessage.class));
+        doThrow(RuntimeException.class).when(session).sendMessage(any(TextMessage.class));
 
         Message<GraphQLMessage> message = connectionAckMessage("operationId", session);
 
@@ -206,7 +206,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
         testSubject.handleMessageToClient(session, message);
 
         // then
-        verify(session).close(ArgumentMatchers.eq(CloseStatus.PROTOCOL_ERROR));
+        verify(session).close(eq(CloseStatus.PROTOCOL_ERROR));
 
     }
 
@@ -220,7 +220,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
 
         // then
         verify(outputChannel).send(messageCaptor.capture());
-        verify(applicationEventPublisher).publishEvent(ArgumentMatchers.any(GraphQLSessionDisconnectEvent.class));
+        verify(applicationEventPublisher).publishEvent(any(GraphQLSessionDisconnectEvent.class));
 
         assertThat(messageCaptor.getValue().getPayload()).isInstanceOf(GraphQLMessage.class);
         assertThat(messageCaptor.getValue().getPayload().getType()).isEqualTo(GraphQLMessageType.CONNECTION_TERMINATE);
@@ -237,7 +237,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
 
         // then
         verify(outputChannel, never()).send(messageCaptor.capture());
-        verify(session).setTextMessageSizeLimit(ArgumentMatchers.eq(GraphQLBrokerSubProtocolHandler.MINIMUM_WEBSOCKET_MESSAGE_SIZE));
+        verify(session).setTextMessageSizeLimit(eq(GraphQLBrokerSubProtocolHandler.MINIMUM_WEBSOCKET_MESSAGE_SIZE));
     }
 
     private WebSocketSession mockWebSocketSession(String sessionId) {

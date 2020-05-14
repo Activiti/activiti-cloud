@@ -1,26 +1,25 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.notifications.graphql</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-notifications-graphql</artifactId>
     <version>7.1.0-SNAPSHOT</version>
-    <relativePath>..</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql-jpa-query</artifactId>
-
   <name>Activiti Cloud Notifications :: Services :: GraphQL Jpa Query</name>
-
   <dependencies>
     <dependency>
       <groupId>com.introproventures</groupId>
       <artifactId>graphql-jpa-query-schema</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.query</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-query-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.notifications.graphql</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-notifications-graphql-schema</artifactId>
     </dependency>
     <dependency>
@@ -42,11 +41,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -88,10 +82,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
 </project>

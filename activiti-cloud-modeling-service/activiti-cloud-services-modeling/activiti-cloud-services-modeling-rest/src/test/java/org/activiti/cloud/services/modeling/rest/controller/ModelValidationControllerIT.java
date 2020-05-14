@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
@@ -31,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -48,14 +46,12 @@ import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -64,7 +60,6 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * Integration tests for validating model content
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -91,7 +86,7 @@ public class ModelValidationControllerIT {
 
     private MockMvc mockMvc;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
@@ -187,7 +182,6 @@ public class ModelValidationControllerIT {
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
-                .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
@@ -232,7 +226,6 @@ public class ModelValidationControllerIT {
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
-                .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
@@ -280,8 +273,7 @@ public class ModelValidationControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
                 .isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: #: only 0 subschema matches out of 2");
@@ -320,8 +312,7 @@ public class ModelValidationControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -351,8 +342,7 @@ public class ModelValidationControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -382,8 +372,7 @@ public class ModelValidationControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -413,8 +402,7 @@ public class ModelValidationControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -444,8 +432,7 @@ public class ModelValidationControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
+                                   processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();

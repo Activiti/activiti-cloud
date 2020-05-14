@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:activiti="http://activiti.org/bpmn" id="Definitions_098ju69" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Activiti Modeler" exporterVersion="3.0.0-beta">
-  <bpmn:process id="shouldDeliverMessagesViaRestApi" isExecutable="true">
+  <bpmn:process id="shouldDeliverMessagesViaRestApi" name="shouldDeliverMessagesViaRestApi" isExecutable="true">
     <bpmn:endEvent id="EndEvent_1yxwnmm">
       <bpmn:incoming>SequenceFlow_1vsdq0e</bpmn:incoming>
     </bpmn:endEvent>

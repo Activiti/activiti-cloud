@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.messages</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-starters-messages</artifactId>
     <version>7.1.0-SNAPSHOT</version>
   </parent>
@@ -23,60 +25,19 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <profiles>
-    <profile>
-      <id>integration-test</id>
-      <activation>
-        <property>
-          <name>!skipITs</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>io.fabric8</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <configuration>
-              <startParallel>true</startParallel>
-              <images>
-                <image>
-                  <name>bitnami/postgresql:10.7.0</name>
-                  <alias>postgres</alias>
-                  <run>
-                    <ports>
-                      <port>5432:5432</port>
-                    </ports>
-                    <env>
-                      <ALLOW_EMPTY_PASSWORD>yes</ALLOW_EMPTY_PASSWORD>
-                    </env>
-                    <wait>
-                      <log>.*database system is ready to accept connections</log>
-                      <time>45000</time>
-                      <shutdown>5000</shutdown>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-               </images>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>start</goal>
-                  <goal>stop</goal>
-                  <goal>remove</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

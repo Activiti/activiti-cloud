@@ -1,4 +1,19 @@
 /*
+ * Copyright 2017-2020 Alfresco Software, Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +40,7 @@ import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceAdminController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
@@ -48,14 +64,18 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     private final SpringPageConverter pageConverter;
 
+    private final ProcessVariablesPayloadConverter variablesPayloadConverter;
+
     public ProcessInstanceAdminControllerImpl(ProcessInstanceResourceAssembler resourceAssembler,
                                               AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler,
                                               ProcessAdminRuntime processAdminRuntime,
-                                              SpringPageConverter pageConverter) {
+                                              SpringPageConverter pageConverter,
+                                              ProcessVariablesPayloadConverter variablesPayloadConverter) {
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.processAdminRuntime = processAdminRuntime;
         this.pageConverter = pageConverter;
+        this.variablesPayloadConverter = variablesPayloadConverter;
     }
 
     @Override
@@ -65,10 +85,12 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
                                                   pageConverter.toSpringPage(pageable, processInstancePage),
                                                   resourceAssembler);
     }
-   
+
     @Override
     public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        return resourceAssembler.toResource(processAdminRuntime.start(startProcessPayload));
+        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+
+        return resourceAssembler.toResource(processAdminRuntime.start(convertedStartProcessPayload));
     }
 
     @Override
@@ -114,6 +136,8 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     @Override
     public Resource<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
+        startMessagePayload = variablesPayloadConverter.convert(startMessagePayload);
+
         ProcessInstance processInstance = processAdminRuntime.start(startMessagePayload);
 
         return resourceAssembler.toResource(processInstance);

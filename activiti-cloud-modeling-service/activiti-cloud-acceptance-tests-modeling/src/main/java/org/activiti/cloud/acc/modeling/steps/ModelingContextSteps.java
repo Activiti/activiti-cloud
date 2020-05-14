@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.acc.modeling.steps;
 
 import java.io.IOException;
@@ -33,11 +32,11 @@ import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.util.StreamUtils;
 
 import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.HttpUtils.HEADER_ATTACHEMNT_FILENAME;
@@ -216,7 +215,7 @@ public abstract class ModelingContextSteps<M> {
                 .orElseThrow(() -> new RuntimeException("No Content-Disposition header in feign response"));
         return new FileContent(filename,
                                contentType,
-                               IOUtils.toByteArray(response.body().asInputStream()));
+                               StreamUtils.copyToByteArray(response.body().asInputStream()));
     }
 
     protected String modelingUri(String uri) {

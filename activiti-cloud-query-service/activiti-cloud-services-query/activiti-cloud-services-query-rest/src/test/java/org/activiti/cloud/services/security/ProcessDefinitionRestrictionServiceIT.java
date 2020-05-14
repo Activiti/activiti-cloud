@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,21 +26,18 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
 @TestPropertySource("classpath:test-application.properties")
 @SpringBootTest
 public class ProcessDefinitionRestrictionServiceIT {
@@ -65,7 +61,7 @@ public class ProcessDefinitionRestrictionServiceIT {
     private ProcessDefinitionEntity defKey3AuthorizedService;
     private ProcessDefinitionEntity defKey1UnauthorizedService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         defKey1AuthorizedService = buildProcessDefinition("test-cmd-endpoint",
                                                           "defKey1");
@@ -87,7 +83,7 @@ public class ProcessDefinitionRestrictionServiceIT {
                                                           defKey2WildService));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processDefinitionRepository.deleteAll();
     }

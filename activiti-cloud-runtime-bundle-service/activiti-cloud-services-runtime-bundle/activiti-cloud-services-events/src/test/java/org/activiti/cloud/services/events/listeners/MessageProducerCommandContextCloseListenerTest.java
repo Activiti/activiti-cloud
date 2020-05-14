@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.events.listeners;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -41,13 +41,12 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.DeploymentEntity;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -72,7 +71,7 @@ public class MessageProducerCommandContextCloseListenerTest {
     private static final String MOCK_BUSINESS_KEY = "mockBusinessKey";
     private static final String MOCK_SUPER_EXECTUION_ID = "mockSuperExectuionId";
     private static final String MOCK_PROCESS_DEFINITION_NAME = "mockProcessDefinitionName";
-    
+
     @InjectMocks
     private MessageProducerCommandContextCloseListener closeListener;
 
@@ -90,16 +89,16 @@ public class MessageProducerCommandContextCloseListenerTest {
     };
 
     @Spy
-    private ExecutionContextMessageBuilderFactory messageBuilderChainFactory = 
+    private ExecutionContextMessageBuilderFactory messageBuilderChainFactory =
                 new ExecutionContextMessageBuilderFactory(properties);
 
     private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     @Spy
-    private RuntimeBundleInfoAppender runtimeBundleInfoAppender = 
+    private RuntimeBundleInfoAppender runtimeBundleInfoAppender =
                 new RuntimeBundleInfoAppender(properties);
-    
-    
+
+
     @Mock
     private MessageChannel auditChannel;
 
@@ -111,22 +110,22 @@ public class MessageProducerCommandContextCloseListenerTest {
 
     private CloudRuntimeEventImpl<?, ?> event;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
         ProcessInstance processInstance = new ProcessInstanceImpl();
         event = new CloudProcessCreatedEventImpl(processInstance);
-        
+
         when(producer.auditProducer()).thenReturn(auditChannel);
 
-        processEngineEventsAggregator = Mockito.spy(new ProcessEngineEventsAggregator(closeListener));
-        
+        processEngineEventsAggregator = spy(new ProcessEngineEventsAggregator(closeListener));
+
         when(processEngineEventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
-        
+
         ExecutionContext executionContext = mockExecutionContext();
         given(commandContext.getGenericAttribute(event.getEntityId()))
                 .willReturn(executionContext);
-        
+
     }
 
     @Test
@@ -143,9 +142,9 @@ public class MessageProducerCommandContextCloseListenerTest {
         verify(auditChannel).send(messageArgumentCaptor.capture());
         assertThat(messageArgumentCaptor.getValue()
                                         .getPayload()).containsExactly(event);
-        
+
         CloudRuntimeEvent<?, ?>[] result = messageArgumentCaptor.getValue().getPayload();
-        
+
         assertThat(result).hasSize(1);
 
         assertThat(result[0].getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
@@ -158,7 +157,7 @@ public class MessageProducerCommandContextCloseListenerTest {
         assertThat(result[0].getAppName()).isEqualTo(APP_NAME);
         assertThat(result[0].getServiceName()).isEqualTo(SPRING_APP_NAME);
         assertThat(result[0].getServiceType()).isEqualTo(SERVICE_TYPE);
-        assertThat(result[0].getServiceVersion()).isEqualTo(SERVICE_VERSION);        
+        assertThat(result[0].getServiceVersion()).isEqualTo(SERVICE_VERSION);
     }
 
     @Test
@@ -208,7 +207,7 @@ public class MessageProducerCommandContextCloseListenerTest {
                                                       .containsEntry("serviceType", SERVICE_TYPE)
                                                       .containsEntry("serviceVersion", SERVICE_VERSION)
                                                       .containsEntry("serviceFullName",SPRING_APP_NAME);
-        
+
     }
 
     private ExecutionContext mockExecutionContext() {
@@ -234,7 +233,7 @@ public class MessageProducerCommandContextCloseListenerTest {
         when(superExectuion.getProcessInstance()).thenReturn(parentProcessInstance);
         when(parentProcessInstance.getId()).thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
         when(parentProcessInstance.getName()).thenReturn(MOCK_PARENT_PROCESS_NAME);
-        
+
         when(processDefinition.getId()).thenReturn(MOCK_PROCESS_DEFINITION_ID);
         when(processDefinition.getKey()).thenReturn(MOCK_PROCESS_DEFINITION_KEY);
         when(processDefinition.getVersion()).thenReturn(MOCK_PROCESS_DEFINITION_VERSION);
@@ -242,7 +241,7 @@ public class MessageProducerCommandContextCloseListenerTest {
 
         when(deploymentEntity.getId()).thenReturn(MOCK_DEPLOYMENT_ID);
         when(deploymentEntity.getName()).thenReturn(MOCK_DEPLOYMENT_NAME);
-        
+
         return context;
     }
 }

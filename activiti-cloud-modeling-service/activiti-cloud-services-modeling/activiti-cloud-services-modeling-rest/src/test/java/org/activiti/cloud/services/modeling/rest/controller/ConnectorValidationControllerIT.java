@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
@@ -31,14 +30,12 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -46,7 +43,6 @@ import org.springframework.web.context.WebApplicationContext;
  * Integration tests for connector models validation rest api
  */
 @ActiveProfiles("test")
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -59,7 +55,7 @@ public class ConnectorValidationControllerIT {
     @Autowired
     private ModelRepository modelRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
     }
@@ -125,7 +121,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("extraneous key [icon] is not permitted",
@@ -148,7 +144,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSyntacticValidationException()
                 .hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
@@ -167,7 +163,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSyntacticValidationException()
                 .hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
@@ -186,7 +182,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("expected maxLength: 26, actual: 27",
@@ -206,7 +202,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("expected minLength: 1, actual: 0",
@@ -226,7 +222,7 @@ public class ConnectorValidationControllerIT {
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
                         .then()
-                        .log().all()
+
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("string [name_with_underscore] does not match pattern " + DNS_LABEL_REGEX);
@@ -245,7 +241,7 @@ public class ConnectorValidationControllerIT {
                     .post("/v1/models/{modelId}/validate",
                         connectorModel.getId())
                     .then()
-                    .log().all()
+
                     .expect(status().isBadRequest()))
             .isSemanticValidationException()
             .hasValidationErrors("string [NameWithUppercase] does not match pattern " + DNS_LABEL_REGEX);

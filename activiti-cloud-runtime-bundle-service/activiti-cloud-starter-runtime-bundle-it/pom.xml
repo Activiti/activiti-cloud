@@ -1,16 +1,17 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.rb</groupId>
+    <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-runtime-bundle-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-runtime-bundle-it</artifactId>
-
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.rb</groupId>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
       <scope>test</scope>
     </dependency>
@@ -30,8 +31,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -39,87 +40,15 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>rabbitmq</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <failIfNoTests>false</failIfNoTests>
-          <trimStackTrace>false</trimStackTrace>
-          <excludes>
-            <exclude>**/*TestCase.java</exclude>
-            <exclude>**/*IT.java</exclude>
-          </excludes>
-          <runOrder>alphabetical</runOrder>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  <profiles>
-    <profile>
-      <id>integration-test</id>
-      <activation>
-        <property>
-          <name>!skipITs</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>io.fabric8</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <configuration>
-              <startParallel>true</startParallel>
-              <images>
-                <image>
-                  <name>activiti/activiti-keycloak</name>
-                  <alias>activiti-keycloak</alias>
-                  <run>
-                    <ports>
-                      <port>8180:8180</port>
-                    </ports>
-                    <wait>
-                      <log>Keycloak .* started in</log>
-                      <time>50000</time>
-                      <shutdown>5000</shutdown>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-                <image>
-                  <name>rabbitmq:management</name>
-                  <alias>activiti-rabbitmq</alias>
-                  <run>
-                    <ports>
-                      <port>5672:5672</port>
-                      <port>15672:15672</port>
-                    </ports>
-                    <wait>
-                      <log>Server startup complete</log>
-                      <time>40000</time>
-                      <shutdown>3000</shutdown>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-              </images>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>start</goal>
-                  <goal>stop</goal>
-                  <goal>remove</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
