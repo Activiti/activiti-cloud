@@ -3,7 +3,7 @@
 
 This repo now includes a set of modules which contains different acceptances tests. This acceptance tests rely on having an environment to run against.
 
-In order to point to an environment you can export the following *ENVIROMENT VARIABLES*
+In order to point to an environment you can export the following *ENVIRONMENT VARIABLES*
 
 ```
 > export GATEWAY_HOST=<custom-gateway-host>:<custom-gateway-port>
@@ -34,4 +34,4 @@ In order to run these acceptance tests you can run:
 ```
 
 This will ignore the following modules: apps-acceptance-tests,multiple-runtime-acceptance-tests,security-policies-acceptance-tests and run all the others. 
-This is extremely useful to control which tests run depending on your environment configurations and why you are trying to test. 
+This is extremely useful to control which tests run depending on your environment configurations and why you are trying to test.
