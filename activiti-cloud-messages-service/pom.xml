@@ -61,17 +61,6 @@
       <type>pom</type>
     </dependency>
   </dependencies>
-  <developers>
-    <developer>
-      <id>igdianov</id>
-      <name>Igor Dianov</name>
-      <organization>Activiti</organization>
-      <organizationUrl>http://activiti.org</organizationUrl>
-      <roles>
-        <role>Principal Developer</role>
-      </roles>
-    </developer>
-  </developers>
   <modules>
     <module>dependencies</module>
     <module>services</module>
