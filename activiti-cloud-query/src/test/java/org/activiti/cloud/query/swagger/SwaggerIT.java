@@ -49,8 +49,8 @@ public class SwaggerIT {
                                 .and(containsString("ListResponseContentOfCloudProcessDefinition"))
                                 .and(containsString("EntriesResponseContentOfCloudProcessDefinition"))
                                 .and(containsString("EntryResponseContentOfCloudProcessDefinition"))
-                                .and(not(containsString("PagedResources«")))
-                                .and(not(containsString("PagedResources«")))
+                                .and(not(containsString("PagedModel«")))
+                                .and(not(containsString("PagedModel«")))
                                 .and(not(containsString("Resources«Resource«")))
                                 .and(not(containsString("Resource«")))
                                            ));

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.query.configuration;
 
+import com.google.common.base.Predicates;
 import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.model.payloads.GetProcessInstancesPayload;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -38,8 +39,9 @@ public class QueryConfiguration {
 
     @Bean
     public Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.rest")
-                       .or(RequestHandlerSelectors.basePackage("org.activiti.cloud.services.audit"));
+        return Predicates.or(
+            RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.rest"),
+            RequestHandlerSelectors.basePackage("org.activiti.cloud.services.audit"))::apply;
     }
 
     @Bean

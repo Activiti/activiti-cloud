@@ -37,7 +37,7 @@ import org.activiti.cloud.acc.core.steps.runtime.TaskRuntimeBundleSteps;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 
 public class ProcessInstanceSubProcesses {
 
@@ -46,20 +46,20 @@ public class ProcessInstanceSubProcesses {
 
     @Steps
     private ProcessVariablesRuntimeBundleSteps processVariablesRuntimeBundleSteps;
-    
+
     @Steps
     private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
-    
+
     @Steps
     private ProcessQuerySteps processQuerySteps;
-    
+
     @Steps
     private AuditSteps auditSteps;
-    
+
     private ProcessInstance processInstance;
 
     private ProcessInstance subprocessInstance;
-    
+
     private Task currentTask;
 
     @When("services are started")
@@ -76,14 +76,14 @@ public class ProcessInstanceSubProcesses {
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
         checkProcessWithTaskCreated();
     }
-    
+
     @When("the user starts a process with a subProcess called $processName")
-    public void startProcess(String processName) throws IOException, InterruptedException {        
+    public void startProcess(String processName) throws IOException, InterruptedException {
         processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),false);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
-    
+
     private void checkProcessWithTaskCreated() {
         assertThat(processInstance).isNotNull();
 
@@ -95,12 +95,12 @@ public class ProcessInstanceSubProcesses {
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
-    
+
     @When("the user claims the task declared in the subprocess")
     public void claimTask() throws Exception {
         taskRuntimeBundleSteps.claimTask(currentTask.getId());
     }
-    
+
     @When("the user completes the task declared in the subprocess")
     public void completeTask() throws Exception {
         taskRuntimeBundleSteps.completeTask(currentTask.getId(),
@@ -109,7 +109,7 @@ public class ProcessInstanceSubProcesses {
                         .withTaskId(currentTask.getId())
                         .build());
     }
-    
+
     @Then("subProcess events are emitted")
     public void verifySubProcessEventsEmiited() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
@@ -142,7 +142,7 @@ public class ProcessInstanceSubProcesses {
                                                 String variableValue){
         assertThat(subprocessInstance).isNotNull();
         await().untilAsserted(() -> {
-            Resources<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(subprocessInstance.getId());
+            CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(subprocessInstance.getId());
             assertThat(processVariables.getContent()).isNotNull();
             assertThat(processVariables.getContent())
                     .extracting(CloudVariableInstance::getName,
@@ -156,7 +156,7 @@ public class ProcessInstanceSubProcesses {
     public void checkParentProcessInstanceVariable(String variableName,
                           String variableValue){
         await().untilAsserted(() -> {
-            Resources<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(processInstance.getId());
+            CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(processInstance.getId());
             assertThat(processVariables.getContent()).isNotNull();
             assertThat(processVariables.getContent())
                     .extracting(CloudVariableInstance::getName,

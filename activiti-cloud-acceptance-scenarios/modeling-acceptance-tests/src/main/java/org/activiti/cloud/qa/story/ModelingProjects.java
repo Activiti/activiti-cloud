@@ -30,7 +30,7 @@ import org.activiti.cloud.modeling.api.Model;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 
 import net.thucydides.core.annotations.Steps;
 
@@ -167,7 +167,7 @@ public class ModelingProjects {
             resourceAsFile(modelType + "/" + setExtension(modelName,
                                                           modelingModelsSteps.getModelType(modelType).getContentFileExtension()))
                     .map(file -> {
-                        Resource<Model> model = modelingProjectsSteps.importModelInCurrentProject(file);
+                        EntityModel<Model> model = modelingProjectsSteps.importModelInCurrentProject(file);
                         if (processVariables != null) {
                             modelingModelsSteps.addProcessVariableToModelModel(model.getContent(),
                                                                                processVariables);

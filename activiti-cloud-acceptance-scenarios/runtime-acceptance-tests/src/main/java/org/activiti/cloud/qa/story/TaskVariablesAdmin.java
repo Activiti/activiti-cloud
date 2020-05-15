@@ -22,7 +22,7 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -47,7 +47,7 @@ public class TaskVariablesAdmin {
     public void assertHasTaskVariable(String variableName, String variableValue){
 
         String taskId = Serenity.sessionVariableCalled(Tasks.STAND_ALONE_TASK_ID);
-        Resources<CloudVariableInstance> rbVariables = taskVariablesRuntimeAdminSteps.getVariables(taskId);
+        CollectionModel<CloudVariableInstance> rbVariables = taskVariablesRuntimeAdminSteps.getVariables(taskId);
         assertThat(rbVariables)
                 .extracting(CloudVariableInstance::getName,
                             CloudVariableInstance::getValue)

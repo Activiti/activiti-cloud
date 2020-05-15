@@ -40,7 +40,7 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
@@ -112,7 +112,7 @@ public class ProcessInstanceConnectors {
 
         assertThat(processInstanceId).isNotNull();
         await().untilAsserted(() -> {
-            Resources<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(processInstanceId);
+            CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(processInstanceId);
             assertThat(processVariables.getContent()).isNotNull();
             assertThat(processVariables.getContent())
                     .extracting(CloudVariableInstance::getName,
