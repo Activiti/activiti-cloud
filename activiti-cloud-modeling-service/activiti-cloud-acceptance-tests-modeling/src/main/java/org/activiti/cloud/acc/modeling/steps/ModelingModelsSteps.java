@@ -36,7 +36,7 @@ import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.HOST_VALUE;
@@ -51,7 +51,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFil
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.Link.REL_SELF;
+import static org.springframework.hateoas.IanaLinkRelations.SELF;
 
 /**
  * Modeling steps for models
@@ -69,7 +69,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     private ModelingTestsConfigurationProperties config;
 
     @Step
-    public Resource<Model> create(String modelName,
+    public EntityModel<Model> create(String modelName,
                                   String modelType,
                                   List<String> processVariables) {
         Model model = mock(Model.class);
@@ -84,7 +84,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Step
     public void removeProcessVariableInCurrentModel(String processVariable) {
-        Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
+        EntityModel<Model> currentContext = checkAndGetCurrentContext(Model.class);
         assertThat(currentContext.getContent()).isInstanceOf(Model.class);
         Model model = currentContext.getContent();
 
@@ -107,7 +107,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Step
     public void addProcessVariableInCurrentModel(List<String> processVariable) {
-        Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
+        EntityModel<Model> currentContext = checkAndGetCurrentContext(Model.class);
         assertThat(currentContext.getContent()).isInstanceOf(Model.class);
         Model model = currentContext.getContent();
 
@@ -131,7 +131,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Step
     public void saveCurrentModel(boolean updateContent) {
-        Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
+        EntityModel<Model> currentContext = checkAndGetCurrentContext(Model.class);
         assertThat(currentContext.getContent()).isInstanceOf(Model.class);
         if (updateContent) {
             String updateMsg = "updated content";
@@ -143,13 +143,13 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     }
 
     @Step
-    public void saveModel(Resource<Model> model) {
-        modelingModelsService.updateByUri(modelingUri(model.getLink(REL_SELF).getHref()),
+    public void saveModel(EntityModel<Model> model) {
+        modelingModelsService.updateByUri(modelingUri(model.getLink(SELF).get().getHref()),
                                           model.getContent());
     }
 
     private List<Response> validateCurrentModel() throws IOException {
-        Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
+        EntityModel<Model> currentContext = checkAndGetCurrentContext(Model.class);
         assertThat(currentContext.getContent()).isInstanceOf(Model.class);
         final Model model = currentContext.getContent();
         model.setId(getModelId(currentContext));
@@ -164,8 +164,8 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         return responses;
     }
 
-    private String getModelId(Resource<Model> model) {
-        String href = model.getLink(REL_SELF).getHref();
+    private String getModelId(EntityModel<Model> model) {
+        String href = model.getLink(SELF).get().getHref();
         return href.substring(href.lastIndexOf('/') + 1);
     }
     private FormData getFormData(Model model,
@@ -226,18 +226,18 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     }
 
     @Step
-    public Response validateModel(Resource<Model> model,
+    public Response validateModel(EntityModel<Model> model,
                                   FormData file) {
-        Link validateModelLink = model.getLink("self");
+        Link validateModelLink = model.getLink(SELF).get();
         assertThat(validateModelLink).isNotNull();
         return modelingModelsService.validateModelByUri(modelingUri(validateModelLink.getHref() + "/validate"),
                                                         file);
     }
 
     @Step
-    public Response validateExtensions(Resource<Model> model,
+    public Response validateExtensions(EntityModel<Model> model,
                                        FormData file) {
-        Link validateModelLink = model.getLink("self");
+        Link validateModelLink = model.getLink(SELF).get();
         assertThat(validateModelLink).isNotNull();
         return modelingModelsService.validateModelByUri(modelingUri(validateModelLink.getHref() + "/validate/extensions"),
                                                         file);
@@ -245,14 +245,14 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Step
     public void checkCurrentModelVersion(String expectedModelVersion) {
-        Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
+        EntityModel<Model> currentContext = checkAndGetCurrentContext(Model.class);
         Model model = currentContext.getContent();
         assertThat(model.getVersion()).isEqualTo(expectedModelVersion);
     }
 
     @Step
     public void checkCurrentModelContainsVariables(String... processVariables) {
-        Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
+        EntityModel<Model> currentContext = checkAndGetCurrentContext(Model.class);
         Model model = currentContext.getContent();
         assertThat(model.getExtensions()).isNotNull();
         assertThat(this.getExtensionFromMap(model).getProcessVariables()).containsKeys(processVariables);

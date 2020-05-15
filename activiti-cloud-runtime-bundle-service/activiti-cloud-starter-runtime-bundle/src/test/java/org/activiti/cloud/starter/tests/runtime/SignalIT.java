@@ -39,8 +39,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -79,7 +79,7 @@ public class SignalIT {
 
     @BeforeEach
     public void setUp() {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
@@ -197,7 +197,7 @@ public class SignalIT {
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        ResponseEntity<PagedResources<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
+        ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
     }
 
@@ -219,11 +219,11 @@ public class SignalIT {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        ResponseEntity<PagedResources<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
+        ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
 
         await().untilAsserted(() -> {
-            ResponseEntity<Resources<CloudVariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(startProcessEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(startProcessEntity);
             Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
             VariableInstance variable = variableCollection.iterator().next();
             assertThat(variable.getName()).isEqualToIgnoringCase("myVar");
@@ -231,8 +231,8 @@ public class SignalIT {
         });
     }
 
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
+    private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
                                      HttpMethod.GET,

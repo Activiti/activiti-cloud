@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
-@TestPropertySource("classpath:/hibernate.properties")
+@TestPropertySource("classpath:application-test.properties")
 public class ActivitiGraphQLSchemaAutoConfigurationTest {
 
     @Autowired(required=false)

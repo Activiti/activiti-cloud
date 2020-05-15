@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -89,7 +89,7 @@ public class ProcessInstanceIT {
     public void setUp() {
         keycloakTestUser = "hruser";
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
@@ -311,7 +311,7 @@ public class ProcessInstanceIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
+        ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
 
         //then
         assertThat(processInstancesPage).isNotNull();
@@ -332,7 +332,7 @@ public class ProcessInstanceIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
         //when
-        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
+        ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
 
         //then
         assertThat(processInstancesPage).isNotNull();
@@ -512,7 +512,7 @@ public class ProcessInstanceIT {
                                                                                                     null,
                                                                                                     "business_key");
         //when
-        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getSubprocesses(startedProcessEntity.getBody().getId());
+        ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getSubprocesses(startedProcessEntity.getBody().getId());
 
         //then
         assertThat(processInstancesPage.getStatusCode()).isEqualTo(HttpStatus.OK);

@@ -36,11 +36,11 @@ import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.rest.api.TaskVariableAdminController;
-import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
-import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,27 +49,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TaskVariableAdminControllerImpl implements TaskVariableAdminController {
-    
-    private final TaskVariableInstanceResourceAssembler variableResourceAssembler;
-    private final ResourcesAssembler resourcesAssembler;
+
+    private final TaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler;
+    private final CollectionModelAssembler resourcesAssembler;
     private final TaskAdminRuntime taskRuntime;
 
     @Autowired
-    public TaskVariableAdminControllerImpl(TaskVariableInstanceResourceAssembler variableResourceAssembler,
-                                           ResourcesAssembler resourcesAssembler,
+    public TaskVariableAdminControllerImpl(TaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler,
+                                           CollectionModelAssembler resourcesAssembler,
                                            TaskAdminRuntime taskRuntime) {
 
-        this.variableResourceAssembler = variableResourceAssembler;
+        this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.resourcesAssembler = resourcesAssembler;
         this.taskRuntime = taskRuntime;
     }
 
     @Override
-    public Resources<Resource<CloudVariableInstance>> getVariables(@PathVariable String taskId) {
-        return resourcesAssembler.toResources(taskRuntime.variables(TaskPayloadBuilder.variables()
+    public CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String taskId) {
+        return resourcesAssembler.toCollectionModel(taskRuntime.variables(TaskPayloadBuilder.variables()
                                                                     .withTaskId(taskId)
                                                                     .build()),
-                                              variableResourceAssembler);
+                                              variableRepresentationModelAssembler);
     }
 
     @Override
@@ -78,10 +78,10 @@ public class TaskVariableAdminControllerImpl implements TaskVariableAdminControl
 
         createTaskVariablePayload.setTaskId(taskId);
         taskRuntime.createVariable(createTaskVariablePayload);
-        
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
+
     @Override
     public ResponseEntity<Void> updateVariable(@PathVariable String taskId,
                                                @PathVariable String variableName,
@@ -90,8 +90,8 @@ public class TaskVariableAdminControllerImpl implements TaskVariableAdminControl
         updateTaskVariablePayload.setTaskId(taskId);
         updateTaskVariablePayload.setName(variableName);
         taskRuntime.updateVariable(updateTaskVariablePayload);
-   
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
- 
+
 }

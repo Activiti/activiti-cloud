@@ -57,7 +57,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,

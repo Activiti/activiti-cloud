@@ -24,8 +24,8 @@ import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -104,7 +104,7 @@ public interface ModelRestApi {
             //response = AlfrescoModelPage.class
     )
     @GetMapping(path = "/projects/{projectId}/models")
-    PagedResources<Resource<Model>> getModels(
+    PagedModel<EntityModel<Model>> getModels(
             @ApiParam(value = GET_MODELS_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
@@ -115,7 +115,7 @@ public interface ModelRestApi {
             tags = MODELS,
             value = "Get metadata information for a model")
     @GetMapping(path = "/models/{modelId}")
-    Resource<Model> getModel(
+    EntityModel<Model> getModel(
             @ApiParam(value = GET_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId);
 
@@ -125,7 +125,7 @@ public interface ModelRestApi {
             notes = "Create a new model related to an existing project")
     @PostMapping(path = "/projects/{projectId}/models")
     @ResponseStatus(CREATED)
-    Resource<Model> createModel(
+    EntityModel<Model> createModel(
             @ApiParam(value = CREATE_MODEL_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(CREATE_MODEL_PARAM_DESCR)
@@ -136,7 +136,7 @@ public interface ModelRestApi {
             value = "Update model metadata",
             notes = "Update the details of a model.")
     @PutMapping(path = "/models/{modelId}")
-    Resource<Model> updateModel(
+    EntityModel<Model> updateModel(
             @ApiParam(value = UPDATE_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId,
             @ApiParam(UPDATE_MODEL_PARAM_DESCR)
@@ -189,7 +189,7 @@ public interface ModelRestApi {
             notes = "Allows a file to be uploaded containing a model definition.")
     @PostMapping(path = "/projects/{projectId}/models/import", consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(CREATED)
-    Resource<Model> importModel(
+    EntityModel<Model> importModel(
             @ApiParam(value = CREATE_MODEL_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(IMPORT_MODEL_TYPE_PARAM_DESCR)
@@ -216,7 +216,7 @@ public interface ModelRestApi {
             value = "List model types",
             notes = "Get the list of available model types.")
     @GetMapping(path = "/model-types")
-    PagedResources<Resource<ModelType>> getModelTypes(Pageable pageable);
+    PagedModel<EntityModel<ModelType>> getModelTypes(Pageable pageable);
 
     @ApiOperation(
             tags = MODELS,

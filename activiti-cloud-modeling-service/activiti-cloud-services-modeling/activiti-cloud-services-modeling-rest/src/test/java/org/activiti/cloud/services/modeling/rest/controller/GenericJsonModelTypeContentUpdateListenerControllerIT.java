@@ -88,7 +88,7 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
         String stringModel = objectMapper.writeValueAsString(genericJsonModel);
 
-        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
+        mockMvc.perform(putMultipart("/{version}/models/{modelId}/content",
                                      API_VERSION,
                                      genericJsonModel.getId()).file("file",
                                                                     "simple-model.json",
@@ -109,7 +109,7 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
         String stringModel = objectMapper.writeValueAsString(genericJsonModel);
 
-        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
+        mockMvc.perform(putMultipart("/{version}/models/{modelId}/content",
                                      API_VERSION,
                                      genericJsonModel.getId()).file("file",
                                                                     "simple-model.json",

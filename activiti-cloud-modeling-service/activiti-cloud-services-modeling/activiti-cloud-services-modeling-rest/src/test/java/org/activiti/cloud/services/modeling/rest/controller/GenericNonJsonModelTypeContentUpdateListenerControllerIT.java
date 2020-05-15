@@ -87,7 +87,7 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
                                                                                 genericNonJsonModelType.getName()));
 
-        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
+        mockMvc.perform(putMultipart("/{version}/models/{modelId}/content",
                                      API_VERSION,
                                      genericNonJsonModel.getId()).file("file",
                                                                        "simple-model.bin",
@@ -110,7 +110,7 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
 
         byte[] fileContent = resourceAsByteArray("generic/model-simple.bin");
 
-        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
+        mockMvc.perform(putMultipart("/{version}/models/{modelId}/content",
                                      API_VERSION,
                                      genericNonJsonModel.getId()).file("file",
                                                                        "simple-model.json",

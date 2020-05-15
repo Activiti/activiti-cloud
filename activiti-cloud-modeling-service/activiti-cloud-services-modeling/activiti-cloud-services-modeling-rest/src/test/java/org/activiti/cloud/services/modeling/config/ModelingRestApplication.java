@@ -15,10 +15,11 @@
  */
 package org.activiti.cloud.services.modeling.config;
 
+import org.activiti.cloud.services.test.TestProducerAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = TestProducerAutoConfiguration.class)
 public class ModelingRestApplication {
 
     public static void main(String[] args) {

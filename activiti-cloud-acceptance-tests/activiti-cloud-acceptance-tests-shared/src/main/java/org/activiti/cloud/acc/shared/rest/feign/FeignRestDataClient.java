@@ -26,8 +26,8 @@ import feign.RequestLine;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.gson.GsonEncoder;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
 
 /**
  * Generic REST client operations
@@ -36,15 +36,15 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
 
     @RequestLine("POST")
     @Headers("Content-Type: application/json")
-    Resource<R> create(R resource);
+    EntityModel<R> create(R resource);
 
     @RequestLine("GET /{id}")
     @Headers("Content-Type: application/json")
-    Resource<R> findById(@Param("id") String id);
+    EntityModel<R> findById(@Param("id") String id);
 
     @RequestLine("GET")
     @Headers("Content-Type: application/json")
-    PagedResources<Resource<R>> findAll();
+    PagedModel<EntityModel<R>> findAll();
 
     @RequestLine("PUT /{id}")
     @Headers("Content-Type: application/json")
@@ -67,7 +67,7 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
 
     @RequestLine("GET")
     @Headers("Content-Type: application/json")
-    Resource<R> get();
+    EntityModel<R> get();
 
     @RequestLine("DELETE")
     @Headers("Content-Type: application/json")
@@ -75,15 +75,15 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
 
     Class<C> getType();
 
-    default PagedResources<Resource<R>> findAllByUri(String uri) {
+    default PagedModel<EntityModel<R>> findAllByUri(String uri) {
         return buildByUri(uri).findAll();
     }
 
-    default Resource<R> findByUri(String uri) {
+    default EntityModel<R> findByUri(String uri) {
         return buildByUri(uri).get();
     }
 
-    default Resource<R> createByUri(String uri,
+    default EntityModel<R> createByUri(String uri,
                              R resource) {
         return buildByUri(uri).create(resource);
     }

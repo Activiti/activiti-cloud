@@ -46,7 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +63,7 @@ public class QueryTaskEntityVariablesIT {
     private static final String VARIABLES_URL = "/v1/tasks/{taskId}/variables";
     private static final String ADMIN_VARIABLES_URL = "/admin/v1/tasks/{taskId}/variables";
 
-    private static final ParameterizedTypeReference<PagedResources<TaskVariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<TaskVariableEntity>>() {
+    private static final ParameterizedTypeReference<PagedModel<TaskVariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<TaskVariableEntity>>() {
     };
 
     @Autowired
@@ -142,7 +142,7 @@ public class QueryTaskEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -182,7 +182,7 @@ public class QueryTaskEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,
@@ -207,7 +207,7 @@ public class QueryTaskEntityVariablesIT {
     public void shouldNotSeeAdminVariables() {
 
         //when
-        ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_VARIABLES_URL,
+        ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_VARIABLES_URL,
                              HttpMethod.GET,
                              keycloakTokenProducer.entityWithAuthorizationHeader(),
                              PAGED_VARIABLE_RESPONSE_TYPE,
@@ -230,7 +230,7 @@ public class QueryTaskEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(standAloneTask.getId());
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = getTaskVariables(standAloneTask.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -264,7 +264,7 @@ public class QueryTaskEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -287,7 +287,7 @@ public class QueryTaskEntityVariablesIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -321,7 +321,7 @@ public class QueryTaskEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -348,7 +348,7 @@ public class QueryTaskEntityVariablesIT {
 
         await().untilAsserted(() -> {
           //when
-          ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity1 = getTaskVariables(task.getId());
+          ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity1 = getTaskVariables(task.getId());
 
           //then
           assertThat(responseEntity1.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -383,7 +383,7 @@ public class QueryTaskEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -403,7 +403,7 @@ public class QueryTaskEntityVariablesIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -420,7 +420,7 @@ public class QueryTaskEntityVariablesIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -439,7 +439,7 @@ public class QueryTaskEntityVariablesIT {
     }
 
 
-    public  ResponseEntity<PagedResources<TaskVariableEntity>> getTaskVariables(String taskId) {
+    public  ResponseEntity<PagedModel<TaskVariableEntity>> getTaskVariables(String taskId) {
         return testRestTemplate.exchange(VARIABLES_URL,
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),

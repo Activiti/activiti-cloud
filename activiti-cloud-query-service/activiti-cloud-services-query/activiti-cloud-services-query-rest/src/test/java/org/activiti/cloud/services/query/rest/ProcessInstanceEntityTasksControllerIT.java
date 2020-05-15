@@ -45,17 +45,19 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ProcessInstanceTasksController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({
     QueryRestWebMvcAutoConfiguration.class,
     CommonModelAutoConfiguration.class,
     AlfrescoWebAutoConfiguration.class
 })
+@WithMockUser
 public class ProcessInstanceEntityTasksControllerIT {
 
     @Autowired

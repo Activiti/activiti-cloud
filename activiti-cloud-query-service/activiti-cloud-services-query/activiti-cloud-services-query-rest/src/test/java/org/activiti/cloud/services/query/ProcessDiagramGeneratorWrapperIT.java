@@ -33,7 +33,7 @@ import org.springframework.test.context.TestPropertySource;
  * Integration tests for ProcessDiagramGeneratorWrapper
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@TestPropertySource("classpath:test-process-diagram.properties")
+@TestPropertySource("classpath:application-test-process-diagram.properties")
 public class ProcessDiagramGeneratorWrapperIT {
 
     private static final String DEFAULT_DIAGRAM_FONT_NAME = "Serif";
@@ -176,7 +176,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     @Test
     public void testProcessDiagramFonts() {
         //GIVEN
-        //test-process-diagram.properties:
+        //application-test-process-diagram.properties:
         //activiti.engine.diagram.activity.font=Lucida
         //activiti.engine.diagram.label.font=InvalidFont
         when(processDiagramGenerator.getAvailableFonts())

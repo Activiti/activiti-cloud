@@ -28,9 +28,9 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 
@@ -49,7 +49,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     private AlfrescoJackson2HttpMessageConverter<String> httpMessageConverter;
 
     @Mock
-    private PagedResourcesConverter pagedResourcesConverter;
+    private PagedModelConverter pagedCollectionModelConverter;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -58,10 +58,10 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     private ListResponseContent<String> alfrescoPageContentListWrapper;
 
     @Mock
-    private PagedResources<Resource<String>> basePagedResources;
+    private PagedModel<EntityModel<String>> basePagedModel;
 
     @Mock
-    private Resources<Resource<String>> baseResources;
+    private CollectionModel<EntityModel<String>> baseCollectionModel;
 
     @Mock
     private Type type;
@@ -78,9 +78,9 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     }
 
     @Test
-    public void writeInternalShouldConvertObjectUsingPagedResourcesConverterWhenIsAPagedResources() throws Exception {
+    public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModel() throws Exception {
         //given
-        given(pagedResourcesConverter.pagedResourcesToListResponseContent(basePagedResources))
+        given(pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(basePagedModel))
                 .willReturn(alfrescoPageContentListWrapper);
 
         doNothing().when(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
@@ -88,7 +88,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
                                                                     outputMessage);
 
         //when
-        httpMessageConverter.writeInternal(basePagedResources,
+        httpMessageConverter.writeInternal(basePagedModel,
                                            type,
                                            outputMessage);
 
@@ -99,10 +99,10 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     }
 
     @Test
-    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfResources() throws Exception {
+    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfCollectionModel() throws Exception {
 
         //given
-        given(pagedResourcesConverter.resourcesToListResponseContent(baseResources))
+        given(pagedCollectionModelConverter.resourcesToListResponseContent(baseCollectionModel))
                 .willReturn(alfrescoPageContentListWrapper);
 
         doNothing().when(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
@@ -110,7 +110,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
                 outputMessage);
 
         //when
-        httpMessageConverter.writeInternal(baseResources,
+        httpMessageConverter.writeInternal(baseCollectionModel,
                 type,
                 outputMessage);
 
@@ -129,7 +129,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
                                                                     eq(outputMessage));
 
         //when
-        httpMessageConverter.writeInternal(new Resource<>("content"),
+        httpMessageConverter.writeInternal(new EntityModel<>("content"),
                                            type,
                                            outputMessage);
 
@@ -164,7 +164,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     @Test
     public void canWriteShouldReturnTrueWhenTypeIsNotStringAndMediaTypeIsApplicationJson() {
         //given
-        Class<Resource> clazz = Resource.class;
+        Class<?> clazz = EntityModel.class;
         given(httpMessageConverter.canWrite(clazz, MediaType.APPLICATION_JSON)).willReturn(true);
 
         //when
