@@ -13,33 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.audit.api.assembler;
+package org.activiti.cloud.services.audit.jpa.assembler;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-import java.lang.reflect.Method;
-
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 public class EventRepresentationModelAssembler implements RepresentationModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>, EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> {
 
     @Override
     public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> toModel(CloudRuntimeEvent<?, CloudRuntimeEventType> event) {
-        Link selfRel = linkTo(getFindByIdMethod(), event.getId()).withSelfRel();
+        Link selfRel = linkTo(methodOn(AuditEventsControllerImpl.class).findById(event.getId())).withSelfRel();
         return new EntityModel<>(event,
                                  selfRel);
     }
 
-    private Method getFindByIdMethod() {
-        try {
-            return AuditEventsController.class.getMethod("findById", String.class);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
