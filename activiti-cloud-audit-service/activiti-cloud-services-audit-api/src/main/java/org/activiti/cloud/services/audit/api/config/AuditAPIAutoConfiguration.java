@@ -15,18 +15,12 @@
  */
 package org.activiti.cloud.services.audit.api.config;
 
-import org.activiti.cloud.services.audit.api.assembler.EventRepresentationModelAssembler;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AuditAPIAutoConfiguration {
-
-    @Bean
-    public EventRepresentationModelAssembler eventRepresentationModelAssembler(){
-        return new EventRepresentationModelAssembler();
-    }
 
     @Bean
     public EventsLinkRelationProvider eventsRelProvider() {
