@@ -332,6 +332,7 @@ pipeline {
         container('maven') {
           script {
 
+            sh "rm -rf .updatebot-repos/github"
             sh "git add --all"
             sh """git commit -m "release $VERSION" --allow-empty """
             sh """git tag -fa v$VERSION -m "Release version $VERSION" """
