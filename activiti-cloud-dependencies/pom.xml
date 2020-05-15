@@ -106,7 +106,6 @@
     </dependency>
   </dependencies>
   <modules>
-    <module>dependencies-tests</module>
     <module>dependencies</module>
   </modules>
   <build>
