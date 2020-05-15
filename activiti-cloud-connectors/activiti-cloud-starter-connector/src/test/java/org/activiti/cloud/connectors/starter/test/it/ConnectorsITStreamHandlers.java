@@ -43,7 +43,7 @@ public class ConnectorsITStreamHandlers {
 
     @StreamListener(value = RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
     public void consumeIntegrationResultsMock(IntegrationResult integrationResult) throws InterruptedException {
-        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables().get("var2")).isEqualTo(2);
+        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables().get("var2")).isEqualTo(2L);
         assertThat(integrationResult.getIntegrationContext().getId()).isEqualTo(getIntegrationId());
         integrationResultEventsCounter.incrementAndGet();
     }

@@ -15,9 +15,13 @@
  */
 package org.activiti.cloud.connectors.starter.test.it;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -37,8 +41,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -91,7 +93,7 @@ public class ActivitiCloudConnectorServiceIT {
         integrationContext.setId(INTEGRATION_ID);
         integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
         integrationContext.setProcessDefinitionId(PROCESS_DEFINITION_ID);
-        integrationContext.setInBoundVariables(variables);
+        integrationContext.addInBoundVariables(variables);
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setAppName("mock-rb");
         integrationRequest.setServiceFullName("mock-rb");

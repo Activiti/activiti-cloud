@@ -44,7 +44,7 @@ public class IntegrationErrorBuilderTest {
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
-        integrationContext.setInBoundVariables(Collections.emptyMap());
+        integrationContext.addInBoundVariables(Collections.emptyMap());
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
@@ -75,7 +75,7 @@ public class IntegrationErrorBuilderTest {
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
-        integrationContext.setInBoundVariables(Collections.emptyMap());
+        integrationContext.addInBoundVariables(Collections.emptyMap());
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
