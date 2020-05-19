@@ -124,7 +124,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        mockMvc.perform(get("/{version}/projects",
+        mockMvc.perform(get("/v1/projects",
                             RepositoryRestConfig.API_VERSION))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
@@ -141,7 +141,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        mockMvc.perform(get("/{version}/projects?name=project1",
+        mockMvc.perform(get("/v1/projects?name=project1",
                             RepositoryRestConfig.API_VERSION))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
@@ -157,7 +157,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project-main-2"));
         projectRepository.createProject(project("project-secondary-2"));
 
-        mockMvc.perform(get("/{version}/projects?name=main",
+        mockMvc.perform(get("/v1/projects?name=main",
                             RepositoryRestConfig.API_VERSION))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
@@ -175,7 +175,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project-main-2"));
         projectRepository.createProject(project("project-secondary-2"));
 
-        mockMvc.perform(get("/{version}/projects?name=MAIN",
+        mockMvc.perform(get("/v1/projects?name=MAIN",
                 RepositoryRestConfig.API_VERSION))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
@@ -190,8 +190,7 @@ public class ProjectControllerIT {
     public void should_returnProject_when_gettingExistingProject() throws Exception {
         Project project = projectRepository.createProject(project("existing-project"));
 
-        mockMvc.perform(get("/{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(get("/v1/projects/{projectId}",
                             project.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
@@ -200,7 +199,7 @@ public class ProjectControllerIT {
 
     @Test
     public void should_returnStatusCreatedAndProjectDetails_when_creatingProject() throws Exception {
-        mockMvc.perform(post("/{version}/projects",
+        mockMvc.perform(post("/v1/projects",
                              API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(projectWithDescription("new-project",
@@ -216,7 +215,7 @@ public class ProjectControllerIT {
     public void should_throwConflictException_when_creatingProjectExistingName() throws Exception {
         projectRepository.createProject(project("existing-project"));
 
-        mockMvc.perform(post("/{version}/projects",
+        mockMvc.perform(post("/v1/projects",
                              API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("existing-project"))))
@@ -227,8 +226,7 @@ public class ProjectControllerIT {
     public void should_returnStatusOk_when_updatingExistingProject() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("updated-project-name"))))
@@ -247,8 +245,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("existing-project"));
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("existing-project"))))
@@ -259,8 +256,7 @@ public class ProjectControllerIT {
     public void should_returnStatusOk_when_updatingProjectNoName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(projectWithDescription(null,
@@ -272,8 +268,7 @@ public class ProjectControllerIT {
     public void should_throwBadRequestException_when_updatingProjectEmptyName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project(""))))
@@ -284,8 +279,7 @@ public class ProjectControllerIT {
     public void should_throwBadRequestException_when_updatingProjectInvalidName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("_1-invalid-name"))))
@@ -296,8 +290,7 @@ public class ProjectControllerIT {
     public void should_throwBadRequestException_when_updatingProjectLongName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("too-long-name-1234567890-1234567890"))))
@@ -308,8 +301,7 @@ public class ProjectControllerIT {
     public void should_returnStatusNoContent_when_deletingProject() throws Exception {
         Project project = projectRepository.createProject(project("project-to-delete"));
 
-        mockMvc.perform(delete("/{version}/projects/{projectId}",
-                               API_VERSION,
+        mockMvc.perform(delete("/v1/projects/{projectId}",
                                project.getId()))
                 .andExpect(status().isNoContent());
 
@@ -341,8 +333,7 @@ public class ProjectControllerIT {
                                     processModelWithExtensions("Process_RankMovieId", extensionsMap));
 
        MvcResult response = mockMvc.perform(
-                get("/{version}/projects/{projectId}/export",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/export",
                     project.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -405,8 +396,7 @@ public class ProjectControllerIT {
                               new ModelValidationError());
 
         MvcResult response = mockMvc.perform(
-                get("/{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -418,8 +408,7 @@ public class ProjectControllerIT {
                 .createProject(project("project-without-process"));
 
         MvcResult response = mockMvc.perform(
-                get("/{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -455,8 +444,7 @@ public class ProjectControllerIT {
                 processModelWithExtensions("process-model", extensionsMap));
 
         MvcResult response = mockMvc.perform(
-                get("/{version}/projects/{projectId}/validate",
-                        API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                         project.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -471,8 +459,7 @@ public class ProjectControllerIT {
                                                     resourceAsByteArray("process/no-assignee.bpmn20.xml")));
 
         MvcResult response = mockMvc.perform(
-                get("/{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -498,8 +485,7 @@ public class ProjectControllerIT {
                                                    "invalid-connector-action",
                                                    resourceAsByteArray("connector/invalid-connector-action.json")));
         MvcResult response = mockMvc.perform(
-                get("/{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -524,8 +510,7 @@ public class ProjectControllerIT {
                                                    "invalid-connector-action",
                                                    resourceAsByteArray("connector/invalid-connector-action.json")));
         MvcResult response = mockMvc.perform(
-                get("/{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -558,8 +543,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("/{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -585,8 +569,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("/{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -612,8 +595,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("/{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -638,8 +620,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
             mockMvc.perform(
-                get("/{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn())
@@ -666,8 +647,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("/{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -695,8 +675,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("/{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -728,8 +707,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("/{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -760,8 +738,7 @@ public class ProjectControllerIT {
                                                                     resourceAsByteArray("process/call-activity.bpmn20.xml")));
 
         mockMvc.perform(
-                get("/{version}/projects/{projectId}/export",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/export",
                     project.getId()))
                 .andExpect(status().isOk());
     }
@@ -773,7 +750,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy.zip"));
 
-        mockMvc.perform(multipart("/{version}/projects/import",
+        mockMvc.perform(multipart("/v1/projects/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
@@ -789,7 +766,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy-invalid.zip"));
 
-        mockMvc.perform(multipart("/{version}/projects/import",
+        mockMvc.perform(multipart("/v1/projects/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
@@ -804,7 +781,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy-invalid-process-json.zip"));
 
-        mockMvc.perform(multipart("/{version}/projects/import",
+        mockMvc.perform(multipart("/v1/projects/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
@@ -821,7 +798,7 @@ public class ProjectControllerIT {
 
         String overridingName = "override";
 
-        mockMvc.perform(multipart("/{version}/projects/import?name=" + overridingName,
+        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName,
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is(overridingName)));
@@ -834,7 +811,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy.zip"));
 
-        mockMvc.perform(multipart("/{version}/projects/import?name=",
+        mockMvc.perform(multipart("/v1/projects/import?name=",
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
@@ -849,7 +826,7 @@ public class ProjectControllerIT {
 
         String overridingName = "      ";
 
-        mockMvc.perform(multipart("/{version}/projects/import?name=" + overridingName,
+        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName,
                                   API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
@@ -869,8 +846,7 @@ public class ProjectControllerIT {
                                                    "movies",
                                                    resourceAsByteArray("connector/movies.json")));
 
-        mockMvc.perform(get("/{version}/projects/{projectId}/export",
-                            API_VERSION,
+        mockMvc.perform(get("/v1/projects/{projectId}/export",
                             project.getId()))
                 .andExpect(status().isOk());
     }
@@ -882,7 +858,7 @@ public class ProjectControllerIT {
             "project/zip",
             resourceAsByteArray("project/e2e-ama-test-dmn-hit-policy-Sh9rw.zip"));
 
-        mockMvc.perform(multipart("/{version}/projects/import",
+        mockMvc.perform(multipart("/v1/projects/import",
             API_VERSION)
             .file(zipFile)
             .accept(APPLICATION_JSON_VALUE))
