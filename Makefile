@@ -82,6 +82,7 @@ update-version-in-example-charts:
 create-helm-charts-release-and-upload:
 	@for chart in $(charts) ; do \
 		cd $$chart && \
+		make version && \
 		make build && \
 		make release && \
 		make github && \

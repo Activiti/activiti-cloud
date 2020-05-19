@@ -18,7 +18,6 @@ pipeline {
     REALM = "activiti"
     APP_NAME = 'activiti-cloud-application'
     JX_VERSION = jx_release_version()
-//    VERSION = "$JX_VERSION"
     CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
     GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
     GITHUB_HELM_REPO_URL = "https://activiti.github.io/activiti-cloud-helm-charts/"
@@ -31,6 +30,7 @@ pipeline {
     RELEASE_BRANCH = "develop"
     RELEASE_TAG_REGEX = "*M*"
     ACTIVITI_CLOUD_FULL_CHART_VERSIONS = "$VERSION"
+    HELM_ACTIVITI_VERSION = "$VERSION"
   }
   stages {
     stage('Configure Git') {
@@ -128,13 +128,7 @@ pipeline {
 
             for (chart in charts) {
               dir("$chart") {
-                retry(5) {
-                  def name = chart.substring(chart.lastIndexOf('/') + 1)
-
-                  sh """sed -i -e "s/version:.*/version: $VERSION/" Chart.yaml"""
-                  sh """sed -i -e "s|repository: .*|repository: $DOCKER_REGISTRY/$ORG/$name|" values.yaml"""
-                  sh """sed -i -e "s/tag: .*/tag: $VERSION/" values.yaml"""
-                }
+                 sh "make version"
               }
             }
 

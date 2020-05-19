@@ -3,7 +3,6 @@ NAME := activiti-cloud-modeling
 ORG := $(or $(ORG),activiti)
 APP_NAME := $(or $(APP_NAME),$(NAME))
 OS := $(shell uname)
-RELEASE_VERSION := $(or $(HELM_ACTIVITI_VERSION),$(shell cat ../../VERSION))
 RELEASE_ARTIFACT := $(or $(RELEASE_ARTIFACT),$(APP_NAME))
 
 GITHUB_CHARTS_REPO := $(or $(GITHUB_CHARTS_REPO),$(shell git config --get remote.origin.url))
@@ -39,24 +38,24 @@ github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	rm -rf $$GITHUB_CHARTS_DIR || echo "try to remove $$GITHUB_CHARTS_DIR"
 	git clone -b "$(GITHUB_CHARTS_BRANCH)" https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git $(GITHUB_CHARTS_DIR)
-	cp "$(NAME)-$(RELEASE_VERSION).tgz" $(GITHUB_CHARTS_DIR)
+	cp "$(NAME)-$(VERSION).tgz" $(GITHUB_CHARTS_DIR)
 		cd $(GITHUB_CHARTS_DIR) && \
 	   helm repo index . && \
 	   git add . && \
 	   git status && \
-	   git commit -m "fix:(version) release $(NAME)-$(RELEASE_VERSION).tgz" && \
+	   git commit -m "fix:(version) release $(NAME)-$(VERSION).tgz" && \
 	   git pull && \
 	   git push origin "$(GITHUB_CHARTS_BRANCH)"
 	rm -rf $(GITHUB_CHARTS_DIR)
 
 version:
-	sed -i -e "s/version:.*/version: $(RELEASE_VERSION)/" Chart.yaml
-	sed -i -e "s/tag: .*/tag: $(VERSION)/" values.yaml
+	sed -i -e "s/version:.*/version: $(VERSION)/" Chart.yaml
+	export VERSION=$(VERSION) && perl -0777 -pi -e '$$version = $$ENV{'VERSION'};s/repository: activiti\/activiti-cloud-modeling\n\s*tag: ([0-9]|[a-zA-Z]|\.)*/repository: activiti\/activiti-cloud-modeling\n    tag: $$version/' values.yaml
 
 tag:
 	git add --all
-	git commit -m "release $(RELEASE_VERSION)" --allow-empty # if first release then no verion update is performed
-	git tag -fa v$(RELEASE_VERSION) -m "Release version $(RELEASE_VERSION)"
-	git push origin v$(RELEASE_VERSION)
+	git commit -m "release $(VERSION)" --allow-empty # if first release then no verion update is performed
+	git tag -fa v$(VERSION) -m "Release version $(VERSION)"
+	git push origin v$(VERSION)
 
 

@@ -107,10 +107,10 @@ push-docker-images:
 github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
-	[[ -d $(GITHUB_CHARTS_DIR) ]] ||git clone -b "$(GITHUB_CHARTS_BRANCH)" "$(GITHUB_CHARTS_REPO)" $(GITHUB_CHARTS_DIR) &&\
-	cp "activiti-cloud-full-example-$(HELM_ACTIVITI_VERSION).tgz" $(GITHUB_CHARTS_DIR)
-
-	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/$(GITHUB_CHARTS_DIR) && \
+	rm -rf $$GITHUB_CHARTS_DIR || echo "try to remove $$GITHUB_CHARTS_DIR"	 && \
+	git clone -b "$(GITHUB_CHARTS_BRANCH)" https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git $(GITHUB_CHARTS_DIR) &&\
+	cp "activiti-cloud-full-example-$(HELM_ACTIVITI_VERSION).tgz" $(GITHUB_CHARTS_DIR) && \
+	cd $(GITHUB_CHARTS_DIR) && \
 	   helm repo index . && \
 	   git add . && \
 	   git status && \
@@ -119,6 +119,8 @@ github:
 	   git push --force origin "$(GITHUB_CHARTS_BRANCH)"
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
      rm -rf $(GITHUB_CHARTS_DIR)
+		 
+		 
 
 tag:
 	#sed -i -e "s/version:.*/version: $(HELM_ACTIVITI_VERSION)/" Chart.yaml
@@ -127,7 +129,7 @@ tag:
 	git add Chart.yaml values.yaml requirements.yaml && \
 	git commit -m "release $(HELM_ACTIVITI_VERSION)" --allow-empty && \
 	git tag -fa v$(HELM_ACTIVITI_VERSION) -m "Release version $(HELM_ACTIVITI_VERSION)" && \
-	git push origin v$(HELM_ACTIVITI_VERSION)
+	git push --force origin v$(HELM_ACTIVITI_VERSION)
 
 
 prepare-helm-chart:

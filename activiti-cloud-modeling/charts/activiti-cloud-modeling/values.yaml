@@ -31,8 +31,7 @@ db:
 
 init:
   image:
-    repository: alpine
-    tag: 3.8
+    repository: alpine:3.8
     pullPolicy: IfNotPresent
 postgres:
   enabled: true
