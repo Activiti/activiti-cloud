@@ -32,7 +32,7 @@
     <module>activiti-cloud-services-test-security-keycloak</module>
   </modules>
   <properties>
-    <activiti.version>7.1.229</activiti.version> 
+    <activiti.version>7.1.229</activiti.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
@@ -43,7 +43,7 @@
     <logstash.version>4.11</logstash.version>
     <resteasy.version>3.6.1.Final</resteasy.version>
     <spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
-    <springfox.version>2.9.2</springfox.version>
+    <springfox.version>2.8.0</springfox.version>
     <swagger.version>1.5.20</swagger.version>
     <xstream.version>1.4.11.1</xstream.version>
     <json-unit.version>1.24.0</json-unit.version>
