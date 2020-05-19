@@ -43,9 +43,32 @@
     <activiti-cloud.version>7.1.487</activiti-cloud.version>
     <assertj.version>3.13.2</assertj.version>
     <serenity-maven-plugin.version>2.1.13</serenity-maven-plugin.version>
+    <feign.version>10.7.0</feign.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <!--  Override feign version: related to:
+          https://github.com/OpenFeign/feign/issues/942
+          https://github.com/OpenFeign/feign/pull/930
+          sort is not working property in versions previous to 10.2.1
+          sort is broken again from version 10.7.1 (https://github.com/spring-cloud/spring-cloud-openfeign/issues/146#issuecomment-626561502)
+          sort is mapped to `sort=timestamp&sort=desc` instead of `sort=timestamp,desc`
+          -->
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-core</artifactId>
+        <version>${feign.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-gson</artifactId>
+        <version>${feign.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-jackson</artifactId>
+        <version>${feign.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
