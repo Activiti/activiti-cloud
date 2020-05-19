@@ -17,7 +17,6 @@ package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuilder.putMultipart;
-import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
@@ -87,8 +86,7 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
                                                                                 genericNonJsonModelType.getName()));
 
-        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
-                                     API_VERSION,
+        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
                                      genericNonJsonModel.getId()).file("file",
                                                                        "simple-model.bin",
                                                                        "application/octet-stream",
@@ -110,8 +108,7 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
 
         byte[] fileContent = resourceAsByteArray("generic/model-simple.bin");
 
-        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
-                                     API_VERSION,
+        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
                                      genericNonJsonModel.getId()).file("file",
                                                                        "simple-model.json",
                                                                        "application/octet-stream",

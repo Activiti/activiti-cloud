@@ -15,14 +15,6 @@
       <artifactId>activiti-engine</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-api-runtime-shared</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-api-process-runtime</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
     </dependency>
@@ -31,32 +23,8 @@
       <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-spring-boot-starter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-test</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

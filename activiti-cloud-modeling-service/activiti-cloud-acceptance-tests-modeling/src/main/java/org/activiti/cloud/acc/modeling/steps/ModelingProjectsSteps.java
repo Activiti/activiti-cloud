@@ -36,7 +36,7 @@ import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.hamcrest.Matcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.util.StreamUtils;
 
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
@@ -51,7 +51,7 @@ import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.Link.REL_SELF;
+import static org.springframework.hateoas.IanaLinkRelations.SELF;
 
 /**
  * Modeling projects steps
@@ -74,7 +74,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     public void checkCurrentProjects(List<String> expectedNames) {
         assertThat(modelingContextHandler.getCurrentProjects()
                            .map(resources -> resources.stream()
-                                   .map(Resource::getContent)
+                                   .map(EntityModel::getContent)
                                    .map(Project::getName))
                            .orElseGet(Stream::empty)
                            .collect(Collectors.toList()))
@@ -82,7 +82,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     }
 
     @Step
-    public Resource<Project> create(String projectName) {
+    public EntityModel<Project> create(String projectName) {
         Project project = mock(Project.class);
         doReturn(projectName).when(project).getName();
         return create(project);
@@ -90,18 +90,18 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
 
     @Step
     public void updateProjectName(String newProjectName) {
-        Resource<Project> currentContext = checkAndGetCurrentContext(Project.class);
+        EntityModel<Project> currentContext = checkAndGetCurrentContext(Project.class);
         Project project = currentContext.getContent();
         project.setName(newProjectName);
 
-        modelingProjectService.updateByUri(modelingUri(currentContext.getLink(REL_SELF).getHref()),
+        modelingProjectService.updateByUri(modelingUri(currentContext.getLink(SELF).get().getHref()),
                                            project);
     }
 
     @Step
     public void checkCurrentProjectName(String projectName) {
         updateCurrentModelingObject();
-        Resource<Project> currentContext = checkAndGetCurrentContext(Project.class);
+        EntityModel<Project> currentContext = checkAndGetCurrentContext(Project.class);
         assertThat(currentContext.getContent().getName()).isEqualTo(projectName);
     }
 
@@ -109,16 +109,16 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     public void checkProjectNotFound(ModelingIdentifier identifier) {
         assertThat(findAll().getContent()
                            .stream()
-                           .map(Resource::getContent)
+                           .map(EntityModel::getContent)
                            .filter(identifier)
                            .findAny())
                 .isEmpty();
     }
 
     @Step
-    public Resource<Model> importModelInCurrentProject(File file) {
-        Resource<Project> currentProject = checkAndGetCurrentContext(Project.class);
-        Link importModelLink = currentProject.getLink("import");
+    public EntityModel<Model> importModelInCurrentProject(File file) {
+        EntityModel<Project> currentProject = checkAndGetCurrentContext(Project.class);
+        Link importModelLink = currentProject.getLink("import").get();
         assertThat(importModelLink).isNotNull();
 
         return modelingProjectService.importProjectModelByUri(modelingUri(importModelLink.getHref()),
@@ -155,15 +155,15 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     }
 
     private Response exportCurrentProject() {
-        Resource<Project> currentProject = checkAndGetCurrentContext(Project.class);
-        Link exportLink = currentProject.getLink("export");
+        EntityModel<Project> currentProject = checkAndGetCurrentContext(Project.class);
+        Link exportLink = currentProject.getLink("export").get();
         assertThat(exportLink).isNotNull();
         return modelingProjectService.exportProjectByUri(modelingUri(exportLink.getHref()));
     }
 
     private Response validateCurrentProject() {
-        Resource<Project> currentProject = checkAndGetCurrentContext(Project.class);
-        Link exportLink = currentProject.getLink("export");
+        EntityModel<Project> currentProject = checkAndGetCurrentContext(Project.class);
+        Link exportLink = currentProject.getLink("export").get();
         String validateLink = exportLink.getHref().replace("/export","/validate");
         assertThat(validateLink).isNotNull();
         return modelingProjectService.validateProjectByUri(modelingUri(validateLink));

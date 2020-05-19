@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.modeling.swagger;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -42,14 +43,15 @@ public class ModelingSwaggerIT {
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
         mockMvc.perform(get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.definitions").isNotEmpty())
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
-            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Starter :: Modeling ReST API"));
-
+            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Starter :: Modeling ReST API"))
+            .andExpect(jsonPath("$['paths']['/v1/projects/{projectId}/models']['get']['parameters'][*]['name']",
+                contains("projectId", "type", "skipCount", "maxItems", "sort")));
     }
 
 }

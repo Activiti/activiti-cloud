@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +50,7 @@ import org.springframework.test.context.TestPropertySource;
 public class QueryProcessInstanceEntityVariablesIT {
 
     private static final String VARIABLES_URL = "/v1/process-instances/{processInstanceId}/variables";
-    private static final ParameterizedTypeReference<PagedResources<ProcessVariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessVariableEntity>>() {
+    private static final ParameterizedTypeReference<PagedModel<ProcessVariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessVariableEntity>>() {
     };
 
     @Autowired
@@ -112,7 +112,7 @@ public class QueryProcessInstanceEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
+            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,
@@ -152,7 +152,7 @@ public class QueryProcessInstanceEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
+            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,
@@ -195,7 +195,7 @@ public class QueryProcessInstanceEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
+            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,

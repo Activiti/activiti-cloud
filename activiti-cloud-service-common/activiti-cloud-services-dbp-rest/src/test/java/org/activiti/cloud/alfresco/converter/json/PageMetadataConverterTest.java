@@ -18,7 +18,7 @@ package org.activiti.cloud.alfresco.converter.json;
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadata;
 import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
 import org.junit.jupiter.api.Test;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 import static org.activiti.test.Assertions.assertThat;
 
@@ -29,7 +29,7 @@ public class PageMetadataConverterTest {
     @Test
     public void toAlfrescoPageMetadataShouldCalculateAlfrescoMetadataFromBaseMetadata() {
         //given
-        PagedResources.PageMetadata basePageMetadata = new PagedResources.PageMetadata(10,
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
                                                                                        2,
                                                                                        100);
 
@@ -49,7 +49,7 @@ public class PageMetadataConverterTest {
     @Test
     public void toAlfrescoPageMetadataShouldReturnMetadataWithNoMoreItemsWhenIsInTheLastPage() {
         //given
-        PagedResources.PageMetadata basePageMetadata = new PagedResources.PageMetadata(10,
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
                                                                                        1,
                                                                                        11);
 

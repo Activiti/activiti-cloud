@@ -30,6 +30,7 @@ import org.activiti.validation.validator.ValidatorSetFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
@@ -43,17 +44,22 @@ public class TestProcessEngineConfiguration {
     public TestProcessEngine testProcessEngine(ProcessEngine processEngine) {
         return new TestProcessEngine(processEngine);
     }
-    
+
     @Bean
     public MockMessageChannel mockMessageChannel() {
         return new MockMessageChannel();
     }
-    
+
     @Bean
     public MockProcessEngineChannels mockProcessEngineChannels() {
         return new MockProcessEngineChannels();
     }
-    
+
+    @Bean
+    public SubscribableChannel commandConsumer() {
+        return new MockSubscribableChannel();
+    }
+
     @Bean
     public ProcessEngine processEngine() {
         return ProcessEngineConfiguration
@@ -71,7 +77,7 @@ public class TestProcessEngineConfiguration {
     public ManagementService managementService(ProcessEngine processEngine) {
         return processEngine.getManagementService();
     }
-    
+
     @Bean
     public RepositoryService repositoryService(ProcessEngine processEngine) {
         return processEngine.getRepositoryService();

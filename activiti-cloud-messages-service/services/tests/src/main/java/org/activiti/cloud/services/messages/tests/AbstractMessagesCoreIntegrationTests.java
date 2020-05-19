@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -35,6 +36,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.activiti.api.process.model.builders.MessageEventPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.MessageDefinitionEvent.MessageDefinitionEvents;
@@ -44,10 +46,11 @@ import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggr
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -80,8 +83,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
-                "spring.cloud.stream.bindings.input.contentType=application/x-java-object",
-                "spring.cloud.stream.bindings.output.contentType=application/x-java-object"
+                "spring.cloud.stream.bindings.input.content-type=application/json",
+                "spring.cloud.stream.bindings.output.content-type=application/json"
         }
 )
 @DirtiesContext
@@ -90,7 +93,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 })
 public abstract class AbstractMessagesCoreIntegrationTests {
 
-    protected ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMessagesCoreIntegrationTests.class);
+
+    protected ObjectMapper objectMapper = new ObjectMapper()
+                                                  .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Autowired
     protected MessageConnectorProcessor channels;
@@ -166,7 +172,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         start.countDown();
 
         try {
-            sent.await();
+            sent.await(10, TimeUnit.SECONDS);
         }
         catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -819,8 +825,16 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @SuppressWarnings("unchecked")
     protected <T> Message<T> poll(long timeout, TimeUnit unit) throws InterruptedException {
-        return (Message<T>) this.collector.forChannel(this.channels.output())
-                                          .poll(timeout, unit);
+
+
+        Message<T> message = (Message<T>) this.collector.forChannel(this.channels.output())
+                                                        .poll(timeout, unit);
+
+        return (Message<T>) Optional.ofNullable(message)
+                                    .map(it -> MessageBuilder.withPayload(messageEventPayload(it))
+                                                             .copyHeaders(it.getHeaders())
+                                                             .build())
+                                    .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
@@ -899,4 +913,16 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         }
     }
 
+    private Object messageEventPayload(Message<?> message) {
+        Object payload = message.getPayload();
+        if (payload instanceof String) {
+            try {
+                return objectMapper.readValue((String) payload, MessageEventPayload.class);
+            } catch (JsonProcessingException e) {
+                LOGGER.warn("The payload {} cannot be converted to MessageEventPayload, so it is returned as is: {}", payload, e);
+                return payload;
+            }
+        }
+        return payload;
+    }
 }

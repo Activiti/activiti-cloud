@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 
 public class EventSpecificationsBuilder {
 
@@ -83,9 +82,9 @@ public class EventSpecificationsBuilder {
         for (int i = 1; i < params.size(); i++) {
             result = params.get(i)
                     .isOrPredicate()
-                    ? Specifications.where(result)
+                    ? Specification.where(result)
                     .or(new EventSpecification(params.get(i)))
-                    : Specifications.where(result)
+                    : Specification.where(result)
                     .and(new EventSpecification(params.get(i)));
         }
 

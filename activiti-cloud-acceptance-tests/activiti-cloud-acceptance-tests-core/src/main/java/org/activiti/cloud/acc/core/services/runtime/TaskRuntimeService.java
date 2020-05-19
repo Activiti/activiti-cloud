@@ -27,8 +27,8 @@ import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 
 public interface TaskRuntimeService extends BaseService {
 
@@ -51,7 +51,7 @@ public interface TaskRuntimeService extends BaseService {
     @Headers("Content-Type: application/json")
     void saveTask(@Param("id") String id,
                       SaveTaskPayload saveTaskPayload);
-    
+
     @RequestLine("POST /v1/tasks/")
     @Headers("Content-Type: application/json")
     CloudTask createTask(CreateTaskPayload task);
@@ -65,11 +65,11 @@ public interface TaskRuntimeService extends BaseService {
 
     @RequestLine("GET /v1/tasks/{parentTaskId}/subtasks")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    Resources<CloudTask> getSubtasks(@Param("parentTaskId") String parentTaskId);
+    CollectionModel<CloudTask> getSubtasks(@Param("parentTaskId") String parentTaskId);
 
     @RequestLine("GET /v1/tasks")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    PagedResources<CloudTask> getTasks();
+    PagedModel<CloudTask> getTasks();
 
     @RequestLine("POST /v1/tasks/{taskId}/variables")
     @Headers("Content-Type: application/json")
@@ -84,7 +84,7 @@ public interface TaskRuntimeService extends BaseService {
 
     @RequestLine("GET /v1/tasks/{id}/variables")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    Resources<CloudVariableInstance> getVariables(@Param("id") String id);
+    CollectionModel<CloudVariableInstance> getVariables(@Param("id") String id);
 
     @RequestLine("PUT /v1/tasks/{taskId}")
     @Headers("Content-Type: application/json")

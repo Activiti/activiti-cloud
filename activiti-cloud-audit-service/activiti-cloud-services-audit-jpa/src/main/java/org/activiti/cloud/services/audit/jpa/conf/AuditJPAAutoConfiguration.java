@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
+import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
@@ -66,6 +67,12 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AuditJPAAutoConfiguration {
+
+    @ConditionalOnMissingBean
+    @Bean
+    public EventRepresentationModelAssembler eventRepresentationModelAssembler(){
+        return new EventRepresentationModelAssembler();
+    }
 
     @ConditionalOnMissingBean
     @Bean

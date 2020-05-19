@@ -15,6 +15,39 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.extensions;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.inputsMappings;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.outputsMappings;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.processFileContent;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.processFileContentWithCallActivity;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithContent;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithExtensions;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.processVariables;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDescription;
+import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.hamcrest.core.AllOf.allOf;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +64,7 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
+import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
@@ -38,6 +72,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
@@ -46,44 +81,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.extensions;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.inputsMappings;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.outputsMappings;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.processFileContent;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.processFileContentWithCallActivity;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithContent;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithExtensions;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.processVariables;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDescription;
-import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
-import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.hamcrest.core.AllOf.allOf;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@DirtiesContext
 @WithMockModelerUser
 public class ProjectControllerIT {
 
@@ -107,9 +107,14 @@ public class ProjectControllerIT {
     @Autowired
     private ObjectMapper mapper;
 
+    @Autowired
+    private ModelJpaRepository modelJpaRepository;
+
     @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        modelJpaRepository.deleteAll();
+        ((JpaRepository)projectRepository).deleteAll();
     }
 
     @Test
@@ -118,8 +123,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        mockMvc.perform(get("{version}/projects",
-                            RepositoryRestConfig.API_VERSION))
+        mockMvc.perform(get("/v1/projects"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
@@ -135,8 +139,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        mockMvc.perform(get("{version}/projects?name=project1",
-                            RepositoryRestConfig.API_VERSION))
+        mockMvc.perform(get("/v1/projects?name=project1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(1)))
@@ -151,8 +154,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project-main-2"));
         projectRepository.createProject(project("project-secondary-2"));
 
-        mockMvc.perform(get("{version}/projects?name=main",
-                            RepositoryRestConfig.API_VERSION))
+        mockMvc.perform(get("/v1/projects?name=main"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
@@ -169,8 +171,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project-main-2"));
         projectRepository.createProject(project("project-secondary-2"));
 
-        mockMvc.perform(get("{version}/projects?name=MAIN",
-                RepositoryRestConfig.API_VERSION))
+        mockMvc.perform(get("/v1/projects?name=MAIN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                         hasSize(2)))
@@ -184,8 +185,7 @@ public class ProjectControllerIT {
     public void should_returnProject_when_gettingExistingProject() throws Exception {
         Project project = projectRepository.createProject(project("existing-project"));
 
-        mockMvc.perform(get("{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(get("/v1/projects/{projectId}",
                             project.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
@@ -194,9 +194,8 @@ public class ProjectControllerIT {
 
     @Test
     public void should_returnStatusCreatedAndProjectDetails_when_creatingProject() throws Exception {
-        mockMvc.perform(post("{version}/projects",
-                             API_VERSION)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+        mockMvc.perform(post("/v1/projects")
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(projectWithDescription("new-project",
                                                                                           "Project description"))))
                 .andExpect(status().isCreated())
@@ -210,9 +209,8 @@ public class ProjectControllerIT {
     public void should_throwConflictException_when_creatingProjectExistingName() throws Exception {
         projectRepository.createProject(project("existing-project"));
 
-        mockMvc.perform(post("{version}/projects",
-                             API_VERSION)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+        mockMvc.perform(post("/v1/projects")
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("existing-project"))))
                 .andExpect(status().isConflict());
     }
@@ -221,10 +219,9 @@ public class ProjectControllerIT {
     public void should_returnStatusOk_when_updatingExistingProject() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("updated-project-name"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
@@ -241,10 +238,9 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("existing-project"));
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("existing-project"))))
                 .andExpect(status().isConflict());
     }
@@ -253,10 +249,9 @@ public class ProjectControllerIT {
     public void should_returnStatusOk_when_updatingProjectNoName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(projectWithDescription(null,
                                                                                           "New Description"))))
                 .andExpect(status().isOk());
@@ -266,10 +261,9 @@ public class ProjectControllerIT {
     public void should_throwBadRequestException_when_updatingProjectEmptyName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project(""))))
                 .andExpect(status().isBadRequest());
     }
@@ -278,10 +272,9 @@ public class ProjectControllerIT {
     public void should_throwBadRequestException_when_updatingProjectInvalidName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("_1-invalid-name"))))
                 .andExpect(status().isBadRequest());
     }
@@ -290,10 +283,9 @@ public class ProjectControllerIT {
     public void should_throwBadRequestException_when_updatingProjectLongName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("{version}/projects/{projectId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/projects/{projectId}",
                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("too-long-name-1234567890-1234567890"))))
                 .andExpect(status().isBadRequest());
     }
@@ -302,8 +294,7 @@ public class ProjectControllerIT {
     public void should_returnStatusNoContent_when_deletingProject() throws Exception {
         Project project = projectRepository.createProject(project("project-to-delete"));
 
-        mockMvc.perform(delete("{version}/projects/{projectId}",
-                               API_VERSION,
+        mockMvc.perform(delete("/v1/projects/{projectId}",
                                project.getId()))
                 .andExpect(status().isNoContent());
 
@@ -335,8 +326,7 @@ public class ProjectControllerIT {
                                     processModelWithExtensions("Process_RankMovieId", extensionsMap));
 
        MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/export",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/export",
                     project.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -399,8 +389,7 @@ public class ProjectControllerIT {
                               new ModelValidationError());
 
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -412,8 +401,7 @@ public class ProjectControllerIT {
                 .createProject(project("project-without-process"));
 
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -449,8 +437,7 @@ public class ProjectControllerIT {
                 processModelWithExtensions("process-model", extensionsMap));
 
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/validate",
-                        API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                         project.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -465,8 +452,7 @@ public class ProjectControllerIT {
                                                     resourceAsByteArray("process/no-assignee.bpmn20.xml")));
 
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -492,8 +478,7 @@ public class ProjectControllerIT {
                                                    "invalid-connector-action",
                                                    resourceAsByteArray("connector/invalid-connector-action.json")));
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -518,8 +503,7 @@ public class ProjectControllerIT {
                                                    "invalid-connector-action",
                                                    resourceAsByteArray("connector/invalid-connector-action.json")));
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -552,8 +536,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -579,8 +562,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -606,8 +588,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -632,8 +613,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
             mockMvc.perform(
-                get("{version}/projects/{projectId}/validate",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/validate",
                     project.getId()))
                 .andExpect(status().isBadRequest())
                 .andReturn())
@@ -660,8 +640,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -689,8 +668,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -722,8 +700,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/validate",
-                            API_VERSION,
+                        get("/v1/projects/{projectId}/validate",
                             project.getId()))
                         .andExpect(status().isBadRequest())
                         .andReturn())
@@ -754,8 +731,7 @@ public class ProjectControllerIT {
                                                                     resourceAsByteArray("process/call-activity.bpmn20.xml")));
 
         mockMvc.perform(
-                get("{version}/projects/{projectId}/export",
-                    API_VERSION,
+                get("/v1/projects/{projectId}/export",
                     project.getId()))
                 .andExpect(status().isOk());
     }
@@ -767,8 +743,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy.zip"));
 
-        mockMvc.perform(multipart("{version}/projects/import",
-                                  API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/import")
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated())
@@ -783,8 +758,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy-invalid.zip"));
 
-        mockMvc.perform(multipart("{version}/projects/import",
-                                  API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/import")
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
@@ -798,8 +772,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy-invalid-process-json.zip"));
 
-        mockMvc.perform(multipart("{version}/projects/import",
-                                  API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/import")
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
@@ -815,8 +788,8 @@ public class ProjectControllerIT {
 
         String overridingName = "override";
 
-        mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
-                                  API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
+        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName)
+                                  .file(zipFile).accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is(overridingName)));
     }
@@ -828,8 +801,8 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy.zip"));
 
-        mockMvc.perform(multipart("{version}/projects/import?name=",
-                                  API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
+        mockMvc.perform(multipart("/v1/projects/import?name=")
+                                  .file(zipFile).accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
@@ -843,8 +816,8 @@ public class ProjectControllerIT {
 
         String overridingName = "      ";
 
-        mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
-                                  API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
+        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName)
+                                  .file(zipFile).accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
@@ -863,8 +836,7 @@ public class ProjectControllerIT {
                                                    "movies",
                                                    resourceAsByteArray("connector/movies.json")));
 
-        mockMvc.perform(get("{version}/projects/{projectId}/export",
-                            API_VERSION,
+        mockMvc.perform(get("/v1/projects/{projectId}/export",
                             project.getId()))
                 .andExpect(status().isOk());
     }
@@ -876,8 +848,7 @@ public class ProjectControllerIT {
             "project/zip",
             resourceAsByteArray("project/e2e-ama-test-dmn-hit-policy-Sh9rw.zip"));
 
-        mockMvc.perform(multipart("{version}/projects/import",
-            API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/import")
             .file(zipFile)
             .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())

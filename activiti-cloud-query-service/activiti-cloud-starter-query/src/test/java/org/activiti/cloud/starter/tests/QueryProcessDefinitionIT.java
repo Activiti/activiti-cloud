@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -95,7 +95,7 @@ public class QueryProcessDefinitionIT {
                       new CloudProcessDeployedEventImpl(secondProcessDefinition));
 
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
 
         //then
         assertThat(responseEntity.getBody())
@@ -165,7 +165,7 @@ public class QueryProcessDefinitionIT {
                       new CloudProcessDeployedEventImpl(secondProcessDefinition));
 
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitionsFilteredOnKey("mySecondProcess");
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitionsFilteredOnKey("mySecondProcess");
 
         //then
         assertThat(responseEntity.getBody())
@@ -196,7 +196,7 @@ public class QueryProcessDefinitionIT {
                       new CloudProcessDeployedEventImpl(duplicatedProcessDefinition));
 
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
 
         //then
         assertThat(responseEntity.getBody())

@@ -15,15 +15,6 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static org.activiti.cloud.services.query.rest.ProcessDefinitionBuilder.buildDefaultProcessDefinition;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -32,7 +23,6 @@ import org.activiti.cloud.services.query.app.repository.ProcessDefinitionReposit
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -45,9 +35,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
+
+import static org.activiti.cloud.services.query.rest.ProcessDefinitionBuilder.buildDefaultProcessDefinition;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessDefinitionAdminController.class)
 @Import({
@@ -56,7 +54,8 @@ import java.util.Collections;
         AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
+@WithMockUser
 public class ProcessDefinitionAdminControllerIT {
 
     @Autowired
@@ -76,14 +75,6 @@ public class ProcessDefinitionAdminControllerIT {
 
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
-
-    @BeforeEach
-    public void setUp() {
-        when(securityManager.getAuthenticatedUserId()).thenReturn("user");
-        assertThat(securityPoliciesManager).isNotNull();
-        assertThat(securityPoliciesProperties).isNotNull();
-        assertThat(taskLookupRestrictionService).isNotNull();
-    }
 
     @Test
     public void shouldReturnAvailableProcessDefinitions() throws Exception {

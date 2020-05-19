@@ -25,6 +25,6 @@ public Predicate<RequestHandler> apiSelector() {
 }
 ```
 
-*Note:* make sure the controllers are returning Spring objects only (`PagedResources<Resource<DomainObject>>`, 
-`Resources<Resource<DomainObject>>`, `Resource<DomainObject>`); the mapping will not work if custom `*Resource` 
+*Note:* make sure the controllers are returning Spring objects only (`PagedModel<EntityModel<DomainObject>>`, 
+`CollectionModel<EntityModel<DomainObject>>`, `EntityModel<DomainObject>`); the mapping will not work if custom `*Model` 
 are used.

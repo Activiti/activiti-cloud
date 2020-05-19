@@ -57,8 +57,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -125,7 +125,7 @@ public class ProcessVariablesIT {
     public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getKey(),
@@ -154,7 +154,7 @@ public class ProcessVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(startResponse);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(startResponse);
             Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
 
             assertThat(variableCollection).isNotEmpty();
@@ -248,7 +248,7 @@ public class ProcessVariablesIT {
         await().untilAsserted(() -> {
 
             // when
-            ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
 
             // then
             Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
@@ -295,7 +295,7 @@ public class ProcessVariablesIT {
         await().untilAsserted(() -> {
 
             // when
-            ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
 
             // then
             Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
@@ -357,7 +357,7 @@ public class ProcessVariablesIT {
         await().untilAsserted(() -> {
 
             // when
-            ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
 
             // then
             Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
@@ -418,7 +418,7 @@ public class ProcessVariablesIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceId);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceId);
             //then
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
@@ -450,7 +450,7 @@ public class ProcessVariablesIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceId);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceId);
             assertThat(responseEntity.getBody()).isNotNull();
 
             CloudVariableInstance var = responseEntity.getBody().getContent()
@@ -482,7 +482,7 @@ public class ProcessVariablesIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceId);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceId);
             assertThat(responseEntity.getBody()).isNotNull();
 
             CloudVariableInstance variable = responseEntity.getBody().getContent()
@@ -506,7 +506,7 @@ public class ProcessVariablesIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
             //then
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
@@ -582,7 +582,7 @@ public class ProcessVariablesIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
             //then
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())

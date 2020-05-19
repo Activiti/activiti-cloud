@@ -15,14 +15,6 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.querydsl.core.types.Predicate;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
@@ -45,6 +37,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -53,7 +46,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-@TestPropertySource(properties="activiti.rest.enable-deletion=true")
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@TestPropertySource(properties = "activiti.rest.enable-deletion=true")
+@TestPropertySource("classpath:application-test.properties")
 @WebMvcTest(ProcessInstanceDeleteController.class)
 @Import({
         QueryRestWebMvcAutoConfiguration.class,
@@ -61,7 +64,8 @@ import java.util.UUID;
         AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
+@WithMockUser("admin")
 public class ProcessInstanceEntityDeleteControllerIT {
 
     @Autowired
@@ -108,6 +112,7 @@ public class ProcessInstanceEntityDeleteControllerIT {
 
         //when
         mockMvc.perform(delete("/admin/v1/process-instances")
+                .with(csrf())
                 .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk());

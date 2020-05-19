@@ -56,7 +56,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +73,7 @@ public class QueryTasksIT {
     private static final String TASKS_URL = "/v1/tasks";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks";
 
-    private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {};
+    private static final ParameterizedTypeReference<PagedModel<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<Task>>() {};
 
     private static final ParameterizedTypeReference<Task> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {};
 
@@ -140,7 +140,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks();
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -164,7 +164,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
                                                                                             HttpMethod.GET,
                                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
@@ -184,7 +184,7 @@ public class QueryTasksIT {
 
 
             //when
-            ResponseEntity<PagedResources<Task>> cancelEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
+            ResponseEntity<PagedModel<Task>> cancelEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE,
@@ -255,7 +255,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks();
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -321,7 +321,7 @@ public class QueryTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?rootTasksOnly=true&status={status}",
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?rootTasksOnly=true&status={status}",
                                                                                             HttpMethod.GET,
                                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
@@ -355,7 +355,7 @@ public class QueryTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?standalone=true&status={status}",
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?standalone=true&status={status}",
                                                                                             HttpMethod.GET,
                                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
@@ -376,7 +376,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks();
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -473,7 +473,7 @@ public class QueryTasksIT {
     private void assertCanRetrieveTask(Task task) {
        await().untilAsserted(() -> {
 
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks();
 
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -710,7 +710,7 @@ public class QueryTasksIT {
     private void assertCannotSeeTask(Task task) {
         await().untilAsserted(() -> {
 
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks();
 
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -724,7 +724,7 @@ public class QueryTasksIT {
         });
     }
 
-    private ResponseEntity<PagedResources<Task>> executeRequestGetTasksFiltered(String name,String description) {
+    private ResponseEntity<PagedModel<Task>> executeRequestGetTasksFiltered(String name,String description) {
         String url=TASKS_URL;
         boolean add = false;
         if (name != null || description != null) {
@@ -747,7 +747,7 @@ public class QueryTasksIT {
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
 
-    private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
+    private ResponseEntity<PagedModel<Task>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
@@ -814,7 +814,7 @@ public class QueryTasksIT {
             //when
             //set check date 1 hour back from start2: we expect 2 tasks
             Date checkDate=new Date(start2.getTime() - 3600000);
-            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdFrom="+sdf.format(checkDate),
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdFrom="+sdf.format(checkDate),
                                                  HttpMethod.GET,
                                                  keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                  PAGED_TASKS_RESPONSE_TYPE
@@ -924,7 +924,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasksFiltered("for filter",null);
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasksFiltered("for filter",null);
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -946,7 +946,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasksFiltered("for filter","task descr");
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasksFiltered("for filter","task descr");
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -985,7 +985,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks();
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -1011,7 +1011,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?processDefinitionVersion={processDefinitionVersion}",
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?processDefinitionVersion={processDefinitionVersion}",
                                                                                             HttpMethod.GET,
                                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
@@ -1044,7 +1044,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks();
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -1067,7 +1067,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?taskDefinitionKey={taskDefinitionKey}",
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?taskDefinitionKey={taskDefinitionKey}",
                                                                                             HttpMethod.GET,
                                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,

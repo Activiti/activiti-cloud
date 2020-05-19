@@ -59,9 +59,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@WebMvcTest(value = ProcessDefinitionAdminControllerImpl.class)
+@WebMvcTest(ProcessDefinitionAdminControllerImpl.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
