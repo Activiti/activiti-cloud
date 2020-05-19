@@ -44,19 +44,20 @@ public class HeadersConnector {
         this.connectorProperties = connectorProperties;
     }
 
-    @StreamListener(value = HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER, 
+    @StreamListener(value = HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER,
                     condition = "headers['processDefinitionVersion']!=null")
     public void receiveHeadersConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
-        
-        Map<String, Object> result = new HashMap<>(headers);
-        
+
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("processDefinitionVersion", headers.get("processDefinitionVersion"));
+        result.put("processDefinitionKey", headers.get("processDefinitionKey"));
+        result.put("processDefinitionId", headers.get("processDefinitionId"));
+
         Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties)
                 .withOutboundVariables(result)
                 .buildMessage();
 
         integrationResultSender.send(message);
-
     }
-    
-    
 }
