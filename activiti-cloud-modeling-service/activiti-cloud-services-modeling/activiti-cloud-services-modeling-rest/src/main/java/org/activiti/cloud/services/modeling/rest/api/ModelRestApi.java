@@ -41,7 +41,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_SVG;
 import static org.activiti.cloud.services.modeling.rest.api.ModelRestApi.MODELS;
-import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.ATTACHMENT_API_PARAM_DESCR;
 import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.EXPORT_AS_ATTACHMENT_PARAM_NAME;
 import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.UPLOAD_FILE_PARAM_NAME;
@@ -56,7 +55,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
  */
 @RestController
 @Api(tags = MODELS, description = "Retrieve and manage models")
-@RequestMapping(path = API_VERSION, produces = {HAL_JSON_VALUE, APPLICATION_JSON_VALUE})
+@RequestMapping(path = "/v1", produces = {HAL_JSON_VALUE, APPLICATION_JSON_VALUE})
 public interface ModelRestApi {
 
     String MODELS = "models";

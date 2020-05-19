@@ -33,7 +33,6 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel
 import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithExtensions;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuilder.putMultipart;
-import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -435,8 +434,7 @@ public class ModelControllerIT {
     @Test
     public void should_returnExistingModelTypes_when_gettingModelTypes() throws Exception {
 
-        mockMvc.perform(get("/v1/model-types",
-                            API_VERSION))
+        mockMvc.perform(get("/v1/model-types"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.model-types",
                                     hasSize(2)))
@@ -832,8 +830,7 @@ public class ModelControllerIT {
     @Test
     public void should_throwNotFoundException_when_exportingNotExistingModel() throws Exception {
         mockMvc.perform(
-                get("/v1/models/not_existing_model/export",
-                    API_VERSION))
+                get("/v1/models/not_existing_model/export"))
                 .andExpect(status().isNotFound())
                 .andReturn();
     }
@@ -902,8 +899,7 @@ public class ModelControllerIT {
                                                           "project/xml",
                                                           resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
-        mockMvc.perform(multipart("/v1/projects/not_existing_project/models/import",
-                                  API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/not_existing_project/models/import")
                                 .file(zipFile)
                                 .param("type",
                                        PROCESS))

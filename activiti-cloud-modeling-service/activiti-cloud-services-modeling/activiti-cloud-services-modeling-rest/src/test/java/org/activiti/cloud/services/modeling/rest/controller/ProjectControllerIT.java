@@ -28,7 +28,6 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel
 import static org.activiti.cloud.services.modeling.mock.MockFactory.processVariables;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDescription;
-import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -124,8 +123,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        mockMvc.perform(get("/v1/projects",
-                            RepositoryRestConfig.API_VERSION))
+        mockMvc.perform(get("/v1/projects"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
@@ -141,8 +139,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        mockMvc.perform(get("/v1/projects?name=project1",
-                            RepositoryRestConfig.API_VERSION))
+        mockMvc.perform(get("/v1/projects?name=project1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(1)))
@@ -157,8 +154,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project-main-2"));
         projectRepository.createProject(project("project-secondary-2"));
 
-        mockMvc.perform(get("/v1/projects?name=main",
-                            RepositoryRestConfig.API_VERSION))
+        mockMvc.perform(get("/v1/projects?name=main"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
@@ -175,8 +171,7 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("project-main-2"));
         projectRepository.createProject(project("project-secondary-2"));
 
-        mockMvc.perform(get("/v1/projects?name=MAIN",
-                RepositoryRestConfig.API_VERSION))
+        mockMvc.perform(get("/v1/projects?name=MAIN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
                         hasSize(2)))
@@ -199,8 +194,7 @@ public class ProjectControllerIT {
 
     @Test
     public void should_returnStatusCreatedAndProjectDetails_when_creatingProject() throws Exception {
-        mockMvc.perform(post("/v1/projects",
-                             API_VERSION)
+        mockMvc.perform(post("/v1/projects")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(projectWithDescription("new-project",
                                                                                           "Project description"))))
@@ -215,8 +209,7 @@ public class ProjectControllerIT {
     public void should_throwConflictException_when_creatingProjectExistingName() throws Exception {
         projectRepository.createProject(project("existing-project"));
 
-        mockMvc.perform(post("/v1/projects",
-                             API_VERSION)
+        mockMvc.perform(post("/v1/projects")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(project("existing-project"))))
                 .andExpect(status().isConflict());
@@ -750,8 +743,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy.zip"));
 
-        mockMvc.perform(multipart("/v1/projects/import",
-                                  API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/import")
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated())
@@ -766,8 +758,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy-invalid.zip"));
 
-        mockMvc.perform(multipart("/v1/projects/import",
-                                  API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/import")
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
@@ -781,8 +772,7 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy-invalid-process-json.zip"));
 
-        mockMvc.perform(multipart("/v1/projects/import",
-                                  API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/import")
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
@@ -798,8 +788,8 @@ public class ProjectControllerIT {
 
         String overridingName = "override";
 
-        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName,
-                                  API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
+        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName)
+                                  .file(zipFile).accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is(overridingName)));
     }
@@ -811,8 +801,8 @@ public class ProjectControllerIT {
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy.zip"));
 
-        mockMvc.perform(multipart("/v1/projects/import?name=",
-                                  API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
+        mockMvc.perform(multipart("/v1/projects/import?name=")
+                                  .file(zipFile).accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
@@ -826,8 +816,8 @@ public class ProjectControllerIT {
 
         String overridingName = "      ";
 
-        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName,
-                                  API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
+        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName)
+                                  .file(zipFile).accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
@@ -858,8 +848,7 @@ public class ProjectControllerIT {
             "project/zip",
             resourceAsByteArray("project/e2e-ama-test-dmn-hit-policy-Sh9rw.zip"));
 
-        mockMvc.perform(multipart("/v1/projects/import",
-            API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/import")
             .file(zipFile)
             .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
