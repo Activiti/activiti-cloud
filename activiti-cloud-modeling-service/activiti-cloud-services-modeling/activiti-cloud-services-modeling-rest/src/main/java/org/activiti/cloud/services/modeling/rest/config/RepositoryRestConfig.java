@@ -24,13 +24,11 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 @Configuration
 public class RepositoryRestConfig implements RepositoryRestConfigurer {
 
-    public static final String API_VERSION = "v1";
-
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-
-        config.setBasePath(API_VERSION)
-                .exposeIdsFor(Project.class)
-                .exposeIdsFor(Model.class);
+        config
+            .exposeIdsFor(Project.class)
+            .exposeIdsFor(Model.class);
     }
+
 }

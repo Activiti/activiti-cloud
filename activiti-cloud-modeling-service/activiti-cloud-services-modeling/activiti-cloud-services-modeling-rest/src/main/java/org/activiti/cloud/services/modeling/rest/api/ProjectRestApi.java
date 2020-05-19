@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.PROJECTS;
-import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -50,7 +49,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
  */
 @RestController
 @Api(tags = PROJECTS, description = "Retrieve and manage project definitions")
-@RequestMapping(path = API_VERSION, produces = {HAL_JSON_VALUE, APPLICATION_JSON_VALUE})
+@RequestMapping(path = "/v1", produces = {HAL_JSON_VALUE, APPLICATION_JSON_VALUE})
 public interface ProjectRestApi {
 
     String PROJECTS = "projects";

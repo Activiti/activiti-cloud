@@ -16,14 +16,13 @@
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuilder.putMultipart;
-import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
@@ -88,8 +87,7 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
         String stringModel = objectMapper.writeValueAsString(genericJsonModel);
 
-        mockMvc.perform(putMultipart("/{version}/models/{modelId}/content",
-                                     API_VERSION,
+        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
                                      genericJsonModel.getId()).file("file",
                                                                     "simple-model.json",
                                                                     "application/json",
@@ -109,8 +107,7 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
         String stringModel = objectMapper.writeValueAsString(genericJsonModel);
 
-        mockMvc.perform(putMultipart("/{version}/models/{modelId}/content",
-                                     API_VERSION,
+        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
                                      genericJsonModel.getId()).file("file",
                                                                     "simple-model.json",
                                                                     "application/json",

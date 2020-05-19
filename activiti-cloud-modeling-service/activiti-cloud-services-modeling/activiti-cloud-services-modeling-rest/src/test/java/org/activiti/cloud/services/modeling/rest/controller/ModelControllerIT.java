@@ -25,9 +25,14 @@ import static org.activiti.cloud.services.modeling.mock.ConstantsBuilder.constan
 import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isBooleanEquals;
 import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isDateEquals;
 import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isIntegerEquals;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.*;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.extensions;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.multipartExtensionsFile;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithContent;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithExtensions;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuilder.putMultipart;
-import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -50,6 +55,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -61,7 +69,6 @@ import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
-import org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,10 +82,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
@@ -111,8 +114,7 @@ public class ModelControllerIT {
                                                  "Process Model 2"));
 
         final ResultActions resultActions = mockMvc
-                .perform(get("/{version}/projects/{projectId}/models?type=PROCESS",
-                             API_VERSION,
+                .perform(get("/v1/projects/{projectId}/models?type=PROCESS",
                              project.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.models",
@@ -127,8 +129,7 @@ public class ModelControllerIT {
     public void should_returnStatusCreatedAndProcessModelDetails_when_creatingProcessModel() throws Exception {
         Project project = projectRepository.createProject(project("parent-project"));
 
-        mockMvc.perform(post("/{version}/projects/{projectId}/models",
-                             API_VERSION,
+        mockMvc.perform(post("/v1/projects/{projectId}/models",
                              project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel("process-model"))))
@@ -145,8 +146,7 @@ public class ModelControllerIT {
     public void should_returnStatusCreatedAndConnectorModelDetails_when_creatingConnectorModel() throws Exception {
         Project project = projectRepository.createProject(project("parent-project"));
 
-        mockMvc.perform(post("/{version}/projects/{projectId}/models",
-                             API_VERSION,
+        mockMvc.perform(post("/v1/projects/{projectId}/models",
                              project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(connectorModel("connector-model"))))
@@ -173,8 +173,7 @@ public class ModelControllerIT {
         Map<String, Extensions> processExtension = new HashMap<String, Extensions>();
         processExtension.put("process-model-extensions", extensions);
         ModelEntity processModel = processModelWithExtensions("process-model-extensions", processExtension);
-        mockMvc.perform(post("/{version}/projects/{projectId}/models",
-                             API_VERSION,
+        mockMvc.perform(post("/v1/projects/{projectId}/models",
                              project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel)))
@@ -219,8 +218,7 @@ public class ModelControllerIT {
         Model formModel = new ModelEntity("name",
                                           "FORM");
 
-        mockMvc.perform(post("/{version}/projects/{projectId}/models",
-                             API_VERSION,
+        mockMvc.perform(post("/v1/projects/{projectId}/models",
                              project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(formModel)))
@@ -233,8 +231,7 @@ public class ModelControllerIT {
         modelRepository.createModel(processModel(project,
                                                  "process-model"));
 
-        mockMvc.perform(post("/{version}/projects/{projectId}/models",
-                             API_VERSION,
+        mockMvc.perform(post("/v1/projects/{projectId}/models",
                              project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel("process-model"))))
@@ -245,8 +242,7 @@ public class ModelControllerIT {
     public void should_returnStatusOk_when_gettingAnExistingModel() throws Exception {
         Model processModel = modelRepository.createModel(processModel("process-model"));
 
-        mockMvc.perform(get("/{version}/models/{modelId}",
-                            API_VERSION,
+        mockMvc.perform(get("/v1/models/{modelId}",
                             processModel.getId()))
                 .andExpect(status().isOk());
     }
@@ -261,8 +257,7 @@ public class ModelControllerIT {
                                                         "jsonVariable"));
         Model processModel = modelRepository
                 .createModel(processModelWithExtensions("process-model-with-extensions", extensions ));
-        mockMvc.perform(get("/{version}/models/{modelId}",
-                            API_VERSION,
+        mockMvc.perform(get("/v1/models/{modelId}",
                             processModel.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.extensions.process-model-with-extensions.properties",
@@ -385,8 +380,7 @@ public class ModelControllerIT {
     public void should_returnStatusOk_when_creatingProcessModelInProject() throws Exception {
         Project parentProject = projectRepository.createProject(project("parent-project"));
 
-        mockMvc.perform(post("/{version}/projects/{projectId}/models",
-                             API_VERSION,
+        mockMvc.perform(post("/v1/projects/{projectId}/models",
                              parentProject.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel("process-model"))))
@@ -397,8 +391,7 @@ public class ModelControllerIT {
     public void should_returnStatusOk_when_updatingModel() throws Exception {
         Model processModel = modelRepository.createModel(processModel("process-model"));
 
-        mockMvc.perform(put("/{version}/models/{modelId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/models/{modelId}",
                             processModel.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(processModel("new-process-model"))))
@@ -420,8 +413,7 @@ public class ModelControllerIT {
         Map<String, Extensions> secondExtensionMap = new HashMap<String, Extensions>();
         extensions.put("process-model-extensions", extensions("variable2", "variable3"));
         ModelEntity newModel = processModelWithExtensions("process-model-extensions", secondExtensionMap);
-        mockMvc.perform(put("/{version}/models/{modelId}",
-                            API_VERSION,
+        mockMvc.perform(put("/v1/models/{modelId}",
                             processModel.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(newModel)))
@@ -432,8 +424,7 @@ public class ModelControllerIT {
     public void should_returnStatusNoContent_when_deletingModel() throws Exception {
         Model processModel = modelRepository.createModel(processModel("process-model"));
 
-        mockMvc.perform(delete("/{version}/models/{modelId}",
-                               API_VERSION,
+        mockMvc.perform(delete("/v1/models/{modelId}",
                                processModel.getId()))
                 .andExpect(status().isNoContent());
 
@@ -443,8 +434,7 @@ public class ModelControllerIT {
     @Test
     public void should_returnExistingModelTypes_when_gettingModelTypes() throws Exception {
 
-        mockMvc.perform(get("/{version}/model-types",
-                            API_VERSION))
+        mockMvc.perform(get("/v1/model-types"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.model-types",
                                     hasSize(2)))
@@ -469,8 +459,7 @@ public class ModelControllerIT {
         Model processModel = modelRepository.createModel(generatedProcess);
 
         final ResultActions resultActions = mockMvc
-                .perform(multipart("/{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
+                .perform(multipart("/v1/models/{model_id}/validate",
                                    processModel.getId())
                                  .file(file))
                 .andExpect(status().isNoContent());
@@ -488,8 +477,7 @@ public class ModelControllerIT {
                                                                       "process-model"));
 
         final ResultActions resultActions = mockMvc
-                .perform(multipart("/{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
+                .perform(multipart("/v1/models/{model_id}/validate",
                                    processModel.getId())
                                  .file(file))
                 .andExpect(status().isBadRequest());
@@ -508,8 +496,7 @@ public class ModelControllerIT {
                 processModel,
                 resourceAsByteArray("process-extensions/valid-extensions.json"));
 
-        mockMvc.perform(multipart("/{version}/models/{model_id}/validate/extensions",
-                                  RepositoryRestConfig.API_VERSION,
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate/extensions",
                                   processModel.getId())
                                 .file(file))
                 .andExpect(status().isNoContent());
@@ -528,8 +515,7 @@ public class ModelControllerIT {
                 processModel,
                 resourceAsByteArray("process-extensions/valid-extensions-no-value.json"));
 
-        mockMvc.perform(multipart("/{version}/models/{model_id}/validate/extensions",
-                                  RepositoryRestConfig.API_VERSION,
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate/extensions",
                                   processModel.getId())
                                 .file(file))
                 .andExpect(status().isNoContent());
@@ -549,8 +535,7 @@ public class ModelControllerIT {
                 resourceAsByteArray("process-extensions/invalid-mapping-extensions.json"));
 
         final ResultActions resultActions = mockMvc
-                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
-                                   RepositoryRestConfig.API_VERSION,
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: #: only 0 subschema matches out of 2");
@@ -587,8 +572,7 @@ public class ModelControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
-                                   RepositoryRestConfig.API_VERSION,
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
@@ -617,8 +601,7 @@ public class ModelControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
-                                   RepositoryRestConfig.API_VERSION,
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
@@ -647,8 +630,7 @@ public class ModelControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
-                                   RepositoryRestConfig.API_VERSION,
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
@@ -677,8 +659,7 @@ public class ModelControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
-                                   RepositoryRestConfig.API_VERSION,
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
@@ -707,8 +688,7 @@ public class ModelControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
-                                   RepositoryRestConfig.API_VERSION,
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
@@ -741,8 +721,7 @@ public class ModelControllerIT {
                                                                                     "process-model",
                                                                                     new Extensions()));
         final ResultActions resultActions = mockMvc
-                .perform(multipart("/{version}/models/{model_id}/validate/extensions",
-                                   RepositoryRestConfig.API_VERSION,
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
 
@@ -771,8 +750,7 @@ public class ModelControllerIT {
                                                        "diagram.bpm",
                                                        "text/plain",
                                                        "BPMN diagram".getBytes());
-        mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
-                                  RepositoryRestConfig.API_VERSION,
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   "model_id")
                                 .file(file))
                 .andExpect(status().isNotFound());
@@ -790,8 +768,7 @@ public class ModelControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
-                                  API_VERSION,
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   processModel.getId())
                                 .file(file))
                 .andExpect(status().isBadRequest());
@@ -809,8 +786,7 @@ public class ModelControllerIT {
         Model connectorModel = modelRepository.createModel(connectorModel(project,
                                                                           "connector-model"));
 
-        mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
-                                  API_VERSION,
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   connectorModel.getId())
                                 .file(file))
                 .andExpect(status().isNoContent());
@@ -828,8 +804,7 @@ public class ModelControllerIT {
         Model connectorModel = modelRepository.createModel(connectorModel(project,
                                                                           "connector-model"));
 
-        mockMvc.perform(multipart("/{version}/models/{model_id}/validate",
-                                  API_VERSION,
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   connectorModel.getId())
                                 .file(file))
                 .andExpect(status().isNoContent());
@@ -840,8 +815,7 @@ public class ModelControllerIT {
         Model processModel = modelRepository.createModel(processModelWithContent("process_model_id",
                                                                                  "Process Model Content"));
         MvcResult response = mockMvc.perform(
-                get("/{version}/models/{modelId}/export",
-                    API_VERSION,
+                get("/v1/models/{modelId}/export",
                     processModel.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -856,8 +830,7 @@ public class ModelControllerIT {
     @Test
     public void should_throwNotFoundException_when_exportingNotExistingModel() throws Exception {
         mockMvc.perform(
-                get("/{version}/models/not_existing_model/export",
-                    API_VERSION))
+                get("/v1/models/not_existing_model/export"))
                 .andExpect(status().isNotFound())
                 .andReturn();
     }
@@ -871,8 +844,7 @@ public class ModelControllerIT {
                                                           "project/xml",
                                                           resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
-        mockMvc.perform(multipart("/{version}/projects/{projectId}/models/import",
-                                  API_VERSION,
+        mockMvc.perform(multipart("/v1/projects/{projectId}/models/import",
                                   parentProject.getId())
                                 .file(zipFile)
                                 .param("type",
@@ -891,8 +863,7 @@ public class ModelControllerIT {
                                                           "project/xml",
                                                           resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
-        mockMvc.perform(multipart("/{version}/projects/{projectId}/models/import",
-                                  API_VERSION,
+        mockMvc.perform(multipart("/v1/projects/{projectId}/models/import",
                                   parentProject.getId())
                                 .file(zipFile)
                                 .param("type",
@@ -912,8 +883,7 @@ public class ModelControllerIT {
                                                           "project/xml",
                                                           resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
-        mockMvc.perform(multipart("/{version}/projects/{projectId}/models/import",
-                                  API_VERSION,
+        mockMvc.perform(multipart("/v1/projects/{projectId}/models/import",
                                   parentProject.getId())
                                 .file(zipFile)
                                 .param("type",
@@ -929,8 +899,7 @@ public class ModelControllerIT {
                                                           "project/xml",
                                                           resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
-        mockMvc.perform(multipart("/{version}/projects/not_existing_project/models/import",
-                                  API_VERSION)
+        mockMvc.perform(multipart("/v1/projects/not_existing_project/models/import")
                                 .file(zipFile)
                                 .param("type",
                                        PROCESS))
@@ -942,8 +911,7 @@ public class ModelControllerIT {
 
         Model processModel = modelRepository.createModel(processModel("Process Model 3"));
 
-        mockMvc.perform(putMultipart("/{version}/models/{modelId}/content",
-            API_VERSION,
+        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
             processModel.getId())
 
             .file("file",
@@ -954,8 +922,7 @@ public class ModelControllerIT {
             .andExpect(status().isNoContent());
 
         // //version should not get incremented here
-        mockMvc.perform(get("/{version}/models/{modelId}",
-            API_VERSION,
+        mockMvc.perform(get("/v1/models/{modelId}",
             processModel.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.version",
@@ -968,8 +935,7 @@ public class ModelControllerIT {
     public void should_returnStatusOk_when_updatingConnectorTemplate() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("Connector With Template"));
 
-        mockMvc.perform(putMultipart("/{version}/models/{modelId}/content",
-                                     API_VERSION,
+        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
                                      connectorModel.getId())
                                 .file("file",
                                       "connector-template.json",
@@ -977,8 +943,7 @@ public class ModelControllerIT {
                                       resourceAsByteArray("connector/connector-template.json")))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/{version}/models/{modelId}",
-                            API_VERSION,
+        mockMvc.perform(get("/v1/models/{modelId}",
                             connectorModel.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.template",
@@ -989,8 +954,7 @@ public class ModelControllerIT {
     public void should_returnStatusOk_when_updatingConnectorCustom() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("SimpleConnector"));
 
-        mockMvc.perform(putMultipart("/{version}/models/{modelId}/content",
-                                     API_VERSION,
+        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
                                      connectorModel.getId())
                                 .file("file",
                                       "connector-simple.json",
@@ -998,8 +962,7 @@ public class ModelControllerIT {
                                       resourceAsByteArray("connector/connector-simple.json")))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/{version}/models/{modelId}",
-                            API_VERSION,
+        mockMvc.perform(get("/v1/models/{modelId}",
                             connectorModel.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.template").doesNotExist());
