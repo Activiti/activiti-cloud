@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import java.nio.file.Files;
 import org.activiti.cloud.starter.audit.tests.it.ContainersApplicationInitializer;
+import org.activiti.cloud.starter.audit.tests.it.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,7 +35,7 @@ import java.io.File;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
+@ContextConfiguration(initializers = { ContainersApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class AuditSwaggerITSupport {
 
     @Autowired

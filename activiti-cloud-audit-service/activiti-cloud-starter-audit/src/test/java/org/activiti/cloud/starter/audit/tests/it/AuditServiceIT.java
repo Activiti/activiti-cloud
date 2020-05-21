@@ -101,7 +101,7 @@ import org.springframework.test.context.TestPropertySource;
 @DirtiesContext
 @TestPropertySource("classpath:application.properties")
 @Import(EventsRestTemplate.class)
-@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
+@ContextConfiguration(initializers ={ ContainersApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class AuditServiceIT {
 
     @Autowired

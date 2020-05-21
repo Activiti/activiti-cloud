@@ -14,7 +14,7 @@
   <properties>
     <h2.version>1.4.199</h2.version>
     <spring-cloud.version>Hoxton.SR4</spring-cloud.version>
-    <testcontainers.version>1.14.1</testcontainers.version>
+    <testcontainers.version>1.14.2</testcontainers.version>
   </properties>
   <dependencyManagement>
     <dependencies>

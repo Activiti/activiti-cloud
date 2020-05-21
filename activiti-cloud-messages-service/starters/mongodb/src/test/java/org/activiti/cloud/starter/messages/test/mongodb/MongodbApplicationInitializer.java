@@ -22,6 +22,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 public class MongodbApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -34,6 +35,7 @@ public class MongodbApplicationInitializer implements ApplicationContextInitiali
         .waitingFor(Wait.forLogMessage(".*waiting for connections on port.*", 1))
         .withCommand("--replSet", "docker-rs");
 
+    private static MongoDBContainer mongoDBContainer = new MongoDBContainer();
     @Override
     public void initialize(ConfigurableApplicationContext context) {
 

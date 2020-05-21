@@ -70,7 +70,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @TestPropertySource("classpath:application.properties")
-@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
+@ContextConfiguration(initializers ={ ContainersApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class APIEventToEntityConvertersIT {
 
     @Autowired

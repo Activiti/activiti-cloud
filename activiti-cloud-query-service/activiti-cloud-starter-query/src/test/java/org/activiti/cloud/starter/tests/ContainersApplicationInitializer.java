@@ -29,7 +29,7 @@ public class ContainersApplicationInitializer implements
 
 
     private static GenericContainer keycloakContainer = new GenericContainer(
-        "activiti/activiti-keycloak")
+        "robfrank/activiti-keycloak")
         .withExposedPorts(8180)
         .waitingFor(Wait.defaultWaitStrategy());
 
