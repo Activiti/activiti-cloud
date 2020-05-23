@@ -50,7 +50,7 @@ import org.springframework.util.StreamUtils;
 @Import({
     ProcessDefinitionRestTemplate.class
 })
-@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
+@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class QueryProcessDefinitionIT {
 
     @Autowired

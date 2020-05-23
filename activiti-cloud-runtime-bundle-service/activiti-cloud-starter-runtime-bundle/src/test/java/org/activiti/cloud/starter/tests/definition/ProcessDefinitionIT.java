@@ -25,7 +25,6 @@ import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
-import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
@@ -53,7 +52,7 @@ import java.util.Iterator;
 @TestPropertySource({"classpath:application-test.properties",
                      "classpath:access-control.properties"})
 @DirtiesContext
-@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
+@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class ProcessDefinitionIT {
 
     @Autowired

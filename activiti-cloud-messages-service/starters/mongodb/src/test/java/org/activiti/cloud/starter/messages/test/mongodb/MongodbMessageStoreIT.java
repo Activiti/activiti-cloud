@@ -15,14 +15,12 @@
  */
 package org.activiti.cloud.starter.messages.test.mongodb;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.integration.mongodb.store.ConfigurableMongoDbMessageStore;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(initializers = MongodbApplicationInitializer.class)
 public class MongodbMessageStoreIT extends AbstractMessagesCoreIntegrationTests {

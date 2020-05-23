@@ -33,7 +33,6 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerExecutedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFiredEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -67,7 +66,7 @@ import java.util.stream.Collectors;
 @DirtiesContext
 @ContextConfiguration(classes = {ServicesAuditITConfiguration.class,
                                 TimerAuditProducerIT.JobExecutorITProcessEngineConfigurer.class}
-                                ,initializers = ContainersApplicationInitializer.class)
+                                ,initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class TimerAuditProducerIT {
 
     public static final String TIMER_AUDIT_PRODUCER_IT = "TimerAuditProducerIT";

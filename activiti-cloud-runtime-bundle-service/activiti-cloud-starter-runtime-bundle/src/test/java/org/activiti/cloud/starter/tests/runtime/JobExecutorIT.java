@@ -36,7 +36,6 @@ import org.activiti.cloud.services.job.executor.JobMessageHeaders;
 import org.activiti.cloud.services.job.executor.JobMessageProducer;
 import org.activiti.cloud.services.job.executor.JobMessageSentEvent;
 import org.activiti.cloud.services.job.executor.MessageBasedJobManager;
-import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -99,7 +98,7 @@ import java.util.concurrent.TimeUnit;
 @DirtiesContext
 @ContextConfiguration(classes = {RuntimeITConfiguration.class,
     JobExecutorIT.JobExecutorITProcessEngineConfigurer.class},
-    initializers = ContainersApplicationInitializer.class)
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class JobExecutorIT {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);

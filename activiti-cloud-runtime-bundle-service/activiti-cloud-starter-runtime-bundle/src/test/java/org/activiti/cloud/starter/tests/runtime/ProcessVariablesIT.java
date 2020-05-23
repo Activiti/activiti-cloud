@@ -50,7 +50,6 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTo
 import org.activiti.cloud.starter.tests.helper.MessageRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.cloud.starter.tests.util.VariablesUtil;
 import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +70,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,initializers = ContainersApplicationInitializer.class)
+@ContextConfiguration(classes = RuntimeITConfiguration.class,initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class ProcessVariablesIT {
     private static final String LONG = "long";
     private static final String INTEGER = "integer";

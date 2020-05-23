@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.audit.tests.it;
+package org.activiti.cloud.services.test.containers;
 
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -22,7 +22,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 public class KeycloakContainerApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
 
     private static GenericContainer keycloakContainer = new GenericContainer(
         "activiti/activiti-keycloak")

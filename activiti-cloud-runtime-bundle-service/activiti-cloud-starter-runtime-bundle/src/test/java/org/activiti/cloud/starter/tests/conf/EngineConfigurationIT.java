@@ -16,7 +16,6 @@
 package org.activiti.cloud.starter.tests.conf;
 
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
-import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
+@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class EngineConfigurationIT {
 
     @Autowired

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.audit.tests.it;
+package org.activiti.cloud.services.test.containers;
 
 import java.util.stream.Stream;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -24,7 +24,7 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.lifecycle.Startables;
 
-public class ContainersApplicationInitializer implements
+public class RabbitMQContainerApplicationInitializer implements
     ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 

@@ -30,6 +30,7 @@
     <module>activiti-cloud-services-swagger</module>
     <module>activiti-cloud-service-error-handlers</module>
     <module>activiti-cloud-services-test-security-keycloak</module>
+    <module>activiti-cloud-services-test-containers</module>
   </modules>
   <properties>
     <activiti.version>7.1.242</activiti.version>
