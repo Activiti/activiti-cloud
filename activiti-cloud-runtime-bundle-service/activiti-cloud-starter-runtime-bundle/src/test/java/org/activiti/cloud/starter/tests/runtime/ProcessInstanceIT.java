@@ -33,6 +33,8 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -57,7 +59,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(classes = RuntimeITConfiguration.class,
+    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class ProcessInstanceIT {
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
@@ -94,7 +97,7 @@ public class ProcessInstanceIT {
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
-                                     pd.getId());
+                pd.getId());
         }
     }
 
@@ -102,8 +105,8 @@ public class ProcessInstanceIT {
     public void shouldStartProcess() {
         //when
         ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                               null,
-                                                                                               "business_key");
+            null,
+            "business_key");
 
         //then
         assertThat(entity).isNotNull();
@@ -199,8 +202,8 @@ public class ProcessInstanceIT {
     public void shouldStartProcessByKey() {
         //when
         ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcessByKey(SIMPLE_PROCESS,
-                                                                                                    null,
-                                                                                                    "business_key");
+            null,
+            "business_key");
 
         //then
         assertThat(entity).isNotNull();
@@ -228,9 +231,9 @@ public class ProcessInstanceIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
         StartProcessPayload startProcess = ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(SIMPLE_PROCESS)
-                .withBusinessKey("business_key")
-                .build();
+            .withProcessDefinitionKey(SIMPLE_PROCESS)
+            .withBusinessKey("business_key")
+            .build();
 
         ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.adminStartProcess(startProcess);
 
@@ -273,8 +276,8 @@ public class ProcessInstanceIT {
         assertThat(responseData).isNotNull();
 
         final InputStream byteArrayInputStream = new ByteArrayInputStream(TestResourceUtil.getProcessXml(startedProcessEntity.getBody()
-                                                                                                                 .getProcessDefinitionId()
-                                                                                                                 .split(":")[0]).getBytes());
+            .getProcessDefinitionId()
+            .split(":")[0]).getBytes());
         BpmnModel sourceModel = new BpmnXMLConverter().convertToBpmnModel(new InputStreamProvider() {
 
                                                                               @Override
@@ -282,21 +285,21 @@ public class ProcessInstanceIT {
                                                                                   return byteArrayInputStream;
                                                                               }
                                                                           },
-                                                                          false,
-                                                                          false);
+            false,
+            false);
         String activityFontName = processDiagramGenerator.getDefaultActivityFontName();
         String labelFontName = processDiagramGenerator.getDefaultLabelFontName();
         String annotationFontName = processDiagramGenerator.getDefaultAnnotationFontName();
         List<String> activityIds = Arrays.asList("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94");
         try (InputStream is = processDiagramGenerator.generateDiagram(sourceModel,
-                                                                      activityIds,
-                                                                      Collections.emptyList(),
-                                                                      activityFontName,
-                                                                      labelFontName,
-                                                                      annotationFontName)) {
+            activityIds,
+            Collections.emptyList(),
+            activityFontName,
+            labelFontName,
+            annotationFontName)) {
             String sourceSvg = new String(IoUtil.readInputStream(is,
-                                                                 null),
-                                          "UTF-8");
+                null),
+                "UTF-8");
             assertThat(responseData).isEqualTo(sourceSvg);
         }
     }
@@ -438,9 +441,9 @@ public class ProcessInstanceIT {
     @Test
     public void shouldUpdateProcessInstance() {
         //given
-       ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                          null,
-                                                                                                          "business_key");
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+            null,
+            "business_key");
 
         assertThat(startProcessEntity).isNotNull();
         CloudProcessInstance returnedProcInst = startProcessEntity.getBody();
@@ -449,15 +452,14 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
         assertThat(returnedProcInst.getBusinessKey()).contains("business_key");
 
-
         //when
-        String newBusinessKey=startProcessEntity.getBody().getBusinessKey()!=null ? startProcessEntity.getBody().getBusinessKey()+" UPDATED" : " UPDATED" ;
-        String newName=startProcessEntity.getBody().getName()!=null ? startProcessEntity.getBody().getName()+" UPDATED" : " UPDATED";
+        String newBusinessKey = startProcessEntity.getBody().getBusinessKey() != null ? startProcessEntity.getBody().getBusinessKey() + " UPDATED" : " UPDATED";
+        String newName = startProcessEntity.getBody().getName() != null ? startProcessEntity.getBody().getName() + " UPDATED" : " UPDATED";
 
         ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.update(startProcessEntity,
-                                                                                 newBusinessKey,
-                                                                                 newName
-                                                                                 );
+            newBusinessKey,
+            newName
+        );
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -470,9 +472,9 @@ public class ProcessInstanceIT {
     @Test
     public void adminShouldUpdateProcessInstance() {
         //given
-       ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                          null,
-                                                                                                          "business_key");
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+            null,
+            "business_key");
 
         assertThat(startProcessEntity).isNotNull();
         CloudProcessInstance returnedProcInst = startProcessEntity.getBody();
@@ -481,19 +483,16 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
         assertThat(returnedProcInst.getBusinessKey()).contains("business_key");
 
-
         //when
-        String newBusinessKey=startProcessEntity.getBody().getBusinessKey()!=null ? startProcessEntity.getBody().getBusinessKey()+" UPDATED" : " UPDATED" ;
-        String newName=startProcessEntity.getBody().getName()!=null ? startProcessEntity.getBody().getName()+" UPDATED" : " UPDATED";
+        String newBusinessKey = startProcessEntity.getBody().getBusinessKey() != null ? startProcessEntity.getBody().getBusinessKey() + " UPDATED" : " UPDATED";
+        String newName = startProcessEntity.getBody().getName() != null ? startProcessEntity.getBody().getName() + " UPDATED" : " UPDATED";
 
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
-
-
         ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminUpdate(startProcessEntity,
-                                                                                 newBusinessKey,
-                                                                                 newName
-                                                                                 );
+            newBusinessKey,
+            newName
+        );
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -508,8 +507,8 @@ public class ProcessInstanceIT {
 
         //given
         ResponseEntity<CloudProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcessByKey(PARENT_PROCESS,
-                                                                                                    null,
-                                                                                                    "business_key");
+            null,
+            "business_key");
         //when
         ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getSubprocesses(startedProcessEntity.getBody().getId());
 
@@ -525,22 +524,20 @@ public class ProcessInstanceIT {
     @Test
     public void nonAdminShouldBeAbleToDeleteProcessInstance() {
         //given
-       ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                          null,
-                                                                                                          "business_key");
+        ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+            null,
+            "business_key");
 
         assertThat(processEntity).isNotNull();
         assertThat(processEntity.getBody()).isNotNull();
         assertThat(processEntity.getBody().getId()).isNotNull();
         assertThat(processEntity.getBody().getProcessDefinitionId()).contains("SimpleProcess:");
 
-
         //when
         ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.delete(processEntity);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
 
         assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
             processInstanceRestTemplate.getProcessInstance(processEntity));
@@ -550,14 +547,13 @@ public class ProcessInstanceIT {
     public void adminShouldDeleteProcessInstance() {
         //given
         ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                           null,
-                                                                                                           "business_key");
+            null,
+            "business_key");
 
         assertThat(processEntity).isNotNull();
         assertThat(processEntity.getBody()).isNotNull();
         assertThat(processEntity.getBody().getId()).isNotNull();
         assertThat(processEntity.getBody().getProcessDefinitionId()).contains("SimpleProcess:");
-
 
         //when
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");

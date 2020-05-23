@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.starter.tests.swagger;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import java.io.File;
 import java.nio.file.Files;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.spring.ProcessDeployedEventProducer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +31,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class RuntimeBundleSwaggerITSupport {
 
     @Autowired
@@ -47,8 +48,7 @@ public class RuntimeBundleSwaggerITSupport {
     private ProcessDeployedEventProducer producer;
 
     /**
-     * This is not a test. It's actually generating the swagger.json and yaml definition of the
-     * service. It is used by maven generate-swagger profile build.
+     * This is not a test. It's actually generating the swagger.json and yaml definition of the service. It is used by maven generate-swagger profile build.
      */
     @Test
     public void generateSwagger() throws Exception {

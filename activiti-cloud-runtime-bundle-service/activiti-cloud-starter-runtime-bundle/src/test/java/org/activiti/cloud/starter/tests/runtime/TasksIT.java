@@ -39,6 +39,8 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.activiti.cloud.api.process.model.impl.CandidateUser;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -60,7 +62,8 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(classes = RuntimeITConfiguration.class,
+    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class TasksIT {
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
@@ -78,7 +81,7 @@ public class TasksIT {
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
     @Autowired
-    private  VariablesUtil variablesUtil;
+    private VariablesUtil variablesUtil;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -92,7 +95,7 @@ public class TasksIT {
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
-                                     pd.getId());
+                pd.getId());
         }
     }
 
@@ -139,9 +142,9 @@ public class TasksIT {
         taskRestTemplate.claim(task);
 
         UpdateTaskPayload updateTask = TaskPayloadBuilder.update().withTaskId(task.getId())
-                .withName("Updated name")
-                .withDescription("Updated description")
-                .build();
+            .withName("Updated name")
+            .withDescription("Updated description")
+            .build();
 
         //when
         taskRestTemplate.updateTask(updateTask);
@@ -154,12 +157,12 @@ public class TasksIT {
 
         //Check UpdateTaskPayload without taskId
         updateTask = TaskPayloadBuilder.update()
-                .withName("New Updated name")
-                .withDescription("New Updated description")
-                .build();
+            .withName("New Updated name")
+            .withDescription("New Updated description")
+            .build();
 
         //when
-        taskRestTemplate.updateTask(task.getId(),updateTask);
+        taskRestTemplate.updateTask(task.getId(), updateTask);
 
         //then
         taskResponseEntity = taskRestTemplate.getTask(task.getId());
@@ -180,9 +183,9 @@ public class TasksIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
         UpdateTaskPayload updateTask = TaskPayloadBuilder.update().withTaskId(task.getId())
-                .withName("Updated name")
-                .withDescription("Updated description")
-                .build();
+            .withName("Updated name")
+            .withDescription("Updated description")
+            .build();
 
         //when
         taskRestTemplate.adminUpdateTask(updateTask);
@@ -198,12 +201,12 @@ public class TasksIT {
         //Check UpdateTaskPayload without taskId
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
         updateTask = TaskPayloadBuilder.update()
-                .withName("New Updated name")
-                .withDescription("New Updated description")
-                .build();
+            .withName("New Updated name")
+            .withDescription("New Updated description")
+            .build();
 
         //when
-        taskRestTemplate.adminUpdateTask(task.getId(),updateTask);
+        taskRestTemplate.adminUpdateTask(task.getId(), updateTask);
 
         //then
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
@@ -418,11 +421,10 @@ public class TasksIT {
         taskRestTemplate.claim(task);
 
         CompleteTaskPayload completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(task.getId()).withVariables(Collections.singletonMap("myVar",
-                                                                                                                                                "any")).build();
+            "any")).build();
 
         //when
-        ResponseEntity<CloudTask> responseEntity = taskRestTemplate.complete(task,completeTaskPayload);
-
+        ResponseEntity<CloudTask> responseEntity = taskRestTemplate.complete(task, completeTaskPayload);
 
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
@@ -446,10 +448,10 @@ public class TasksIT {
         //when
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
         AssignTaskPayload assignTaskPayload = TaskPayloadBuilder
-                                              .assign()
-                                              .withTaskId(task.getId())
-                                              .withAssignee("hruser")
-                                              .build();
+            .assign()
+            .withTaskId(task.getId())
+            .withAssignee("hruser")
+            .build();
 
         ResponseEntity<CloudTask> assignResponseEntity = taskRestTemplate.adminAssignTask(assignTaskPayload);
 
@@ -471,18 +473,18 @@ public class TasksIT {
         assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(userCandidates.getBody().getContent()
-                           .stream()
-                           .map(EntityModel::getContent)
-                           .map(CandidateUser::getUser)
+            .stream()
+            .map(EntityModel::getContent)
+            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
         taskRestTemplate.claim(task);
 
         //when
         CandidateUsersPayload candidateusers = TaskPayloadBuilder
-                .addCandidateUsers()
-                .withTaskId(task.getId())
-                .withCandidateUser("testuser")
-                .build();
+            .addCandidateUsers()
+            .withTaskId(task.getId())
+            .withCandidateUser("testuser")
+            .build();
         ResponseEntity<Void> responseEntity = taskRestTemplate.addUserCandidates(candidateusers);
 
         //then
@@ -495,11 +497,11 @@ public class TasksIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(2);
         assertThat(userCandidates.getBody().getContent()
-                           .stream()
-                           .map(EntityModel::getContent)
-                           .map(CandidateUser::getUser)
+            .stream()
+            .map(EntityModel::getContent)
+            .map(CandidateUser::getUser)
         ).containsExactly("hruser",
-                          "testuser");
+            "testuser");
 
         //when
         taskRestTemplate.release(task);
@@ -527,19 +529,19 @@ public class TasksIT {
         assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(userCandidates.getBody().getContent()
-                           .stream()
-                           .map(EntityModel::getContent)
-                           .map(CandidateUser::getUser)
+            .stream()
+            .map(EntityModel::getContent)
+            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
 
         taskRestTemplate.claim(task);
 
         //when
         CandidateUsersPayload candidateusers = TaskPayloadBuilder
-                .addCandidateUsers()
-                .withTaskId(task.getId())
-                .withCandidateUser("testuser")
-                .build();
+            .addCandidateUsers()
+            .withTaskId(task.getId())
+            .withCandidateUser("testuser")
+            .build();
         ResponseEntity<Void> responseEntity = taskRestTemplate.addUserCandidates(candidateusers);
 
         //then
@@ -553,18 +555,17 @@ public class TasksIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(2);
         assertThat(userCandidates.getBody().getContent()
-                           .stream()
-                           .map(EntityModel::getContent)
-                           .map(CandidateUser::getUser)
+            .stream()
+            .map(EntityModel::getContent)
+            .map(CandidateUser::getUser)
         ).containsExactly("hruser",
-                          "testuser");
-
+            "testuser");
 
         candidateusers = TaskPayloadBuilder
-                .addCandidateUsers()
-                .withTaskId(task.getId())
-                .withCandidateUser("testuser")
-                .build();
+            .addCandidateUsers()
+            .withTaskId(task.getId())
+            .withCandidateUser("testuser")
+            .build();
         responseEntity = taskRestTemplate.deleteUserCandidates(candidateusers);
 
         //then
@@ -577,9 +578,9 @@ public class TasksIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(userCandidates.getBody().getContent()
-                           .stream()
-                           .map(EntityModel::getContent)
-                           .map(CandidateUser::getUser)
+            .stream()
+            .map(EntityModel::getContent)
+            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
 
     }
@@ -596,20 +597,19 @@ public class TasksIT {
         assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(groupCandidates.getBody().getContent()
-                           .stream()
-                           .map(EntityModel::getContent)
-                           .map(CandidateGroup::getGroup)
+            .stream()
+            .map(EntityModel::getContent)
+            .map(CandidateGroup::getGroup)
         ).containsExactly("hr");
-
 
         taskRestTemplate.claim(task);
 
         //when
         CandidateGroupsPayload candidategroups = TaskPayloadBuilder
-                .deleteCandidateGroups()
-                .withTaskId(task.getId())
-                .withCandidateGroup("hr")
-                .build();
+            .deleteCandidateGroups()
+            .withTaskId(task.getId())
+            .withCandidateGroup("hr")
+            .build();
         ResponseEntity<Void> responseEntity = taskRestTemplate.deleteGroupCandidates(candidategroups);
 
         //then
@@ -620,10 +620,10 @@ public class TasksIT {
 
         //when
         candidategroups = TaskPayloadBuilder
-                .addCandidateGroups()
-                .withTaskId(task.getId())
-                .withCandidateGroup("hr")
-                .build();
+            .addCandidateGroups()
+            .withTaskId(task.getId())
+            .withCandidateGroup("hr")
+            .build();
 
         responseEntity = taskRestTemplate.addGroupCandidates(candidategroups);
 
@@ -634,9 +634,9 @@ public class TasksIT {
 
         assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(groupCandidates.getBody().getContent()
-                           .stream()
-                           .map(EntityModel::getContent)
-                           .map(CandidateGroup::getGroup)
+            .stream()
+            .map(EntityModel::getContent)
+            .map(CandidateGroup::getGroup)
         ).containsExactly("hr");
 
     }
@@ -652,20 +652,20 @@ public class TasksIT {
         Date date = new Date();
 
         variables.put("variableInt",
-                      2);
+            2);
         variables.put("variableStr",
-                      "new value");
+            "new value");
         variables.put("variableBool",
-                      false);
+            false);
         variables.put("variableDateTime",
-                      variablesUtil.getDateTimeFormattedString(date));
+            variablesUtil.getDateTimeFormattedString(date));
         variables.put("variableDate",
-                      variablesUtil.getDateFormattedString(date));
+            variablesUtil.getDateFormattedString(date));
 
         SaveTaskPayload saveTaskPayload = TaskPayloadBuilder.save()
-                                                            .withTaskId(task.getId())
-                                                            .withVariables(variables)
-                                                            .build();
+            .withTaskId(task.getId())
+            .withVariables(variables)
+            .build();
         //when
         ResponseEntity<Void> responseEntity = taskRestTemplate.save(task, saveTaskPayload);
 
@@ -678,25 +678,25 @@ public class TasksIT {
         // then
         assertThat(variablesResponse).isNotNull();
         assertThat(variablesResponse.getBody().getContent()).extracting(CloudVariableInstance::getName,
-                                                                        CloudVariableInstance::getType,
-                                                                        CloudVariableInstance::getValue)
-                                                            .containsExactlyInAnyOrder(
-                                                                             tuple("variableInt",
-                                                                                   "integer",
-                                                                                   2),
-                                                                             tuple("variableStr",
-                                                                                   "string",
-                                                                                   "new value"),
-                                                                             tuple("variableBool",
-                                                                                   "boolean",
-                                                                                   false),
-                                                                             tuple("variableDateTime",
-                                                                                   "date",
-                                                                                   variablesUtil.getExpectedDateTimeFormattedString(date)),
-                                                                             tuple("variableDate",
-                                                                                   "date",
-                                                                                   variablesUtil.getExpectedDateFormattedString(date))
-                                                                             );
+            CloudVariableInstance::getType,
+            CloudVariableInstance::getValue)
+            .containsExactlyInAnyOrder(
+                tuple("variableInt",
+                    "integer",
+                    2),
+                tuple("variableStr",
+                    "string",
+                    "new value"),
+                tuple("variableBool",
+                    "boolean",
+                    false),
+                tuple("variableDateTime",
+                    "date",
+                    variablesUtil.getExpectedDateTimeFormattedString(date)),
+                tuple("variableDate",
+                    "date",
+                    variablesUtil.getExpectedDateFormattedString(date))
+            );
         // cleanup
         processInstanceRestTemplate.delete(processInstanceEntity);
 

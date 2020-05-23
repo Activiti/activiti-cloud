@@ -28,6 +28,8 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.engine.RuntimeService;
@@ -57,7 +59,8 @@ import java.util.Map;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(classes = RuntimeITConfiguration.class,
+    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class SignalIT {
 
     @Autowired
@@ -82,7 +85,7 @@ public class SignalIT {
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
-                                     pd.getId());
+                pd.getId());
         }
     }
 
@@ -118,10 +121,10 @@ public class SignalIT {
         runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess");
         SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal().withName("Test").build();
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
-                                                                    HttpMethod.POST,
-                                                                    new HttpEntity<>(signalProcessInstancesCmd),
-                                                                    new ParameterizedTypeReference<Void>() {
-                                                                    });
+            HttpMethod.POST,
+            new HttpEntity<>(signalProcessInstancesCmd),
+            new ParameterizedTypeReference<Void>() {
+            });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         await("Broadcast Signals").untilAsserted(() -> {
@@ -189,10 +192,10 @@ public class SignalIT {
 
         //when
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
-                                                                    HttpMethod.POST,
-                                                                    new HttpEntity<>(signalProcessInstancesCmd),
-                                                                    new ParameterizedTypeReference<Void>() {
-                                                                    });
+            HttpMethod.POST,
+            new HttpEntity<>(signalProcessInstancesCmd),
+            new ParameterizedTypeReference<Void>() {
+            });
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -205,15 +208,15 @@ public class SignalIT {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
         SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal().withName("go").withVariables(
-                Collections.singletonMap("myVar",
-                                         "myContent")).build();
+            Collections.singletonMap("myVar",
+                "myContent")).build();
 
         //when
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
-                                                                    HttpMethod.POST,
-                                                                    new HttpEntity<>(signalProcessInstancesCmd),
-                                                                    new ParameterizedTypeReference<Void>() {
-                                                                    });
+            HttpMethod.POST,
+            new HttpEntity<>(signalProcessInstancesCmd),
+            new ParameterizedTypeReference<Void>() {
+            });
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -234,8 +237,8 @@ public class SignalIT {
         ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
-                                     HttpMethod.GET,
-                                     null,
-                                     responseType);
+            HttpMethod.GET,
+            null,
+            responseType);
     }
 }

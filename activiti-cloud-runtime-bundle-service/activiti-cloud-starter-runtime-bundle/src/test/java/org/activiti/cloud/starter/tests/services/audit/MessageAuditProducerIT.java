@@ -15,20 +15,8 @@
  */
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.activiti.api.process.model.builders.MessagePayloadBuilder.receive;
-import static org.activiti.api.process.model.builders.MessagePayloadBuilder.start;
-import static org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED;
-import static org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents.MESSAGE_SENT;
-import static org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents.MESSAGE_WAITING;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 import java.util.Collections;
 import java.util.List;
-
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
@@ -37,6 +25,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.MessageRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.apache.groovy.util.Maps;
@@ -50,12 +40,23 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import static org.activiti.api.process.model.builders.MessagePayloadBuilder.receive;
+import static org.activiti.api.process.model.builders.MessagePayloadBuilder.start;
+import static org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED;
+import static org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents.MESSAGE_SENT;
+import static org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents.MESSAGE_WAITING;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = ServicesAuditITConfiguration.class, initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(classes = ServicesAuditITConfiguration.class,
+    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class MessageAuditProducerIT {
 
     private static final String CATCH_MESSAGE = "catchMessage";

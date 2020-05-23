@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.starter.audit.tests.it.swagger;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import java.io.File;
 import java.nio.file.Files;
-import org.activiti.cloud.starter.audit.tests.it.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.starter.audit.tests.it.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,12 +29,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.io.File;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class AuditSwaggerITSupport {
 
     @Autowired
@@ -45,8 +43,7 @@ public class AuditSwaggerITSupport {
     private ObjectMapper objectMapper;
 
     /**
-     * This is not a test. It's actually generating the swagger.json and yaml definition of the service.
-     * It is used by maven generate-swagger profile build.
+     * This is not a test. It's actually generating the swagger.json and yaml definition of the service. It is used by maven generate-swagger profile build.
      */
     @Test
     public void generateSwagger() throws Exception {

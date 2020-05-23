@@ -15,18 +15,11 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.message.RuntimeBundleInfoMessageHeaders;
 import org.activiti.cloud.services.job.executor.JobMessageFailedEvent;
@@ -36,6 +29,8 @@ import org.activiti.cloud.services.job.executor.JobMessageHeaders;
 import org.activiti.cloud.services.job.executor.JobMessageProducer;
 import org.activiti.cloud.services.job.executor.JobMessageSentEvent;
 import org.activiti.cloud.services.job.executor.MessageBasedJobManager;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -82,12 +77,17 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
 @TestPropertySource("classpath:application-test.properties")
@@ -98,7 +98,7 @@ import java.util.concurrent.TimeUnit;
 @DirtiesContext
 @ContextConfiguration(classes = {RuntimeITConfiguration.class,
     JobExecutorIT.JobExecutorITProcessEngineConfigurer.class},
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class JobExecutorIT {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);
@@ -565,7 +565,7 @@ public class JobExecutorIT {
 
         // then
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish JobMessageFailedEvent")
-                                                             .isTrue();
+            .isTrue();
     }
 
     @Test
@@ -606,7 +606,7 @@ public class JobExecutorIT {
 
         // then
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish JobMessageSentEvent")
-                                                             .isTrue();
+            .isTrue();
     }
 
     @Test
@@ -652,23 +652,23 @@ public class JobExecutorIT {
         ;
 
         assertThat(message.getHeaders()).as("should build runtime bundle properties as headers")
-                                        .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, properties.getAppName())
-                                        .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, properties.getServiceName())
-                                        .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE, properties.getServiceType())
-                                        .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_VERSION, properties.getServiceVersion())
-                                        ;
+            .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, properties.getAppName())
+            .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, properties.getServiceName())
+            .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE, properties.getServiceType())
+            .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_VERSION, properties.getServiceVersion())
+        ;
 
         assertThat(message.getHeaders()).as("should build job attributes as headers")
-                                        .containsEntry(JobMessageHeaders.JOB_ID, job.getId())
-                                        .containsEntry(JobMessageHeaders.JOB_TYPE, job.getJobType())
-                                        .containsEntry(JobMessageHeaders.JOB_HANDLER_TYPE, job.getJobHandlerType())
-                                        .containsEntry(JobMessageHeaders.JOB_EXCEPTION_MESSAGE, job.getExceptionMessage())
-                                        .containsEntry(JobMessageHeaders.JOB_PROCESS_DEFINITION_ID, job.getProcessDefinitionId())
-                                        .containsEntry(JobMessageHeaders.JOB_EXECUTION_ID, job.getExecutionId())
-                                        .containsEntry(JobMessageHeaders.JOB_DUE_DATE, job.getDuedate())
-                                        .containsEntry(JobMessageHeaders.JOB_HANDLER_CONFIGURATION, job.getJobHandlerConfiguration())
-                                        .containsEntry(JobMessageHeaders.JOB_RETRIES, job.getRetries())
-                                        ;
+            .containsEntry(JobMessageHeaders.JOB_ID, job.getId())
+            .containsEntry(JobMessageHeaders.JOB_TYPE, job.getJobType())
+            .containsEntry(JobMessageHeaders.JOB_HANDLER_TYPE, job.getJobHandlerType())
+            .containsEntry(JobMessageHeaders.JOB_EXCEPTION_MESSAGE, job.getExceptionMessage())
+            .containsEntry(JobMessageHeaders.JOB_PROCESS_DEFINITION_ID, job.getProcessDefinitionId())
+            .containsEntry(JobMessageHeaders.JOB_EXECUTION_ID, job.getExecutionId())
+            .containsEntry(JobMessageHeaders.JOB_DUE_DATE, job.getDuedate())
+            .containsEntry(JobMessageHeaders.JOB_HANDLER_CONFIGURATION, job.getJobHandlerConfiguration())
+            .containsEntry(JobMessageHeaders.JOB_RETRIES, job.getRetries())
+        ;
 
     }
 

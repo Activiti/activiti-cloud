@@ -21,6 +21,8 @@ import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.MessageRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -36,7 +38,8 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(classes = RuntimeITConfiguration.class,
+    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class MessageIT {
 
     @Autowired
@@ -49,9 +52,9 @@ public class MessageIT {
     public void shouldDeliverMessagesViaRestApi() {
         //given
         StartMessagePayload startMessage = MessagePayloadBuilder.start("startMessage")
-                                                                .withBusinessKey("businessId")
-                                                                .withVariable("correlationKey", "correlationId")
-                                                                .build();
+            .withBusinessKey("businessId")
+            .withVariable("correlationKey", "correlationId")
+            .build();
         //when
         ResponseEntity<CloudProcessInstance> startResponse = messageRestTemplate.message(startMessage);
 
@@ -59,18 +62,18 @@ public class MessageIT {
         assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(startResponse.getBody()).isNotNull();
         assertThat(runtimeService.createProcessInstanceQuery()
-                                 .includeProcessVariables()
-                                 .processDefinitionKey("shouldDeliverMessagesViaRestApi")
-                                 .list()).hasSize(1)
-                                         .extracting(ProcessInstance::getProcessVariables)
-                                         .extracting("correlationKey")
-                                         .contains("correlationId");
+            .includeProcessVariables()
+            .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+            .list()).hasSize(1)
+            .extracting(ProcessInstance::getProcessVariables)
+            .extracting("correlationKey")
+            .contains("correlationId");
 
         //given
         ReceiveMessagePayload boundaryMessage = MessagePayloadBuilder.receive("boundaryMessage")
-                                                                     .withCorrelationKey("correlationId")
-                                                                     .withVariable("customerKey", "customerId")
-                                                                     .build();
+            .withCorrelationKey("correlationId")
+            .withVariable("customerKey", "customerId")
+            .build();
 
         //when
         ResponseEntity<Void> boundaryResponse = messageRestTemplate.message(boundaryMessage);
@@ -78,16 +81,16 @@ public class MessageIT {
         //then
         assertThat(boundaryResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(runtimeService.createProcessInstanceQuery()
-                                 .includeProcessVariables()
-                                 .processDefinitionKey("shouldDeliverMessagesViaRestApi")
-                                 .list()).hasSize(1)
-                                         .extracting(ProcessInstance::getProcessVariables)
-                                         .extracting("customerKey")
-                                         .contains("customerId");
+            .includeProcessVariables()
+            .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+            .list()).hasSize(1)
+            .extracting(ProcessInstance::getProcessVariables)
+            .extracting("customerKey")
+            .contains("customerId");
         //given
         ReceiveMessagePayload catchMessage = MessagePayloadBuilder.receive("catchMessage")
-                                                                  .withCorrelationKey("customerId")
-                                                                  .build();
+            .withCorrelationKey("customerId")
+            .build();
 
         // when
         ResponseEntity<Void> catchResponse = messageRestTemplate.message(catchMessage);
@@ -95,17 +98,17 @@ public class MessageIT {
         // then
         assertThat(catchResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(runtimeService.createProcessInstanceQuery()
-                                 .processDefinitionKey("shouldDeliverMessagesViaRestApi")
-                                 .list()).isEmpty();
+            .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+            .list()).isEmpty();
     }
 
     @Test
     public void shouldReceive404NotFoundIfWrongMessageName() {
         //given
         StartMessagePayload startMessage = MessagePayloadBuilder.start("notFound")
-                                                                .withBusinessKey("businessId")
-                                                                .withVariable("correlationKey", "correlationId")
-                                                                .build();
+            .withBusinessKey("businessId")
+            .withVariable("correlationKey", "correlationId")
+            .build();
         //when
         ResponseEntity<CloudProcessInstance> startResponse = messageRestTemplate.message(startMessage);
 
