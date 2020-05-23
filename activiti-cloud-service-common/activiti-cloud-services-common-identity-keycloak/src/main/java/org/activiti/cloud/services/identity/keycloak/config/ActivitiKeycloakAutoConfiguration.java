@@ -20,6 +20,8 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDeta
 import org.activiti.cloud.services.identity.keycloak.KeycloakInstanceWrapper;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
+import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
+import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -44,7 +46,7 @@ public class ActivitiKeycloakAutoConfiguration {
     public KeycloakUserGroupManager keycloakUserGroupManager(KeycloakInstanceWrapper keycloakInstanceWrapper) {
         return new KeycloakUserGroupManager(keycloakInstanceWrapper);
     }
-    
+
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
     @ConditionalOnMissingBean
@@ -52,4 +54,10 @@ public class ActivitiKeycloakAutoConfiguration {
         return new KeycloakClientPrincipalDetailsProvider(keycloakInstanceWrapper);
     }
 
+
+    @Bean
+    @ConditionalOnMissingBean
+    public KeycloakSpringBootConfigResolver keycloakConfigResolver() {
+        return new KeycloakSpringBootConfigResolver();
+    }
 }
