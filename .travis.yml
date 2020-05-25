@@ -26,9 +26,7 @@ before_script:
 
 stages:
 - name: build
-- name: tag
-  if: type != pull_request
-- name: updatebot
+- name: tag_updatebot
   if: type != pull_request
 
 install: true
@@ -70,17 +68,14 @@ jobs:
         - mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off -q clean verify
         - cd -
 
-    - name: Create a tag
-      stage: tag
+    - name: tag_updatebot
+      stage: tag_updatebot
       script: |
         mvn versions:set -q -DnewVersion=$(cat VERSION)
         git add -u
         git commit -m "Release $(cat VERSION)" --allow-empty
         git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)"|| travis_terminate 1;
         git push -f -q https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git v$(cat VERSION)|| travis_terminate 1;
-    - name: Updatebot
-      stage: updatebot
-      script: |
         updatebot push-version --kind maven \
                   org.activiti.cloud:activiti-cloud-dependencies ${VERSION} \
                   org.activiti.cloud:activiti-cloud-modeling-dependencies ${activiti_cloud_version} \
