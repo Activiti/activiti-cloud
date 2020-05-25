@@ -14,7 +14,6 @@ build: clean
 	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/
 	helm dependency build
 	helm lint
-	#helm install . --name ${NAME} --debug --dry-run
 
 install:
 	helm install . --name ${NAME}
@@ -57,3 +56,9 @@ tag:
 	git commit -m "release $(VERSION)" --allow-empty # if first release then no verion update is performed
 	git tag -fa v$(VERSION) -m "Release version $(VERSION)"
 	git push origin v$(VERSION)
+
+updatebot/push-version: 
+	@echo Resolving push versions for artifacts........
+	$(eval ACTIVITI_CLOUD_QUERY_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud.version -q -DforceStdout -f ../../pom.xml))
+	$(eval MAVEN_VERSIONS=org.activiti.cloud.examples:activiti-cloud-query $(RELEASE_VERSION) org.activiti.cloud.query:activiti-cloud-query-dependencies $(ACTIVITI_CLOUD_QUERY_VERSION))
+	updatebot -d ../../ push-version --kind maven $(MAVEN_VERSIONS);

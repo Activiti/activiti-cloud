@@ -14,8 +14,6 @@ build: clean
 	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/
 	helm dependency build
 	helm lint
-	#helm install . --name ${NAME} --debug --dry-run
-
 install:
 	helm install . --name ${NAME}
 
@@ -32,7 +30,6 @@ clean:
 
 release:
 	helm package .
-
 
 github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
@@ -58,4 +55,9 @@ tag:
 	git tag -fa v$(VERSION) -m "Release version $(VERSION)"
 	git push origin v$(VERSION)
 
+updatebot/push-version:
+	$(eval MODELING_DEPENDENCIES_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling-dependencies.version -q -DforceStdout -f ../../pom.xml))
+	$(eval MAVEN_VERSIONS=org.activiti.cloud.examples:activiti-cloud-modeling $(RELEASE_VERSION) org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $(MODELING_DEPENDENCIES_VERSION))
+	
+	updatebot -d ../../ push-version --kind maven $(MAVEN_VERSIONS);
 

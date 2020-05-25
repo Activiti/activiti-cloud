@@ -5,10 +5,6 @@ ACTIVITI_CLOUD_MODELING_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-model
 
 ACTIVITI_CLOUD_VERSION_NUMBER := $(shell grep -oPm1 "(?<=<activiti-cloud-build.version>)[^<]+" "pom.xml")
 
-#PREVIEW_NAMESPACE := $(shell echo $(PREVIEW_NAMESPACE)|  tr '[:upper:]' '[:lower:]')
-
-
-ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.273
 ACTIVITI_CLOUD_COMMON_HELM_CHART := 1.1.21
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
@@ -21,26 +17,13 @@ ACTIVITI_CLOUD_SERVICES_VERSIONS := org.activiti.cloud.rb:activiti-cloud-runtime
     org.activiti.cloud.audit:activiti-cloud-audit-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER) org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER) \
     org.activiti.cloud.messages:activiti-cloud-messages-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER)
 
-ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(HELM_ACTIVITI_VERSION) activiti-cloud-connector $(HELM_ACTIVITI_VERSION) \
-    activiti-cloud-query $(HELM_ACTIVITI_VERSION)  \
-    activiti-cloud-modeling $(HELM_ACTIVITI_VERSION)
-
-
+ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(VERSION) activiti-cloud-connector $(VERSION) \
+    activiti-cloud-query $(VERSION)  \
+    activiti-cloud-modeling $(VERSION)
 
 GITHUB_CHARTS_BRANCH := "gh-pages"
 
-
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
-get-acc-scenarious-version:
-	@echo $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
-
-activiti-cloud-acceptance-scenarios:
-	rm -rf activiti-cloud-acceptance-scenarios && \
-	git clone https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git && \
-	cd activiti-cloud-acceptance-scenarios && \
-	git fetch --all --tags --prune && \
-	git checkout tags/v$(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION) -b $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION) && \
-	mvn clean install -DskipTests
 
 modeling-acceptance-tests:
 	cd activiti-cloud-acceptance-scenarios && \
@@ -49,26 +32,6 @@ modeling-acceptance-tests:
 runtime-acceptance-tests:
 	cd activiti-cloud-acceptance-scenarios && \
 	mvn -pl 'runtime-acceptance-tests' clean verify
-
-update-ea:
-	#$(eval ACTIVITI_CLOUD_VERSION = $(shell cat VERSION))
-	@echo "ACTIVITI_CLOUD_VERSION=<$(ACTIVITI_CLOUD_VERSION)>"
-
-	$(eval ID = $(shell echo ${ACTIVITI_CLOUD_VERSION}|tr -dc '[:alnum:]\n\r'))
-	@echo ID=${ID}
-
-	rm -rf alfresco-process-parent||echo removing alfresco-process-parent
-	git clone https://oauth2:${GITLAB_TOKEN}@git.alfresco.com/process-services/alfresco-process-parent.git
-	@echo "Clone for alfresco-process-parent done"
-
-	cd alfresco-process-parent && \
-	  git checkout develop && \
-	  git checkout -b update-cloud-to-$(ACTIVITI_CLOUD_VERSION) && \
-	  mvn versions:set-property -Dproperty=activiti-cloud.version -DnewVersion=$(ACTIVITI_CLOUD_VERSION) && \
-	  git diff --word-diff && \
-	  git commit -a -m "AAE-0 update ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION}" && \
-	  git push  --set-upstream origin update-cloud-to-${ACTIVITI_CLOUD_VERSION}
-	@cd alfresco-process-parent && curl --request POST --header "PRIVATE-TOKEN: $(GITLAB_TOKEN)" --header "Content-Type: application/json" -d '{"id": ${ID} ,"source_branch": "update-cloud-to-${ACTIVITI_CLOUD_VERSION}" ,"target_branch":"develop","title":"community propagation ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION}"}' https://git.alfresco.com/api/v4/projects/1031/merge_requests
 
 updatebot/push-version:
 	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_SERVICES_VERSIONS)   --merge false
@@ -118,9 +81,7 @@ github:
 	   git pull && \
 	   git push --force origin "$(GITHUB_CHARTS_BRANCH)"
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
-     rm -rf $(GITHUB_CHARTS_DIR)
-		 
-		 
+     rm -rf $(GITHUB_CHARTS_DIR)	 
 
 tag:
 	#sed -i -e "s/version:.*/version: $(HELM_ACTIVITI_VERSION)/" Chart.yaml
@@ -130,7 +91,6 @@ tag:
 	git commit -m "release $(HELM_ACTIVITI_VERSION)" --allow-empty && \
 	git tag -fa v$(HELM_ACTIVITI_VERSION) -m "Release version $(HELM_ACTIVITI_VERSION)" && \
 	git push --force origin v$(HELM_ACTIVITI_VERSION)
-
 
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
@@ -150,8 +110,7 @@ run-helm-chart:
             	helm upgrade ${PREVIEW_NAMESPACE} . \
             		--install \
             		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
-            		--namespace ${PREVIEW_NAMESPACE} \
-
+            		--namespace ${PREVIEW_NAMESPACE} 
 delete:
 	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
 

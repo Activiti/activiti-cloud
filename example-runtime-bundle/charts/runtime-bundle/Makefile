@@ -22,6 +22,11 @@ install:
 upgrade: clean build
 	helm upgrade ${NAME} .
 
+dry-run: 
+	helm install . --name ${NAME} --dry-run
+
+preview: version package dry-run release
+
 delete:
 	helm delete --purge ${NAME}
 
@@ -58,3 +63,12 @@ tag:
 	git commit -m "release $(VERSION)" --allow-empty # if first release then no verion update is performed
 	git tag -fa v$(VERSION) -m "Release version $(VERSION)"
 	git push origin v$(VERSION)
+
+updatebot/push-version: 
+	@echo Resolving push versions for artifacts........
+	$(eval ACTIVITI_CLOUD_RB_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-runtime-bundle-service.version -q -DforceStdout -f ../../pom.xml))
+	$(eval MAVEN_VERSIONS=org.activiti.cloud.examples:example-runtime-bundle $(RELEASE_VERSION) org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies $(ACTIVITI_CLOUD_RB_VERSION))
+
+	updatebot -d ../../ push-version --kind maven $(MAVEN_VERSIONS);
+
+	

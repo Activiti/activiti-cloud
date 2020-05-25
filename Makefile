@@ -18,7 +18,6 @@ updatebot/push:
 	updatebot push --ref $(RELEASE_VERSION)
 
 updatebot/push-version-dry:
-	echo $(VESION)
 	updatebot --dry push-version --kind helm activiti-cloud-dependencies $(RELEASE_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
 
 
@@ -70,15 +69,17 @@ run-helm-chart:
             		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
             		--namespace ${PREVIEW_NAMESPACE} \
             		--wait
-
-update-version-in-example-charts:
+								
+create-helm-charts-release-and-upload:
 	@for chart in $(charts) ; do \
-		pwd; \
 		cd $$chart ; \
-		sed -i -e "s/version:.*/version: $$HELM_ACTIVITI_VERSION/" Chart.yaml; \
-		sed -i -e "s/tag: .*/tag: $$VERSION/" values.yaml ; \
+		make version; \
+		make build; \
+		make release; \
+		make github; \
 		cd - ; \
-	done
+	done 
+
 create-helm-charts-release-and-upload:
 	@for chart in $(charts) ; do \
 		cd $$chart && \

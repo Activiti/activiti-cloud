@@ -8,7 +8,7 @@
       <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
-    <root level="INFO">
+    <root level="ERROR">
       <appender-ref ref="stash"/>
     </root>
   </springProfile>
