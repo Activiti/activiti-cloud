@@ -625,12 +625,9 @@ public class ProcessVariablesIT {
     private void checkBADREQUESTStartProcessWihWrongDateVariables(boolean isAdmin) throws Exception {
         Map<String, Object> variables = new HashMap<>();
 
-        variables.put("variableBool",
-            false);
-        variables.put("variableDate",
-            "WrongDateString");
-        variables.put("variableDateTime",
-            "WrongDateString");
+        variables.put("variableBool", false);
+        variables.put("variableDate", "WrongDateString");
+        variables.put("variableDateTime", "WrongDateString");
 
         ResponseEntity<ActivitiErrorMessageImpl> responseEntity;
         if (isAdmin) {
