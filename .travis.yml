@@ -7,11 +7,7 @@ stages:
   - name: activiti-cloud-acceptance-tests
   - name: activiti-cloud-services
   - name: activiti-cloud-messages-and-notifications-service
-  - name: deploy
-    if: type != pull_request
-  - name: tag
-    if: type != pull_request
-  - name: updatebot
+  - name: tag_deploy_updatebot
     if: type != pull_request
 jobs:
   include:
@@ -51,23 +47,17 @@ jobs:
     - name: activiti-cloud-notifications-graphql-service
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
 
-    - name: Create a tag
-      stage: tag
+    - name: tag_deploy_updatebot
+      stage: tag_deploy_updatebot
       script: |
         mvn versions:set -DnewVersion=$(cat VERSION)
         git add --all
         git commit -m "Release $(cat VERSION)" --allow-empty
         git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)"
         git push -f -q https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud.git v$(cat VERSION)
-    - name: Deploy to nexus
-      stage: deploy
-      script:
-      - mvn versions:set -DnewVersion=$(cat VERSION)
-      - mvn clean deploy -DskipTests
-    - name: Update versions in other components
-      stage: updatebot
-      script:
-      - export VERSION=$(cat VERSION)| make updatebot/push-version
+        mvn versions:set -DnewVersion=$(cat VERSION)
+        mvn clean deploy -DskipTests
+        export VERSION=$(cat VERSION)| make updatebot/push-version
 
 # Send coverage data
 after_success:
