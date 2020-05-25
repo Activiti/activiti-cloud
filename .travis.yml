@@ -36,7 +36,7 @@ jobs:
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml
 
     - name: activiti-cloud-query-service
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml
+      script: ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml
     - name: activiti-cloud-audit-service
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml
     - name: activiti-cloud-modeling-service
