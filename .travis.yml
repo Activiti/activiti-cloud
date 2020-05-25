@@ -1,5 +1,5 @@
 import: Activiti/activiti-scripts:.travis.java.yml@master
-install: travis_wait mvn ${MAVEN_CLI_OPTS} dependency:resolve dependency:resolve-plugins || true
+install: true
 stages:
   - name: activiti-cloud-build
   - name: activiti-cloud-api
