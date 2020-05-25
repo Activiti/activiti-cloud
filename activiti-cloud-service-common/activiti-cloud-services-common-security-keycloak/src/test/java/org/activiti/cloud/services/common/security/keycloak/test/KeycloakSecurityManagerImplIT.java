@@ -31,7 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import java.util.List;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class KeycloakSecurityManagerImplTest {
+public class KeycloakSecurityManagerImplIT {
 
     @Autowired
     private SecurityManager securityManager;
