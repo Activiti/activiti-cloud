@@ -20,7 +20,10 @@ import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 import org.activiti.api.process.model.ProcessDefinition;
@@ -29,6 +32,7 @@ import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.runtime.model.impl.ProcessVariableValue;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
@@ -77,6 +81,9 @@ public class ProcessRuntimeBundleSteps {
 
         if(variables){
             payload.withVariable("test_variable_name", "test-variable-value");
+            payload.withVariable("test_bigdecimal_variable_name", wrap(BigDecimal.valueOf(1234567890L, 2)));
+            payload.withVariable("test_date_variable_name", wrap(Date.from(Instant.EPOCH)));
+            payload.withVariable("test_long_variable_name", wrap(1234567890L));
             payload.withVariable("test_int_variable_name", 7);
             payload.withVariable("test_bool_variable_name", true);
             payload.withVariable("test_json_variable_name",objectMapper.readTree("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}"));
@@ -84,6 +91,31 @@ public class ProcessRuntimeBundleSteps {
         }
 
         return startProcess(payload.build());
+    }
+
+    protected Map<String, String> wrap(BigDecimal value) {
+        return ProcessVariableValue.builder()
+                                   .type("bigdecimal")
+                                   .value(value.toString())
+                                   .build()
+                                   .toMap();
+    }
+
+    protected Map<String, String> wrap(Long value) {
+        return ProcessVariableValue.builder()
+                                   .type("long")
+                                   .value(value.toString())
+                                   .build()
+                                   .toMap();
+    }
+
+    protected Map<String, String> wrap(Date value) {
+        return ProcessVariableValue.builder()
+                                   .type("date")
+                                   .value(value.toInstant()
+                                               .toString())
+                                   .build()
+                                   .toMap();
     }
 
     @Step
