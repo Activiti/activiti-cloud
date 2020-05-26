@@ -53,6 +53,10 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     private String executionId;
 
     @Convert(converter = VariableValueJsonConverter.class)
+    @Column(name = "value", columnDefinition="text", insertable = false, updatable = false)
+    private VariableValue<?> internalValue;
+
+    @Convert(converter = VariableValueJsonConverter.class)
     @Column(columnDefinition="text")
     private VariableValue<?> value;
 
@@ -140,6 +144,14 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
 
     public void setExecutionId(String executionId) {
         this.executionId = executionId;
+    }
+
+    public VariableValue<?> getInternalValue() {
+        return internalValue;
+    }
+
+    public void setInternalValue(VariableValue<?> internalValue) {
+        this.internalValue = internalValue;
     }
 
     public <T> void setValue(T value) {

@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
@@ -44,6 +43,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
@@ -51,6 +51,7 @@ import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
+import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,6 +99,9 @@ public class QueryTasksIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
+    private TaskVariableRepository taskVariableRepository;
+
+    @Autowired
     private MyProducer producer;
 
     private EventsAggregator eventsAggregator;
@@ -108,11 +112,15 @@ public class QueryTasksIT {
 
     private TaskEventContainedBuilder taskEventContainedBuilder;
 
+    private VariableEventContainedBuilder variableEventContainedBuilder;
+
+
     @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
         taskEventContainedBuilder = new TaskEventContainedBuilder(eventsAggregator);
+        variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
         runningProcessInstance = processInstanceBuilder.aRunningProcessInstance("My running instance");
     }
 
@@ -120,6 +128,7 @@ public class QueryTasksIT {
     public void tearDown() {
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
+        taskVariableRepository.deleteAll();
         taskRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
@@ -204,6 +213,57 @@ public class QueryTasksIT {
                     .containsExactly(tuple(cancelledTask.getId(),
                             Task.TaskStatus.CANCELLED));
         });
+    }
+
+    @Test
+    public void shouldGetAvailableTasksFilteredOnVariableNameAndValue() {
+        //given
+        taskEventContainedBuilder.aCompletedTask("Task with no var",
+                                                                      runningProcessInstance);
+        Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved",
+                                                                      runningProcessInstance);
+        Task taskRejected = taskEventContainedBuilder.aCompletedTask("Task rejected",
+                                                                      runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved", "string")
+            .onTask(taskApproved);
+
+        variableEventContainedBuilder.aCreatedVariable("outcome", "rejected", "string")
+            .onTask(taskRejected);
+        variableEventContainedBuilder.aCreatedVariable("anotherVariable", "approved", "string")
+            .onTask(taskRejected);
+
+        eventsAggregator.sendAll();
+
+
+        await().untilAsserted(() -> {
+
+            //when
+            Collection<Task> tasks = executeGetTasksWithVariable("outcome", "approved");
+
+            //then
+            assertThat(tasks)
+                    .extracting(Task::getName)
+                    .containsExactly(taskApproved.getName());
+
+        });
+    }
+
+    private Collection<Task> executeGetTasksWithVariable(String variableName,
+        String variableValue) {
+        ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+        .exchange(TASKS_URL + "?variables.name={name}&variables.value={outcome}",
+            HttpMethod.GET,
+            keycloakTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_TASKS_RESPONSE_TYPE,
+            variableName,
+            variableValue);
+
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        Collection<Task> tasks = responseEntity.getBody().getContent();
+        return tasks;
     }
 
     @Test
