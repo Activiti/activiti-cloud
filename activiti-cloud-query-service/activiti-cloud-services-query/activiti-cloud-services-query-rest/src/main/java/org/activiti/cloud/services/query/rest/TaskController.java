@@ -28,6 +28,7 @@ import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.VariableValue;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
@@ -92,22 +93,30 @@ public class TaskController {
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudTask>> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
                                                        @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+                                                       @RequestParam(name = "variableName", required = false) String variableName,
+                                                       @RequestParam(name = "variableValue", required = false) VariableValue<?> variableValue,
                                                        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                        Pageable pageable) {
         Predicate extendedPredicate = Optional.ofNullable(predicate)
                                               .orElseGet(BooleanBuilder::new);
         if (rootTasksOnly) {
             BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull();
-            extendedPredicate= extendedPredicate !=null ? parentTaskNull.and(extendedPredicate) : parentTaskNull;
+            extendedPredicate = parentTaskNull.and(extendedPredicate);
         }
         if (standalone) {
             BooleanExpression processInstanceIdNull = QTaskEntity.taskEntity.processInstanceId.isNull();
-            extendedPredicate= extendedPredicate !=null ? processInstanceIdNull.and(extendedPredicate) : processInstanceIdNull;
+            extendedPredicate = extendedPredicate != null ? processInstanceIdNull.and(extendedPredicate) : processInstanceIdNull;
         }
 
         extendedPredicate = taskLookupRestrictionService.restrictTaskQuery(extendedPredicate);
-        Page<TaskEntity> page = taskRepository.findAll(extendedPredicate,
-                                                       pageable);
+        Page<TaskEntity> page;
+        if (variableName != null && variableValue != null) {
+            page = taskRepository
+                .findByVariableNameAndValue(variableName, variableValue, extendedPredicate,
+                    pageable);
+        } else {
+            page = taskRepository.findAll(extendedPredicate, pageable);
+        }
 
         return pagedCollectionModelAssembler.toModel(pageable,
                                                   page,

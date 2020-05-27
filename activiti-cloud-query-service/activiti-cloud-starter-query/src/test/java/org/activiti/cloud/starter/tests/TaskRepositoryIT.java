@@ -17,25 +17,23 @@ package org.activiti.cloud.starter.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import java.util.Collections;
 import java.util.UUID;
-
 import org.activiti.api.task.model.Task.TaskStatus;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.querydsl.core.BooleanBuilder;
 
 @SpringBootTest
 @Transactional
@@ -47,10 +45,6 @@ public class TaskRepositoryIT {
     @Autowired
     private TaskVariableRepository taskVariableRepository;
 
-    @SpringBootApplication
-    static class Application {
-
-    }
 
     @AfterEach
     void tearDown() {
@@ -62,35 +56,30 @@ public class TaskRepositoryIT {
     @Test
     public void shouldFilterByVariableNameAndValue() {
 
-        TaskEntity task1 = createTask("t1");
-        TaskEntity task2 = createTask("t2");
+        TaskEntity task1 = createTask("t1", TaskStatus.CREATED);
+        TaskEntity task2 = createTask("t2", TaskStatus.CREATED);
+        TaskEntity task3 = createTask("t3", TaskStatus.COMPLETED);
 
-        TaskVariableEntity variable = createVariable(task1, "outcome", "approved");
+        createVariable(task1, "outcome", "approved");
         createVariable(task2, "outcome", "rejected");
         createVariable(task2, "anotherVariable", "approved");
+        createVariable(task3, "outcome", "approved");
 
-        BooleanBuilder predicates = new BooleanBuilder();
-
-        Page<TaskEntity> result = taskRepository.findByVariableNameAndValue("outcome",
-                                                                            new VariableValue<>("approved"),
-                                                                            predicates,
-                                                                            PageRequest.of(0, 10));
-        assertThat(result).extracting(TaskEntity::getName).containsExactly("t1");
+        BooleanExpression predicates =  QTaskEntity.taskEntity.status.eq(TaskStatus.CREATED);
 
         Page<TaskEntity> approvedTasks = taskRepository
-            .findByVariablesNameAndVariablesInternalValue("outcome", new VariableValue<>("approved"),
+            .findByVariableNameAndValue("outcome", new VariableValue<>("approved"), predicates,
                 PageRequest.of(0, 10));
         Page<TaskEntity> rejectedTasks = taskRepository
-            .findByVariablesNameAndVariablesInternalValue("outcome", new VariableValue<>("rejected"),
+            .findByVariableNameAndValue("outcome", new VariableValue<>("rejected"), predicates,
                 PageRequest.of(0, 10));
         Page<TaskEntity> nonMatchingTasks = taskRepository
-            .findByVariablesNameAndVariablesInternalValue("outcome", new VariableValue<>("notMatching"),
+            .findByVariableNameAndValue("outcome", new VariableValue<>("notMatching"), predicates,
                 PageRequest.of(0, 10));
 
         assertThat(approvedTasks).extracting(TaskEntity::getName).containsExactly("t1");
         assertThat(rejectedTasks).extracting(TaskEntity::getName).containsExactly("t2");
         assertThat(nonMatchingTasks).extracting(TaskEntity::getName).isEmpty();
-
 
     }
 
@@ -106,11 +95,11 @@ public class TaskRepositoryIT {
         return variableEntity;
     }
 
-    private TaskEntity createTask(String name) {
+    private TaskEntity createTask(String name, TaskStatus status) {
         TaskEntity task1 = new TaskEntity();
         task1.setId(UUID.randomUUID().toString());
         task1.setName(name);
-        task1.setStatus(TaskStatus.CREATED);
+        task1.setStatus(status);
         taskRepository.save(task1);
         return task1;
     }

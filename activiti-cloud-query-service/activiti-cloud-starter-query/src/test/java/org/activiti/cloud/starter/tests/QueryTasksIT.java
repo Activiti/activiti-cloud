@@ -252,7 +252,7 @@ public class QueryTasksIT {
     private Collection<Task> executeGetTasksWithVariable(String variableName,
         String variableValue) {
         ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
-        .exchange(TASKS_URL + "?variables.name={name}&variables.value={outcome}",
+        .exchange(TASKS_URL + "?variableName={name}&variableValue={outcome}",
             HttpMethod.GET,
             keycloakTokenProducer.entityWithAuthorizationHeader(),
             PAGED_TASKS_RESPONSE_TYPE,
