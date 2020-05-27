@@ -89,19 +89,12 @@ public class MQServiceTaskIT {
         CustomPojoAnnotated customPojoAnnotated = new CustomPojoAnnotated();
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("firstName",
-            "John");
-        variables.put("lastName",
-            "Smith");
-        variables.put("age",
-            19);
-        variables.put("boolVar",
-            true);
-        variables.put("customPojo",
-            customPojo
-        );
-        variables.put("customPojoAnnotated",
-            customPojoAnnotated);
+        variables.put("firstName", "John");
+        variables.put("lastName", "Smith");
+        variables.put("age", 19);
+        variables.put("boolVar", true);
+        variables.put("customPojo", customPojo);
+        variables.put("customPojoAnnotated", customPojoAnnotated);
 
         //when
         ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskProcess",
@@ -123,14 +116,10 @@ public class MQServiceTaskIT {
         // the variable "age" should be updated based on ServiceTaskConsumerHandler.receive
         Map<String, Object> updatedVariables = runtimeService.getVariables(procInst.getId());
         assertThat(updatedVariables)
-            .containsEntry("firstName",
-                "John")
-            .containsEntry("lastName",
-                "Smith")
-            .containsEntry("age",
-                20)
-            .containsEntry("boolVar",
-                false);
+            .containsEntry("firstName", "John")
+            .containsEntry("lastName", "Smith")
+            .containsEntry("age", 20)
+            .containsEntry("boolVar", false);
 
         //engine can resolve annotated pojo in var to correct type but not without annotation
         assertThat(updatedVariables.get("customPojo").getClass()).isEqualTo(CustomPojo.class);
@@ -190,24 +179,16 @@ public class MQServiceTaskIT {
                 .isNotNull()
                 .extracting(CloudVariableInstance::getName,
                     CloudVariableInstance::getValue)
-                .containsOnly(tuple("name",
-                    "outName"), //mapped from connector outputs based on extension mappings
-                    tuple("age",
-                        25),        //mapped from connector outputs based on extension mappings
-                    tuple("input_unmapped_variable_with_matching_name",
-                        "inTest"), //kept unchanging because no connector output is updating it
-                    tuple("input_unmapped_variable_with_non_matching_connector_input_name",
-                        "inTest"), //kept unchanging because no connector output is updating it
-                    tuple("nickName",
-                        "testName"),//kept unchanging because no connector output is updating it
-                    tuple("out_unmapped_variable_matching_name",
-                        "default"),//not present in extension mappings, hence not updated although
+                .containsOnly(tuple("name", "outName"), //mapped from connector outputs based on extension mappings
+                    tuple("age", 25),        //mapped from connector outputs based on extension mappings
+                    tuple("input_unmapped_variable_with_matching_name", "inTest"), //kept unchanging because no connector output is updating it
+                    tuple("input_unmapped_variable_with_non_matching_connector_input_name", "inTest"), //kept unchanging because no connector output is updating it
+                    tuple("nickName", "testName"),//kept unchanging because no connector output is updating it
+                    tuple("out_unmapped_variable_matching_name", "default"),//not present in extension mappings, hence not updated although
                     // the process variable have the same name as the connector output
-                    tuple("output_unmapped_variable_with_non_matching_connector_output_name",
-                        "default"),
+                    tuple("output_unmapped_variable_with_non_matching_connector_output_name", "default"),
                     tuple("outVarFromJsonExpression", "Tower of London"),
-                    tuple("outVarFromListExpression",
-                        "Peter"));//kept unchanging because no connector output is updating it
+                    tuple("outVarFromListExpression", "Peter"));//kept unchanging because no connector output is updating it
 
         });
 
@@ -237,12 +218,9 @@ public class MQServiceTaskIT {
                 .isNotNull()
                 .extracting(CloudVariableInstance::getName,
                     CloudVariableInstance::getValue)
-                .containsOnly(tuple("name",
-                    "outName"), //mapped from connector outputs based on extension mappings
-                    tuple("age",
-                        25),
-                    tuple("_constant_value_",
-                        "myConstantValue"));
+                .containsOnly(tuple("name", "outName"), //mapped from connector outputs based on extension mappings
+                    tuple("age", 25),
+                    tuple("_constant_value_", "myConstantValue"));
 
         });
     }
@@ -275,8 +253,7 @@ public class MQServiceTaskIT {
                 .isNotNull()
                 .extracting(CloudVariableInstance::getName,
                     CloudVariableInstance::getValue)
-                .containsOnly(tuple("restResult",
-                    "fromConnector"));//kept unchanging because no connector output is updating it
+                .containsOnly(tuple("restResult", "fromConnector"));//kept unchanging because no connector output is updating it
         });
 
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
