@@ -264,7 +264,7 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void should_returnStatusNoContent_when_validatingConnectorWithErrors() throws IOException {
+    public void shouldReturnStatusNoContentEhenValidatingConnectorWithErrors() throws IOException {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
@@ -280,7 +280,7 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticValidationException_when_validatingInvalidConnectorErrorInvalidProperty() throws IOException {
+    public void shouldThrowSemanticValidationExceptionWhenValidatingInvalidConnectorErrorInvalidProperty() throws IOException {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
