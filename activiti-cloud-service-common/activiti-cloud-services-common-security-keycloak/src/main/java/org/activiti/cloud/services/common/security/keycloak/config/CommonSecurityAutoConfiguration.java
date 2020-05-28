@@ -196,7 +196,8 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
-        http.authorizeRequests();
+        http.authorizeRequests()
+                .anyRequest().permitAll().and().csrf().disable().httpBasic().disable();
     }
 
 }
