@@ -252,14 +252,50 @@ public class ConnectorValidationControllerIT {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
-            .multiPart("file",
-                "connector-with-custom-type.json",
-                resourceAsByteArray("connector/connector-with-custom-type.json"),
-                "text/plain")
-            .post("/v1/models/{modelId}/validate",
-                connectorModel.getId())
-            .then()
-            .expect(status().isNoContent())
-            .body(isEmptyString());
+                .multiPart("file",
+                        "connector-with-custom-type.json",
+                        resourceAsByteArray("connector/connector-with-custom-type.json"),
+                        "text/plain")
+                .post("/v1/models/{modelId}/validate",
+                        connectorModel.getId())
+                .then()
+                .expect(status().isNoContent())
+                .body(isEmptyString());
     }
+
+    @Test
+    public void should_returnStatusNoContent_when_validatingConnectorWithErrors() throws IOException {
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+
+        given()
+                .multiPart("file",
+                        "connector-with-errors.json",
+                        resourceAsByteArray("connector/connector-with-errors.json"),
+                        "text/plain")
+                .post("/v1/models/{modelId}/validate",
+                        connectorModel.getId())
+                .then()
+                .expect(status().isNoContent())
+                .body(isEmptyString());
+    }
+
+    @Test
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorErrorInvalidProperty() throws IOException {
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+
+        assertThatResponse(
+                given()
+                        .multiPart("file",
+                                "connector-with-errors-invalid-property.json",
+                                resourceAsByteArray("connector/connector-with-errors-invalid-property.json"),
+                                CONTENT_TYPE_JSON)
+                        .post("/v1/models/{modelId}/validate",
+                                connectorModel.getId())
+                        .then()
+
+                        .expect(status().isBadRequest()))
+                .isSemanticValidationException()
+                .hasValidationErrors("extraneous key [invalid] is not permitted");
+    }
+
 }

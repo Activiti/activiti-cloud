@@ -1,0 +1,12 @@
+{
+  "name": "name-of-the-connector",
+  "description": "Description of the connector",
+  "errors": [
+    {
+      "name": "error-sample",
+      "description": "error-desc",
+      "value": "error-value",
+      "invalid": true
+    }
+  ]
+}
