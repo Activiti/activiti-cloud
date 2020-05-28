@@ -26,16 +26,17 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtens
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.removeEnd;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.transaction.Transactional;
 import javax.xml.stream.XMLStreamException;
-
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
@@ -45,9 +46,9 @@ import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
+import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -135,15 +136,23 @@ public class ModelServiceImpl implements ModelService{
     @Override
     public Model createModel(Project project,
                              Model model) {
+        checkIfModelNameExistsInProject(project,model);
         model.setId(null);
         ModelType modelType = findModelType(model);
-        model.setProject(project);
+        model.addProject(project);
         if (model.getExtensions() == null) {
             if (PROCESS.equals(modelType.getName()) || isJsonContentType(model.getContentType())) {
-                model.setExtensions(new HashMap<String, Object>());
+                model.setExtensions(new HashMap<>());
             }
         }
         return modelRepository.createModel(model);
+    }
+
+    private void checkIfModelNameExistsInProject(Project project, Model model) {
+        if (modelRepository.existsModelNameInProject(project, model.getName(), model.getType())) {
+            throw new ModelNameConflictException(
+                "A model with the same type already exists within the project with id: " + project != null ? project.getId() : "null");
+        }
     }
 
     @Override
@@ -183,7 +192,7 @@ public class ModelServiceImpl implements ModelService{
 
     @Override
     public void cleanModelIdList() {
-        this.modelIdentifiers.clear();
+        modelIdentifiers.clear();
     }
 
     @Override
@@ -220,7 +229,7 @@ public class ModelServiceImpl implements ModelService{
     @Override
     public Model updateModelContent(Model modelToBeUpdate,
                                     FileContent fileContent) {
-        FileContent fixedFileContent = this.modelIdentifiers.isEmpty()
+        FileContent fixedFileContent = modelIdentifiers.isEmpty()
                 ? fileContent
                 : overrideModelContentId(modelToBeUpdate,
                                          fileContent);
@@ -247,7 +256,7 @@ public class ModelServiceImpl implements ModelService{
     public FileContent overrideModelContentId(Model model,
                                               FileContent fileContent) {
         return modelContentService.findModelContentConverter(model.getType()).map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent,
-                                                                                                                                                 this.modelIdentifiers))
+            modelIdentifiers))
                 .orElse(fileContent);
     }
 
@@ -262,12 +271,12 @@ public class ModelServiceImpl implements ModelService{
     public Model importSingleModel(Project project,
                                    ModelType modelType,
                                    FileContent fileContent) {
-        Model model = this.importModel(project,
+        Model model = importModel(project,
                                        modelType,
                                        fileContent);
-        model = this.updateModelContent(model,
+        model = updateModelContent(model,
                                        fileContent);
-        this.cleanModelIdList();
+        cleanModelIdList();
         return model;
     }
 
@@ -329,7 +338,7 @@ public class ModelServiceImpl implements ModelService{
 
     @Override
     public List<Process> getProcessesBy(Project project, ModelType type) {
-        return this.getModels(project, type, Pageable.unpaged())
+        return getModels(project, type, Pageable.unpaged())
                 .stream()
                 .filter(model -> nonNull(model.getContent()))
                 .map(this::safeGetBpmnModel)
@@ -348,7 +357,7 @@ public class ModelServiceImpl implements ModelService{
 
     private String retrieveModelIdFromModelContent(Model model,
                                                    FileContent fileContent) {
-        Optional<ModelContent> modelContent = this.createModelContentFromModel(model,
+        Optional<ModelContent> modelContent = createModelContentFromModel(model,
                                                                                fileContent);
         return modelContent.isPresent() ? modelContent.get().getId() : null;
     }
@@ -396,15 +405,25 @@ public class ModelServiceImpl implements ModelService{
 
     @Override
     public void validateModelContent(Model model,
+                                     Project project) {
+        validateModelContent(model.getType(),
+                             modelRepository.getModelContent(model),
+                             createValidationContext(project));
+    }
+
+    @Override
+    public void validateModelContent(Model model,
                                      FileContent fileContent) {
         ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
                 ? EMPTY_CONTEXT
-                : Optional.ofNullable(model.getProject()).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+                : createValidationContext(model);
 
         validateModelContent(model.getType(),
                              fileContent.getFileContent(),
                              validationContext);
     }
+
+
 
     private ValidationContext createValidationContext(Project project) {
         return new ProjectValidationContext(getAllModels(project));
@@ -421,6 +440,19 @@ public class ModelServiceImpl implements ModelService{
         validateModelContent(model.getType(),
                              fileContent.getFileContent(),
                              validationContext);
+    }
+
+    @Override
+    public void validateModelContent(Model model,
+                                     FileContent fileContent,
+                                     Project project) {
+        ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
+            ? EMPTY_CONTEXT
+            : Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+
+        validateModelContent(model.getType(),
+            fileContent.getFileContent(),
+            validationContext);
     }
 
     private void validateModelContent(String modelType,
@@ -440,10 +472,18 @@ public class ModelServiceImpl implements ModelService{
 
     @Override
     public void validateModelExtensions(Model model,
+                                        Project project) {
+        validateModelExtensions(model.getType(),
+                                modelRepository.getModelContent(model),
+                                createValidationContext(project));
+    }
+
+    @Override
+    public void validateModelExtensions(Model model,
                                         FileContent fileContent) {
         ValidationContext validationContext = !modelTypeService.isJson(findModelType(model))
                 ? EMPTY_CONTEXT
-                : Optional.ofNullable(model.getProject()).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+                : createValidationContext(model);
         validateModelExtensions(model.getType(),
                                 fileContent.getFileContent(),
                                 validationContext);
@@ -453,6 +493,18 @@ public class ModelServiceImpl implements ModelService{
     public void validateModelExtensions(Model model,
                                         FileContent fileContent,
                                         ValidationContext validationContext) {
+        validateModelExtensions(model.getType(),
+                                fileContent.getFileContent(),
+                                validationContext);
+    }
+
+    @Override
+    public void validateModelExtensions(Model model,
+                                        FileContent fileContent,
+                                        Project project) {
+        ValidationContext validationContext = !modelTypeService.isJson(findModelType(model))
+            ? EMPTY_CONTEXT
+            : Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
         validateModelExtensions(model.getType(),
                                 fileContent.getFileContent(),
                                 validationContext);

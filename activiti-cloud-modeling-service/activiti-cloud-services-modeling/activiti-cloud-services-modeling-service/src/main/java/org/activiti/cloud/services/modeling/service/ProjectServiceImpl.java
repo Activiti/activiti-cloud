@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +39,7 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
@@ -55,11 +60,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
-
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 
 /**
  * Business logic related to {@link Project} entities
@@ -154,7 +154,7 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Override
     public void deleteProject(Project project) {
-        modelService.getAllModels(project).forEach(modelService::deleteModel);
+        modelService.getAllModels(project).stream().filter(model -> ModelScope.PROJECT.equals(model.getScope())).forEach(modelService::deleteModel);
         projectRepository.deleteProject(project);
     }
 
@@ -241,7 +241,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private ProjectDescriptor buildDescriptor(Project project) {
         ProjectDescriptor projectDescriptor = new ProjectDescriptor(project);
-        ProjectAccessControl accessControl = this.getProjectAccessControl(project);
+        ProjectAccessControl accessControl = getProjectAccessControl(project);
         projectDescriptor.setUsers(accessControl.getUsers());
         projectDescriptor.setGroups(accessControl.getGroups());
         return projectDescriptor;
@@ -284,21 +284,21 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectHolder projectHolder = new ProjectHolder();
 
         ZipStream.of(file)
-                .forEach(zipEntry -> this.createFileContentFromZipEntry(zipEntry)
-                        .ifPresent(fileContent -> this.convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
+                .forEach(zipEntry -> createFileContentFromZipEntry(zipEntry)
+                        .ifPresent(fileContent -> convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
 
         Project createdProject = projectHolder.getProjectMetadata().map(this::createProject)
                 .orElseThrow(() -> new ImportProjectException("No valid project entry found to import: " + file.getOriginalFilename()));
 
         projectHolder.getModelJsonFiles().forEach(modelJsonFile -> {
-            this.importJSONModelFiles(projectHolder, createdProject, modelJsonFile);
+            importJSONModelFiles(projectHolder, createdProject, modelJsonFile);
         });
 
         projectHolder.getModelContentFiles().forEach(modelXmlFile ->
                 importXMLModelFiles(projectHolder, createdProject, modelXmlFile.getModelType(), modelXmlFile.getFileContent()));
 
-        Map<Model, FileContent> createdProcesses = this.createXMLModelFiles(projectHolder, createdProject);
-        createdProcesses.keySet().forEach(model -> this.updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
+        Map<Model, FileContent> createdProcesses = createXMLModelFiles(projectHolder, createdProject);
+        createdProcesses.keySet().forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
 
         modelService.cleanModelIdList();
         return createdProject;
@@ -316,13 +316,13 @@ public class ProjectServiceImpl implements ProjectService {
         projectHolder.getModelExtension(createdModel)
                 .ifPresent(fileMetadata -> {
                     jsonMetadataConverter.tryConvertToEntity(fileMetadata.getFileContent())
-                            .ifPresent(extensions -> createdModel.setExtensions(this.getExtensionsValueMapFromJson(extensions)));
+                            .ifPresent(extensions -> createdModel.setExtensions(getExtensionsValueMapFromJson(extensions)));
                     modelService.updateModel(createdModel, createdModel);
                 });
     }
 
     private Map<Model, FileContent> createXMLModelFiles(ProjectHolder projectHolder, Project createdProject) {
-        Map<Model, FileContent> createdModels = new HashMap<Model, FileContent>();
+        Map<Model, FileContent> createdModels = new HashMap<>();
         projectHolder.getProcessFiles().forEach(modelProcessFile -> {
             Model createdModel = modelService.importModel(createdProject, modelProcessFile.getModelType(), modelProcessFile.getFileContent());
             createdModels.put(createdModel, modelProcessFile.getFileContent());
@@ -337,7 +337,7 @@ public class ProjectServiceImpl implements ProjectService {
         Model createdModel = modelService.importModel(createdProject,
                 modelType,
                 fileContent);
-        this.updateModelProcessImported(projectHolder, createdModel, fileContent);
+        updateModelProcessImported(projectHolder, createdModel, fileContent);
     }
 
     private void updateModelProcessImported(ProjectHolder projectHolder, Model createdModel, FileContent fileContent) {
@@ -346,7 +346,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectHolder.getModelExtension(createdModel)
                 .ifPresent(fileMetadata -> {
                     jsonMetadataConverter.tryConvertToEntity(fileMetadata.getFileContent())
-                            .ifPresent(extensions -> createdModel.setExtensions(this.getExtensionsValueMapFromJson(extensions)));
+                            .ifPresent(extensions -> createdModel.setExtensions(getExtensionsValueMapFromJson(extensions)));
                     modelService.updateModel(createdModel, createdModel);
                 });
     }

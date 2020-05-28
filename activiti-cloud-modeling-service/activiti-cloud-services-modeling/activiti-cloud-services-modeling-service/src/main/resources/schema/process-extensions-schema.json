@@ -371,6 +371,11 @@
     },
     "id": {
       "type": "string"
+    },
+    "scope": {
+      "description": "The model scope (it can be shared across projects if it is GLOBAL)",
+      "type": "string",
+      "enum": ["PROJECT","GLOBAL"]
     }
   },
   "required": [ "id" ],

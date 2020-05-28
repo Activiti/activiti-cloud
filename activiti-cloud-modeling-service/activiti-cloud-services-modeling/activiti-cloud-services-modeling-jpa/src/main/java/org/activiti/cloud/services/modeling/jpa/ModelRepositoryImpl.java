@@ -50,6 +50,13 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     }
 
     @Override
+    public boolean existsModelNameInProject(
+        ProjectEntity project, String modelName, String modelTypeFilter) {
+        return !modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(project != null ? project.getId() : null, modelName, modelTypeFilter)
+            .isEmpty();
+    }
+
+    @Override
     public Optional<ModelEntity> findModelById(String modelId) {
 
         return modelJpaRepository.findById(modelId);
@@ -97,7 +104,7 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public void deleteModel(ModelEntity model) {
-        this.modelJpaRepository.delete(model);
+        modelJpaRepository.delete(model);
 
     }
 

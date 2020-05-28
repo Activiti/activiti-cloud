@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -25,10 +28,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletResponse;
-
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ImportProjectException;
+import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
@@ -45,10 +48,6 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * Handler for REST exceptions
@@ -127,6 +126,13 @@ public class ModelingRestExceptionHandler {
                      ex);
         response.sendError(CONFLICT.value(),
                            DATA_INTEGRITY_VIOLATION_EXCEPTION_MESSAGE);
+    }
+
+    @ExceptionHandler(ModelNameConflictException.class)
+    public void handleModelNameConflictException(ModelNameConflictException ex,
+        HttpServletResponse response) throws IOException {
+        logger.error(ex.getMessage(), ex);
+        response.sendError(CONFLICT.value(), ex.getMessage());
     }
 
     @ExceptionHandler({

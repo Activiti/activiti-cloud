@@ -53,11 +53,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -81,12 +80,14 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @WithMockModelerUser
+@Transactional
 public class ModelControllerIT {
 
     private MockMvc mockMvc;
@@ -101,7 +102,7 @@ public class ModelControllerIT {
 
     @BeforeEach
     public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
@@ -170,7 +171,7 @@ public class ModelControllerIT {
                                         .add("myIntegerConstant",
                                              10)
                                         .build());
-        Map<String, Extensions> processExtension = new HashMap<String, Extensions>();
+        Map<String, Extensions> processExtension = new HashMap<>();
         processExtension.put("process-model-extensions", extensions);
         ModelEntity processModel = processModelWithExtensions("process-model-extensions", processExtension);
         mockMvc.perform(post("/v1/projects/{projectId}/models",
@@ -249,7 +250,7 @@ public class ModelControllerIT {
 
     @Test
     public void should_returnStatusOkAndExtensions_when_gettingAnExistingModelWithExtensions() throws Exception {
-        Map<String, Extensions> extensions = new HashMap<String, Extensions>();
+        Map<String, Extensions> extensions = new HashMap<>();
         extensions.put("process-model-with-extensions",extensions("ServiceTask",  "stringVariable",
                                                         "integerVariable",
                                                         "booleanVariable",
@@ -297,7 +298,7 @@ public class ModelControllerIT {
                                                          hasEntry(equalTo("type"),
                                                                   equalTo("date")),
                                                          hasEntry(equalTo("value"),
-                                                                  isDateEquals(0)))),
+                                                                  isDateEquals("1970-01-01T00:00:00.000+0000")))),
                                           hasEntry(equalTo("jsonVariable"),
                                                    allOf(hasEntry(equalTo("id"),
                                                                   equalTo("jsonVariable")),
@@ -405,12 +406,12 @@ public class ModelControllerIT {
 
     @Test
     public void should_returnStatusOk_when_updatingModelWithExtensions() throws Exception {
-        Map<String, Extensions> extensions = new HashMap<String, Extensions>();
+        Map<String, Extensions> extensions = new HashMap<>();
         extensions.put("process-model-extensions", extensions("ServiceTask", "variable1"));
         ModelEntity processModel = processModelWithExtensions("process-model-extensions", extensions);
         modelRepository.createModel(processModel);
 
-        Map<String, Extensions> secondExtensionMap = new HashMap<String, Extensions>();
+        Map<String, Extensions> secondExtensionMap = new HashMap<>();
         extensions.put("process-model-extensions", extensions("variable2", "variable3"));
         ModelEntity newModel = processModelWithExtensions("process-model-extensions", secondExtensionMap);
         mockMvc.perform(put("/v1/models/{modelId}",

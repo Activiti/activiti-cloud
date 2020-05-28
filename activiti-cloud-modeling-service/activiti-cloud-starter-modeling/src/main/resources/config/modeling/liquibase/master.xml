@@ -34,6 +34,19 @@
              path="changelog/01.pg.update.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
-             stripComments="true"/>         
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="aae-modeling"
+             id="global-models" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <columnExists tableName="model" columnName="project_id"/>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/02.pg.update.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
   </changeSet>
 </databaseChangeLog>

@@ -16,7 +16,8 @@
 package org.activiti.cloud.modeling.api;
 
 import java.util.Map;
-
+import java.util.Set;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.auditable.Auditable;
 
 /**
@@ -36,9 +37,11 @@ public interface Model<A extends Project, U> extends Auditable<U> {
 
     void setType(String type);
 
-    A getProject();
+    Set<A> getProjects();
 
-    void setProject(A project);
+    void addProject(A project);
+
+    void removeProject(A project);
 
     String getVersion();
 
@@ -57,4 +60,8 @@ public interface Model<A extends Project, U> extends Auditable<U> {
     String getTemplate();
 
     void setTemplate(String template);
+
+    ModelScope getScope();
+
+    void setScope(ModelScope scope);
 }

@@ -15,32 +15,33 @@
  */
 package org.activiti.cloud.services.modeling.entity;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.modeling.api.process.Extensions;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
 import org.hibernate.annotations.GenericGenerator;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Model model entity
@@ -48,22 +49,23 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Entity(name = "Model")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-@Table(name = "Model",
-        uniqueConstraints = @UniqueConstraint(
-                name = "UNQ_PROJECT_ID_TYPE_NAME",
-                columnNames = {"project_id", "type", "name"})
-)
+@Table(name = "Model")
 public class ModelEntity extends AuditableEntity<String> implements Model<ProjectEntity, String>,
-                                                                    VersionedEntity<ModelVersionEntity> {
+    VersionedEntity<ModelVersionEntity> {
 
     @Id
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     private String id;
 
-    @ManyToOne
     @JsonIgnore
-    private ProjectEntity project;
+    @ManyToMany
+    @JoinTable(
+        name = "project_models",
+        joinColumns = {@JoinColumn(name = "models_id")},
+        inverseJoinColumns = {@JoinColumn(name = "project_id")}
+    )
+    private Set<ProjectEntity> projects = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
@@ -79,11 +81,14 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
 
     private String template;
 
+    @Enumerated(EnumType.ORDINAL)
+    private ModelScope scope = ModelScope.PROJECT;
+
     public ModelEntity() { // for JPA
     }
 
     public ModelEntity(String name,
-                       String type) {
+        String type) {
         this.name = name;
         this.type = type;
     }
@@ -119,21 +124,33 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     }
 
     @Override
-    public ProjectEntity getProject() {
-        return project;
+    public Set<ProjectEntity> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(Set<ProjectEntity> projects) {
+        this.projects = projects;
     }
 
     @Override
-    public void setProject(ProjectEntity project) {
-        this.project = project;
+    public void addProject(ProjectEntity project) {
+        if(project!=null) {
+            if(projects == null){
+                projects = new HashSet<>();
+            }
+            if(!projects.contains(project)){
+                projects.add(project);
+                project.addModel(this);
+            }
+        }
     }
 
-    @Transient
-    @JsonProperty("projectId")
-    public String projectId() {
-        return Optional.ofNullable(project)
-                .map(ProjectEntity::getId)
-                .orElse(null);
+    @Override
+    public void removeProject(ProjectEntity project) {
+        if(projects!=null && projects.contains(project)){
+            projects.remove(project);
+            project.removeModel(this);
+        }
     }
 
     @Transient
@@ -165,12 +182,12 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     }
 
     @Override
-    public Map<String,Object> getExtensions() {
+    public Map<String, Object> getExtensions() {
         return latestVersion.getExtensions();
     }
 
     @Override
-    public void setExtensions(Map<String,Object> extensions) {
+    public void setExtensions(Map<String, Object> extensions) {
         latestVersion.setExtensions(extensions);
     }
 
@@ -185,10 +202,21 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     }
 
     @Override
+    public ModelScope getScope() {
+        return scope;
+    }
+
+    @Override
+    public void setScope(ModelScope scope) {
+        this.scope = scope;
+    }
+
+    @Override
     public List<ModelVersionEntity> getVersions() {
         return versions;
     }
 
+    @Override
     public void setVersions(List<ModelVersionEntity> versions) {
         this.versions = versions;
     }

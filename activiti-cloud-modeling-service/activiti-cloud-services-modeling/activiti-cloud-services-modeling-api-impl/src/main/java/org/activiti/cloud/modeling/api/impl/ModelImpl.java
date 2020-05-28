@@ -15,18 +15,18 @@
  */
 package org.activiti.cloud.modeling.api.impl;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-import java.util.Map;
 
 /**
  * Implementation for {@link Model}
@@ -56,9 +56,9 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
 
     @ApiModelProperty(hidden = true)
     @JsonIgnore
-    private ProjectImpl project;
+    private Set<ProjectImpl> projects = new HashSet<>();
 
-    @ApiModelProperty("The parent project id")
+    @ApiModelProperty("The parent project id when the model scope is PROJECT")
     private String projectId;
 
     @ApiModelProperty(value = "The extensions of the model", readOnly = true)
@@ -66,6 +66,9 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
 
     @ApiModelProperty(value = "The template of the model", readOnly = true)
     private String template;
+
+    @ApiModelProperty(value = "The scope of the model. They can be shared between projects if it's scope is GLOBAL", readOnly = true)
+    private ModelScope scope;
 
     public ModelImpl() {
 
@@ -110,8 +113,8 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     }
 
     @Override
-    public ProjectImpl getProject() {
-        return project;
+    public Set<ProjectImpl> getProjects() {
+        return projects;
     }
 
     public String getProjectId() {
@@ -119,9 +122,24 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     }
 
     @Override
-    public void setProject(ProjectImpl project) {
-        this.project = project;
-        this.projectId = project.getId();
+    public void addProject(ProjectImpl project) {
+        if (project != null) {
+            if (projects == null) {
+                projects = new HashSet<>();
+            }
+            if(!projects.contains(project)){
+                projects.add(project);
+            }
+        }
+        updateProjectId();
+    }
+
+    @Override
+    public void removeProject(ProjectImpl project) {
+        if(projects.contains(project)) {
+            projects.remove(project);
+        }
+        updateProjectId();
     }
 
     @Override
@@ -171,6 +189,25 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     @Override
     public void setTemplate(String template) {
         this.template = template;
+    }
+
+    @Override
+    public ModelScope getScope() {
+        return scope;
+    }
+
+    @Override
+    public void setScope(ModelScope scope) {
+        this.scope = scope;
+        updateProjectId();
+    }
+
+    private void updateProjectId() {
+        if (scope.equals(ModelScope.PROJECT) && projects != null && projects.size() == 1) {
+            projectId = projects.iterator().next().getId();
+        } else {
+            projectId = null;
+        }
     }
 
     @Override
