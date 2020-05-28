@@ -3,7 +3,6 @@
   "title": "Connector editor schema",
   "description": "Connector editor schema",
   "type": "object",
-
   "definitions": {
     "connector-parameters": {
       "type": "array",
@@ -72,7 +71,34 @@
             "type": "boolean"
           }
         },
-        "required": [ "name" ]
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "connector-error": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name"
+        ]
       }
     }
   },
@@ -99,16 +125,23 @@
     },
     "actions" : {
       "type": "object",
-      "additionalProperties": { "$ref": "#/definitions/connector-feature" },
+      "additionalProperties": {
+        "$ref": "#/definitions/connector-feature"
+      },
       "default": {}
     },
-    "events" : {
+    "events": {
       "type": "object",
-      "additionalProperties": { "$ref": "#/definitions/connector-feature" },
+      "additionalProperties": {
+        "$ref": "#/definitions/connector-feature"
+      },
       "default": {}
     },
-    "config" : {
+    "config": {
       "$ref": "#/definitions/connector-config"
+    },
+    "errors": {
+      "$ref": "#/definitions/connector-error"
     }
   },
   "required": [ "name" ]
