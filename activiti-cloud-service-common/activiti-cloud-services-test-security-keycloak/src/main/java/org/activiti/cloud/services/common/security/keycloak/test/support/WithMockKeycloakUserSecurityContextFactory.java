@@ -58,28 +58,27 @@ public class WithMockKeycloakUserSecurityContextFactory implements WithSecurityC
         accessToken.setPreferredUsername(annotation.username());
         accessToken.setRealmAccess(realmAccess);
         accessToken.setOtherClaims("groups", groups);
-        
+
         when(accessToken.isActive()).thenReturn(annotation.isActive());
         when(securityContext.getToken()).thenReturn(accessToken);
-        
-        KeycloakAccount account = new SimpleKeycloakAccount(new KeycloakPrincipal<RefreshableKeycloakSecurityContext>(UUID.randomUUID().toString(),
-                                                                                                                      securityContext),
-                                                            roles,
-                                                            securityContext);
+
+        KeycloakAccount account = new SimpleKeycloakAccount(new KeycloakPrincipal<>(UUID.randomUUID().toString(), securityContext),
+            roles,
+            securityContext);
 
         List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
-        
+
         for (String role : account.getRoles()) {
             grantedAuthorities.add(new KeycloakRole(role));
-        }        
-        
+        }
+
         SimpleAuthorityMapper grantedAuthoritiesMapper = new SimpleAuthorityMapper();
         grantedAuthoritiesMapper.setPrefix(annotation.rolePrefix());
-        
-        context.setAuthentication(new KeycloakAuthenticationToken(account, 
-                                                                  annotation.isInteractive(), 
-                                                                  grantedAuthoritiesMapper.mapAuthorities(grantedAuthorities)));
-        
+
+        context.setAuthentication(new KeycloakAuthenticationToken(account,
+            annotation.isInteractive(),
+            grantedAuthoritiesMapper.mapAuthorities(grantedAuthorities)));
+
         return context;
     }
 

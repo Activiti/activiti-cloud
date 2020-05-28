@@ -23,11 +23,12 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.activiti.cloud.starter.tests.util.ContainersApplicationInitializer;
 import org.activiti.cloud.starter.tests.util.VariablesUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,8 @@ import java.util.Map;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,initializers = ContainersApplicationInitializer.class)
+@ContextConfiguration(classes = RuntimeITConfiguration.class,
+    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class TaskVariablesIT {
 
     @Autowired
@@ -69,7 +71,7 @@ public class TaskVariablesIT {
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
     @Autowired
-    private  VariablesUtil variablesUtil;
+    private VariablesUtil variablesUtil;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -91,9 +93,9 @@ public class TaskVariablesIT {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1",
-                      "test1");
+            "test1");
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                      variables);
+            variables);
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
@@ -107,33 +109,31 @@ public class TaskVariablesIT {
 
         //then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var2", "test2", variablesResponse.getBody().getContent())).isTrue();
         //process variables also at task level
-        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1", "test1", variablesResponse.getBody().getContent())).isTrue();
 
         // when
         variablesResponse = taskRestTemplate.getVariables(taskId);
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var2", "test2", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1", "test1", variablesResponse.getBody().getContent())).isTrue();
 
         // give
-        taskRestTemplate.updateVariable(taskId, "var2", "test2-update" );
+        taskRestTemplate.updateVariable(taskId, "var2", "test2-update");
 
-
-        taskRestTemplate.createVariable(taskId, "var3", "test3" );
-
+        taskRestTemplate.createVariable(taskId, "var3", "test3");
 
         // when
         variablesResponse = taskRestTemplate.getVariables(taskId);
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var2", "test2-update", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1", "test1", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var3", "test3", variablesResponse.getBody().getContent())).isTrue();
 
         //given
         taskRestTemplate.updateVariable(taskId, "var3", "test3-update");
@@ -143,9 +143,9 @@ public class TaskVariablesIT {
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var3","test3-update",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var2", "test2-update", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1", "test1", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var3", "test3-update", variablesResponse.getBody().getContent())).isTrue();
 
 
     }
@@ -155,9 +155,9 @@ public class TaskVariablesIT {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1",
-                      "test1");
+            "test1");
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                      variables);
+            variables);
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
@@ -170,22 +170,21 @@ public class TaskVariablesIT {
 
         //then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
-
+        assertThat(variablesContainEntry("var2", "test2", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1", "test1", variablesResponse.getBody().getContent())).isTrue();
 
         //given
-        taskRestTemplate.adminUpdateVariable(taskId, "var2","test2-update");
-        taskRestTemplate.adminCreateVariable(taskId, "var3","test3");
+        taskRestTemplate.adminUpdateVariable(taskId, "var2", "test2-update");
+        taskRestTemplate.adminCreateVariable(taskId, "var3", "test3");
 
         // when
         variablesResponse = taskRestTemplate.adminGetVariables(taskId);
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var2", "test2-update", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1", "test1", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var3", "test3", variablesResponse.getBody().getContent())).isTrue();
 
         //given
         taskRestTemplate.adminUpdateVariable(taskId, "var3", "test3-update");
@@ -195,18 +194,18 @@ public class TaskVariablesIT {
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("var3","test3-update",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var2", "test2-update", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1", "test1", variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var3", "test3-update", variablesResponse.getBody().getContent())).isTrue();
     }
 
     @Test
-    public void should_Change_Date_When_CreateUpdateTaskVariables() throws Exception{
+    public void should_Change_Date_When_CreateUpdateTaskVariables() throws Exception {
         //given
         Date date = new Date();
 
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                      null);
+            null);
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
@@ -221,8 +220,8 @@ public class TaskVariablesIT {
 
         //then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("variableDateTime",variablesUtil.getExpectedDateTimeFormattedString(date),variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("variableDate",variablesUtil.getExpectedDateFormattedString(date),variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("variableDateTime", variablesUtil.getExpectedDateTimeFormattedString(date), variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("variableDate", variablesUtil.getExpectedDateFormattedString(date), variablesResponse.getBody().getContent())).isTrue();
 
         // when
         date = new Date(date.getTime() + 3600000);
@@ -236,12 +235,12 @@ public class TaskVariablesIT {
     }
 
     @Test
-    public void admin_Should_Change_Date_When_CreateUpdateTaskVariables() throws Exception{
+    public void admin_Should_Change_Date_When_CreateUpdateTaskVariables() throws Exception {
         //given
         Date date = new Date();
 
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                      null);
+            null);
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
@@ -256,8 +255,8 @@ public class TaskVariablesIT {
 
         //then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("variableDateTime",variablesUtil.getExpectedDateTimeFormattedString(date),variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("variableDate",variablesUtil.getExpectedDateFormattedString(date),variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("variableDateTime", variablesUtil.getExpectedDateTimeFormattedString(date), variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("variableDate", variablesUtil.getExpectedDateFormattedString(date), variablesResponse.getBody().getContent())).isTrue();
 
         // when
         date = new Date(date.getTime() + 3600000);
@@ -270,11 +269,11 @@ public class TaskVariablesIT {
         processInstanceRestTemplate.delete(startResponse);
     }
 
-    private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection){
+    private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection) {
         Iterator<CloudVariableInstance> iterator = variableCollection.iterator();
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             VariableInstance variable = iterator.next();
-            if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
+            if (variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)) {
                 String type = variable.getType();
                 if (type.equalsIgnoreCase("date")) {
                     assertThat("String").isEqualTo(variable.getValue().getClass().getSimpleName());
@@ -291,8 +290,8 @@ public class TaskVariablesIT {
         ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
-                                     HttpMethod.GET,
-                                     null,
-                                     responseType);
+            HttpMethod.GET,
+            null,
+            responseType);
     }
 }

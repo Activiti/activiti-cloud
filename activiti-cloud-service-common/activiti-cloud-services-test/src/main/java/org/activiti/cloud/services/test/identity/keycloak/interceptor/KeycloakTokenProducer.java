@@ -66,7 +66,7 @@ public class KeycloakTokenProducer implements ClientHttpRequestInterceptor {
                                     resource).tokenManager().getAccessToken();
     }
 
-    private String getTokenString() {
+    public String getTokenString() {
         AccessTokenResponse token = getAccessTokenResponse();
         return "Bearer " + token.getToken();
     }

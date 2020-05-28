@@ -62,6 +62,8 @@ import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryRes
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.apache.groovy.util.Maps;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,7 +92,7 @@ import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.test.StepVerifier;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(initializers = ContainersApplicationInitializer.class)
+@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class ActivitiGraphQLStarterIT {
 
     private static final String WS_GRAPHQL_URI = "/ws/graphql";

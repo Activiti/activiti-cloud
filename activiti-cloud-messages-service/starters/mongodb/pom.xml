@@ -21,7 +21,7 @@
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
+      <artifactId>mongodb</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
