@@ -15,10 +15,11 @@
  */
 package org.activiti.cloud.alfresco.config;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageParameterParser;
 import org.activiti.cloud.alfresco.converter.json.AlfrescoJackson2HttpMessageConverter;
@@ -26,6 +27,7 @@ import org.activiti.cloud.alfresco.converter.json.PageMetadataConverter;
 import org.activiti.cloud.alfresco.converter.json.PagedModelConverter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -87,6 +89,21 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
                                                                                   @Autowired(required = false) UriComponents baseUri,
                                                                                   ExtendedPageMetadataConverter extendedPageMetadataConverter){
         return new AlfrescoPagedModelAssembler<>(resolver, baseUri, extendedPageMetadataConverter);
+    }
+
+    @Bean
+    public InitializingBean configureObjectMapperForBigDecimal(ObjectMapper objectMapper) {
+        /*
+        This will ensure that BigDecimals are serialized as String and not as a number, meaning
+        that double quotes will be added around the value. Serializing it as a number it's problematic
+        because, by default, it will be deserialized back to Java as double and it will loose precision.
+        For instance, `1.00` (scale 2) will become `1.0` (scale 1) that are considered as different
+        values in BigDecimal. By adding the quotes, it will be deserialized as String, but it will not
+        loose the information about the scale, so it can be easily converted back to BigDecimal.
+         */
+
+        return () -> objectMapper.configOverride(BigDecimal.class)
+            .setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
     }
 
 }

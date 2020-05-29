@@ -45,6 +45,15 @@ public class VariableEventContainedBuilder {
         return this;
     }
 
+    public <T> VariableEventContainedBuilder aCreatedVariable(String name, T value) {
+        aCreatedVariable(name, value, resolveType(value));
+        return this;
+    }
+
+    private <T> String resolveType(T value) {
+        return value.getClass().getSimpleName().toLowerCase();
+    }
+
     public <T> VariableEventContainedBuilder anUpdatedVariable(String name,
                                                                T value,
                                                                String type) {
