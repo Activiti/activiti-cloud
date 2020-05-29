@@ -72,6 +72,7 @@ jobs:
       stage: tag_updatebot
       script: |
         mvn versions:set -q -DprocessAllModules=true -DgenerateBackupPoms=false  -DnewVersion=$(cat VERSION)
+        mvn clean deploy -DskipTests
         git add -u
         git commit -m "Release $(cat VERSION)" --allow-empty
         git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)"|| travis_terminate 1;
