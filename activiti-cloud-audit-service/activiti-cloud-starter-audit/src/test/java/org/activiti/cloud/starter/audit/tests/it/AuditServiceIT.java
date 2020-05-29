@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
@@ -43,14 +43,17 @@ import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.api.model.shared.impl.conf.IgnoredRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
@@ -146,6 +149,38 @@ public class AuditServiceIT {
                                         coveredEvent.getServiceVersion()));
             }
             assertThatEntityIsSet(retrievedEvents);
+        });
+    }
+
+    @Test
+    public void should_supportEventsContainingBigDecimalValues() {
+        //given
+        CloudVariableCreatedEventImpl variableCreatedEvent = new CloudVariableCreatedEventImpl(
+            new VariableInstanceImpl<>("bigDecimalVar", "bigdecimal",
+                BigDecimal.valueOf(100, 2), UUID.randomUUID().toString()));
+        producer.send(variableCreatedEvent);
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate
+                .executeFindAll();
+
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+            assertThat(retrievedEvents)
+                .hasSize(1)
+                .hasOnlyElementsOfTypes(CloudVariableCreatedEvent.class);
+            CloudVariableCreatedEvent retrievedEvent = (CloudVariableCreatedEvent) retrievedEvents
+                .iterator().next();
+            assertThat(retrievedEvent)
+                .extracting(event -> event.getEntity().getName(),
+                    event -> event.getEntity().getType(),
+                    event -> event.getEntity().getValue())
+                .containsExactly(
+                   "bigDecimalVar", "bigdecimal", "1.00"
+                );
+
         });
     }
 

@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
@@ -123,7 +124,6 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldRetrieveAllTaskVariables() {
         //given
-
         variableEventContainedBuilder.aCreatedVariable("varCreated",
             "v1",
             "string")
@@ -165,6 +165,37 @@ public class QueryTaskEntityVariablesIT {
                 );
         });
 
+    }
+
+    @Test
+    void should_handleBigDecimalVariables() {
+        //given
+        BigDecimal bigDecimalValue = BigDecimal.valueOf(100, 2);
+        variableEventContainedBuilder.aCreatedVariable("bigDecimalVar",
+            bigDecimalValue)
+            .onTask(task);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                .extracting(
+                    TaskVariableEntity::getName,
+                    TaskVariableEntity::getValue,
+                    TaskVariableEntity::getType)
+                .containsExactly(
+                    tuple(
+                        "bigDecimalVar",
+                        "1.00",
+                        "bigdecimal")
+                );
+        });
     }
 
     @Test
