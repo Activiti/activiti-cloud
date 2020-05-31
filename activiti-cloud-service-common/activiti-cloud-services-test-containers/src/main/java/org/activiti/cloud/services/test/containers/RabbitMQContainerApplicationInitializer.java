@@ -27,9 +27,8 @@ import org.testcontainers.lifecycle.Startables;
 public class RabbitMQContainerApplicationInitializer implements
     ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-
-    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer(
-        "rabbitmq:management");
+    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management")
+        .withReuse(true);
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
@@ -40,7 +39,7 @@ public class RabbitMQContainerApplicationInitializer implements
 
         TestPropertyValues.of(
             "spring.rabbitmq.host=" + rabbitMQContainer.getContainerIpAddress(),
-            "spring.rabbitmq.port=" + String.valueOf(rabbitMQContainer.getAmqpPort())
+            "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort()
         ).applyTo(context.getEnvironment());
 
     }
