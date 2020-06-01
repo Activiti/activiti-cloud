@@ -1,7 +1,7 @@
-ALTER TABLE public.model DROP CONSTRAINT unq_project_id_type_name;
+ALTER TABLE model DROP CONSTRAINT unq_project_id_type_name;
 
-ALTER TABLE public.project_models DROP CONSTRAINT uk_cphei6yijnpnhdym2dckgxnka;
-ALTER TABLE public.project_models ADD CONSTRAINT project_models_pk PRIMARY KEY (project_id,models_id);
+ALTER TABLE project_models DROP CONSTRAINT uk_cphei6yijnpnhdym2dckgxnka;
+ALTER TABLE project_models ADD CONSTRAINT project_models_pk PRIMARY KEY (project_id,models_id);
 
 INSERT INTO project_models
             (project_id,
@@ -15,5 +15,5 @@ WHERE  NOT EXISTS (SELECT project_id,
                    WHERE  project_models.project_id = model.project_id
                           AND project_models.models_id = model.id);
 
-ALTER TABLE public.model DROP COLUMN project_id;
-ALTER TABLE public.model ADD 'scope' int NOT NULL DEFAULT 0;
+ALTER TABLE model DROP COLUMN project_id;
+ALTER TABLE model ADD scope int NOT NULL DEFAULT 0;

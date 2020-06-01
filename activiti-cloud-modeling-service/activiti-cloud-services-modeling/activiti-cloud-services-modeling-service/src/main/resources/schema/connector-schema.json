@@ -116,11 +116,6 @@
       "description": "The connector's description",
       "type": "string"
     },
-    "scope": {
-      "description": "The model scope (it can be shared across projects if it is GLOBAL)",
-      "type": "string",
-      "enum": ["PROJECT","GLOBAL"]
-    },
     "template": {
       "description": "The connector's template",
       "type": "string"

@@ -58,9 +58,6 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     @JsonIgnore
     private Set<ProjectImpl> projects = new HashSet<>();
 
-    @ApiModelProperty("The parent project id when the model scope is PROJECT")
-    private String projectId;
-
     @ApiModelProperty(value = "The extensions of the model", readOnly = true)
     private Map<String,Object> extensions;
 
@@ -117,8 +114,20 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
         return projects;
     }
 
+    @ApiModelProperty("The parent project id when the model scope is PROJECT")
     public String getProjectId() {
-        return projectId;
+        return projects != null && !projects.isEmpty() ? projects.iterator().next().getId() : null;
+    }
+
+    @ApiModelProperty("The list of project ids in which the model is included")
+    public Set<String> getProjectsId() {
+        if (projects != null && !projects.isEmpty()) {
+            Set<String> projectsId = new HashSet<>();
+            projects.forEach(project -> projectsId.add(project.getId()));
+            return projectsId;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -131,7 +140,6 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
                 projects.add(project);
             }
         }
-        updateProjectId();
     }
 
     @Override
@@ -139,7 +147,6 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
         if(projects.contains(project)) {
             projects.remove(project);
         }
-        updateProjectId();
     }
 
     @Override
@@ -199,15 +206,6 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     @Override
     public void setScope(ModelScope scope) {
         this.scope = scope;
-        updateProjectId();
-    }
-
-    private void updateProjectId() {
-        if (scope.equals(ModelScope.PROJECT) && projects != null && projects.size() == 1) {
-            projectId = projects.iterator().next().getId();
-        } else {
-            projectId = null;
-        }
     }
 
     @Override
