@@ -15,18 +15,14 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import com.querydsl.core.types.dsl.StringPath;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.model.VariableValue;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-
-import com.querydsl.core.types.dsl.StringPath;
 
 @RepositoryRestResource(exported = false)
 public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, String>,
@@ -47,14 +43,10 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, S
         bindings.bind(root.lastClaimedTo).first((path, value) -> root.claimedDate.before(value));
         bindings.bind(root.completedFrom).first((path, value) -> root.completedDate.after(value));
         bindings.bind(root.completedTo).first((path, value) -> root.completedDate.before(value));
-        bindings.bind(root.name).first((path, value) -> path.like("%"+value.toString()+"%"));
-        bindings.bind(root.description).first((path, value) -> path.like("%"+value.toString()+"%"));
+        bindings.bind(root.name).first((path, value) -> path.like("%" + value.toString() + "%"));
+        bindings.bind(root.description).first((path, value) -> path.like("%" + value.toString() + "%"));
 
-        bindings.excluding(root.variables.any().value);
-        bindings.bind(root.variables.any().internalValue).as("variables.value").first((path, value) -> path.eq(value));
-
+        bindings.excluding(root.variables);
         bindings.excluding(root.standalone);
     }
-
-    Page<TaskEntity> findByVariablesNameAndVariablesInternalValue(String variableName, VariableValue<?> variableValue, Pageable pageable);
 }

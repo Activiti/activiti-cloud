@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -27,6 +28,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.Task.TaskStatus;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -76,9 +78,11 @@ public class QueryTasksIT {
     private static final String TASKS_URL = "/v1/tasks";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks";
 
-    private static final ParameterizedTypeReference<PagedModel<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<Task>>() {};
+    private static final ParameterizedTypeReference<PagedModel<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
+    };
 
-    private static final ParameterizedTypeReference<Task> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {};
+    private static final ParameterizedTypeReference<Task> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
+    };
 
     @Autowired
     private KeycloakTokenProducer keycloakTokenProducer;
@@ -216,21 +220,31 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableTasksFilteredOnVariableNameAndValue() {
+    public void should_getTasksFilteredOnVariableNameAndValue() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var",
-                                                                      runningProcessInstance);
+            runningProcessInstance);
         Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved",
-                                                                      runningProcessInstance);
+            runningProcessInstance);
         Task taskRejected = taskEventContainedBuilder.aCompletedTask("Task rejected",
-                                                                      runningProcessInstance);
+            runningProcessInstance);
+        Task createdTask = taskEventContainedBuilder
+            .aCreatedTask("Task Created", runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariable("outcome", "approved", "string")
+        variableEventContainedBuilder
+            .aCreatedVariable("outcome", "approved")
             .onTask(taskApproved);
-
-        variableEventContainedBuilder.aCreatedVariable("outcome", "rejected", "string")
+        variableEventContainedBuilder
+            .aCreatedVariable("intValue", 40)
+            .onTask(taskApproved);
+        variableEventContainedBuilder
+            .aCreatedVariable("outcome", "approved")
+            .onTask(createdTask);
+        variableEventContainedBuilder
+            .aCreatedVariable("outcome", "rejected")
             .onTask(taskRejected);
-        variableEventContainedBuilder.aCreatedVariable("anotherVariable", "approved", "string")
+        variableEventContainedBuilder
+            .aCreatedVariable("anotherVariable", "approved")
             .onTask(taskRejected);
 
         eventsAggregator.sendAll();
@@ -239,31 +253,127 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            Collection<Task> tasks = executeGetTasksWithVariable("outcome", "approved");
+            Collection<Task> approvedTasks = executeGetTasksWithVariable("outcome", "approved", TaskStatus.COMPLETED);
 
             //then
-            assertThat(tasks)
+            assertThat(approvedTasks)
                     .extracting(Task::getName)
                     .containsExactly(taskApproved.getName());
 
         });
     }
 
-    private Collection<Task> executeGetTasksWithVariable(String variableName,
-        String variableValue) {
+
+    @Test
+    public void should_getTasksFilteredOnIntegerVariables() {
+        //given
+        taskEventContainedBuilder.aCompletedTask("Task with no var",
+            runningProcessInstance);
+        Task taskForties = taskEventContainedBuilder.aCompletedTask("Task forties",
+            runningProcessInstance);
+        Task taskThirties = taskEventContainedBuilder.aCompletedTask("Task thirties",
+            runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariable("intValue", 40)
+            .onTask(taskForties);
+        variableEventContainedBuilder.aCreatedVariable("intValue", 30)
+            .onTask(taskThirties);
+
+        eventsAggregator.sendAll();
+
+
+        await().untilAsserted(() -> {
+
+            //when
+            Collection<Task> retrievedTasks = executeGetTasksWithVariable("intValue", 30, TaskStatus.COMPLETED);
+
+            //then
+            assertThat(retrievedTasks)
+                    .extracting(Task::getName)
+                    .containsExactly(taskThirties.getName());
+
+        });
+    }
+
+    @Test
+    public void should_getTasksFilteredOnBooleanVariables() {
+        //given
+        taskEventContainedBuilder.aCompletedTask("Task with no var",
+            runningProcessInstance);
+        Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved",
+            runningProcessInstance);
+        Task taskRejected = taskEventContainedBuilder.aCompletedTask("Task rejected",
+            runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariable("approved", true)
+            .onTask(taskApproved);
+        variableEventContainedBuilder.aCreatedVariable("approved", false)
+            .onTask(taskRejected);
+
+        eventsAggregator.sendAll();
+
+
+        await().untilAsserted(() -> {
+
+            //when
+            Collection<Task> retrievedTasks = executeGetTasksWithVariable("approved", true, TaskStatus.COMPLETED);
+
+            //then
+            assertThat(retrievedTasks)
+                    .extracting(Task::getName)
+                    .containsExactly(taskApproved.getName());
+
+        });
+    }
+
+    @Test
+    public void should_getTasksFilteredOnBigDecimalVariables() {
+        //given
+        taskEventContainedBuilder.aCompletedTask("Task with no var",
+            runningProcessInstance);
+        Task taskScale2 = taskEventContainedBuilder.aCompletedTask("Task scale 2",
+            runningProcessInstance);
+        Task taskScale3 = taskEventContainedBuilder.aCompletedTask("Task scale 3",
+            runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariable("bigDecimalVar", BigDecimal.valueOf(100, 2))
+            .onTask(taskScale2);
+        BigDecimal bigDecimalScale3 = BigDecimal.valueOf(1000, 3);
+        variableEventContainedBuilder.aCreatedVariable("bigDecimalVar", bigDecimalScale3)
+            .onTask(taskScale3);
+
+        eventsAggregator.sendAll();
+
+
+        await().untilAsserted(() -> {
+
+            //when
+            Collection<Task> retrievedTasks = executeGetTasksWithVariable("bigDecimalVar", bigDecimalScale3, TaskStatus.COMPLETED);
+
+            //then
+            assertThat(retrievedTasks)
+                    .extracting(Task::getName)
+                    .containsExactly(taskScale3.getName());
+
+        });
+    }
+
+    private <T> Collection<Task> executeGetTasksWithVariable(String variableName,
+        T variableValue, TaskStatus status) {
         ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
-        .exchange(TASKS_URL + "?variableName={name}&variableValue={outcome}",
+        .exchange(TASKS_URL + "?variables.name={name}&variables.value={outcome}&variables.type={type}&status={status}",
             HttpMethod.GET,
             keycloakTokenProducer.entityWithAuthorizationHeader(),
             PAGED_TASKS_RESPONSE_TYPE,
             variableName,
-            variableValue);
+            variableValue,
+            variableValue.getClass().getSimpleName().toLowerCase(),
+            status);
 
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
-        Collection<Task> tasks = responseEntity.getBody().getContent();
-        return tasks;
+        return responseEntity.getBody().getContent();
     }
 
     @Test
@@ -292,8 +402,8 @@ public class QueryTasksIT {
             ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASKS_URL + "/" + assignedTask.getId(),
                                                                             HttpMethod.GET,
                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                            new ParameterizedTypeReference<Task>() {
-                                                                            });
+                new ParameterizedTypeReference<>() {
+                });
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -516,8 +626,8 @@ public class QueryTasksIT {
             ResponseEntity<Task> responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                         new ParameterizedTypeReference<Task>() {
-                                         });
+                new ParameterizedTypeReference<>() {
+                });
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -691,8 +801,8 @@ public class QueryTasksIT {
             ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                         new ParameterizedTypeReference<CloudTask>() {
-                                         });
+                new ParameterizedTypeReference<>() {
+                });
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -714,8 +824,8 @@ public class QueryTasksIT {
             responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                         new ParameterizedTypeReference<CloudTask>() {
-                                         });
+                new ParameterizedTypeReference<>() {
+                });
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -827,16 +937,16 @@ public class QueryTasksIT {
         return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-users",
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                         new ParameterizedTypeReference<List<String>>() {
-                                         });
+            new ParameterizedTypeReference<>() {
+            });
     }
 
     private  ResponseEntity<List<String>> getCandidateGroups(String taskId) {
         return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-groups",
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                         new ParameterizedTypeReference<List<String>>() {
-                                         });
+            new ParameterizedTypeReference<>() {
+            });
     }
 
     @Test

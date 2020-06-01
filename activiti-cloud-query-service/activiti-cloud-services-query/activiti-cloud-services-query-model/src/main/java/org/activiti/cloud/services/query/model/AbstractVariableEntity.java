@@ -53,11 +53,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     private String executionId;
 
     @Convert(converter = VariableValueJsonConverter.class)
-    @Column(name = "value", columnDefinition="text", insertable = false, updatable = false)
-    private VariableValue<?> internalValue;
-
-    @Convert(converter = VariableValueJsonConverter.class)
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private VariableValue<?> value;
 
     private Boolean markedAsDeleted = false;
@@ -65,11 +61,10 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     private String processInstanceId;
 
     @JsonIgnore
-    @ManyToOne(optional = true, fetch=FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false,
+        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private ProcessInstanceEntity processInstance;
-
 
     public AbstractVariableEntity() {
     }
@@ -146,14 +141,6 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         this.executionId = executionId;
     }
 
-    public VariableValue<?> getInternalValue() {
-        return internalValue;
-    }
-
-    public void setInternalValue(VariableValue<?> internalValue) {
-        this.internalValue = internalValue;
-    }
-
     public <T> void setValue(T value) {
         this.value = new VariableValue<>(value);
     }
@@ -171,22 +158,18 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         this.markedAsDeleted = markedAsDeleted;
     }
 
-
     @Override
     public String getProcessInstanceId() {
         return processInstanceId;
     }
 
-
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
 
-
     public ProcessInstanceEntity getProcessInstance() {
         return processInstance;
     }
-
 
     public void setProcessInstance(ProcessInstanceEntity processInstance) {
         this.processInstance = processInstance;

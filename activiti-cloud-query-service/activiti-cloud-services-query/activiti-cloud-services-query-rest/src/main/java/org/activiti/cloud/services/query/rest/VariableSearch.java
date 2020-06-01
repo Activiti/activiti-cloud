@@ -17,12 +17,34 @@
 package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.services.query.model.VariableValue;
-import org.springframework.core.convert.converter.Converter;
 
-public class StringToVariableValueConverter implements Converter<String, VariableValue<?>> {
+public class VariableSearch {
 
-    @Override
-    public VariableValue<?> convert(String source) {
-        return new VariableValue<>(source);
+    private String name;
+
+    private VariableValue<?> value;
+
+    private String type;
+
+    public VariableSearch(String name, VariableValue<?> value, String type) {
+        this.name = name;
+        this.value = value;
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public VariableValue<?> getValue() {
+        return value;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public boolean isSet() {
+        return name != null && value != null && value.getValue() != null;
     }
 }

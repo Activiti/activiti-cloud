@@ -13,18 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.services.query.rest.config;
 
-import org.activiti.cloud.services.query.rest.StringToVariableValueConverter;
+import java.util.List;
+import org.activiti.cloud.services.query.rest.VariableSearchArgumentResolver;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.FormatterRegistry;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class QueryRestWebAutoConfiguration implements WebMvcConfigurer {
 
+    private ConversionService conversionService;
+
+    public QueryRestWebAutoConfiguration(ConversionService mvcConversionService) {
+        this.conversionService = mvcConversionService;
+    }
+
     @Override
-    public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new StringToVariableValueConverter());
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(new VariableSearchArgumentResolver(conversionService));
     }
 }

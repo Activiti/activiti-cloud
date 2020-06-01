@@ -15,10 +15,12 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -28,7 +30,6 @@ import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.model.VariableValue;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
@@ -38,19 +39,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
 
 @RestController
 @RequestMapping(
@@ -93,9 +90,8 @@ public class TaskController {
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudTask>> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
                                                        @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
-                                                       @RequestParam(name = "variableName", required = false) String variableName,
-                                                       @RequestParam(name = "variableValue", required = false) VariableValue<?> variableValue,
                                                        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+                                                       VariableSearch variableSearch,
                                                        Pageable pageable) {
         Predicate extendedPredicate = Optional.ofNullable(predicate)
                                               .orElseGet(BooleanBuilder::new);
@@ -110,9 +106,9 @@ public class TaskController {
 
         extendedPredicate = taskLookupRestrictionService.restrictTaskQuery(extendedPredicate);
         Page<TaskEntity> page;
-        if (variableName != null && variableValue != null) {
+        if (variableSearch.isSet()) {
             page = taskRepository
-                .findByVariableNameAndValue(variableName, variableValue, extendedPredicate,
+                .findByVariableNameAndValue(variableSearch.getName(), variableSearch.getValue(), extendedPredicate,
                     pageable);
         } else {
             page = taskRepository.findAll(extendedPredicate, pageable);
@@ -151,7 +147,7 @@ public class TaskController {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
-        return taskEntity.getTaskCandidateUsers()!=null ?
+        return taskEntity.getTaskCandidateUsers() != null ?
                                       taskEntity.getTaskCandidateUsers().stream().map(TaskCandidateUser::getUserId).collect(Collectors.toList()) :
                                       null;
     }
@@ -168,7 +164,7 @@ public class TaskController {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
-        return taskEntity.getTaskCandidateGroups()!=null ?
+        return taskEntity.getTaskCandidateGroups() != null ?
                                        taskEntity.getTaskCandidateGroups().stream().map(TaskCandidateGroup::getGroupId).collect(Collectors.toList()) :
                                        null;
     }
