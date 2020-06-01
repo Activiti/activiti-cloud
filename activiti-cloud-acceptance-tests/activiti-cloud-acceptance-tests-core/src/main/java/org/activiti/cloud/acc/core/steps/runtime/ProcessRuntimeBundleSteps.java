@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
@@ -79,6 +80,7 @@ public class ProcessRuntimeBundleSteps {
                 .withName("processInstanceName")
                 .withBusinessKey(businessKey);
 
+
         if(variables){
             payload.withVariable("test_variable_name", "test-variable-value");
             payload.withVariable("test_bigdecimal_variable_name", wrap(BigDecimal.valueOf(1234567890L, 2)));
@@ -110,10 +112,11 @@ public class ProcessRuntimeBundleSteps {
     }
 
     protected Map<String, String> wrap(Date value) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+
         return ProcessVariableValue.builder()
                                    .type("date")
-                                   .value(value.toInstant()
-                                               .toString())
+                                   .value(formatter.format(value))
                                    .build()
                                    .toMap();
     }
