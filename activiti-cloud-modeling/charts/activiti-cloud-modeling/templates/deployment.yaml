@@ -1,5 +1,10 @@
 {{ include "common.deployment.head"  .}}
 spec:
+  selector:
+    matchLabels:
+      draft: {{ default "draft-app" .Values.draft }}
+      app: {{ template "fullname" . }}
+      release: "{{ .Release.Name }}"
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
