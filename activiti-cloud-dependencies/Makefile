@@ -33,8 +33,10 @@ updatebot/push-version:
 updatebot/push-version-dry:
 	rm -rf  .updatebot-repos
 	updatebot --dry push-version --kind helm activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
- 
-
+	echo "printing requirements.yaml+++++++++++++++++"
+	cat .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/requirements.yaml
+	echo "end of requirements.yaml++++++++++++++++++++"
+	
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
 	  cat requirements.yaml && \
@@ -45,9 +47,8 @@ prepare-helm-chart:
         	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
         	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
         	helm repo add alfresco-incubator https://kubernetes-charts.alfresco.com/incubator && \
-        	helm dependency build && \
-        	helm lint && \
-		helm package .
+        	helm dep up && \
+        	helm lint
 
 run-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
