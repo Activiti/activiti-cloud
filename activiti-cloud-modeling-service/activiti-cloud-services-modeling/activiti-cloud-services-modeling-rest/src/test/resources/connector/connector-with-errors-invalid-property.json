@@ -5,7 +5,7 @@
     {
       "name": "error-sample",
       "description": "error-desc",
-      "value": "error-value",
+      "code": "error-code",
       "invalid": true
     }
   ]
