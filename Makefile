@@ -79,13 +79,3 @@ create-helm-charts-release-and-upload:
 		make github; \
 		cd - ; \
 	done 
-
-create-helm-charts-release-and-upload:
-	@for chart in $(charts) ; do \
-		cd $$chart && \
-		make version && \
-		make build && \
-		make release && \
-		make github && \
-		cd - ; \
-	done
