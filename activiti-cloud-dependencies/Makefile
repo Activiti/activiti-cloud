@@ -94,6 +94,7 @@ tag:
 
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+	  ls -la charts && \
 		rm -rf requirements.lock && \
 		rm -rf charts && \
 		rm -rf *.tgz && \
