@@ -59,6 +59,7 @@ jobs:
         - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn -q versions:set -Droot.log.level=off -DnewVersion=${VERSION}  || travis_terminate 1
         - make updatebot/push-version-dry || travis_terminate 1
         - sleep 20
+        - make prepare-helm-chart || travis_terminate 1
         - make run-helm-chart || travis_terminate 1
         - cd -
         - sleep 360
