@@ -15,14 +15,11 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -31,12 +28,12 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
+import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
@@ -62,29 +59,28 @@ public class TaskController {
 
     private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
-    private AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
-
     private EntityFinder entityFinder;
 
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
     private SecurityManager securityManager;
 
+    private TaskControllerHelper taskControllerHelper;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
 
-    @Autowired
     public TaskController(TaskRepository taskRepository,
-                          TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                          AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
-                          EntityFinder entityFinder,
-                          TaskLookupRestrictionService taskLookupRestrictionService,
-                          SecurityManager securityManager) {
+        TaskRepresentationModelAssembler taskRepresentationModelAssembler,
+        EntityFinder entityFinder,
+        TaskLookupRestrictionService taskLookupRestrictionService,
+        SecurityManager securityManager,
+        TaskControllerHelper taskControllerHelper) {
         this.taskRepository = taskRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
-        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.entityFinder = entityFinder;
         this.taskLookupRestrictionService = taskLookupRestrictionService;
         this.securityManager = securityManager;
+        this.taskControllerHelper = taskControllerHelper;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -93,30 +89,8 @@ public class TaskController {
                                                        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                        VariableSearch variableSearch,
                                                        Pageable pageable) {
-        Predicate extendedPredicate = Optional.ofNullable(predicate)
-                                              .orElseGet(BooleanBuilder::new);
-        if (rootTasksOnly) {
-            BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull();
-            extendedPredicate = parentTaskNull.and(extendedPredicate);
-        }
-        if (standalone) {
-            BooleanExpression processInstanceIdNull = QTaskEntity.taskEntity.processInstanceId.isNull();
-            extendedPredicate = extendedPredicate != null ? processInstanceIdNull.and(extendedPredicate) : processInstanceIdNull;
-        }
-
-        extendedPredicate = taskLookupRestrictionService.restrictTaskQuery(extendedPredicate);
-        Page<TaskEntity> page;
-        if (variableSearch.isSet()) {
-            page = taskRepository
-                .findByVariableNameAndValue(variableSearch.getName(), variableSearch.getValue(), extendedPredicate,
-                    pageable);
-        } else {
-            page = taskRepository.findAll(extendedPredicate, pageable);
-        }
-
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  page,
-                                                  taskRepresentationModelAssembler);
+        return taskControllerHelper.findAll(predicate, variableSearch, pageable, Arrays.asList(new RootTasksFilter(rootTasksOnly),
+            new StandAloneTaskFilter(standalone), taskLookupRestrictionService));
     }
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)

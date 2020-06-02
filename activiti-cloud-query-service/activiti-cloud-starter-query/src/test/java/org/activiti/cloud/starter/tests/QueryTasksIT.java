@@ -54,6 +54,7 @@ import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,10 +79,10 @@ public class QueryTasksIT {
     private static final String TASKS_URL = "/v1/tasks";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks";
 
-    private static final ParameterizedTypeReference<PagedModel<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
+    private static final ParameterizedTypeReference<PagedModel<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<Task>>() {
     };
 
-    private static final ParameterizedTypeReference<Task> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
+    private static final ParameterizedTypeReference<Task> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {
     };
 
     @Autowired
@@ -360,8 +361,19 @@ public class QueryTasksIT {
 
     private <T> Collection<Task> executeGetTasksWithVariable(String variableName,
         T variableValue, TaskStatus status) {
+        return executeGetTasksWithVariable(TASKS_URL, variableName, variableValue, status);
+    }
+
+    private <T> Collection<Task> executeGetAdminTasksWithVariable(String variableName,
+        T variableValue, TaskStatus status) {
+        return executeGetTasksWithVariable(ADMIN_TASKS_URL, variableName, variableValue, status);
+    }
+
+    @NotNull
+    private <T> Collection<Task> executeGetTasksWithVariable(String tasksUrl, String variableName,
+        T variableValue, TaskStatus status) {
         ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
-        .exchange(TASKS_URL + "?variables.name={name}&variables.value={outcome}&variables.type={type}&status={status}",
+        .exchange(tasksUrl + "?variables.name={name}&variables.value={outcome}&variables.type={type}&status={status}",
             HttpMethod.GET,
             keycloakTokenProducer.entityWithAuthorizationHeader(),
             PAGED_TASKS_RESPONSE_TYPE,
@@ -402,7 +414,7 @@ public class QueryTasksIT {
             ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASKS_URL + "/" + assignedTask.getId(),
                                                                             HttpMethod.GET,
                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
-                new ParameterizedTypeReference<>() {
+                new ParameterizedTypeReference<Task>() {
                 });
 
             //then
@@ -515,7 +527,7 @@ public class QueryTasksIT {
         //given
         TaskImpl processTask = new TaskImpl(UUID.randomUUID().toString(),
                                             "Task1",
-                                            Task.TaskStatus.ASSIGNED);
+                                            TaskStatus.CREATED);
         processTask.setProcessInstanceId(runningProcessInstance.getId());
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(processTask));
 
@@ -609,8 +621,6 @@ public class QueryTasksIT {
         assertCanRetrieveTask(taskWithCandidate);
     }
 
-
-
     @Test
     public void shouldGetAdminTask() {
         //given
@@ -619,14 +629,14 @@ public class QueryTasksIT {
                                                                   runningProcessInstance);
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        keycloakTokenProducer.setKeycloakTestUser("hradmin");
 
-            keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        await().untilAsserted(() -> {
             //when
             ResponseEntity<Task> responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                new ParameterizedTypeReference<>() {
+                new ParameterizedTypeReference<Task>() {
                 });
 
             //then
@@ -638,8 +648,6 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody().getId()).isEqualTo(createdTask.getId());
 
         });
-
-
     }
 
     private void assertCanRetrieveTask(Task task) {
@@ -657,6 +665,52 @@ public class QueryTasksIT {
                                 Task::getStatus)
                     .contains(tuple(task.getId(),
                                     Task.TaskStatus.CREATED));
+        });
+    }
+
+    @Test
+    public void should_getTasksFilteredOnVariableNameAndValue_when_loggedAsAdmin() {
+        //given
+        taskEventContainedBuilder.aCompletedTask("Task with no var",
+            runningProcessInstance);
+        Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved",
+            runningProcessInstance);
+        Task taskRejected = taskEventContainedBuilder.aCompletedTask("Task rejected",
+            runningProcessInstance);
+        Task createdTask = taskEventContainedBuilder
+            .aCreatedTask("Task Created", runningProcessInstance);
+
+        variableEventContainedBuilder
+            .aCreatedVariable("outcome", "approved")
+            .onTask(taskApproved);
+        variableEventContainedBuilder
+            .aCreatedVariable("intValue", 40)
+            .onTask(taskApproved);
+        variableEventContainedBuilder
+            .aCreatedVariable("outcome", "approved")
+            .onTask(createdTask);
+        variableEventContainedBuilder
+            .aCreatedVariable("outcome", "rejected")
+            .onTask(taskRejected);
+        variableEventContainedBuilder
+            .aCreatedVariable("anotherVariable", "approved")
+            .onTask(taskRejected);
+
+        eventsAggregator.sendAll();
+
+        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+
+
+        await().untilAsserted(() -> {
+
+            //when
+            Collection<Task> approvedTasks = executeGetAdminTasksWithVariable("outcome", "approved", TaskStatus.COMPLETED);
+
+            //then
+            assertThat(approvedTasks)
+                .extracting(Task::getName)
+                .containsExactly(taskApproved.getName());
+
         });
     }
 
@@ -792,16 +846,14 @@ public class QueryTasksIT {
                                                                   runningProcessInstance);
         eventsAggregator.sendAll();
 
-        await().forever()
-               .untilAsserted(() -> {
+        keycloakTokenProducer.setKeycloakTestUser("hradmin");
 
-            keycloakTokenProducer.setKeycloakTestUser("hradmin");
-
+        await().untilAsserted(() -> {
             //when
             ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                new ParameterizedTypeReference<>() {
+                new ParameterizedTypeReference<CloudTask>() {
                 });
 
             //then
@@ -810,7 +862,6 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getId()).isEqualTo(createdTask.getId());
             assertThat(responseEntity.getBody().getAssignee()).isNull();
-
 
             //when
             TaskImpl assignedTask = new TaskImpl(createdTask.getId(),
@@ -824,7 +875,7 @@ public class QueryTasksIT {
             responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                new ParameterizedTypeReference<>() {
+                new ParameterizedTypeReference<CloudTask>() {
                 });
 
             //then
@@ -937,7 +988,7 @@ public class QueryTasksIT {
         return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-users",
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-            new ParameterizedTypeReference<>() {
+            new ParameterizedTypeReference<List<String>>() {
             });
     }
 
@@ -945,7 +996,7 @@ public class QueryTasksIT {
         return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-groups",
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-            new ParameterizedTypeReference<>() {
+            new ParameterizedTypeReference<List<String>>() {
             });
     }
 

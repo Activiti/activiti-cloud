@@ -17,18 +17,19 @@ package org.activiti.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
+import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.util.List;
 
 /*
  * Tested by RestrictTaskQueryIT
  * Applies permissions/restrictions to TaskEntity data (and TaskEntity Variables) based upon Candidate user/group logic
  */
-public class TaskLookupRestrictionService {
+public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
 
     private final SecurityManager securityManager;
 
@@ -44,6 +45,10 @@ public class TaskLookupRestrictionService {
         return restrictTaskQuery(predicate, QTaskEntity.taskEntity);
     }
 
+    @Override
+    public Predicate extend(@NotNull Predicate currentPredicate) {
+        return restrictTaskQuery(currentPredicate);
+    }
 
     public Predicate restrictTaskVariableQuery(Predicate predicate){
 
