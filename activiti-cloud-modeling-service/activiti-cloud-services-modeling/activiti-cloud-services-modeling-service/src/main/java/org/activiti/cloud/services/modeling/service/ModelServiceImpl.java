@@ -522,12 +522,9 @@ public class ModelServiceImpl implements ModelService{
     public void validateModelExtensions(Model model,
                                         FileContent fileContent,
                                         Project project) {
-        ValidationContext validationContext = !modelTypeService.isJson(findModelType(model))
-            ? EMPTY_CONTEXT
-            : Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
         validateModelExtensions(model.getType(),
                                 fileContent.getFileContent(),
-                                validationContext);
+                                createValidationContext(project));
     }
 
     private void validateModelExtensions(String modelType,

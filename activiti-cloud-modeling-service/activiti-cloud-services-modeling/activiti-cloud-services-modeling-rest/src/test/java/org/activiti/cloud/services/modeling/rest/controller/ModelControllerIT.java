@@ -1024,5 +1024,45 @@ public class ModelControllerIT {
             .andExpect(jsonPath("$.projectsId", Matchers.containsInAnyOrder(parentProjectOne.getId(),parentProjectTwo.getId())));
     }
 
+    @Test
+    public void should_returnAllProjectModels_when_globalScopeModelsExists() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("parent-project"));
+        ProjectEntity anotherProject = (ProjectEntity) projectRepository.createProject(project("another-project"));
+
+        modelRepository.createModel(processModel(project,
+            "Process Model 1"));
+        ModelEntity secondProcessModel = processModel(project,
+            "Process Model 2");
+        secondProcessModel.setScope(ModelScope.GLOBAL);
+        secondProcessModel.addProject(anotherProject);
+        modelRepository.createModel(secondProcessModel);
+
+        mockMvc
+            .perform(get("/v1/projects/{projectId}/models?type=PROCESS",
+                project.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.models",
+                hasSize(2)))
+            .andExpect(jsonPath("$._embedded.models[0].name",
+                is("Process Model 1")))
+            .andExpect(jsonPath("$._embedded.models[0].scope",
+                is("PROJECT")))
+            .andExpect(jsonPath("$._embedded.models[1].name",
+                is("Process Model 2")))
+            .andExpect(jsonPath("$._embedded.models[1].scope",
+                is("GLOBAL")));
+
+        mockMvc
+            .perform(get("/v1/projects/{projectId}/models?type=PROCESS",
+                anotherProject.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.models",
+                hasSize(1)))
+            .andExpect(jsonPath("$._embedded.models[0].name",
+                is("Process Model 2")))
+            .andExpect(jsonPath("$._embedded.models[0].scope",
+                is("GLOBAL")));
+    }
+
 
 }

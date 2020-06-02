@@ -31,15 +31,16 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.process.Extensions;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
+import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
@@ -87,7 +88,7 @@ public class ModelValidationControllerIT {
 
     @BeforeEach
     public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
@@ -501,7 +502,7 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_throwExceptiojn_when_validatingProcessWithServiceTaskImplementationSetToUnknownConnectorAction() throws Exception {
+    public void should_throwException_when_validatingProcessWithServiceTaskImplementationSetToUnknownConnectorAction() throws Exception {
         byte[] validContent = resourceAsByteArray("process/unknown-implementation-service-task.bpmn20.xml");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "process.xml",
@@ -569,7 +570,98 @@ public class ModelValidationControllerIT {
         resultActions.andExpect(status().isNoContent());
     }
 
+    @Test
+    public void should_validateModelContentInTheProjectContext_when_projectIdIsProvided() throws Exception {
+        ProjectEntity projectOne = (ProjectEntity) projectRepository.createProject(project("project-one"));
+        ProjectEntity projectTwo = (ProjectEntity) projectRepository.createProject(project("project-two"));
 
+        modelService.importSingleModel(projectOne,
+            connectorModelType,
+            connectorFileContent("movies",
+                resourceAsByteArray("connector/movies.json")));
 
+        byte[] validContent = resourceAsByteArray("process/RankMovie.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+            "process.xml",
+            CONTENT_TYPE_XML,
+            validContent);
+        ModelEntity generatedProcess = processModel(projectOne, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
 
+        processModel.setScope(ModelScope.GLOBAL);
+        processModel.addProject(projectTwo);
+        processModel = modelService.updateModel(processModel, processModel);
+
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate?projectId={project_id}",
+            processModel.getId(),
+            projectOne.getId())
+            .file(file))
+            .andExpect(status().isNoContent());
+
+        ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate?projectId={project_id}",
+            processModel.getId(),
+            projectTwo.getId())
+            .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .hasSize(1)
+            .extracting(ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName)
+            .contains(tuple("Invalid service implementation on service 'Task_1spvopd'", "BPMN service task validator"));
+    }
+
+    @Test
+    public void should_validateModeExtensionslInTheProjectContext_when_projectIdIsProvided() throws Exception {
+        ProjectEntity projectOne = (ProjectEntity) projectRepository.createProject(project("project-one"));
+        ProjectEntity projectTwo = (ProjectEntity) projectRepository.createProject(project("project-two"));
+
+        modelService.importSingleModel(projectOne,
+            connectorModelType,
+            connectorFileContent("movies",
+                resourceAsByteArray("connector/movies.json")));
+
+        byte[] validContent = resourceAsByteArray("process/RankMovie.bpmn20.xml");
+        FileContent file = new FileContent("process-model.bpmn20.xml", CONTENT_TYPE_XML, validContent);
+
+        Model processModel = modelService.importSingleModel(projectOne,
+            processModelType,
+            file);
+
+        processModel.setScope(ModelScope.GLOBAL);
+        processModel.addProject(projectTwo);
+        processModel = modelService.updateModel(processModel, processModel);
+
+        MockMultipartFile extensionsFile = multipartExtensionsFile(
+            processModel,
+            resourceAsByteArray("process-extensions/RankMovie-extensions.json"));
+
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate/extensions?projectId={project_id}",
+            processModel.getId(),
+            projectOne.getId())
+            .file(extensionsFile))
+            .andExpect(status().isNoContent());
+
+        ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate/extensions?projectId={project_id}",
+            processModel.getId(),
+            projectTwo.getId())
+            .file(extensionsFile));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .hasSize(2)
+            .extracting(ModelValidationError::getDescription)
+            .contains(
+                "The extensions for process 'Process_RankMovieId' contains INPUTS mappings to task 'Task_1spvopd' referencing an unknown connector action 'movies.getMovieDesc'",
+                "The extensions for process 'Process_RankMovieId' contains OUTPUTS mappings to task 'Task_1spvopd' referencing an unknown connector action 'movies.getMovieDesc'");
+    }
 }
