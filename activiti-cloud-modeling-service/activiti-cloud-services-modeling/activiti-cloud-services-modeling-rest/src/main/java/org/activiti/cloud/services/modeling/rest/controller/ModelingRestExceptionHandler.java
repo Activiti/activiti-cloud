@@ -32,6 +32,7 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
+import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
@@ -130,6 +131,13 @@ public class ModelingRestExceptionHandler {
 
     @ExceptionHandler(ModelNameConflictException.class)
     public void handleModelNameConflictException(ModelNameConflictException ex,
+        HttpServletResponse response) throws IOException {
+        logger.error(ex.getMessage(), ex);
+        response.sendError(CONFLICT.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(ModelScopeIntegrityException.class)
+    public void handleModelScopeIntegrityException(ModelScopeIntegrityException ex,
         HttpServletResponse response) throws IOException {
         logger.error(ex.getMessage(), ex);
         response.sendError(CONFLICT.value(), ex.getMessage());

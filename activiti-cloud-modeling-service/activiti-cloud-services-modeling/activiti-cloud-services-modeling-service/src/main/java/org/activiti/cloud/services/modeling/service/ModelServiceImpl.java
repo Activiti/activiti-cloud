@@ -46,9 +46,11 @@ import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
+import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -137,6 +139,7 @@ public class ModelServiceImpl implements ModelService{
     public Model createModel(Project project,
                              Model model) {
         checkIfModelNameExistsInProject(project,model);
+        checkModelScopeIntegrity(model);
         model.setId(null);
         ModelType modelType = findModelType(model);
         model.addProject(project);
@@ -149,15 +152,31 @@ public class ModelServiceImpl implements ModelService{
     }
 
     private void checkIfModelNameExistsInProject(Project project, Model model) {
-        if (modelRepository.existsModelNameInProject(project, model.getName(), model.getType())) {
+        Optional<Model> existingModel = modelRepository.getModelByNameInProject(project, model.getName(), model.getType());
+        if (!existingModel.isEmpty() && !existingModel.get().getId().equals(model.getId())) {
             throw new ModelNameConflictException(
-                "A model with the same type already exists within the project with id: " + project != null ? project.getId() : "null");
+                "A model with the same type already exists within the project with id: " + (project != null ? project.getId() : "null"));
+        }
+    }
+
+    private void checkModelScopeIntegrity(Model model){
+        if(model.getScope() == null){
+            model.setScope(ModelScope.PROJECT);
+        }
+
+        if(ModelScope.PROJECT.equals(model.getScope()) && model.getProjects()!=null && model.getProjects().size()>1){
+            throw new ModelScopeIntegrityException(
+                "A model at PROJECT scope can only be associated to one project");
         }
     }
 
     @Override
     public Model updateModel(Model modelToBeUpdated,
                              Model newModel) {
+        if(newModel.getProjects()!= null && !newModel.getProjects().isEmpty()){
+            newModel.getProjects().stream().forEach(project -> checkIfModelNameExistsInProject((Project) project,newModel));
+        }
+        checkModelScopeIntegrity(newModel);
         return modelRepository.updateModel(modelToBeUpdated,
                                            newModel);
     }
@@ -183,6 +202,7 @@ public class ModelServiceImpl implements ModelService{
                                        fullModel.getName());
         modelToFile.setId(fullModel.getType().toLowerCase().concat("-").concat(model.getId()));
         modelToFile.setExtensions(fullModel.getExtensions());
+        modelToFile.setScope(null);
 
         FileContent extensionsFileContent = new FileContent(getExtensionsFilename(model),
                                                             CONTENT_TYPE_JSON,

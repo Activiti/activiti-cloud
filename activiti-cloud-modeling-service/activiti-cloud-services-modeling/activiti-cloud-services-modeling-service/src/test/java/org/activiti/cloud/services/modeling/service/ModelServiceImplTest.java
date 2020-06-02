@@ -24,15 +24,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
-
 import javax.xml.stream.XMLStreamException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
@@ -42,7 +39,11 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.impl.ModelImpl;
+import org.activiti.cloud.modeling.api.impl.ProjectImpl;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
+import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
+import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
@@ -75,6 +76,9 @@ public class ModelServiceImplTest {
 
     @Mock
     private Model modelOne;
+
+    @Mock
+    private Model modelTwo;
 
     @Mock
     private BpmnModel bpmnModelOne;
@@ -147,7 +151,7 @@ public class ModelServiceImplTest {
     @Test
     public void should_returnProcessExtensionsFileForTheModelGiven() throws IOException, XMLStreamException {
         ProcessModelType modelType = new ProcessModelType();
-        ModelImpl extensionModelImpl = this.createModelImpl();
+        ModelImpl extensionModelImpl = createModelImpl();
         when(modelRepository.getModelType()).thenReturn(ModelImpl.class);
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(jsonConverter.convertToJsonBytes(any()))
@@ -157,6 +161,44 @@ public class ModelServiceImplTest {
         assertThat(fileContent.get().getFilename()).isEqualTo("fake-process-model-extensions.json");
         assertThat(new String(fileContent.get().getFileContent()))
             .isEqualToIgnoringCase("{\"id\":\"12345678\",\"name\":\"fake-process-model\",\"type\":\"PROCESS\",\"extensions\":{\"mappings\":\"\",\"constants\":\"\",\"properties\":\"\"}}");
+    }
+
+    @Test
+    public void should_throwModelNameConflictException_when_creatingAModelWithSameNameInAProject() {
+        ProcessModelType modelType = new ProcessModelType();
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+        when(modelRepository.getModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelOne));
+        when(modelTwo.getId()).thenReturn("modelTwoId");
+        when(modelTwo.getName()).thenReturn("name");
+        when(modelTwo.getType()).thenReturn(modelType.getName());
+        when(modelOne.getId()).thenReturn("modelOneId");
+        when(modelOne.getName()).thenReturn("name");
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        assertThatThrownBy(() -> modelService.createModel(projectOne, modelTwo))
+            .isInstanceOf(ModelNameConflictException.class);
+    }
+
+    @Test
+    public void should_throwModelScopeIntegrityException_when_creatingModelWithProjectScopeAndBelongsToMoreThanOneProject() throws Exception {
+        ModelImpl model = new ModelImpl();
+        model.setScope(ModelScope.PROJECT);
+        model.addProject(new ProjectImpl());
+        model.addProject(new ProjectImpl());
+
+        assertThatThrownBy(() -> modelService.createModel(null, model))
+            .isInstanceOf(ModelScopeIntegrityException.class);
+    }
+
+    @Test
+    public void should_throwModelScopeIntegrityException_when_updatingModelWithProjectScopeAndBelongsToMoreThanOneProject() throws Exception {
+        ModelImpl model = new ModelImpl();
+        model.setScope(ModelScope.PROJECT);
+        model.addProject(new ProjectImpl());
+        model.addProject(new ProjectImpl());
+
+        assertThatThrownBy(() -> modelService.updateModel(null, model))
+            .isInstanceOf(ModelScopeIntegrityException.class);
     }
 
     private ModelImpl createModelImpl() {

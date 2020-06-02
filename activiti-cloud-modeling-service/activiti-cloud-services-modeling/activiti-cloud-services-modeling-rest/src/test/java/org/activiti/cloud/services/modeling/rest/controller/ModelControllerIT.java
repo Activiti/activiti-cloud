@@ -62,6 +62,7 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.process.Extensions;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
@@ -69,6 +70,7 @@ import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -968,4 +970,59 @@ public class ModelControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.template").doesNotExist());
     }
+
+    @Test
+    public void should_projectIdBeFilled_when_modelIsInProjectScope() throws Exception {
+        Project parentProject = project("parent-project");
+        projectRepository.createProject(parentProject);
+
+        Model processModel = processModel("testProcess");
+        processModel.addProject(parentProject);
+        modelRepository.createModel(processModel);
+
+        mockMvc.perform(get("/v1/models/{modelId}",
+            processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope", is("PROJECT")))
+            .andExpect(jsonPath("$.projectId", is(parentProject.getId())))
+            .andExpect(jsonPath("$.projectsId", hasSize(1)))
+            .andExpect(jsonPath("$.projectsId", Matchers.contains(parentProject.getId())));
+    }
+
+    @Test
+    public void should_projectIdNotBeIncluded_when_modelIsNotInProjectScope() throws Exception {
+        Model processModel = processModel("testProcess");
+        processModel.setScope(ModelScope.GLOBAL);
+        modelRepository.createModel(processModel);
+
+        mockMvc.perform(get("/v1/models/{modelId}",
+            processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope", is("GLOBAL")))
+            .andExpect(jsonPath("$.projectId").doesNotExist());
+    }
+
+    @Test
+    public void should_retrieveAllProjects_when_modelAppearsInSeveralProjects() throws Exception {
+        Project parentProjectOne = project("parent-project-one");
+        projectRepository.createProject(parentProjectOne);
+        Project parentProjectTwo = project("parent-project-two");
+        projectRepository.createProject(parentProjectTwo);
+        Model processModel = processModel("testProcess");
+        processModel.setScope(ModelScope.GLOBAL);
+        processModel.addProject(parentProjectOne);
+        processModel.addProject(parentProjectTwo);
+        modelRepository.createModel(processModel);
+
+        String[] projectsId = {parentProjectOne.getId(), parentProjectTwo.getId()};
+
+        mockMvc.perform(get("/v1/models/{modelId}",
+            processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope", is("GLOBAL")))
+            .andExpect(jsonPath("$.projectsId", hasSize(2)))
+            .andExpect(jsonPath("$.projectsId", Matchers.containsInAnyOrder(parentProjectOne.getId(),parentProjectTwo.getId())));
+    }
+
+
 }

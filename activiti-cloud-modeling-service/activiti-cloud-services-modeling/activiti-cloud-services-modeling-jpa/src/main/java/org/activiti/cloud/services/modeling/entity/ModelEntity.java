@@ -37,6 +37,7 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
@@ -150,6 +151,24 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
         if(projects!=null && projects.contains(project)){
             projects.remove(project);
             project.removeModel(this);
+        }
+    }
+
+    @Transient
+    @JsonProperty("projectId")
+    public String getProjectId() {
+        return ModelScope.PROJECT.equals(scope) && projects != null && !projects.isEmpty() ? projects.iterator().next().getId() : null;
+    }
+
+    @Transient
+    @JsonProperty("projectsId")
+    public Set<String> getProjectsId() {
+        if (projects != null && !projects.isEmpty()) {
+            Set<String> projectsId = new HashSet<>();
+            projects.forEach(project -> projectsId.add(project.getId()));
+            return projectsId;
+        } else {
+            return null;
         }
     }
 
