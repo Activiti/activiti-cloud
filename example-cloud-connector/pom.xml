@@ -16,7 +16,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud.version>7.1.501</activiti-cloud.version>
+    <activiti-cloud.version>7.1.502</activiti-cloud.version>
   </properties>
   <dependencyManagement>
     <dependencies>

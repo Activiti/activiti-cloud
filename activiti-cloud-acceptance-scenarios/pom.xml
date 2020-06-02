@@ -40,7 +40,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud.version>7.1.501</activiti-cloud.version>
+    <activiti-cloud.version>7.1.502</activiti-cloud.version>
     <assertj.version>3.13.2</assertj.version>
     <serenity-maven-plugin.version>2.1.13</serenity-maven-plugin.version>
     <feign.version>10.7.0</feign.version>
