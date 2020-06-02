@@ -132,6 +132,11 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     }
 
     @Override
+    public void clearProjects(){
+        projects.clear();
+    }
+
+    @Override
     public String getVersion() {
         return version;
     }

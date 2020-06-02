@@ -17,6 +17,7 @@ package org.activiti.cloud.services.modeling.jpa;
 
 
 import java.util.List;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,4 +45,8 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String> {
         @Param("modelName") String modelName,
         @Param("modelTypeFilter") String modelTypeFilter);
 
+    Page<ModelEntity> findAllByScopeAndTypeEquals(ModelScope scope, String modelTypeFilter, Pageable pageable);
+
+    @Query("SELECT m FROM Model m LEFT JOIN m.projects p WHERE m.type=:modelTypeFilter AND (m.scope=:scope OR p.id IS NULL)" )
+    Page<ModelEntity> findAllByScopeAndTypeEqualsWithOrphans(@Param("scope") ModelScope scope, @Param("modelTypeFilter") String modelTypeFilter, Pageable pageable);
 }

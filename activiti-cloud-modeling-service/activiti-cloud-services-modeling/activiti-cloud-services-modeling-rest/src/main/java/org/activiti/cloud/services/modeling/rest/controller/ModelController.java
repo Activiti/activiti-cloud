@@ -28,6 +28,7 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.rest.api.ModelRestApi;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationModelAssembler;
@@ -119,7 +120,6 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
-    @Transactional
     public EntityModel<Model> updateModel(
             @PathVariable String modelId,
             @Valid @RequestBody Model model) {
@@ -231,6 +231,66 @@ public class ModelController implements ModelRestApi {
             modelService.validateModelExtensions(findModelById(modelId), multipartToFileContent(file), project);
         }
     }
+
+    @Override
+    public PagedModel<EntityModel<Model>> getGlobalModels(
+        @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
+        @RequestParam(value = INCLUDE_ORPHANS_PARAM_NAME, required = false) Boolean includeOrphans,
+        Pageable pageable) {
+
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            modelService.getGlobalModels(findModelType(type),includeOrphans,pageable),
+            representationModelAssembler);
+    }
+
+    @Override
+    @Transactional
+    public EntityModel<Model> putProjectModelRelationship(
+        @PathVariable String projectId,
+        @PathVariable String modelId,
+        @RequestParam(value = SCOPE_PARAM_NAME, required = false) String scope,
+        @RequestParam(value = FORCE_PARAM_NAME, required = false) Boolean force) {
+
+        Project project = projectController.findProjectById(projectId);
+        Model modelToBeUpdated = findModelById(modelId);
+        Model newModel = findModelById(modelId);
+
+        if (force != null && force &&
+            (
+                (scope != null && scope.equals(ModelScope.PROJECT.name()))
+                    || (scope == null && newModel.getScope().equals(ModelScope.PROJECT))
+            )
+        ) {
+
+            newModel.getProjects().clear();
+            newModel.addProject(project);
+        }
+
+        if (scope != null) {
+            newModel.setScope(ModelScope.valueOf(scope));
+        }
+
+        newModel.addProject(project);
+
+        return representationModelAssembler.toModel(modelService.updateModel(modelToBeUpdated,newModel));
+    }
+
+    @Override
+    @Transactional
+    public EntityModel<Model> deleteProjectModelRelationship(
+        @PathVariable String projectId,
+        @PathVariable String modelId) {
+
+        Project project = projectController.findProjectById(projectId);
+        Model modelToBeUpdated = findModelById(modelId);
+        Model newModel = findModelById(modelId);
+
+        newModel.removeProject(project);
+
+        return representationModelAssembler.toModel(modelService.updateModel(modelToBeUpdated,newModel));
+    }
+
 
     public Model findModelById(String modelId) {
         Optional<Model> optionalModel = modelService.findModelById(modelId);

@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.jpa;
 import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
@@ -112,7 +113,21 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     @Override
     public void deleteModel(ModelEntity model) {
         modelJpaRepository.delete(model);
+    }
 
+    @Override
+    public Page<ModelEntity> getGlobalModels(ModelType modelTypeFilter, Boolean includeOrphans, Pageable pageable) {
+        if(includeOrphans!=null && includeOrphans){
+            return modelJpaRepository.findAllByScopeAndTypeEqualsWithOrphans(
+                ModelScope.GLOBAL,
+                modelTypeFilter.getName(),
+                pageable);
+        }else{
+            return modelJpaRepository.findAllByScopeAndTypeEquals(
+                ModelScope.GLOBAL,
+                modelTypeFilter.getName(),
+                pageable);
+        }
     }
 
     @Override

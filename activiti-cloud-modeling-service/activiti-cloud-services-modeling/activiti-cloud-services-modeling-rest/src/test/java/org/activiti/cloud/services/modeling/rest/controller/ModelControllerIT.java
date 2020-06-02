@@ -1106,7 +1106,166 @@ public class ModelControllerIT {
             .contentType(MediaType.APPLICATION_JSON)
             .content(mapper.writeValueAsString(deserializedStringModel)))
             .andExpect(status().isConflict());
+    }
 
+    @Test
+    public void should_returnOnlyGlobalModels_when_retrievingAllModels() throws Exception {
+        ModelEntity connectorProjectScoped = connectorModel("connector-project-scoped");
+        modelRepository.createModel(connectorProjectScoped);
+        ModelEntity connectorGlobalScoped = connectorModel("connector-global-scoped");
+        modelRepository.createModel(connectorGlobalScoped);
+
+        ModelEntity projectScoped = processModel("process-project-scoped");
+        modelRepository.createModel(projectScoped);
+        ModelEntity globalScopedOne = processModel("process-global-scoped-1");
+        globalScopedOne.setScope(ModelScope.GLOBAL);
+        modelRepository.createModel(globalScopedOne);
+        ModelEntity globalScopedTwo = processModel("process-global-scoped-2");
+        globalScopedTwo.setScope(ModelScope.GLOBAL);
+        modelRepository.createModel(globalScopedTwo);
+
+        mockMvc
+            .perform(get("/v1/models?type=PROCESS"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.models",
+                hasSize(2)))
+            .andExpect(jsonPath("$._embedded.models[0].name",
+                is("process-global-scoped-1")))
+            .andExpect(jsonPath("$._embedded.models[0].scope",
+                is("GLOBAL")))
+            .andExpect(jsonPath("$._embedded.models[1].name",
+                is("process-global-scoped-2")))
+            .andExpect(jsonPath("$._embedded.models[1].scope",
+                is("GLOBAL")));
+    }
+
+    @Test
+    public void should_returnGlobalAndModels_when_retrievingAllModelsWithOrphansOption() throws Exception {
+        ModelEntity connectorProjectScoped = connectorModel("connector-project-scoped");
+        modelRepository.createModel(connectorProjectScoped);
+        ModelEntity connectorGlobalScoped = connectorModel("connector-global-scoped");
+        modelRepository.createModel(connectorGlobalScoped);
+
+        ModelEntity projectScoped = processModel("process-project-scoped");
+        modelRepository.createModel(projectScoped);
+        ModelEntity globalScopedOne = processModel("process-global-scoped-1");
+        globalScopedOne.setScope(ModelScope.GLOBAL);
+        modelRepository.createModel(globalScopedOne);
+        ModelEntity globalScopedTwo = processModel("process-global-scoped-2");
+        globalScopedTwo.setScope(ModelScope.GLOBAL);
+        modelRepository.createModel(globalScopedTwo);
+
+        mockMvc
+            .perform(get("/v1/models?type=PROCESS&includeOrphans=true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.models",
+                hasSize(3)))
+            .andExpect(jsonPath("$._embedded.models[0].name",
+                is("process-project-scoped")))
+            .andExpect(jsonPath("$._embedded.models[0].scope",
+                is("PROJECT")))
+            .andExpect(jsonPath("$._embedded.models[1].name",
+                is("process-global-scoped-1")))
+            .andExpect(jsonPath("$._embedded.models[1].scope",
+                is("GLOBAL")))
+            .andExpect(jsonPath("$._embedded.models[2].name",
+                is("process-global-scoped-2")))
+            .andExpect(jsonPath("$._embedded.models[2].scope",
+                is("GLOBAL")));
+    }
+
+    @Test
+    public void should_addProjectModelRelationship_when_scopeIsProjectAndModelHasNoRelationships() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project"));
+        Model model = (ModelEntity) modelRepository.createModel(processModel("process-project-scoped"));
+
+        mockMvc
+            .perform(put("/v1/projects/{projectId}/models/{modelId}", project.getId(), model.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope",is("PROJECT")))
+            .andExpect(jsonPath("$.projectId",is(project.getId())))
+            .andExpect(jsonPath("$.projectsId", hasSize(1)))
+            .andExpect(jsonPath("$.projectsId", Matchers.contains(project.getId())));
+    }
+
+    @Test
+    public void should_returnStatusConflict_when_scopeIsProjectAndModelHasRelationships() throws Exception {
+        ProjectEntity parentProject = (ProjectEntity) projectRepository.createProject(project("parent-project"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project"));
+        Model model = (ModelEntity) modelRepository.createModel(processModel(parentProject,"process-project-scoped"));
+
+        ResultActions resultActions = mockMvc
+            .perform(put("/v1/projects/{projectId}/models/{modelId}", project.getId(), model.getId()))
+            .andExpect(status().isConflict());
+
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("A model at PROJECT scope can only be associated to one project");
+    }
+
+    @Test
+    public void should_addProjectModelRelationship_when_scopeIsChangedToGlobalAndModelHasRelationships() throws Exception {
+        ProjectEntity parentProject = (ProjectEntity) projectRepository.createProject(project("parent-project"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project"));
+        Model model = (ModelEntity) modelRepository.createModel(processModel(parentProject, "process-project-scoped"));
+
+        mockMvc
+            .perform(put("/v1/projects/{projectId}/models/{modelId}?scope=GLOBAL", project.getId(), model.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope", is("GLOBAL")))
+            .andExpect(jsonPath("$.projectId").doesNotExist())
+            .andExpect(jsonPath("$.projectsId", hasSize(2)))
+            .andExpect(jsonPath("$.projectsId", Matchers.containsInAnyOrder(parentProject.getId(), project.getId())));
+    }
+
+    @Test
+    public void should_returnConflict_when_scopeIsChangedToProjectAndModelHasRelationships() throws Exception {
+        ProjectEntity parentProject = (ProjectEntity) projectRepository.createProject(project("parent-project"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project"));
+        Model model = processModel(parentProject, "process-global-scoped");
+        model.setScope(ModelScope.GLOBAL);
+        model.addProject(project);
+        model = (ModelEntity) modelRepository.createModel(model);
+
+        ResultActions resultActions = mockMvc
+            .perform(put("/v1/projects/{projectId}/models/{modelId}?scope=PROJECT", project.getId(), model.getId()))
+            .andExpect(status().isConflict());
+
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("A model at PROJECT scope can only be associated to one project");
+    }
+
+    @Test
+    public void should_deleteOtherProjectRelationships_when_scopeIsChangedToProjectAndForcedOptionAndModelhasRelationships() throws Exception {
+        ProjectEntity parentProject = (ProjectEntity) projectRepository.createProject(project("parent-project"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project"));
+        Model model = processModel(parentProject, "process-global-scoped");
+        model.setScope(ModelScope.GLOBAL);
+        model.addProject(project);
+        model = (ModelEntity) modelRepository.createModel(model);
+
+        mockMvc
+            .perform(put("/v1/projects/{projectId}/models/{modelId}?scope=PROJECT&force=true", project.getId(), model.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope", is("PROJECT")))
+            .andExpect(jsonPath("$.projectId", is(project.getId())))
+            .andExpect(jsonPath("$.projectsId", hasSize(1)))
+            .andExpect(jsonPath("$.projectsId", Matchers.contains(project.getId())));
+    }
+
+    @Test
+    public void should_deleteProjectRelationship_when_methodIsCalled() throws Exception {
+        ProjectEntity parentProject = (ProjectEntity) projectRepository.createProject(project("parent-project"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project"));
+        Model model = processModel(parentProject, "process-global-scoped");
+        model.setScope(ModelScope.GLOBAL);
+        model.addProject(project);
+        model = (ModelEntity) modelRepository.createModel(model);
+
+        mockMvc
+            .perform(delete("/v1/projects/{projectId}/models/{modelId}", project.getId(), model.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope", is("GLOBAL")))
+            .andExpect(jsonPath("$.projectId").doesNotExist())
+            .andExpect(jsonPath("$.projectsId", hasSize(1)))
+            .andExpect(jsonPath("$.projectsId", Matchers.contains(parentProject.getId())));
     }
 
     @Test

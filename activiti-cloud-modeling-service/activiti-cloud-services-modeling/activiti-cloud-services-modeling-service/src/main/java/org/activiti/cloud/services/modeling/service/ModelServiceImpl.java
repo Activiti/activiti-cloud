@@ -528,6 +528,14 @@ public class ModelServiceImpl implements ModelService{
                                 createValidationContext(project));
     }
 
+    @Override
+    public Page<Model> getGlobalModels(
+        ModelType modelType,
+        Boolean includeOrphans,
+        Pageable pageable) {
+        return modelRepository.getGlobalModels(modelType, includeOrphans, pageable);
+    }
+
     private void validateModelExtensions(String modelType,
                                          byte[] modelContent,
                                          ValidationContext validationContext) {
