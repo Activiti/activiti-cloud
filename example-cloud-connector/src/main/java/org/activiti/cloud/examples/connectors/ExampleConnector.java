@@ -17,11 +17,12 @@ package org.activiti.cloud.examples.connectors;
 
 import static net.logstash.logback.marker.Markers.append;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
@@ -35,6 +36,8 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 @EnableBinding(ExampleConnectorChannels.class)
@@ -100,6 +103,24 @@ public class ExampleConnector {
         Object boolVar = event.getIntegrationContext().getInBoundVariables().get("test_bool_variable_name");
         if( boolVar != null && boolVar instanceof Boolean){
             results.put("test_bool_variable_result","able to read boolean");
+        }
+
+        Object bigDecimalVar = event.getIntegrationContext().getInBoundVariable("test_bigdecimal_variable_name");
+        logger.info("bigDecimalVar value as string "+ bigDecimalVar);
+        if( bigDecimalVar != null && bigDecimalVar instanceof BigDecimal && BigDecimal.valueOf(1234567890L, 2).equals(bigDecimalVar)) {
+            results.put("test_bigdecimal_variable_result", bigDecimalVar);
+        }
+
+        Object longVar = event.getIntegrationContext().getInBoundVariable("test_long_variable_name");
+        logger.info("longVar value as string "+ longVar);
+        if( longVar != null && longVar instanceof Long && Long.valueOf(1234567890L).equals(longVar)) {
+            results.put("test_long_variable_result", longVar);
+        }
+
+        Object dateVar = event.getIntegrationContext().getInBoundVariable("test_date_variable_name");
+        logger.info("dateVar value as string "+ dateVar);
+        if( dateVar != null && dateVar instanceof Date) {
+            results.put("test_date_variable_result", dateVar);
         }
 
         results.put("var1",
