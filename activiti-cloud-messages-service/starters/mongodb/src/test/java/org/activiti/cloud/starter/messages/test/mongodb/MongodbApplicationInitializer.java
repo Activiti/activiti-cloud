@@ -22,7 +22,8 @@ import org.testcontainers.containers.MongoDBContainer;
 
 public class MongodbApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static MongoDBContainer container = new MongoDBContainer();
+    private static MongoDBContainer container = new MongoDBContainer()
+        .withReuse(false);
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {

@@ -23,11 +23,10 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 public class KeycloakContainerApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static GenericContainer keycloakContainer = new GenericContainer(
-        "activiti/activiti-keycloak")
+    private static GenericContainer keycloakContainer = new GenericContainer("activiti/activiti-keycloak")
         .withExposedPorts(8180)
-        .waitingFor(Wait.defaultWaitStrategy());
-
+        .waitingFor(Wait.defaultWaitStrategy())
+        .withReuse(true);
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {

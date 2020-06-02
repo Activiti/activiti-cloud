@@ -24,6 +24,7 @@ public class RedisApplicationInitializer implements ApplicationContextInitialize
 
 
     private static GenericContainer container = new GenericContainer("redis")
+        .withReuse(false)
         .withExposedPorts(6379);
 
     @Override

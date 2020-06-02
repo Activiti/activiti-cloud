@@ -15,19 +15,15 @@
  */
 package org.activiti.cloud.connectors.starter.test.it;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.ClassRule;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,28 +34,15 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.ContextConfiguration;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
-@Testcontainers
+@ContextConfiguration(initializers = RabbitMQContainerApplicationInitializer.class)
 public class ActivitiCloudConnectorServiceIT {
-
-
-    @Container
-    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
-
-    @BeforeAll
-    public static void beforeAll() {
-
-        System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
-        System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
-
-    }
-
 
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
 
