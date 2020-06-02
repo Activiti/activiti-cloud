@@ -21,10 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.cloud.services.query.model.VariableValue;
 import org.junit.jupiter.api.Test;
 
-class VariableSearchTest {
+public class VariableSearchTest {
 
     @Test
-    void isSet_shouldReturnTrue_when_variableNameAndValueAreSet() {
+    public void isSet_shouldReturnTrue_when_variableNameAndValueAreSet() {
         //given
         VariableSearch variableSearch = new VariableSearch("var", new VariableValue<>("any"),
             "string");
@@ -37,7 +37,7 @@ class VariableSearchTest {
     }
 
     @Test
-    void isSet_shouldReturnFalse_when_variableNameIsNotSet() {
+    public void isSet_shouldReturnFalse_when_variableNameIsNotSet() {
         //given
         VariableSearch variableSearch = new VariableSearch(null, new VariableValue<>("any"),
             "string");
@@ -50,7 +50,7 @@ class VariableSearchTest {
     }
 
     @Test
-    void isSet_shouldReturnFalse_when_variableValueIsNotSet() {
+    public void isSet_shouldReturnFalse_when_variableValueIsNotSet() {
         //given
         VariableSearch variableSearch = new VariableSearch("var", null,
             "string");
@@ -63,7 +63,7 @@ class VariableSearchTest {
     }
 
     @Test
-    void isSet_shouldReturnFalse_when_variableValueIsWrappingANullValue() {
+    public void isSet_shouldReturnFalse_when_variableValueIsWrappingANullValue() {
         //given
         VariableSearch variableSearch = new VariableSearch("var", new VariableValue<>(null),
             "string");

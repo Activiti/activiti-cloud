@@ -41,7 +41,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
-class TaskControllerHelperTest {
+public class TaskControllerHelperTest {
 
     @InjectMocks
     private TaskControllerHelper taskControllerHelper;
@@ -67,7 +67,7 @@ class TaskControllerHelperTest {
     }
 
     @Test
-    void findAll_should_useFindByVariableNameAndValue_when_variableSearchIsSet() {
+    public void findAll_should_useFindByVariableNameAndValue_when_variableSearchIsSet() {
         //given
         Predicate initialPredicate = mock(Predicate.class);
         List<QueryDslPredicateFilter> filters = Collections.emptyList();
@@ -95,7 +95,7 @@ class TaskControllerHelperTest {
     }
 
     @Test
-    void findAll_should_useDefaultFindAll_when_variableSearchIsNotSet() {
+    public void findAll_should_useDefaultFindAll_when_variableSearchIsNotSet() {
         //given
         Predicate initialPredicate = mock(Predicate.class);
         List<QueryDslPredicateFilter> filters = Collections.emptyList();
