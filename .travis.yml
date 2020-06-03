@@ -5,13 +5,11 @@ env:
     - APP_NAME='activiti-cloud-dependencies'
     - GITHUB_CHARTS_REPO="https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git"
     - RELEASE_BRANCH="develop"
-    - RELEASE_TAG_REGEX="*M*"
     - HELM_VERSION=2.12.3
     - HELM_REPO_BASE_URL=https://kubernetes-charts.alfresco.com
     - HELM_REPO=stable
     - KUBERNETES_VERSION=1.14.8
     - TRAVIS_WAIT_TIMEOUT=${TRAVIS_WAIT_TIMEOUT:-180}
-
 before_script:
   - echo -e "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com" >>  ~/.git-credentials
   - curl -s https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar zx
@@ -23,7 +21,6 @@ before_script:
   - kubectl config set-context default-system --cluster=default-cluster --user=default-admin || travis_terminate 1
   - kubectl config use-context default-system || travis_terminate 1
   - kubectl get ns || travis_terminate 1
-
 stages:
 - name: build
 - name: tag_updatebot
@@ -96,17 +93,13 @@ jobs:
                         activiti-cloud-connector ${VERSION} \
                         activiti-cloud-query ${VERSION} \
                         activiti-cloud-modeling ${VERSION}
-
 after_failure:
   - cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart" &&  cd -
 after_success:
   - cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart" &&  cd -
-
-
 
 before_install:
   - echo -e "https://$GITHUB_USER:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
   - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY"
   - curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear
   - export activiti_cloud_version=$(grep -oPm1 "(?<=<activiti-cloud-build.version>)[^<]+" "activiti-cloud-dependencies/pom.xml")
-
