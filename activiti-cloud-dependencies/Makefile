@@ -33,9 +33,6 @@ updatebot/push-version:
 updatebot/push-version-dry:
 	rm -rf  .updatebot-repos
 	updatebot --dry push-version --kind helm activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
-	echo "printing requirements.yaml+++++++++++++++++"
-	cat .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/requirements.yaml
-	echo "end of requirements.yaml++++++++++++++++++++"
 	
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
@@ -50,7 +47,7 @@ prepare-helm-chart:
         	helm dep up && \
         	helm lint
 
-run-helm-chart:
+run-helm-chart: delete
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
             	helm upgrade ${PREVIEW_NAMESPACE} . \
             		--install \
@@ -58,6 +55,7 @@ run-helm-chart:
             		--namespace ${PREVIEW_NAMESPACE} 
 delete:
 	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
+	kubectl delete ns ${PREVIEW_NAMESPACE} || echo "try to remove namespace ${PREVIEW_NAMESPACE}"
 
 
 RELEASE_GREP_EXPR := '^[Rr]elease'

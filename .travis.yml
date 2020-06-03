@@ -99,10 +99,8 @@ jobs:
 
 after_failure:
   - cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart" &&  cd -
-  - kubectl delete ns ${PREVIEW_NAMESPACE}
 after_success:
   - cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart" &&  cd -
-  - kubectl delete ns ${PREVIEW_NAMESPACE}
 
 
 
