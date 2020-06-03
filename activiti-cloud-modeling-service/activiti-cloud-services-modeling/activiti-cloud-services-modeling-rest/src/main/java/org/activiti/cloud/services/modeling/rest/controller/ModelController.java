@@ -123,6 +123,9 @@ public class ModelController implements ModelRestApi {
             @Valid @RequestBody Model model) {
         Model modelToUpdate = findModelById(modelId);
         model.setId(modelId);
+        if(modelToUpdate.getProjects()!=null) {
+            modelToUpdate.getProjects().forEach(project -> model.addProject((Project) project));
+        }
         return representationModelAssembler.toModel(
                 modelService.updateModel(modelToUpdate,
                                          model));

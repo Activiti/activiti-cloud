@@ -133,16 +133,16 @@ public class ModelControllerIT {
         Project project = projectRepository.createProject(project("parent-project"));
 
         mockMvc.perform(post("/v1/projects/{projectId}/models",
-                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(processModel("process-model"))))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name",
-                                    equalTo("process-model")))
-                .andExpect(jsonPath("$.type",
-                                    equalTo(PROCESS)))
-                .andExpect(jsonPath("$.extensions",
-                                    notNullValue()));
+            project.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(processModel("process-model"))))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name",
+                equalTo("process-model")))
+            .andExpect(jsonPath("$.type",
+                equalTo(PROCESS)))
+            .andExpect(jsonPath("$.extensions",
+                notNullValue()));
     }
 
     @Test
@@ -972,6 +972,21 @@ public class ModelControllerIT {
     }
 
     @Test
+    public void should_setProjectScopeByDefault_when_creatingModel() throws Exception {
+        Project project = projectRepository.createProject(project("parent-project"));
+
+        ModelEntity model = processModel("process-model");
+        model.setScope(null);
+
+        mockMvc.perform(post("/v1/projects/{projectId}/models",
+            project.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(model)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.scope", is("PROJECT")));
+    }
+
+    @Test
     public void should_projectIdBeFilled_when_modelIsInProjectScope() throws Exception {
         Project parentProject = project("parent-project");
         projectRepository.createProject(parentProject);
@@ -1064,5 +1079,28 @@ public class ModelControllerIT {
                 is("GLOBAL")));
     }
 
+    @Test
+    public void should_checkModelNames_when_updatingModel() throws Exception {
+        ProjectEntity projectOne = (ProjectEntity) projectRepository.createProject(project("project-1"));
+        ProjectEntity projectTwo = (ProjectEntity) projectRepository.createProject(project("project-2"));
 
+        ModelEntity modelOne = processModel(projectOne,"model-1");
+        modelRepository.createModel(modelOne);
+        ModelEntity modelTwo = processModel(projectOne,"model-2");
+        modelTwo.setScope(ModelScope.GLOBAL);
+        modelTwo.addProject(projectTwo);
+        modelRepository.createModel(modelTwo);
+
+        String subjectModelString = mapper.writeValueAsString(modelTwo);
+        Model deserializedStringModel = mapper.readValue(subjectModelString,Model.class);
+        deserializedStringModel.setName("model-1");
+        deserializedStringModel.addProject(projectOne);
+        deserializedStringModel.addProject(projectTwo);
+
+        mockMvc.perform(put("/v1/models/{modelId}", modelTwo.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(deserializedStringModel)))
+            .andExpect(status().isConflict());
+
+    }
 }

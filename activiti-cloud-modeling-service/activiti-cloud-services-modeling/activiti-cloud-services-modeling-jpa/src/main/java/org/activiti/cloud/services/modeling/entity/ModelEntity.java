@@ -172,6 +172,10 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
         }
     }
 
+    public void setProjectsId(Set<String> projectsId) {
+        // Defined only for avoiding Jackson deserialization issues
+    }
+
     @Transient
     @Override
     public String getVersion() {
