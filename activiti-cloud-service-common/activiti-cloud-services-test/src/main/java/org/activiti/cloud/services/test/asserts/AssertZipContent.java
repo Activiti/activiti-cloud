@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.test.asserts;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,12 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-
 import net.javacrumbs.jsonunit.fluent.JsonFluentAssert;
+import net.javacrumbs.jsonunit.fluent.JsonFluentAssert.ConfigurableJsonFluentAssert;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipStream;
-
-import static org.assertj.core.api.Assertions.*;
 
 /**
  * Asserts for zip content
@@ -111,7 +111,7 @@ public class AssertZipContent {
     }
 
     public AssertZipContent hasJsonContentSatisfying(String entry,
-                                                     Consumer<JsonFluentAssert> requirement) {
+                                                     Consumer<ConfigurableJsonFluentAssert> requirement) {
         assertThat(zipContent(entry))
                 .map(JsonFluentAssert::assertThatJson)
                 .hasValueSatisfying(requirement);

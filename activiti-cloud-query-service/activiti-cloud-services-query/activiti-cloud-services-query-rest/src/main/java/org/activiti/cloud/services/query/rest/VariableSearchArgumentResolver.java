@@ -29,7 +29,7 @@ public class VariableSearchArgumentResolver implements HandlerMethodArgumentReso
 
     private static final String VARIABLE_NAME_KEY = "variables.name";
     private static final String VARIABLE_VALUE_KEY = "variables.value";
-    public static final String VARIABLE_TYPE_KEY = "variables.type";
+    private static final String VARIABLE_TYPE_KEY = "variables.type";
 
     private ConversionService conversionService;
 
