@@ -89,11 +89,8 @@
           "description": {
             "type": "string"
           },
-          "value": {
+          "code": {
             "type": "string"
-          },
-          "required": {
-            "type": "boolean"
           }
         },
         "required": [
