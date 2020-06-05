@@ -39,6 +39,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -118,6 +119,7 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
+    @Transactional
     public EntityModel<Model> updateModel(
             @PathVariable String modelId,
             @Valid @RequestBody Model model) {

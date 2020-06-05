@@ -333,6 +333,7 @@ public class ModelServiceImpl implements ModelService{
             convertedId = retrieveModelIdFromModelContent(model,
                                             fileContent);
         }
+        model.setScope(ModelScope.PROJECT);
         createModel(project,
                     model);
         if (convertedId != null) {

@@ -1103,4 +1103,31 @@ public class ModelControllerIT {
             .andExpect(status().isConflict());
 
     }
+
+    @Test
+    public void should_retrieveModelContent_whenModelExists() throws Exception {
+        Model processModel = modelRepository.createModel(processModelWithContent("process_model_id",
+            "Process Model Content"));
+
+       mockMvc.perform(
+            get("/v1/models/{modelId}/content",
+                processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(result -> equalTo("Process Model Content"));
+    }
+
+    @Test
+    public void should_returnStatusNotAcceptable_whenRetrievingModelDiagram() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(
+            processModelWithExtensions(project,
+                "process-model",
+                new Extensions(),
+                resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+
+        mockMvc.perform(
+            get("/v1/models/{modelId}/content",
+                processModel.getId()).header("Accept","image/svg+xml"))
+            .andExpect(status().isNotAcceptable());
+    }
 }
