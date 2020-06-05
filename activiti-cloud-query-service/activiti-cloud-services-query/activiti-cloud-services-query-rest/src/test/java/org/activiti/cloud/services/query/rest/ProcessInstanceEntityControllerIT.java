@@ -15,7 +15,17 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.querydsl.core.types.Predicate;
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -24,6 +34,7 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
@@ -44,17 +55,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessInstanceController.class)
 @Import({
@@ -93,6 +93,9 @@ public class ProcessInstanceEntityControllerIT {
 
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
+
+    @MockBean
+    private TaskRepository taskRepository;
 
     @Test
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {

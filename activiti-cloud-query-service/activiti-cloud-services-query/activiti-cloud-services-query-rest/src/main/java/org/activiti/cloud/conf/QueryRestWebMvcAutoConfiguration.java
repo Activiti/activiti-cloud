@@ -16,12 +16,17 @@
 package org.activiti.cloud.conf;
 
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
+import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
 import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
@@ -149,5 +154,14 @@ public class QueryRestWebMvcAutoConfiguration  {
         return new ProcessDefinitionRestrictionService(securityPoliciesManager,
                                                        restrictionBuilder,
                                                        processDefinitionFilter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TaskControllerHelper taskControllerHelper(TaskRepository taskRepository,
+        AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
+        TaskRepresentationModelAssembler taskRepresentationModelAssembler) {
+        return new TaskControllerHelper(taskRepository, pagedCollectionModelAssembler,
+            new QueryDslPredicateAggregator(), taskRepresentationModelAssembler);
     }
 }

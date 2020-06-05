@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -29,6 +30,7 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -43,8 +45,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.UUID;
 
 @WebMvcTest(ProcessModelAdminController.class)
 @EnableSpringDataWebSupport
@@ -77,6 +77,9 @@ public class ProcessModelAdminControllerIT {
 
     @MockBean
     private EntityFinder entityFinder;
+
+    @MockBean
+    private TaskRepository taskRepository;
 
     @Test
     public void shouldReturnProcessModelById() throws Exception {

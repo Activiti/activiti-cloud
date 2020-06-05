@@ -27,7 +27,8 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource(exported = false)
 public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, String>,
                                         QuerydslPredicateExecutor<TaskEntity>,
-                                        QuerydslBinderCustomizer<QTaskEntity> {
+                                        QuerydslBinderCustomizer<QTaskEntity>,
+                                        CustomizedTaskRepository {
 
     @Override
     default void customize(QuerydslBindings bindings,
@@ -42,8 +43,10 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, S
         bindings.bind(root.lastClaimedTo).first((path, value) -> root.claimedDate.before(value));
         bindings.bind(root.completedFrom).first((path, value) -> root.completedDate.after(value));
         bindings.bind(root.completedTo).first((path, value) -> root.completedDate.before(value));
-        bindings.bind(root.name).first((path, value) -> path.like("%"+value.toString()+"%"));
-        bindings.bind(root.description).first((path, value) -> path.like("%"+value.toString()+"%"));
+        bindings.bind(root.name).first((path, value) -> path.like("%" + value.toString() + "%"));
+        bindings.bind(root.description).first((path, value) -> path.like("%" + value.toString() + "%"));
+
+        bindings.excluding(root.variables);
         bindings.excluding(root.standalone);
     }
 }

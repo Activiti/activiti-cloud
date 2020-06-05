@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.query.configuration;
 
+import com.fasterxml.classmate.TypeResolver;
 import java.util.function.Predicate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
@@ -47,5 +48,11 @@ public class QuerySwaggerConfig {
     @ConditionalOnMissingBean
     public Predicate<RequestHandler> apiSelector() {
         return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.rest")::apply;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public VariableSearchDocketCustomizer variableSearchDocketCustomizer(TypeResolver typeResolver) {
+        return new VariableSearchDocketCustomizer(typeResolver);
     }
 }
