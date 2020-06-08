@@ -14,14 +14,9 @@
       <artifactId>activiti-cloud-services-messages-core</artifactId>
       <optional>true</optional>
     </dependency>
-    <!-- Test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>

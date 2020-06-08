@@ -163,11 +163,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-api-process-runtime-impl</artifactId>
       <scope>test</scope>
