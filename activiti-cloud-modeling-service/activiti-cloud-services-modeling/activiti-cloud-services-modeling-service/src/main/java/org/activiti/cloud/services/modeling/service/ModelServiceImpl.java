@@ -142,7 +142,9 @@ public class ModelServiceImpl implements ModelService{
         checkModelScopeIntegrity(model);
         model.setId(null);
         ModelType modelType = findModelType(model);
-        model.addProject(project);
+        if(project != null) {
+            model.addProject(project);
+        }
         if (model.getExtensions() == null) {
             if (PROCESS.equals(modelType.getName()) || isJsonContentType(model.getContentType())) {
                 model.setExtensions(new HashMap<>());

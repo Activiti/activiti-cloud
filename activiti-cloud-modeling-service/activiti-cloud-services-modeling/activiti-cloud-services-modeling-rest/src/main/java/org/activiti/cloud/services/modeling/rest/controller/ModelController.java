@@ -245,7 +245,6 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
-    @Transactional
     public EntityModel<Model> putProjectModelRelationship(
         @PathVariable String projectId,
         @PathVariable String modelId,
@@ -277,7 +276,6 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
-    @Transactional
     public EntityModel<Model> deleteProjectModelRelationship(
         @PathVariable String projectId,
         @PathVariable String modelId) {
@@ -289,6 +287,13 @@ public class ModelController implements ModelRestApi {
         newModel.removeProject(project);
 
         return representationModelAssembler.toModel(modelService.updateModel(modelToBeUpdated,newModel));
+    }
+
+    @Override
+    public EntityModel<Model> createModelWithoutProject(Model model) {
+        return representationModelAssembler.toModel(
+            modelService.createModel(null,
+                model));
     }
 
 

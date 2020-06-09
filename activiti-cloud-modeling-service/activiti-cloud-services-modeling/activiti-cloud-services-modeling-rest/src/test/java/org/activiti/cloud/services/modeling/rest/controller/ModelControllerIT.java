@@ -1294,4 +1294,19 @@ public class ModelControllerIT {
                 processModel.getId()).header("Accept","image/svg+xml"))
             .andExpect(status().isNotAcceptable());
     }
+
+    @Test
+    public void should_returnStatusCreatedAndProcessModelDetails_when_creatingProcessModelWithoutProject() throws Exception {
+
+        mockMvc.perform(post("/v1/models")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(processModel("process-model"))))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name",
+                equalTo("process-model")))
+            .andExpect(jsonPath("$.type",
+                equalTo(PROCESS)))
+            .andExpect(jsonPath("$.extensions",
+                notNullValue()));
+    }
 }

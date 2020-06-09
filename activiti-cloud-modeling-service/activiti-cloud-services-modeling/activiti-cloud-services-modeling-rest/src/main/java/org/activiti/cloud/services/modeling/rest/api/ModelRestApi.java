@@ -312,4 +312,15 @@ public interface ModelRestApi {
         @ApiParam(value = DELETE_RELATIONSHIP_MODEL_PROJECT_MODEL_ID_PARAM_DESCR, required = true)
         @PathVariable String modelId);
 
+    @ApiOperation(
+        tags = MODELS,
+        value = "Create new model that does note belong to a project",
+        notes = "Create a new model with no relationship to other projects"
+    )
+    @PostMapping(path = "/models")
+    @ResponseStatus(CREATED)
+    EntityModel<Model> createModelWithoutProject(
+        @ApiParam(CREATE_MODEL_PARAM_DESCR)
+        @RequestBody Model model);
+
 }
