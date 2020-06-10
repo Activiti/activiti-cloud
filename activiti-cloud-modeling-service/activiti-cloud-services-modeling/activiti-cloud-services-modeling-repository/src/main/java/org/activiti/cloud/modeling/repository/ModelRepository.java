@@ -34,6 +34,8 @@ public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
 
     Optional<M> findModelByNameInProject(P project, String modelName, String modelTypeFilter);
 
+    Optional<M> findGlobalModelByNameAndType(String modelName, String modelTypeFilter);
+
     Optional<M> findModelById(String modelId);
 
     byte[] getModelContent(M model);
