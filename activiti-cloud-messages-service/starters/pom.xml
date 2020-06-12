@@ -13,7 +13,6 @@
   <modules>
     <module>jdbc</module>
     <module>redis</module>
-    <module>mongodb</module>
     <module>hazelcast</module>
   </modules>
   <dependencies>

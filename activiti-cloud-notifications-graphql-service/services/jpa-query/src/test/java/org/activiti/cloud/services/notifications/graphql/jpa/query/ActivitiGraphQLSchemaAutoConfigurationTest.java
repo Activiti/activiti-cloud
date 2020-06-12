@@ -17,15 +17,16 @@ package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import graphql.Scalars;
-import graphql.schema.GraphQLSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-@SpringBootTest
+import graphql.Scalars;
+import graphql.schema.GraphQLSchema;
+
+@SpringBootTest(properties = "spring.data.jpa.repositories.bootstrap-mode=default")
 @TestPropertySource("classpath:application-test.properties")
 public class ActivitiGraphQLSchemaAutoConfigurationTest {
 
