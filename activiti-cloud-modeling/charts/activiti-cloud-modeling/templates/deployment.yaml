@@ -158,7 +158,7 @@ spec:
         - name: APP_CONFIG_IDENTITY_HOST
           value: {{ include "common.keycloak-url" . }}/admin/realms/{{ include "common.keycloak-realm" . }}
         - name: APP_CONFIG_OAUTH2_CLIENTID
-          value: {{ include "common.keycloak-client" .| quote }}
+          value: {{ include "common.keycloak-resource" .| quote }}
         - name: APP_CONFIG_BPM_HOST
 {{- if .Values.backend.url }}
           value: {{ tpl .Values.backend.url .|quote }}
