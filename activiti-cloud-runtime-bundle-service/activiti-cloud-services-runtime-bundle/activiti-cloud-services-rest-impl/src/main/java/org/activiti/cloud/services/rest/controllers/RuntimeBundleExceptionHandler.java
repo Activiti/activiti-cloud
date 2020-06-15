@@ -17,6 +17,7 @@ package org.activiti.cloud.services.rest.controllers;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
@@ -28,6 +29,7 @@ import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.UnprocessableEntityException;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.hateoas.EntityModel;
@@ -72,4 +74,12 @@ public class RuntimeBundleExceptionHandler {
         response.setContentType(APPLICATION_JSON_VALUE);
         return new EntityModel<>(new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage()));
     }
+
+    @ExceptionHandler(ActivitiException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    public EntityModel<ActivitiErrorMessage> handleAppException(ActivitiException ex, HttpServletResponse response) {
+        response.setContentType(APPLICATION_JSON_VALUE);
+        return new EntityModel<>(new ActivitiErrorMessageImpl(INTERNAL_SERVER_ERROR.value(), ex.getMessage()));
+    }
+
 }
