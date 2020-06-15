@@ -11,6 +11,5 @@
 
 In this repository you will find the core services (*activiti-cloud-services-audit*) related to audit capabilities and the Spring Boot starters which use different technologies to store data. 
 - *activiti-cloud-starter-audit*: uses JPA and a relational DB to store audit logs
-- *activiti-cloud-starter-mongodb*: uses mongoDB to store audit logs and JSON Documents
 
 For more information about these services visit our [Activiti & Activiti Cloud GitBook](https://activiti.gitbooks.io/activiti-7-developers-guide/content/components/activiti-cloud-app/AuditService.html)
