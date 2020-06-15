@@ -42,11 +42,6 @@
         <artifactId>activiti-cloud-starter-messages-redis</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-messages-mongodb</artifactId>
-        <version>${project.version}</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
