@@ -32,7 +32,7 @@ public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
                       ModelType modelTypeFilter,
                       Pageable pageable);
 
-    Optional<M> getModelByNameInProject(P project, String modelName, String modelTypeFilter);
+    Optional<M> findModelByNameInProject(P project, String modelName, String modelTypeFilter);
 
     Optional<M> findModelById(String modelId);
 

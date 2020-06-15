@@ -27,7 +27,6 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -44,6 +43,8 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
+import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
+import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +63,7 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@DirtiesContext
 @WithMockModelerUser
 public class ModelValidationControllerIT {
 
@@ -84,11 +85,19 @@ public class ModelValidationControllerIT {
     @Autowired
     private ConnectorModelType connectorModelType;
 
+    @Autowired
+    private ModelJpaRepository modelJpaRepository;
+
+    @Autowired
+    private ProjectJpaRepository projectJpaRepository;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     public void setUp() {
         mockMvc = webAppContextSetup(webApplicationContext).build();
+        modelJpaRepository.deleteAll();
+        projectJpaRepository.deleteAll();
     }
 
     @Test

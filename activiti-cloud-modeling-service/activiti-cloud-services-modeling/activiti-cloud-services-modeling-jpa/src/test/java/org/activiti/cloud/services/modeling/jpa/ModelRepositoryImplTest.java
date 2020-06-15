@@ -59,7 +59,7 @@ public class ModelRepositoryImplTest {
         when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(project.getId(), model.getName(), processModelType.getName()))
             .thenReturn(Collections.singletonList(model));
 
-        Optional<ModelEntity> result = repository.getModelByNameInProject(project, model.getName(), processModelType.getName());
+        Optional<ModelEntity> result = repository.findModelByNameInProject(project, model.getName(), processModelType.getName());
 
         verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(project.getId(), model.getName(), processModelType.getName());
         assertThat(result.isPresent()).isTrue();
@@ -71,7 +71,7 @@ public class ModelRepositoryImplTest {
         when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName()))
             .thenReturn(Collections.singletonList(model));
 
-        Optional<ModelEntity> result = repository.getModelByNameInProject(null, model.getName(), processModelType.getName());
+        Optional<ModelEntity> result = repository.findModelByNameInProject(null, model.getName(), processModelType.getName());
 
         verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName());
         assertThat(result.isPresent()).isTrue();
@@ -83,7 +83,7 @@ public class ModelRepositoryImplTest {
         when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(project.getId(), model.getName(), processModelType.getName()))
             .thenReturn(Collections.emptyList());
 
-        Optional<ModelEntity> result = repository.getModelByNameInProject(project, model.getName(), processModelType.getName());
+        Optional<ModelEntity> result = repository.findModelByNameInProject(project, model.getName(), processModelType.getName());
 
         verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(project.getId(), model.getName(), processModelType.getName());
         assertThat(result.isEmpty()).isTrue();
@@ -94,7 +94,7 @@ public class ModelRepositoryImplTest {
         when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName()))
             .thenReturn(Collections.emptyList());
 
-        Optional<ModelEntity> result = repository.getModelByNameInProject(null, model.getName(), processModelType.getName());
+        Optional<ModelEntity> result = repository.findModelByNameInProject(null, model.getName(), processModelType.getName());
 
         verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName());
         assertThat(result.isEmpty()).isTrue();

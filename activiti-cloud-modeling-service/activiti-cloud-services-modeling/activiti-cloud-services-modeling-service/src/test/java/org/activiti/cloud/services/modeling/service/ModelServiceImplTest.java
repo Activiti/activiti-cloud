@@ -186,7 +186,7 @@ public class ModelServiceImplTest {
     public void should_throwModelNameConflictException_when_creatingAModelWithSameNameInAProject() {
         ProcessModelType modelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
-        when(modelRepository.getModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelOne));
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelOne));
         when(modelTwo.getId()).thenReturn("modelTwoId");
         when(modelTwo.getName()).thenReturn("name");
         when(modelTwo.getType()).thenReturn(modelType.getName());
@@ -213,7 +213,7 @@ public class ModelServiceImplTest {
         when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        when(modelRepository.getModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelOne));
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelOne));
 
         assertThatThrownBy(() -> modelService.updateModel(modelTwo, modelTwo))
             .isInstanceOf(ModelNameConflictException.class);

@@ -44,7 +44,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -69,6 +68,8 @@ import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
+import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
+import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,7 +88,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@DirtiesContext
 @WithMockModelerUser
 @Transactional
 public class ModelControllerIT {
@@ -101,10 +102,16 @@ public class ModelControllerIT {
     private ProjectRepository projectRepository;
     @Autowired
     private ModelRepository modelRepository;
+    @Autowired
+    private ModelJpaRepository modelJpaRepository;
+    @Autowired
+    private ProjectJpaRepository projectJpaRepository;
 
     @BeforeEach
     public void setUp() {
         mockMvc = webAppContextSetup(webApplicationContext).build();
+        modelJpaRepository.deleteAll();
+        projectJpaRepository.deleteAll();
     }
 
     @Test
@@ -300,7 +307,7 @@ public class ModelControllerIT {
                                                          hasEntry(equalTo("type"),
                                                                   equalTo("date")),
                                                          hasEntry(equalTo("value"),
-                                                                  isDateEquals("1970-01-01T00:00:00.000+0000")))),
+                                                                  isDateEquals("1970-01-01T00:00:00.000+00:00")))),
                                           hasEntry(equalTo("jsonVariable"),
                                                    allOf(hasEntry(equalTo("id"),
                                                                   equalTo("jsonVariable")),

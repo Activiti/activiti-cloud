@@ -136,15 +136,13 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
             if (projects == null) {
                 projects = new HashSet<>();
             }
-            if(!projects.contains(project)){
-                projects.add(project);
-            }
+            projects.add(project);
         }
     }
 
     @Override
     public void removeProject(ProjectImpl project) {
-        if(projects.contains(project)) {
+        if (projects != null) {
             projects.remove(project);
         }
     }

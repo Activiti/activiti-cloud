@@ -152,7 +152,7 @@ public class ModelServiceImpl implements ModelService{
     }
 
     private void checkIfModelNameExistsInProject(Project project, Model model) {
-        Optional<Model> existingModel = modelRepository.getModelByNameInProject(project, model.getName(), model.getType());
+        Optional<Model> existingModel = modelRepository.findModelByNameInProject(project, model.getName(), model.getType());
         if (!existingModel.isEmpty() && !existingModel.get().getId().equals(model.getId())) {
             throw new ModelNameConflictException(
                 "A model with the same type already exists within the project with id: " + (project != null ? project.getId() : "null"));

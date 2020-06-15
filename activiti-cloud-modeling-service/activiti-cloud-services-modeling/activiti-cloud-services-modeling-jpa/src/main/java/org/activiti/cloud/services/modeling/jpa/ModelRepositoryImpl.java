@@ -51,7 +51,7 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     }
 
     @Override
-    public Optional<ModelEntity> getModelByNameInProject(
+    public Optional<ModelEntity> findModelByNameInProject(
         ProjectEntity project, String modelName, String modelTypeFilter) {
         List<ModelEntity> models = modelJpaRepository
             .findModelByProjectIdAndNameEqualsAndTypeEquals(project != null ? project.getId() : null, modelName, modelTypeFilter);
