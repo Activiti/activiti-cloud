@@ -77,5 +77,6 @@ create-helm-charts-release-and-upload:
 		make build; \
 		make release; \
 		make github; \
+		sleep 60 ; \
 		cd - ; \
 	done 
