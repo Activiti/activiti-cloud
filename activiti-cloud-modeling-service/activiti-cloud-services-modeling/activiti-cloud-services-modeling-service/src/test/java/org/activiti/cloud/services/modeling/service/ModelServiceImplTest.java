@@ -335,7 +335,7 @@ public class ModelServiceImplTest {
     public void should_allowModelsWithAndWithoutProject_when_creatingAModelWithProject() {
         ProcessModelType modelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
-        when(modelRepository.getModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelTwo));
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelTwo));
         when(modelRepository.createModel(modelTwo)).thenReturn(modelTwo);
         when(modelRepository.createModel(modelOne)).thenReturn(modelOne);
 
@@ -352,16 +352,16 @@ public class ModelServiceImplTest {
     }
 
     private ModelImpl createModelImpl() {
-        ModelImpl transoformationModelImpl = new ModelImpl();
+        ModelImpl transformationModelImpl = new ModelImpl();
         LinkedHashMap extension = new LinkedHashMap<>();
         extension.put("mappings", "");
         extension.put("constants", "");
         extension.put("properties", "");
-        transoformationModelImpl.setExtensions(extension);
-        transoformationModelImpl.setName("fake-process-model");
-        transoformationModelImpl.setType("PROCESS");
-        transoformationModelImpl.setId("12345678");
-        return transoformationModelImpl;
+        transformationModelImpl.setExtensions(extension);
+        transformationModelImpl.setName("fake-process-model");
+        transformationModelImpl.setType("PROCESS");
+        transformationModelImpl.setId("12345678");
+        return transformationModelImpl;
     }
 
     private Process initProcess(FlowElement... elements) {
