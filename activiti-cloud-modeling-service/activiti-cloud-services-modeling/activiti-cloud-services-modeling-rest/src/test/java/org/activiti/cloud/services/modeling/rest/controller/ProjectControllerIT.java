@@ -344,7 +344,7 @@ public class ProjectControllerIT {
                         "connectors/movies.json")
                 .hasJsonContentSatisfying("project-with-models.json",
                                           jsonContent -> jsonContent
-                                                  .node("name").isEqualTo("project-with-models"))
+                                                  .node("name").isStringEqualTo("project-with-models"))
                 .hasJsonContentSatisfying("project-with-models.json",
                         jsonContent -> jsonContent
                                 .node("users")
@@ -361,8 +361,8 @@ public class ProjectControllerIT {
                                 .thatContains("testgroup"))
                 .hasJsonContentSatisfying("processes/Process_RankMovieId-extensions.json",
                                           jsonContent -> jsonContent
-                                                  .node("name").isEqualTo("Process_RankMovieId")
-                                                  .node("type").isEqualTo("PROCESS")
+                                                  .node("name").isStringEqualTo("Process_RankMovieId")
+                                                  .node("type").isStringEqualTo("PROCESS")
                                                   .node("extensions.Process_RankMovieId.properties").matches(allOf(hasKey("movieName"),
                                                                                                hasKey("movieDescription")))
                                                   .node("extensions.Process_RankMovieId.mappings").matches(
