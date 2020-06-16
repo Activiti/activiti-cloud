@@ -1183,9 +1183,8 @@ public class ModelControllerIT {
             .perform(put("/v1/projects/{projectId}/models/{modelId}", project.getId(), model.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope",is("PROJECT")))
-            .andExpect(jsonPath("$.projectId",is(project.getId())))
-            .andExpect(jsonPath("$.projectsId", hasSize(1)))
-            .andExpect(jsonPath("$.projectsId", Matchers.contains(project.getId())));
+            .andExpect(jsonPath("$.projectIds", hasSize(1)))
+            .andExpect(jsonPath("$.projectIds", Matchers.contains(project.getId())));
     }
 
     @Test
@@ -1211,9 +1210,8 @@ public class ModelControllerIT {
             .perform(put("/v1/projects/{projectId}/models/{modelId}?scope=GLOBAL", project.getId(), model.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("GLOBAL")))
-            .andExpect(jsonPath("$.projectId").doesNotExist())
-            .andExpect(jsonPath("$.projectsId", hasSize(2)))
-            .andExpect(jsonPath("$.projectsId", Matchers.containsInAnyOrder(parentProject.getId(), project.getId())));
+            .andExpect(jsonPath("$.projectIds", hasSize(2)))
+            .andExpect(jsonPath("$.projectIds", Matchers.containsInAnyOrder(parentProject.getId(), project.getId())));
     }
 
     @Test
@@ -1245,9 +1243,8 @@ public class ModelControllerIT {
             .perform(put("/v1/projects/{projectId}/models/{modelId}?scope=PROJECT&force=true", project.getId(), model.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("PROJECT")))
-            .andExpect(jsonPath("$.projectId", is(project.getId())))
-            .andExpect(jsonPath("$.projectsId", hasSize(1)))
-            .andExpect(jsonPath("$.projectsId", Matchers.contains(project.getId())));
+            .andExpect(jsonPath("$.projectIds", hasSize(1)))
+            .andExpect(jsonPath("$.projectIds", Matchers.contains(project.getId())));
     }
 
     @Test
@@ -1263,9 +1260,8 @@ public class ModelControllerIT {
             .perform(delete("/v1/projects/{projectId}/models/{modelId}", project.getId(), model.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("GLOBAL")))
-            .andExpect(jsonPath("$.projectId").doesNotExist())
-            .andExpect(jsonPath("$.projectsId", hasSize(1)))
-            .andExpect(jsonPath("$.projectsId", Matchers.contains(parentProject.getId())));
+            .andExpect(jsonPath("$.projectIds", hasSize(1)))
+            .andExpect(jsonPath("$.projectIds", Matchers.contains(parentProject.getId())));
     }
 
     @Test
