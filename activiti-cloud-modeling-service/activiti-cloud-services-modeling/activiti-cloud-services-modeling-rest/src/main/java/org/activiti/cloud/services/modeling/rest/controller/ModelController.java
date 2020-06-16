@@ -57,6 +57,7 @@ import org.springframework.web.server.ServerWebInputException;
  */
 @RestController
 @ControllerAdvice
+@Transactional
 public class ModelController implements ModelRestApi {
 
     private final ModelService modelService;
