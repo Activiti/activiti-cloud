@@ -155,24 +155,18 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     }
 
     @Transient
-    @JsonProperty("projectId")
-    public String getProjectId() {
-        return ModelScope.PROJECT.equals(scope) && projects != null && !projects.isEmpty() ? projects.iterator().next().getId() : null;
-    }
-
-    @Transient
-    @JsonProperty("projectsId")
-    public Set<String> getProjectsId() {
+    @JsonProperty("projectIds")
+    public Set<String> getProjectIds() {
         if (projects != null && !projects.isEmpty()) {
-            Set<String> projectsId = new HashSet<>();
-            projects.forEach(project -> projectsId.add(project.getId()));
-            return projectsId;
+            Set<String> projectIds = new HashSet<>();
+            projects.forEach(project -> projectIds.add(project.getId()));
+            return projectIds;
         } else {
             return null;
         }
     }
 
-    public void setProjectsId(Set<String> projectsId) {
+    public void setProjectIds(Set<String> projectsId) {
         // Defined only for avoiding Jackson deserialization issues
     }
 

@@ -1006,9 +1006,8 @@ public class ModelControllerIT {
             processModel.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("PROJECT")))
-            .andExpect(jsonPath("$.projectId", is(parentProject.getId())))
-            .andExpect(jsonPath("$.projectsId", hasSize(1)))
-            .andExpect(jsonPath("$.projectsId", Matchers.contains(parentProject.getId())));
+            .andExpect(jsonPath("$.projectIds", hasSize(1)))
+            .andExpect(jsonPath("$.projectIds", Matchers.contains(parentProject.getId())));
     }
 
     @Test
@@ -1020,8 +1019,7 @@ public class ModelControllerIT {
         mockMvc.perform(get("/v1/models/{modelId}",
             processModel.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.scope", is("GLOBAL")))
-            .andExpect(jsonPath("$.projectId").doesNotExist());
+            .andExpect(jsonPath("$.scope", is("GLOBAL")));
     }
 
     @Test
@@ -1036,14 +1034,14 @@ public class ModelControllerIT {
         processModel.addProject(parentProjectTwo);
         modelRepository.createModel(processModel);
 
-        String[] projectsId = {parentProjectOne.getId(), parentProjectTwo.getId()};
+        String[] projectIds = {parentProjectOne.getId(), parentProjectTwo.getId()};
 
         mockMvc.perform(get("/v1/models/{modelId}",
             processModel.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("GLOBAL")))
-            .andExpect(jsonPath("$.projectsId", hasSize(2)))
-            .andExpect(jsonPath("$.projectsId", Matchers.containsInAnyOrder(parentProjectOne.getId(),parentProjectTwo.getId())));
+            .andExpect(jsonPath("$.projectIds", hasSize(2)))
+            .andExpect(jsonPath("$.projectIds", Matchers.containsInAnyOrder(parentProjectOne.getId(),parentProjectTwo.getId())));
     }
 
     @Test

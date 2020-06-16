@@ -114,22 +114,6 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
         return projects;
     }
 
-    @ApiModelProperty("The parent project id when the model scope is PROJECT")
-    public String getProjectId() {
-        return ModelScope.PROJECT.equals(scope) && projects != null && !projects.isEmpty() ? projects.iterator().next().getId() : null;
-    }
-
-    @ApiModelProperty("The list of project ids in which the model is included")
-    public Set<String> getProjectsId() {
-        if (projects != null && !projects.isEmpty()) {
-            Set<String> projectsId = new HashSet<>();
-            projects.forEach(project -> projectsId.add(project.getId()));
-            return projectsId;
-        } else {
-            return null;
-        }
-    }
-
     @Override
     public void addProject(ProjectImpl project) {
         if (project != null) {
