@@ -116,8 +116,8 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     }
 
     @Override
-    public Page<ModelEntity> getGlobalModels(ModelType modelTypeFilter, Boolean includeOrphans, Pageable pageable) {
-        if(includeOrphans!=null && includeOrphans){
+    public Page<ModelEntity> getGlobalModels(ModelType modelTypeFilter, boolean includeOrphans, Pageable pageable) {
+        if(includeOrphans){
             return modelJpaRepository.findAllByScopeAndTypeEqualsWithOrphans(
                 ModelScope.GLOBAL,
                 modelTypeFilter.getName(),

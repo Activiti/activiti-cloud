@@ -279,7 +279,7 @@ public interface ModelRestApi {
         @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
         @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
         @ApiParam(value = INCLUDE_ORPHANS_PARAM_DESCR, required = false)
-        @RequestParam(value = INCLUDE_ORPHANS_PARAM_NAME, required = false) Boolean includeOrphans,
+        @RequestParam(value = INCLUDE_ORPHANS_PARAM_NAME, required = false, defaultValue = "false") boolean includeOrphans,
         Pageable pageable);
 
     @ApiOperation(
@@ -297,7 +297,7 @@ public interface ModelRestApi {
         @ApiParam(value = SCOPE_PARAM_DESCR, required = false)
         @RequestParam(value = SCOPE_PARAM_NAME, required = false) String scope,
         @ApiParam(value = FORCE_PARAM_DESCR, required = false)
-        @RequestParam(value = FORCE_PARAM_NAME, required = false) Boolean force);
+        @RequestParam(value = FORCE_PARAM_NAME, required = false, defaultValue = "false") boolean force);
 
     @ApiOperation(
         tags = MODELS,

@@ -533,7 +533,7 @@ public class ModelServiceImpl implements ModelService{
     @Override
     public Page<Model> getGlobalModels(
         ModelType modelType,
-        Boolean includeOrphans,
+        boolean includeOrphans,
         Pageable pageable) {
         return modelRepository.getGlobalModels(modelType, includeOrphans, pageable);
     }

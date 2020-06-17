@@ -137,7 +137,7 @@ public interface ModelService {
                                  Project project);
 
     Page<Model> getGlobalModels(ModelType modelType,
-                                Boolean includeOrphans,
+                                boolean includeOrphans,
                                 Pageable pageable);
 
     public static class ProjectAccessControl {
