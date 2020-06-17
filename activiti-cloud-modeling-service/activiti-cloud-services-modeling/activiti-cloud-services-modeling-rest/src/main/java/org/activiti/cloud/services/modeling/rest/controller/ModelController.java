@@ -19,13 +19,10 @@ import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileC
 import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.UPLOAD_FILE_PARAM_NAME;
-
 import java.io.IOException;
 import java.util.Optional;
-
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Model;
@@ -40,8 +37,10 @@ import org.activiti.cloud.services.modeling.service.ModelTypeService;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -120,11 +119,15 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
+    @Transactional
     public EntityModel<Model> updateModel(
             @PathVariable String modelId,
             @Valid @RequestBody Model model) {
         Model modelToUpdate = findModelById(modelId);
         model.setId(modelId);
+        if(modelToUpdate.getProjects()!=null) {
+            modelToUpdate.getProjects().forEach(project -> model.addProject((Project) project));
+        }
         return representationModelAssembler.toModel(
                 modelService.updateModel(modelToUpdate,
                                          model));
@@ -202,10 +205,15 @@ public class ModelController implements ModelRestApi {
     @Override
     public void validateModel(
             @PathVariable String modelId,
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId) throws IOException {
 
-        modelService.validateModelContent(findModelById(modelId),
-                                          multipartToFileContent(file));
+        if (StringUtils.isEmpty(projectId)) {
+            modelService.validateModelContent(findModelById(modelId), multipartToFileContent(file));
+        } else {
+            Project project = projectController.findProjectById(projectId);
+            modelService.validateModelContent(findModelById(modelId), multipartToFileContent(file), project);
+        }
     }
 
     @Override
@@ -213,10 +221,15 @@ public class ModelController implements ModelRestApi {
             @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
             @ApiParam(VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId) throws IOException {
 
-        modelService.validateModelExtensions(findModelById(modelId),
-                                          multipartToFileContent(file));
+        if (StringUtils.isEmpty(projectId)) {
+            modelService.validateModelExtensions(findModelById(modelId), multipartToFileContent(file));
+        } else {
+            Project project = projectController.findProjectById(projectId);
+            modelService.validateModelExtensions(findModelById(modelId), multipartToFileContent(file), project);
+        }
     }
 
     public Model findModelById(String modelId) {

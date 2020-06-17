@@ -15,11 +15,23 @@
  */
 package org.activiti.cloud.services.modeling.mock;
 
+import static java.util.Collections.singletonMap;
+import static org.activiti.cloud.modeling.api.ProcessModelType.BPMN20_XML;
+import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -33,16 +45,6 @@ import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.StringUtils;
-
-import static java.util.Collections.singletonMap;
-import static org.activiti.cloud.modeling.api.ProcessModelType.BPMN20_XML;
-import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
-import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 
 /**
  * Mocks factory
@@ -68,7 +70,7 @@ public class MockFactory {
     public static ModelEntity processModel(ProjectEntity parentProject,
                                            String name) {
         ModelEntity model = processModel(name);
-        model.setProject(parentProject);
+        model.addProject(parentProject);
         return model;
     }
 
@@ -103,7 +105,7 @@ public class MockFactory {
                                                          byte[] content) {
         ModelEntity processModel = new ModelEntity(name,
                                                    PROCESS);
-        processModel.setProject(parentProject);
+        processModel.addProject(parentProject);
         processModel.setExtensions(extensions!=null? buildExtensions(name, extensions):null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
@@ -113,7 +115,7 @@ public class MockFactory {
     }
 
     private static Map<String, Object> buildExtensions(String name, Extensions extensions) {
-        Map<String, Object> generatedExtension = new HashMap<String, Object>();
+        Map<String, Object> generatedExtension = new HashMap<>();
         generatedExtension.put(name, extensions.getAsMap());
         return generatedExtension;
     }
@@ -157,7 +159,7 @@ public class MockFactory {
                                                       Extensions extensions,
                                                       String content) {
         ModelEntity processModel = processModel(name);
-        processModel.setProject(project);
+        processModel.addProject(project);
         processModel.setExtensions(extensions!=null? buildExtensions(name, extensions):null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
@@ -294,7 +296,7 @@ public class MockFactory {
                                              String name,
                                              byte[] content) {
         ModelEntity modelEntity = connectorModel(name);
-        modelEntity.setProject(parentProject);
+        modelEntity.addProject(parentProject);
         if (content != null) {
             modelEntity.setContentType(CONTENT_TYPE_JSON);
             modelEntity.setContent(content);

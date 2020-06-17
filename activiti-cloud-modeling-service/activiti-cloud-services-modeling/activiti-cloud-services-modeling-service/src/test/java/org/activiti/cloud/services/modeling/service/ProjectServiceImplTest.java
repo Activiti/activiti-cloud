@@ -20,15 +20,21 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.LinkedList;
 import java.util.List;
-
 import org.activiti.bpmn.model.UserTask;
+import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.impl.ModelImpl;
+import org.activiti.cloud.modeling.api.process.ModelScope;
+import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +58,9 @@ public class ProjectServiceImplTest {
 
     @Mock
     private UserTask taskTwo;
+
+    @Mock
+    private ProjectRepository projectRepository;
 
     @BeforeEach
     public void setUp() {
@@ -125,5 +134,23 @@ public class ProjectServiceImplTest {
 
         assertThat(projectAccessControl.getGroups()).isEmpty();
         assertThat(projectAccessControl.getUsers()).isEmpty();
+    }
+
+    @Test
+    public void should_deleteProjectScopedModelsOnly_when_deletingAProject() {
+        Model globalModel = new ModelImpl();
+        globalModel.setScope(ModelScope.GLOBAL);
+        globalModel.setId("global");
+        Model projectModel = new ModelImpl();
+        projectModel.setScope(ModelScope.PROJECT);
+        projectModel.setId("project");
+        when(modelService.getAllModels(project)).thenReturn(List.of(globalModel,projectModel));
+        doNothing().when(modelService).deleteModel(any());
+        doNothing().when(projectRepository).deleteProject(any());
+
+        projectService.deleteProject(project);
+
+        verify(modelService, times(1)).deleteModel(projectModel);
+        verify(modelService, never()).deleteModel(globalModel);
     }
 }

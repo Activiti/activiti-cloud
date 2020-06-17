@@ -19,7 +19,12 @@ import static java.lang.String.format;
 import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
 import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
 import static org.springframework.util.StringUtils.isEmpty;
-
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
@@ -31,15 +36,8 @@ import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 import org.activiti.cloud.modeling.api.process.VariableMappingType;
 import org.activiti.cloud.services.modeling.converter.ConnectorActionParameter;
-import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
+import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 
 /**
  * Implementation of {@link TaskMappingsValidator} for {@link ServiceTask} implementation
@@ -50,6 +48,11 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
             "Unknown %s connector parameter name in process extensions: %s";
     public static final String UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_DESCRIPTION =
             "The extensions for process '%s' contains mappings to task '%s' for an unknown %s connector parameter name '%s'";
+
+    public static final String UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_PROBLEM =
+        "Unknown %s mapping connector action referenced in task %s: '%s'";
+    public static final String UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_DESCRIPTION =
+        "The extensions for process '%s' contains %s mappings to task '%s' referencing an unknown connector action '%s'";
 
     private final ConnectorModelType connectorModelType;
 
@@ -66,6 +69,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                                                              Map<String, Constant> taskConstants,
                                                              ValidationContext validationContext) {
         Map<String, ConnectorModelFeature> availableConnectorActions = getAvailableConnectorActions(validationContext);
+
         return taskMappings
                 .stream()
                 .flatMap(taskMapping -> validateTaskMapping(taskMapping,
@@ -74,6 +78,23 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
 
     private Stream<ModelValidationError> validateTaskMapping(MappingModel taskMapping,
                                                              Map<String, ConnectorModelFeature> availableConnectorActions) {
+
+        Optional<String> implementationTask = getTaskImplementation(taskMapping.getFlowNode());
+
+        if (implementationTask.isPresent() && !availableConnectorActions.containsKey(implementationTask.get())) {
+            return Optional.of(createModelValidationError(
+                format(UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_PROBLEM,
+                    taskMapping.getAction().name(),
+                    taskMapping.getFlowNode().getId(),
+                    implementationTask.get()),
+                format(UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_DESCRIPTION,
+                    taskMapping.getProcessId(),
+                    taskMapping.getAction().name(),
+                    taskMapping.getFlowNode().getId(),
+                    implementationTask.get())
+            )).stream();
+        }
+
         return taskMapping
                 .getProcessVariableMappings()
                 .entrySet()
@@ -95,28 +116,29 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                                                                 ProcessVariableMapping processVariableMapping,
                                                                 Map<String, ConnectorModelFeature> availableConnectorActions) {
 
-        if(actionType == OUTPUTS && processVariableMapping.getType() == VariableMappingType.VALUE) {
+        if (actionType == OUTPUTS && processVariableMapping.getType() == VariableMappingType.VALUE) {
             return Optional.<ModelValidationError>empty();
-        }else {
+        } else {
             Object connectorParameterName = actionType == INPUTS ? processVariableMappingKey : processVariableMapping.getValue();
+
             return getTaskImplementation(task)
-                    .map(availableConnectorActions::get)
-                    .flatMap(action -> Optional.ofNullable(actionType == INPUTS ? action.getInputs() : action.getOutputs())
-                            .map(Arrays::stream)
-                            .orElseGet(Stream::empty)
-                            .map(ConnectorActionParameter::getName)
-                            .filter(parameter -> parameter.equals(connectorParameterName))
-                            .findFirst()
-                            .map(parameter -> Optional.<ModelValidationError>empty())
-                            .orElseGet(() -> Optional.of(createModelValidationError(
-                                    format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM,
-                                           actionType.name().toLowerCase(),
-                                           connectorParameterName),
-                                    format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_DESCRIPTION,
-                                           processId,
-                                           task.getId(),
-                                           actionType.name().toLowerCase(),
-                                           connectorParameterName)))));
+                .map(availableConnectorActions::get)
+                .flatMap(action -> Optional.ofNullable(actionType == INPUTS ? action.getInputs() : action.getOutputs())
+                    .map(Arrays::stream)
+                    .orElseGet(Stream::empty)
+                    .map(ConnectorActionParameter::getName)
+                    .filter(parameter -> parameter.equals(connectorParameterName))
+                    .findFirst()
+                    .map(parameter -> Optional.<ModelValidationError>empty())
+                    .orElseGet(() -> Optional.of(createModelValidationError(
+                        format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM,
+                            actionType.name().toLowerCase(),
+                            connectorParameterName),
+                        format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_DESCRIPTION,
+                            processId,
+                            task.getId(),
+                            actionType.name().toLowerCase(),
+                            connectorParameterName)))));
         }
     }
 

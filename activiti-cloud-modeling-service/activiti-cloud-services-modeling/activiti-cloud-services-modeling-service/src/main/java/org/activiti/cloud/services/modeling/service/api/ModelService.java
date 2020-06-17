@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.service.api;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.modeling.api.Model;
@@ -107,14 +106,24 @@ public interface ModelService {
                               ValidationContext validationContext);
 
     void validateModelContent(Model model,
+                              Project project);
+
+    void validateModelContent(Model model,
                               FileContent fileContent);
 
     void validateModelContent(Model model,
                               FileContent fileContent,
                               ValidationContext validationContext);
 
+    void validateModelContent(Model model,
+                              FileContent fileContent,
+                              Project project);
+
     void validateModelExtensions(Model model,
                                  ValidationContext validationContext);
+
+    void validateModelExtensions(Model model,
+                                 Project project);
 
     void validateModelExtensions(Model model,
                                  FileContent fileContent);
@@ -122,6 +131,10 @@ public interface ModelService {
     void validateModelExtensions(Model model,
                                  FileContent fileContent,
                                  ValidationContext validationContext);
+
+    void validateModelExtensions(Model model,
+                                 FileContent fileContent,
+                                 Project project);
 
     public static class ProjectAccessControl {
 

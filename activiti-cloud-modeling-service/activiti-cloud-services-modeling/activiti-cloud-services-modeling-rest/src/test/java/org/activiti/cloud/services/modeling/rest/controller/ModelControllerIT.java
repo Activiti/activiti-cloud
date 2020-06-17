@@ -44,7 +44,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -53,23 +52,26 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.process.Extensions;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
+import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
+import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,12 +83,14 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@DirtiesContext
 @WithMockModelerUser
+@Transactional
 public class ModelControllerIT {
 
     private MockMvc mockMvc;
@@ -98,10 +102,16 @@ public class ModelControllerIT {
     private ProjectRepository projectRepository;
     @Autowired
     private ModelRepository modelRepository;
+    @Autowired
+    private ModelJpaRepository modelJpaRepository;
+    @Autowired
+    private ProjectJpaRepository projectJpaRepository;
 
     @BeforeEach
     public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        mockMvc = webAppContextSetup(webApplicationContext).build();
+        modelJpaRepository.deleteAll();
+        projectJpaRepository.deleteAll();
     }
 
     @Test
@@ -130,16 +140,16 @@ public class ModelControllerIT {
         Project project = projectRepository.createProject(project("parent-project"));
 
         mockMvc.perform(post("/v1/projects/{projectId}/models",
-                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(processModel("process-model"))))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name",
-                                    equalTo("process-model")))
-                .andExpect(jsonPath("$.type",
-                                    equalTo(PROCESS)))
-                .andExpect(jsonPath("$.extensions",
-                                    notNullValue()));
+            project.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(processModel("process-model"))))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name",
+                equalTo("process-model")))
+            .andExpect(jsonPath("$.type",
+                equalTo(PROCESS)))
+            .andExpect(jsonPath("$.extensions",
+                notNullValue()));
     }
 
     @Test
@@ -170,7 +180,7 @@ public class ModelControllerIT {
                                         .add("myIntegerConstant",
                                              10)
                                         .build());
-        Map<String, Extensions> processExtension = new HashMap<String, Extensions>();
+        Map<String, Extensions> processExtension = new HashMap<>();
         processExtension.put("process-model-extensions", extensions);
         ModelEntity processModel = processModelWithExtensions("process-model-extensions", processExtension);
         mockMvc.perform(post("/v1/projects/{projectId}/models",
@@ -249,7 +259,7 @@ public class ModelControllerIT {
 
     @Test
     public void should_returnStatusOkAndExtensions_when_gettingAnExistingModelWithExtensions() throws Exception {
-        Map<String, Extensions> extensions = new HashMap<String, Extensions>();
+        Map<String, Extensions> extensions = new HashMap<>();
         extensions.put("process-model-with-extensions",extensions("ServiceTask",  "stringVariable",
                                                         "integerVariable",
                                                         "booleanVariable",
@@ -297,7 +307,7 @@ public class ModelControllerIT {
                                                          hasEntry(equalTo("type"),
                                                                   equalTo("date")),
                                                          hasEntry(equalTo("value"),
-                                                                  isDateEquals(0)))),
+                                                                  isDateEquals("1970-01-01T00:00:00.000+00:00")))),
                                           hasEntry(equalTo("jsonVariable"),
                                                    allOf(hasEntry(equalTo("id"),
                                                                   equalTo("jsonVariable")),
@@ -405,12 +415,12 @@ public class ModelControllerIT {
 
     @Test
     public void should_returnStatusOk_when_updatingModelWithExtensions() throws Exception {
-        Map<String, Extensions> extensions = new HashMap<String, Extensions>();
+        Map<String, Extensions> extensions = new HashMap<>();
         extensions.put("process-model-extensions", extensions("ServiceTask", "variable1"));
         ModelEntity processModel = processModelWithExtensions("process-model-extensions", extensions);
         modelRepository.createModel(processModel);
 
-        Map<String, Extensions> secondExtensionMap = new HashMap<String, Extensions>();
+        Map<String, Extensions> secondExtensionMap = new HashMap<>();
         extensions.put("process-model-extensions", extensions("variable2", "variable3"));
         ModelEntity newModel = processModelWithExtensions("process-model-extensions", secondExtensionMap);
         mockMvc.perform(put("/v1/models/{modelId}",
@@ -966,5 +976,163 @@ public class ModelControllerIT {
                             connectorModel.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.template").doesNotExist());
+    }
+
+    @Test
+    public void should_setProjectScopeByDefault_when_creatingModel() throws Exception {
+        Project project = projectRepository.createProject(project("parent-project"));
+
+        ModelEntity model = processModel("process-model");
+        model.setScope(null);
+
+        mockMvc.perform(post("/v1/projects/{projectId}/models",
+            project.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(model)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.scope", is("PROJECT")));
+    }
+
+    @Test
+    public void should_projectIdBeFilled_when_modelIsInProjectScope() throws Exception {
+        Project parentProject = project("parent-project");
+        projectRepository.createProject(parentProject);
+
+        Model processModel = processModel("testProcess");
+        processModel.addProject(parentProject);
+        modelRepository.createModel(processModel);
+
+        mockMvc.perform(get("/v1/models/{modelId}",
+            processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope", is("PROJECT")))
+            .andExpect(jsonPath("$.projectIds", hasSize(1)))
+            .andExpect(jsonPath("$.projectIds", Matchers.contains(parentProject.getId())));
+    }
+
+    @Test
+    public void should_projectIdNotBeIncluded_when_modelIsNotInProjectScope() throws Exception {
+        Model processModel = processModel("testProcess");
+        processModel.setScope(ModelScope.GLOBAL);
+        modelRepository.createModel(processModel);
+
+        mockMvc.perform(get("/v1/models/{modelId}",
+            processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope", is("GLOBAL")));
+    }
+
+    @Test
+    public void should_retrieveAllProjects_when_modelAppearsInSeveralProjects() throws Exception {
+        Project parentProjectOne = project("parent-project-one");
+        projectRepository.createProject(parentProjectOne);
+        Project parentProjectTwo = project("parent-project-two");
+        projectRepository.createProject(parentProjectTwo);
+        Model processModel = processModel("testProcess");
+        processModel.setScope(ModelScope.GLOBAL);
+        processModel.addProject(parentProjectOne);
+        processModel.addProject(parentProjectTwo);
+        modelRepository.createModel(processModel);
+
+        String[] projectIds = {parentProjectOne.getId(), parentProjectTwo.getId()};
+
+        mockMvc.perform(get("/v1/models/{modelId}",
+            processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.scope", is("GLOBAL")))
+            .andExpect(jsonPath("$.projectIds", hasSize(2)))
+            .andExpect(jsonPath("$.projectIds", Matchers.containsInAnyOrder(parentProjectOne.getId(),parentProjectTwo.getId())));
+    }
+
+    @Test
+    public void should_returnAllProjectModels_when_globalScopeModelsExists() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("parent-project"));
+        ProjectEntity anotherProject = (ProjectEntity) projectRepository.createProject(project("another-project"));
+
+        modelRepository.createModel(processModel(project,
+            "Process Model 1"));
+        ModelEntity secondProcessModel = processModel(project,
+            "Process Model 2");
+        secondProcessModel.setScope(ModelScope.GLOBAL);
+        secondProcessModel.addProject(anotherProject);
+        modelRepository.createModel(secondProcessModel);
+
+        mockMvc
+            .perform(get("/v1/projects/{projectId}/models?type=PROCESS",
+                project.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.models",
+                hasSize(2)))
+            .andExpect(jsonPath("$._embedded.models[0].name",
+                is("Process Model 1")))
+            .andExpect(jsonPath("$._embedded.models[0].scope",
+                is("PROJECT")))
+            .andExpect(jsonPath("$._embedded.models[1].name",
+                is("Process Model 2")))
+            .andExpect(jsonPath("$._embedded.models[1].scope",
+                is("GLOBAL")));
+
+        mockMvc
+            .perform(get("/v1/projects/{projectId}/models?type=PROCESS",
+                anotherProject.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.models",
+                hasSize(1)))
+            .andExpect(jsonPath("$._embedded.models[0].name",
+                is("Process Model 2")))
+            .andExpect(jsonPath("$._embedded.models[0].scope",
+                is("GLOBAL")));
+    }
+
+    @Test
+    public void should_checkModelNames_when_updatingModel() throws Exception {
+        ProjectEntity projectOne = (ProjectEntity) projectRepository.createProject(project("project-1"));
+        ProjectEntity projectTwo = (ProjectEntity) projectRepository.createProject(project("project-2"));
+
+        ModelEntity modelOne = processModel(projectOne,"model-1");
+        modelRepository.createModel(modelOne);
+        ModelEntity modelTwo = processModel(projectOne,"model-2");
+        modelTwo.setScope(ModelScope.GLOBAL);
+        modelTwo.addProject(projectTwo);
+        modelRepository.createModel(modelTwo);
+
+        String subjectModelString = mapper.writeValueAsString(modelTwo);
+        Model deserializedStringModel = mapper.readValue(subjectModelString,Model.class);
+        deserializedStringModel.setName("model-1");
+        deserializedStringModel.addProject(projectOne);
+        deserializedStringModel.addProject(projectTwo);
+
+        mockMvc.perform(put("/v1/models/{modelId}", modelTwo.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(deserializedStringModel)))
+            .andExpect(status().isConflict());
+
+    }
+
+    @Test
+    public void should_retrieveModelContent_whenModelExists() throws Exception {
+        Model processModel = modelRepository.createModel(processModelWithContent("process_model_id",
+            "Process Model Content"));
+
+       mockMvc.perform(
+            get("/v1/models/{modelId}/content",
+                processModel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(result -> equalTo("Process Model Content"));
+    }
+
+    @Test
+    public void should_returnStatusNotAcceptable_whenRetrievingModelDiagram() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(
+            processModelWithExtensions(project,
+                "process-model",
+                new Extensions(),
+                resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+
+        mockMvc.perform(
+            get("/v1/models/{modelId}/content",
+                processModel.getId()).header("Accept","image/svg+xml"))
+            .andExpect(status().isNotAcceptable());
     }
 }

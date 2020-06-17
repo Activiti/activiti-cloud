@@ -15,16 +15,14 @@
  */
 package org.activiti.cloud.services.modeling.entity;
 
-import java.util.List;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
+import javax.persistence.ManyToMany;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -32,8 +30,6 @@ import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.hibernate.annotations.GenericGenerator;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Project model entity
@@ -44,9 +40,9 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 public class ProjectEntity extends AuditableEntity<String> implements Project<String>,
                                                                       ModelValidationErrorProducer {
 
-    @OneToMany
     @JsonIgnore
-    private List<ModelEntity> models;
+    @ManyToMany(mappedBy = "projects")
+    private Set<ModelEntity> models = new HashSet<>();
 
     @Id
     @GeneratedValue(generator = "system-uuid")
@@ -77,11 +73,11 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
         this.id = id;
     }
 
-    public List<ModelEntity> getModels() {
+    public Set<ModelEntity> getModels() {
         return models;
     }
 
-    public void setModels(List<ModelEntity> models) {
+    public void setModels(Set<ModelEntity> models) {
         this.models = models;
     }
 
@@ -113,5 +109,19 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @Override
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void addModel(ModelEntity model){
+        if(! models.contains(model)){
+            models.add(model);
+            model.addProject(this);
+        }
+    }
+
+    public void removeModel(ModelEntity model){
+        if(models.contains(model)){
+            models.remove(model);
+            model.removeProject(this);
+        }
     }
 }

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.jpa;
 
+import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -47,6 +48,19 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
         return modelJpaRepository.findAllByProjectIdAndTypeEquals(project.getId(),
             modelTypeFilter.getName(),
             pageable);
+    }
+
+    @Override
+    public Optional<ModelEntity> findModelByNameInProject(
+        ProjectEntity project, String modelName, String modelTypeFilter) {
+        List<ModelEntity> models = modelJpaRepository
+            .findModelByProjectIdAndNameEqualsAndTypeEquals(project != null ? project.getId() : null, modelName, modelTypeFilter);
+
+        if(models!=null && !models.isEmpty()){
+            return Optional.of(models.get(0));
+        }else{
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -97,7 +111,7 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public void deleteModel(ModelEntity model) {
-        this.modelJpaRepository.delete(model);
+        modelJpaRepository.delete(model);
 
     }
 

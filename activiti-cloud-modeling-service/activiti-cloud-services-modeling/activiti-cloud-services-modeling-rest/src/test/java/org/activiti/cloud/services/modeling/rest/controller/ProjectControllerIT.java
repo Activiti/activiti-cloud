@@ -47,13 +47,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
@@ -65,7 +64,6 @@ import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
-import org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,12 +77,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext
 @WithMockModelerUser
+@Transactional
 public class ProjectControllerIT {
 
     private MockMvc mockMvc;
@@ -112,7 +113,7 @@ public class ProjectControllerIT {
 
     @BeforeEach
     public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        mockMvc = webAppContextSetup(webApplicationContext).build();
         modelJpaRepository.deleteAll();
         ((JpaRepository)projectRepository).deleteAll();
     }
@@ -206,6 +207,7 @@ public class ProjectControllerIT {
     }
 
     @Test
+    @Transactional(propagation = Propagation.NEVER)
     public void should_throwConflictException_when_creatingProjectExistingName() throws Exception {
         projectRepository.createProject(project("existing-project"));
 
@@ -234,6 +236,7 @@ public class ProjectControllerIT {
     }
 
     @Test
+    @Transactional(propagation = Propagation.NEVER)
     public void should_throwConflictException_when_updatingProjectExistingName() throws Exception {
         projectRepository.createProject(project("existing-project"));
         Project project = projectRepository.createProject(project("project-to-update"));
