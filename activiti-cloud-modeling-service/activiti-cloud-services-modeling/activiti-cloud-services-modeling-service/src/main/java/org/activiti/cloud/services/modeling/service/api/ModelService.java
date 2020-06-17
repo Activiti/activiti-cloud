@@ -136,6 +136,10 @@ public interface ModelService {
                                  FileContent fileContent,
                                  Project project);
 
+    Page<Model> getGlobalModels(ModelType modelType,
+                                boolean includeOrphans,
+                                Pageable pageable);
+
     public static class ProjectAccessControl {
 
         private final Set<String> users;

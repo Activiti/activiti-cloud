@@ -28,6 +28,7 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.rest.api.ModelRestApi;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationModelAssembler;
@@ -56,6 +57,7 @@ import org.springframework.web.server.ServerWebInputException;
  */
 @RestController
 @ControllerAdvice
+@Transactional
 public class ModelController implements ModelRestApi {
 
     private final ModelService modelService;
@@ -73,12 +75,12 @@ public class ModelController implements ModelRestApi {
     private final ProjectController projectController;
 
     public ModelController(ModelService modelService,
-                           ModelTypeService modelTypeService,
-                           ModelRepresentationModelAssembler representationModelAssembler,
-                           AlfrescoPagedModelAssembler<Model> pagedCollectionModelAssembler,
-                           ModelTypeRepresentationModelAssembler modelTypeAssembler,
-                           PagedModelTypeAssembler pagedModelTypeAssembler,
-                           ProjectController projectController) {
+        ModelTypeService modelTypeService,
+        ModelRepresentationModelAssembler representationModelAssembler,
+        AlfrescoPagedModelAssembler<Model> pagedCollectionModelAssembler,
+        ModelTypeRepresentationModelAssembler modelTypeAssembler,
+        PagedModelTypeAssembler pagedModelTypeAssembler,
+        ProjectController projectController) {
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
         this.representationModelAssembler = representationModelAssembler;
@@ -90,53 +92,52 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public PagedModel<EntityModel<Model>> getModels(
-            @PathVariable String projectId,
-            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
-            Pageable pageable) {
+        @PathVariable String projectId,
+        @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
+        Pageable pageable) {
         Project project = projectController.findProjectById(projectId);
         return pagedCollectionModelAssembler.toModel(
-                pageable,
-                modelService.getModels(project,
-                                       findModelType(type),
-                                       pageable),
-                representationModelAssembler);
+            pageable,
+            modelService.getModels(project,
+                findModelType(type),
+                pageable),
+            representationModelAssembler);
     }
 
     @Override
     public EntityModel<Model> getModel(
-            @PathVariable String modelId) {
+        @PathVariable String modelId) {
         return representationModelAssembler.toModel(findModelById(modelId));
     }
 
     @Override
     public EntityModel<Model> createModel(
-            @PathVariable String projectId,
-            @Valid @RequestBody Model model) {
+        @PathVariable String projectId,
+        @Valid @RequestBody Model model) {
         Project project = projectController.findProjectById(projectId);
         return representationModelAssembler.toModel(
-                modelService.createModel(project,
-                                         model));
+            modelService.createModel(project,
+                model));
     }
 
     @Override
-    @Transactional
     public EntityModel<Model> updateModel(
-            @PathVariable String modelId,
-            @Valid @RequestBody Model model) {
+        @PathVariable String modelId,
+        @Valid @RequestBody Model model) {
         Model modelToUpdate = findModelById(modelId);
         model.setId(modelId);
-        if(modelToUpdate.getProjects()!=null) {
+        if (modelToUpdate.getProjects() != null) {
             modelToUpdate.getProjects().forEach(project -> model.addProject((Project) project));
         }
         return representationModelAssembler.toModel(
-                modelService.updateModel(modelToUpdate,
-                                         model));
+            modelService.updateModel(modelToUpdate,
+                model));
     }
 
     @Override
     public void updateModelContent(
-            @PathVariable String modelId,
-            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
+        @PathVariable String modelId,
+        @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
 
         modelService.updateModelContent(findModelById(modelId),
             multipartToFileContent(file));
@@ -144,69 +145,69 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public void deleteModel(
-            @PathVariable String modelId) {
+        @PathVariable String modelId) {
         modelService.deleteModel(findModelById(modelId));
     }
 
     @Override
     public void getModelContent(
-            HttpServletResponse response,
-            @PathVariable String modelId) throws IOException {
+        HttpServletResponse response,
+        @PathVariable String modelId) throws IOException {
         Model model = findModelById(modelId);
         writeFileToResponse(response,
-                            modelService.getModelContentFile(model),
-                            false);
+            modelService.getModelContentFile(model),
+            false);
     }
 
     @Override
     public void getModelDiagram(
-            HttpServletResponse response,
-            @PathVariable String modelId) throws IOException {
+        HttpServletResponse response,
+        @PathVariable String modelId) throws IOException {
         Model model = findModelById(modelId);
         FileContent fileContent = modelService.getModelDiagramFile(model.getId())
-                .orElseThrow(() -> new NotAcceptableStatusException("Model content cannot be retrieved as svg image: " + modelId));
+            .orElseThrow(() -> new NotAcceptableStatusException("Model content cannot be retrieved as svg image: " + modelId));
         writeFileToResponse(response,
-                            fileContent,
-                            false);
+            fileContent,
+            false);
     }
 
     @Override
     public EntityModel<Model> importModel(
-            @PathVariable String projectId,
-            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
-            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
+        @PathVariable String projectId,
+        @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
+        @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
         Project project = projectController.findProjectById(projectId);
         return representationModelAssembler.toModel(
-                modelService.importSingleModel(project,
-                                         findModelType(type),
-                                         multipartToFileContent(file)));
+            modelService.importSingleModel(project,
+                findModelType(type),
+                multipartToFileContent(file)));
     }
 
     @Override
     public void exportModel(
-            HttpServletResponse response,
-            @PathVariable String modelId,
-            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
-                    required = false,
-                    defaultValue = "true") boolean attachment) throws IOException {
+        HttpServletResponse response,
+        @PathVariable String modelId,
+        @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
+            required = false,
+            defaultValue = "true") boolean attachment) throws IOException {
         Model model = findModelById(modelId);
         writeFileToResponse(response,
-                            modelService.exportModel(model),
-                            attachment);
+            modelService.exportModel(model),
+            attachment);
     }
 
     @Override
     public PagedModel<EntityModel<ModelType>> getModelTypes(Pageable pageable) {
         return pagedModelTypeAssembler.toModel(pageable,
-                                                  modelTypeService.getModelTypeNames(pageable),
-                                                  modelTypeAssembler);
+            modelTypeService.getModelTypeNames(pageable),
+            modelTypeAssembler);
     }
 
     @Override
     public void validateModel(
-            @PathVariable String modelId,
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
-            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId) throws IOException {
+        @PathVariable String modelId,
+        @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+        @RequestParam(value = PROJECT_ID_PARAM_NAME, required = false) String projectId) throws IOException {
 
         if (StringUtils.isEmpty(projectId)) {
             modelService.validateModelContent(findModelById(modelId), multipartToFileContent(file));
@@ -218,11 +219,11 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public void validateModelExtensions(
-            @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
-            @PathVariable String modelId,
-            @ApiParam(VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
-            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId) throws IOException {
+        @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
+        @PathVariable String modelId,
+        @ApiParam(VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
+        @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+        @RequestParam(value = PROJECT_ID_PARAM_NAME, required = false) String projectId) throws IOException {
 
         if (StringUtils.isEmpty(projectId)) {
             modelService.validateModelExtensions(findModelById(modelId), multipartToFileContent(file));
@@ -232,15 +233,72 @@ public class ModelController implements ModelRestApi {
         }
     }
 
+    @Override
+    public PagedModel<EntityModel<Model>> getGlobalModels(
+        @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
+        @RequestParam(value = INCLUDE_ORPHANS_PARAM_NAME, required = false, defaultValue = "false") boolean includeOrphans,
+        Pageable pageable) {
+
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            modelService.getGlobalModels(findModelType(type), includeOrphans, pageable),
+            representationModelAssembler);
+    }
+
+    @Override
+    public EntityModel<Model> putProjectModelRelationship(
+        @PathVariable String projectId,
+        @PathVariable String modelId,
+        @RequestParam(value = SCOPE_PARAM_NAME, required = false) String scope,
+        @RequestParam(value = FORCE_PARAM_NAME, required = false, defaultValue = "false") boolean force) {
+
+        Project project = projectController.findProjectById(projectId);
+        Model modelToBeUpdated = findModelById(modelId);
+
+        if (force && (ModelScope.PROJECT.name().equals(scope) || (scope == null && modelToBeUpdated.getScope().equals(ModelScope.PROJECT)))) {
+            modelToBeUpdated.getProjects().clear();
+            modelToBeUpdated.addProject(project);
+        }
+
+        if (scope != null) {
+            modelToBeUpdated.setScope(ModelScope.valueOf(scope));
+        }
+
+        modelToBeUpdated.addProject(project);
+
+        return representationModelAssembler.toModel(modelService.updateModel(modelToBeUpdated, modelToBeUpdated));
+    }
+
+    @Override
+    public EntityModel<Model> deleteProjectModelRelationship(
+        @PathVariable String projectId,
+        @PathVariable String modelId) {
+
+        Project project = projectController.findProjectById(projectId);
+        Model modelToBeUpdated = findModelById(modelId);
+
+        modelToBeUpdated.removeProject(project);
+
+        return representationModelAssembler.toModel(modelService.updateModel(modelToBeUpdated, modelToBeUpdated));
+    }
+
+    @Override
+    public EntityModel<Model> createModelWithoutProject(Model model) {
+        return representationModelAssembler.toModel(
+            modelService.createModel(null,
+                model));
+    }
+
+
     public Model findModelById(String modelId) {
         Optional<Model> optionalModel = modelService.findModelById(modelId);
         return optionalModel
-                .orElseThrow(() -> new ResourceNotFoundException("Model not found: " + modelId));
+            .orElseThrow(() -> new ResourceNotFoundException("Model not found: " + modelId));
     }
 
     public ModelType findModelType(String type) {
         Optional<ModelType> optionalModelType = modelTypeService.findModelTypeByName(type);
         return optionalModelType
-                .orElseThrow(() -> new ServerWebInputException("Unknown model type: " + type));
+            .orElseThrow(() -> new ServerWebInputException("Unknown model type: " + type));
     }
 }

@@ -51,4 +51,6 @@ public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
     void deleteModel(M model);
 
     Class<M> getModelType();
+
+    Page<M> getGlobalModels(ModelType modelTypeFilter, boolean includeOrphans, Pageable pageable);
 }

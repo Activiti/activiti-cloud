@@ -154,6 +154,11 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
         }
     }
 
+    @Override
+    public void clearProjects(){
+        projects.clear();
+    }
+
     @Transient
     @JsonProperty("projectIds")
     public Set<String> getProjectIds() {

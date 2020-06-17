@@ -331,17 +331,37 @@ public class ModelServiceImplTest {
         assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, fileContent, projectOne)).isInstanceOf(SemanticModelValidationException.class);
     }
 
+    @Test
+    public void should_allowModelsWithAndWithoutProject_when_creatingAModelWithProject() {
+        ProcessModelType modelType = new ProcessModelType();
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelTwo));
+        when(modelRepository.createModel(modelTwo)).thenReturn(modelTwo);
+        when(modelRepository.createModel(modelOne)).thenReturn(modelOne);
+
+        when(modelTwo.getId()).thenReturn("modelTwoId");
+        when(modelTwo.getName()).thenReturn("name");
+        when(modelTwo.getType()).thenReturn(modelType.getName());
+
+        when(modelOne.getId()).thenReturn("modelOneId");
+        when(modelOne.getName()).thenReturn("name");
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        assertThat( modelService.createModel(projectOne, modelTwo)).isEqualTo(modelTwo);
+        assertThat( modelService.createModel(null, modelOne)).isEqualTo(modelOne);
+    }
+
     private ModelImpl createModelImpl() {
-        ModelImpl transoformationModelImpl = new ModelImpl();
+        ModelImpl transformationModelImpl = new ModelImpl();
         LinkedHashMap extension = new LinkedHashMap<>();
         extension.put("mappings", "");
         extension.put("constants", "");
         extension.put("properties", "");
-        transoformationModelImpl.setExtensions(extension);
-        transoformationModelImpl.setName("fake-process-model");
-        transoformationModelImpl.setType("PROCESS");
-        transoformationModelImpl.setId("12345678");
-        return transoformationModelImpl;
+        transformationModelImpl.setExtensions(extension);
+        transformationModelImpl.setName("fake-process-model");
+        transformationModelImpl.setType("PROCESS");
+        transformationModelImpl.setId("12345678");
+        return transformationModelImpl;
     }
 
     private Process initProcess(FlowElement... elements) {

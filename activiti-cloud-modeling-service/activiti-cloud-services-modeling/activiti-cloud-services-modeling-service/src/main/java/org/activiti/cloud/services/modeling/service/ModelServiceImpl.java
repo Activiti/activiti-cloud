@@ -142,7 +142,9 @@ public class ModelServiceImpl implements ModelService{
         checkModelScopeIntegrity(model);
         model.setId(null);
         ModelType modelType = findModelType(model);
-        model.addProject(project);
+        if(project != null) {
+            model.addProject(project);
+        }
         if (model.getExtensions() == null) {
             if (PROCESS.equals(modelType.getName()) || isJsonContentType(model.getContentType())) {
                 model.setExtensions(new HashMap<>());
@@ -526,6 +528,14 @@ public class ModelServiceImpl implements ModelService{
         validateModelExtensions(model.getType(),
                                 fileContent.getFileContent(),
                                 createValidationContext(project));
+    }
+
+    @Override
+    public Page<Model> getGlobalModels(
+        ModelType modelType,
+        boolean includeOrphans,
+        Pageable pageable) {
+        return modelRepository.getGlobalModels(modelType, includeOrphans, pageable);
     }
 
     private void validateModelExtensions(String modelType,

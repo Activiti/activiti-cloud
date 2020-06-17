@@ -96,6 +96,26 @@ public interface ModelRestApi {
 
     String PROJECT_ID_PARAM_NAME = "projectId";
 
+    String INCLUDE_ORPHANS_PARAM_DESCR = "If true, then models with no relationship to any project are retrieved regardless of their scope";
+
+    String INCLUDE_ORPHANS_PARAM_NAME = "includeOrphans";
+
+    String RELATE_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR = "The id of the project to associate the model with";
+
+    String RELATE_MODEL_PROJECT_MODEL_ID_PARAM_DESCR = "The id of the model to associate the project with";
+
+    String SCOPE_PARAM_DESCR = "Scope to update the model if needed (optional)";
+
+    String SCOPE_PARAM_NAME = "scope";
+
+    String FORCE_PARAM_DESCR = "If the scope of the model has restrictions on the number of projects that a model can belong to, remove the other relationships of the model with other projects";
+
+    String FORCE_PARAM_NAME = "force";
+
+    String DELETE_RELATIONSHIP_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR = "The id of the project of the relationship to delete";
+
+    String DELETE_RELATIONSHIP_MODEL_PROJECT_MODEL_ID_PARAM_DESCR = "The id of the model of the relationship to delete";
+
 
     @ApiOperation(
             tags = MODELS,
@@ -246,4 +266,61 @@ public interface ModelRestApi {
             @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
             @ApiParam(value=VALIDATE_PROJECT_ID_PARAM_DESCR, required = false)
             @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId) throws IOException;
+
+    @ApiOperation(
+        tags = MODELS,
+        value = "List all the models that are not coupled to a project",
+        notes = "Get the models that has GLOBAL as scope. " +
+            "Minimal information for each model is returned."
+        //response = AlfrescoModelPage.class
+    )
+    @GetMapping(path = "/models")
+    PagedModel<EntityModel<Model>> getGlobalModels(
+        @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
+        @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
+        @ApiParam(value = INCLUDE_ORPHANS_PARAM_DESCR, required = false)
+        @RequestParam(value = INCLUDE_ORPHANS_PARAM_NAME, required = false, defaultValue = "false") boolean includeOrphans,
+        Pageable pageable);
+
+    @ApiOperation(
+        tags = MODELS,
+        value = "Add or update the relationship between an existing model, and the project",
+        notes = "Get the model associated with the project updated. " +
+            "Minimal information for the model is returned."
+    )
+    @PutMapping(path = "/projects/{projectId}/models/{modelId}")
+    EntityModel<Model> putProjectModelRelationship(
+        @ApiParam(value = RELATE_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR, required = true)
+        @PathVariable String projectId,
+        @ApiParam(value = RELATE_MODEL_PROJECT_MODEL_ID_PARAM_DESCR, required = true)
+        @PathVariable String modelId,
+        @ApiParam(value = SCOPE_PARAM_DESCR, required = false)
+        @RequestParam(value = SCOPE_PARAM_NAME, required = false) String scope,
+        @ApiParam(value = FORCE_PARAM_DESCR, required = false)
+        @RequestParam(value = FORCE_PARAM_NAME, required = false, defaultValue = "false") boolean force);
+
+    @ApiOperation(
+        tags = MODELS,
+        value = "Delete the relationship between an existing model, and the project",
+        notes = "Get the model associated with the project updated. " +
+            "Minimal information for the model is returned."
+    )
+    @DeleteMapping(path = "/projects/{projectId}/models/{modelId}")
+    EntityModel<Model> deleteProjectModelRelationship(
+        @ApiParam(value = DELETE_RELATIONSHIP_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR, required = true)
+        @PathVariable String projectId,
+        @ApiParam(value = DELETE_RELATIONSHIP_MODEL_PROJECT_MODEL_ID_PARAM_DESCR, required = true)
+        @PathVariable String modelId);
+
+    @ApiOperation(
+        tags = MODELS,
+        value = "Create new model that does note belong to a project",
+        notes = "Create a new model with no relationship to other projects"
+    )
+    @PostMapping(path = "/models")
+    @ResponseStatus(CREATED)
+    EntityModel<Model> createModelWithoutProject(
+        @ApiParam(CREATE_MODEL_PARAM_DESCR)
+        @RequestBody Model model);
+
 }

@@ -43,6 +43,8 @@ public interface Model<A extends Project, U> extends Auditable<U> {
 
     void removeProject(A project);
 
+    void clearProjects();
+
     String getVersion();
 
     String getContentType();
