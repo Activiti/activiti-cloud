@@ -1110,19 +1110,12 @@ public class ModelControllerIT {
 
     @Test
     public void should_returnOnlyGlobalModels_when_retrievingAllModels() throws Exception {
-        ModelEntity connectorProjectScoped = connectorModel("connector-project-scoped");
-        modelRepository.createModel(connectorProjectScoped);
-        ModelEntity connectorGlobalScoped = connectorModel("connector-global-scoped");
-        modelRepository.createModel(connectorGlobalScoped);
+        createConnectorModel("connector-project-scoped");
+        createConnectorModel("connector-global-scoped");
 
-        ModelEntity projectScoped = processModel("process-project-scoped");
-        modelRepository.createModel(projectScoped);
-        ModelEntity globalScopedOne = processModel("process-global-scoped-1");
-        globalScopedOne.setScope(ModelScope.GLOBAL);
-        modelRepository.createModel(globalScopedOne);
-        ModelEntity globalScopedTwo = processModel("process-global-scoped-2");
-        globalScopedTwo.setScope(ModelScope.GLOBAL);
-        modelRepository.createModel(globalScopedTwo);
+        createProcessModel("process-project-scoped");
+        createGlobalProcessModel("process-global-scoped-1");
+        createGlobalProcessModel("process-global-scoped-2");
 
         mockMvc
             .perform(get("/v1/models?type=PROCESS"))
@@ -1139,21 +1132,24 @@ public class ModelControllerIT {
                 is("GLOBAL")));
     }
 
+    private void createProcessModel(String name) {
+        ModelEntity projectScoped = processModel(name);
+        modelRepository.createModel(projectScoped);
+    }
+
+    private void createConnectorModel(String name) {
+        ModelEntity connectorProjectScoped = connectorModel(name);
+        modelRepository.createModel(connectorProjectScoped);
+    }
+
     @Test
     public void should_returnGlobalAndModels_when_retrievingAllModelsWithOrphansOption() throws Exception {
-        ModelEntity connectorProjectScoped = connectorModel("connector-project-scoped");
-        modelRepository.createModel(connectorProjectScoped);
-        ModelEntity connectorGlobalScoped = connectorModel("connector-global-scoped");
-        modelRepository.createModel(connectorGlobalScoped);
+        createConnectorModel("connector-project-scoped");
+        createConnectorModel("connector-global-scoped");
 
-        ModelEntity projectScoped = processModel("process-project-scoped");
-        modelRepository.createModel(projectScoped);
-        ModelEntity globalScopedOne = processModel("process-global-scoped-1");
-        globalScopedOne.setScope(ModelScope.GLOBAL);
-        modelRepository.createModel(globalScopedOne);
-        ModelEntity globalScopedTwo = processModel("process-global-scoped-2");
-        globalScopedTwo.setScope(ModelScope.GLOBAL);
-        modelRepository.createModel(globalScopedTwo);
+        createProcessModel("process-project-scoped");
+        createGlobalProcessModel("process-global-scoped-1");
+        createGlobalProcessModel("process-global-scoped-2");
 
         mockMvc
             .perform(get("/v1/models?type=PROCESS&includeOrphans=true"))
@@ -1172,6 +1168,12 @@ public class ModelControllerIT {
                 is("process-global-scoped-2")))
             .andExpect(jsonPath("$._embedded.models[2].scope",
                 is("GLOBAL")));
+    }
+
+    private void createGlobalProcessModel(String name) {
+        ModelEntity globalScopedOne = processModel(name);
+        globalScopedOne.setScope(ModelScope.GLOBAL);
+        modelRepository.createModel(globalScopedOne);
     }
 
     @Test
