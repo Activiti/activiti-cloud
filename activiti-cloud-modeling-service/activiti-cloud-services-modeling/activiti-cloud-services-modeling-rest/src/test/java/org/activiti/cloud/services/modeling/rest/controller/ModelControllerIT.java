@@ -307,7 +307,7 @@ public class ModelControllerIT {
                                                          hasEntry(equalTo("type"),
                                                                   equalTo("date")),
                                                          hasEntry(equalTo("value"),
-                                                                  isDateEquals("1970-01-01T00:00:00.000+00:00")))),
+                                                                  isDateEquals("1970-01-01T00:00:00.000+0000")))),
                                           hasEntry(equalTo("jsonVariable"),
                                                    allOf(hasEntry(equalTo("id"),
                                                                   equalTo("jsonVariable")),
