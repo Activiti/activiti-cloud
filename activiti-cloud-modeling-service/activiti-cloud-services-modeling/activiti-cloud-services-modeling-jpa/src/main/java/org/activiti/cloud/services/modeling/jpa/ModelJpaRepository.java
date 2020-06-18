@@ -45,6 +45,11 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String> {
         @Param("modelName") String modelName,
         @Param("modelTypeFilter") String modelTypeFilter);
 
+    @Query("SELECT m FROM Model m WHERE m.name=:modelName AND m.scope=:scope AND m.type=:modelTypeFilter")
+    List<ModelEntity> findModelByNameAndScopeAndTypeEquals(@Param("modelName") String modelName,
+        @Param("scope") ModelScope scope,
+        @Param("modelTypeFilter") String modelTypeFilter);
+
     Page<ModelEntity> findAllByScopeAndTypeEquals(ModelScope scope, String modelTypeFilter, Pageable pageable);
 
     @Query("SELECT m FROM Model m LEFT JOIN m.projects p WHERE m.type=:modelTypeFilter AND (m.scope=:scope OR p.id IS NULL)" )

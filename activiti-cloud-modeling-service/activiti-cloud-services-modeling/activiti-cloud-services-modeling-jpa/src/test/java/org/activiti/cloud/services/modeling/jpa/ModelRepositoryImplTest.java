@@ -23,6 +23,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.util.Collections;
 import java.util.Optional;
 import org.activiti.cloud.modeling.api.ProcessModelType;
+import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,6 +99,29 @@ public class ModelRepositoryImplTest {
 
         verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName());
         assertThat(result.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void should_returnModel_when_getModelByNameAndScopeExists() {
+        when(modelJpaRepository.findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL,processModelType.getName()))
+            .thenReturn(Collections.singletonList(model));
+
+        Optional<ModelEntity> result = repository.findGlobalModelByNameAndType(model.getName(), processModelType.getName());
+
+        verify(modelJpaRepository, times(1)).findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL,processModelType.getName());
+        assertThat(result.isPresent()).isTrue();
+        assertThat(result.get().getId()).isEqualTo(model.getId());
+    }
+
+    @Test
+    public void should_returnEmpty_when_getModelByNameAndScopeDoesNotExist() {
+        when(modelJpaRepository.findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL,processModelType.getName()))
+            .thenReturn(Collections.emptyList());
+
+        Optional<ModelEntity> result = repository.findGlobalModelByNameAndType(model.getName(), processModelType.getName());
+
+        verify(modelJpaRepository, times(1)).findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL,processModelType.getName());
+        assertThat(result.isPresent()).isFalse();
     }
 
 }

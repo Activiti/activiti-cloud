@@ -65,6 +65,17 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     }
 
     @Override
+    public Optional<ModelEntity> findGlobalModelByNameAndType(String modelName, String modelTypeFilter) {
+        List<ModelEntity> models = modelJpaRepository.findModelByNameAndScopeAndTypeEquals(modelName, ModelScope.GLOBAL, modelTypeFilter);
+
+        if (models != null && !models.isEmpty()) {
+            return Optional.of(models.get(0));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Optional<ModelEntity> findModelById(String modelId) {
 
         return modelJpaRepository.findById(modelId);
