@@ -95,7 +95,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
             )).stream();
         }
 
-        return taskMapping
+        return isNotConnector(implementationTask) ? Stream.empty() : taskMapping
                 .getProcessVariableMappings()
                 .entrySet()
                 .stream()
@@ -107,6 +107,12 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                                                                   availableConnectorActions))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
+    }
+
+    private boolean isNotConnector(Optional<String> implementationTask) {
+        return implementationTask.isEmpty()
+            || implementationTask.get().equals("dmn-connector.EXECUTE_TABLE")
+            || implementationTask.get().equals("script.EXECUTE");
     }
 
     private Optional<ModelValidationError> validateTaskMappings(String processId,
@@ -162,6 +168,8 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                                                                                               action),
                                                                          action)));
 
+
+
         return availableConnectorActions;
     }
 
@@ -172,5 +180,10 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                 String.join(".",
                             connectorName,
                             action.getName());
+    }
+
+    private void addDmnScriptImplementations(Map<String, ConnectorModelFeature> availableConnectorActions){
+        ConnectorModelFeature dmn = new ConnectorModelFeature();
+        dmn.setName("EXECUTE_TABLE");
     }
 }
