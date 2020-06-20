@@ -81,7 +81,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
 
         Optional<String> implementationTask = getTaskImplementation(taskMapping.getFlowNode());
 
-        if (implementationTask.isPresent() && !availableConnectorActions.containsKey(implementationTask.get())) {
+        if (implementationTask.isPresent() && isConnector(implementationTask) && !availableConnectorActions.containsKey(implementationTask.get())) {
             return Optional.of(createModelValidationError(
                 format(UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_PROBLEM,
                     taskMapping.getAction().name(),
@@ -95,7 +95,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
             )).stream();
         }
 
-        return isNotConnector(implementationTask) ? Stream.empty() : taskMapping
+        return taskMapping
                 .getProcessVariableMappings()
                 .entrySet()
                 .stream()
@@ -109,10 +109,10 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                 .map(Optional::get);
     }
 
-    private boolean isNotConnector(Optional<String> implementationTask) {
-        return implementationTask.isEmpty()
-            || implementationTask.get().equals("dmn-connector.EXECUTE_TABLE")
-            || implementationTask.get().equals("script.EXECUTE");
+    private boolean isConnector(Optional<String> implementationTask) {
+        return implementationTask.isPresent()
+            && !implementationTask.get().equals("dmn-connector.EXECUTE_TABLE")
+            && !implementationTask.get().equals("script.EXECUTE");
     }
 
     private Optional<ModelValidationError> validateTaskMappings(String processId,
