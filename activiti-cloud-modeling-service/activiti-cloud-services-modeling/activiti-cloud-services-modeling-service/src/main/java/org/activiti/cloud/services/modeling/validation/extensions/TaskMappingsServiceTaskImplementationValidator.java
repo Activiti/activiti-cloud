@@ -168,8 +168,6 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                                                                                               action),
                                                                          action)));
 
-
-
         return availableConnectorActions;
     }
 
@@ -180,10 +178,5 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                 String.join(".",
                             connectorName,
                             action.getName());
-    }
-
-    private void addDmnScriptImplementations(Map<String, ConnectorModelFeature> availableConnectorActions){
-        ConnectorModelFeature dmn = new ConnectorModelFeature();
-        dmn.setName("EXECUTE_TABLE");
     }
 }
