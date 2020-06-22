@@ -10,7 +10,7 @@
   <artifactId>activiti-cloud-starter-messages-hazelcast</artifactId>
   <properties>
     <spring-integration-hazelcast.version>2.0.0.RELEASE</spring-integration-hazelcast.version>
-    <hazelcast.version>3.12.4</hazelcast.version>
+    <hazelcast.version>4.0.1</hazelcast.version>
   </properties>
   <dependencyManagement>
     <dependencies>
