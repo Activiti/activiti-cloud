@@ -36,7 +36,7 @@
     <activiti.version>7.1.255</activiti.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
-    <commons-configuration.version>1.8</commons-configuration.version>
+    <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <guava.version>24.1.1-jre</guava.version>
     <java-semver.version>0.9.0</java-semver.version>
