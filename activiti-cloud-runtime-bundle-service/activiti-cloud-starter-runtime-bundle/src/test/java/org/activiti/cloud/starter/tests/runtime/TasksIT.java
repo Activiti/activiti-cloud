@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -295,6 +296,24 @@ public class TasksIT {
 
         //then
         assertThat(subTasks.getContent()).extracting(CloudTask::getId).containsExactly(subTask.getId());
+    }
+
+    @Test
+    public void should_createTaskWithDueDateUsingFormatWithMilliSeconds() {
+        //given
+        String dueDateAsString = "2020-06-22T15:26:50.936Z";
+
+        Map<String, Object> payloadAsMap = new HashMap<>();
+        payloadAsMap.put("payloadType", "CreateTaskPayload");
+        payloadAsMap.put("name", "My task");
+        payloadAsMap.put("dueDate", dueDateAsString);
+
+        //when
+        CloudTask createdTask = taskRestTemplate.createTask(payloadAsMap);
+
+        //then
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getDueDate()).isEqualTo(dueDateAsString);
     }
 
     @Test
