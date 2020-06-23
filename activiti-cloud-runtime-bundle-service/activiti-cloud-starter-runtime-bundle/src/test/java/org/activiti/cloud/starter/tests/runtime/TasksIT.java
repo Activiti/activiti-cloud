@@ -298,6 +298,24 @@ public class TasksIT {
     }
 
     @Test
+    public void should_createTaskWithDueDateUsingFormatWithMilliSeconds() {
+        //given
+        String dueDateAsString = "2020-06-22T15:26:50.936Z";
+
+        Map<String, Object> payloadAsMap = new HashMap<>();
+        payloadAsMap.put("payloadType", "CreateTaskPayload");
+        payloadAsMap.put("name", "My task");
+        payloadAsMap.put("dueDate", dueDateAsString);
+
+        //when
+        CloudTask createdTask = taskRestTemplate.createTask(payloadAsMap);
+
+        //then
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getDueDate()).isEqualTo(dueDateAsString);
+    }
+
+    @Test
     public void shouldBeAbleToDeleteTask() {
         //given
         CloudTask standaloneTask = taskRestTemplate.createTask(TaskPayloadBuilder.create()
