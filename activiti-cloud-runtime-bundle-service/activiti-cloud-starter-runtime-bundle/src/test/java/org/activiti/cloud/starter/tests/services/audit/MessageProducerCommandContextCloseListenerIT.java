@@ -61,18 +61,18 @@ public class MessageProducerCommandContextCloseListenerIT {
     @Test
     public void testMessageProducerCommandContextCloseListenerNeverClosed() {
         // given
-        String processDefintionKey = "SimpleProcess";
+        String processDefinitionKey = "rollbackProcess";
 
         // when
         Throwable thrown = catchThrowable(() -> {
             runtimeService.createProcessInstanceBuilder()
-                          .processDefinitionKey("rollbackProcess")
+                          .processDefinitionKey(processDefinitionKey)
                           .start();
         });
 
         // then
         ProcessInstance result = runtimeService.createProcessInstanceQuery()
-                                               .processDefinitionKey(processDefintionKey)
+                                               .processDefinitionKey(processDefinitionKey)
                                                .singleResult();
         assertThat(result).isNull();
         assertThat(thrown).isInstanceOf(ActivitiException.class);
@@ -82,7 +82,7 @@ public class MessageProducerCommandContextCloseListenerIT {
     @Test
     public void testMessageProducerCommandContextCloseListenerNeverSend() throws InterruptedException {
         // given
-        String processDefintionKey = "SimpleProcess";
+        String processDefinitionKey = "SimpleProcess";
 
         doAnswer(new Answer<Void>() {
             @Override
@@ -102,13 +102,13 @@ public class MessageProducerCommandContextCloseListenerIT {
         // when
         Throwable thrown = catchThrowable(() -> {
             runtimeService.createProcessInstanceBuilder()
-                          .processDefinitionKey(processDefintionKey)
+                          .processDefinitionKey(processDefinitionKey)
                           .start();
         });
 
         // then
         ProcessInstance result = runtimeService.createProcessInstanceQuery()
-                                               .processDefinitionKey(processDefintionKey)
+                                               .processDefinitionKey(processDefinitionKey)
                                                .singleResult();
         assertThat(result).isNull();
         assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
