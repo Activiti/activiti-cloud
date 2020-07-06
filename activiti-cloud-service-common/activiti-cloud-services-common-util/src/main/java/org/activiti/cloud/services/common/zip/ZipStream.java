@@ -86,14 +86,16 @@ public class ZipStream {
 
         private final Path path;
 
+        private final boolean isDirectory;
+
         ZipStreamEntry(ZipEntry zipEntry,
                        ZipInputStream zipInputStream) throws IOException {
             this.zipEntry = zipEntry;
-            this.content = !zipEntry.isDirectory() ?
+            this.isDirectory = zipEntry.isDirectory();
+            this.content = !isDirectory ?
                     Optional.of(StreamUtils.copyToByteArray(zipInputStream)) :
                     Optional.empty();
             path = Paths.get(zipEntry.getName());
-
 
         }
 
@@ -119,7 +121,7 @@ public class ZipStream {
          */
         public Optional<String> getFolderName(int index) {
             Path folderPath = null;
-            int foldersCount = zipEntry.isDirectory() ?
+            int foldersCount = isDirectory ?
                     path.getNameCount() :
                     path.getNameCount() - 1;
             if (0 <= index && index < foldersCount) {
@@ -140,11 +142,28 @@ public class ZipStream {
 
         /**
          * Get the file content for this zip entry.
-         * If this is not a file, this will retunrn {@literal Optional#empty()}
+         * If this is not a file, this will return {@literal Optional#empty()}
          * @return the file content, or {@literal Optional#empty()}
          */
         public Optional<byte[]> getContent() {
             return content;
         }
+
+        /**
+         * Check if the zip entry is a directory
+         * @return true if it's a directory
+         */
+        public boolean isDirectory() {
+            return isDirectory;
+        }
+
+        /**
+         * Check if the zip entry content (file or folder) is at root level
+         * @return true if at root level
+         */
+        public boolean isAtRoot() {
+            return path.getNameCount() == 1;
+        }
+
     }
 }
