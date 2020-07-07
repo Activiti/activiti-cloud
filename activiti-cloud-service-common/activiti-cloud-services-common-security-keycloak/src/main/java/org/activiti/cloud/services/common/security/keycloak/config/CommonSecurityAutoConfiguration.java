@@ -48,7 +48,6 @@ import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityCont
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
 import org.keycloak.adapters.KeycloakConfigResolver;
-import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
@@ -71,7 +70,6 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @Configuration
 @KeycloakConfiguration
 @ConditionalOnWebApplication
-@Import({KeycloakSpringBootConfigResolver.class})
 @ConditionalOnMissingBean(value = {KeycloakConfigResolver.class, SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
 public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigurerAdapter {
 
@@ -167,12 +165,6 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
     @ConditionalOnMissingBean
     public SecurityContextTokenProvider securityContextTokenProvider() {
         return new KeycloakSecurityContextTokenProvider();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public KeycloakConfigResolver KeycloakConfigResolver() {
-        return new KeycloakSpringBootConfigResolver();
     }
 
     @Bean
