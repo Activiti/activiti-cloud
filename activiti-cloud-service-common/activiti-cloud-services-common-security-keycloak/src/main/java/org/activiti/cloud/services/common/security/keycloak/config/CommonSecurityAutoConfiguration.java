@@ -47,16 +47,12 @@ import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRol
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
-import org.keycloak.adapters.AdapterDeploymentContext;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
-import org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
-import org.keycloak.adapters.springsecurity.config.KeycloakSpringConfigResolverWrapper;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.keycloak.adapters.springsecurity.management.HttpSessionManager;
-import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -174,24 +170,6 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
     public SecurityContextTokenProvider securityContextTokenProvider() {
         return new KeycloakSecurityContextTokenProvider();
     }
-
-//    @Bean
-//    public AdapterConfig adapterConfig() {
-//        return new AdapterConfig();
-//    }
-
-//    @Bean
-//    public KeycloakConfigResolver KeycloakConfigResolver(AdapterConfig adapterConfig) {
-//        return new CustomKeycloakSpringConfigResolver(adapterConfig);
-//    }
-//
-//    @Bean
-//    protected AdapterDeploymentContext adapterDeploymentContext() throws Exception {
-//        AdapterDeploymentContextFactoryBean factoryBean;
-//        factoryBean = new AdapterDeploymentContextFactoryBean(new KeycloakSpringConfigResolverWrapper(keycloakConfigResolver));
-//        factoryBean.afterPropertiesSet();
-//        return factoryBean.getObject();
-//    }
 
     @Bean
     @Override
