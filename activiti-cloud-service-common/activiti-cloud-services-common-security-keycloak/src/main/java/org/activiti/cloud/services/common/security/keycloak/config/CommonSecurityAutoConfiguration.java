@@ -53,6 +53,7 @@ import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.keycloak.adapters.springsecurity.management.HttpSessionManager;
+import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -170,9 +171,14 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
     }
 
     @Bean
+    public AdapterConfig adapterConfig() {
+        return new AdapterConfig();
+    }
+
+    @Bean
     @ConditionalOnMissingBean
-    public KeycloakConfigResolver KeycloakConfigResolver() {
-        return new KeycloakSpringBootConfigResolver();
+    public KeycloakConfigResolver KeycloakConfigResolver(AdapterConfig adapterConfig) {
+        return new CustomKeycloakSpringBootConfigResolver(adapterConfig);
     }
 
     @Bean
