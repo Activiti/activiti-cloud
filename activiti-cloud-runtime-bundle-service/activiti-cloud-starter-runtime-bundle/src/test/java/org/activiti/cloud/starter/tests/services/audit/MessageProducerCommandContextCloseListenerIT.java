@@ -59,7 +59,7 @@ public class MessageProducerCommandContextCloseListenerIT {
     }
 
     @Test
-    public void testMessageProducerCommandContextCloseListenerNeverClosed() {
+    public void shouldNot_callCloseListener_when_exceptionOccursOnActivitiTransaction() {
         // given
         String processDefinitionKey = "rollbackProcess";
 
@@ -80,7 +80,7 @@ public class MessageProducerCommandContextCloseListenerIT {
     }
 
     @Test
-    public void testMessageProducerCommandContextCloseListenerNeverSend() throws InterruptedException {
+    public void should_rollbackSentMessages_when_exceptionOccursAfterSent() throws InterruptedException {
         // given
         String processDefinitionKey = "SimpleProcess";
 
