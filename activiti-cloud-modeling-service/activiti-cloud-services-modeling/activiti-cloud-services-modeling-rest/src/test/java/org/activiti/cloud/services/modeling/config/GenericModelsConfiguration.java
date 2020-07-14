@@ -162,7 +162,7 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public void execute(Model model) {
+        public void execute(Model modelToBeUpdated, Model newModel) {
             LOGGER.info("generic json model update listener");
         }
     };
@@ -189,7 +189,7 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public void execute(Model model) {
+        public void execute(Model modelToBeUpdated, Model newModel) {
             LOGGER.info("generic non json model update listener");
         }
     };

@@ -86,14 +86,18 @@ public class GenericJsonModelTypeModelUpdateListenerControllerIT {
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
             genericJsonModelType.getName()));
 
+        Model updatedModel = new ModelEntity(name, genericJsonModelType.getName());
+
         mockMvc
             .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))))
+                .content(objectMapper.writeValueAsString(updatedModel)))
             .andExpect(status().is2xxSuccessful());
 
         verify(genericJsonModelUpdateListener,
             times(1))
-            .execute(argThat(model -> model.getId().equals(genericJsonModel.getId())));
+            .execute(
+                argThat(modelToBeUpdated -> modelToBeUpdated.getId().equals(genericJsonModel.getId())),
+                argThat(newModel -> newModel.getName().equals(name)));
     }
 
     @Test
@@ -102,13 +106,14 @@ public class GenericJsonModelTypeModelUpdateListenerControllerIT {
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
             genericJsonModelType.getName()));
 
+        Model updatedModel = new ModelEntity(name, genericJsonModelType.getName());
+
         mockMvc
             .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))))
-            .andExpect(status().is2xxSuccessful());
+                .content(objectMapper.writeValueAsString(updatedModel))).andExpect(status().is2xxSuccessful());
 
         verify(genericNonJsonModelUpdateListener,
             times(0))
-            .execute(any());
+            .execute(any(), any());
     }
 }

@@ -190,7 +190,7 @@ public class ModelServiceImpl implements ModelService{
         }
         checkModelScopeIntegrity(newModel);
 
-        emptyIfNull(findModelUpdateListeners(modelToBeUpdated.getType())).stream().forEach(listener -> listener.execute(newModel));
+        emptyIfNull(findModelUpdateListeners(modelToBeUpdated.getType())).stream().forEach(listener -> listener.execute(modelToBeUpdated, newModel));
 
         return modelRepository.updateModel(modelToBeUpdated,
                                            newModel);

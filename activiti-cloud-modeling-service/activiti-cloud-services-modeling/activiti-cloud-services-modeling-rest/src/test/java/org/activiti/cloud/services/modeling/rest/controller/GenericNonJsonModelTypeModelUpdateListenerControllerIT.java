@@ -87,14 +87,16 @@ public class GenericNonJsonModelTypeModelUpdateListenerControllerIT {
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
             genericNonJsonModelType.getName()));
 
+        Model updatedModel = new ModelEntity(name, genericNonJsonModelType.getName());
+
         mockMvc
             .perform(put("/v1/models/{modelId}", genericNonJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModel.getName()))))
+                .content(objectMapper.writeValueAsString(updatedModel)))
             .andExpect(status().is2xxSuccessful());
 
         verify(genericJsonModelUpdateListener,
             times(0))
-            .execute(any());
+            .execute(any(), any());
 
     }
 
@@ -105,14 +107,17 @@ public class GenericNonJsonModelTypeModelUpdateListenerControllerIT {
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
             genericNonJsonModelType.getName()));
 
+        Model updatedModel = new ModelEntity(name, genericNonJsonModelType.getName());
+
         mockMvc
             .perform(put("/v1/models/{modelId}", genericNonJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModel.getName()))))
+                .content(objectMapper.writeValueAsString(updatedModel)))
             .andExpect(status().is2xxSuccessful());
 
         verify(genericNonJsonModelUpdateListener,
             times(1))
-            .execute(argThat(model -> model.getId().equals(genericNonJsonModel.getId())));
-
+            .execute(
+                argThat(modelToBeUpdated -> modelToBeUpdated.getId().equals(genericNonJsonModel.getId())),
+                argThat(newModel -> newModel.getName().equals(name)));
     }
 }

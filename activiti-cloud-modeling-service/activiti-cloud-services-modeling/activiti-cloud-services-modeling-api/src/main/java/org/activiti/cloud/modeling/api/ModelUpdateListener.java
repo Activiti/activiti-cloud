@@ -23,9 +23,10 @@ public interface ModelUpdateListener {
     /**
      * Perform an extra action over the model from the data received.
      *
-     * @param model       the model to act with
+     * @param modelToBeUpdated the model as it is before the update
+     * @param newModel         the model containing the changes to be performed
      */
-    void execute(Model model);
+    void execute(Model modelToBeUpdated, Model newModel);
 
     /**
      * Get handled model type by this listener.
