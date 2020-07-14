@@ -15,17 +15,19 @@
  */
 package org.activiti.cloud.services.modeling.config;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.ALL_VALUE;
-
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.JsonModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.services.common.file.FileContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -33,6 +35,8 @@ import org.springframework.context.annotation.Profile;
 @Profile("generic")
 @Configuration
 public class GenericModelsConfiguration {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(GenericModelsConfiguration.class);
 
     JsonModelType genericJsonModelType = new JsonModelType() {
 
@@ -75,6 +79,7 @@ public class GenericModelsConfiguration {
         @Override
         public void validate(byte[] modelFile,
                              ValidationContext validationContext) {
+            LOGGER.info("validate generic json content");
         }
 
         @Override
@@ -93,6 +98,7 @@ public class GenericModelsConfiguration {
         @Override
         public void validate(byte[] modelFile,
                              ValidationContext validationContext) {
+            LOGGER.info("validate generic json extensions");
         }
 
         @Override
@@ -106,6 +112,7 @@ public class GenericModelsConfiguration {
         @Override
         public void validate(byte[] modelFile,
                              ValidationContext validationContext) {
+            LOGGER.info("validate generic non json content");
         }
 
         @Override
@@ -124,6 +131,7 @@ public class GenericModelsConfiguration {
         @Override
         public void validate(byte[] modelFile,
                              ValidationContext validationContext) {
+            LOGGER.info("validate generic non json extensions");
         }
 
         @Override
@@ -142,6 +150,20 @@ public class GenericModelsConfiguration {
         @Override
         public void execute(Model model,
                             FileContent fileContent) {
+            LOGGER.info("generic json content update listener");
+        }
+    };
+
+    private ModelUpdateListener genericJsonModelUpdateListener = new ModelUpdateListener() {
+
+        @Override
+        public ModelType getHandledModelType() {
+            return genericJsonModelType;
+        }
+
+        @Override
+        public void execute(Model model) {
+            LOGGER.info("generic json model update listener");
         }
     };
 
@@ -155,6 +177,20 @@ public class GenericModelsConfiguration {
         @Override
         public void execute(Model model,
                             FileContent fileContent) {
+            LOGGER.info("generic non json content update listener");
+        }
+    };
+
+    private ModelUpdateListener genericNonJsonModelUpdateListener = new ModelUpdateListener() {
+
+        @Override
+        public ModelType getHandledModelType() {
+            return genericNonJsonModelType;
+        }
+
+        @Override
+        public void execute(Model model) {
+            LOGGER.info("generic non json model update listener");
         }
     };
 
@@ -193,8 +229,18 @@ public class GenericModelsConfiguration {
         return genericJsonContentUpdateListener;
     }
 
+    @Bean(name = "genericJsonModelUpdateListener")
+    public ModelUpdateListener genericJsonModelUpdateListener() {
+        return genericJsonModelUpdateListener;
+    }
+
     @Bean(name = "genericNonJsonContentUpdateListener")
     public ContentUpdateListener genericNonJsonContentUpdateListener() {
         return genericNonJsonContentUpdateListener;
+    }
+
+    @Bean(name = "genericNonJsonModelUpdateListener")
+    public ModelUpdateListener genericNonJsonModelUpdateListener() {
+        return genericNonJsonModelUpdateListener;
     }
 }

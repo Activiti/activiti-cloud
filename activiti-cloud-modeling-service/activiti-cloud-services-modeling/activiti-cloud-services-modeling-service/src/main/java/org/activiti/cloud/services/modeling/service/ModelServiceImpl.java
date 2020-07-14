@@ -33,7 +33,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import javax.xml.stream.XMLStreamException;
@@ -44,6 +46,7 @@ import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.process.ModelScope;
@@ -90,20 +93,27 @@ public class ModelServiceImpl implements ModelService{
 
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
+    private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
+
     @Autowired
     public ModelServiceImpl(ModelRepository modelRepository,
                             ModelTypeService modelTypeService,
                             ModelContentService modelContentService,
                             ModelExtensionsService modelExtensionsService,
                             JsonConverter<Model> jsonConverter,
-                            ProcessModelContentConverter processModelContentConverter) {
+                            ProcessModelContentConverter processModelContentConverter,
+                            Set<ModelUpdateListener> modelUpdateListeners) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
         this.jsonConverter = jsonConverter;
         this.modelExtensionsService = modelExtensionsService;
         this.processModelContentConverter = processModelContentConverter;
+        modelUpdateListenersMapByModelType = modelUpdateListeners
+            .stream()
+            .collect(Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName()));
     }
+
 
     @Override
     public List<Model> getAllModels(Project project) {
@@ -179,6 +189,9 @@ public class ModelServiceImpl implements ModelService{
             newModel.getProjects().stream().forEach(project -> checkIfModelNameExistsInProject((Project) project,newModel));
         }
         checkModelScopeIntegrity(newModel);
+
+        emptyIfNull(findModelUpdateListeners(modelToBeUpdated.getType())).stream().forEach(listener -> listener.execute(modelToBeUpdated));
+
         return modelRepository.updateModel(modelToBeUpdated,
                                            newModel);
     }
@@ -549,5 +562,11 @@ public class ModelServiceImpl implements ModelService{
         return Optional.ofNullable(model.getType()).flatMap(modelTypeService::findModelTypeByName)
                 .orElseThrow(() -> new UnknownModelTypeException("Unknown model type: " + model.getType()));
     }
+
+    @Override
+    public List<ModelUpdateListener> findModelUpdateListeners(String modelType) {
+        return modelUpdateListenersMapByModelType.get(modelType);
+    }
+
 
 }
