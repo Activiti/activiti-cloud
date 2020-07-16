@@ -12,19 +12,19 @@ jobs:
   include:
     - name: activiti-cloud-build
       stage: activiti-cloud-build
-      script: travis_wait 120 ${MAVEN_CMD} -N && ${MAVEN_CMD} -f activiti-cloud-build/pom.xml || travis_terminate 1
+      script: travis_wait 120 ${MAVEN_CMD} -N && ${MAVEN_CMD} -f activiti-cloud-build/pom.xml
 
     - name: activiti-cloud-api
       stage: activiti-cloud-api
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-api/pom.xml || travis_terminate 1
+      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-api/pom.xml
 
     - name: activiti-cloud-service-common
       stage: activiti-cloud-service-common
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-service-common/pom.xml || travis_terminate 1
+      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-service-common/pom.xml
 
     - name: activiti-cloud-acceptance-tests
       stage: activiti-cloud-acceptance-tests
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml || travis_terminate 1
+      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml
 
     - name: activiti-cloud-runtime-bundle-service_and_activiti-cloud-messages-service
       stage: activiti-cloud-services
@@ -40,15 +40,15 @@ jobs:
 
     - name: activiti-cloud-audit-service
       stage: activiti-cloud-services
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml || travis_terminate 1
+      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml
 
     - name: activiti-cloud-modeling-service
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling-service/pom.xml || travis_terminate 1
+      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling-service/pom.xml
       stage: activiti-cloud-services
 
     - name: activiti-cloud-connectors
       stage: activiti-cloud-services
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml || travis_terminate 1
+      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
 
     - name: tag_deploy_updatebot
       stage: tag_deploy_updatebot
