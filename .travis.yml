@@ -29,19 +29,23 @@ jobs:
     - name: activiti-cloud-runtime-bundle-service_and_activiti-cloud-messages-service
       stage: activiti-cloud-services
       script: |
-        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml
-        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml
+        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml || travis_terminate 1
+        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml || travis_terminate 1
+
     - name: activiti-cloud-query-service_and_activiti-cloud-notifications-graphql-service
       stage: activiti-cloud-services
       script: |
-        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml
-        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
+        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml || travis_terminate 1
+        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml || travis_terminate 1
+
     - name: activiti-cloud-audit-service
       stage: activiti-cloud-services
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml
+
     - name: activiti-cloud-modeling-service
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling-service/pom.xml
       stage: activiti-cloud-services
+
     - name: activiti-cloud-connectors
       stage: activiti-cloud-services
       script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
@@ -49,13 +53,13 @@ jobs:
     - name: tag_deploy_updatebot
       stage: tag_deploy_updatebot
       script: |
-        mvn versions:set -DnewVersion=$(cat VERSION) -DprocessAllModules=true -DgenerateBackupPoms=false
-        git add -u
-        git commit -m "Release $(cat VERSION)" --allow-empty
-        git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)"
-        git push -f -q https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud.git v$(cat VERSION)
-        mvn clean deploy -DskipTests
-        export VERSION=$(cat VERSION)| make updatebot/push-version
+        mvn versions:set -DnewVersion=$(cat VERSION) -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1
+        git add -u || travis_terminate 1
+        git commit -m "Release $(cat VERSION)" --allow-empty || travis_terminate 1
+        git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)" || travis_terminate 1
+        git push -f -q https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud.git v$(cat VERSION) || travis_terminate 1
+        mvn clean deploy -DskipTests  || travis_terminate 1
+        export VERSION=$(cat VERSION)| make updatebot/push-version || travis_terminate 1
 
 # Send coverage data
 after_success:
