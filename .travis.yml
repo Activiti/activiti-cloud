@@ -53,13 +53,13 @@ jobs:
     - name: tag_deploy_updatebot
       stage: tag_deploy_updatebot
       script: |
-        mvn versions:set -DnewVersion=$(cat VERSION) -DprocessAllModules=true -DgenerateBackupPoms=false
-        git add -u
-        git commit -m "Release $(cat VERSION)" --allow-empty
-        git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)"
-        git push -f -q https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud.git v$(cat VERSION)
-        mvn clean deploy -DskipTests
-        export VERSION=$(cat VERSION)| make updatebot/push-version
+        mvn versions:set -DnewVersion=$(cat VERSION) -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1
+        git add -u || travis_terminate 1
+        git commit -m "Release $(cat VERSION)" --allow-empty || travis_terminate 1
+        git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)" || travis_terminate 1
+        git push -f -q https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud.git v$(cat VERSION) || travis_terminate 1
+        mvn clean deploy -DskipTests  || travis_terminate 1
+        export VERSION=$(cat VERSION)| make updatebot/push-version || travis_terminate 1
 
 # Send coverage data
 after_success:
