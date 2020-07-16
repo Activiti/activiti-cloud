@@ -196,6 +196,12 @@
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
     </repository>
   </repositories>
+  <dependencies>
+    <dependency>
+      <groupId></groupId>
+      <artifactId></artifactId>
+    </dependency>
+  </dependencies>
   <build>
     <pluginManagement>
       <plugins>
