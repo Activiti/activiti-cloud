@@ -50,14 +50,17 @@ public class IntegrationRequestSender {
         this.messageBuilderFactory = messageBuilderFactory;
     }
 
+    //the integration request itself is sent after the Activiti transaction has been committed
+    //because the connector channel is not transacted
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendIntegrationRequest(IntegrationRequest event) {
 
         resolver.resolveDestination(event.getIntegrationContext().getConnectorType()).send(buildIntegrationRequestMessage(event));
-        sendAuditEvent(event);
     }
 
-    private void sendAuditEvent(IntegrationRequest integrationRequest) {
+    //send audit event is included in the the transaction because the audit chanel is transacted
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void sendAuditEvent(IntegrationRequest integrationRequest) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationRequestedEventImpl integrationRequested = new CloudIntegrationRequestedEventImpl(integrationRequest.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequested);
