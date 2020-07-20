@@ -17,7 +17,7 @@ package org.activiti.cloud.starter.rb.configuration;
 
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
 import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
-import org.activiti.runtime.api.impl.VariablesMappingProvider;
+import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
 import org.activiti.spring.process.ProcessVariablesInitiator;
@@ -26,12 +26,12 @@ import org.springframework.context.ApplicationContext;
 public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConfigurer {
 
     private ApplicationContext applicationContext;
-    private VariablesMappingProvider variablesMappingProvider;
+    private ExtensionsVariablesMappingProvider variablesMappingProvider;
     private ProcessVariablesInitiator processVariablesInitiator;
     private EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider;
 
     public SignalBehaviourConfigurer(ApplicationContext applicationContext,
-                                     VariablesMappingProvider variablesMappingProvider,
+                                     ExtensionsVariablesMappingProvider variablesMappingProvider,
                                      ProcessVariablesInitiator processVariablesInitiator,
                                      EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider
     ) {
@@ -44,7 +44,7 @@ public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConf
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
         processEngineConfiguration.setEventSubscriptionPayloadMappingProvider(eventSubscriptionPayloadMappingProvider);
-        
+
         processEngineConfiguration.setActivityBehaviorFactory(new CloudActivityBehaviorFactory(applicationContext,
                                                                                                variablesMappingProvider,
                                                                                                processVariablesInitiator

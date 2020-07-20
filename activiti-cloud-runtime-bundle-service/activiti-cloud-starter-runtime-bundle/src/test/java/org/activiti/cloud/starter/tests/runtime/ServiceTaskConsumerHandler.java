@@ -19,7 +19,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -61,6 +63,9 @@ public class ServiceTaskConsumerHandler {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ObjectMapper objectMapper;
 
+    private final AtomicInteger currentMealIndex = new AtomicInteger(0);
+    private List<String> meals = Arrays.asList("pizza", "pasta");
+
     @Autowired
     public ServiceTaskConsumerHandler(BinderAwareChannelResolver resolver,
         RuntimeBundleProperties runtimeBundleProperties,
@@ -95,9 +100,18 @@ public class ServiceTaskConsumerHandler {
 
         integrationContext.addOutBoundVariables(resultVariables);
 
-        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
-        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
-        resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
+        sendIntegrationResult(integrationRequest, integrationContext);
+    }
+
+    private void sendIntegrationResult(IntegrationRequest integrationRequest,
+        IntegrationContext integrationContext) {
+        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest,
+            integrationContext);
+        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult)
+            .build();
+        resolver
+            .resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName())
+            .send(message);
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
@@ -146,9 +160,7 @@ public class ServiceTaskConsumerHandler {
         integrationContext.addOutBoundVariable("sightSeeing", value);
         integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
 
-        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
-        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
-        resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
+        sendIntegrationResult(integrationRequest, integrationContext);
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
@@ -174,9 +186,7 @@ public class ServiceTaskConsumerHandler {
         integrationContext.addOutBoundVariable("age", 25);
         integrationContext.addOutBoundVariable("_constant_value_", constantValue);
 
-        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
-        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
-        resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
+        sendIntegrationResult(integrationRequest, integrationContext);
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER,
@@ -187,9 +197,7 @@ public class ServiceTaskConsumerHandler {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         integrationContext.addOutBoundVariable("restResult", "fromConnector");
 
-        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
-        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
-        resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
+        sendIntegrationResult(integrationRequest, integrationContext);
     }
 
 
@@ -226,4 +234,12 @@ public class ServiceTaskConsumerHandler {
         }
     }
 
+    @StreamListener(value = ConnectorIntegrationChannels.MEALS_CONNECTOR_CONSUMER)
+    public void receiveMealsConnector(IntegrationRequest integrationRequest) {
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        int remainder = currentMealIndex.getAndIncrement() % meals.size();
+        integrationContext.addOutBoundVariable("meal", meals.get(remainder));
+
+        sendIntegrationResult(integrationRequest, integrationContext);
+    }
 }

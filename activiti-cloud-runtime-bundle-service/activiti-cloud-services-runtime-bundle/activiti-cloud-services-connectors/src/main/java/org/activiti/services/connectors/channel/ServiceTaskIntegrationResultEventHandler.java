@@ -15,7 +15,6 @@
  */
 package org.activiti.services.connectors.channel;
 
-import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -31,7 +30,6 @@ import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
-import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,22 +46,19 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final MessageChannel auditProducer;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private final VariablesMappingProvider outboundVariablesProvider;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
 
     public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
-                                                    IntegrationContextService integrationContextService,
-                                                    MessageChannel auditProducer,
-                                                    RuntimeBundleProperties runtimeBundleProperties,
-                                                    RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                    VariablesMappingProvider outboundVariablesProvider,
-                                                    IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+        IntegrationContextService integrationContextService,
+        MessageChannel auditProducer,
+        RuntimeBundleProperties runtimeBundleProperties,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.auditProducer = auditProducer;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-        this.outboundVariablesProvider = outboundVariablesProvider;
         this.messageBuilderFactory = messageBuilderFactory;
     }
 
@@ -75,15 +70,15 @@ public class ServiceTaskIntegrationResultEventHandler {
         if (integrationContextEntity != null) {
             integrationContextService.deleteIntegrationContext(integrationContextEntity);
 
-            List<Execution> executions = runtimeService.createExecutionQuery().executionId(integrationContextEntity.getExecutionId()).list();
+            String executionId = integrationContextEntity.getExecutionId();
+            List<Execution> executions = runtimeService.createExecutionQuery().executionId(
+                executionId).list();
             if (executions.size() > 0) {
                 ExecutionEntity execution = ExecutionEntity.class.cast(executions.get(0));
 
                 if(execution.getActivityId().equals(integrationContext.getClientId())) {
-                    runtimeService.trigger(integrationContextEntity.getExecutionId(),
-                                           outboundVariablesProvider.calculateOutPutVariables(buildMappingExecutionContext(integrationContext.getProcessDefinitionId(),
-                                                                                                                           execution.getActivityId()),
-                                                                                              integrationContext.getOutBoundVariables()));
+                    runtimeService.setVariablesLocal(executionId, integrationContext.getOutBoundVariables());
+                    runtimeService.trigger(executionId);
                 } else {
                     LOGGER.warn("Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
                                  integrationContext.getClientId(),
@@ -92,7 +87,7 @@ public class ServiceTaskIntegrationResultEventHandler {
                 }
             } else {
                 String message = "No task is in this RB is waiting for integration result with execution id `" +
-                    integrationContextEntity.getExecutionId() +
+                    executionId +
                     ", flow node id `" + integrationContext.getClientId() +
                     "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
                 LOGGER.warn(message);

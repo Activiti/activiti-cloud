@@ -1,0 +1,30 @@
+{
+  "id":"process-with-multi-instance-result-collection-model",
+  "name":"process-with-multi-instance-result-collection",
+  "extensions": {
+    "process-with-multi-instance-result-collection": {
+      "properties": {
+        "age-id": {
+          "id": "age-id",
+          "name": "age",
+          "type": "integer",
+          "value": 20
+        },
+        "name-id": {
+          "id": "name-id",
+          "name": "name",
+          "type": "string",
+          "value": "inName"
+        }
+      },
+      "mappings": {
+        "serviceTask": {
+          "inputs": {
+          },
+          "outputs": {
+          }
+        }
+      }
+    }
+  }
+}
