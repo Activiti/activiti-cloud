@@ -219,7 +219,7 @@ public class IntegrationRequestSenderTest {
         given(eventsProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
 
         //when
-        integrationRequestSender.sendIntegrationRequest(integrationRequest);
+        integrationRequestSender.sendAuditEvent(integrationRequest);
 
         //then
         verify(auditProducer).send(auditMessageArgumentCaptor.capture());
