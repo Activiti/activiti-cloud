@@ -19,11 +19,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -268,5 +271,34 @@ public class MQServiceTaskIT {
         assertThat(availableTasks).isNotNull();
         assertThat(availableTasks.getBody()).isNotEmpty();
         return availableTasks.getBody().getContent().iterator().next();
+    }
+
+    @Test
+    public void should_supportResultCollectionOnMultiInstance() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate
+            .startProcess(ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey("process-with-multi-instance-result-collection")
+            .build());
+
+        //when
+        await().untilAsserted(() -> {
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate
+            .getVariables(processInstance);
+
+        //then
+            Collection<CloudVariableInstance> variables = variablesResponse.getBody().getContent();
+            assertThat(variables)
+                .extracting(VariableInstance::getName)
+                .contains("meals");
+            VariableInstance meals = variables
+                .stream()
+                .filter(variableInstance -> "meals".equals(variableInstance.getName()))
+                .findFirst()
+                .orElse(null);
+            List<String> mealValues = meals.getValue();
+            assertThat(mealValues).containsExactlyInAnyOrder("pizza", "pasta");
+        });
     }
 }
