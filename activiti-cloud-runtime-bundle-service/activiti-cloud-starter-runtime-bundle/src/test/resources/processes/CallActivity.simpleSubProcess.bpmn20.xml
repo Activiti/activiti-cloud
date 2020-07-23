@@ -11,7 +11,7 @@
 
     <sequenceFlow id="flow1" sourceRef="theStart" targetRef="task" />
 
-    <userTask id="task" name="Task in subprocess" />
+    <userTask id="task" name="Task in subprocess" activiti:assignee="hruser"/>
 
     <sequenceFlow id="flow2" sourceRef="task" targetRef="theEnd" />
 

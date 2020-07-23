@@ -1092,8 +1092,6 @@ public class AuditProducerIT {
 
         // Completing this task end the process instance
         taskRestTemplate.complete(taskAfterSubProcess);
-
-        runtimeService.deleteProcessInstance(processInstance.getId(), "Clean up");
     }
 
 

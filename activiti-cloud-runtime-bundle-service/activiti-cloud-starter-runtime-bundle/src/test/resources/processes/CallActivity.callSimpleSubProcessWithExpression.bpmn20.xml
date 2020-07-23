@@ -11,7 +11,7 @@
 
     <sequenceFlow id="flow1" sourceRef="theStart" targetRef="taskBeforeSubProcess" />
 
-    <userTask id="taskBeforeSubProcess" name="Task before subprocess" />
+    <userTask id="taskBeforeSubProcess" name="Task before subprocess" activiti:assignee="hruser"/>
 
     <sequenceFlow id="flow2" sourceRef="taskBeforeSubProcess" targetRef="callSubProcess" />
 
@@ -19,7 +19,7 @@
 
     <sequenceFlow id="flow3" sourceRef="callSubProcess" targetRef="taskAfterSubProcess" />
 
-    <userTask id="taskAfterSubProcess" name="Task after subprocess" />
+    <userTask id="taskAfterSubProcess" name="Task after subprocess" activiti:assignee="hruser"/>
 
     <sequenceFlow id="flow4" sourceRef="taskAfterSubProcess" targetRef="theEnd" />
 
