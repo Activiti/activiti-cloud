@@ -18,26 +18,28 @@ package org.activiti.cloud.services.modeling.validation.process;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.CallActivity;
-import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.modeling.api.ModelValidationError;
-import org.activiti.cloud.modeling.api.ProcessModelType;
-import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
-import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
-import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.xml.stream.XMLStreamException;
+
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.CallActivity;
+import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.ModelValidationError;
+import org.activiti.cloud.modeling.api.ProcessModelType;
+import org.activiti.cloud.modeling.api.ValidationContext;
+import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
+import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
+
 public class BpmnModelCallActivityValidator implements BpmnModelValidator {
 
     private ProcessModelType processModelType;
     private ProcessModelContentConverter processModelContentConverter;
+    private final String expressionRegex = "\\$+\\{+.+\\}";
     private final String INVALID_CALL_ACTIVITY_REFERENCE_DESCRIPTION = "Call activity '%s' with call element '%s' found in process '%s' references a process id that does not exist in the current project.";
     private final String INVALID_CALL_ACTIVITY_REFERENCE_PROBLEM = "Call activity element must reference a process id present in the current project.";
     private final String INVALID_CALL_ACTIVITY_REFERENCE_NAME = "Invalid call activity reference validator.";
@@ -100,6 +102,11 @@ public class BpmnModelCallActivityValidator implements BpmnModelValidator {
                                                                 String mainProcess,
                                                                 CallActivity callActivity) {
         String calledElement = callActivity.getCalledElement();
+
+        if (calledElement.matches(expressionRegex)) {
+            return Optional.empty();
+        }
+
         if (isEmpty(calledElement)) {
             return Optional.of(createModelValidationError(format(NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM,
                                                                  callActivity.getId(),
