@@ -41,6 +41,7 @@ import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
+import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
@@ -107,6 +108,9 @@ public class ModelServiceImplTest {
 
     @Mock
     private ModelExtensionsValidator modelExtensionsValidator;
+
+    @Mock
+    public Set<ModelUpdateListener> modelUpdateListeners;
 
     @BeforeEach
     public void setUp() {

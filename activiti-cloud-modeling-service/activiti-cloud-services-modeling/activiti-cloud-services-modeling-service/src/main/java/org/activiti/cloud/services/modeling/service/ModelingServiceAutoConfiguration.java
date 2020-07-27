@@ -17,7 +17,6 @@ package org.activiti.cloud.services.modeling.service;
 
 import java.util.Map;
 import java.util.Set;
-
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
@@ -25,6 +24,7 @@ import org.activiti.cloud.modeling.api.ModelContentConverter;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -73,13 +73,15 @@ public class ModelingServiceAutoConfiguration {
                                      ModelContentService modelContentService,
                                      ModelExtensionsService modelExtensionsService,
                                      JsonConverter<Model> jsonConverter,
-                                     ProcessModelContentConverter processModelContentConverter) {
+                                     ProcessModelContentConverter processModelContentConverter,
+                                     Set<ModelUpdateListener> modelUpdateListeners) {
         return new ModelServiceImpl(modelRepository,
                                     modelTypeService,
                                     modelContentService,
                                     modelExtensionsService,
                                     jsonConverter,
-                                    processModelContentConverter);
+                                    processModelContentConverter,
+                                    modelUpdateListeners);
 
     }
 
