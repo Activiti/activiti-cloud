@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -257,6 +258,79 @@ public class ModelValidationControllerIT {
                             ModelValidationError::getValidatorSetName)
                 .contains(tuple("The process name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'RankMovie'",
                                 "DNS name validator"));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithEmptyCallActivity() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/call-activity-with-no-call-element.bpmn20.xml");
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/call-activity-with-no-call-element.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(2)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getValidatorSetName)
+                .contains(tuple("Call activity element must reference a process id present in the current project.",
+                                "Invalid call activity reference validator."),
+                          tuple("No call element found for call activity 'Task_1mbp1v0' in process 'process-1722e83c-8f2f-4ddb-85bd-563ef87d279e'",
+                                "Call activity must have a call element validator."));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalideCallActivityVariable() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml");
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(1)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getValidatorSetName)
+                .contains(tuple("Call activity element must reference a process id present in the current project.",
+                                "Invalid call activity reference validator."));
+    }
+
+    @Test
+    public void should_returnSuccessful_when_validatingProcessModelWithValidCallActivityVariable() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/call-activity-with-valid-variable-reference.bpmn20.xml");
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/call-activity-with-valid-variable-reference.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().is2xxSuccessful());
     }
 
     @Test

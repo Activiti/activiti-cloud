@@ -103,10 +103,6 @@ public class BpmnModelCallActivityValidator implements BpmnModelValidator {
                                                                 CallActivity callActivity) {
         String calledElement = callActivity.getCalledElement();
 
-        if (calledElement.matches(expressionRegex)) {
-            return Optional.empty();
-        }
-
         if (isEmpty(calledElement)) {
             return Optional.of(createModelValidationError(format(NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM,
                                                                  callActivity.getId(),
@@ -116,7 +112,11 @@ public class BpmnModelCallActivityValidator implements BpmnModelValidator {
                                                                  mainProcess),
                                                           NO_REFERENCE_FOR_CALL_ACTIVITY_REFERENCE_NAME)
             );
-        } else {
+        }
+        else if (calledElement.matches(expressionRegex)) {
+            return Optional.empty();
+        }
+        else {
             String calledElementId = calledElement.replace("process-",
                                                            "");
             return !availableProcessesIds.contains(calledElementId) ?
