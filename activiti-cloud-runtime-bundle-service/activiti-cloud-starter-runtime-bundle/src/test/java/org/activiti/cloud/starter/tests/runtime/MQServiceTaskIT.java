@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
-import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -45,8 +45,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -274,31 +274,51 @@ public class MQServiceTaskIT {
     }
 
     @Test
-    public void should_supportResultCollectionOnMultiInstance() {
+    public void multiInstance_should_collectSpecifiedVariable_when_dataItemIsSet() {
         //given
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate
             .startProcess(ProcessPayloadBuilder
                 .start()
-                .withProcessDefinitionKey("process-with-multi-instance-result-collection")
+                .withProcessDefinitionKey("multi-instance-service-task-result-collection-data-item")
             .build());
 
-        //when
         await().untilAsserted(() -> {
-        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate
-            .getVariables(processInstance);
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate
+                .getVariables(processInstance);
 
-        //then
+            //then
             Collection<CloudVariableInstance> variables = variablesResponse.getBody().getContent();
             assertThat(variables)
-                .extracting(VariableInstance::getName)
-                .contains("meals");
-            VariableInstance meals = variables
-                .stream()
-                .filter(variableInstance -> "meals".equals(variableInstance.getName()))
-                .findFirst()
-                .orElse(null);
-            List<String> mealValues = meals.getValue();
-            assertThat(mealValues).containsExactlyInAnyOrder("pizza", "pasta");
+                .extracting(VariableInstance::getName, VariableInstance::getValue)
+                .contains(
+                    tuple("meals",
+                        asList("pizza", "pasta")));
+        });
+    }
+
+    @Test
+    public void multiInstance_should_collectAllVariables_when_noDataItem() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate
+            .startProcess(ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey("multi-instance-service-task-result-collection-all")
+            .build());
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate
+                .getVariables(processInstance);
+
+            //then
+            Collection<CloudVariableInstance> variables = variablesResponse.getBody().getContent();
+            assertThat(variables)
+                .extracting(VariableInstance::getName, VariableInstance::getValue)
+                .contains(tuple("miResult",
+                    asList(
+                        Map.of("meal", "pizza", "size", "small"),
+                        Map.of("meal", "pasta", "size", "medium"))));
         });
     }
 }

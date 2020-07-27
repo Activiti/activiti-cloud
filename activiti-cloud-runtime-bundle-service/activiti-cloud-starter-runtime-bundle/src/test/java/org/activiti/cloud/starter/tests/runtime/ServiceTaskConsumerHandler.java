@@ -65,6 +65,7 @@ public class ServiceTaskConsumerHandler {
 
     private final AtomicInteger currentMealIndex = new AtomicInteger(0);
     private List<String> meals = Arrays.asList("pizza", "pasta");
+    private List<String> sizes = Arrays.asList("small", "medium");
 
     @Autowired
     public ServiceTaskConsumerHandler(BinderAwareChannelResolver resolver,
@@ -239,6 +240,7 @@ public class ServiceTaskConsumerHandler {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         int remainder = currentMealIndex.getAndIncrement() % meals.size();
         integrationContext.addOutBoundVariable("meal", meals.get(remainder));
+        integrationContext.addOutBoundVariable("size", sizes.get(remainder));
 
         sendIntegrationResult(integrationRequest, integrationContext);
     }
