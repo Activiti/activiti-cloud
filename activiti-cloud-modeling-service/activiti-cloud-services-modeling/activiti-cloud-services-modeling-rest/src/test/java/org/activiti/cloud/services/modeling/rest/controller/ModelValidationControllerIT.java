@@ -317,6 +317,22 @@ public class ModelValidationControllerIT {
     }
 
     @Test
+    public void should_returnSuccessful_when_validatingProcessModelWithValidCallActivityElement() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/RankMovie.bpmn20.xml");
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/call-activity-with-valid-call-element.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+        resultActions.andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
     public void should_returnSuccessful_when_validatingProcessModelWithValidCallActivityVariable() throws Exception {
         byte[] validContent = resourceAsByteArray("process/call-activity-with-valid-variable-reference.bpmn20.xml");
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
