@@ -224,8 +224,9 @@ public class AuditProducerIT {
                 .extracting(cloudRuntimeEvent -> ((ProcessInstance) cloudRuntimeEvent.getEntity()).getBusinessKey())
                 .containsExactly("my business key");
             assertThat(receivedEvents).filteredOn(cloudRuntimeEvent -> PROCESS_STARTED.equals(cloudRuntimeEvent.getEventType()))
-                .extracting(cloudRuntimeEvent -> ((ProcessInstance) cloudRuntimeEvent.getEntity()).getName())
-                .containsExactly("my instance name");
+                .extracting(cloudRuntimeEvent -> ((ProcessInstance) cloudRuntimeEvent.getEntity()).getName(),
+                            cloudRuntimeEvent -> ((ProcessInstance) cloudRuntimeEvent.getEntity()).getProcessDefinitionName())
+                .containsExactly(tuple("my instance name", "SimpleProcess"));
             assertThat(receivedEvents)
                 .filteredOn(event -> TASK_CREATED.equals(event.getEventType()))
                 .extracting(event -> event.getProcessDefinitionVersion(),

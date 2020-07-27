@@ -87,6 +87,7 @@ create table process_instance
     start_from                 timestamp,
     start_to                   timestamp,
     status                     varchar(255),
+    process_definition_name    varchar(255),
     primary key (id)
 );
 create table process_model
@@ -253,6 +254,7 @@ create index task_var_processInstanceId_idx on task_variable (process_instance_i
 create index task_var_taskId_idx on task_variable (task_id);
 create index task_var_name_idx on task_variable (name);
 create index task_var_executionId_idx on task_variable (execution_id);
+create index pi_processDefinitionName_idx on process_instance (process_definition_name);
 alter table integration_context
     add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
 alter table process_model
