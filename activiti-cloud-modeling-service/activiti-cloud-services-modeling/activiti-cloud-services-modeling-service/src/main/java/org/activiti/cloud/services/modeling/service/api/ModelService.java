@@ -141,7 +141,7 @@ public interface ModelService {
                                 boolean includeOrphans,
                                 Pageable pageable);
 
-    public Set<ModelUpdateListener> findModelUpdateListeners(String modelType);
+    public List<ModelUpdateListener> findModelUpdateListeners(String modelType);
 
     public static class ProjectAccessControl {
 

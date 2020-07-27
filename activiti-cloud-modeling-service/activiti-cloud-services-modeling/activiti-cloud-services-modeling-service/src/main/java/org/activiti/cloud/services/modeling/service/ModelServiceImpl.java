@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.service;
 
 import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.toSet;
 import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.modeling.api.ValidationContext.EMPTY_CONTEXT;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
@@ -94,7 +93,7 @@ public class ModelServiceImpl implements ModelService{
 
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
-    private final Map<String, Set<ModelUpdateListener>> modelUpdateListenersMapByModelType;
+    private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
 
     @Autowired
     public ModelServiceImpl(ModelRepository modelRepository,
@@ -112,7 +111,7 @@ public class ModelServiceImpl implements ModelService{
         this.processModelContentConverter = processModelContentConverter;
         modelUpdateListenersMapByModelType = modelUpdateListeners
             .stream()
-            .collect(Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName(), toSet()));
+            .collect(Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName()));
     }
 
 
@@ -565,8 +564,8 @@ public class ModelServiceImpl implements ModelService{
     }
 
     @Override
-    public Set<ModelUpdateListener> findModelUpdateListeners(String modelType) {
-        return (Set<ModelUpdateListener>) emptyIfNull(modelUpdateListenersMapByModelType.get(modelType));
+    public List<ModelUpdateListener> findModelUpdateListeners(String modelType) {
+        return (List<ModelUpdateListener>) emptyIfNull(modelUpdateListenersMapByModelType.get(modelType));
     }
 
 
