@@ -17,9 +17,9 @@ package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -49,9 +48,8 @@ import org.springframework.web.context.WebApplicationContext;
 @ActiveProfiles(profiles = {"test", "generic"})
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @WithMockModelerUser
-public class GenericJsonModelTypeModelUpdateListenerControllerIT {
+public class ModelUpdateListenerControllerIT {
 
     @Autowired
     private WebApplicationContext context;
@@ -81,7 +79,7 @@ public class GenericJsonModelTypeModelUpdateListenerControllerIT {
     }
 
     @Test
-    public void should_callJsonModelUpdateListener_when_updatingModelContent() throws Exception {
+    public void should_callUpdateListenerMatchingWithModelType_when_updatingModelContent() throws Exception {
         String name = "updated-model-name";
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
             genericJsonModelType.getName()));
@@ -98,22 +96,9 @@ public class GenericJsonModelTypeModelUpdateListenerControllerIT {
             .execute(
                 argThat(modelToBeUpdated -> modelToBeUpdated.getId().equals(genericJsonModel.getId())),
                 argThat(newModel -> newModel.getName().equals(name)));
-    }
-
-    @Test
-    public void should_notCallNonJsonModelUpdateListener_when_updatingModelContent() throws Exception {
-        String name = "updated-model-name";
-        Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-            genericJsonModelType.getName()));
-
-        Model updatedModel = new ModelEntity(name, genericJsonModelType.getName());
-
-        mockMvc
-            .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updatedModel))).andExpect(status().is2xxSuccessful());
 
         verify(genericNonJsonModelUpdateListener,
-            times(0))
+            never())
             .execute(any(), any());
     }
 }

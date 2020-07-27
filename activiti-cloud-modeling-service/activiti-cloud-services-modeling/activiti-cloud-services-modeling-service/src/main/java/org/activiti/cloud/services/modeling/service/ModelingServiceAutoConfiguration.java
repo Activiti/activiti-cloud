@@ -35,6 +35,7 @@ import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,7 +75,7 @@ public class ModelingServiceAutoConfiguration {
                                      ModelExtensionsService modelExtensionsService,
                                      JsonConverter<Model> jsonConverter,
                                      ProcessModelContentConverter processModelContentConverter,
-                                     Set<ModelUpdateListener> modelUpdateListeners) {
+                                     @Autowired(required = false) Set<ModelUpdateListener> modelUpdateListeners) {
         return new ModelServiceImpl(modelRepository,
                                     modelTypeService,
                                     modelContentService,
