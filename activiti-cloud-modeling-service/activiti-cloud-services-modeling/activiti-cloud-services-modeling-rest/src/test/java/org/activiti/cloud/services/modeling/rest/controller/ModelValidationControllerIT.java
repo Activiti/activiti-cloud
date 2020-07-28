@@ -290,7 +290,7 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalideCallActivityVariable() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidCallActivityVariable() throws Exception {
         byte[] validContent = resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml");
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
         ModelEntity generatedProcess = processModel(project, "process-model");
