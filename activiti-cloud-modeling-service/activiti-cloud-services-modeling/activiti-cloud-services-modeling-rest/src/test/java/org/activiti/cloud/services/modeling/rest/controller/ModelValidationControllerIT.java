@@ -108,10 +108,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   processModel.getId())
@@ -126,10 +123,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate",
@@ -236,10 +230,7 @@ public class ModelValidationControllerIT {
     @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidName() throws Exception {
         byte[] validContent = resourceAsByteArray("process/invalid-process-name.bpmn20.xml");
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
                                                       resourceAsByteArray("process/invalid-process-name.bpmn20.xml"));
 
@@ -260,13 +251,18 @@ public class ModelValidationControllerIT {
                                 "DNS name validator"));
     }
 
+    private Model createModel(byte[] processContent) {
+        ProjectEntity project = (ProjectEntity) projectRepository
+            .createProject(project("project-test"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(processContent);
+        return modelRepository.createModel(generatedProcess);
+    }
+
     @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelWithEmptyCallActivity() throws Exception {
         byte[] validContent = resourceAsByteArray("process/call-activity-with-no-call-element.bpmn20.xml");
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
                                                       resourceAsByteArray("process/call-activity-with-no-call-element.bpmn20.xml"));
 
@@ -292,10 +288,7 @@ public class ModelValidationControllerIT {
     @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidCallActivityVariable() throws Exception {
         byte[] validContent = resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml");
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
                                                       resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml"));
 
@@ -319,10 +312,7 @@ public class ModelValidationControllerIT {
     @Test
     public void should_returnSuccessful_when_validatingProcessModelWithValidCallActivityElement() throws Exception {
         byte[] validContent = resourceAsByteArray("process/RankMovie.bpmn20.xml");
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
                                                       resourceAsByteArray("process/call-activity-with-valid-call-element.bpmn20.xml"));
 
@@ -335,10 +325,7 @@ public class ModelValidationControllerIT {
     @Test
     public void should_returnSuccessful_when_validatingProcessModelWithValidCallActivityVariable() throws Exception {
         byte[] validContent = resourceAsByteArray("process/call-activity-with-valid-variable-reference.bpmn20.xml");
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
                                                       resourceAsByteArray("process/call-activity-with-valid-variable-reference.bpmn20.xml"));
 
@@ -607,10 +594,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate",
@@ -636,10 +620,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate",
@@ -656,10 +637,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate",
