@@ -1,8 +1,8 @@
 {
-  "id":"process-with-multi-instance-result-collection-model",
-  "name":"process-with-multi-instance-result-collection",
+  "id":"multi-instance-service-task-result-collection-all-model",
+  "name":"multi-instance-service-task-result-collection-all",
   "extensions": {
-    "process-with-multi-instance-result-collection": {
+    "multi-instance-service-task-result-collection-all": {
       "properties": {
         "age-id": {
           "id": "age-id",

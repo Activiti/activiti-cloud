@@ -4,7 +4,7 @@
              xmlns:activiti="http://activiti.org/bpmn"
              targetNamespace="processDefinitions">
 
-    <process id="process-with-multi-instance-result-collection">
+    <process id="multi-instance-service-task-result-collection-data-item">
 
         <startEvent id="start"/>
 
