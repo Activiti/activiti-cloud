@@ -33,6 +33,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     private String processDefinitionKey;
     private String parentId;
     private Integer processDefinitionVersion;
+    private String processDefinitionName;
 
     public CloudProcessInstanceImpl() {
     }
@@ -49,6 +50,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         processDefinitionKey = processInstance.getProcessDefinitionKey();
         parentId = processInstance.getParentId();
         processDefinitionVersion = processInstance.getProcessDefinitionVersion();
+        processDefinitionName = processInstance.getProcessDefinitionName();
     }
 
     @Override
@@ -137,5 +139,14 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
 
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
+    }
+    
+    @Override
+    public String getProcessDefinitionName() {
+        return processDefinitionName;
+    }
+
+    public void setProcessDefinitionName(String processDefinitionName) {
+        this.processDefinitionName = processDefinitionName;
     }
 }

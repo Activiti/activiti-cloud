@@ -113,13 +113,16 @@ public class QueryProcessInstancesEntityIT {
             assertThat(processInstanceEntities)
                     .extracting(ProcessInstanceEntity::getId,
                                 ProcessInstanceEntity::getName,
-                                ProcessInstanceEntity::getStatus)
+                                ProcessInstanceEntity::getStatus,
+                                ProcessInstanceEntity::getProcessDefinitionName)
                     .contains(tuple(completedProcess.getId(),
                                     "first",
-                                    ProcessInstance.ProcessInstanceStatus.COMPLETED),
+                                    ProcessInstance.ProcessInstanceStatus.COMPLETED,
+                                    completedProcess.getProcessDefinitionName()),
                               tuple(runningProcess.getId(),
                                     "second",
-                                    ProcessInstance.ProcessInstanceStatus.RUNNING));
+                                    ProcessInstance.ProcessInstanceStatus.RUNNING, 
+                                    runningProcess.getProcessDefinitionName()));
         });
 
         await().untilAsserted(() -> {
@@ -235,6 +238,7 @@ public class QueryProcessInstancesEntityIT {
         process.setName("process");
         process.setProcessDefinitionKey("process-definition-key");
         process.setProcessDefinitionId("process-definition-id");
+        process.setProcessDefinitionName("process-definition-name");
         process.setProcessDefinitionVersion(10);
 
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
@@ -258,6 +262,7 @@ public class QueryProcessInstancesEntityIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
+            assertThat(responseEntity.getBody().getProcessDefinitionName()).isEqualTo("process-definition-name");
 
 
         });
@@ -393,14 +398,17 @@ public class QueryProcessInstancesEntityIT {
                     .extracting(
                     CloudProcessInstance::getId,
                     CloudProcessInstance::getName,
-                    CloudProcessInstance::getStatus)
+                    CloudProcessInstance::getStatus, 
+                    CloudProcessInstance::getProcessDefinitionName)
                     .containsExactly(
                             tuple(completedProcess.getId(),
                                   completedProcess.getName(),
-                                  ProcessInstanceStatus.COMPLETED),
+                                  ProcessInstanceStatus.COMPLETED, 
+                                  completedProcess.getProcessDefinitionName()),
                             tuple(runningProcess.getId(),
                                   runningProcess.getName(),
-                                  ProcessInstanceStatus.RUNNING)
+                                  ProcessInstanceStatus.RUNNING,
+                                  runningProcess.getProcessDefinitionName())
                     );
         });
     }

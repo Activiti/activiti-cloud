@@ -43,8 +43,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 				@Index(name="pi_businessKey_idx", columnList="businessKey", unique=false),
 				@Index(name="pi_name_idx", columnList="name", unique=false),
 				@Index(name="pi_processDefinitionId_idx", columnList="processDefinitionId", unique=false),
-				@Index(name="pi_processDefinitionKey_idx", columnList="processDefinitionKey", unique=false)
-		})
+				@Index(name="pi_processDefinitionKey_idx", columnList="processDefinitionKey", unique=false),
+                @Index(name="pi_processDefinitionName_idx", columnList="processDefinitionName", unique=false)
+        })
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
@@ -58,6 +59,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @Enumerated(EnumType.STRING)
     private ProcessInstanceStatus status;
     private Integer processDefinitionVersion;
+    private String processDefinitionName;
  
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModified;
@@ -258,6 +260,15 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
+
+    @Override
+    public String getProcessDefinitionName() {
+        return processDefinitionName;
+    }
+
+    public void setProcessDefinitionName(String processDefinitionName) {
+        this.processDefinitionName = processDefinitionName;
+    }
     
     @Transient
     public Date getStartFrom() {
@@ -320,6 +331,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
                                                processDefinitionId,
                                                processDefinitionKey,
                                                processDefinitionVersion,
+                                               processDefinitionName,
                                                startDate,
                                                startFrom,
                                                startTo,
@@ -337,20 +349,21 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
             return false;
         ProcessInstanceEntity other = (ProcessInstanceEntity) obj;
         return Objects.equals(businessKey, other.businessKey) && 
-               Objects.equals(id, other.id) && 
-               Objects.equals(initiator, other.initiator) && 
-               Objects.equals(lastModified, other.lastModified) && 
-               Objects.equals(lastModifiedFrom, other.lastModifiedFrom) && 
-               Objects.equals(lastModifiedTo, other.lastModifiedTo) && 
-               Objects.equals(name, other.name) && 
-               Objects.equals(parentId, other.parentId) && 
-               Objects.equals(processDefinitionId, other.processDefinitionId) && 
-               Objects.equals(processDefinitionKey, other.processDefinitionKey) && 
-               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) && 
-               Objects.equals(startDate, other.startDate) && 
-               Objects.equals(startFrom, other.startFrom) && 
-               Objects.equals(startTo, other.startTo) && 
-               status == other.status;
+                Objects.equals(id, other.id) && 
+                Objects.equals(initiator, other.initiator) && 
+                Objects.equals(lastModified, other.lastModified) && 
+                Objects.equals(lastModifiedFrom, other.lastModifiedFrom) && 
+                Objects.equals(lastModifiedTo, other.lastModifiedTo) && 
+                Objects.equals(name, other.name) && 
+                Objects.equals(parentId, other.parentId) && 
+                Objects.equals(processDefinitionId, other.processDefinitionId) && 
+                Objects.equals(processDefinitionKey, other.processDefinitionKey) && 
+                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) && 
+                Objects.equals(processDefinitionName, other.processDefinitionName) && 
+                Objects.equals(startDate, other.startDate) && 
+                Objects.equals(startFrom, other.startFrom) && 
+                Objects.equals(startTo, other.startTo) && 
+                status == other.status;
     }
     
 
