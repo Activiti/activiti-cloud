@@ -1,0 +1,24 @@
+{
+  "id": "basicInclusiveGatewayModel",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "basicInclusiveGateway": {
+      "properties": {},
+      "mappings": {
+        "task0": {
+          "mappingType": "MAP_ALL"
+        },
+        "theTask1": {
+          "mappingType": "MAP_ALL"
+        },
+        "theTask2": {
+          "mappingType": "MAP_ALL"
+        },
+        "theTask3": {
+          "mappingType": "MAP_ALL"
+        }
+      },
+      "constants": {}
+    }
+  }
+}
