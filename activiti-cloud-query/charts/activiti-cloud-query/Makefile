@@ -51,6 +51,9 @@ version:
 	sed -i -e "s/version:.*/version: $(VERSION)/" Chart.yaml
 	sed -i -e "s/tag: .*/tag: $(VERSION)/" values.yaml
 
+common-helm-chart-version:
+	sed -i -e "s/version:.*/version: $(VERSION)/" requirements.yaml
+
 tag:
 	git add --all
 	git commit -m "release $(VERSION)" --allow-empty # if first release then no verion update is performed

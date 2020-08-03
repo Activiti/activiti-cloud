@@ -80,3 +80,9 @@ create-helm-charts-release-and-upload:
 		sleep 60 ; \
 		cd - ; \
 	done 
+update-common-helm-chart-version:
+	@for chart in $(charts) ; do \
+		cd $$chart ; \
+		make common-helm-chart-version; \
+		cd -; \
+	done 
