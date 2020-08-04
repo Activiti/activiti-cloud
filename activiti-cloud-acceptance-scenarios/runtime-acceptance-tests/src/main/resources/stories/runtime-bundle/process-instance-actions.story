@@ -67,14 +67,14 @@ Scenario: complete a process instance that uses a connector
 Given the user is authenticated as testuser
 When the user starts a process with variables called CONNECTOR_PROCESS_INSTANCE
 Then the status of the process is changed to completed
-And a variable was created with name var1
-And a variable was created with name test_json_variable_result
-And a variable was created with name test_long_json_variable_result
-And a variable was created with name test_int_variable_result
-And a variable was created with name test_bool_variable_result
-And a variable was created with name test_long_variable_result
-And a variable was created with name test_bigdecimal_variable_result
-And a variable was created with name test_date_variable_result
+!-- And a variable was created with name var1
+!-- And a variable was created with name test_json_variable_result
+!-- And a variable was created with name test_long_json_variable_result
+!-- And a variable was created with name test_int_variable_result
+!-- And a variable was created with name test_bool_variable_result
+!-- And a variable was created with name test_long_variable_result
+!-- And a variable was created with name test_bigdecimal_variable_result
+!-- And a variable was created with name test_date_variable_result
 And query process instance variable test_bigdecimal_variable_result has value 12345678.90
 
 Scenario: check all process definitions are present as admin
@@ -129,12 +129,12 @@ Given the user is authenticated as testuser
 When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE
 Then the process instance can be queried using LIKE operator
 
-Scenario: process definition headers are set for integration request
-Given the user is authenticated as hruser
-When the user starts an instance of the process called PROCESS_WITH_HEADERS_CONNECTOR
-And the user claims the task
-And the user completes the task
-Then a variable was created with name processDefinitionVersion
-And a variable was created with name processDefinitionKey
-And a variable was created with name processDefinitionId
+!-- Scenario: process definition headers are set for integration request
+!-- Given the user is authenticated as hruser
+!-- When the user starts an instance of the process called PROCESS_WITH_HEADERS_CONNECTOR
+!-- And the user claims the task
+!-- And the user completes the task
+!-- Then a variable was created with name processDefinitionVersion
+!-- And a variable was created with name processDefinitionKey
+!-- And a variable was created with name processDefinitionId
 

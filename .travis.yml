@@ -59,7 +59,7 @@ jobs:
         - make prepare-helm-chart || travis_terminate 1
         - make run-helm-chart || travis_terminate 1
         - cd -
-        - sleep 360
+        - sleep 240
         - cd activiti-cloud-acceptance-scenarios
         - mvn -pl 'modeling-acceptance-tests' -Droot.log.level=off -q clean verify
         - mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off -q clean verify
