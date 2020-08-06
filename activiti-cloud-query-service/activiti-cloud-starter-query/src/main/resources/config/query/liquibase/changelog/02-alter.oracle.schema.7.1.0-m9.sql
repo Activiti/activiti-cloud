@@ -5,7 +5,7 @@ create index pi_processDefinitionName_idx on process_instance (process_definitio
 
 update process_instance pi
   set process_definition_name = (select pd.name
-                                    from process_definition as pd
+                                    from process_definition pd
                                     where pd.id = pi.process_definition_id);
 
 commit;
