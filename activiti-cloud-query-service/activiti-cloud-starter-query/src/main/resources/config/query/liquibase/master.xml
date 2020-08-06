@@ -99,5 +99,25 @@
         splitStatements="true"
         stripComments="true"/>
   </changeSet>
+
+  <changeSet author="activiti-query"
+      id="alter5-schema-m9" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+        encoding="utf8"
+        path="changelog/06-alter.pg.schema.7.1.0-m9.sql"
+        relativeToChangelogFile="true"
+        splitStatements="true"
+        stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+      id="alter3-oracle-schema-m9" dbms="oracle">
+    <sqlFile dbms="oracle"
+        encoding="utf8"
+        path="changelog/03-alter.oracle.schema.7.1.0-m9.sql"
+        relativeToChangelogFile="true"
+        splitStatements="true"
+        stripComments="true"/>
+  </changeSet>
   
 </databaseChangeLog>

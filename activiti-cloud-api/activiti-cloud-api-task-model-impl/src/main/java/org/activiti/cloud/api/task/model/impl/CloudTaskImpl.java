@@ -46,6 +46,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private String taskDefinitionKey;
     private List<String> candidateUsers;
     private List<String> candidateGroups;
+    private String processDefinitionName;
 
     public CloudTaskImpl() {
     }
@@ -71,6 +72,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         taskDefinitionKey = task.getTaskDefinitionKey();
         candidateUsers = task.getCandidateUsers();
         candidateGroups = task.getCandidateGroups();
+        processDefinitionName = task.getProcessDefinitionName();
     }
 
     @Override
@@ -268,6 +270,15 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     }
 
     @Override
+    public String getProcessDefinitionName() {
+        return processDefinitionName;
+    }
+
+    public void setProcessDefinitionName(String processDefinitionName) {
+        this.processDefinitionName = processDefinitionName;
+    }
+
+    @Override
     public String toString() {
         return "CloudTaskImpl{" +
                "id='" + id + '\'' +
@@ -287,7 +298,8 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                ", processDefinitionVersion=" + processDefinitionVersion +
                ", businessKey=" + businessKey +
                ", taskDefinitionKey=" + taskDefinitionKey +
-               '}';
+               ", processDefinitionName=" + processDefinitionName +
+                '}';
     }
 
     @Override
@@ -327,7 +339,9 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                Objects.equals(processDefinitionVersion,
                               task.processDefinitionVersion) &&
                Objects.equals(businessKey,
-                              task.businessKey) &&
+                              task.businessKey) && 
+               Objects.equals(processDefinitionName,
+                        task.processDefinitionName) &&
                status == task.status;
     }
 }

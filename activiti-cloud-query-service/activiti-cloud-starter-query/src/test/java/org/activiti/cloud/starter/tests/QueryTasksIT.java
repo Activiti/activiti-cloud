@@ -1541,4 +1541,52 @@ public class QueryTasksIT {
 
     }
 
+    @Test
+    public void should_getTask_when_queryFilteredByProcessDefinitionName() {
+        //given
+        Task task1 = taskEventContainedBuilder.aCreatedTask("Task1",
+                runningProcessInstance);
+
+        Task task2 = taskEventContainedBuilder.aCreatedTask("Task2", null);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId)
+                    .contains(task1.getId(), task2.getId());
+        });
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?processDefinitionName={processDefinitionName}",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    "my-proc-definition-name");
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId)
+                    .containsExactly(task1.getId());
+        });
+
+    }
+
 }
