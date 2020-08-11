@@ -232,11 +232,13 @@ public class AuditProducerIT {
                 .extracting(event -> event.getProcessDefinitionVersion(),
                     event -> event.getBusinessKey(),
                     event -> ((CloudTaskCreatedEvent) event).getEntity().getTaskDefinitionKey(),
-                    event -> ((CloudTaskCreatedEvent) event).getEntity().getFormKey())
+                    event -> ((CloudTaskCreatedEvent) event).getEntity().getFormKey(),
+                    event -> ((CloudTaskCreatedEvent) event).getEntity().getProcessDefinitionName())
                 .containsExactly(tuple(startProcessEntity.getBody().getProcessDefinitionVersion(),
                     startProcessEntity.getBody().getBusinessKey(),
                     "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94",
-                    "taskFormKey"));
+                    "taskFormKey",
+                    startProcessEntity.getBody().getProcessDefinitionName()));
         });
 
         //when

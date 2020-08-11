@@ -58,6 +58,7 @@ public class TaskEntityCreatedEventHandlerTest {
     public void handleShouldStoreNewTaskInstance() {
         //given
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
+        when(processInstanceEntity.getProcessDefinitionName()).thenReturn("processDefinitionName");
 
         TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
                                      "task",
@@ -93,6 +94,7 @@ public class TaskEntityCreatedEventHandlerTest {
         assertThat(captor.getValue().getProcessDefinitionVersion()).isEqualTo(event.getProcessDefinitionVersion());
         assertThat(captor.getValue().getBusinessKey()).isEqualTo(event.getBusinessKey());
         assertThat(captor.getValue().getTaskDefinitionKey()).isEqualTo(task.getTaskDefinitionKey());
+        assertThat(captor.getValue().getProcessDefinitionName()).isEqualTo("processDefinitionName");
 
     }
 
