@@ -83,3 +83,9 @@ update-common-helm-chart-version:
 		make common-helm-chart-version; \
 		cd -; \
 	done 
+update-common-chart-version:
+	@for chart in $(charts) ; do \
+		cd $$chart ; \
+		make update-common-version; \
+		cd - ; \
+	done 
