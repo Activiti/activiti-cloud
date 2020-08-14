@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,9 +54,11 @@ import org.activiti.cloud.acc.shared.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
 import org.springframework.hateoas.PagedModel;
 
 public class ProcessInstanceTasks {
@@ -116,16 +119,25 @@ public class ProcessInstanceTasks {
     @When("the user starts an instance of the process called $processName")
     public void startProcess(String processName) {
 
-        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName));
+        String processDefinitionKey = processDefinitionKeyMatcher(processName);
+        startProcessByKey(processDefinitionKey);
+        checkProcessWithTaskCreated(processName);
+    }
+
+    @When("the user starts an instance of the process with key $processDefinitionKey")
+    public void startProcessByKey(String processDefinitionKey) {
+        processInstance = processRuntimeBundleSteps.startProcess(
+            processDefinitionKey);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
-        checkProcessWithTaskCreated(processName);
     }
 
     @When("the user starts a process with variables called $processName")
     public void startProcessWithVariables(String processName) throws IOException {
 
-        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),true);
+        String processDefinitionKey = processDefinitionKeyMatcher(processName);
+        processInstance = processRuntimeBundleSteps.startProcess(
+            processDefinitionKey,true);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
         checkProcessWithTaskCreated(processName);
@@ -134,7 +146,7 @@ public class ProcessInstanceTasks {
     private void checkProcessWithTaskCreated(String processName) {
         assertThat(processInstance).isNotNull();
 
-        if(withTasks(processName)){
+        if (withTasks(processName)) {
             List<Task> tasks = new ArrayList<>(
                     processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
             assertThat(tasks).isNotEmpty();
@@ -183,6 +195,52 @@ public class ProcessInstanceTasks {
                         .complete()
                         .withTaskId(currentTask.getId())
                         .withVariable(variableName, value)
+                        .build());
+    }
+
+    @Then("the process instance reaches a task named $taskName")
+    public void checkProcessIsOnTask(String taskName) throws Exception {
+        await().untilAsserted(() -> {
+            Collection<CloudTask> tasks = processRuntimeBundleSteps
+                .getTaskByProcessInstanceId(processInstance.getId());
+            assertThat(tasks)
+                .extracting(CloudTask::getName)
+                .contains("Wait");
+        });
+    }
+
+    @Then("the process instance has a resultCollection named $resultCollectionName with entries of size $entriesSize as following: $variableTable")
+    public void checkProcessHasResultCollection(String resultCollectionName, int entriesSize, ExamplesTable variableTable) {
+        List<Object> resultCollection = new ArrayList<>();
+        Map<String, Object> resultCollectionEntry = new HashMap<>();
+        Iterator<Map<String, String>> iterator = variableTable.getRows().iterator();
+        int currentCount = 1;
+        while (iterator.hasNext()) {
+            Map<String, String> currentRow = iterator.next();
+            resultCollectionEntry.put(currentRow.get("name"), currentRow.get("value"));
+            if (currentCount % entriesSize == 0) {
+                resultCollection.add(resultCollectionEntry);
+                resultCollectionEntry = new HashMap<>();
+            }
+            currentCount++;
+        }
+
+        processQuerySteps.checkProcessInstanceHasVariableValue(processInstance.getId(),
+            resultCollectionName, resultCollection);
+
+    }
+
+    @When("the user completes the task available in the current process instance passing the following variables: $variableTable")
+    public void completeTask(ExamplesTable variableTable) {
+        Map<String, Object> variables = new HashMap<>();
+        variableTable.getRows().forEach( map -> variables.put(map.get("name"), map.get("value")));
+        Collection<CloudTask> tasks = processRuntimeBundleSteps
+            .getTaskByProcessInstanceId(processInstance.getId());
+        assertThat(tasks).isNotEmpty();
+        taskRuntimeBundleSteps.completeTask(tasks.iterator().next().getId(),
+                TaskPayloadBuilder
+                        .complete()
+                        .withVariables(variables)
                         .build());
     }
 

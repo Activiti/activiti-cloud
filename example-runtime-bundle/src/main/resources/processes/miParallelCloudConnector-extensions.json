@@ -1,0 +1,27 @@
+{
+  "id":"miParallelCloudConnector-model",
+  "name":"miParallelCloudConnector",
+  "extensions": {
+    "miParallelCloudConnector": {
+      "properties": {
+        "instanceCount-id": {
+          "id": "instanceCount-id",
+          "name": "instanceCount",
+          "type": "integer"
+        }
+      },
+      "mappings": {
+        "miCloudConnectorId": {
+          "inputs": {
+            "instanceCount": {
+              "type": "variable",
+              "value": "instanceCount"
+            }
+          },
+          "outputs": {
+          }
+        }
+      }
+    }
+  }
+}

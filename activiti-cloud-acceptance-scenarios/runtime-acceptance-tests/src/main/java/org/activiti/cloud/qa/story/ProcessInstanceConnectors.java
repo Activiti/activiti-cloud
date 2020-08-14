@@ -15,13 +15,17 @@
  */
 package org.activiti.cloud.qa.story;
 
+import static java.util.Collections.singletonMap;
 import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
+import java.util.List;
+import java.util.Map;
 import org.activiti.api.process.model.BPMNError;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent.ErrorEvents;
@@ -40,6 +44,7 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
 import org.springframework.hateoas.CollectionModel;
 
 import net.serenitybdd.core.Serenity;
@@ -130,6 +135,20 @@ public class ProcessInstanceConnectors {
         processQuerySteps.checkProcessInstanceHasVariableValue(processInstanceId,
                                                                variableName,
                                                                variableValue);
+    }
+
+    @Then("the process instance has a resultCollection named $variableName with the following integer entries: $variableTable")
+    public void assertThatQueryHasVariable(String variableName,
+                                           ExamplesTable variableTable) {
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        List<Map<String, Integer>> resultCollectionValue = new ArrayList<>();
+        variableTable.getRows().forEach( map ->
+            resultCollectionValue.add(singletonMap(map.get("name"), Integer.valueOf(map.get("value"))))
+            );
+
+        processQuerySteps.checkProcessInstanceHasVariableValue(processInstanceId,
+                                                               variableName,
+                                                               resultCollectionValue);
     }
 
     @Then("integration error event is emitted for the process")
