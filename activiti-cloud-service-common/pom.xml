@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.1.547</version>
+    <version>7.1.0-M9</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-service-common-parent</artifactId>
-  <version>7.1.547</version>
+  <version>7.1.0-M9</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Service Common Parent</name>
   <modules>
@@ -33,7 +33,7 @@
     <module>activiti-cloud-services-test-containers</module>
   </modules>
   <properties>
-    <activiti.version>7.1.263</activiti.version>
+    <activiti.version>7.1.0-M9</activiti.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
