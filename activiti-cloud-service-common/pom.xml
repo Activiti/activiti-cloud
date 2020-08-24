@@ -33,7 +33,7 @@
     <module>activiti-cloud-services-test-containers</module>
   </modules>
   <properties>
-    <activiti.version>7.1.264</activiti.version>
+    <activiti.version>7.1.265</activiti.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
