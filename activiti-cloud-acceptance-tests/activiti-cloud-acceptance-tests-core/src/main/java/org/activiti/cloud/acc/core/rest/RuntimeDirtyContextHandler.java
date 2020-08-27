@@ -22,13 +22,13 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService.PROCESS_INSTANCES_PATH;
-import static org.activiti.cloud.acc.core.services.runtime.TaskRuntimeService.TASKS_PATH;
-
 /**
  * DirtyContextHandler for runtime bundle
  */
 public class RuntimeDirtyContextHandler {
+
+    private final String TASKS_PATH = "/v1/tasks/";
+    private final String PROCESS_INSTANCES_PATH = "/v1/process-instances/";
 
     @Autowired
     private DirtyContextHandler dirtyContextHandler;
