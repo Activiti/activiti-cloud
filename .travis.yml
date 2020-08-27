@@ -108,3 +108,9 @@ notifications:
   slack:
     rooms:
       - alfresco:$SLACKTOKEN#activiti-community-builds
+    on_failure: always
+    on_success: change
+    template:
+      - 'Repo `%{repository_slug}` *%{result}* build (<%{build_url}|#%{build_number}>) for commit (<%{compare_url}|%{commit}>) on branch `%{branch}`.'
+      - 'Author: %{author} Execution time: *%{duration}*'
+      - 'Message: %{message}'
