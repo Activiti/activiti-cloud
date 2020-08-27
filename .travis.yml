@@ -2,73 +2,62 @@ import: Activiti/activiti-scripts:.travis.java.yml@master
 install: true
 cache:
   directories:
-    - ${HOME}/.m2/repository
+  - "${HOME}/.m2/repository"
 stages:
-  - name: activiti-cloud-build
-  - name: activiti-cloud-api
-  - name: activiti-cloud-service-common
-  - name: activiti-cloud-acceptance-tests
-  - name: activiti-cloud-services
-  - name: tag_deploy_updatebot
-    if: type != pull_request
+- name: activiti-cloud-build
+- name: activiti-cloud-api
+- name: activiti-cloud-service-common
+- name: activiti-cloud-acceptance-tests
+- name: activiti-cloud-services
+- name: tag_deploy_updatebot
+  if: type != pull_request
 jobs:
   include:
-    - name: activiti-cloud-build
-      stage: activiti-cloud-build
-      script: travis_wait 120 ${MAVEN_CMD} -N && ${MAVEN_CMD} -f activiti-cloud-build/pom.xml
-
-    - name: activiti-cloud-api
-      stage: activiti-cloud-api
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-api/pom.xml
-
-    - name: activiti-cloud-service-common
-      stage: activiti-cloud-service-common
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-service-common/pom.xml
-
-    - name: activiti-cloud-acceptance-tests
-      stage: activiti-cloud-acceptance-tests
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml
-
-    - name: activiti-cloud-runtime-bundle-service_and_activiti-cloud-messages-service
-      stage: activiti-cloud-services
-      script: |
-        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml || travis_terminate 1
-        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml || travis_terminate 1
-
-    - name: activiti-cloud-query-service_and_activiti-cloud-notifications-graphql-service
-      stage: activiti-cloud-services
-      script: |
-        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml || travis_terminate 1
-        travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml || travis_terminate 1
-
-    - name: activiti-cloud-audit-service
-      stage: activiti-cloud-services
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml
-
-    - name: activiti-cloud-modeling-service
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling-service/pom.xml
-      stage: activiti-cloud-services
-
-    - name: activiti-cloud-connectors
-      stage: activiti-cloud-services
-      script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
-
-    - name: tag_deploy_updatebot
-      stage: tag_deploy_updatebot
-      script: |
-        mvn versions:set -DnewVersion=$(cat VERSION) -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1
-        git add -u || travis_terminate 1
-        git commit -m "Release $(cat VERSION)" --allow-empty || travis_terminate 1
-        git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)" || travis_terminate 1
-        git push -f -q https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud.git v$(cat VERSION) || travis_terminate 1
-        mvn clean deploy -DskipTests  || travis_terminate 1
-        export VERSION=$(cat VERSION)| make updatebot/push-version || travis_terminate 1
-
-# Send coverage data
-after_success:
-  bash <(curl -s https://codecov.io/bash)
-
+  - name: activiti-cloud-build
+    stage: activiti-cloud-build
+    script: travis_wait 120 ${MAVEN_CMD} -N && ${MAVEN_CMD} -f activiti-cloud-build/pom.xml
+  - name: activiti-cloud-api
+    stage: activiti-cloud-api
+    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-api/pom.xml
+  - name: activiti-cloud-service-common
+    stage: activiti-cloud-service-common
+    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-service-common/pom.xml
+  - name: activiti-cloud-acceptance-tests
+    stage: activiti-cloud-acceptance-tests
+    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml
+  - name: activiti-cloud-runtime-bundle-service_and_activiti-cloud-messages-service
+    stage: activiti-cloud-services
+    script: |
+      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml || travis_terminate 1
+      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml || travis_terminate 1
+  - name: activiti-cloud-query-service_and_activiti-cloud-notifications-graphql-service
+    stage: activiti-cloud-services
+    script: |
+      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml || travis_terminate 1
+      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml || travis_terminate 1
+  - name: activiti-cloud-audit-service
+    stage: activiti-cloud-services
+    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml
+  - name: activiti-cloud-modeling-service
+    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling-service/pom.xml
+    stage: activiti-cloud-services
+  - name: activiti-cloud-connectors
+    stage: activiti-cloud-services
+    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
+  - name: tag_deploy_updatebot
+    stage: tag_deploy_updatebot
+    script: |
+      mvn versions:set -DnewVersion=$(cat VERSION) -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1
+      git add -u || travis_terminate 1
+      git commit -m "Release $(cat VERSION)" --allow-empty || travis_terminate 1
+      git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)" || travis_terminate 1
+      git push -f -q https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud.git v$(cat VERSION) || travis_terminate 1
+      mvn clean deploy -DskipTests  || travis_terminate 1
+      export VERSION=$(cat VERSION)| make updatebot/push-version || travis_terminate 1
+after_success: bash <(curl -s https://codecov.io/bash)
 after_failure:
-  - cat **/target/surefire-reports/*.xml | grep -B 1 -A 10 "<error"
-  - cat **/target/failsafe-reports/*.xml | grep -B 1 -A 10 "<error"
-
+- cat **/target/surefire-reports/*.xml | grep -B 1 -A 10 "<error"
+- cat **/target/failsafe-reports/*.xml | grep -B 1 -A 10 "<error"
+notifications:
+  slack:
+    secure: X8z7uRaZQ1Ygxs5el98Qb6ie8yr4qdOaabyMfUYTb3IxR3pucn7D+pGb3mA/+bBe6DqQ1RB6/Xinou7VIV7n2YNzRly9OTu0cgubC7QW8Fg6yexTlZnUxwOwxl25l8wNM6cr45u7dTjCWkOkVrva0FM/ldhAMHxdkuCKo0h7FTM7TWVZl4sN1bAV65jHopGp5Zito/rmmfx5k0g+CAr1fgWTTr6uED43OJdmVhuti4K1FnF/I4V1d+/gl4kHnfQJEpcd1KaH6dNDhrS5aSVB7ZZwYXoihQ1M6Srrcjgt3+w37lWbhgFhdCFiw3bk+veeIFrw/BPGDaQ06ZImbFN1q4rcw3nyZImzle0AXsqNVbtzaZ9ExzcCmCh8xA7L4yjL/gRXAxKkDZE6vd4QmyCzZf3b6+ERhLDyaeOIx3H/KBZlSGn7Ba0iruXCk4DU6DkDYppLAPuH9WxYt2qzhuHBFkQ9LRJx+Iyg7aYCzSuKejQ6IPW6Qik84alqNFPI/5kyXuaaGA7dSVDttsRNA+htz6BurprXc/wso0pyV8rnmMORg7Bz29pQKzEl3NW7CgRZZ/W6UZnlGAwOwzrweZYnVpWLfiU0aPRQKTbqc5njVgoG9+7lkqAIl04LFqPG7aT0Drnt0dtLKV7jjrc91RfpyBWDtG6AkvL43WAjn3lqbIY=
