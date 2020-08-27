@@ -1,116 +1,125 @@
 import: Activiti/activiti-scripts:.travis.java.yml@master
 env:
   global:
-    - ORG='activiti'
-    - APP_NAME='activiti-cloud-dependencies'
-    - GITHUB_CHARTS_REPO="https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git"
-    - RELEASE_BRANCH="develop"
-    - HELM_VERSION=2.12.3
-    - HELM_REPO_BASE_URL=https://kubernetes-charts.alfresco.com
-    - HELM_REPO=stable
-    - KUBERNETES_VERSION=1.14.8
-    - TRAVIS_WAIT_TIMEOUT=${TRAVIS_WAIT_TIMEOUT:-180}
+  - ORG='activiti'
+  - APP_NAME='activiti-cloud-dependencies'
+  - GITHUB_CHARTS_REPO="https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git"
+  - RELEASE_BRANCH="develop"
+  - HELM_VERSION=2.12.3
+  - HELM_REPO_BASE_URL=https://kubernetes-charts.alfresco.com
+  - HELM_REPO=stable
+  - KUBERNETES_VERSION=1.14.8
+  - TRAVIS_WAIT_TIMEOUT=${TRAVIS_WAIT_TIMEOUT:-180}
 before_script:
-  - echo -e "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com" >>  ~/.git-credentials
-  - curl -s https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar zx
-  - sudo mv linux-amd64/helm /usr/local/bin/
-  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl
-  - chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-  - kubectl config set-cluster default-cluster --server=${K8S_API_URL} || travis_terminate 1
-  - kubectl config set-credentials default-admin --token=${K8S_API_TOKEN} || travis_terminate 1
-  - kubectl config set-context default-system --cluster=default-cluster --user=default-admin || travis_terminate 1
-  - kubectl config use-context default-system || travis_terminate 1
-  - kubectl get ns || travis_terminate 1
+- echo -e "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com" >>  ~/.git-credentials
+- curl -s https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz
+  | tar zx
+- sudo mv linux-amd64/helm /usr/local/bin/
+- curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl
+- chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+- kubectl config set-cluster default-cluster --server=${K8S_API_URL} || travis_terminate
+  1
+- kubectl config set-credentials default-admin --token=${K8S_API_TOKEN} || travis_terminate
+  1
+- kubectl config set-context default-system --cluster=default-cluster --user=default-admin
+  || travis_terminate 1
+- kubectl config use-context default-system || travis_terminate 1
+- kubectl get ns || travis_terminate 1
 stages:
 - name: build
 - name: tag_updatebot
   if: type != pull_request
-
 install: true
-
 jobs:
   include:
-    - name: build jars
-      stage: build
-      script:
-        - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -DskipITs -DskipTests -f activiti-cloud-acceptance-scenarios/pom.xml || travis_terminate 1
-        - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-runtime-bundle/pom.xml || travis_terminate 1
-        - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-query/pom.xml || travis_terminate 1
-        - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-cloud-connector/pom.xml || travis_terminate 1
-        - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-modeling/pom.xml || travis_terminate 1
-        - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-dependencies/pom.xml || travis_terminate 1
-        - docker build -f activiti-cloud-query/Dockerfile -q -t docker.io/activiti/activiti-cloud-query:$(cat VERSION) activiti-cloud-query
-        - docker build -f example-cloud-connector/Dockerfile -q -t docker.io/activiti/example-cloud-connector:$(cat VERSION) example-cloud-connector
-        - docker build -f example-runtime-bundle/Dockerfile -q -t docker.io/activiti/example-runtime-bundle:$(cat VERSION) example-runtime-bundle
-        - docker build -f activiti-cloud-modeling/Dockerfile -q -t docker.io/activiti/activiti-cloud-modeling:$(cat VERSION) activiti-cloud-modeling
-
-        - docker push docker.io/activiti/activiti-cloud-query:$(cat VERSION) || travis_terminate 1
-        - docker push docker.io/activiti/example-runtime-bundle:$(cat VERSION) || travis_terminate 1
-        - docker push docker.io/activiti/example-cloud-connector:$(cat VERSION) || travis_terminate 1
-        - docker push docker.io/activiti/activiti-cloud-modeling:$(cat VERSION) || travis_terminate 1
-
-        - make create-helm-charts-release-and-upload
-
-        - cp VERSION  activiti-cloud-dependencies/
-        - cd activiti-cloud-dependencies
-        - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn -q versions:set -Droot.log.level=off -DnewVersion=${VERSION}  || travis_terminate 1
-        - make updatebot/push-version-dry || travis_terminate 1
-        - sleep 20
-        - make prepare-helm-chart || travis_terminate 1
-        - make run-helm-chart || travis_terminate 1
-        - cd -
-        - sleep 240
-        - cd activiti-cloud-acceptance-scenarios
-        - mvn -pl 'modeling-acceptance-tests' -Droot.log.level=off -q clean verify
-        - mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off -q clean verify
-        - cd -
-
-    - name: tag_updatebot
-      stage: tag_updatebot
-      script: |
-        mvn versions:set -q -DprocessAllModules=true -DgenerateBackupPoms=false  -DnewVersion=$(cat VERSION)
-        mvn clean deploy -DskipTests
-        git add -u
-        git commit -m "Release $(cat VERSION)" --allow-empty
-        git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)"|| travis_terminate 1;
-        git push -f -q https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git v$(cat VERSION)|| travis_terminate 1;
-        updatebot push-version --kind maven \
-                  org.activiti.cloud:activiti-cloud-dependencies ${VERSION} \
-                  org.activiti.cloud:activiti-cloud-modeling-dependencies ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-audit-dependencies ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-api-dependencies ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-parent ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-connectors-dependencies ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-messages-dependencies ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-modeling-dependencies ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-query-dependencies ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies ${activiti_cloud_version} \
-                  org.activiti.cloud:activiti-cloud-service-common-dependencies ${activiti_cloud_version} \
-                  --merge false;
-        updatebot push-version --kind helm activiti-cloud-dependencies ${VERSION} \
-                        runtime-bundle ${VERSION} \
-                        activiti-cloud-connector ${VERSION} \
-                        activiti-cloud-query ${VERSION} \
-                        activiti-cloud-modeling ${VERSION}
+  - name: build jars
+    stage: build
+    script:
+    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -DskipITs -DskipTests -f activiti-cloud-acceptance-scenarios/pom.xml
+      || travis_terminate 1
+    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-runtime-bundle/pom.xml
+      || travis_terminate 1
+    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-query/pom.xml
+      || travis_terminate 1
+    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-cloud-connector/pom.xml
+      || travis_terminate 1
+    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-modeling/pom.xml
+      || travis_terminate 1
+    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-dependencies/pom.xml
+      || travis_terminate 1
+    - docker build -f activiti-cloud-query/Dockerfile -q -t docker.io/activiti/activiti-cloud-query:$(cat
+      VERSION) activiti-cloud-query
+    - docker build -f example-cloud-connector/Dockerfile -q -t docker.io/activiti/example-cloud-connector:$(cat
+      VERSION) example-cloud-connector
+    - docker build -f example-runtime-bundle/Dockerfile -q -t docker.io/activiti/example-runtime-bundle:$(cat
+      VERSION) example-runtime-bundle
+    - docker build -f activiti-cloud-modeling/Dockerfile -q -t docker.io/activiti/activiti-cloud-modeling:$(cat
+      VERSION) activiti-cloud-modeling
+    - docker push docker.io/activiti/activiti-cloud-query:$(cat VERSION) || travis_terminate
+      1
+    - docker push docker.io/activiti/example-runtime-bundle:$(cat VERSION) || travis_terminate
+      1
+    - docker push docker.io/activiti/example-cloud-connector:$(cat VERSION) || travis_terminate
+      1
+    - docker push docker.io/activiti/activiti-cloud-modeling:$(cat VERSION) || travis_terminate
+      1
+    - make create-helm-charts-release-and-upload
+    - cp VERSION  activiti-cloud-dependencies/
+    - cd activiti-cloud-dependencies
+    - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn -q versions:set -Droot.log.level=off
+      -DnewVersion=${VERSION}  || travis_terminate 1
+    - make updatebot/push-version-dry || travis_terminate 1
+    - sleep 20
+    - make prepare-helm-chart || travis_terminate 1
+    - make run-helm-chart || travis_terminate 1
+    - cd -
+    - sleep 240
+    - cd activiti-cloud-acceptance-scenarios
+    - mvn -pl 'modeling-acceptance-tests' -Droot.log.level=off -q clean verify
+    - mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off -q clean verify
+    - cd -
+  - name: tag_updatebot
+    stage: tag_updatebot
+    script: |
+      mvn versions:set -q -DprocessAllModules=true -DgenerateBackupPoms=false  -DnewVersion=$(cat VERSION)
+      mvn clean deploy -DskipTests
+      git add -u
+      git commit -m "Release $(cat VERSION)" --allow-empty
+      git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)"|| travis_terminate 1;
+      git push -f -q https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git v$(cat VERSION)|| travis_terminate 1;
+      updatebot push-version --kind maven \
+                org.activiti.cloud:activiti-cloud-dependencies ${VERSION} \
+                org.activiti.cloud:activiti-cloud-modeling-dependencies ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-audit-dependencies ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-api-dependencies ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-parent ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-connectors-dependencies ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-messages-dependencies ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-modeling-dependencies ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-query-dependencies ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies ${activiti_cloud_version} \
+                org.activiti.cloud:activiti-cloud-service-common-dependencies ${activiti_cloud_version} \
+                --merge false;
+      updatebot push-version --kind helm activiti-cloud-dependencies ${VERSION} \
+                      runtime-bundle ${VERSION} \
+                      activiti-cloud-connector ${VERSION} \
+                      activiti-cloud-query ${VERSION} \
+                      activiti-cloud-modeling ${VERSION}
 after_failure:
-  - cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart" &&  cd -
+- cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart"
+  &&  cd -
 after_success:
-  - cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart" &&  cd -
-
+- cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart"
+  &&  cd -
 before_install:
-  - echo -e "https://$GITHUB_USER:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
-  - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY"
-  - curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear
-  - export activiti_cloud_version=$(grep -oPm1 "(?<=<activiti-cloud.version>)[^<]+" "activiti-cloud-dependencies/pom.xml")
-  - echo activiti_cloud_version=${activiti_cloud_version}
+- echo -e "https://$GITHUB_USER:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
+- echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin
+  "$DOCKER_REGISTRY"
+- curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear
+- export activiti_cloud_version=$(grep -oPm1 "(?<=<activiti-cloud.version>)[^<]+"
+  "activiti-cloud-dependencies/pom.xml")
+- echo activiti_cloud_version=${activiti_cloud_version}
 notifications:
   slack:
-    rooms:
-      - alfresco:$SLACKTOKEN#activiti-community-builds
-    on_failure: always
-    on_success: change
-    template:
-      - 'Repo `%{repository_slug}` *%{result}* build (<%{build_url}|#%{build_number}>) for commit (<%{compare_url}|%{commit}>) on branch `%{branch}`.'
-      - 'Author: %{author} Execution time: *%{duration}*'
-      - 'Message: %{message}'
+    secure: J/ilLqmqXD7/4VpZZ3HxFrp5Ae6zJJuo6KjsxP5MN4kTxUhfAJvbrfoZfVioxsBX/qXGx/ckvq1WCzen13N+UrWcL+SiXBf9sTsiB4oB2O4mNV8COUAJThJxHvG6w1YFUYIFePD7s9Y6c+4idL5mLfzdthuzBcwn4lHM64iYcWFXqnOR0dJvChzZnbyrLYhOp5MJq9knDdiemKMNU7TI4sa+FTx4Uxj89/f0qKlw7Wd3cuvf1uSPOof+wy2r5ujPz3c5bvecXURcNUc2GLhNAv4TWMNrfY6jQCoCNC9pdmWHm2qcQjXmVqrM75527rOap9wuh1ZSk+fsh/ExiCUWMROB7An1I7Nqy0AdtjUXctuj0kGcjTyKEvVrUg8Eb0DLmFGANcmNvv28JTTokyM2AWx+Jma5ilDnNVZV1TCv++npFGaTMRSP9f3U3IKYDFzHdkjDRifvpQCrpp1Wj+RaGg8r1dRSyfG/3QoAGJ9CwlM1NxJY9SL7aR+aRLgQHSmdsWZWN+LL6ivLgu2OABjInZHDlzwLtDg1nHupbaxAb1lzxGPik52X5rZEkxUHiLHmCnyI94Yvf0L+jvM/Dko+ETGrTj4e1Qayv6ZxSU8ULsOV8gDeBcK5woaCTJsAzXvohz4vKl1YhZ5WP6vISz7sj/WetaPQyaBOLhfQnz+8O5k=
