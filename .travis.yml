@@ -107,4 +107,4 @@ before_install:
 notifications:
   slack:
     rooms:
-	  - alfresco:$SLACKTOKEN#activiti-community-builds
+      - alfresco:$SLACKTOKEN#activiti-community-builds
