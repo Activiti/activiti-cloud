@@ -12,6 +12,11 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-rest-client</artifactId>
+      <version>7.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
@@ -48,5 +53,11 @@
       <artifactId>batik-codec</artifactId>
       <version>${batik.version}</version>
     </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.activiti.cloud</groupId>-->
+      <!--<artifactId>activiti-cloud-services-rest-client</artifactId>-->
+      <!--<version>7.1.0-SNAPSHOT</version>-->
+      <!--<scope>compile</scope>-->
+    <!--</dependency>-->
   </dependencies>
 </project>
