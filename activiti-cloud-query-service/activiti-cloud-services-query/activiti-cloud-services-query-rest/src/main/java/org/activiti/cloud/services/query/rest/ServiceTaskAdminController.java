@@ -57,9 +57,9 @@ public class ServiceTaskAdminController {
 
 
     public ServiceTaskAdminController(BPMNActivityRepository bpmnActivityRepository,
-                                 ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                 AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler,
-                                 EntityFinder entityFinder) {
+                                      ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
+                                      AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler,
+                                      EntityFinder entityFinder) {
         this.bpmnActivityRepository = bpmnActivityRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.entityFinder = entityFinder;
@@ -70,8 +70,9 @@ public class ServiceTaskAdminController {
     public PagedModel<EntityModel<CloudBPMNActivity>> findAll(@QuerydslPredicate(root = BPMNActivityEntity.class) Predicate predicate,
                                                               Pageable pageable) {
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                     bpmnActivityRepository.findAll(predicate,
-                                                                            pageable),
+                                                     bpmnActivityRepository.findByActivityType("serviceTask",
+                                                                                               predicate,
+                                                                                               pageable),
                                                      taskRepresentationModelAssembler);
     }
 

@@ -20,12 +20,15 @@ import java.util.List;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity.BPMNActivityStatus;
 import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.StringPath;
 
 @RepositoryRestResource(exported = false)
@@ -52,5 +55,10 @@ public interface BPMNActivityRepository extends PagingAndSortingRepository<BPMNA
     BPMNActivityEntity findByProcessInstanceIdAndElementIdAndExecutionId(String processInstanceId,
                                                                          String elementId,
                                                                          String executionId);
+
+    Page<BPMNActivityEntity> findByActivityType(String activityType,
+                                                Predicate predicate,
+                                                Pageable pagable);
+
 
 }

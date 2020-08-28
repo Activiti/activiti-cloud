@@ -50,8 +50,8 @@ public class ProcessInstanceServiceTasksAdminController {
 
     @Autowired
     public ProcessInstanceServiceTasksAdminController(BPMNActivityRepository taskRepository,
-                                          ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                          AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler) {
+                                                      ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
+                                                      AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler) {
         this.taskRepository = taskRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
@@ -59,11 +59,12 @@ public class ProcessInstanceServiceTasksAdminController {
 
     @RequestMapping(value = "/service-tasks", method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudBPMNActivity>> getTasks(@PathVariable String processInstanceId,
-                                                       Pageable pageable) {
-        Page<BPMNActivityEntity> page = taskRepository.findAll(QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(processInstanceId),
-                                                       pageable);
+                                                               Pageable pageable) {
+        Page<BPMNActivityEntity> page = taskRepository.findByActivityType("serviceTask",
+                                                                          QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(processInstanceId),
+                                                                          pageable);
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                  page,
-                                                  taskRepresentationModelAssembler);
+                                                     page,
+                                                     taskRepresentationModelAssembler);
     }
 }
