@@ -20,7 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.rest.ServiceTaskController;
+import org.activiti.cloud.services.query.rest.ServiceTaskAdminController;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -29,7 +29,7 @@ public class ServiceTaskRepresentationModelAssembler implements RepresentationMo
 
     @Override
     public EntityModel<CloudBPMNActivity> toModel(BPMNActivityEntity entity) {
-        Link selfRel = linkTo(methodOn(ServiceTaskController.class).findById(entity.getId())).withSelfRel();
+        Link selfRel = linkTo(methodOn(ServiceTaskAdminController.class).findById(entity.getId())).withSelfRel();
 
         return new EntityModel<>(entity,
                                  selfRel);
