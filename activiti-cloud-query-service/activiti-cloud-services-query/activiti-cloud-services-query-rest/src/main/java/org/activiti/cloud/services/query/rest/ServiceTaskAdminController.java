@@ -20,6 +20,7 @@ import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,10 +70,12 @@ public class ServiceTaskAdminController {
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudBPMNActivity>> findAll(@QuerydslPredicate(root = BPMNActivityEntity.class) Predicate predicate,
                                                               Pageable pageable) {
+
+        Predicate filter = QBPMNActivityEntity.bPMNActivityEntity.activityType.eq("serviceTask").and(predicate);
+
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                     bpmnActivityRepository.findByActivityType("serviceTask",
-                                                                                               predicate,
-                                                                                               pageable),
+                                                     bpmnActivityRepository.findAll(filter,
+                                                                                    pageable),
                                                      taskRepresentationModelAssembler);
     }
 
