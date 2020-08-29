@@ -22,8 +22,7 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.activiti.cloud.services.query.rest.predicate.ServiceTasksFilter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
@@ -46,15 +45,13 @@ import com.querydsl.core.types.Predicate;
         })
 public class ServiceTaskAdminController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskAdminController.class);
-
     private final BPMNActivityRepository bpmnActivityRepository;
 
-    private ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;
+    private final ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
-    private AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler;
 
-    private EntityFinder entityFinder;
+    private final EntityFinder entityFinder;
 
 
     public ServiceTaskAdminController(BPMNActivityRepository bpmnActivityRepository,
@@ -71,7 +68,7 @@ public class ServiceTaskAdminController {
     public PagedModel<EntityModel<CloudBPMNActivity>> findAll(@QuerydslPredicate(root = BPMNActivityEntity.class) Predicate predicate,
                                                               Pageable pageable) {
 
-        Predicate filter = QBPMNActivityEntity.bPMNActivityEntity.activityType.eq("serviceTask").and(predicate);
+        Predicate filter = new ServiceTasksFilter().extend(predicate);
 
         return pagedCollectionModelAssembler.toModel(pageable,
                                                      bpmnActivityRepository.findAll(filter,
@@ -82,9 +79,11 @@ public class ServiceTaskAdminController {
     @RequestMapping(value = "/{serviceTaskId}", method = RequestMethod.GET)
     public EntityModel<CloudBPMNActivity> findById(@PathVariable String serviceTaskId) {
 
-        BPMNActivityEntity entity = entityFinder.findById(bpmnActivityRepository,
-                                                          serviceTaskId,
-                                                          "Unable to find service task entity for the given id:'" + serviceTaskId + "'");
+        Predicate filter = new ServiceTasksFilter().extend(QBPMNActivityEntity.bPMNActivityEntity.id.eq(serviceTaskId));
+
+        BPMNActivityEntity entity = entityFinder.findOne(bpmnActivityRepository,
+                                                         filter,
+                                                         "Unable to find service task entity for the given id:'" + serviceTaskId + "'");
 
         return taskRepresentationModelAssembler.toModel(entity);
     }

@@ -22,6 +22,7 @@ import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.predicate.ServiceTasksFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.querydsl.core.types.Predicate;
+
 @RestController
 @RequestMapping(
         value = "/admin/v1/process-instances/{processInstanceId}",
@@ -43,9 +46,9 @@ import org.springframework.web.bind.annotation.RestController;
         })
 public class ProcessInstanceServiceTasksAdminController {
 
-    private ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;
+    private final ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
-    private AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler;
 
     private final BPMNActivityRepository taskRepository;
 
@@ -62,8 +65,9 @@ public class ProcessInstanceServiceTasksAdminController {
     public PagedModel<EntityModel<CloudBPMNActivity>> getTasks(@PathVariable String processInstanceId,
                                                                Pageable pageable) {
 
-        Page<BPMNActivityEntity> page = taskRepository.findAll(bPMNActivityEntity.processInstanceId.eq(processInstanceId)
-                                                                                 .and(bPMNActivityEntity.activityType.eq("serviceTask")),
+        Predicate filter = new ServiceTasksFilter().extend(bPMNActivityEntity.processInstanceId.eq(processInstanceId));
+
+        Page<BPMNActivityEntity> page = taskRepository.findAll(filter,
                                                                pageable);
         return pagedCollectionModelAssembler.toModel(pageable,
                                                      page,
