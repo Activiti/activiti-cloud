@@ -146,7 +146,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
 
-        await().atMost(Durations.ONE_MINUTE).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             //when
             ResponseEntity<PagedModel<BPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks",
                                                                                        HttpMethod.GET,
