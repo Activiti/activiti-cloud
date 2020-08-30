@@ -21,4 +21,6 @@ import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 public interface CloudBPMNActivity extends CloudRuntimeEntity,
         BPMNActivity {
 
+    String getId();
+
 }

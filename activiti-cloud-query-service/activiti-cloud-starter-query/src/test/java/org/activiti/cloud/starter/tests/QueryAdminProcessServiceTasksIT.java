@@ -29,6 +29,7 @@ import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
 import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
@@ -45,7 +46,6 @@ import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationI
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,17 +67,16 @@ import org.springframework.test.context.TestPropertySource;
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class QueryAdminProcessServiceTasksIT {
 
-    private static final String SERVICE_TASK_ID = "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94";
+    private static final String SERVICE_TASK_ELEMENT_ID = "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94";
 
-    private static final String SERVICE_TASK = "serviceTask";
+    private static final String SERVICE_TASK_TYPE = "serviceTask";
 
     private static final String PROC_URL = "/admin/v1/process-instances";
 
-    private static final ParameterizedTypeReference<PagedModel<BPMNActivity>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<BPMNActivity>>() {
+    private static final ParameterizedTypeReference<PagedModel<CloudBPMNActivity>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudBPMNActivity>>() {
     };
 
-    private static final ParameterizedTypeReference<BPMNActivity> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<BPMNActivity>() {
-    };
+    private static final ParameterizedTypeReference<CloudBPMNActivity> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudBPMNActivity>() { };
 
     @Autowired
     private KeycloakTokenProducer keycloakTokenProducer;
@@ -152,7 +151,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedModel<BPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks",
+            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks",
                                                                                        HttpMethod.GET,
                                                                                        keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                        PAGED_TASKS_RESPONSE_TYPE);
@@ -161,7 +160,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent()).hasSize(1)
                                                              .extracting(BPMNActivity::getActivityType)
-                                                             .contains(SERVICE_TASK);
+                                                             .contains(SERVICE_TASK_TYPE);
         });
     }
 
@@ -181,7 +180,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedModel<BPMNActivity>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks",
+            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks",
                                                                                        HttpMethod.GET,
                                                                                        keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                        PAGED_TASKS_RESPONSE_TYPE);
@@ -190,7 +189,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent()).hasSize(1)
                                                              .extracting(BPMNActivity::getActivityType)
-                                                             .contains(SERVICE_TASK);
+                                                             .contains(SERVICE_TASK_TYPE);
         });
     }
 
@@ -209,16 +208,30 @@ public class QueryAdminProcessServiceTasksIT {
         });
 
         await().untilAsserted(() -> {
+
+            ResponseEntity<PagedModel<CloudBPMNActivity>> serviceTasksResponse = testRestTemplate.exchange("/admin/v1/service-tasks",
+                                                                                                      HttpMethod.GET,
+                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                      PAGED_TASKS_RESPONSE_TYPE);
+
+            assertThat(serviceTasksResponse.getBody().getContent()).isNotEmpty();
+
+            String serviceTaskId = serviceTasksResponse.getBody()
+                                                       .getContent()
+                                                       .iterator()
+                                                       .next()
+                                                       .getId();
+
             //when
-            ResponseEntity<BPMNActivity> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/" + SERVICE_TASK_ID,
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       SINGLE_TASK_RESPONSE_TYPE);
+            ResponseEntity<CloudBPMNActivity> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/" + serviceTaskId,
+                                                                                    HttpMethod.GET,
+                                                                                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                    SINGLE_TASK_RESPONSE_TYPE);
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody()).extracting(BPMNActivity::getActivityType)
-                                                .isEqualTo(SERVICE_TASK);
+            assertThat(responseEntity.getBody()).extracting(CloudBPMNActivity::getId, BPMNActivity::getElementId, BPMNActivity::getActivityType)
+                                                .containsExactly(serviceTaskId, SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_TYPE);
         });
     }
 
@@ -239,9 +252,9 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
 
-        await().atMost(Durations.ONE_MINUTE).untilAsserted(() -> {
+        await().untilAsserted(() -> {
            //when
-           ResponseEntity<PagedModel<BPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks",
+           ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks",
                                                                                          HttpMethod.GET,
                                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                          PAGED_TASKS_RESPONSE_TYPE);
@@ -263,11 +276,11 @@ public class QueryAdminProcessServiceTasksIT {
         startActivity.setProcessInstanceId(process.getId());
         startActivity.setExecutionId(UUID.randomUUID().toString());
 
-        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sid-68945AF1-396F-4B8A-B836-FC318F62313F", "startEvent1", SERVICE_TASK_ID);
+        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sid-68945AF1-396F-4B8A-B836-FC318F62313F", "startEvent1", SERVICE_TASK_ELEMENT_ID);
         sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
         sequenceFlow.setProcessInstanceId(process.getId());
 
-        BPMNActivityImpl taskActivity = new BPMNActivityImpl(SERVICE_TASK_ID, "Service Task", SERVICE_TASK);
+        BPMNActivityImpl taskActivity = new BPMNActivityImpl(SERVICE_TASK_ELEMENT_ID, "Service Task", SERVICE_TASK_TYPE);
         taskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
         taskActivity.setProcessInstanceId(process.getId());
         taskActivity.setExecutionId(UUID.randomUUID().toString());
