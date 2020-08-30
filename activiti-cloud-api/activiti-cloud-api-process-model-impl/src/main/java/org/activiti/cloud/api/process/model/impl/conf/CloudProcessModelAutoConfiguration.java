@@ -26,12 +26,14 @@ import org.activiti.api.process.model.events.MessageSubscriptionEvent;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinition;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.impl.CloudBPMNActivityImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.CloudStartMessageDeploymentDefinitionImpl;
@@ -169,6 +171,8 @@ public class CloudProcessModelAutoConfiguration {
                             CloudStartMessageDeploymentDefinitionImpl.class);
         resolver.addMapping(CloudProcessInstance.class,
                             CloudProcessInstanceImpl.class);
+        resolver.addMapping(CloudBPMNActivity.class,
+                            CloudBPMNActivityImpl.class);
 
         module.setAbstractTypes(resolver);
 
