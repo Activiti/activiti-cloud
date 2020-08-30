@@ -67,6 +67,10 @@ import org.springframework.test.context.TestPropertySource;
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class QueryAdminProcessServiceTasksIT {
 
+    private static final String SERVICE_TASK_ID = "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94";
+
+    private static final String SERVICE_TASK = "serviceTask";
+
     private static final String PROC_URL = "/admin/v1/process-instances";
 
     private static final ParameterizedTypeReference<PagedModel<BPMNActivity>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<BPMNActivity>>() {
@@ -155,12 +159,72 @@ public class QueryAdminProcessServiceTasksIT {
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getContent()).hasSize(1);
+            assertThat(responseEntity.getBody().getContent()).hasSize(1)
+                                                             .extracting(BPMNActivity::getActivityType)
+                                                             .contains(SERVICE_TASK);
         });
     }
 
     @Test
-    public void shouldNotGetProcessInstanceDiagramAdmin() throws InterruptedException {
+    public void shouldGetServiceTasks() throws InterruptedException {
+        //given
+        ProcessInstanceImpl process = startSimpleProcessInstance();
+
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<BPMNActivity>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks",
+                                                                                       HttpMethod.GET,
+                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       PAGED_TASKS_RESPONSE_TYPE);
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent()).hasSize(1)
+                                                             .extracting(BPMNActivity::getActivityType)
+                                                             .contains(SERVICE_TASK);
+        });
+    }
+
+    @Test
+    public void shouldGetServiceTaskById() throws InterruptedException {
+        //given
+        ProcessInstanceImpl process = startSimpleProcessInstance();
+
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<BPMNActivity> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/" + SERVICE_TASK_ID,
+                                                                                       HttpMethod.GET,
+                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       SINGLE_TASK_RESPONSE_TYPE);
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody()).extracting(BPMNActivity::getActivityType)
+                                                .isEqualTo(SERVICE_TASK);
+        });
+    }
+
+
+    @Test
+    public void shouldNotGetProcessInstanceServiceTasks() throws InterruptedException {
         //given
         keycloakTokenProducer.setKeycloakTestUser("hruser");
 
@@ -199,11 +263,11 @@ public class QueryAdminProcessServiceTasksIT {
         startActivity.setProcessInstanceId(process.getId());
         startActivity.setExecutionId(UUID.randomUUID().toString());
 
-        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sid-68945AF1-396F-4B8A-B836-FC318F62313F", "startEvent1", "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94");
+        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sid-68945AF1-396F-4B8A-B836-FC318F62313F", "startEvent1", SERVICE_TASK_ID);
         sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
         sequenceFlow.setProcessInstanceId(process.getId());
 
-        BPMNActivityImpl taskActivity = new BPMNActivityImpl("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Service Task", "serviceTask");
+        BPMNActivityImpl taskActivity = new BPMNActivityImpl(SERVICE_TASK_ID, "Service Task", SERVICE_TASK);
         taskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
         taskActivity.setProcessInstanceId(process.getId());
         taskActivity.setExecutionId(UUID.randomUUID().toString());
