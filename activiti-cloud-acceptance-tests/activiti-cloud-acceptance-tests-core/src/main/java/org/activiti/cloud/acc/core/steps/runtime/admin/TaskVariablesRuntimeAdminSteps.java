@@ -31,10 +31,6 @@ public class TaskVariablesRuntimeAdminSteps {
     @Autowired
     private TaskVariablesRuntimeAdminService taskRuntimeService;
 
-    @Autowired
-    @Qualifier("runtimeBundleBaseService")
-    private BaseService baseService;
-
     @Step
     public void updateVariable(String taskId, String name, Object value){
 
