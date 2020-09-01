@@ -19,7 +19,6 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.acc.shared.service.BaseService;
 import org.springframework.hateoas.PagedModel;
 
 public interface AuditService {

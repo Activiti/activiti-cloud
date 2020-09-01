@@ -19,13 +19,9 @@ import feign.Headers;
 import feign.RequestLine;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.acc.shared.service.BaseService;
-import org.activiti.cloud.api.task.model.CloudTask;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
-
-import java.util.function.Predicate;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
 public interface ProcessQueryAdminService {
 

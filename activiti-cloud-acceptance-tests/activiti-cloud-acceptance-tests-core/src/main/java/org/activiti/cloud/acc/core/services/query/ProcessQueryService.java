@@ -21,7 +21,6 @@ import feign.RequestLine;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.acc.shared.service.BaseService;
 import org.springframework.hateoas.PagedModel;
 
 public interface ProcessQueryService {

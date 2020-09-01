@@ -17,11 +17,10 @@ package org.activiti.cloud.acc.core.services.audit.admin;
 
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
 public interface AuditAdminService {
 

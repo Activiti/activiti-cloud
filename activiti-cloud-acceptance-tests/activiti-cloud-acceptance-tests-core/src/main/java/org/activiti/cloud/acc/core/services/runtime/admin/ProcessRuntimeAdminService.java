@@ -20,7 +20,6 @@ import feign.Param;
 import feign.RequestLine;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
-import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.hateoas.PagedModel;
 
