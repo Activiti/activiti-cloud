@@ -45,6 +45,7 @@
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
         <version>${project.version}</version>
+        <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
