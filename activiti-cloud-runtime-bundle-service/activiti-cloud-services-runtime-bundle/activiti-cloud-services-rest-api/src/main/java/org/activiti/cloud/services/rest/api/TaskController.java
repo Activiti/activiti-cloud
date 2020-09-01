@@ -37,8 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(value = "/v1/tasks", produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public interface TaskController {
 
-    @GetMapping(value = "/",
-        headers = "Content-type=application/json")
+    @GetMapping(headers = "Content-type=application/json")
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
 
     @GetMapping(value = "/{taskId}")
@@ -63,8 +62,7 @@ public interface TaskController {
     @DeleteMapping(value = "/{taskId}")
     EntityModel<CloudTask> deleteTask(@PathVariable(value = "taskId") String taskId);
 
-    @PostMapping(value = "/",
-        headers = "Content-type=application/json")
+    @PostMapping(headers = "Content-type=application/json")
     EntityModel<CloudTask> createNewTask(@RequestBody CreateTaskPayload createTaskPayload);
 
     @PutMapping(value = "/{taskId}",
