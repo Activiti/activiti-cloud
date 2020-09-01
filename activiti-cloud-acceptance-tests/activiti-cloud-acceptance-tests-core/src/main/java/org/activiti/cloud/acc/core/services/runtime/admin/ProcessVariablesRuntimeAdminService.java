@@ -25,7 +25,7 @@ import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.springframework.http.ResponseEntity;
 
-public interface ProcessVariablesRuntimeAdminService extends BaseService {
+public interface ProcessVariablesRuntimeAdminService {
 
     @RequestLine("PUT /admin/v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")

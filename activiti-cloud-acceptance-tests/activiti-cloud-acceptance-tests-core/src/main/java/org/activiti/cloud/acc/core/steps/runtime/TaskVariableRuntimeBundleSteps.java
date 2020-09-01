@@ -13,52 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.acc.core.steps.runtime.admin;
+package org.activiti.cloud.acc.core.steps.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.acc.core.services.runtime.admin.TaskVariablesRuntimeAdminService;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.services.rest.api.TaskVariableApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 
 @EnableRuntimeFeignContext
-public class TaskVariablesRuntimeAdminSteps {
+public class TaskVariableRuntimeBundleSteps {
 
     @Autowired
-    private TaskVariablesRuntimeAdminService taskRuntimeService;
+    private TaskVariableApiClient taskVariableApiClient;
 
     @Autowired
     @Qualifier("runtimeBundleBaseService")
     private BaseService baseService;
 
     @Step
-    public void updateVariable(String taskId, String name, Object value){
+    public void checkServicesHealth() {
+        assertThat(baseService.isServiceUp()).isTrue();
+    }
 
-        taskRuntimeService.updateTaskVariable(taskId, name, TaskPayloadBuilder.updateVariable().withTaskId(taskId)
-                .withVariable(name, value).build());
+    @Step
+    public void updateVariable(String taskId, String name, Object value) {
+
+        taskVariableApiClient.updateVariable(taskId, name, TaskPayloadBuilder.updateVariable().withTaskId(taskId)
+            .withVariable(name, value).build());
     }
 
     @Step
     public void createVariable(String taskId,
-                               String name,
-                               Object value) {
+        String name,
+        Object value) {
 
-        taskRuntimeService.createTaskVariable(taskId,
-                                              TaskPayloadBuilder
-                                                      .createVariable()
-                                                      .withTaskId(taskId)
-                                                      .withVariable(name,
-                                                                    value)
-                                                      .build());
+        taskVariableApiClient.createVariable(taskId,
+            TaskPayloadBuilder
+                .createVariable()
+                .withTaskId(taskId)
+                .withVariable(name,
+                    value)
+                .build());
     }
 
     @Step
-    public CollectionModel<CloudVariableInstance> getVariables(String taskId) {
-        return taskRuntimeService.getVariables(taskId);
+    public Collection<CloudVariableInstance> getVariables(String taskId) {
+        return taskVariableApiClient.getVariables(taskId)
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .collect(Collectors.toList());
     }
-
 }

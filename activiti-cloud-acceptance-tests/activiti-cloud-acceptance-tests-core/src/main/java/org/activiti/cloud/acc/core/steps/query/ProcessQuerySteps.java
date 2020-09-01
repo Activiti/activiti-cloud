@@ -30,9 +30,11 @@ import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.ProcessModelQueryService;
 import org.activiti.cloud.acc.core.services.query.ProcessQueryDiagramService;
 import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.PagedModel;
 
 @EnableRuntimeFeignContext
@@ -47,9 +49,13 @@ public class ProcessQuerySteps {
     @Autowired
     private ProcessQueryDiagramService processQueryDiagramService;
 
+    @Autowired
+    @Qualifier("queryBaseService")
+    private BaseService baseService;
+
     @Step
     public void checkServicesHealth() {
-        assertThat(processQueryService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
 
     @Step

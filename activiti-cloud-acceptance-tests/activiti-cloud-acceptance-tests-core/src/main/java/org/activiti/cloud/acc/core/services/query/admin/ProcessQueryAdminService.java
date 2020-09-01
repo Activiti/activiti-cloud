@@ -27,7 +27,7 @@ import org.springframework.hateoas.CollectionModel;
 
 import java.util.function.Predicate;
 
-public interface ProcessQueryAdminService extends BaseService {
+public interface ProcessQueryAdminService {
 
     @RequestLine("GET /admin/v1/process-definitions")
     @Headers("Content-Type: application/json")

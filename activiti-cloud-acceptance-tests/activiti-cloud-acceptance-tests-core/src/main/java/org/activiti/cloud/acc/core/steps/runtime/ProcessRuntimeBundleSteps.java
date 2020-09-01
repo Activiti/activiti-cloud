@@ -38,10 +38,12 @@ import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.diagram.ProcessRuntimeDiagramService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.PagedModel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,9 +64,13 @@ public class ProcessRuntimeBundleSteps {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    @Qualifier("runtimeBundleBaseService")
+    private BaseService baseService;
+
     @Step
     public void checkServicesHealth() {
-        assertThat(processRuntimeService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
 
     @Step

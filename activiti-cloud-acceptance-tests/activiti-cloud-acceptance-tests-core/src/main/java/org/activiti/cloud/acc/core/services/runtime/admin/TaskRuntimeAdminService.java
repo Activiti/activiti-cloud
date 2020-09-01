@@ -25,7 +25,7 @@ import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.PagedModel;
 
-public interface TaskRuntimeAdminService extends BaseService {
+public interface TaskRuntimeAdminService {
 
     @RequestLine("POST /admin/v1/tasks/{id}/complete")
     @Headers("Content-Type: application/json")

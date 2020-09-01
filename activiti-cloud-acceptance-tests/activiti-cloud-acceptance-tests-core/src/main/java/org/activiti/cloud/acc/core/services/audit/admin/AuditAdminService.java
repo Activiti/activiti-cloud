@@ -23,7 +23,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
 
-public interface AuditAdminService extends BaseService {
+public interface AuditAdminService {
 
     @RequestLine("GET /admin/v1/events?search={search}&sort=timestamp,desc&sort=id,desc")
     PagedModel<CloudRuntimeEvent> getEvents(@Param("search") String search);

@@ -24,7 +24,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.springframework.hateoas.PagedModel;
 
-public interface ProcessQueryService extends BaseService {
+public interface ProcessQueryService {
 
     @RequestLine("GET /v1/process-instances/{processInstanceId}")
     @Headers("Content-Type: application/json")

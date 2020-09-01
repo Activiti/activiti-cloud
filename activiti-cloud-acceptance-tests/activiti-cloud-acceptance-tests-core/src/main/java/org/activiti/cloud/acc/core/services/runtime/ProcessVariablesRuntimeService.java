@@ -24,7 +24,7 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 
-public interface ProcessVariablesRuntimeService extends BaseService {
+public interface ProcessVariablesRuntimeService {
 
     @RequestLine("GET /v1/process-instances/{id}/variables")
     @Headers("Accept: application/hal+json;charset=UTF-8")

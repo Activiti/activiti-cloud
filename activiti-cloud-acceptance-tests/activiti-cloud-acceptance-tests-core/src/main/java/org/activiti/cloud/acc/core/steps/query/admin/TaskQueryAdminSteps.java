@@ -20,8 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.admin.TaskQueryAdminService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
@@ -32,9 +34,13 @@ public class TaskQueryAdminSteps {
     @Autowired
     private TaskQueryAdminService taskQueryAdminService;
 
+    @Autowired
+    @Qualifier("queryBaseService")
+    private BaseService baseService;
+
     @Step
     public void checkServicesHealth() {
-        assertThat(taskQueryAdminService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
 
 

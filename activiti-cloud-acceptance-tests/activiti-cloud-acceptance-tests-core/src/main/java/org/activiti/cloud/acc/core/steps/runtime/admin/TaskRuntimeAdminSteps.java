@@ -23,8 +23,10 @@ import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskRuntimeAdminService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.PagedModel;
 
 @EnableRuntimeFeignContext
@@ -33,9 +35,13 @@ public class TaskRuntimeAdminSteps {
     @Autowired
     private TaskRuntimeAdminService taskRuntimeAdminService;
 
+    @Autowired
+    @Qualifier("runtimeBundleBaseService")
+    private BaseService baseService;
+
     @Step
     public void checkServicesHealth() {
-        assertThat(taskRuntimeAdminService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
 
 

@@ -27,7 +27,7 @@ import org.springframework.hateoas.CollectionModel;
 
 import java.util.function.Predicate;
 
-public interface TaskQueryAdminService extends BaseService {
+public interface TaskQueryAdminService {
 
     @RequestLine("GET /admin/v1/tasks/{taskId}")
     @Headers("Accept: application/hal+json;charset=UTF-8")

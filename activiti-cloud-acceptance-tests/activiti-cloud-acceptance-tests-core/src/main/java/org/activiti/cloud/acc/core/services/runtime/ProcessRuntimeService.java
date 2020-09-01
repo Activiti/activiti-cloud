@@ -28,7 +28,8 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.PagedModel;
 
-public interface ProcessRuntimeService extends BaseService {
+public interface ProcessRuntimeService
+{
 
     String PROCESS_INSTANCES_PATH = "/v1/process-instances/";
 

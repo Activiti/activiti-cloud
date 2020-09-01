@@ -27,7 +27,7 @@ import org.springframework.hateoas.CollectionModel;
 
 import java.util.List;
 
-public interface TaskQueryService extends BaseService {
+public interface TaskQueryService {
 
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
     PagedModel<CloudTask> queryTasksByIdAnsStatus(@Param("taskId") String taskId,

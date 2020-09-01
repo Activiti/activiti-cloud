@@ -21,8 +21,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 @FeignClient(value = "runtime",
     url = "${runtime.url}",
     path = "${runtime.path}",
-    configuration = {ClientConfiguration.class},
-    decode404 = true)
+    configuration = {ClientConfiguration.class})
 public interface TaskApiClient extends TaskController{
 
 }

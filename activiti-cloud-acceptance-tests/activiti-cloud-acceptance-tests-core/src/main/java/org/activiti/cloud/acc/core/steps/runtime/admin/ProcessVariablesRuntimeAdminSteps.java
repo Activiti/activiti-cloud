@@ -24,7 +24,9 @@ import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessVariablesRuntimeAdminService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 
 @EnableRuntimeFeignContext
@@ -33,9 +35,13 @@ public class ProcessVariablesRuntimeAdminSteps {
     @Autowired
     private ProcessVariablesRuntimeAdminService processVariablesRuntimeAdminService;
 
+    @Autowired
+    @Qualifier("runtimeBundleBaseService")
+    private BaseService baseService;
+
     @Step
     public void checkServicesHealth() {
-        assertThat(processVariablesRuntimeAdminService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
     
     @Step

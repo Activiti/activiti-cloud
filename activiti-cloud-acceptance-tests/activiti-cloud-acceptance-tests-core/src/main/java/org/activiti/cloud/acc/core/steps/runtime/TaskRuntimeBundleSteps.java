@@ -29,10 +29,11 @@ import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.acc.core.services.runtime.TaskRuntimeService;
-import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.rest.api.TaskApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.EntityModel;
 
@@ -43,42 +44,46 @@ public class TaskRuntimeBundleSteps {
     private RuntimeDirtyContextHandler dirtyContextHandler;
 
     @Autowired
-    private TaskRuntimeService taskRuntimeService;
+    private TaskApiClient taskApiClient;
+
+    @Autowired
+    @Qualifier("runtimeBundleBaseService")
+    private BaseService baseService;
 
     @Step
     public void checkServicesHealth() {
-        assertThat(taskRuntimeService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
 
     @Step
     public void claimTask(String id) {
-        taskRuntimeService
+        taskApiClient
             .claimTask(id);
     }
 
     @Step
     public void cannotClaimTask(String id) {
         assertThatRestNotFoundErrorIsThrownBy(
-            () -> taskRuntimeService.claimTask(id)
+            () -> taskApiClient.claimTask(id)
         ).withMessageContaining("Unable to find task for the given id: " + id);
     }
 
     @Step
     public void completeTask(String id, CompleteTaskPayload completeTaskPayload) {
-        taskRuntimeService
+        taskApiClient
             .completeTask(id, completeTaskPayload);
     }
 
     @Step
     public void saveTask(String id, SaveTaskPayload saveTaskPayload) {
-        taskRuntimeService
+        taskApiClient
             .saveTask(id, saveTaskPayload);
     }
 
     @Step
     public void cannotCompleteTask(String id, CompleteTaskPayload createTaskPayload) {
         assertThatRestNotFoundErrorIsThrownBy(
-            () -> taskRuntimeService.completeTask(id, createTaskPayload)
+            () -> taskApiClient.completeTask(id, createTaskPayload)
         ).withMessageContaining("Unable to find task for the given id: " + id);
     }
 
@@ -92,7 +97,7 @@ public class TaskRuntimeBundleSteps {
             .withAssignee("testuser")
             .build();
         return dirtyContextHandler.dirty(
-            taskRuntimeService.createNewTask(createTask).getContent());
+            taskApiClient.createNewTask(createTask).getContent());
     }
 
     @Step
@@ -104,7 +109,7 @@ public class TaskRuntimeBundleSteps {
             .withDescription("unassigned-task-description")
             .build();
         return dirtyContextHandler.dirty(
-            taskRuntimeService.createNewTask(createTask).getContent());
+            taskApiClient.createNewTask(createTask).getContent());
     }
 
     public CloudTask createSubtask(String parentTaskId) {
@@ -115,11 +120,11 @@ public class TaskRuntimeBundleSteps {
             .withAssignee("testuser")
             .withParentTaskId(parentTaskId)
             .build();
-        return taskRuntimeService.createNewTask(subTask).getContent();
+        return taskApiClient.createNewTask(subTask).getContent();
     }
 
     public Collection<CloudTask> getSubtasks(String parentTaskId) {
-        return taskRuntimeService
+        return taskApiClient
             .getSubtasks(PageRequest.of(0, 100), parentTaskId)
             .getContent()
             .stream()
@@ -129,24 +134,24 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public CloudTask getTaskById(String id) {
-        return taskRuntimeService.getTaskById(id).getContent();
+        return taskApiClient.getTaskById(id).getContent();
     }
 
     @Step
     public void deleteTask(String taskId) {
-        taskRuntimeService.deleteTask(taskId);
+        taskApiClient.deleteTask(taskId);
     }
 
     @Step
     public void checkTaskNotFound(String taskId) {
         assertThatRestNotFoundErrorIsThrownBy(
-            () -> taskRuntimeService.getTaskById(taskId)
+            () -> taskApiClient.getTaskById(taskId)
         ).withMessageContaining("Unable to find task");
     }
 
     @Step
     public Collection<CloudTask> getAllTasks() {
-        return taskRuntimeService.getTasks(PageRequest.of(0, 100))
+        return taskApiClient.getTasks(PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -157,76 +162,46 @@ public class TaskRuntimeBundleSteps {
     public void checkTaskStatus(String id, Task.TaskStatus status) {
         //once a task is completed, it disappears from the runtime bundle
         if (!status.equals(Task.TaskStatus.COMPLETED)) {
-            assertThat(taskRuntimeService.getTaskById(id).getContent().getStatus()).isEqualTo(status);
+            assertThat(taskApiClient.getTaskById(id).getContent().getStatus()).isEqualTo(status);
         }
     }
 
     @Step
-    public void updateVariable(String taskId, String name, Object value) {
-
-        taskRuntimeService.updateVariable(taskId, name, TaskPayloadBuilder.updateVariable().withTaskId(taskId)
-            .withVariable(name, value).build());
-    }
-
-    @Step
-    public void createVariable(String taskId,
-        String name,
-        Object value) {
-
-        taskRuntimeService.createVariable(taskId,
-            TaskPayloadBuilder
-                .createVariable()
-                .withTaskId(taskId)
-                .withVariable(name,
-                    value)
-                .build());
-    }
-
-    @Step
-    public Collection<CloudVariableInstance> getVariables(String taskId) {
-        return taskRuntimeService.getVariables(taskId)
-            .getContent()
-            .stream()
-            .map(EntityModel::getContent)
-            .collect(Collectors.toSet());
-    }
-
-    @Step
     public CloudTask setTaskName(String taskId, String taskName) {
-        return taskRuntimeService.updateTask(
+        return taskApiClient.updateTask(
             taskId,
             TaskPayloadBuilder.update().withName(taskName).build()).getContent();
     }
 
     @Step
     public CloudTask setTaskFormKey(String taskId, String formKey) {
-        return taskRuntimeService.updateTask(
+        return taskApiClient.updateTask(
             taskId,
             TaskPayloadBuilder.update().withFormKey(formKey).build()).getContent();
     }
 
     @Step
     public CloudTask setTaskPriority(String taskId, int priority) {
-        return taskRuntimeService.updateTask(
+        return taskApiClient.updateTask(
             taskId,
             TaskPayloadBuilder.update().withPriority(priority).build()).getContent();
     }
 
     @Step
     public CloudTask setTaskDueDate(String taskId, Date dueDate) {
-        return taskRuntimeService.updateTask(
+        return taskApiClient.updateTask(
             taskId,
             TaskPayloadBuilder.update().withDueDate(dueDate).build()).getContent();
     }
 
     @Step
     public void releaseTask(String taskId) {
-        taskRuntimeService.releaseTask(taskId);
+        taskApiClient.releaseTask(taskId);
     }
 
     @Step
     public Collection<CloudTask> getTaskWithStandalone(boolean standalone) {
-        return taskRuntimeService.getTasks(PageRequest.of(0, 100))
+        return taskApiClient.getTasks(PageRequest.of(0, 100))
             .getContent()
             .stream()
             .filter(cloudTask -> cloudTask.getContent().isStandalone() == standalone)
