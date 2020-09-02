@@ -49,6 +49,9 @@ import org.activiti.cloud.acc.shared.service.SwaggerService;
 import org.activiti.cloud.api.model.shared.impl.conf.CloudCommonModelAutoConfiguration;
 import org.activiti.cloud.api.process.model.impl.conf.CloudProcessModelAutoConfiguration;
 import org.activiti.cloud.api.task.model.impl.conf.CloudTaskModelAutoConfiguration;
+import org.activiti.cloud.services.rest.api.ProcessDefinitionsApiClient;
+import org.activiti.cloud.services.rest.api.ProcessInstanceApiClient;
+import org.activiti.cloud.services.rest.api.ProcessInstanceTasksApiClient;
 import org.activiti.cloud.services.rest.api.TaskApiClient;
 import org.activiti.cloud.services.rest.api.TaskVariableApiClient;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -114,6 +117,36 @@ public class RuntimeFeignConfiguration {
                 new HalDecoder(objectMapper))
             .contract(new SpringMvcContract())
             .target(TaskVariableApiClient.class,
+                runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ProcessInstanceApiClient processInstanceApiClient() {
+        return FeignRestDataClient
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(ProcessInstanceApiClient.class,
+                runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ProcessInstanceTasksApiClient processInstanceTasksApiClient() {
+        return FeignRestDataClient
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(ProcessInstanceTasksApiClient.class,
+                runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ProcessDefinitionsApiClient processDefinitionsApiClient() {
+        return FeignRestDataClient
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(ProcessDefinitionsApiClient.class,
                 runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 

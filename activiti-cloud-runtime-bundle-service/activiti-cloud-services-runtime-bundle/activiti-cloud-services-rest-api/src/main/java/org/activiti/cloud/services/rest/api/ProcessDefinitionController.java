@@ -37,26 +37,26 @@ public interface ProcessDefinitionController {
 
     @RequestMapping(value = "/{id}",
             method = RequestMethod.GET)
-    EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable String id);
+    EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable(value = "id") String id);
 
     @RequestMapping(value = "/{id}/model",
             method = RequestMethod.GET,
             produces = "application/xml")
     @ResponseBody
     @ApiOperation("getProcessModel")
-    String getProcessModel(@PathVariable String id);
+    String getProcessModel(@PathVariable(value = "id") String id);
 
     @RequestMapping(value = "/{id}/model",
             method = RequestMethod.GET,
             produces = "application/json")
     @ResponseBody
     @ApiOperation("getProcessModel")
-    String getBpmnModel(@PathVariable String id);
+    String getBpmnModel(@PathVariable(value = "id") String id);
 
     @RequestMapping(value = "/{id}/model",
             method = RequestMethod.GET,
             produces = "image/svg+xml")
     @ResponseBody
     @ApiOperation("getProcessModel")
-    String getProcessDiagram(@PathVariable String id);
+    String getProcessDiagram(@PathVariable(value = "id") String id);
 }

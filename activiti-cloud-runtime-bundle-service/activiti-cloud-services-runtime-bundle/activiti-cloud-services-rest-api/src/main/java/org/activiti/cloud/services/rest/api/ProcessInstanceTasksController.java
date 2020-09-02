@@ -29,6 +29,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface ProcessInstanceTasksController {
 
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
-    PagedModel<EntityModel<CloudTask>> getTasks(@PathVariable String processInstanceId,
+    PagedModel<EntityModel<CloudTask>> getTasks(@PathVariable(value = "processInstanceId") String processInstanceId,
                                                  Pageable pageable);
 }

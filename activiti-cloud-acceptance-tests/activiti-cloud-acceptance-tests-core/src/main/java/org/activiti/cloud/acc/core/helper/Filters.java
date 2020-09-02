@@ -36,6 +36,16 @@ public class Filters {
         return filteredCollection;
     }
 
+    public static Collection<CloudProcessInstance> checkProcessInstances(Collection<CloudProcessInstance> resource, String processKey) {
+        Collection<CloudProcessInstance> filteredCollection = new ArrayList<>();
+        for (CloudProcessInstance e : resource) {
+            if (e.getProcessDefinitionKey().equals(processKey)) {
+                filteredCollection.add(e);
+            }
+        }
+        return filteredCollection;
+    }
+
     public static Collection<CloudRuntimeEvent> checkEvents(Collection<CloudRuntimeEvent> rawCollection, String processKey){
 
         Collection<CloudRuntimeEvent> filteredCollection = new ArrayList<>();

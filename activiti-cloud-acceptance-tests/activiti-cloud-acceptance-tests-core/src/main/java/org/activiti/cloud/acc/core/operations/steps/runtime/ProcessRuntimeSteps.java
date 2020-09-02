@@ -27,6 +27,7 @@ import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.diagram.ProcessRuntimeDiagramService;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.services.rest.api.ProcessInstanceApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -37,10 +38,7 @@ public class ProcessRuntimeSteps {
     private RuntimeDirtyContextHandler dirtyContextHandler;
 
     @Autowired
-    private ProcessRuntimeService processRuntimeService;
-
-    @Autowired
-    private ProcessRuntimeDiagramService processRuntimeDiagramService;
+    private ProcessInstanceApiClient processInstanceApiClient;
 
     @Autowired
     @Qualifier("runtimeBundleBaseService")
@@ -64,18 +62,19 @@ public class ProcessRuntimeSteps {
             payload.withVariable("test-variable-name", "test-variable-value");
         }
 
-        return dirtyContextHandler.dirty(processRuntimeService
-                .startProcess(payload.build()));
+        return dirtyContextHandler.dirty(processInstanceApiClient
+            .startProcess(payload.build())
+            .getContent());
     }
 
     @Step
     public void deleteProcessInstance(String processInstanceId) {
-        processRuntimeService.deleteProcess(processInstanceId);
+        processInstanceApiClient.deleteProcessInstance(processInstanceId);
     }
 
     @Step
     public void suspendProcessInstance(String processInstanceId){
-        processRuntimeService.suspendProcess(processInstanceId);
+        processInstanceApiClient.suspend(processInstanceId);
     }
 
 }
