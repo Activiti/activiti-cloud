@@ -18,16 +18,14 @@ package org.activiti.cloud.acc.core.services.query;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+import java.util.List;
 import org.activiti.api.task.model.Task;
-import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
 
-import java.util.List;
-
-public interface TaskQueryService extends BaseService {
+public interface TaskQueryService {
 
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
     PagedModel<CloudTask> queryTasksByIdAnsStatus(@Param("taskId") String taskId,

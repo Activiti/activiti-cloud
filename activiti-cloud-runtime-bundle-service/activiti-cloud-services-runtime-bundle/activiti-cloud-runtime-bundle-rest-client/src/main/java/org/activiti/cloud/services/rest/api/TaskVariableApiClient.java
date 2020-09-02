@@ -13,9 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.acc.core.services.notifications;
+package org.activiti.cloud.services.rest.api;
 
-public interface NotificationsService {
+import org.activiti.cloud.services.rest.api.configuration.ClientConfiguration;
+import org.springframework.cloud.openfeign.FeignClient;
 
+@FeignClient(value = "runtime",
+    url = "${runtime.url}",
+    path = "${runtime.path}",
+    configuration = {ClientConfiguration.class},
+    decode404 = true)
+public interface TaskVariableApiClient extends TaskVariableController{
 
 }

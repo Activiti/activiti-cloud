@@ -42,6 +42,13 @@
         <type>pom</type>
       </dependency>
       <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
+        <version>${project.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
         <groupId>net.serenity-bdd</groupId>
         <artifactId>serenity-core</artifactId>
         <version>${serenity.version}</version>
@@ -83,6 +90,12 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-dependencies</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
     </dependency>

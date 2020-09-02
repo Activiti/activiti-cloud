@@ -23,6 +23,7 @@ import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
+import org.activiti.cloud.acc.core.rest.encoders.PageableQueryEncoder;
 import org.activiti.cloud.acc.core.services.audit.AuditService;
 import org.activiti.cloud.acc.core.services.audit.admin.AuditAdminService;
 import org.activiti.cloud.acc.core.services.query.ProcessModelQueryService;
@@ -35,7 +36,6 @@ import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService
 import org.activiti.cloud.acc.core.services.query.admin.TaskQueryAdminService;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.ProcessVariablesRuntimeService;
-import org.activiti.cloud.acc.core.services.runtime.TaskRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessVariablesRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskRuntimeAdminService;
@@ -44,11 +44,15 @@ import org.activiti.cloud.acc.core.services.runtime.diagram.ProcessRuntimeDiagra
 import org.activiti.cloud.acc.shared.rest.feign.FeignConfiguration;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.acc.shared.rest.feign.HalDecoder;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.acc.shared.service.SwaggerService;
 import org.activiti.cloud.api.model.shared.impl.conf.CloudCommonModelAutoConfiguration;
 import org.activiti.cloud.api.process.model.impl.conf.CloudProcessModelAutoConfiguration;
 import org.activiti.cloud.api.task.model.impl.conf.CloudTaskModelAutoConfiguration;
+import org.activiti.cloud.services.rest.api.TaskApiClient;
+import org.activiti.cloud.services.rest.api.TaskVariableApiClient;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -94,12 +98,53 @@ public class RuntimeFeignConfiguration {
     }
 
     @Bean
-    public TaskRuntimeService taskRuntimeService() {
+    public TaskApiClient taskApiClient(){
         return FeignRestDataClient
-                .builder(new JacksonEncoder(objectMapper),
-                        new HalDecoder(objectMapper))
-                .target(TaskRuntimeService.class,
-                        runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(TaskApiClient.class,
+                runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public TaskVariableApiClient taskVariableApiClient() {
+        return FeignRestDataClient
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(TaskVariableApiClient.class,
+                runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean(name = "runtimeBundleBaseService")
+    public BaseService runtimeBundleBaseService(){
+        return FeignRestDataClient
+            .builder(new JacksonEncoder(objectMapper),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(BaseService.class,
+                runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean(name = "queryBaseService")
+    public BaseService queryBaseService() {
+        return FeignRestDataClient
+            .builder(new JacksonEncoder(objectMapper),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(BaseService.class,
+                runtimeTestsConfigurationProperties.getQueryUrl());
+    }
+
+    @Bean(name = "auditBaseService")
+    public BaseService auditBaseService() {
+        return FeignRestDataClient
+            .builder(new JacksonEncoder(objectMapper),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(BaseService.class,
+                runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
 
     @Bean

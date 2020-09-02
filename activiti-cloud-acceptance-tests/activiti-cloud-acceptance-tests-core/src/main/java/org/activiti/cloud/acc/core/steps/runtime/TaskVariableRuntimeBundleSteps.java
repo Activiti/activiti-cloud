@@ -17,22 +17,23 @@ package org.activiti.cloud.acc.core.steps.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
 import net.thucydides.core.annotations.Step;
-import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.acc.core.services.runtime.ProcessVariablesRuntimeService;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.services.rest.api.TaskVariableApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.ResponseEntity;
+import org.springframework.hateoas.EntityModel;
 
 @EnableRuntimeFeignContext
-public class ProcessVariablesRuntimeBundleSteps {
+public class TaskVariableRuntimeBundleSteps {
 
     @Autowired
-    private ProcessVariablesRuntimeService processVariablesRuntimeService;
+    private TaskVariableApiClient taskVariableApiClient;
 
     @Autowired
     @Qualifier("runtimeBundleBaseService")
@@ -44,14 +45,32 @@ public class ProcessVariablesRuntimeBundleSteps {
     }
 
     @Step
-    public CollectionModel<CloudVariableInstance> getVariables(String id) {
-        return processVariablesRuntimeService.getVariables(id);
+    public void updateVariable(String taskId, String name, Object value) {
+
+        taskVariableApiClient.updateVariable(taskId, name, TaskPayloadBuilder.updateVariable().withTaskId(taskId)
+            .withVariable(name, value).build());
     }
 
     @Step
-    public ResponseEntity<Void> setVariables(String id,
-                                      SetProcessVariablesPayload setProcessVariablesPayload) {
-        return processVariablesRuntimeService.setVariables(id, setProcessVariablesPayload);
+    public void createVariable(String taskId,
+        String name,
+        Object value) {
+
+        taskVariableApiClient.createVariable(taskId,
+            TaskPayloadBuilder
+                .createVariable()
+                .withTaskId(taskId)
+                .withVariable(name,
+                    value)
+                .build());
     }
 
+    @Step
+    public Collection<CloudVariableInstance> getVariables(String taskId) {
+        return taskVariableApiClient.getVariables(taskId)
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .collect(Collectors.toList());
+    }
 }

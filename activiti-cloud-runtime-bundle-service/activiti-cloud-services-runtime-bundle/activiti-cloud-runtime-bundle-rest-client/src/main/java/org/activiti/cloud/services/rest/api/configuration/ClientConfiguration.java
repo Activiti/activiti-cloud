@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.acc.core.services.notifications;
+package org.activiti.cloud.services.rest.api.configuration;
 
-public interface NotificationsService {
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
+@EnableConfigurationProperties
+public class ClientConfiguration {
 
 }

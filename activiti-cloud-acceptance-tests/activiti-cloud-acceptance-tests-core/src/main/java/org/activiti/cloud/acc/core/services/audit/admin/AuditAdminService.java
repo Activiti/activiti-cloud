@@ -17,13 +17,12 @@ package org.activiti.cloud.acc.core.services.audit.admin;
 
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
-public interface AuditAdminService extends BaseService {
+public interface AuditAdminService {
 
     @RequestLine("GET /admin/v1/events?search={search}&sort=timestamp,desc&sort=id,desc")
     PagedModel<CloudRuntimeEvent> getEvents(@Param("search") String search);
