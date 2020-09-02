@@ -27,7 +27,6 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +49,6 @@ public class NotificationsSteps {
 
     @Autowired
     private RuntimeTestsConfigurationProperties properties;
-
-    @Autowired
-    private ProcessRuntimeService processRuntimeService;
 
     @Autowired
     @Qualifier("runtimeBundleBaseService")

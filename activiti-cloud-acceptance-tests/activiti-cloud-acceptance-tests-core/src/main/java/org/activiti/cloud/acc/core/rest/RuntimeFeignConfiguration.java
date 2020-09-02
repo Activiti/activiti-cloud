@@ -34,7 +34,6 @@ import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminSe
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminDiagramService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.TaskQueryAdminService;
-import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.ProcessVariablesRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessVariablesRuntimeAdminService;
@@ -82,15 +81,6 @@ public class RuntimeFeignConfiguration {
                                      ObjectMapper objectMapper) {
         this.runtimeTestsConfigurationProperties = runtimeTestsConfigurationProperties;
         this.objectMapper = objectMapper;
-    }
-
-    @Bean
-    public ProcessRuntimeService processRuntimeService() {
-        return FeignRestDataClient
-                .builder(new JacksonEncoder(objectMapper),
-                         new HalDecoder(objectMapper))
-                .target(ProcessRuntimeService.class,
-                        runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
     @Bean
