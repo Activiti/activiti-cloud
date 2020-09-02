@@ -37,24 +37,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(value = "/v1/tasks", produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public interface TaskController {
 
-    @GetMapping(headers = "Content-type=application/json")
+    @GetMapping()
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
 
     @GetMapping(value = "/{taskId}")
     EntityModel<CloudTask> getTaskById(@PathVariable(value = "taskId") String taskId);
 
-    @PostMapping(value = "/{taskId}/claim")
+    @PostMapping(value = "/{taskId}/claim",
+        headers = "Content-type=application/json")
     EntityModel<CloudTask> claimTask(@PathVariable(value = "taskId") String taskId);
 
-    @PostMapping(value = "/{taskId}/release")
+    @PostMapping(value = "/{taskId}/release",
+        headers = "Content-type=application/json")
     EntityModel<CloudTask> releaseTask(@PathVariable(value = "taskId") String taskId);
 
     @PostMapping(value = "/{taskId}/complete",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
         headers = "Content-type=application/json")
     EntityModel<CloudTask> completeTask(@PathVariable(value = "taskId") String taskId,
         @RequestBody CompleteTaskPayload completeTaskPayload);
 
     @PostMapping(value = "/{taskId}/save",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
         headers = "Content-type=application/json")
     void saveTask(@PathVariable(value = "taskId") String taskId,
         @RequestBody SaveTaskPayload saveTaskPayload);
@@ -62,10 +66,12 @@ public interface TaskController {
     @DeleteMapping(value = "/{taskId}")
     EntityModel<CloudTask> deleteTask(@PathVariable(value = "taskId") String taskId);
 
-    @PostMapping(headers = "Content-type=application/json")
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
+        headers = "Content-type=application/json")
     EntityModel<CloudTask> createNewTask(@RequestBody CreateTaskPayload createTaskPayload);
 
     @PutMapping(value = "/{taskId}",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
         headers = "Content-type=application/json")
     EntityModel<CloudTask> updateTask(@PathVariable(value = "taskId") String taskId,
         @RequestBody UpdateTaskPayload updateTaskPayload);
