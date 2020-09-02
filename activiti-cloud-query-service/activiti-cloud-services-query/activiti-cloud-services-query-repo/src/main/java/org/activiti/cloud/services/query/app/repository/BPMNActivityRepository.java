@@ -17,8 +17,8 @@ package org.activiti.cloud.services.query.app.repository;
 
 import java.util.List;
 
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity.BPMNActivityStatus;
 import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
@@ -42,7 +42,7 @@ public interface BPMNActivityRepository extends PagingAndSortingRepository<BPMNA
     }
 
     List<BPMNActivityEntity> findByProcessInstanceIdAndStatus(String processInstanceId,
-                                                              BPMNActivityStatus status);
+                                                              CloudBPMNActivity.BPMNActivityStatus status);
 
     List<BPMNActivityEntity> findByProcessInstanceId(String processInstanceId);
 

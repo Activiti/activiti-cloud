@@ -26,6 +26,7 @@ import org.activiti.cloud.services.query.rest.predicate.ServiceTasksFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
@@ -63,9 +64,11 @@ public class ProcessInstanceServiceTasksAdminController {
 
     @RequestMapping(value = "/service-tasks", method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudBPMNActivity>> getTasks(@PathVariable String processInstanceId,
+                                                               @QuerydslPredicate(root = BPMNActivityEntity.class) Predicate predicate,
                                                                Pageable pageable) {
 
-        Predicate filter = new ServiceTasksFilter().extend(bPMNActivityEntity.processInstanceId.eq(processInstanceId));
+        Predicate filter = new ServiceTasksFilter().extend(bPMNActivityEntity.processInstanceId.eq(processInstanceId)
+                                                                                               .and(predicate));
 
         Page<BPMNActivityEntity> page = taskRepository.findAll(filter,
                                                                pageable);

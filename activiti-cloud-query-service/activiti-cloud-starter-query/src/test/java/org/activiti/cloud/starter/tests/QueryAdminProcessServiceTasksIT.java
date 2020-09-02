@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
@@ -161,6 +162,36 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getBody().getContent()).hasSize(1)
                                                              .extracting(BPMNActivity::getActivityType)
                                                              .contains(SERVICE_TASK_TYPE);
+        });
+    }
+
+    @Test
+    public void shouldGetProcessInstanceServiceTasksByStatus() throws InterruptedException {
+        //given
+        ProcessInstanceImpl process = startSimpleProcessInstance();
+
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
+                                                                                                     HttpMethod.GET,
+                                                                                                     keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                     PAGED_TASKS_RESPONSE_TYPE,
+                                                                                                     CloudBPMNActivity.BPMNActivityStatus.STARTED);
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent()).hasSize(1)
+                                                             .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
+                                                             .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
         });
     }
 
