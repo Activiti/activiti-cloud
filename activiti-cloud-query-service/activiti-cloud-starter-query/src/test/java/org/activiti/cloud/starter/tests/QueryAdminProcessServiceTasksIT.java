@@ -225,6 +225,36 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
+    public void shouldGetServiceTasksByStatus() throws InterruptedException {
+        //given
+        ProcessInstanceImpl process = startSimpleProcessInstance();
+
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks?status={status}",
+                                                                                       HttpMethod.GET,
+                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       PAGED_TASKS_RESPONSE_TYPE,
+                                                                                       CloudBPMNActivity.BPMNActivityStatus.STARTED);
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent()).hasSize(1)
+                                                             .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
+                                                             .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
+        });
+    }
+
+    @Test
     public void shouldGetServiceTaskById() throws InterruptedException {
         //given
         ProcessInstanceImpl process = startSimpleProcessInstance();
