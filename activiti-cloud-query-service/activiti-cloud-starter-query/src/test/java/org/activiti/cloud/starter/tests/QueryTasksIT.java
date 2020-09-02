@@ -21,6 +21,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -1460,6 +1461,72 @@ public class QueryTasksIT {
         assertThat(responseEntity.getBody()).containsExactly("testuser");
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
+
+    }
+
+    @Test
+    public void shouldFilterTasksForDueDate() {
+        //given
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date dueDate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+
+        //set due date as current date + 1
+        dueDate.setTime(now.getTime() + 86400000);
+
+        Task assignedTask = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task",
+            "testuser",
+            runningProcessInstance, dueDate);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            //set check date to current date
+            Date fromDate = now;
+            // to date, from date plus 2 days
+            Date toDate = new Date(dueDate.getTime() + 86400000);
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?dueDate=" + sdf.format(fromDate) + "&dueDate=" +
+                        sdf.format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.size()).isEqualTo(1);
+
+
+        });
+
+        await().untilAsserted(() -> {
+            //check for specific due date
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?dueDate=" + sdf.format(dueDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.size()).isEqualTo(1);
+
+
+        });
 
     }
 
