@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(value = "/v1/tasks", produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public interface TaskController {
 
-    @GetMapping(headers = "Content-type=application/json")
+    @GetMapping()
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
 
     @GetMapping(value = "/{taskId}")
