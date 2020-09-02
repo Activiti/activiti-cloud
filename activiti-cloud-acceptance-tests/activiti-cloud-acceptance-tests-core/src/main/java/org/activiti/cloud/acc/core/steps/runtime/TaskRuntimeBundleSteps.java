@@ -35,10 +35,13 @@ import org.activiti.cloud.services.rest.api.TaskApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 
 @EnableRuntimeFeignContext
 public class TaskRuntimeBundleSteps {
+
+    private static final Pageable DEFAULT_PAGEABLE = PageRequest.of(0, 100);
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;
@@ -125,7 +128,7 @@ public class TaskRuntimeBundleSteps {
 
     public Collection<CloudTask> getSubtasks(String parentTaskId) {
         return taskApiClient
-            .getSubtasks(PageRequest.of(0, 100), parentTaskId)
+            .getSubtasks(DEFAULT_PAGEABLE, parentTaskId)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -151,7 +154,7 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public Collection<CloudTask> getAllTasks() {
-        return taskApiClient.getTasks(PageRequest.of(0, 100))
+        return taskApiClient.getTasks(DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -201,7 +204,7 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public Collection<CloudTask> getTaskWithStandalone(boolean standalone) {
-        return taskApiClient.getTasks(PageRequest.of(0, 100))
+        return taskApiClient.getTasks(DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .filter(cloudTask -> cloudTask.getContent().isStandalone() == standalone)
