@@ -34,7 +34,6 @@ import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminSe
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminDiagramService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.TaskQueryAdminService;
-import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.ProcessVariablesRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessVariablesRuntimeAdminService;
@@ -49,6 +48,9 @@ import org.activiti.cloud.acc.shared.service.SwaggerService;
 import org.activiti.cloud.api.model.shared.impl.conf.CloudCommonModelAutoConfiguration;
 import org.activiti.cloud.api.process.model.impl.conf.CloudProcessModelAutoConfiguration;
 import org.activiti.cloud.api.task.model.impl.conf.CloudTaskModelAutoConfiguration;
+import org.activiti.cloud.services.rest.api.ProcessDefinitionsApiClient;
+import org.activiti.cloud.services.rest.api.ProcessInstanceApiClient;
+import org.activiti.cloud.services.rest.api.ProcessInstanceTasksApiClient;
 import org.activiti.cloud.services.rest.api.TaskApiClient;
 import org.activiti.cloud.services.rest.api.TaskVariableApiClient;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -82,15 +84,6 @@ public class RuntimeFeignConfiguration {
     }
 
     @Bean
-    public ProcessRuntimeService processRuntimeService() {
-        return FeignRestDataClient
-                .builder(new JacksonEncoder(objectMapper),
-                         new HalDecoder(objectMapper))
-                .target(ProcessRuntimeService.class,
-                        runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
-    }
-
-    @Bean
     public ProcessRuntimeDiagramService runtimeBundleDiagramService() {
         return baseFeignBuilder()
                 .target(ProcessRuntimeDiagramService.class,
@@ -114,6 +107,36 @@ public class RuntimeFeignConfiguration {
                 new HalDecoder(objectMapper))
             .contract(new SpringMvcContract())
             .target(TaskVariableApiClient.class,
+                runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ProcessInstanceApiClient processInstanceApiClient() {
+        return FeignRestDataClient
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(ProcessInstanceApiClient.class,
+                runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ProcessInstanceTasksApiClient processInstanceTasksApiClient() {
+        return FeignRestDataClient
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(ProcessInstanceTasksApiClient.class,
+                runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ProcessDefinitionsApiClient processDefinitionsApiClient() {
+        return FeignRestDataClient
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)),
+                new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(ProcessDefinitionsApiClient.class,
                 runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
