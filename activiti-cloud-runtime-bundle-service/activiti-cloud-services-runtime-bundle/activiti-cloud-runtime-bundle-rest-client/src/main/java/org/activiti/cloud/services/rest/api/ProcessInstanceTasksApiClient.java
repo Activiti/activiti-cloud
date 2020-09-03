@@ -18,9 +18,9 @@ package org.activiti.cloud.services.rest.api;
 import org.activiti.cloud.services.rest.api.configuration.ClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 
-@FeignClient(value = "runtime",
-    url = "${runtime.url}",
-    path = "${runtime.path}",
+@FeignClient(value = "processInstanceTasks",
+    url = "processInstanceTasksUrl",
+    path = "processInstanceTasksPath",
     configuration = {ClientConfiguration.class})
 public interface ProcessInstanceTasksApiClient extends ProcessInstanceTasksController {
 

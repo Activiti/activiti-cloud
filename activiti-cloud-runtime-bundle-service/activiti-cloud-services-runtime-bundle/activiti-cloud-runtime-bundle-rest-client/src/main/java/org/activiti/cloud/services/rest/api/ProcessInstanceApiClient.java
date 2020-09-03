@@ -18,9 +18,9 @@ package org.activiti.cloud.services.rest.api;
 import org.activiti.cloud.services.rest.api.configuration.ClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 
-@FeignClient(value = "runtime",
-    url = "${runtime.url}",
-    path = "${runtime.path}",
+@FeignClient(value = "processInstances",
+    url = "processInstancesUrl",
+    path = "processInstancesPath",
     configuration = {ClientConfiguration.class})
 public interface ProcessInstanceApiClient extends ProcessInstanceController {
 

@@ -18,9 +18,9 @@ package org.activiti.cloud.services.rest.api;
 import org.activiti.cloud.services.rest.api.configuration.ClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 
-@FeignClient(value = "runtime",
-    url = "${runtime.url}",
-    path = "${runtime.path}",
+@FeignClient(value = "tasksVariables",
+    url = "tasksVariablesUrl",
+    path = "tasksVariablesPath",
     configuration = {ClientConfiguration.class},
     decode404 = true)
 public interface TaskVariableApiClient extends TaskVariableController{
