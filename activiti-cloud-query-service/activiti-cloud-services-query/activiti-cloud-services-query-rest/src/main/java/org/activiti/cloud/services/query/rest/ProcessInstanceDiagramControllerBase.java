@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.activiti.bpmn.BpmnAutoLayout;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
@@ -29,7 +30,6 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity.BPMNActivityStatus;
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
@@ -42,11 +42,11 @@ public abstract class ProcessInstanceDiagramControllerBase {
     protected final ProcessModelRepository processModelRepository;
 
     protected final BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
-    
+
     protected final EntityFinder entityFinder;
 
     protected final ProcessInstanceRepository processInstanceRepository;
-    
+
     protected final BPMNActivityRepository bpmnActivityRepository;
 
     protected final ProcessDiagramGeneratorWrapper processDiagramGenerator;
@@ -58,7 +58,7 @@ public abstract class ProcessInstanceDiagramControllerBase {
                                             ProcessInstanceRepository processInstanceRepository,
                                             BPMNActivityRepository bpmnActivityRepository,
                                             EntityFinder entityFinder) {
-        
+
         this.processInstanceRepository = processInstanceRepository;
         this.processModelRepository = processModelRepository;
         this.entityFinder = entityFinder;
@@ -74,7 +74,7 @@ public abstract class ProcessInstanceDiagramControllerBase {
 
         if(!bpmnModel.hasDiagramInterchangeInfo())
             new BpmnAutoLayout(bpmnModel).execute();
-        
+
         List<String> highLightedActivities = resolveStartedActivitiesIds(processInstanceId);
         List<String> highLightedFlows = resolveCompletedFlows(bpmnModel, processInstanceId);
 
@@ -94,7 +94,7 @@ public abstract class ProcessInstanceDiagramControllerBase {
     }
 
     protected List<String> resolveStartedActivitiesIds(String processInstanceId) {
-        return bpmnActivityRepository.findByProcessInstanceIdAndStatus(processInstanceId, BPMNActivityStatus.STARTED)
+        return bpmnActivityRepository.findByProcessInstanceIdAndStatus(processInstanceId, CloudBPMNActivity.BPMNActivityStatus.STARTED)
                                      .stream()
                                      .map(BPMNActivityEntity::getElementId)
                                      .distinct()

@@ -40,10 +40,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 })
 public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudBPMNActivity {
 
-    public static enum BPMNActivityStatus {
-        STARTED, COMPLETED, CANCELLED, ERROR
-    }
-
     /** The unique identifier of this historic activity instance. */
     @Id
     private String id;
@@ -106,6 +102,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
               appVersion);
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -135,6 +132,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
         return processInstanceId;
     }
 
+    @Override
     public BPMNActivityStatus getStatus() {
         return status;
     }

@@ -29,6 +29,7 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
     private String elementId;
     private String processDefinitionId;
     private String processInstanceId;
+    private CloudBPMNActivity.BPMNActivityStatus status;
 
     public CloudBPMNActivityImpl() { }
 
@@ -109,6 +110,15 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
     }
 
     @Override
+    public CloudBPMNActivity.BPMNActivityStatus getStatus() {
+        return status;
+    }
+
+
+    public void setStatus(CloudBPMNActivity.BPMNActivityStatus status) {
+        this.status = status;
+    }
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
@@ -118,7 +128,8 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
                                                executionId,
                                                id,
                                                processDefinitionId,
-                                               processInstanceId);
+                                               processInstanceId,
+                                               status);
         return result;
     }
 
@@ -140,7 +151,8 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
                Objects.equals(executionId, other.executionId) &&
                Objects.equals(id, other.id) &&
                Objects.equals(processDefinitionId, other.processDefinitionId) &&
-               Objects.equals(processInstanceId, other.processInstanceId);
+               Objects.equals(processInstanceId, other.processInstanceId) &&
+               Objects.equals(status, other.status);
     }
 
     @Override
@@ -160,6 +172,8 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
                .append(processDefinitionId)
                .append(", processInstanceId=")
                .append(processInstanceId)
+               .append(", status=")
+               .append(status)
                .append(", super()=")
                .append(super.toString())
                .append("]");
