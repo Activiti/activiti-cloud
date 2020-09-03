@@ -21,6 +21,11 @@ import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 public interface CloudBPMNActivity extends CloudRuntimeEntity,
         BPMNActivity {
 
+    public static enum BPMNActivityStatus {
+        STARTED, COMPLETED, CANCELLED, ERROR
+    }
+
     String getId();
 
+    BPMNActivityStatus getStatus();
 }

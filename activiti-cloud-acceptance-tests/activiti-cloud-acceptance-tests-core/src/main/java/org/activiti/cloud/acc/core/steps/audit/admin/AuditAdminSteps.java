@@ -18,8 +18,10 @@ package org.activiti.cloud.acc.core.steps.audit.admin;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.audit.admin.AuditAdminService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
@@ -34,9 +36,13 @@ public class AuditAdminSteps {
     @Autowired
     private AuditAdminService auditAdminService;
 
+    @Autowired
+    @Qualifier("auditBaseService")
+    private BaseService baseService;
+
     @Step
     public void checkServicesHealth() {
-        assertThat(auditAdminService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
 
     @Step

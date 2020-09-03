@@ -17,21 +17,20 @@ package org.activiti.cloud.acc.core.steps.notifications;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-
+import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.thucydides.core.annotations.Step;
+import org.springframework.beans.factory.annotation.Qualifier;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.http.client.HttpClient;
@@ -52,14 +51,15 @@ public class NotificationsSteps {
     private RuntimeTestsConfigurationProperties properties;
 
     @Autowired
-    private ProcessRuntimeService processRuntimeService;
+    @Qualifier("runtimeBundleBaseService")
+    private BaseService baseService;
 
     @Autowired
     private ObjectMapper objectMapper;
     
     @Step
     public void checkServicesHealth() {
-        assertThat(processRuntimeService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
     
     public String getRuntimeBundleServiceName() {

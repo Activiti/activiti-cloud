@@ -24,7 +24,10 @@ jobs:
     script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-service-common/pom.xml
   - name: activiti-cloud-acceptance-tests
     stage: activiti-cloud-acceptance-tests
-    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml
+    # acceptance tests depend on runtime bundle dependencies, so we need to build rb first - rb tests will be run in next stage
+    script: |
+      mvn clean install -B -DskipTests -DskipSwaggerGen -f activiti-cloud-runtime-bundle-service/pom.xml || travis_terminate 1
+      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml || travis_terminate 1
   - name: activiti-cloud-runtime-bundle-service_and_activiti-cloud-messages-service
     stage: activiti-cloud-services
     script: |

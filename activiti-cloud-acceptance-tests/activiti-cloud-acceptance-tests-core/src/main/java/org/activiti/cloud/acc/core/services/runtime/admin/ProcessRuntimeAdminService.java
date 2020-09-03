@@ -20,11 +20,10 @@ import feign.Param;
 import feign.RequestLine;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
-import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.hateoas.PagedModel;
 
-public interface ProcessRuntimeAdminService extends BaseService {
+public interface ProcessRuntimeAdminService {
 
     @RequestLine("GET /admin/v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
