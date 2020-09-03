@@ -474,7 +474,7 @@ public class ProcessInstanceTasks {
                                              Task.TaskStatus status,
                                              String taskName) {
         List<ProcessInstance> processInstancesList = new ArrayList<>(
-                processRuntimeBundleSteps.getAllProcessInstances().getContent());
+                processRuntimeBundleSteps.getAllProcessInstances());
         assertThat(processInstancesList).extracting("processDefinitionKey")
                 .contains(processDefinitionKeyMatcher(processName));
 
@@ -492,7 +492,7 @@ public class ProcessInstanceTasks {
 
     @When("the user gets the process definitions")
     public void getProcessDefinitions(){
-        Collection<ProcessDefinition> processDefinitionsRuntimeBundle = processRuntimeBundleSteps.getProcessDefinitions().getContent();
+        Collection<ProcessDefinition> processDefinitionsRuntimeBundle = processRuntimeBundleSteps.getProcessDefinitions();
         Collection<ProcessDefinition> processDefinitionsQuery = processQuerySteps.getProcessDefinitions().getContent();
 
         Serenity.setSessionVariable("processDefinitionsRuntimeBundle").to(processDefinitionsRuntimeBundle);

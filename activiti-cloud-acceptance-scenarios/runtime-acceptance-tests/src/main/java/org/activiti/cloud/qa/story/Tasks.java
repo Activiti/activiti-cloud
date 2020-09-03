@@ -38,6 +38,7 @@ import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.query.admin.TaskQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.TaskRuntimeBundleSteps;
+import org.activiti.cloud.acc.core.steps.runtime.TaskVariableRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessRuntimeAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.TaskRuntimeAdminSteps;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -56,6 +57,8 @@ public class Tasks {
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
     @Steps
     private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
+    @Steps
+    private TaskVariableRuntimeBundleSteps taskVariableRuntimeBundleSteps;
     @Steps
     private TaskRuntimeAdminSteps taskRuntimeAdminSteps;
 
@@ -153,7 +156,7 @@ public class Tasks {
 
     @Then("a list of one subtask is be available for the task")
     public void getSubtasksForTask() {
-        final Collection<CloudTask> subtasks = taskRuntimeBundleSteps.getSubtasks(newTask.getId()).getContent();
+        final Collection<CloudTask> subtasks = taskRuntimeBundleSteps.getSubtasks(newTask.getId());
         assertThat(subtasks)
             .isNotNull()
             .extracting(CloudTask::getId)
@@ -218,7 +221,7 @@ public class Tasks {
     public void updateTaskVariableValue(String variableName, String variableValue) {
         newTask = obtainFirstTaskFromProcess();
 
-        taskRuntimeBundleSteps.updateVariable(newTask.getId(),
+        taskVariableRuntimeBundleSteps.updateVariable(newTask.getId(),
                                               variableName,
                                               variableValue);
 
@@ -340,7 +343,9 @@ public class Tasks {
     @When("the user creates task variables")
     public void setTaskVariables() {
         for (Map.Entry<String, Object> entry : VariableGenerator.variables.entrySet()) {
-            taskRuntimeBundleSteps.createVariable(newTask.getId(), entry.getKey(), entry.getValue());
+            taskVariableRuntimeBundleSteps.createVariable(newTask.getId(), entry.getKey(), entry.getValue());
+            taskVariableRuntimeBundleSteps
+                .getVariables(newTask.getId());
         }
     }
 
@@ -350,17 +355,11 @@ public class Tasks {
         Map<String,Object> generatedMapRuntime = new HashMap<>();
         Map<String,Object> generatedMapQuery = new HashMap<>();
 
-        taskRuntimeBundleSteps
-                .getVariables(newTask.getId())
-                .getContent()
-                .stream()
-                .forEach(element -> generatedMapRuntime.put(element.getName(),element.getValue()));
+        taskVariableRuntimeBundleSteps.getVariables(newTask.getId())
+            .forEach(element -> generatedMapRuntime.put(element.getName(), element.getValue()));
 
-        taskQuerySteps
-                .getVariables(newTask.getId())
-                .getContent()
-                .stream()
-                .forEach(element -> generatedMapQuery.put(element.getName(),element.getValue()));
+        taskQuerySteps.getVariables(newTask.getId())
+            .forEach(element -> generatedMapQuery.put(element.getName(), element.getValue()));
 
         assertThat(generatedMapRuntime).isEqualTo(VariableGenerator.variables);
         assertThat(generatedMapQuery).isEqualTo(VariableGenerator.variables);
@@ -392,7 +391,7 @@ public class Tasks {
 
     @Then("the user retrieves the tasks and the standalone tasks separately")
     public void getTasksAndStandaloneTasks() {
-        Collection<CloudTask> tasks = taskRuntimeBundleSteps.getAllTasks().getContent();
+        Collection<CloudTask> tasks = taskRuntimeBundleSteps.getAllTasks();
         assertThat(tasks).isNotEmpty();
         assertThat(tasks).isNotNull();
 

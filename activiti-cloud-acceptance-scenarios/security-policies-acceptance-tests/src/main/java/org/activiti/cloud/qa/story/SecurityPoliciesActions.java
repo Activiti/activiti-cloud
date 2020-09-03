@@ -126,7 +126,7 @@ public class SecurityPoliciesActions {
 
     @Then("the user can get tasks")
     public void checkIfTaskArePresent(){
-        assertThat(taskRuntimeBundleSteps.getAllTasks().getContent()).isNotNull();
+        assertThat(taskRuntimeBundleSteps.getAllTasks()).isNotNull();
     }
 
     @Then("the user can query tasks")

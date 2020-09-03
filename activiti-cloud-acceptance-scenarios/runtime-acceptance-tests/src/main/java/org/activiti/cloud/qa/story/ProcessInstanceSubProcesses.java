@@ -128,7 +128,6 @@ public class ProcessInstanceSubProcesses {
         String parentProcessId = Serenity.sessionVariableCalled("processInstanceId");
 
         subprocessInstance = processRuntimeBundleSteps.getSubProcesses(parentProcessId)
-                .getContent()
                 .iterator()
                 .next();
         assertThat(subprocessInstance).isNotNull();
