@@ -21,6 +21,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -1476,12 +1477,19 @@ public class QueryTasksIT {
         cal.set(Calendar.MILLISECOND, 0);
         Date now = cal.getTime();
 
-        //set due date as current date + 1
-        dueDate.setTime(now.getTime() + 86400000);
 
-        Task assignedTask = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task",
+        //set due date as current date + 1
+        dueDate.setTime(now.getTime() + Duration.ofDays(1).toMillis());
+
+        Task assignedTask1 = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task1",
+            "testuser",
+            runningProcessInstance, new Date(now.getTime() - Duration.ofDays(1).toMillis()));
+        Task assignedTask2 = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task2",
             "testuser",
             runningProcessInstance, dueDate);
+        Task assignedTask3 = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task3",
+            "testuser",
+            runningProcessInstance, new Date(dueDate.getTime() + Duration.ofDays(2).toMillis()));
 
         eventsAggregator.sendAll();
 
@@ -1490,9 +1498,9 @@ public class QueryTasksIT {
             //set check date to current date
             Date fromDate = now;
             // to date, from date plus 2 days
-            Date toDate = new Date(dueDate.getTime() + 86400000);
+            Date toDate = new Date(dueDate.getTime() + Duration.ofDays(1).toMillis());
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
-                .exchange(TASKS_URL + "?dueDate=" + sdf.format(fromDate) + "&dueDate=" +
+                .exchange(TASKS_URL + "?dueDateFrom=" + sdf.format(fromDate) + "&dueDateTo=" +
                         sdf.format(toDate),
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),

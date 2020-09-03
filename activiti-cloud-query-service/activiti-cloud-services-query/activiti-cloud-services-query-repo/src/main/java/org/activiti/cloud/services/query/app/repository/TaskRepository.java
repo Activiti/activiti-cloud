@@ -15,13 +15,7 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
-import com.querydsl.core.types.dsl.DateTimePath;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -38,8 +32,9 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, S
 
     @Override
     default void customize(QuerydslBindings bindings,
-                           QTaskEntity root) {
+        QTaskEntity root) {
 
+        bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
         bindings.bind(root.createdFrom).first((path, value) -> root.createdDate.after(value));
         bindings.bind(root.createdTo).first((path, value) -> root.createdDate.before(value));
         bindings.bind(root.lastModifiedFrom).first((path, value) -> root.lastModified.after(value));
@@ -48,22 +43,12 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, S
         bindings.bind(root.lastClaimedTo).first((path, value) -> root.claimedDate.before(value));
         bindings.bind(root.completedFrom).first((path, value) -> root.completedDate.after(value));
         bindings.bind(root.completedTo).first((path, value) -> root.completedDate.before(value));
-        bindings.bind(root.dueDate)
-            .all((path, value) -> {
-                List<? extends Date> dates = new ArrayList<>(value);
-                if (dates.size() == 1) {
-                    return Optional.of(path.eq(dates.get(0)));
-                } else {
-                    Date from = dates.get(0);
-                    Date to = dates.get(1);
-                    return Optional.of(path.between(from, to));
-                }
-            });
+        bindings.bind(root.dueDateFrom).first((path, value) -> root.dueDate.after(value));
+        bindings.bind(root.dueDateTo).first((path, value) -> root.dueDate.before(value));
 
-
-        bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
         bindings.bind(root.name).first((path, value) -> path.like("%" + value.toString() + "%"));
-        bindings.bind(root.description).first((path, value) -> path.like("%" + value.toString() + "%"));
+        bindings.bind(root.description)
+            .first((path, value) -> path.like("%" + value.toString() + "%"));
 
         bindings.excluding(root.variables);
         bindings.excluding(root.standalone);
