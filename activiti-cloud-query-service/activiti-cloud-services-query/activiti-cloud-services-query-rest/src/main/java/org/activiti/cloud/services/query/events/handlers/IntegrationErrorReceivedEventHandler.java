@@ -22,11 +22,11 @@ import javax.persistence.EntityManager;
 
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity.BPMNActivityStatus;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity.IntegrationContextStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +58,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
             entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
             BPMNActivityEntity bpmnActivityEntity = entity.getBpmnActivity();
-            bpmnActivityEntity.setStatus(BPMNActivityStatus.ERROR);
+            bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
         });
     }
 
