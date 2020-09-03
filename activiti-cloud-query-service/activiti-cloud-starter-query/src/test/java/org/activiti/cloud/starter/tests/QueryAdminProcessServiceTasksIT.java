@@ -193,6 +193,31 @@ public class QueryAdminProcessServiceTasksIT {
                                                              .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
                                                              .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
         });
+
+        // and given
+        BPMNActivityImpl taskActivity = new BPMNActivityImpl(SERVICE_TASK_ELEMENT_ID, "Service Task", SERVICE_TASK_TYPE);
+        taskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
+        taskActivity.setProcessInstanceId(process.getId());
+        taskActivity.setExecutionId(UUID.randomUUID().toString());
+
+        eventsAggregator.addEvents(new CloudBPMNActivityCompletedEventImpl(taskActivity, processDefinitionId, process.getId()));
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
+                                                                                                     HttpMethod.GET,
+                                                                                                     keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                     PAGED_TASKS_RESPONSE_TYPE,
+                                                                                                     CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent()).hasSize(1)
+                                                             .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
+                                                             .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
+        });
     }
 
     @Test
@@ -229,6 +254,7 @@ public class QueryAdminProcessServiceTasksIT {
         //given
         ProcessInstanceImpl process = startSimpleProcessInstance();
 
+
         //when
         eventsAggregator.sendAll();
 
@@ -252,6 +278,32 @@ public class QueryAdminProcessServiceTasksIT {
                                                              .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
                                                              .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
         });
+
+        // and given
+        BPMNActivityImpl taskActivity = new BPMNActivityImpl(SERVICE_TASK_ELEMENT_ID, "Service Task", SERVICE_TASK_TYPE);
+        taskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
+        taskActivity.setProcessInstanceId(process.getId());
+        taskActivity.setExecutionId(UUID.randomUUID().toString());
+
+        eventsAggregator.addEvents(new CloudBPMNActivityCompletedEventImpl(taskActivity, processDefinitionId, process.getId()));
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks?status={status}",
+                                                                                       HttpMethod.GET,
+                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       PAGED_TASKS_RESPONSE_TYPE,
+                                                                                       CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent()).hasSize(1)
+                                                             .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
+                                                             .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
+        });
+
     }
 
     @Test
