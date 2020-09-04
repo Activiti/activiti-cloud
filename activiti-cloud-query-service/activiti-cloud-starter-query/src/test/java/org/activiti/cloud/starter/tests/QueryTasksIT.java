@@ -1477,7 +1477,6 @@ public class QueryTasksIT {
         cal.set(Calendar.MILLISECOND, 0);
         Date now = cal.getTime();
 
-
         //set due date as current date + 1
         dueDate.setTime(now.getTime() + Duration.ofDays(1).toMillis());
 
@@ -1511,7 +1510,9 @@ public class QueryTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
-            assertThat(tasks.size()).isEqualTo(1);
+            assertThat(tasks)
+                .extracting(Task::getName)
+                .containsExactly(assignedTask2.getName());
 
 
         });
@@ -1531,7 +1532,9 @@ public class QueryTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
-            assertThat(tasks.size()).isEqualTo(1);
+            assertThat(tasks)
+                .extracting(Task::getName)
+                .containsExactly(assignedTask2.getName());
 
 
         });
