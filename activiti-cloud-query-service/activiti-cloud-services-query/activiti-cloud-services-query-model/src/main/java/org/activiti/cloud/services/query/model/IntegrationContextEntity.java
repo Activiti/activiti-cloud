@@ -230,13 +230,15 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         this.parentProcessInstanceId = parentProcessInstanceId;
     }
 
-//    public Map<String, Object> getInboundVariables() {
-//        return inboundVariables;
-//    }
-//
-//    public void setInboundVariables(Map<String, Object> inboundVariables) {
-//        this.inboundVariables = inboundVariables;
-//    }
+    @Deprecated
+    public Map<String, Object> getInboundVariables() {
+        return getInboundVariables();
+    }
+
+    @Deprecated
+    public void setInboundVariables(Map<String, Object> inboundVariables) {
+        setInBoundVariables(inboundVariables);
+    }
 
     @Override
     public Date getRequestDate() {
