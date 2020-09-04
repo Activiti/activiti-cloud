@@ -22,11 +22,11 @@ import javax.persistence.EntityManager;
 
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
-import org.activiti.cloud.services.query.model.IntegrationContextEntity.IntegrationContextStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +53,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         result.ifPresent(entity -> {
             entity.setRequestDate(new Date(integrationEvent.getTimestamp()));
             entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
-            entity.setInboundVariables(integrationEvent.getEntity().getInBoundVariables());
+            entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
         });
     }
 
