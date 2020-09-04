@@ -1,0 +1,21 @@
+{
+  "id": "basicExclusiveGatewayModel",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "basicExclusiveGateway": {
+      "properties": {},
+      "mappings": {
+        "task1": {
+          "mappingType": "MAP_ALL"
+        },
+        "task2": {
+          "mappingType": "MAP_ALL"
+        },
+        "task3": {
+          "mappingType": "MAP_ALL"
+        }
+      },
+      "constants": {}
+    }
+  }
+}

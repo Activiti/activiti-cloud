@@ -1,0 +1,30 @@
+{
+  "id": "shouldAuditEventsMessagesAreDeliveredModel",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "shouldAuditEventsMessagesAreDelivered": {
+      "properties": {},
+      "mappings": {
+        "Task_05bhhuh": {
+          "mappingType": "MAP_ALL"
+        },
+        "boundaryMessageEvent": {
+          "mappingType": "MAP_ALL"
+        },
+        "intermediateCatchMessageEvent": {
+          "mappingType": "MAP_ALL"
+        },
+        "intermediateThrowMessageEvent": {
+          "mappingType": "MAP_ALL"
+        },
+        "throwEndMessageEvent": {
+          "mappingType": "MAP_ALL"
+        }
+      },
+      "constants": {}
+    }
+  }
+}
+
+
+

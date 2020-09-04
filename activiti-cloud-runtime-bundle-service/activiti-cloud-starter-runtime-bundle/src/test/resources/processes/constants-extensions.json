@@ -18,7 +18,11 @@
           "value": "inName"
         }
       },
-      "mappings": {},
+      "mappings": {
+        "serviceTaskConstants": {
+          "mappingType": "MAP_ALL"
+        }
+      },
       "constants": {
         "serviceTaskConstants": {
           "_constant_value_": {
