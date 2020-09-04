@@ -21,6 +21,8 @@ import static org.awaitility.Awaitility.await;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -1460,6 +1462,82 @@ public class QueryTasksIT {
         assertThat(responseEntity.getBody()).containsExactly("testuser");
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
+
+    }
+
+    @Test
+    public void shouldFilterTasksForDueDate() {
+        //given
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date dueDate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+
+        //set due date as current date + 1
+        dueDate.setTime(now.getTime() + Duration.ofDays(1).toMillis());
+
+        Task assignedTask1 = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task1",
+            "testuser",
+            runningProcessInstance, new Date(now.getTime() - Duration.ofDays(1).toMillis()));
+        Task assignedTask2 = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task2",
+            "testuser",
+            runningProcessInstance, dueDate);
+        Task assignedTask3 = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task3",
+            "testuser",
+            runningProcessInstance, new Date(dueDate.getTime() + Duration.ofDays(2).toMillis()));
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            //set check date to current date
+            Date fromDate = now;
+            // to date, from date plus 2 days
+            Date toDate = new Date(dueDate.getTime() + Duration.ofDays(1).toMillis());
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?dueDateFrom=" + sdf.format(fromDate) + "&dueDateTo=" +
+                        sdf.format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getName)
+                .containsExactly(assignedTask2.getName());
+
+
+        });
+
+        await().untilAsserted(() -> {
+            //check for specific due date
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?dueDate=" + sdf.format(dueDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getName)
+                .containsExactly(assignedTask2.getName());
+
+
+        });
 
     }
 

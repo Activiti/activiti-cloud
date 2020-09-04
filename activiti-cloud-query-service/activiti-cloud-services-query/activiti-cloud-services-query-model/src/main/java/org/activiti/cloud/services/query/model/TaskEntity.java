@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.querydsl.core.annotations.PropertyType;
+import com.querydsl.core.annotations.QueryTransient;
+import com.querydsl.core.annotations.QueryType;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.ConstraintMode;
@@ -110,6 +113,18 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date completedFrom;
+
+    @JsonIgnore
+    @Transient
+    @QueryType(PropertyType.DATETIME)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date dueDateTo;
+
+    @JsonIgnore
+    @Transient
+    @QueryType(PropertyType.DATETIME)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date dueDateFrom;
 
     @JsonIgnore
     @ManyToOne(optional = true, fetch=FetchType.LAZY)
@@ -210,12 +225,12 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public String getProcessInstanceId() {
         return processInstanceId;
     }
-    
+
     @Override
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
     }
-    
+
     @Override
     public String getBusinessKey() {
         return businessKey;
@@ -274,11 +289,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
-    
+
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
-    
+
     public void setStatus(TaskStatus status) {
         this.status = status;
     }
@@ -419,7 +434,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setTaskDefinitionKey(String taskDefinitionKey) {
         this.taskDefinitionKey = taskDefinitionKey;
     }
-    
+
     @Override
     public Long getDuration() {
         return duration;
@@ -438,12 +453,12 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setCompletedDate(Date endDate) {
         this.completedDate = endDate;
     }
-    
+
     @Transient
     public Date getCreatedTo() {
         return createdTo;
     }
-   
+
     public void setCreatedTo(Date createdTo) {
         this.createdTo = createdTo;
     }
@@ -452,7 +467,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public Date getCreatedFrom() {
         return createdFrom;
     }
-   
+
     public void setCreatedFrom(Date createdFrom) {
         this.createdFrom = createdFrom;
     }
@@ -462,7 +477,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return lastClaimedTo;
     }
 
-    
+
     public void setLastClaimedTo(Date lastClaimedTo) {
         this.lastClaimedTo = lastClaimedTo;
     }
@@ -472,7 +487,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return lastClaimedFrom;
     }
 
-    
+
     public void setLastClaimedFrom(Date lastClaimedFrom) {
         this.lastClaimedFrom = lastClaimedFrom;
     }
@@ -481,7 +496,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public Date getCompletedTo() {
         return completedTo;
     }
-   
+
     public void setCompletedTo(Date completedTo) {
         this.completedTo = completedTo;
     }
@@ -494,10 +509,10 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setCompletedFrom(Date completedFrom) {
         this.completedFrom = completedFrom;
     }
-    
+
     public boolean isInFinalState(){
-        return  !(TaskStatus.CREATED.equals(status) || 
-                  TaskStatus.ASSIGNED.equals(status)|| 
+        return  !(TaskStatus.CREATED.equals(status) ||
+                  TaskStatus.ASSIGNED.equals(status)||
                   TaskStatus.SUSPENDED.equals(status));
     }
 
@@ -520,5 +535,5 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         TaskEntity other = (TaskEntity) obj;
         return Objects.equals(id, other.id);
     }
-    
+
 }

@@ -15,16 +15,21 @@
  */
 package org.activiti.cloud.starters.test.builder;
 
+import java.util.Date;
 import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
-import org.activiti.cloud.api.task.model.impl.events.*;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
-import java.util.Date;
 
 public class TaskEventContainedBuilder {
 
@@ -73,6 +78,20 @@ public class TaskEventContainedBuilder {
 
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
                                    new CloudTaskAssignedEventImpl(task));
+        return task;
+    }
+
+    public Task anAssignedTaskWithDueDate(String taskName,
+        String username,
+        ProcessInstance processInstance, Date dueDate) {
+        TaskImpl task = buildTask(taskName,
+            Task.TaskStatus.ASSIGNED,
+            processInstance);
+        task.setAssignee(username);
+        task.setDueDate(dueDate);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+            new CloudTaskAssignedEventImpl(task));
         return task;
     }
 

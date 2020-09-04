@@ -32,7 +32,7 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, S
 
     @Override
     default void customize(QuerydslBindings bindings,
-                           QTaskEntity root) {
+        QTaskEntity root) {
 
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
         bindings.bind(root.createdFrom).first((path, value) -> root.createdDate.after(value));
@@ -43,8 +43,12 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, S
         bindings.bind(root.lastClaimedTo).first((path, value) -> root.claimedDate.before(value));
         bindings.bind(root.completedFrom).first((path, value) -> root.completedDate.after(value));
         bindings.bind(root.completedTo).first((path, value) -> root.completedDate.before(value));
+        bindings.bind(root.dueDateFrom).first((path, value) -> root.dueDate.after(value));
+        bindings.bind(root.dueDateTo).first((path, value) -> root.dueDate.before(value));
+
         bindings.bind(root.name).first((path, value) -> path.like("%" + value.toString() + "%"));
-        bindings.bind(root.description).first((path, value) -> path.like("%" + value.toString() + "%"));
+        bindings.bind(root.description)
+            .first((path, value) -> path.like("%" + value.toString() + "%"));
 
         bindings.excluding(root.variables);
         bindings.excluding(root.standalone);
