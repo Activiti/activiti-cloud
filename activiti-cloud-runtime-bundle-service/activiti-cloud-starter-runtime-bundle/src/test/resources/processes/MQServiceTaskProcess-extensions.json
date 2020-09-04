@@ -1,0 +1,15 @@
+{
+  "id": "MQServiceTaskProcessModel",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "MQServiceTaskProcess": {
+      "properties": {},
+      "mappings": {
+        "serviceTask": {
+          "mappingType": "MAP_ALL"
+        }
+      },
+      "constants": {}
+    }
+  }
+}
