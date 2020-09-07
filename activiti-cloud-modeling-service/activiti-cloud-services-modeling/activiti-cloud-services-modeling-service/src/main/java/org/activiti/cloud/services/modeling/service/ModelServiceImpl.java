@@ -492,25 +492,37 @@ public class ModelServiceImpl implements ModelService{
     }
 
     @Override
-    public void validateModelContent(Model model, FileContent fileContent, Project project, boolean usage) {
-        if(!usage)
-            validateModelExtensions(model.getType(), fileContent.getFileContent(), createValidationContext(project));
-        else
-            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), createValidationContext(project));
+    public void validateModelContent(Model model,
+                                     FileContent fileContent,
+                                     Project project,
+                                     boolean usage) {
+        if(usage) {
+            ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
+                ? EMPTY_CONTEXT
+                : Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+
+            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), validationContext);
+        } else {
+            this.validateModelContent(model, fileContent, project);
+        }
     }
 
     @Override
     public void validateModelContent(Model model, FileContent fileContent, boolean usage) {
-        if(!usage)
+        if(usage) {
+            ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
+                ? EMPTY_CONTEXT
+                : createValidationContext(model);
+            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), validationContext);
+        } else {
             this.validateModelContent(model, fileContent);
-        else
-            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), createValidationContext(model));
+        }
     }
 
     private void validateModelContentAndUsage(String modelType,
                                               byte[] modelContent,
                                               ValidationContext validationContext) {
-        emptyIfNull(modelContentService.findModelValidators(modelType)).stream().forEach(modelValidator -> modelValidator.validate(modelContent,
+        emptyIfNull(modelContentService.findModelValidators(modelType)).stream().forEach(modelValidator -> modelValidator.validateModelContent(modelContent,
             validationContext, true));
     }
 
