@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -466,38 +467,45 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     @Override
-    public void addOutBoundVariable(String arg0, Object arg1) {
-        // TODO Auto-generated method stub
-
+    public void addOutBoundVariable(String name,
+                                    Object value) {
+        outBoundVariables.put(name, value);
     }
-
     @Override
-    public void addOutBoundVariables(Map<String, Object> arg0) {
-        // TODO Auto-generated method stub
-
+    public void addOutBoundVariables(Map<String, Object> variables) {
+        outBoundVariables.putAll(variables);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <T> T getInBoundVariable(String arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    public <T> T getInBoundVariable(String name) {
+        return Optional.ofNullable(inboundVariables)
+                       .map(it -> (T) inboundVariables.get(name))
+                       .orElse(null);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <T> T getInBoundVariable(String arg0, Class<T> arg1) {
-        // TODO Auto-generated method stub
-        return null;
+    public <T> T getInBoundVariable(String name, Class<T> type) {
+        return Optional.ofNullable(inboundVariables)
+                       .map(it -> (T) inboundVariables.get(name))
+                       .orElse(null);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <T> T getOutBoundVariable(String arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    public <T> T getOutBoundVariable(String name) {
+        return Optional.ofNullable(outBoundVariables)
+                       .map(it -> (T) it.get(name))
+                       .orElse(null);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <T> T getOutBoundVariable(String arg0, Class<T> arg1) {
-        // TODO Auto-generated method stub
-        return null;
+    public <T> T getOutBoundVariable(String name, Class<T> type) {
+        return Optional.ofNullable(outBoundVariables)
+                       .map(it -> (T) it.get(name))
+                       .orElse(null);
     }
+
 }
