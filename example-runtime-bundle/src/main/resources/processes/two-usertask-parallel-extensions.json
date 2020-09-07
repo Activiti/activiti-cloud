@@ -1,0 +1,18 @@
+{
+  "id": "twoTaskProcess",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "twoTaskProcess": {
+      "properties": {},
+      "mappings": {
+        "usertask1": {
+          "mappingType": "MAP_ALL"
+        },
+        "usertask2": {
+          "mappingType": "MAP_ALL"
+        }
+      },
+      "constants": {}
+    }
+  }
+}
