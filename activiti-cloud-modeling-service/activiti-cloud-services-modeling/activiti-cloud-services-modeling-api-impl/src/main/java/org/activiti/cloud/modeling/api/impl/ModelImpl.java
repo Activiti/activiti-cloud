@@ -27,6 +27,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
+import org.activiti.cloud.services.common.file.FileContent;
 
 /**
  * Implementation for {@link Model}
@@ -156,7 +157,7 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     }
 
     @Override
-    public byte[] getContent() {
+    public FileContent getContent() {
         return content;
     }
 

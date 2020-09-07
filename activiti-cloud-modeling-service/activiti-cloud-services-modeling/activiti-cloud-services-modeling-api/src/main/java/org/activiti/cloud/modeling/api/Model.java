@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.auditable.Auditable;
+import org.activiti.cloud.services.common.file.FileContent;
 
 /**
  * Interface for models
@@ -51,7 +52,7 @@ public interface Model<A extends Project, U> extends Auditable<U> {
 
     void setContentType(String contentType);
 
-    byte[] getContent();
+    FileContent getContent();
 
     void setContent(byte[] content);
 

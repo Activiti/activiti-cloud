@@ -491,6 +491,29 @@ public class ModelServiceImpl implements ModelService{
             validationContext);
     }
 
+    @Override
+    public void validateModelContent(Model model, FileContent fileContent, Project project, boolean usage) {
+        if(!usage)
+            validateModelExtensions(model.getType(), fileContent.getFileContent(), createValidationContext(project));
+        else
+            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), createValidationContext(project));
+    }
+
+    @Override
+    public void validateModelContent(Model model, FileContent fileContent, boolean usage) {
+        if(!usage)
+            this.validateModelContent(model, fileContent);
+        else
+            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), createValidationContext(model));
+    }
+
+    private void validateModelContentAndUsage(String modelType,
+                                              byte[] modelContent,
+                                              ValidationContext validationContext) {
+        emptyIfNull(modelContentService.findModelValidators(modelType)).stream().forEach(modelValidator -> modelValidator.validate(modelContent,
+            validationContext, true));
+    }
+
     private void validateModelContent(String modelType,
                                       byte[] modelContent,
                                       ValidationContext validationContext) {

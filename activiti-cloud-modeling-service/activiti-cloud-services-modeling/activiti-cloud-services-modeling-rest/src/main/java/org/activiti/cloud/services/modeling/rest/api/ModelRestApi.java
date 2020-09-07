@@ -96,6 +96,10 @@ public interface ModelRestApi {
 
     String PROJECT_ID_PARAM_NAME = "projectId";
 
+    String VALIDATE_USAGE_PARAM_DESCR = "The model is going to be validated and checked it usage in other model";
+
+    String USAGE_PARAM_NAME = "usage";
+
     String INCLUDE_ORPHANS_PARAM_DESCR = "If true, then models with no relationship to any project are retrieved regardless of their scope";
 
     String INCLUDE_ORPHANS_PARAM_NAME = "includeOrphans";
@@ -182,7 +186,9 @@ public interface ModelRestApi {
     @ResponseStatus(NO_CONTENT)
     void deleteModel(
             @ApiParam(value = DELETE_MODEL_ID_PARAM_DESCR, required = true)
-            @PathVariable String modelId);
+            @PathVariable String modelId,
+            @ApiParam(value = USAGE_PARAM_NAME, required = false)
+            @PathVariable boolean usage);
 
     @ApiOperation(
             tags = MODELS,
@@ -251,7 +257,9 @@ public interface ModelRestApi {
             @ApiParam(VALIDATE_MODEL_FILE_PARAM_DESCR)
             @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
             @ApiParam(value=VALIDATE_PROJECT_ID_PARAM_DESCR, required = false)
-            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId) throws IOException;
+            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId,
+            @ApiParam(value=VALIDATE_USAGE_PARAM_DESCR, required = false)
+            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) boolean usage) throws IOException;
 
     @ApiOperation(
             tags = MODELS,
