@@ -19,8 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Calendar;
 import java.util.Collection;
-
+import java.util.Date;
+import java.util.TimeZone;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -121,7 +125,7 @@ public class QueryProcessInstancesEntityIT {
                                     completedProcess.getProcessDefinitionName()),
                               tuple(runningProcess.getId(),
                                     "second",
-                                    ProcessInstance.ProcessInstanceStatus.RUNNING, 
+                                    ProcessInstance.ProcessInstanceStatus.RUNNING,
                                     runningProcess.getProcessDefinitionName()));
         });
 
@@ -398,12 +402,12 @@ public class QueryProcessInstancesEntityIT {
                     .extracting(
                     CloudProcessInstance::getId,
                     CloudProcessInstance::getName,
-                    CloudProcessInstance::getStatus, 
+                    CloudProcessInstance::getStatus,
                     CloudProcessInstance::getProcessDefinitionName)
                     .containsExactly(
                             tuple(completedProcess.getId(),
                                   completedProcess.getName(),
-                                  ProcessInstanceStatus.COMPLETED, 
+                                  ProcessInstanceStatus.COMPLETED,
                                   completedProcess.getProcessDefinitionName()),
                             tuple(runningProcess.getId(),
                                   runningProcess.getName(),
@@ -419,6 +423,65 @@ public class QueryProcessInstancesEntityIT {
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+    }
+
+    @Test
+    public void shouldGetProcessInstancesFilteredByStartDate() {
+        //given
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date startDate1 = new Date();
+        Date startDate2 = new Date();
+        Date startDate3 = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+
+        //set start date as current date + 1
+        startDate1.setTime(now.getTime() + Duration.ofDays(1).toMillis());
+
+        ProcessInstance runningProcess1 = processInstanceBuilder
+            .aRunningProcessInstanceWithStartDate("first", startDate1);
+
+        startDate2.setTime(now.getTime() + Duration.ofDays(3).toMillis());
+        ProcessInstance runningProcess2 = processInstanceBuilder
+            .aRunningProcessInstanceWithStartDate("second", startDate2);
+
+        startDate3.setTime(now.getTime() - Duration.ofDays(3).toMillis());
+        ProcessInstance runningProcess3 = processInstanceBuilder
+            .aRunningProcessInstanceWithStartDate("third", startDate3);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            //set from date to current date
+            Date fromDate = now;
+            // to date, from date plus 2 days
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
+                .exchange(PROC_URL + "?startFrom=" + sdf.format(fromDate) + "&startTo=" + sdf
+                        .format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getId,
+                    ProcessInstanceEntity::getStatus)
+                .containsExactly(tuple(runningProcess1.getId(),
+                    ProcessInstanceStatus.RUNNING));
+        });
     }
 
     private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstancesFiltered(String name,String description) {
