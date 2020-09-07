@@ -145,12 +145,7 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public void deleteModel(
-        @PathVariable String modelId,
-        @PathVariable boolean usage) {
-        if(usage) {
-            Model model = findModelById(modelId);
-            modelService.validateModelContent(model, modelService.getModelContentFile(model), true);
-        }
+        @PathVariable String modelId) {
         modelService.deleteModel(findModelById(modelId));
     }
 
@@ -213,7 +208,7 @@ public class ModelController implements ModelRestApi {
         @PathVariable String modelId,
         @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
         @RequestParam(value = PROJECT_ID_PARAM_NAME, required = false) String projectId,
-        @RequestParam(value = USAGE_PARAM_NAME, required = false) boolean usage) throws IOException {
+        @RequestParam(value = MODEL_USAGE_PARAM_NAME, required = false) boolean usage) throws IOException {
 
         if (StringUtils.isEmpty(projectId)) {
             modelService.validateModelContent(findModelById(modelId), multipartToFileContent(file), usage);
