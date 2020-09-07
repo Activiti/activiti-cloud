@@ -208,13 +208,13 @@ public class ModelController implements ModelRestApi {
         @PathVariable String modelId,
         @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
         @RequestParam(value = PROJECT_ID_PARAM_NAME, required = false) String projectId,
-        @RequestParam(value = MODEL_USAGE_PARAM_NAME, required = false) boolean usage) throws IOException {
+        @RequestParam(value = MODEL_USED_PARAM_NAME, required = false) boolean isUsed) throws IOException {
 
         if (StringUtils.isEmpty(projectId)) {
-            modelService.validateModelContent(findModelById(modelId), multipartToFileContent(file), usage);
+            modelService.validateModelContent(findModelById(modelId), multipartToFileContent(file), isUsed);
         } else {
             Project project = projectController.findProjectById(projectId);
-            modelService.validateModelContent(findModelById(modelId), multipartToFileContent(file), project, usage);
+            modelService.validateModelContent(findModelById(modelId), multipartToFileContent(file), project, isUsed);
         }
     }
 

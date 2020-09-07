@@ -36,11 +36,11 @@ public interface ModelContentValidator extends ModelValidator {
      *
      * @param modelContent      the model content to validate
      * @param validationContext the validation context
-     * @param usage the usage of the model
+     * @param isUsed the usage of the model
      */
     default void validateModelContent(byte[] modelContent,
                               ValidationContext validationContext,
-                              boolean usage) {
-        validate(modelContent,validationContext, usage);
+                              boolean isUsed) {
+        validate(modelContent,validationContext, isUsed);
     }
 }

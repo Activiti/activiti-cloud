@@ -495,8 +495,8 @@ public class ModelServiceImpl implements ModelService{
     public void validateModelContent(Model model,
                                      FileContent fileContent,
                                      Project project,
-                                     boolean usage) {
-        if(usage) {
+                                     boolean isUsed) {
+        if(isUsed) {
             ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
                 ? EMPTY_CONTEXT
                 : Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
@@ -508,8 +508,8 @@ public class ModelServiceImpl implements ModelService{
     }
 
     @Override
-    public void validateModelContent(Model model, FileContent fileContent, boolean usage) {
-        if(usage) {
+    public void validateModelContent(Model model, FileContent fileContent, boolean isUsed) {
+        if(isUsed) {
             ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
                 ? EMPTY_CONTEXT
                 : createValidationContext(model);
