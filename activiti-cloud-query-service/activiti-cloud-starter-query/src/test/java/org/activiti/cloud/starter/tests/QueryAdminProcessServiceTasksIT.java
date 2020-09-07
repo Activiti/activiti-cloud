@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.UUID;
 
 import org.activiti.api.process.model.BPMNActivity;
@@ -32,10 +33,12 @@ import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
@@ -368,33 +371,72 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
 
+        ResponseEntity<PagedModel<CloudBPMNActivity>> serviceTasksResponse = testRestTemplate.exchange("/admin/v1/service-tasks",
+                                                                                                       HttpMethod.GET,
+                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                       PAGED_TASKS_RESPONSE_TYPE);
+
+        assertThat(serviceTasksResponse.getBody().getContent()).isNotEmpty();
+
+        CloudBPMNActivity serviceTask = serviceTasksResponse.getBody()
+                                                            .getContent()
+                                                            .iterator()
+                                                            .next();
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setProcessInstanceId(process.getId());
+        integrationContext.setExecutionId(serviceTask.getExecutionId());
+        integrationContext.setClientId(serviceTask.getElementId());
+        integrationContext.setClientType(serviceTask.getActivityType());
+        integrationContext.setClientName(serviceTask.getActivityName());
+        integrationContext.setProcessDefinitionId(process.getProcessDefinitionId());
+        integrationContext.addInBoundVariable("key", "value");
+
+        eventsAggregator.addEvents(new CloudIntegrationRequestedEventImpl(integrationContext));
+
+        eventsAggregator.sendAll();
+
+         //when
         await().untilAsserted(() -> {
 
-            ResponseEntity<PagedModel<CloudBPMNActivity>> serviceTasksResponse = testRestTemplate.exchange("/admin/v1/service-tasks",
-                                                                                                      HttpMethod.GET,
-                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_TASKS_RESPONSE_TYPE);
-
-            assertThat(serviceTasksResponse.getBody().getContent()).isNotEmpty();
-
-            String serviceTaskId = serviceTasksResponse.getBody()
-                                                       .getContent()
-                                                       .iterator()
-                                                       .next()
-                                                       .getId();
-
-            //when
             ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/{serviceTaskId}/integration-context",
-                                                                                    HttpMethod.GET,
-                                                                                    keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                    SINGLE_INT_CONTEXT_RESPONSE_TYPE,
-                                                                                    serviceTaskId);
+                                                                                               HttpMethod.GET,
+                                                                                               keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                               SINGLE_INT_CONTEXT_RESPONSE_TYPE,
+                                                                                               serviceTask.getId());
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody()).extracting(CloudIntegrationContext::getClientId, CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
                                                 .containsExactly(SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_TYPE, IntegrationContextStatus.INTEGRATION_REQUESTED);
         });
+
+        // and given
+        CloudBpmnError error = new CloudBpmnError("ERROR_CODE");
+
+        error.fillInStackTrace();
+        error.initCause(new RuntimeException("Runtime Exception"));
+
+        eventsAggregator.addEvents(new CloudIntegrationErrorReceivedEventImpl(integrationContext,
+                                                                              error.getMessage(),
+                                                                              error.getCause().getClass().getName(),
+                                                                              Arrays.asList(error.getStackTrace())));
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/{serviceTaskId}/integration-context",
+                                                                                               HttpMethod.GET,
+                                                                                               keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                               SINGLE_INT_CONTEXT_RESPONSE_TYPE,
+                                                                                               serviceTask.getId());
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody()).extracting(CloudIntegrationContext::getClientId, CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
+                                                .containsExactly(SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_TYPE, IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
+        });
+
     }
 
     @Test
@@ -446,22 +488,12 @@ public class QueryAdminProcessServiceTasksIT {
         taskActivity.setProcessInstanceId(process.getId());
         taskActivity.setExecutionId(UUID.randomUUID().toString());
 
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.setClientId(taskActivity.getElementId());
-        integrationContext.setClientType(taskActivity.getActivityType());
-        integrationContext.setClientName(taskActivity.getActivityName());
-        integrationContext.setProcessInstanceId(process.getId());
-        integrationContext.setExecutionId(taskActivity.getExecutionId());
-        integrationContext.setProcessDefinitionId(process.getProcessDefinitionId());
-        integrationContext.addInBoundVariable("key", "value");
-
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
                                    new CloudProcessStartedEventImpl(process, null, null),
                                    new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
                                    new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
                                    new CloudSequenceFlowTakenEventImpl(sequenceFlow),
-                                   new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId()),
-                                   new CloudIntegrationRequestedEventImpl(integrationContext)
+                                   new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId())
         );
 
         return process;

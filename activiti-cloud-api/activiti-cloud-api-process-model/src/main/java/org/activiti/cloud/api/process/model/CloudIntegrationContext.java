@@ -23,7 +23,7 @@ import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
 public interface CloudIntegrationContext extends IntegrationContext, CloudRuntimeEntity {
 
-    public static enum IntegrationContextStatus {
+    public enum IntegrationContextStatus {
         INTEGRATION_REQUESTED, INTEGRATION_RESULT_RECEIVED, INTEGRATION_ERROR_RECEIVED
     }
 
