@@ -72,7 +72,6 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         taskDefinitionKey = task.getTaskDefinitionKey();
         candidateUsers = task.getCandidateUsers();
         candidateGroups = task.getCandidateGroups();
-        processDefinitionName = task.getProcessDefinitionName();
     }
 
     @Override
@@ -267,15 +266,6 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
 
     public void setTaskDefinitionKey(String taskDefinitionKey) {
         this.taskDefinitionKey = taskDefinitionKey;
-    }
-
-    @Override
-    public String getProcessDefinitionName() {
-        return processDefinitionName;
-    }
-
-    public void setProcessDefinitionName(String processDefinitionName) {
-        this.processDefinitionName = processDefinitionName;
     }
 
     @Override

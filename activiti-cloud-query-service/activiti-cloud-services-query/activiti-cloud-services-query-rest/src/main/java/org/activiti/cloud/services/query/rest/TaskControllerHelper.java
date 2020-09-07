@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
@@ -48,7 +48,7 @@ public class TaskControllerHelper {
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
     }
 
-    public PagedModel<EntityModel<CloudTask>> findAll(Predicate predicate,
+    public PagedModel<EntityModel<QueryCloudTask>> findAll(Predicate predicate,
         VariableSearch variableSearch, Pageable pageable, List<QueryDslPredicateFilter> filters) {
         Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
 

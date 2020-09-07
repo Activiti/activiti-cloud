@@ -25,7 +25,7 @@ import com.querydsl.core.types.Predicate;
 import java.util.Collections;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
@@ -59,7 +59,7 @@ public class TaskControllerHelperTest {
     private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
     @Mock
-    private PagedModel<EntityModel<CloudTask>> cloudTaskPagedModel;
+    private PagedModel<EntityModel<QueryCloudTask>> cloudTaskPagedModel;
 
     @BeforeEach
     public void setUp() {
@@ -86,7 +86,7 @@ public class TaskControllerHelperTest {
             .willReturn(cloudTaskPagedModel);
 
         //when
-        PagedModel<EntityModel<CloudTask>> resultPagedModel = taskControllerHelper.findAll(
+        PagedModel<EntityModel<QueryCloudTask>> resultPagedModel = taskControllerHelper.findAll(
             initialPredicate,
             variableSearch, pageable, filters);
 
@@ -112,7 +112,7 @@ public class TaskControllerHelperTest {
             .willReturn(cloudTaskPagedModel);
 
         //when
-        PagedModel<EntityModel<CloudTask>> resultPagedModel = taskControllerHelper.findAll(
+        PagedModel<EntityModel<QueryCloudTask>> resultPagedModel = taskControllerHelper.findAll(
             initialPredicate,
             variableSearch, pageable, filters);
 
