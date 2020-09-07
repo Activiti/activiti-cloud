@@ -40,7 +40,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.process.ModelScope;
-import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
 import org.hibernate.annotations.GenericGenerator;
@@ -195,7 +194,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
 
     @Override
     @JsonIgnore
-    public FileContent getContent() {
+    public byte[] getContent() {
         return latestVersion.getContent();
     }
 

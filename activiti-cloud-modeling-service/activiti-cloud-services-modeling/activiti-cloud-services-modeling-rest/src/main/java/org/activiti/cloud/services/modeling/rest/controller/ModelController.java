@@ -149,7 +149,7 @@ public class ModelController implements ModelRestApi {
         @PathVariable boolean usage) {
         if(usage) {
             Model model = findModelById(modelId);
-            modelService.validateModelContent(model, model.getContent(), true);
+            modelService.validateModelContent(model, modelService.getModelContentFile(model), true);
         }
         modelService.deleteModel(findModelById(modelId));
     }
