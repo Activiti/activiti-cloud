@@ -46,6 +46,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
+import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
@@ -107,6 +108,9 @@ public class QueryAdminProcessServiceTasksIT {
     private BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
 
     @Autowired
+    private IntegrationContextRepository integrationContextRepository;
+
+    @Autowired
     private MyProducer producer;
 
     @Autowired
@@ -141,6 +145,7 @@ public class QueryAdminProcessServiceTasksIT {
         processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();
         processInstanceRepository.deleteAll();
+        integrationContextRepository.deleteAll();
         bpmnActivityRepository.deleteAll();
         bpmnSequenceFlowRepository.deleteAll();
     }
