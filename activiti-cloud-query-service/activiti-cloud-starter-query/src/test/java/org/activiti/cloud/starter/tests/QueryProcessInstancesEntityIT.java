@@ -431,27 +431,27 @@ public class QueryProcessInstancesEntityIT {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        Date startDate1 = new Date();
-        Date startDate2 = new Date();
-        Date startDate3 = new Date();
+        Date nextDay = new Date();
+        Date inThreeDays = new Date();
+        Date threeDaysAgo = new Date();
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         Date now = cal.getTime();
 
         //set start date as current date + 1
-        startDate1.setTime(now.getTime() + Duration.ofDays(1).toMillis());
+        nextDay.setTime(now.getTime() + Duration.ofDays(1).toMillis());
 
-        ProcessInstance runningProcess1 = processInstanceBuilder
-            .aRunningProcessInstanceWithStartDate("first", startDate1);
+        ProcessInstance processInstanceStartedNextDay = processInstanceBuilder
+            .aRunningProcessInstanceWithStartDate("first", nextDay);
 
-        startDate2.setTime(now.getTime() + Duration.ofDays(3).toMillis());
-        ProcessInstance runningProcess2 = processInstanceBuilder
-            .aRunningProcessInstanceWithStartDate("second", startDate2);
+        inThreeDays.setTime(now.getTime() + Duration.ofDays(3).toMillis());
+        ProcessInstance processInstanceStartedInThreeDays = processInstanceBuilder
+            .aRunningProcessInstanceWithStartDate("second", inThreeDays);
 
-        startDate3.setTime(now.getTime() - Duration.ofDays(3).toMillis());
-        ProcessInstance runningProcess3 = processInstanceBuilder
-            .aRunningProcessInstanceWithStartDate("third", startDate3);
+        threeDaysAgo.setTime(now.getTime() - Duration.ofDays(3).toMillis());
+        ProcessInstance processInstanceStartedThreeDaysAgo = processInstanceBuilder
+            .aRunningProcessInstanceWithStartDate("third", threeDaysAgo);
 
         eventsAggregator.sendAll();
 
@@ -479,7 +479,7 @@ public class QueryProcessInstancesEntityIT {
             assertThat(filteredProcessInstanceEntities)
                 .extracting(ProcessInstanceEntity::getId,
                     ProcessInstanceEntity::getStatus)
-                .containsExactly(tuple(runningProcess1.getId(),
+                .containsExactly(tuple(processInstanceStartedNextDay.getId(),
                     ProcessInstanceStatus.RUNNING));
         });
     }

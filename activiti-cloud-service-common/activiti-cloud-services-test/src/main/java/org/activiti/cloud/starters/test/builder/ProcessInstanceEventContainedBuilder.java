@@ -66,9 +66,7 @@ public class ProcessInstanceEventContainedBuilder {
         ProcessInstanceImpl processInstance = buildProcessInstance(name);
         processInstance.setStartDate(startDate);
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
-            new CloudProcessStartedEventImpl(processInstance,
-                null,
-                null));
+            new CloudProcessStartedEventImpl(processInstance));
         return processInstance;
     }
 
