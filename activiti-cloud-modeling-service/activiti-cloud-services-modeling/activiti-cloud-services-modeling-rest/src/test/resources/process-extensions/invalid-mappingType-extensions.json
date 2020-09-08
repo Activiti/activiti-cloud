@@ -4,7 +4,7 @@
     "Process_test": {
       "mappings": {
         "ServiceTask_06crg3b": {
-          "mappingType": "MAP_ALL_INPUTS_AND_OUTPUTS"
+          "mappingType": "WRONG_MAPPING_TYPE"
         },
         "ServiceTask_07fergb": {
           "mappingTypo": "MAP_ALL"
