@@ -39,8 +39,9 @@ import javax.persistence.Table;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity(name="IntegrationContext")
 @Table(name="INTEGRATION_CONTEXT", indexes={
@@ -53,10 +54,9 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @Id
     private String id;
 
-    @JsonProperty("inBoundVariables")
     @Convert(converter = MapOfStringObjectJsonConverter.class)
-    @Column(columnDefinition="text")
-    private Map<String, Object> inboundVariables = new HashMap<>();
+    @Column(columnDefinition="text", name = "inbound_variables")
+    private Map<String, Object> inBoundVariables = new HashMap<>();
 
     @Convert(converter = MapOfStringObjectJsonConverter.class)
     @Column(columnDefinition="text")
@@ -91,6 +91,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @Column(columnDefinition="text")
     private List<StackTraceElement> stackTraceElements;
 
+    @JsonFormat(shape = Shape.STRING)
     private IntegrationContextStatus status;
 
     @JsonIgnore
@@ -162,11 +163,11 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     @Override
     public Map<String, Object> getInBoundVariables() {
-        return inboundVariables;
+        return inBoundVariables;
     }
 
     public void setInBoundVariables(Map<String, Object> inboundVariables) {
-        this.inboundVariables = inboundVariables;
+        this.inBoundVariables = inboundVariables;
     }
 
     @Override
@@ -232,6 +233,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     @Deprecated
+    @JsonIgnore
     public Map<String, Object> getInboundVariables() {
         return getInboundVariables();
     }
@@ -312,7 +314,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
                                                errorDate,
                                                errorMessage,
                                                id,
-                                               inboundVariables,
+                                               inBoundVariables,
                                                outBoundVariables,
                                                parentProcessInstanceId,
                                                processDefinitionId,
@@ -348,7 +350,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
                Objects.equals(errorDate,other.errorDate) &&
                Objects.equals(errorMessage, other.errorMessage) &&
                Objects.equals(id, other.id) &&
-               Objects.equals(inboundVariables, other.inboundVariables) &&
+               Objects.equals(inBoundVariables, other.inBoundVariables) &&
                Objects.equals(outBoundVariables, other.outBoundVariables) &&
                Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) &&
                Objects.equals(processDefinitionId, other.processDefinitionId) &&
@@ -370,7 +372,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         builder.append("IntegrationContextEntity [id=")
                .append(id)
                .append(", inboundVariables=")
-               .append(inboundVariables != null ? toString(inboundVariables.entrySet(), maxLen) : null)
+               .append(inBoundVariables != null ? toString(inBoundVariables.entrySet(), maxLen) : null)
                .append(", outBoundVariables=")
                .append(outBoundVariables != null ? toString(outBoundVariables.entrySet(), maxLen) : null)
                .append(", processInstanceId=")
@@ -479,16 +481,16 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name) {
-        return Optional.ofNullable(inboundVariables)
-                       .map(it -> (T) inboundVariables.get(name))
+        return Optional.ofNullable(inBoundVariables)
+                       .map(it -> (T) inBoundVariables.get(name))
                        .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name, Class<T> type) {
-        return Optional.ofNullable(inboundVariables)
-                       .map(it -> (T) inboundVariables.get(name))
+        return Optional.ofNullable(inBoundVariables)
+                       .map(it -> (T) inBoundVariables.get(name))
                        .orElse(null);
     }
 

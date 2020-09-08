@@ -419,7 +419,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         eventsAggregator.addEvents(new CloudIntegrationErrorReceivedEventImpl(integrationContext,
                                                                               error.getMessage(),
-                                                                              error.getCause().getClass().getName(),
+                                                                              error.getClass().getName(),
                                                                               Arrays.asList(error.getStackTrace())));
         eventsAggregator.sendAll();
 
@@ -433,8 +433,19 @@ public class QueryAdminProcessServiceTasksIT {
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody()).extracting(CloudIntegrationContext::getClientId, CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
-                                                .containsExactly(SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_TYPE, IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
+            assertThat(responseEntity.getBody()).extracting(CloudIntegrationContext::getClientId,
+                                                            CloudIntegrationContext::getClientType,
+                                                            CloudIntegrationContext::getStatus,
+                                                            CloudIntegrationContext::getErrorMessage,
+                                                            CloudIntegrationContext::getErrorClassName)
+                                                .containsExactly(SERVICE_TASK_ELEMENT_ID,
+                                                                 SERVICE_TASK_TYPE,
+                                                                 IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
+                                                                 error.getErrorCode(),
+                                                                 error.getClass().getName());
+
+            assertThat(responseEntity.getBody().getStackTraceElements()).isNotEmpty();
+
         });
 
     }
