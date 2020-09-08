@@ -19,7 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.TimeZone;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
@@ -121,7 +126,7 @@ public class QueryProcessInstancesEntityIT {
                                     completedProcess.getProcessDefinitionName()),
                               tuple(runningProcess.getId(),
                                     "second",
-                                    ProcessInstance.ProcessInstanceStatus.RUNNING, 
+                                    ProcessInstance.ProcessInstanceStatus.RUNNING,
                                     runningProcess.getProcessDefinitionName()));
         });
 
@@ -398,12 +403,12 @@ public class QueryProcessInstancesEntityIT {
                     .extracting(
                     CloudProcessInstance::getId,
                     CloudProcessInstance::getName,
-                    CloudProcessInstance::getStatus, 
+                    CloudProcessInstance::getStatus,
                     CloudProcessInstance::getProcessDefinitionName)
                     .containsExactly(
                             tuple(completedProcess.getId(),
                                   completedProcess.getName(),
-                                  ProcessInstanceStatus.COMPLETED, 
+                                  ProcessInstanceStatus.COMPLETED,
                                   completedProcess.getProcessDefinitionName()),
                             tuple(runningProcess.getId(),
                                   runningProcess.getName(),
@@ -412,6 +417,46 @@ public class QueryProcessInstancesEntityIT {
                     );
         });
     }
+
+//    @Test
+//    public void shouldFilterProcessInstanceEntityForCompletedDate() {
+//        //given
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+//        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+//
+//        Date completedDate = new Date();
+//        Calendar cal = Calendar.getInstance();
+//        cal.set(Calendar.SECOND, 0);
+//        cal.set(Calendar.MILLISECOND, 0);
+//        Date now = cal.getTime();
+//
+//        //set completed date as current date
+//        completedDate.setTime(now.getTime());
+//
+//        ProcessInstance completedProcess = processInstanceBuilder.aCompletedProcessInstance("Process for filter");
+//        ProcessInstance runningProcess = processInstanceBuilder.aRunningProcessInstance("Process");
+//
+//        eventsAggregator.sendAll();
+//
+//        await().untilAsserted(() -> {
+//
+//            //when
+//            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstancesFiltered("for filter",null);
+//
+//            //then
+//            assertThat(responseEntity).isNotNull();
+//            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+//
+//            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+//            assertThat(processInstanceEntities)
+//                .extracting(ProcessInstanceEntity::getId,
+//                    ProcessInstanceEntity::getName,
+//                    ProcessInstanceEntity::getStatus)
+//                .contains(tuple(completedProcess.getId(),
+//                    completedProcess.getName(),
+//                    ProcessInstance.ProcessInstanceStatus.COMPLETED));
+//        });
+//    }
 
     private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstances() {
 

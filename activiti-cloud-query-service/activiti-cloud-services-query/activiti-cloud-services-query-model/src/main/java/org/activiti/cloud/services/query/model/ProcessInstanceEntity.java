@@ -370,6 +370,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
                                                startDate,
                                                startFrom,
                                                startTo,
+                                               completedDate,
+                                               completedFrom,
+                                               completedTo,
                                                status);
         return result;
     }
@@ -398,6 +401,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
                 Objects.equals(startDate, other.startDate) &&
                 Objects.equals(startFrom, other.startFrom) &&
                 Objects.equals(startTo, other.startTo) &&
+                Objects.equals(completedDate, other.completedDate) &&
+                Objects.equals(completedFrom, other.completedFrom) &&
+                Objects.equals(completedTo, other.completedTo) &&
                 status == other.status;
     }
 
