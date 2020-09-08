@@ -577,8 +577,8 @@ public class ModelControllerIT {
             .hasSize(2)
             .extracting(ModelValidationError::getProblem,
                 ModelValidationError::getDescription)
-            .containsOnly(tuple("MAP_ALL_INPUTS_AND_OUTPUTS is not a valid enum value",
-                "#/extensions/Process_test/mappings/ServiceTask_06crg3b/mappingType: MAP_ALL_INPUTS_AND_OUTPUTS is not a valid enum value"),
+            .containsOnly(tuple("WRONG_MAPPING_TYPE is not a valid enum value",
+                "#/extensions/Process_test/mappings/ServiceTask_06crg3b/mappingType: WRONG_MAPPING_TYPE is not a valid enum value"),
                 tuple("extraneous key [mappingTypo] is not permitted",
                     "#/extensions/Process_test/mappings/ServiceTask_07fergb: extraneous key [mappingTypo] is not permitted"));
 
@@ -601,24 +601,20 @@ public class ModelControllerIT {
                 .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
-        assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: #: only 0 subschema matches out of 2");
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: 2 schema violations found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
 
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-                .hasSize(4)
+                .hasSize(2)
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
                 .containsOnly(tuple("extraneous key [inputds] is not permitted",
                                     "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [inputds] is not permitted"),
                               tuple("extraneous key [outputss] is not permitted",
-                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"),
-                                tuple("required key [inputs] not found",
-                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: required key [inputs] not found"),
-                                tuple("required key [outputs] not found",
-                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: required key [outputs] not found"));
+                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"));
     }
 
     @Test
