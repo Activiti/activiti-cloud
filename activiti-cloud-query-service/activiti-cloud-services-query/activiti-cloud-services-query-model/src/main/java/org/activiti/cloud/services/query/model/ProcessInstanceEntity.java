@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.querydsl.core.annotations.PropertyType;
+import com.querydsl.core.annotations.QueryType;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -75,10 +77,12 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
     private Date startFrom;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
     private Date startTo;
 
     @JsonIgnore

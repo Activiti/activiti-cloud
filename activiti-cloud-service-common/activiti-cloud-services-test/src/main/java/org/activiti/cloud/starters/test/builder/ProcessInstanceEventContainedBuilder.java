@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starters.test.builder;
 
+import java.util.Date;
 import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessInstance;
@@ -59,6 +60,14 @@ public class ProcessInstanceEventContainedBuilder {
         completedProcess.setProcessDefinitionId(UUID.randomUUID().toString());
         completedProcess.setProcessDefinitionName("my-proc-definition-name");
         return completedProcess;
+    }
+
+    public ProcessInstanceImpl aRunningProcessInstanceWithStartDate(String name, Date startDate) {
+        ProcessInstanceImpl processInstance = buildProcessInstance(name);
+        processInstance.setStartDate(startDate);
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
+            new CloudProcessStartedEventImpl(processInstance));
+        return processInstance;
     }
 
 }
