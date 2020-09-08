@@ -38,6 +38,8 @@ public interface ProcessInstanceRepository extends PagingAndSortingRepository<Pr
         bindings.bind(root.lastModifiedTo).first((path, value) -> root.lastModified.before(value));
         bindings.bind(root.startFrom).first((path, value) -> root.startDate.after(value));
         bindings.bind(root.startTo).first((path, value) -> root.startDate.before(value));
+        bindings.bind(root.completedFrom).first((path, value) -> root.completedDate.after(value));
+        bindings.bind(root.completedTo).first((path, value) -> root.completedDate.before(value));
         bindings.bind(root.name).first((path, value) -> path.like("%"+value.toString()+"%"));
     }
 }
