@@ -20,7 +20,7 @@ create table bpmn_activity
     execution_id	       	   varchar(255),
     started_date               timestamp,
     status                     varchar(255),
-	
+
     primary key (id)
 );
 create table bpmn_sequence_flow
@@ -86,6 +86,9 @@ create table process_instance
     start_date                 timestamp,
     start_from                 timestamp,
     start_to                   timestamp,
+    completed_date             timestamp,
+    completed_from             timestamp,
+    completed_to               timestamp,
     status                     varchar(255),
     process_definition_name    varchar(255),
     primary key (id)
@@ -207,7 +210,7 @@ create table integration_context
     client_id                  	varchar(255),
     client_name                	varchar(255),
     client_type                	varchar(255),
-    
+
     connector_type            	varchar(255),
     status                      varchar(255),
 

@@ -299,7 +299,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.startTo = startTo;
     }
 
-    @Transient
     public Date getCompletedDate() {
         return completedDate;
     }
