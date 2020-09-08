@@ -16,12 +16,13 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -47,7 +48,7 @@ public class TaskEntityCreatedEventHandlerTest {
     private TaskRepository taskRepository;
 
     @Mock
-    private EntityManager entityManager;
+    private ProcessInstanceRepository processInstanceRepository;
 
     @BeforeEach
     public void setUp() {
@@ -74,11 +75,9 @@ public class TaskEntityCreatedEventHandlerTest {
         event.setServiceName("runtime-bundle-a");
         event.setProcessDefinitionVersion(10);
         event.setBusinessKey("businessKey");
-
-        when(entityManager.getReference(ProcessInstanceEntity.class,
-                                        task.getProcessInstanceId()))
-                .thenReturn(processInstanceEntity);
-
+        
+        when(processInstanceRepository.findById(task.getProcessInstanceId()))
+                .thenReturn(Optional.of(processInstanceEntity));
         //when
         handler.handle(event);
 

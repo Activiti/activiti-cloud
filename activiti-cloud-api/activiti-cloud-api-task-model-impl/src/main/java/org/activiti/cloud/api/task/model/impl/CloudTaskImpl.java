@@ -46,7 +46,6 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private String taskDefinitionKey;
     private List<String> candidateUsers;
     private List<String> candidateGroups;
-    private String processDefinitionName;
 
     public CloudTaskImpl() {
     }
@@ -288,7 +287,6 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                ", processDefinitionVersion=" + processDefinitionVersion +
                ", businessKey=" + businessKey +
                ", taskDefinitionKey=" + taskDefinitionKey +
-               ", processDefinitionName=" + processDefinitionName +
                 '}';
     }
 
@@ -329,9 +327,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                Objects.equals(processDefinitionVersion,
                               task.processDefinitionVersion) &&
                Objects.equals(businessKey,
-                              task.businessKey) && 
-               Objects.equals(processDefinitionName,
-                        task.processDefinitionName) &&
+                              task.businessKey) &&
                status == task.status;
     }
 }
