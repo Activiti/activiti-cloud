@@ -418,49 +418,6 @@ public class QueryProcessInstancesEntityIT {
         });
     }
 
-    @Test
-    public void shouldFilterProcessInstanceEntityForCompletedDate() {
-        //given
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-
-        Date completedDate = new Date();
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date now = cal.getTime();
-
-        //set completed date as current date
-        completedDate.setTime(now.getTime());
-
-        ProcessInstance completedProcess1 = processInstanceBuilder.aCompletedProcessInstance("Process1 for filter");
-
-        ProcessInstance completedProcess2 = processInstanceBuilder.aCompletedProcessInstance("Process2 for filter");
-
-        ProcessInstance runningProcess1 = processInstanceBuilder.aRunningProcessInstance("Process3");
-
-        eventsAggregator.sendAll();
-
-        await().untilAsserted(() -> {
-
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstancesFilteredByCompletedDate("for filter",completedDate);
-
-            //then
-            assertThat(responseEntity).isNotNull();
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
-            assertThat(processInstanceEntities)
-                .extracting(ProcessInstanceEntity::getId,
-                    ProcessInstanceEntity::getName,
-                    ProcessInstanceEntity::getStatus)
-                .contains(tuple(completedProcess1.getId(),
-                    completedProcess1.getName(),
-                    ProcessInstance.ProcessInstanceStatus.COMPLETED));
-        });
-    }
-
     private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstances() {
 
         return testRestTemplate.exchange(PROC_URL,
@@ -528,6 +485,55 @@ public class QueryProcessInstancesEntityIT {
         });
     }
 
+    @Test
+    public void shouldGetProcessInstancesFilteredByCompletedDate() {
+        //given
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date completedDate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+
+        //set completed date as current date
+        completedDate.setTime(now.getTime());
+
+        ProcessInstance processInstanceStartedToday = processInstanceBuilder
+            .aRunningProcessInstanceWithStartDate("first", completedDate);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            //set from date to current date
+            Date fromDate = now;
+            // to date, from date plus 2 days
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
+                .exchange(PROC_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" + sdf
+                        .format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getId,
+                    ProcessInstanceEntity::getStatus)
+                .containsExactly(tuple(processInstanceStartedToday.getId(),
+                    ProcessInstanceStatus.RUNNING));
+        });
+    }
+
     private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstancesFiltered(String name,String description) {
         String url=PROC_URL;
         boolean add = false;
@@ -551,26 +557,4 @@ public class QueryProcessInstancesEntityIT {
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
 
-    private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstancesFilteredByCompletedDate(String name,Date date) {
-        String url=PROC_URL;
-        boolean add = false;
-        if (name != null || date != null) {
-            url += "?";
-            if (name != null) {
-                url += "name=" + name;
-                add = true;
-            }
-            if (date != null) {
-                if (add) {
-                    url += "&";
-                }
-                url += "completedDate=" + date;
-            }
-
-        }
-        return testRestTemplate.exchange(url,
-                                         HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                         PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
-    }
 }
