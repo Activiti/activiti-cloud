@@ -22,22 +22,24 @@ public interface ModelValidator extends ModelValidationErrorProducer {
 
     /**
      * Validate the given model.
-     * @param modelFile the model to validate
+     * @param modelContent content of the model to validate
      * @param validationContext the validation context
      */
-    void validate(byte[] modelFile,
-                              ValidationContext validationContext);
+    void validate(byte[] modelContent,
+                  ValidationContext validationContext);
 
     /**
      * Validate the given model and its usage
-     * @param modelFile the model to validate
+     * @param model the model to validate
+     * @param modelContent content of the model to validate
      * @param validationContext the validation context
      * @param validateUsage validate the usage of a model
      */
-     default void validate(byte[] modelFile,
-                  ValidationContext validationContext,
-                  boolean validateUsage) {
-         validate(modelFile, validationContext);
+     default void validate(Model model,
+                           byte[] modelContent,
+                           ValidationContext validationContext,
+                           boolean validateUsage) {
+         validate(modelContent, validationContext);
      };
 
     /**

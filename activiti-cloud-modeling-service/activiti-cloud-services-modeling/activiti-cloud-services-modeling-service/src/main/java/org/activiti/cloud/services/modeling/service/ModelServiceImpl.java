@@ -503,7 +503,7 @@ public class ModelServiceImpl implements ModelService{
                                      Project project,
                                      boolean validateUsage) {
         if(validateUsage) {
-            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), getValidationContext(model, fileContent, project));
+            validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, project));
         } else {
             this.validateModelContent(model, fileContent, project);
         }
@@ -512,16 +512,16 @@ public class ModelServiceImpl implements ModelService{
     @Override
     public void validateModelContent(Model model, FileContent fileContent, boolean validateUsage) {
         if(validateUsage) {
-            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), getValidationContext(model, fileContent, null));
+            validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, null));
         } else {
             this.validateModelContent(model, fileContent);
         }
     }
 
-    private void validateModelContentAndUsage(String modelType,
+    private void validateModelContentAndUsage(Model model,
                                               byte[] modelContent,
                                               ValidationContext validationContext) {
-        emptyIfNull(modelContentService.findModelValidators(modelType)).stream().forEach(modelValidator -> modelValidator.validateModelContent(modelContent,
+        emptyIfNull(modelContentService.findModelValidators(model.getType())).stream().forEach(modelValidator -> modelValidator.validateModelContent(model, modelContent,
             validationContext, true));
     }
 
