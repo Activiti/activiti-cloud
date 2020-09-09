@@ -81,6 +81,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         this.startDate = startDate;
     }
 
+    @Override
     public Date getCompletedDate() {
         return completedDate;
     }

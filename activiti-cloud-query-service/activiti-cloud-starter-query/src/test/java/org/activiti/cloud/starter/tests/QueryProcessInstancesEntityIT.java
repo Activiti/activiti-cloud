@@ -501,7 +501,7 @@ public class QueryProcessInstancesEntityIT {
         completedDate.setTime(now.getTime());
 
         ProcessInstance processInstanceStartedToday = processInstanceBuilder
-            .aRunningProcessInstanceWithStartDate("first", completedDate);
+            .aRunningProcessInstanceWithCompletedDate("first", completedDate);
 
         eventsAggregator.sendAll();
 
@@ -510,8 +510,8 @@ public class QueryProcessInstancesEntityIT {
             //when
             //set from date to current date
             Date fromDate = now;
-            // to date, from date plus 2 days
-            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            // to date, from date minus 2 days
+            Date toDate = new Date(now.getTime() - Duration.ofDays(2).toMillis());
             //when
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
                 .exchange(PROC_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" + sdf
