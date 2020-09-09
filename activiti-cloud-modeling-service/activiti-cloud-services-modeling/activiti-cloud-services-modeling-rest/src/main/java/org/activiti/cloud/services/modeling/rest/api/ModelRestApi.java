@@ -98,7 +98,7 @@ public interface ModelRestApi {
 
     String MODEL_USED_PARAM_DESCR = "The model is going to be validated and checked used in other model";
 
-    String MODEL_USED_PARAM_NAME = "isUsed";
+    String MODEL_USED_PARAM_NAME = "validateUsage";
 
     String INCLUDE_ORPHANS_PARAM_DESCR = "If true, then models with no relationship to any project are retrieved regardless of their scope";
 

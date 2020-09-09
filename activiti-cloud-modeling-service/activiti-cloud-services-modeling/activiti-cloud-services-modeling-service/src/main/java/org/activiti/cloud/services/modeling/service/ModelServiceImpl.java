@@ -67,6 +67,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 
@@ -450,16 +451,23 @@ public class ModelServiceImpl implements ModelService{
     @Override
     public void validateModelContent(Model model,
                                      FileContent fileContent) {
-        ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
-                ? EMPTY_CONTEXT
-                : createValidationContext(model);
-
+        ValidationContext validationContext = getValidationContext(model, fileContent, null);
         validateModelContent(model.getType(),
                              fileContent.getFileContent(),
                              validationContext);
     }
 
 
+
+    private ValidationContext getValidationContext(Model model, FileContent fileContent, @Nullable Project project) {
+        if (!modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON))
+            return EMPTY_CONTEXT;
+
+        if(project != null)
+            return Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+
+        return createValidationContext(model);
+    }
 
     private ValidationContext createValidationContext(Project project) {
         return new ProjectValidationContext(getAllModels(project));
@@ -482,9 +490,7 @@ public class ModelServiceImpl implements ModelService{
     public void validateModelContent(Model model,
                                      FileContent fileContent,
                                      Project project) {
-        ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
-            ? EMPTY_CONTEXT
-            : Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+        ValidationContext validationContext = getValidationContext(model, fileContent, project);
 
         validateModelContent(model.getType(),
             fileContent.getFileContent(),
@@ -495,25 +501,18 @@ public class ModelServiceImpl implements ModelService{
     public void validateModelContent(Model model,
                                      FileContent fileContent,
                                      Project project,
-                                     boolean isUsed) {
-        if(isUsed) {
-            ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
-                ? EMPTY_CONTEXT
-                : Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
-
-            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), validationContext);
+                                     boolean validateUsage) {
+        if(validateUsage) {
+            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), getValidationContext(model, fileContent, project));
         } else {
             this.validateModelContent(model, fileContent, project);
         }
     }
 
     @Override
-    public void validateModelContent(Model model, FileContent fileContent, boolean isUsed) {
-        if(isUsed) {
-            ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
-                ? EMPTY_CONTEXT
-                : createValidationContext(model);
-            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), validationContext);
+    public void validateModelContent(Model model, FileContent fileContent, boolean validateUsage) {
+        if(validateUsage) {
+            validateModelContentAndUsage(model.getType(), fileContent.getFileContent(), getValidationContext(model, fileContent, null));
         } else {
             this.validateModelContent(model, fileContent);
         }

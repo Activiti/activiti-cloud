@@ -32,11 +32,11 @@ public interface ModelValidator extends ModelValidationErrorProducer {
      * Validate the given model and its usage
      * @param modelFile the model to validate
      * @param validationContext the validation context
-     * @param isUsed to see the usage of a model
+     * @param validateUsage validate the usage of a model
      */
      default void validate(byte[] modelFile,
                   ValidationContext validationContext,
-                  boolean isUsed) {
+                  boolean validateUsage) {
          validate(modelFile, validationContext);
      };
 

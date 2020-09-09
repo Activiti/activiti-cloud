@@ -114,7 +114,7 @@ public interface ModelService {
 
     void validateModelContent(Model model,
                               FileContent fileContent,
-                              boolean isUsed);
+                              boolean validateUsage);
 
     void validateModelContent(Model model,
                               FileContent fileContent,
@@ -127,7 +127,7 @@ public interface ModelService {
     void validateModelContent(Model model,
                               FileContent fileContent,
                               Project project,
-                              boolean isUsed);
+                              boolean validateUsage);
 
     void validateModelExtensions(Model model,
                                  ValidationContext validationContext);
