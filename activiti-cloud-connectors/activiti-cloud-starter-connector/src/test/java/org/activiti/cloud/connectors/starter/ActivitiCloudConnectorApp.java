@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -103,6 +104,21 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
             Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
                                                                                  connectorProperties,
                                                                                  error)
+                                                                       .buildMessage();
+            integrationErrorSender.send(message);
+        }
+    }
+
+    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnError'")
+    public void mockTypeIntegrationCloudBpmnErrorSender(IntegrationRequest integrationRequest) {
+        try {
+
+            throw new Error("Root Cause");
+
+        } catch (Error error) {
+            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
+                                                                                 connectorProperties,
+                                                                                 new CloudBpmnError("ERROR_CODE", error))
                                                                        .buildMessage();
             integrationErrorSender.send(message);
         }

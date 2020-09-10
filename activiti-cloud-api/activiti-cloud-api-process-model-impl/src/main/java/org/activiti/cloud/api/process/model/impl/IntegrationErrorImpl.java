@@ -21,6 +21,7 @@ import java.util.Objects;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 
@@ -29,6 +30,7 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     private IntegrationRequest integrationRequest;
     private IntegrationContext integrationContext;
 
+    private String errorCode;
     private String errorMessage;
     private List<StackTraceElement> stackTraceElements;
     private String errorClassName;
@@ -40,9 +42,19 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
                                 Throwable error) {
         this.integrationRequest = integrationRequest;
         this.integrationContext = integrationRequest.getIntegrationContext();
-        this.errorMessage = error.getMessage();
         this.errorClassName = error.getClass().getName();
-        this.stackTraceElements = Arrays.asList(error.getStackTrace());
+
+        if (CloudBpmnError.class.isInstance(error)) {
+            this.errorCode = CloudBpmnError.class.cast(error).getErrorCode();
+        } else {
+            this.errorCode = error.getMessage();
+        }
+
+        Throwable cause = findRootCause(error);
+
+        this.errorMessage = cause.getMessage();
+        this.stackTraceElements = Arrays.asList(cause.getStackTrace());
+
     }
 
     @Override
@@ -68,6 +80,11 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     @Override
     public String getErrorClassName() {
         return errorClassName;
+    }
+
+    @Override
+    public String getErrorCode() {
+        return errorCode;
     }
 
     @Override
@@ -121,5 +138,15 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
                .append(super.toString())
                .append("]");
         return builder.toString();
+    }
+
+    protected Throwable findRootCause(Throwable throwable) {
+        Throwable rootCause = Objects.requireNonNull(throwable);
+
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+
+        return rootCause;
     }
 }
