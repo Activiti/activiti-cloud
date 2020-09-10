@@ -109,8 +109,8 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
         }
     }
 
-    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnError'")
-    public void mockTypeIntegrationCloudBpmnErrorSender(IntegrationRequest integrationRequest) {
+    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorRootCause'")
+    public void mockTypeIntegrationCloudBpmnErrorRootCauseSender(IntegrationRequest integrationRequest) {
         try {
 
             throw new Error("Root Cause");
@@ -124,6 +124,20 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
         }
     }
 
+    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnError'")
+    public void mockTypeIntegrationCloudBpmnErrorSender(IntegrationRequest integrationRequest) {
+        try {
+
+            throw new Error("Root Cause");
+
+        } catch (Error error) {
+            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
+                                                                                 connectorProperties,
+                                                                                 new CloudBpmnError("ERROR_CODE"))
+                                                                       .buildMessage();
+            integrationErrorSender.send(message);
+        }
+    }
     private void verifyEventAndCreateResults(IntegrationRequest event) {
         assertThat(event.getIntegrationContext().getId()).isNotEmpty();
         assertThat(event).isNotNull();
