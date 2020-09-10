@@ -509,9 +509,9 @@ public class QueryProcessInstancesEntityIT {
 
             //when
             //set from date to current date
-            Date fromDate = now;
+            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
             // to date, from date minus 2 days
-            Date toDate = new Date(now.getTime() - Duration.ofDays(2).toMillis());
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
             //when
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
                 .exchange(PROC_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" + sdf
