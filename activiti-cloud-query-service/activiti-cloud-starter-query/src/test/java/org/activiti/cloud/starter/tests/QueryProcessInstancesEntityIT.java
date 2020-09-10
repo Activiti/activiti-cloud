@@ -500,7 +500,7 @@ public class QueryProcessInstancesEntityIT {
         //set completed date as current date
         completedDate.setTime(now.getTime());
 
-        ProcessInstance processInstanceStartedToday = processInstanceBuilder
+        ProcessInstance processInstanceCompletedToday = processInstanceBuilder
             .aRunningProcessInstanceWithCompletedDate("first", completedDate);
 
         eventsAggregator.sendAll();
@@ -524,13 +524,19 @@ public class QueryProcessInstancesEntityIT {
             assertThat(responseEntityFiltered).isNotNull();
             assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                .getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                .extracting(ProcessInstanceEntity::getId,
-                    ProcessInstanceEntity::getStatus)
-                .containsExactly(tuple(processInstanceStartedToday.getId(),
-                    ProcessInstanceStatus.RUNNING));
+            assertThat(responseEntityFiltered.getBody().getContent())
+                .extracting(
+                    ProcessInstanceEntity::getId,
+                    ProcessInstanceEntity::getName,
+                    ProcessInstanceEntity::getStatus,
+                    ProcessInstanceEntity::getProcessDefinitionName
+                )
+                .containsExactly(
+                    tuple(processInstanceCompletedToday.getId(),
+                        processInstanceCompletedToday.getName(),
+                        ProcessInstanceStatus.COMPLETED,
+                        processInstanceCompletedToday.getProcessDefinitionName())
+                );
         });
     }
 

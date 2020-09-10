@@ -86,6 +86,9 @@ create table process_instance
     start_date                 timestamp,
     start_from                 timestamp,
     start_to                   timestamp,
+    completed_date             timestamp,
+    completed_from             timestamp,
+    completed_to               timestamp,
     status                     varchar(255),
     process_definition_name    varchar(255),
     primary key (id)
