@@ -508,9 +508,9 @@ public class QueryProcessInstancesEntityIT {
         await().untilAsserted(() -> {
 
             //when
-            //set from date to current date
+            //set from date to yesterday date
             Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
-            // to date, from date minus 2 days
+            // to date, from date plus 2 days
             Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
             //when
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate

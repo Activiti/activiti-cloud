@@ -71,12 +71,7 @@ public class ProcessInstanceEventContainedBuilder {
     }
 
     public ProcessInstanceImpl aRunningProcessInstanceWithCompletedDate(String name, Date completedDate) {
-        ProcessInstanceImpl completedProcess = new ProcessInstanceImpl();
-        completedProcess.setId(UUID.randomUUID().toString());
-        completedProcess.setName(name);
-        completedProcess.setProcessDefinitionKey("my-proc");
-        completedProcess.setProcessDefinitionId(UUID.randomUUID().toString());
-        completedProcess.setProcessDefinitionName("my-proc-definition-name");
+        ProcessInstanceImpl completedProcess = buildProcessInstance(name);
         completedProcess.setCompletedDate(completedDate);
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(completedProcess),
             new CloudProcessCompletedEventImpl(completedProcess));
