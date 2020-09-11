@@ -115,7 +115,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
             raiseErrorCause("Error code message");
 
-        } catch (Error error) {
+        } catch (Error cause) {
             Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
                                                                                  connectorProperties,
                                                                                  new CloudBpmnError("ERROR_CODE"))
@@ -130,10 +130,10 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
             raiseErrorCause("Error cause message");
 
-        } catch (Error error) {
+        } catch (Error cause) {
             Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
                                                                                  connectorProperties,
-                                                                                 new CloudBpmnError("ERROR_CODE", error))
+                                                                                 new CloudBpmnError("ERROR_CODE", cause))
                                                                        .buildMessage();
             integrationErrorSender.send(message);
         }
@@ -145,10 +145,10 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
             raiseErrorCause("Error code message");
 
-        } catch (Error error) {
+        } catch (Error cause) {
             Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
                                                                                  connectorProperties,
-                                                                                 new CloudBpmnError("ERROR_CODE", error.getMessage()))
+                                                                                 new CloudBpmnError("ERROR_CODE", cause.getMessage()))
                                                                        .buildMessage();
             integrationErrorSender.send(message);
         }
