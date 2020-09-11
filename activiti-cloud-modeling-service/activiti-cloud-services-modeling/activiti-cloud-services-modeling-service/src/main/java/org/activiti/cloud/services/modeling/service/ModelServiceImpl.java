@@ -460,11 +460,13 @@ public class ModelServiceImpl implements ModelService{
 
 
     private ValidationContext getValidationContext(Model model, FileContent fileContent, @Nullable Project project) {
-        if (!modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON))
+        if (!modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)) {
             return EMPTY_CONTEXT;
+        }
 
-        if(project != null)
+        if(project != null) {
             return Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+        }
 
         return createValidationContext(model);
     }
