@@ -84,9 +84,9 @@ public class GenericModelsConfiguration {
 
         @Override
         public void validate(Model model,
-                                         byte[] modelContent,
-                                         ValidationContext validationContext,
-                                         boolean validateUsage) {
+                             byte[] modelContent,
+                             ValidationContext validationContext,
+                             boolean validateUsage) {
             LOGGER.info("usage of json");
         }
 
