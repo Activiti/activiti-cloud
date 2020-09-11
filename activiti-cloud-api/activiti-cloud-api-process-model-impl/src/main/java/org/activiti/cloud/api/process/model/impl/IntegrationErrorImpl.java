@@ -18,6 +18,7 @@ package org.activiti.cloud.api.process.model.impl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
@@ -43,18 +44,16 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         this.integrationRequest = integrationRequest;
         this.integrationContext = integrationRequest.getIntegrationContext();
         this.errorClassName = error.getClass().getName();
-
-        if (CloudBpmnError.class.isInstance(error)) {
-            this.errorCode = CloudBpmnError.class.cast(error).getErrorCode();
-        } else {
-            this.errorCode = error.getMessage();
-        }
+        this.errorCode = Optional.of(error)
+                                 .filter(CloudBpmnError.class::isInstance)
+                                 .map(CloudBpmnError.class::cast)
+                                 .map(CloudBpmnError::getErrorCode)
+                                 .orElse(null);
 
         Throwable cause = findRootCause(error);
 
         this.errorMessage = cause.getMessage();
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
-
     }
 
     @Override

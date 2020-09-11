@@ -22,12 +22,15 @@ public class CloudBpmnError extends RuntimeException {
     private final String errorCode;
 
     public CloudBpmnError(String errorCode) {
-      super(errorCode);
+      this(errorCode, errorCode);
+    }
 
-      requireValidErrorCode(errorCode);
+    public CloudBpmnError(String errorCode, String message) {
+        super(message);
 
-      this.errorCode = errorCode;
+        requireValidErrorCode(errorCode);
 
+        this.errorCode = errorCode;
     }
 
     public CloudBpmnError(String errorCode, Throwable cause) {
@@ -36,7 +39,6 @@ public class CloudBpmnError extends RuntimeException {
         requireValidErrorCode(errorCode);
 
         this.errorCode = errorCode;
-
     }
 
     public String getErrorCode() {
