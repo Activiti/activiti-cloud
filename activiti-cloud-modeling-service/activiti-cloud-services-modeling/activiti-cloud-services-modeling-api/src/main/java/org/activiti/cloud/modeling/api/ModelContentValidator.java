@@ -30,4 +30,19 @@ public interface ModelContentValidator extends ModelValidator {
                               ValidationContext validationContext) {
         validate(modelContent,validationContext);
     }
+
+    /**
+     * Validate the given model content and it's usage
+     *
+     * @param model             the model to validate
+     * @param modelContent      the model content to validate
+     * @param validationContext the validation context
+     * @param validateUsage validate the usage of the model
+     */
+    default void validateModelContent(Model model,
+                                      byte[] modelContent,
+                                      ValidationContext validationContext,
+                                      boolean validateUsage) {
+        validate(model, modelContent, validationContext, validateUsage);
+    }
 }

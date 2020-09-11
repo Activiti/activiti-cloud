@@ -21,6 +21,7 @@ import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteAr
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -395,5 +396,35 @@ public class GenericJsonModelTypeValidationControllerIT {
                        times(1))
                 .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
                                          argThat(context -> !context.isEmpty()));
+    }
+
+    @Test
+    public void should_throwExceptionAndCallGenericJsonContentUsageValidatorA_when_validatingInvalidModelContent() throws IOException {
+        SemanticModelValidationException exception = new SemanticModelValidationException(Collections
+            .singletonList(genericJsonContentValidator.createModelValidationError("Content invalid", "The content is invalid!!")));
+
+        doThrow(exception).when(genericJsonContentValidator).validateModelContent(any(Model.class), any(byte[].class), any(ValidationContext.class), any(boolean.class));
+
+        byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
+
+        assertThatResponse(given().multiPart("file",
+            "invalid-simple-model.json",
+            fileContent,
+            "application/json")
+            .post("/v1/models/{modelId}/validate?validateUsage=true",
+                genericJsonModel.getId())
+            .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Content invalid");
+
+        verify(genericJsonExtensionsValidator, times(0))
+            .validateModelExtensions(any(),
+                any());
+
+        verify(genericJsonContentValidator, times(1))
+            .validateModelContent(
+                any(),
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty()),
+                anyBoolean()
+            );
     }
 }
