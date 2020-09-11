@@ -114,11 +114,20 @@ public interface ModelService {
 
     void validateModelContent(Model model,
                               FileContent fileContent,
+                              boolean validateUsage);
+
+    void validateModelContent(Model model,
+                              FileContent fileContent,
                               ValidationContext validationContext);
 
     void validateModelContent(Model model,
                               FileContent fileContent,
                               Project project);
+
+    void validateModelContent(Model model,
+                              FileContent fileContent,
+                              Project project,
+                              boolean validateUsage);
 
     void validateModelExtensions(Model model,
                                  ValidationContext validationContext);
