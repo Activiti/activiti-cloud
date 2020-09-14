@@ -44,6 +44,7 @@ import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.impl.TaskImpl;
+import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
@@ -269,6 +270,20 @@ public class TaskControllerImplIT {
         this.mockMvc.perform(put("/v1/tasks/{taskId}",
                                  1).contentType(MediaType.APPLICATION_JSON)
                                  .content(mapper.writeValueAsString(updateTaskCmd)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void assignTask() throws Exception {
+        given(taskRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
+        AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign()
+                .withTaskId("1")
+                .withAssignee("assignee")
+                .build();
+
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/assign",
+                1).contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(assignTaskCmd)))
                 .andExpect(status().isOk());
     }
 

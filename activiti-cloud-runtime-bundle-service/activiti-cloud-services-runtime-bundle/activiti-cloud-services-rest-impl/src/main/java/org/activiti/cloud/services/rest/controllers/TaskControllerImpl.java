@@ -33,6 +33,7 @@ package org.activiti.cloud.services.rest.controllers;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
@@ -169,5 +170,14 @@ public class TaskControllerImpl implements TaskController {
         }
 
         taskRuntime.save(saveTaskPayload);
+    }
+
+    @Override
+    public EntityModel<CloudTask> assign(@PathVariable String taskId,
+                                         @RequestBody AssignTaskPayload assignTaskPayload) {
+        if (assignTaskPayload!=null)
+            assignTaskPayload.setTaskId(taskId);
+
+        return taskRepresentationModelAssembler.toModel(taskRuntime.assign(assignTaskPayload));
     }
 }
