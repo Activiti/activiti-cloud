@@ -44,6 +44,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     private Date requestDate;
     private Date resultDate;
     private Date errorDate;
+    private String errorCode;
     private String errorMessage;
     private String errorClassName;
     private List<StackTraceElement> stackTraceElements;
@@ -243,6 +244,15 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     }
 
     @Override
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    @Override
     public void addOutBoundVariable(String name,
                                     Object value) {
         outBoundVariables.put(name, value);
@@ -295,6 +305,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                                                connectorType,
                                                errorClassName,
                                                errorDate,
+                                               errorCode,
                                                errorMessage,
                                                executionId,
                                                id,
@@ -331,6 +342,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                Objects.equals(connectorType, other.connectorType) &&
                Objects.equals(errorClassName, other.errorClassName) &&
                Objects.equals(errorDate, other.errorDate) &&
+               Objects.equals(errorCode, other.errorCode) &&
                Objects.equals(errorMessage, other.errorMessage) &&
                Objects.equals(executionId, other.executionId) &&
                Objects.equals(id, other.id) &&
@@ -381,6 +393,8 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                .append(resultDate)
                .append(", errorDate=")
                .append(errorDate)
+               .append(", errorCode=")
+               .append(errorCode)
                .append(", errorMessage=")
                .append(errorMessage)
                .append(", errorClassName=")

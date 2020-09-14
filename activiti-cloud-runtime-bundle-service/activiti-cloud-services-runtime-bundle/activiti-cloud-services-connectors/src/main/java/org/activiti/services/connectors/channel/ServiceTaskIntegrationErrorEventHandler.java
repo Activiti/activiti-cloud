@@ -98,7 +98,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
                         String errorCode = Optional.ofNullable(integrationError.getErrorCode())
                                                    .orElse(integrationError.getErrorMessage());
 
-                        CloudBpmnError cloudBpmnError = new CloudBpmnError(errorCode);
+                        CloudBpmnError cloudBpmnError = new CloudBpmnError(errorCode,
+                                                                           integrationError.getErrorMessage());
                         cloudBpmnError.setStackTrace(integrationError.getStackTraceElements()
                                                                      .toArray(new StackTraceElement[] {}));
                         try {
@@ -129,6 +130,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
     private void sendAuditMessage(IntegrationError integrationError) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationErrorReceivedEventImpl integrationErrorReceived = new CloudIntegrationErrorReceivedEventImpl(integrationError.getIntegrationContext(),
+                                                                                                                         integrationError.getErrorCode(),
                                                                                                                          integrationError.getErrorMessage(),
                                                                                                                          integrationError.getErrorClassName(),
                                                                                                                          integrationError.getStackTraceElements());

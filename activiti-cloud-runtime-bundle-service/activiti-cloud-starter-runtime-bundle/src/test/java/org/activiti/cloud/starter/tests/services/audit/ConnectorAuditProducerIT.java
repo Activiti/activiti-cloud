@@ -663,7 +663,8 @@ public class ConnectorAuditProducerIT {
 
     private void sendIntegrationErrorFor(
         List<CloudIntegrationRequestedEvent> integrationRequestedEvents) {
-        CloudBpmnError error = new CloudBpmnError("CLOUD_BPMN_ERROR");
+        RuntimeException cause = new RuntimeException("Runtime exception");
+        CloudBpmnError error = new CloudBpmnError("CLOUD_BPMN_ERROR", cause);
 
         MessageChannel errorChannel = channelResolver
             .resolveDestination(integrationErrorDestination);

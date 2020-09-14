@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
@@ -54,6 +55,7 @@ import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.api.model.shared.impl.conf.IgnoredRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
@@ -1044,13 +1046,15 @@ public class AuditServiceIT {
 
         testEvents.add(cloudIntegrationResultReceivedEvent);
 
-        Error error = new Error("Error Message");
-        error.fillInStackTrace();
+        Error cause = new Error("Error Message");
+        CloudBpmnError error = new CloudBpmnError("ERROR_CODE", cause);
 
         CloudIntegrationErrorReceivedEventImpl cloudIntegrationErrorReceivedEvent = new CloudIntegrationErrorReceivedEventImpl(integrationContext,
+                                                                                                                               error.getErrorCode(),
                                                                                                                                error.getMessage(),
                                                                                                                                error.getClass().getName(),
-                                                                                                                               Arrays.asList(error.getStackTrace()));
+                                                                                                                               Arrays.asList(error.getCause()
+                                                                                                                                                  .getStackTrace()));
         testEvents.add(cloudIntegrationErrorReceivedEvent);
 
         return testEvents;

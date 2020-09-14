@@ -216,6 +216,7 @@ create table integration_context
     result_date                	timestamp,
     error_date                 	timestamp,
 
+    error_code				   	varchar(255),
     error_message			   	varchar(255),
     error_class_name    	   	varchar(255),
 	stack_trace_elements 	   	text,
