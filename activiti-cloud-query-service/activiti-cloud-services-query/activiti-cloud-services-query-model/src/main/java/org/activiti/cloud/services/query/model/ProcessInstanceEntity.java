@@ -87,10 +87,12 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Transient
     private Date completedTo;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Transient
     private Date completedFrom;
 
     @JsonIgnore
@@ -312,7 +314,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.completedDate = endDate;
     }
 
-    @Transient
     public Date getCompletedTo() {
         return completedTo;
     }
@@ -321,7 +322,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.completedTo = completedTo;
     }
 
-    @Transient
     public Date getCompletedFrom() {
         return completedFrom;
     }

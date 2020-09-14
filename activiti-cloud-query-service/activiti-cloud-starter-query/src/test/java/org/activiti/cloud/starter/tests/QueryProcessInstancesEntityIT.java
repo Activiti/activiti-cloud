@@ -491,17 +491,29 @@ public class QueryProcessInstancesEntityIT {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        Date completedDate = new Date();
+        Date completedDateToday = new Date();
+        Date completedDateTwoDaysAgo = new Date();
+        Date completedDateFiveDaysAfter = new Date();
+
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         Date now = cal.getTime();
 
-        //set completed date as current date
-        completedDate.setTime(now.getTime());
-
+        //Start a process and set it's completed date as current date
+        completedDateToday.setTime(now.getTime());
         ProcessInstance processInstanceCompletedToday = processInstanceBuilder
-            .aRunningProcessInstanceWithCompletedDate("first", completedDate);
+            .aRunningProcessInstanceWithCompletedDate("completedDateToday", completedDateToday);
+
+        //Start a process and set it's completed date as current date minus two days
+        completedDateTwoDaysAgo.setTime(now.getTime() - Duration.ofDays(2).toMillis());
+        ProcessInstance processInstanceCompletedTwoDaysAgo = processInstanceBuilder
+            .aRunningProcessInstanceWithCompletedDate("completedDateTwoDaysAgo", completedDateTwoDaysAgo);
+
+        //Start a process and set it's completed date as current date plus five days
+        completedDateFiveDaysAfter.setTime(now.getTime() + Duration.ofDays(5).toMillis());
+        ProcessInstance processInstanceCompletedFiveDaysAfter = processInstanceBuilder
+            .aRunningProcessInstanceWithCompletedDate("completedDateFiveDaysAfter", completedDateFiveDaysAfter);
 
         eventsAggregator.sendAll();
 
@@ -524,19 +536,11 @@ public class QueryProcessInstancesEntityIT {
             assertThat(responseEntityFiltered).isNotNull();
             assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            assertThat(responseEntityFiltered.getBody().getContent())
-                .extracting(
-                    ProcessInstanceEntity::getId,
-                    ProcessInstanceEntity::getName,
-                    ProcessInstanceEntity::getStatus,
-                    ProcessInstanceEntity::getProcessDefinitionName
-                )
-                .containsExactly(
-                    tuple(processInstanceCompletedToday.getId(),
-                        processInstanceCompletedToday.getName(),
-                        ProcessInstanceStatus.COMPLETED,
-                        processInstanceCompletedToday.getProcessDefinitionName())
-                );
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getName)
+                .containsExactly(processInstanceCompletedToday.getName());
         });
     }
 
