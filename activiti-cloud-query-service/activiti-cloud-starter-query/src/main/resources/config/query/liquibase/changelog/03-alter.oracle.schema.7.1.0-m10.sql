@@ -1,4 +1,4 @@
 alter table integration_context
-    add column error_code varchar(255);
+    add error_code varchar(255);
 
 commit;
