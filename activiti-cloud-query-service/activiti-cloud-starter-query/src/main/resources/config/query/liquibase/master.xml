@@ -91,10 +91,10 @@
   </changeSet>
 
   <changeSet author="activiti-query"
-             id="alter6-schema-m9" dbms="postgresql">
+             id="alter6-schema-m10" dbms="postgresql">
     <sqlFile dbms="postgresql"
         encoding="utf8"
-        path="changelog/06-alter.pg.schema.7.1.0-m9.sql"
+        path="changelog/06-alter.pg.schema.7.1.0-m10.sql"
         relativeToChangelogFile="true"
         splitStatements="true"
         stripComments="true"/>
@@ -111,10 +111,10 @@
   </changeSet>
 
   <changeSet author="activiti-query"
-      id="alter3-oracle-schema-m9" dbms="oracle">
+      id="alter3-oracle-schema-m10" dbms="oracle">
     <sqlFile dbms="oracle"
         encoding="utf8"
-        path="changelog/03-alter.oracle.schema.7.1.0-m9.sql"
+        path="changelog/03-alter.oracle.schema.7.1.0-m10.sql"
         relativeToChangelogFile="true"
         splitStatements="true"
         stripComments="true"/>
