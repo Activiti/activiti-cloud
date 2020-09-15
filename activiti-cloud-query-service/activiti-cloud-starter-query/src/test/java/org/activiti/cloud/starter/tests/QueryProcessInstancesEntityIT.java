@@ -507,13 +507,11 @@ public class QueryProcessInstancesEntityIT {
 
         //Start a process and set it's completed date as current date minus two days
         completedDateTwoDaysAgo.setTime(now.getTime() - Duration.ofDays(2).toMillis());
-        ProcessInstance processInstanceCompletedTwoDaysAgo = processInstanceBuilder
-            .aRunningProcessInstanceWithCompletedDate("completedDateTwoDaysAgo", completedDateTwoDaysAgo);
+        processInstanceBuilder.aRunningProcessInstanceWithCompletedDate("completedDateTwoDaysAgo", completedDateTwoDaysAgo);
 
         //Start a process and set it's completed date as current date plus five days
         completedDateFiveDaysAfter.setTime(now.getTime() + Duration.ofDays(5).toMillis());
-        ProcessInstance processInstanceCompletedFiveDaysAfter = processInstanceBuilder
-            .aRunningProcessInstanceWithCompletedDate("completedDateFiveDaysAfter", completedDateFiveDaysAfter);
+        processInstanceBuilder.aRunningProcessInstanceWithCompletedDate("completedDateFiveDaysAfter", completedDateFiveDaysAfter);
 
         eventsAggregator.sendAll();
 
