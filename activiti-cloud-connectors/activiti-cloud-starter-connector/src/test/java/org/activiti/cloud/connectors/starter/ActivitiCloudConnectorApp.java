@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -108,6 +109,51 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
         }
     }
 
+    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnError'")
+    public void mockTypeIntegrationCloudBpmnErrorSender(IntegrationRequest integrationRequest) {
+        try {
+
+            raiseErrorCause("Error code message");
+
+        } catch (Error cause) {
+            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
+                                                                                 connectorProperties,
+                                                                                 new CloudBpmnError("ERROR_CODE"))
+                                                                       .buildMessage();
+            integrationErrorSender.send(message);
+        }
+    }
+
+    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorCause'")
+    public void mockTypeIntegrationCloudBpmnErrorRootCauseSender(IntegrationRequest integrationRequest) {
+        try {
+
+            raiseErrorCause("Error cause message");
+
+        } catch (Error cause) {
+            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
+                                                                                 connectorProperties,
+                                                                                 new CloudBpmnError("ERROR_CODE", cause))
+                                                                       .buildMessage();
+            integrationErrorSender.send(message);
+        }
+    }
+
+    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorMessage'")
+    public void mockTypeIntegrationCloudBpmnErrorMessageSender(IntegrationRequest integrationRequest) {
+        try {
+
+            raiseErrorCause("Error code message");
+
+        } catch (Error cause) {
+            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
+                                                                                 connectorProperties,
+                                                                                 new CloudBpmnError("ERROR_CODE", cause.getMessage()))
+                                                                       .buildMessage();
+            integrationErrorSender.send(message);
+        }
+    }
+
     private void verifyEventAndCreateResults(IntegrationRequest event) {
         assertThat(event.getIntegrationContext().getId()).isNotEmpty();
         assertThat(event).isNotNull();
@@ -123,4 +169,9 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
                             Long.valueOf(integrationRequest.getIntegrationContext().getInBoundVariables().get("var2").toString()) + 1);
         return resultVariables;
     }
+
+    public static void raiseErrorCause(String message) {
+        throw new Error(message);
+    }
+
 }

@@ -187,10 +187,10 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCreatedEventHandler taskCreatedEventHandler(TaskRepository taskRepository,
-                                                           EntityManager entityManager) {
-        return new TaskCreatedEventHandler(taskRepository,
-                                           entityManager);
+    public TaskCreatedEventHandler taskCreatedEventHandler(TaskRepository taskRepository, 
+                                                           ProcessInstanceRepository processInstanceRepository) {
+        return new TaskCreatedEventHandler(taskRepository, 
+                                            processInstanceRepository);
     }
 
     @Bean

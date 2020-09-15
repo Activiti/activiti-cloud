@@ -19,20 +19,40 @@ public class CloudBpmnError extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
+    private final String errorCode;
+
     public CloudBpmnError(String errorCode) {
-      super(errorCode);
+      this(errorCode, errorCode);
+    }
 
-      if (errorCode == null) {
-          throw new IllegalArgumentException("Error Code must not be null.");
-        }
-        if (errorCode.length() < 1) {
-          throw new IllegalArgumentException("Error Code must not be empty.");
-        }
+    public CloudBpmnError(String errorCode, String message) {
+        super(message);
 
+        requireValidErrorCode(errorCode);
+
+        this.errorCode = errorCode;
+    }
+
+    public CloudBpmnError(String errorCode, Throwable cause) {
+        super(cause);
+
+        requireValidErrorCode(errorCode);
+
+        this.errorCode = errorCode;
     }
 
     public String getErrorCode() {
-      return getMessage();
+      return this.errorCode;
+    }
+
+    protected void requireValidErrorCode(String errorCode) {
+        if (errorCode == null) {
+            throw new IllegalArgumentException("Error Code must not be null.");
+        }
+        if (errorCode.length() < 1) {
+            throw new IllegalArgumentException("Error Code must not be empty.");
+        }
+
     }
 
 }
