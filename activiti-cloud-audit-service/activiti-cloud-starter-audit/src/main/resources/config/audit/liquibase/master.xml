@@ -36,6 +36,16 @@
   </changeSet>
 
   <changeSet author="activiti-audit"
+             id="oracle-schema-m10" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/02-alter.oracle.schema.m10.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+  
+  <changeSet author="activiti-audit"
              id="initial-schema-m3" dbms="postgresql">
     <preConditions onFail="CONTINUE">
       <not>
@@ -82,4 +92,13 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
+  
+  <changeSet author="activiti-audit" id="alter-schema-m10" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/05-alter.pg.schema.m10.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>  
 </databaseChangeLog>

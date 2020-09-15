@@ -45,6 +45,7 @@ public class IntegrationErrorReceivedEventConverter extends BaseEventToEntityCon
         IntegrationErrorReceivedEventEntity entity = IntegrationErrorReceivedEventEntity.class.cast(auditEventEntity);
 
         return new CloudIntegrationErrorReceivedEventImpl(entity.getIntegrationContext(),
+                                                          entity.getErrorCode(),
                                                           entity.getErrorMessage(),
                                                           entity.getErrorClassName(),
                                                           entity.getStackTraceElements());
