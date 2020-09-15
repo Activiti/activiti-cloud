@@ -87,11 +87,13 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
     @Transient
     private Date completedTo;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
     @Transient
     private Date completedFrom;
 
