@@ -151,6 +151,7 @@ create table task
     process_instance_id        varchar(255),
     status                     varchar(255),
     task_definition_key        varchar(255),
+    process_definition_name    varchar(255),
     primary key (id)
 );
 create table task_candidate_group
@@ -255,6 +256,7 @@ create index task_var_taskId_idx on task_variable (task_id);
 create index task_var_name_idx on task_variable (name);
 create index task_var_executionId_idx on task_variable (execution_id);
 create index pi_processDefinitionName_idx on process_instance (process_definition_name);
+create index task_processDefinitionName_idx on task (process_definition_name);
 alter table integration_context
     add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
 alter table process_model

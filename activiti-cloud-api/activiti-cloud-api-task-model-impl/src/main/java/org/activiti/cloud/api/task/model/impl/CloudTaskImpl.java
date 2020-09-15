@@ -287,7 +287,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                ", processDefinitionVersion=" + processDefinitionVersion +
                ", businessKey=" + businessKey +
                ", taskDefinitionKey=" + taskDefinitionKey +
-               '}';
+                '}';
     }
 
     @Override
