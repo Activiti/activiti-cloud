@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
   <changeSet author="activiti-query"
@@ -49,7 +49,7 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
-
+  
   <changeSet author="activiti-query"
              id="alter-schema-m6" dbms="postgresql">
     <sqlFile dbms="postgresql"
@@ -79,45 +79,45 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
-
+  
   <changeSet author="activiti-query"
              id="alter4-schema-m9" dbms="postgresql">
     <sqlFile dbms="postgresql"
-             encoding="utf8"
-             path="changelog/05-alter.pg.schema.7.1.0-m9.sql"
-             relativeToChangelogFile="true"
-             splitStatements="true"
-             stripComments="true"/>
+        encoding="utf8"
+        path="changelog/05-alter.pg.schema.7.1.0-m9.sql"
+        relativeToChangelogFile="true"
+        splitStatements="true"
+        stripComments="true"/>
   </changeSet>
 
   <changeSet author="activiti-query"
-             id="alter2-oracle-schema-m9" dbms="oracle">
+      id="alter2-oracle-schema-m9" dbms="oracle">
     <sqlFile dbms="oracle"
-             encoding="utf8"
-             path="changelog/02-alter.oracle.schema.7.1.0-m9.sql"
-             relativeToChangelogFile="true"
-             splitStatements="true"
-             stripComments="true"/>
+        encoding="utf8"
+        path="changelog/02-alter.oracle.schema.7.1.0-m9.sql"
+        relativeToChangelogFile="true"
+        splitStatements="true"
+        stripComments="true"/>
   </changeSet>
 
   <changeSet author="activiti-query"
-             id="alter7-schema-m10" dbms="postgresql">
+      id="alter7-schema-m10" dbms="postgresql">
     <sqlFile dbms="postgresql"
-             encoding="utf8"
-             path="changelog/07-alter.pg.schema.7.1.0-m10.sql"
-             relativeToChangelogFile="true"
-             splitStatements="true"
-             stripComments="true"/>
+        encoding="utf8"
+        path="changelog/07-alter.pg.schema.7.1.0-m10.sql"
+        relativeToChangelogFile="true"
+        splitStatements="true"
+        stripComments="true"/>
   </changeSet>
 
   <changeSet author="activiti-query"
-             id="alter4-oracle-schema-m10" dbms="oracle">
+      id="alter4-oracle-schema-m10" dbms="oracle">
     <sqlFile dbms="oracle"
-             encoding="utf8"
-             path="changelog/04-alter.oracle.schema.7.1.0-m10.sql"
-             relativeToChangelogFile="true"
-             splitStatements="true"
-             stripComments="true"/>
+        encoding="utf8"
+        path="changelog/04-alter.oracle.schema.7.1.0-m10.sql"
+        relativeToChangelogFile="true"
+        splitStatements="true"
+        stripComments="true"/>
   </changeSet>
-
+  
 </databaseChangeLog>
