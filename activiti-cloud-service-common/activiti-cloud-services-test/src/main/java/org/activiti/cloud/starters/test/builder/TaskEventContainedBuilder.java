@@ -195,4 +195,18 @@ public class TaskEventContainedBuilder {
         }
         return task;
     }
+
+    public Task aCompletedTaskWithCompletedBy(String taskName,
+        ProcessInstance processInstance, String completedBy){
+
+        TaskImpl task = buildTask(taskName,
+            Task.TaskStatus.COMPLETED,
+            processInstance);
+        task.setCompletedBy(completedBy);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+            new CloudTaskAssignedEventImpl(task),
+            new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
+        return task;
+
+    }
 }

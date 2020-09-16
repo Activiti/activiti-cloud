@@ -1541,4 +1541,44 @@ public class QueryTasksIT {
 
     }
 
+    @Test
+    public void shouldFilterForCompletedBy() {
+
+        //Given
+        String completedByFirstUser = "hruser1";
+        String completedBySecondUser = "userXyz";
+
+        Task assignedTask1 = taskEventContainedBuilder
+            .aCompletedTaskWithCompletedBy("Assigned task1",
+                runningProcessInstance, completedByFirstUser);
+        Task assignedTask2 = taskEventContainedBuilder
+            .aCompletedTaskWithCompletedBy("Assigned task2",
+                runningProcessInstance, completedBySecondUser);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //check for specific completed by value
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?completedBy=" + completedByFirstUser,
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getCompletedBy)
+                .containsExactly(assignedTask1.getCompletedBy());
+
+        });
+
+
+    }
+
 }

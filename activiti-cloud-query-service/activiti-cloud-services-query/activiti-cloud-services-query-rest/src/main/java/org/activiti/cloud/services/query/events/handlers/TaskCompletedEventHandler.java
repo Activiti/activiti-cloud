@@ -46,9 +46,10 @@ public class TaskCompletedEventHandler implements QueryEventHandler {
         queryTaskEntity.setStatus(eventTask.getStatus());
         queryTaskEntity.setLastModified(new Date(taskCompletedEvent.getTimestamp()));
         queryTaskEntity.setCompletedDate(new Date (taskCompletedEvent.getTimestamp()));
-        
+        queryTaskEntity.setCompletedBy(taskCompletedEvent.getEntity().getCompletedBy());
+
         if (queryTaskEntity.getCompletedDate() != null && queryTaskEntity.getCreatedDate() != null) {
-            queryTaskEntity.setDuration(queryTaskEntity.getCompletedDate().getTime() - queryTaskEntity.getCreatedDate().getTime());        
+            queryTaskEntity.setDuration(queryTaskEntity.getCompletedDate().getTime() - queryTaskEntity.getCreatedDate().getTime());
         }
 
         taskRepository.save(queryTaskEntity);

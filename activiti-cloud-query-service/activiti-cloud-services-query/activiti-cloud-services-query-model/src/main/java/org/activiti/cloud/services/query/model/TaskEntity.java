@@ -70,6 +70,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private Integer processDefinitionVersion;
     private String businessKey;
     private String taskDefinitionKey;
+    private String completedBy;
 
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
@@ -508,6 +509,13 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
 
     public void setCompletedFrom(Date completedFrom) {
         this.completedFrom = completedFrom;
+    }
+
+    public String getCompletedBy(){
+        return completedBy;
+    }
+    public void setCompletedBy(String completedBy){
+        this.completedBy=completedBy;
     }
 
     public boolean isInFinalState(){

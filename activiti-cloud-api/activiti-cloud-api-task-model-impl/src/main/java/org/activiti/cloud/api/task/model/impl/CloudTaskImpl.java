@@ -38,6 +38,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private String processInstanceId;
     private String parentTaskId;
     private String formKey;
+    private String completedBy;
     private TaskStatus status;
     private Date completedDate;
     private Long duration;
@@ -265,6 +266,14 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
 
     public void setTaskDefinitionKey(String taskDefinitionKey) {
         this.taskDefinitionKey = taskDefinitionKey;
+    }
+
+    @Override
+    public String getCompletedBy(){
+        return this.completedBy;
+    }
+    public void setCompletedBy(String completedBy){
+        this.completedBy=completedBy;
     }
 
     @Override
