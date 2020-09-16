@@ -83,6 +83,8 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date errorDate;
 
+    private String errorCode;
+
     private String errorMessage;
 
     private String errorClassName;
@@ -299,6 +301,15 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     public void setOutBoundVariables(Map<String, Object> outBoundVariables) {
         this.outBoundVariables = outBoundVariables;
+    }
+
+    @Override
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
     }
 
     @Override

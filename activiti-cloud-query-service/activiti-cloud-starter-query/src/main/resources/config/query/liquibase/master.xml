@@ -101,7 +101,7 @@
   </changeSet>
 
   <changeSet author="activiti-query"
-      id="alter6-schema-m10" dbms="postgresql">
+             id="alter6-schema-m10" dbms="postgresql">
     <sqlFile dbms="postgresql"
         encoding="utf8"
         path="changelog/06-alter.pg.schema.7.1.0-m10.sql"
@@ -139,7 +139,7 @@
         splitStatements="true"
         stripComments="true"/>
   </changeSet>
-
+  
   <changeSet author="activiti-query"
       id="alter4-oracle-schema-m10" dbms="oracle">
     <sqlFile dbms="oracle"
@@ -159,5 +159,5 @@
         splitStatements="true"
         stripComments="true"/>
   </changeSet>
-
+ 
 </databaseChangeLog>
