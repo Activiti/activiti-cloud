@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.TimeZone;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -484,6 +485,63 @@ public class QueryProcessInstancesEntityIT {
         });
     }
 
+    @Test
+    public void shouldGetProcessInstancesFilteredByCompletedDate() {
+        //given
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date completedDateToday = new Date();
+        Date completedDateTwoDaysAgo = new Date();
+        Date completedDateFiveDaysAfter = new Date();
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+
+        //Start a process and set it's completed date as current date
+        completedDateToday.setTime(now.getTime());
+        ProcessInstance processInstanceCompletedToday = processInstanceBuilder
+            .aRunningProcessInstanceWithCompletedDate("completedDateToday", completedDateToday);
+
+        //Start a process and set it's completed date as current date minus two days
+        completedDateTwoDaysAgo.setTime(now.getTime() - Duration.ofDays(2).toMillis());
+        processInstanceBuilder.aRunningProcessInstanceWithCompletedDate("completedDateTwoDaysAgo", completedDateTwoDaysAgo);
+
+        //Start a process and set it's completed date as current date plus five days
+        completedDateFiveDaysAfter.setTime(now.getTime() + Duration.ofDays(5).toMillis());
+        processInstanceBuilder.aRunningProcessInstanceWithCompletedDate("completedDateFiveDaysAfter", completedDateFiveDaysAfter);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            //set from date to yesterday date
+            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
+            // to date, from date plus 2 days
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
+                .exchange(PROC_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" + sdf
+                        .format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getName)
+                .containsExactly(processInstanceCompletedToday.getName());
+        });
+    }
+
     private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstancesFiltered(String name,String description) {
         String url=PROC_URL;
         boolean add = false;
@@ -506,4 +564,5 @@ public class QueryProcessInstancesEntityIT {
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
+
 }

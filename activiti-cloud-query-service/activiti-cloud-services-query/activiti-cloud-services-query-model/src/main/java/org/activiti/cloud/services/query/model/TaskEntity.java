@@ -36,7 +36,7 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
-import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -44,9 +44,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Table(name = "TASK",
         indexes = {
                 @Index(name = "task_status_idx", columnList = "status", unique = false),
-                @Index(name = "task_processInstance_idx", columnList = "processInstanceId", unique = false)
+                @Index(name = "task_processInstance_idx", columnList = "processInstanceId", unique = false),
+                @Index(name = "task_processDefinitionName_idx", columnList = "processDefinitionName", unique = false)
         })
-public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
+public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask {
 
     /**
      * serialVersionUID
@@ -68,6 +69,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private String processDefinitionId;
     private String processInstanceId;
     private Integer processDefinitionVersion;
+    private String processDefinitionName;
     private String businessKey;
     private String taskDefinitionKey;
     private String completedBy;
@@ -221,6 +223,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public String getProcessDefinitionId() {
         return processDefinitionId;
     }
+    
+    @Override
+    public String getProcessDefinitionName() {
+        return processDefinitionName;
+    }
 
     @Override
     public String getProcessInstanceId() {
@@ -291,6 +298,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.processDefinitionVersion = processDefinitionVersion;
     }
 
+    
+    public void setProcessDefinitionName(String processDefinitionName) {
+        this.processDefinitionName = processDefinitionName;
+    }
+    
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
@@ -488,7 +500,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return lastClaimedFrom;
     }
 
-
+    
     public void setLastClaimedFrom(Date lastClaimedFrom) {
         this.lastClaimedFrom = lastClaimedFrom;
     }

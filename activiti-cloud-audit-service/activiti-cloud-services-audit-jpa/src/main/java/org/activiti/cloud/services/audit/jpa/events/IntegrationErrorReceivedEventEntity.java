@@ -32,6 +32,7 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
 
     protected static final String INTEGRATION_ERROR_RECEIVED_EVENT = "IntegrationErrorReceivedEvent";
 
+    private String errorCode;
     private String errorMessage;
     private String errorClassName;
 
@@ -44,9 +45,18 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
     public IntegrationErrorReceivedEventEntity(CloudIntegrationErrorReceivedEvent event) {
         super(event);
 
+        this.errorMessage = event.getErrorCode();
         this.errorMessage = event.getErrorMessage();
         this.errorClassName = event.getErrorClassName();
         this.stackTraceElements = event.getStackTraceElements();
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
     }
 
     public String getErrorMessage() {
@@ -67,7 +77,7 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(errorClassName, errorMessage, stackTraceElements);
+        result = prime * result + Objects.hash(errorCode, errorClassName, errorMessage, stackTraceElements);
         return result;
     }
 
@@ -83,7 +93,8 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
             return false;
         }
         IntegrationErrorReceivedEventEntity other = (IntegrationErrorReceivedEventEntity) obj;
-        return Objects.equals(errorClassName, other.errorClassName) &&
+        return Objects.equals(errorCode, other.errorCode) &&
+               Objects.equals(errorClassName, other.errorClassName) &&
                Objects.equals(errorMessage, other.errorMessage) &&
                Objects.equals(stackTraceElements, other.stackTraceElements);
     }
@@ -93,6 +104,8 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
         final int maxLen = 10;
         StringBuilder builder = new StringBuilder();
         builder.append("IntegrationErrorReceivedEventEntity [errorMessage=")
+               .append(errorCode)
+               .append(", errorCode=")
                .append(errorMessage)
                .append(", errorClassName=")
                .append(errorClassName)

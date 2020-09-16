@@ -35,6 +35,8 @@ public interface CloudIntegrationContext extends IntegrationContext, CloudRuntim
 
     Date getErrorDate();
 
+    String getErrorCode();
+
     String getErrorMessage();
 
     String getErrorClassName();

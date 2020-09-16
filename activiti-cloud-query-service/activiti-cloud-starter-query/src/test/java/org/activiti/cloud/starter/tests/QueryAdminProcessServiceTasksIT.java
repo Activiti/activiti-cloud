@@ -417,15 +417,16 @@ public class QueryAdminProcessServiceTasksIT {
         });
 
         // and given
-        CloudBpmnError error = new CloudBpmnError("ERROR_CODE");
-
-        error.fillInStackTrace();
-        error.initCause(new RuntimeException("Runtime Exception"));
+        Throwable cause = new RuntimeException("Runtime Exception");
+        CloudBpmnError error = new CloudBpmnError("ERROR_CODE", cause);
 
         eventsAggregator.addEvents(new CloudIntegrationErrorReceivedEventImpl(integrationContext,
+                                                                              error.getErrorCode(),
                                                                               error.getMessage(),
-                                                                              error.getClass().getName(),
-                                                                              Arrays.asList(error.getStackTrace())));
+                                                                              error.getClass()
+                                                                                   .getName(),
+                                                                              Arrays.asList(error.getCause()
+                                                                                                 .getStackTrace())));
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
@@ -441,12 +442,14 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getBody()).extracting(CloudIntegrationContext::getClientId,
                                                             CloudIntegrationContext::getClientType,
                                                             CloudIntegrationContext::getStatus,
+                                                            CloudIntegrationContext::getErrorCode,
                                                             CloudIntegrationContext::getErrorMessage,
                                                             CloudIntegrationContext::getErrorClassName)
                                                 .containsExactly(SERVICE_TASK_ELEMENT_ID,
                                                                  SERVICE_TASK_TYPE,
                                                                  IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
                                                                  error.getErrorCode(),
+                                                                 error.getMessage(),
                                                                  error.getClass().getName());
 
             assertThat(responseEntity.getBody().getStackTraceElements()).isNotEmpty();

@@ -20,7 +20,7 @@ create table bpmn_activity
     execution_id	       	   varchar(255),
     started_date               timestamp,
     status                     varchar(255),
-	
+
     primary key (id)
 );
 create table bpmn_sequence_flow
@@ -86,6 +86,7 @@ create table process_instance
     start_date                 timestamp,
     start_from                 timestamp,
     start_to                   timestamp,
+    completed_date             timestamp,
     status                     varchar(255),
     process_definition_name    varchar(255),
     primary key (id)
@@ -151,6 +152,8 @@ create table task
     process_instance_id        varchar(255),
     status                     varchar(255),
     task_definition_key        varchar(255),
+    process_definition_name    varchar(255),
+    completed_by               varchar(255),
     primary key (id)
 );
 create table task_candidate_group
@@ -207,7 +210,7 @@ create table integration_context
     client_id                  	varchar(255),
     client_name                	varchar(255),
     client_type                	varchar(255),
-    
+
     connector_type            	varchar(255),
     status                      varchar(255),
 
@@ -215,6 +218,7 @@ create table integration_context
     result_date                	timestamp,
     error_date                 	timestamp,
 
+    error_code				   	varchar(255),
     error_message			   	varchar(255),
     error_class_name    	   	varchar(255),
 	stack_trace_elements 	   	text,
@@ -255,6 +259,7 @@ create index task_var_taskId_idx on task_variable (task_id);
 create index task_var_name_idx on task_variable (name);
 create index task_var_executionId_idx on task_variable (execution_id);
 create index pi_processDefinitionName_idx on process_instance (process_definition_name);
+create index task_processDefinitionName_idx on task (process_definition_name);
 alter table integration_context
     add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
 alter table process_model

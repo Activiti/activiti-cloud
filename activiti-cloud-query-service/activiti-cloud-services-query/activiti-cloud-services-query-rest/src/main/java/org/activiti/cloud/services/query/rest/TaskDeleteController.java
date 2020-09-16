@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
@@ -56,9 +56,9 @@ public class TaskDeleteController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
-    public CollectionModel<EntityModel<CloudTask>> deleteTasks (@QuerydslPredicate(root = TaskEntity.class) Predicate predicate) {
+    public CollectionModel<EntityModel<QueryCloudTask>> deleteTasks (@QuerydslPredicate(root = TaskEntity.class) Predicate predicate) {
 
-        Collection <EntityModel<CloudTask>> result = new ArrayList<>();
+        Collection <EntityModel<QueryCloudTask>> result = new ArrayList<>();
         Iterable <TaskEntity> iterable = taskRepository.findAll(predicate);
 
         for(TaskEntity entity : iterable){

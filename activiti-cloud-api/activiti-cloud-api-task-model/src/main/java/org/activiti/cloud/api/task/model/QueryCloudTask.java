@@ -13,25 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.process.model;
+package org.activiti.cloud.api.task.model;
 
-import java.util.List;
-
-import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
-
-public interface IntegrationError extends CloudRuntimeEntity {
-
-    IntegrationContext getIntegrationContext();
-
-    IntegrationRequest getIntegrationRequest();
-
-    public String getErrorCode();
-
-    public List<StackTraceElement> getStackTraceElements();
-
-    public String getErrorMessage();
-
-    public String getErrorClassName();
-
+public interface QueryCloudTask extends CloudTask{
+    public String getProcessDefinitionName();
 }

@@ -43,6 +43,7 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
             ProcessInstanceEntity processInstanceEntity = findResult.get();
             processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
             processInstanceEntity.setLastModified(new Date(completedEvent.getTimestamp()));
+            processInstanceEntity.setCompletedDate(new Date(completedEvent.getTimestamp()));
             processInstanceRepository.save(processInstanceEntity);
         } else {
             throw new QueryException("Unable to find process instance with the given id: " + processInstanceId);

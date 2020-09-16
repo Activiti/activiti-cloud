@@ -15,15 +15,21 @@
  */
 package org.activiti.cloud.connectors.starter.test.it;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.ClassRule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +41,9 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
 @ContextConfiguration(initializers = RabbitMQContainerApplicationInitializer.class)
 public class ActivitiCloudConnectorServiceIT {
@@ -62,6 +66,11 @@ public class ActivitiCloudConnectorServiceIT {
     @BeforeEach
     public void setUp() throws Exception {
         streamHandler.setIntegrationId(INTEGRATION_ID);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        streamHandler.reset();
     }
 
     @Test
@@ -147,6 +156,98 @@ public class ActivitiCloudConnectorServiceIT {
         assertThat(integrationError.getStackTraceElements()).asList().isNotEmpty();
         assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
 
+    }
+
+    @Test
+    public void integrationErrorShouldBeProducedByConnectorCloudBpmnErrorCauseMock() throws Exception {
+        //given
+        streamHandler.isIntegrationErrorEventProduced().set(false);
+
+        IntegrationRequest integrationRequest = mockIntegrationRequest();
+
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
+            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+            .setHeader("type", "CloudBpmnErrorCause")
+            .build();
+
+        integrationEventsProducer.send(message);
+
+        await("Should produce CloudBpmnError with root cause and message integration error")
+            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+
+        IntegrationError integrationError = streamHandler.getIntegrationError();
+
+        assertThat(integrationError.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
+        assertThat(integrationError.getErrorCode()).isEqualTo("ERROR_CODE");
+        assertThat(integrationError.getErrorMessage()).isEqualTo("Error cause message");
+        assertThat(integrationError.getStackTraceElements()).asList()
+                                                            .isNotEmpty()
+                                                            .extracting("methodName")
+                                                            .contains("raiseErrorCause", "mockTypeIntegrationCloudBpmnErrorRootCauseSender");
+
+        assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
+    }
+
+    @Test
+    public void integrationErrorShouldBeProducedByConnectorCloudBpmnErrorMessageMock() throws Exception {
+        //given
+        streamHandler.isIntegrationErrorEventProduced().set(false);
+
+        IntegrationRequest integrationRequest = mockIntegrationRequest();
+
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
+            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+            .setHeader("type", "CloudBpmnErrorMessage")
+            .build();
+
+        integrationEventsProducer.send(message);
+
+        await("Should produce CloudBpmnError with error code and message integration error")
+            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+
+        IntegrationError integrationError = streamHandler.getIntegrationError();
+
+        assertThat(integrationError.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
+        assertThat(integrationError.getErrorCode()).isEqualTo("ERROR_CODE");
+        assertThat(integrationError.getErrorMessage()).isEqualTo("Error code message");
+        assertThat(integrationError.getStackTraceElements()).asList()
+                                                            .isNotEmpty()
+                                                            .extracting("methodName")
+                                                            .contains("mockTypeIntegrationCloudBpmnErrorMessageSender")
+                                                            .doesNotContain("raiseErrorCause");
+
+        assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
+    }
+
+    @Test
+    public void integrationErrorShouldBeProducedByConnectorCloudBpmnErrorMock() throws Exception {
+        //given
+        streamHandler.isIntegrationErrorEventProduced().set(false);
+
+        IntegrationRequest integrationRequest = mockIntegrationRequest();
+
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
+            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+            .setHeader("type", "CloudBpmnError")
+            .build();
+
+        integrationEventsProducer.send(message);
+
+        await("Should produce CloudBpmnError integration error")
+            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+
+        IntegrationError integrationError = streamHandler.getIntegrationError();
+
+        assertThat(integrationError.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
+        assertThat(integrationError.getErrorCode()).isEqualTo("ERROR_CODE");
+        assertThat(integrationError.getErrorMessage()).isEqualTo("ERROR_CODE");
+        assertThat(integrationError.getStackTraceElements()).asList()
+                                                            .isNotEmpty()
+                                                            .extracting("methodName")
+                                                            .contains("mockTypeIntegrationCloudBpmnErrorSender")
+                                                            .doesNotContain("raiseErrorCause");
+
+        assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
     }
 
     private IntegrationRequest mockIntegrationRequest() {

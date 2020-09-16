@@ -62,6 +62,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private ProcessInstanceStatus status;
     private Integer processDefinitionVersion;
     private String processDefinitionName;
+    private Date completedDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModified;
@@ -83,6 +84,18 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @QueryType(PropertyType.DATETIME)
     private Date startTo;
+
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
+    @Transient
+    private Date completedTo;
+
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
+    @Transient
+    private Date completedFrom;
 
     @JsonIgnore
     @OneToMany(fetch=FetchType.LAZY)
@@ -294,6 +307,31 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.startTo = startTo;
     }
 
+    @Override
+    public Date getCompletedDate() {
+        return completedDate;
+    }
+
+    public void setCompletedDate(Date endDate) {
+        this.completedDate = endDate;
+    }
+
+    public Date getCompletedTo() {
+        return completedTo;
+    }
+
+    public void setCompletedTo(Date completedTo) {
+        this.completedTo = completedTo;
+    }
+
+    public Date getCompletedFrom() {
+        return completedFrom;
+    }
+
+    public void setCompletedFrom(Date completedFrom) {
+        this.completedFrom = completedFrom;
+    }
+
     public boolean isInFinalState(){
         return  !(ProcessInstanceStatus.CREATED.equals(status) ||
                   ProcessInstanceStatus.RUNNING.equals(status)||
@@ -339,6 +377,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
                                                startDate,
                                                startFrom,
                                                startTo,
+                                               completedDate,
+                                               completedFrom,
+                                               completedTo,
                                                status);
         return result;
     }
@@ -367,6 +408,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
                 Objects.equals(startDate, other.startDate) &&
                 Objects.equals(startFrom, other.startFrom) &&
                 Objects.equals(startTo, other.startTo) &&
+                Objects.equals(completedDate, other.completedDate) &&
+                Objects.equals(completedFrom, other.completedFrom) &&
+                Objects.equals(completedTo, other.completedTo) &&
                 status == other.status;
     }
 

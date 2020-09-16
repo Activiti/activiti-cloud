@@ -15,25 +15,25 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import javax.persistence.EntityManager;
+import java.util.Optional;
 
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-
 public class TaskCreatedEventHandler implements QueryEventHandler {
 
     private final TaskRepository taskRepository;
-    private final EntityManager entityManager;
+    private final ProcessInstanceRepository processInstanceRepository;
 
     public TaskCreatedEventHandler(TaskRepository taskRepository,
-                                   EntityManager entityManager) {
+                                   ProcessInstanceRepository processInstanceRepository) {
         this.taskRepository = taskRepository;
-        this.entityManager = entityManager;
+        this.processInstanceRepository = processInstanceRepository;
     }
 
     @Override
@@ -42,15 +42,15 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
         TaskEntity queryTaskEntity = new TaskEntity(taskCreatedEvent);
 
         if (!queryTaskEntity.isStandalone()) {
-            // Get processInstanceEntity reference proxy without database query
-            ProcessInstanceEntity processInstanceEntity = entityManager
-                    .getReference(ProcessInstanceEntity.class,
-                                  queryTaskEntity.getProcessInstanceId());
-
+            Optional<ProcessInstanceEntity> processInstanceEntity = processInstanceRepository
+                    .findById(queryTaskEntity.getProcessInstanceId());
             
-            queryTaskEntity.setProcessInstance(processInstanceEntity);
+            if(processInstanceEntity.isPresent()) {
+                queryTaskEntity.setProcessInstance(processInstanceEntity.get());
+                queryTaskEntity.setProcessDefinitionName(processInstanceEntity.get().getProcessDefinitionName());
+            }
+  
         }
-
         persistIntoDatabase(event,
                             queryTaskEntity);
     }
