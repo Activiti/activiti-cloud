@@ -70,4 +70,12 @@ public class ProcessInstanceEventContainedBuilder {
         return processInstance;
     }
 
+    public ProcessInstanceImpl aRunningProcessInstanceWithCompletedDate(String name, Date completedDate) {
+        ProcessInstanceImpl completedProcess = buildProcessInstance(name);
+        completedProcess.setCompletedDate(completedDate);
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(completedProcess),
+            new CloudProcessCompletedEventImpl(UUID.randomUUID().toString(), completedDate.getTime(), completedProcess));
+        return completedProcess;
+    }
+
 }
