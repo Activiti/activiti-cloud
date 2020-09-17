@@ -15,10 +15,14 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.PropertyType;
-import com.querydsl.core.annotations.QueryTransient;
 import com.querydsl.core.annotations.QueryType;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -32,8 +36,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
@@ -223,7 +225,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     public String getProcessDefinitionId() {
         return processDefinitionId;
     }
-    
+
     @Override
     public String getProcessDefinitionName() {
         return processDefinitionName;
@@ -298,11 +300,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         this.processDefinitionVersion = processDefinitionVersion;
     }
 
-    
+
     public void setProcessDefinitionName(String processDefinitionName) {
         this.processDefinitionName = processDefinitionName;
     }
-    
+
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
@@ -500,7 +502,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         return lastClaimedFrom;
     }
 
-    
+
     public void setLastClaimedFrom(Date lastClaimedFrom) {
         this.lastClaimedFrom = lastClaimedFrom;
     }
@@ -526,8 +528,9 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     public String getCompletedBy(){
         return completedBy;
     }
-    public void setCompletedBy(String completedBy){
-        this.completedBy=completedBy;
+
+    public void setCompletedBy(String completedBy) {
+        this.completedBy = completedBy;
     }
 
     public boolean isInFinalState(){

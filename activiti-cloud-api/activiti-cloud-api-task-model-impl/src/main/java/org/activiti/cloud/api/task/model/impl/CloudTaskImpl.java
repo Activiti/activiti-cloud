@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.api.task.model.impl;
 
-import org.activiti.api.task.model.Task;
-import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
-import org.activiti.cloud.api.task.model.CloudTask;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
+import org.activiti.cloud.api.task.model.CloudTask;
 
 public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
 
@@ -272,8 +271,9 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     public String getCompletedBy(){
         return this.completedBy;
     }
-    public void setCompletedBy(String completedBy){
-        this.completedBy=completedBy;
+
+    public void setCompletedBy(String completedBy) {
+        this.completedBy = completedBy;
     }
 
     @Override
