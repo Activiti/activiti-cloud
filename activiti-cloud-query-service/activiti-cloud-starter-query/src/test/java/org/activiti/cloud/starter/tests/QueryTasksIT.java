@@ -1591,16 +1591,16 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterForCompletedBy() {
+    public void shouldFilterTasksForCompletedBy() {
 
         //Given
         String completedByFirstUser = "hruser1";
         String completedBySecondUser = "userXyz";
 
-        Task assignedTask1 = taskEventContainedBuilder
+        Task assignedTask = taskEventContainedBuilder
             .aCompletedTaskWithCompletedBy("Assigned task1",
                 runningProcessInstance, completedByFirstUser);
-        Task assignedTask2 = taskEventContainedBuilder
+        taskEventContainedBuilder
             .aCompletedTaskWithCompletedBy("Assigned task2",
                 runningProcessInstance, completedBySecondUser);
 
@@ -1621,9 +1621,10 @@ public class QueryTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks).hasSize(1);
             assertThat(tasks)
                 .extracting(Task::getCompletedBy)
-                .containsExactly(assignedTask1.getCompletedBy());
+                .containsExactly(assignedTask.getCompletedBy());
 
         });
 
