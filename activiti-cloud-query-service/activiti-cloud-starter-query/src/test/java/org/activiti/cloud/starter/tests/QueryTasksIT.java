@@ -1621,7 +1621,6 @@ public class QueryTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
-            assertThat(tasks).hasSize(1);
             assertThat(tasks)
                 .extracting(Task::getCompletedBy)
                 .containsExactly(assignedTask.getCompletedBy());
