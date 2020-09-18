@@ -78,4 +78,11 @@ public class ProcessInstanceEventContainedBuilder {
         return completedProcess;
     }
 
+    public ProcessInstanceImpl aRunningProcessInstanceWithInitiator(String name, String initiator) {
+        ProcessInstanceImpl processInstance = buildProcessInstance(name);
+        processInstance.setInitiator(initiator);
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
+                new CloudProcessStartedEventImpl(processInstance));
+        return processInstance;
+    }
 }
