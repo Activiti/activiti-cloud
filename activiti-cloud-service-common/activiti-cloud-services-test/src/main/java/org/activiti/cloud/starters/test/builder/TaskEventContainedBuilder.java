@@ -183,6 +183,20 @@ public class TaskEventContainedBuilder {
         return task;
     }
 
+    public Task aTaskWithPriority(String taskName,
+                                       int priority,
+                                       ProcessInstance processInstance) {
+        Task task = buildTask(taskName,
+                                  Task.TaskStatus.CREATED,
+                                  processInstance);
+
+        ((TaskImpl) task).setPriority(priority);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+                                   new CloudTaskCompletedEventImpl(task));
+        return task;
+    }
+
     private static TaskImpl buildTask(String taskName,
                                       Task.TaskStatus status,
                                       ProcessInstance processInstance) {
