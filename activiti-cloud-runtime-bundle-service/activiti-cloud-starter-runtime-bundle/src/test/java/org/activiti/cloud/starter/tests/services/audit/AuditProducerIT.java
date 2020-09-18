@@ -327,6 +327,11 @@ public class AuditProducerIT {
             .filteredOn(event -> event.getEventType().equals(TASK_COMPLETED))
             .extracting(event -> ((Task) event.getEntity()).getStatus())
             .containsOnly(Task.TaskStatus.COMPLETED);
+        assertThat(streamHandler.getLatestReceivedEvents())
+            .filteredOn(event -> event.getEventType().equals(TASK_COMPLETED))
+            .extracting(event -> ((Task) event.getEntity()).getCompletedBy())
+            .doesNotContainNull();
+
     }
 
     @Test

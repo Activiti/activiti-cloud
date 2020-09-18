@@ -153,6 +153,7 @@ create table task
     status                     varchar(255),
     task_definition_key        varchar(255),
     process_definition_name    varchar(255),
+    completed_by               varchar(255),
     primary key (id)
 );
 create table task_candidate_group

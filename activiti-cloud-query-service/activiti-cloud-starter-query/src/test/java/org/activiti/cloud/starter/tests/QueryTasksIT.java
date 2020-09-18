@@ -1545,7 +1545,7 @@ public class QueryTasksIT {
     public void should_getTask_when_queryFilteredByProcessDefinitionName() {
         //given
         Task task1 = taskEventContainedBuilder.aCreatedTask("Task1",
-                runningProcessInstance);
+            runningProcessInstance);
 
         Task task2 = taskEventContainedBuilder.aCreatedTask("Task2", null);
 
@@ -1563,14 +1563,15 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks)
-                    .extracting(Task::getId)
-                    .contains(task1.getId(), task2.getId());
+                .extracting(Task::getId)
+                .contains(task1.getId(), task2.getId());
         });
 
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?processDefinitionName={processDefinitionName}",
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?processDefinitionName={processDefinitionName}",
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE,
@@ -1583,9 +1584,49 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks)
-                    .extracting(Task::getId)
-                    .containsExactly(task1.getId());
+                .extracting(Task::getId)
+                .containsExactly(task1.getId());
         });
+
+    }
+
+    @Test
+    public void shouldFilterTasksForCompletedBy() {
+
+        //Given
+        String completedByFirstUser = "hruser1";
+        String completedBySecondUser = "userXyz";
+
+        Task assignedTask = taskEventContainedBuilder
+            .aCompletedTaskWithCompletedBy("Assigned task1",
+                runningProcessInstance, completedByFirstUser);
+        taskEventContainedBuilder
+            .aCompletedTaskWithCompletedBy("Assigned task2",
+                runningProcessInstance, completedBySecondUser);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //check for specific completed by value
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?completedBy=" + completedByFirstUser,
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getCompletedBy)
+                .containsExactly(assignedTask.getCompletedBy());
+
+        });
+
 
     }
 
