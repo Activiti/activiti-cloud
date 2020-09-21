@@ -175,8 +175,9 @@ public class TaskControllerImpl implements TaskController {
     @Override
     public EntityModel<CloudTask> assign(@PathVariable String taskId,
                                          @RequestBody AssignTaskPayload assignTaskPayload) {
-        if (assignTaskPayload!=null)
+        if (assignTaskPayload!=null) {
             assignTaskPayload.setTaskId(taskId);
+        }
 
         return taskRepresentationModelAssembler.toModel(taskRuntime.assign(assignTaskPayload));
     }
