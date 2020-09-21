@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.dsl.StringPath;
+import java.util.Arrays;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -41,5 +42,6 @@ public interface ProcessInstanceRepository extends PagingAndSortingRepository<Pr
         bindings.bind(root.completedFrom).first((path, value) -> root.completedDate.after(value));
         bindings.bind(root.completedTo).first((path, value) -> root.completedDate.before(value));
         bindings.bind(root.name).first((path, value) -> path.like("%"+value.toString()+"%"));
+        bindings.bind(root.initiator).first((path, value) -> root.initiator.in(Arrays.asList(value.split(","))));
     }
 }
