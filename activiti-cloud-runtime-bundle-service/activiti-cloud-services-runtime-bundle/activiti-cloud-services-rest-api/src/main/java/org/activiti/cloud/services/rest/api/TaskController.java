@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 
 @RequestMapping(value = "/v1/tasks", produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public interface TaskController {
@@ -72,4 +72,8 @@ public interface TaskController {
 
     @GetMapping(value = "/{taskId}/subtasks")
     PagedModel<EntityModel<CloudTask>> getSubtasks(Pageable pageable, @PathVariable(value = "taskId") String taskId);
+
+    @PostMapping(value = "/{taskId}/assign")
+    EntityModel<CloudTask> assign(@PathVariable("taskId") String taskId,
+                                  @RequestBody AssignTaskPayload assignTaskPayload);
 }

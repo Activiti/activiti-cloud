@@ -426,5 +426,11 @@ public class TaskRestTemplate {
         return responseEntity;
     }
 
-
+    public ResponseEntity<CloudTask> userAssignTask(AssignTaskPayload assignTask) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_RELATIVE_URL + assignTask.getTaskId() + "/assign",
+                HttpMethod.POST,
+                new HttpEntity<>(assignTask),
+                TASK_RESPONSE_TYPE);
+        return responseEntity;
+    }
 }
