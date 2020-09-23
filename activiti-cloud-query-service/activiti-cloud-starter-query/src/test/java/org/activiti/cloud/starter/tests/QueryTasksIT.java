@@ -1630,4 +1630,35 @@ public class QueryTasksIT {
 
     }
 
+    @Test
+    public void should_getTask_when_queryFilteredByPriority() {
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithPriority("Task1", 20, runningProcessInstance);
+
+        taskEventContainedBuilder.aTaskWithPriority("Task2", 30, runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?priority={priority}",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    "20");
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId)
+                    .containsExactly(task1.getId());
+        });
+
+    }
+
 }

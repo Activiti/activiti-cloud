@@ -565,4 +565,58 @@ public class QueryProcessInstancesEntityIT {
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
 
+    @Test
+    public void shouldGetProcessInstancesFilteredByInitiator() {
+        
+        ProcessInstance processInstanceInitiatorUser1 = processInstanceBuilder
+                .aRunningProcessInstanceWithInitiator("first", "User1");
+        ProcessInstance processInstanceInitiatorUser2 = processInstanceBuilder
+                .aRunningProcessInstanceWithInitiator("second", "User2");
+        ProcessInstance processInstanceInitiatorUser3 = processInstanceBuilder
+                .aRunningProcessInstanceWithInitiator("third", "User3");
+        eventsAggregator.sendAll();
+
+        shouldGetProcessInstancesFilteredBySingleInitiator(processInstanceInitiatorUser1.getId());
+        shouldGetProcessInstancesFilteredByInitiatorsList(processInstanceInitiatorUser1.getId(),
+                processInstanceInitiatorUser2.getId());
+    }
+    
+    private void shouldGetProcessInstancesFilteredBySingleInitiator(String processId) {
+        await().untilAsserted(() -> {
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
+                    .exchange(PROC_URL + "?initiator=User1",
+                            HttpMethod.GET,
+                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                            PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                    .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                    .extracting(ProcessInstanceEntity::getId)
+                    .containsExactly(processId);
+        });
+    }
+    
+    private void shouldGetProcessInstancesFilteredByInitiatorsList(String processIdUser1, String  processIdUser2) {
+        await().untilAsserted(() -> {
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
+                    .exchange(PROC_URL + "?initiator=User1,User2",
+                            HttpMethod.GET,
+                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                            PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                    .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                    .extracting(ProcessInstanceEntity::getId)
+                    .containsExactly(processIdUser1,
+                            processIdUser2);
+        });
+    }
 }
