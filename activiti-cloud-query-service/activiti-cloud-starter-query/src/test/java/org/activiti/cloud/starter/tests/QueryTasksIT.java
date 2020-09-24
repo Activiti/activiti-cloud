@@ -1662,7 +1662,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetProcessInstancesFilteredByCompletedDate() {
+    public void shouldGetTaskListFilteredByCompletedDate() {
         //given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
