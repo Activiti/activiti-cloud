@@ -223,4 +223,20 @@ public class TaskEventContainedBuilder {
         return task;
 
     }
+
+    public Task aCompletedTaskWithCompletionDate(String taskName,
+                                                 ProcessInstance processInstance,
+                                                 Date completedDate){
+        Task task = buildTask(taskName,
+            Task.TaskStatus.COMPLETED,
+            processInstance);
+
+        ((TaskImpl) task).setCompletedDate(completedDate);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+            new CloudTaskAssignedEventImpl(task),
+            new CloudTaskCompletedEventImpl("task-completed-event-id" + UUID.randomUUID().toString(), completedDate.getTime(), task));
+        return task;
+    }
+
 }
