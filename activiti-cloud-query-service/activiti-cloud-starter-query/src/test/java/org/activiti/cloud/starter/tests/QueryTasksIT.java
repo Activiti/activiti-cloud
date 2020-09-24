@@ -1661,4 +1661,60 @@ public class QueryTasksIT {
 
     }
 
+    @Test
+    public void shouldGetTaskListFilteredByCompletedDate() {
+        //given
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date completedDateToday = new Date();
+        Date completedDateTwoDaysAgo = new Date();
+        Date completedDateFiveDaysAfter = new Date();
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+
+        //Start a Task and set it's completed date as current date
+        completedDateToday.setTime(now.getTime());
+        Task task1 = taskEventContainedBuilder.aCompletedTaskWithCompletionDate("Task1", runningProcessInstance, completedDateToday);
+
+        //Start a Task and set it's completed date as current date minus two days
+        completedDateTwoDaysAgo.setTime(now.getTime() - Duration.ofDays(2).toMillis());
+        taskEventContainedBuilder.aCompletedTaskWithCompletionDate("Task2", runningProcessInstance, completedDateTwoDaysAgo);
+
+        //Start a Task and set it's completed date as current date plus five days
+        completedDateFiveDaysAfter.setTime(now.getTime() + Duration.ofDays(5).toMillis());
+        taskEventContainedBuilder.aCompletedTaskWithCompletionDate("Task3", runningProcessInstance, completedDateFiveDaysAfter);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            //set from date to yesterday date
+            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
+            // to date, from date plus 2 days
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" +
+                        sdf.format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<Task> filteredTaskEntities = responseEntity.getBody().getContent();
+            assertThat(filteredTaskEntities)
+                .extracting(Task::getId)
+                .containsExactly(task1.getId());
+        });
+    }
+
 }
