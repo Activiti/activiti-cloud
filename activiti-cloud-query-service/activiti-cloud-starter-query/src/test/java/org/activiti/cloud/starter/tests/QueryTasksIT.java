@@ -1676,15 +1676,15 @@ public class QueryTasksIT {
         cal.set(Calendar.MILLISECOND, 0);
         Date now = cal.getTime();
 
-        //Start a process and set it's completed date as current date
+        //Start a Task and set it's completed date as current date
         completedDateToday.setTime(now.getTime());
         Task task1 = taskEventContainedBuilder.aCompletedTaskWithCompletionDate("Task1", runningProcessInstance, completedDateToday);
 
-        //Start a process and set it's completed date as current date minus two days
+        //Start a Task and set it's completed date as current date minus two days
         completedDateTwoDaysAgo.setTime(now.getTime() - Duration.ofDays(2).toMillis());
         taskEventContainedBuilder.aCompletedTaskWithCompletionDate("Task2", runningProcessInstance, completedDateTwoDaysAgo);
 
-        //Start a process and set it's completed date as current date plus five days
+        //Start a Task and set it's completed date as current date plus five days
         completedDateFiveDaysAfter.setTime(now.getTime() + Duration.ofDays(5).toMillis());
         taskEventContainedBuilder.aCompletedTaskWithCompletionDate("Task3", runningProcessInstance, completedDateFiveDaysAfter);
 
