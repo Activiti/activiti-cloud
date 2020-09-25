@@ -44,6 +44,10 @@ public interface ProcessQueryAdminService {
     @Headers("Content-Type: application/json")
     PagedModel<CloudBPMNActivity> getServiceTasks();
 
+    @RequestLine("GET /admin/v1/service-tasks?{query}")
+    @Headers("Content-Type: application/json")
+    PagedModel<CloudBPMNActivity> getServiceTasksByQuery(@Param("query") String query);
+
     @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}")
     @Headers("Content-Type: application/json")
     CloudBPMNActivity getServiceTaskById(@Param("serviceTaskId") String serviceTaskId);

@@ -33,7 +33,6 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
-import feign.Param;
 import net.thucydides.core.annotations.Step;
 
 @EnableRuntimeFeignContext
@@ -99,21 +98,25 @@ public class ProcessQueryAdminSteps {
         return processQueryAdminService.getServiceTasks();
     }
     @Step
-    public CloudBPMNActivity getServiceTaskById(@Param("serviceTaskId") String serviceTaskId) {
+    public PagedModel<CloudBPMNActivity> getServiceTasksByQuery(String query) {
+        return processQueryAdminService.getServiceTasksByQuery(query);
+    }
+    @Step
+    public CloudBPMNActivity getServiceTaskById(String serviceTaskId) {
         return processQueryAdminService.getServiceTaskById(serviceTaskId);
     }
     @Step
-    public PagedModel<CloudBPMNActivity> getServiceTasks(@Param("processInstanceId") String processInstanceId) {
+    public PagedModel<CloudBPMNActivity> getServiceTasks(String processInstanceId) {
         return processQueryAdminService.getServiceTasks(processInstanceId);
     }
     @Step
-    public PagedModel<CloudBPMNActivity> getServiceTasksByStatus(@Param("processInstanceId") String processInstanceId,
-                                                                 @Param("status") String status) {
+    public PagedModel<CloudBPMNActivity> getServiceTasksByStatus(String processInstanceId,
+                                                                 String status) {
         return processQueryAdminService.getServiceTasksByStatus(processInstanceId,
                                                                 status);
     }
     @Step
-    public CloudIntegrationContext getCloudIntegrationContext(@Param("serviceTaskId") String serviceTaskId) {
+    public CloudIntegrationContext getCloudIntegrationContext(String serviceTaskId) {
         return processQueryAdminService.getCloudIntegrationContext(serviceTaskId);
     }
 }
