@@ -40,7 +40,7 @@ public interface ProcessQueryAdminService {
     @RequestLine("DELETE /admin/v1/process-instances")
     CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances();
 
-    @RequestLine("GET /admin/v1/service-tasks?sort=startDate,desc&sort=id,desc")
+    @RequestLine("GET /admin/v1/service-tasks?sort=id,desc")
     @Headers("Content-Type: application/json")
     PagedModel<CloudBPMNActivity> getServiceTasks();
 
