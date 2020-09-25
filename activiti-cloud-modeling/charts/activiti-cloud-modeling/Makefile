@@ -34,7 +34,7 @@ release:
 github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	rm -rf $$GITHUB_CHARTS_DIR || echo "try to remove $$GITHUB_CHARTS_DIR"
-	git clone -b "$(GITHUB_CHARTS_BRANCH)" https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git $(GITHUB_CHARTS_DIR)
+	git clone -b "$(GITHUB_CHARTS_BRANCH)" https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git $(GITHUB_CHARTS_DIR) --depth=1
 	cp "$(NAME)-$(VERSION).tgz" $(GITHUB_CHARTS_DIR)
 		cd $(GITHUB_CHARTS_DIR) && \
 	   helm repo index . && \
@@ -62,6 +62,6 @@ tag:
 updatebot/push-version:
 	$(eval MODELING_DEPENDENCIES_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling-dependencies.version -q -DforceStdout -f ../../pom.xml))
 	$(eval MAVEN_VERSIONS=org.activiti.cloud.examples:activiti-cloud-modeling $(RELEASE_VERSION) org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $(MODELING_DEPENDENCIES_VERSION))
-	
+
 	updatebot -d ../../ push-version --kind maven $(MAVEN_VERSIONS);
 

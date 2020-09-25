@@ -35,7 +35,7 @@ release:
 github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	rm -rf $$GITHUB_CHARTS_DIR || echo "try to remove $$GITHUB_CHARTS_DIR"
-	git clone -b "$(GITHUB_CHARTS_BRANCH)" https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git $(GITHUB_CHARTS_DIR)
+	git clone -b "$(GITHUB_CHARTS_BRANCH)" https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git $(GITHUB_CHARTS_DIR) --depth=1
 	cp "$(NAME)-$(VERSION).tgz" $(GITHUB_CHARTS_DIR)
 	cd $(GITHUB_CHARTS_DIR) && \
 	   helm repo index . && \
@@ -61,7 +61,7 @@ tag:
 	git tag -fa v$(VERSION) -m "Release version $(VERSION)"
 	git push origin v$(VERSION)
 
-updatebot/push-version: 
+updatebot/push-version:
 	@echo Resolving push versions for artifacts........
 	$(eval ACTIVITI_CLOUD_QUERY_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud.version -q -DforceStdout -f ../../pom.xml))
 	$(eval MAVEN_VERSIONS=org.activiti.cloud.examples:activiti-cloud-query $(RELEASE_VERSION) org.activiti.cloud.query:activiti-cloud-query-dependencies $(ACTIVITI_CLOUD_QUERY_VERSION))

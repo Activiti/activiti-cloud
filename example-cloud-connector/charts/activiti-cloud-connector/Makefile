@@ -35,7 +35,7 @@ release:
 github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	rm -rf $$GITHUB_CHARTS_DIR || echo "try to remove $$GITHUB_CHARTS_DIR"
-	git clone -b "$(GITHUB_CHARTS_BRANCH)" https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git $(GITHUB_CHARTS_DIR)
+	git clone -b "$(GITHUB_CHARTS_BRANCH)" https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git $(GITHUB_CHARTS_DIR) --depth=1
 	cp "$(NAME)-$(VERSION).tgz" $(GITHUB_CHARTS_DIR)
 	cd $(GITHUB_CHARTS_DIR) && \
 	   helm repo index . && \
@@ -52,7 +52,7 @@ version:
 	sed -i -e "s/apiVersion:.*/apiVersion: $(VERSION)/" Chart.yaml
 
 common-helm-chart-version:
-	sed -i -e "s/version:.*/version: $(VERSION)/" requirements.yaml	
+	sed -i -e "s/version:.*/version: $(VERSION)/" requirements.yaml
 
 tag:
 	git add --all
@@ -61,6 +61,6 @@ tag:
 	git push origin v$(VERSION)
 
 
-	updatebot -d ../../ push-version --kind maven $(MAVEN_VERSIONS); 
+	updatebot -d ../../ push-version --kind maven $(MAVEN_VERSIONS);
 
-	
+

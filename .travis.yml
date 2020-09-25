@@ -1,4 +1,7 @@
 import: Activiti/activiti-scripts:.travis.java.yml@master
+
+fail_fast: true
+
 env:
   global:
   - ORG='activiti'
