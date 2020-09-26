@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.acc.core.services.query.admin;
 
+import java.util.Map;
+
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -25,6 +27,7 @@ import org.springframework.hateoas.PagedModel;
 
 import feign.Headers;
 import feign.Param;
+import feign.QueryMap;
 import feign.RequestLine;
 
 public interface ProcessQueryAdminService {
@@ -44,9 +47,9 @@ public interface ProcessQueryAdminService {
     @Headers("Content-Type: application/json")
     PagedModel<CloudBPMNActivity> getServiceTasks();
 
-    @RequestLine("GET /admin/v1/service-tasks?{query}")
+    @RequestLine("GET /admin/v1/service-tasks")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudBPMNActivity> getServiceTasksByQuery(@Param("query") String query);
+    PagedModel<CloudBPMNActivity> getServiceTasks(@QueryMap Map<String, String> queryMap);
 
     @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}")
     @Headers("Content-Type: application/json")

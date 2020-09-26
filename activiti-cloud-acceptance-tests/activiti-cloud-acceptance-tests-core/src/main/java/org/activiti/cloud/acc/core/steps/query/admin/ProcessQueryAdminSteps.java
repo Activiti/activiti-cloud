@@ -18,6 +18,8 @@ package org.activiti.cloud.acc.core.steps.query.admin;
 import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
+
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminDiagramService;
@@ -98,8 +100,8 @@ public class ProcessQueryAdminSteps {
         return processQueryAdminService.getServiceTasks();
     }
     @Step
-    public PagedModel<CloudBPMNActivity> getServiceTasksByQuery(String query) {
-        return processQueryAdminService.getServiceTasksByQuery(query);
+    public PagedModel<CloudBPMNActivity> getServiceTasksByQuery(Map<String, String> queryMap) {
+        return processQueryAdminService.getServiceTasks(queryMap);
     }
     @Step
     public CloudBPMNActivity getServiceTaskById(String serviceTaskId) {
