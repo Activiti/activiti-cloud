@@ -28,11 +28,14 @@ before_script:
   || travis_terminate 1
 - kubectl config use-context default-system || travis_terminate 1
 - kubectl get ns || travis_terminate 1
+
 stages:
 - name: build
 - name: tag_updatebot
   if: type != pull_request
+
 install: true
+
 jobs:
   include:
   - name: build jars
@@ -89,6 +92,7 @@ jobs:
       - cd activiti-cloud-acceptance-scenarios
       - mvn -pl 'modeling-acceptance-tests' -Droot.log.level=off -q clean verify
       - mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off -q clean verify
+      - cd -
 
   - name: tag_updatebot
     stage: tag_updatebot
