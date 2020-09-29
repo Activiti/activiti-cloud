@@ -81,6 +81,8 @@ public class ProcessDefinitionRegistry {
             "errorStartEventSubProcess");
         put("ERROR_BOUNDARY_EVENT_CALLACTIVITY",
             "catchErrorOnCallActivity");
+        put("BPMN_ERROR_CONNECTOR_PROCESS",
+            "testBpmnErrorConnectorProcess");
     }};
 
     public static final HashMap<String, String> processDefinitionKeys = new HashMap<String, String>() {{
