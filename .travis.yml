@@ -38,49 +38,58 @@ jobs:
   - name: build jars
     stage: build
     script:
-    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -DskipITs -DskipTests -f activiti-cloud-acceptance-scenarios/pom.xml
-      || travis_terminate 1
-    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-runtime-bundle/pom.xml
-      || travis_terminate 1
-    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-query/pom.xml
-      || travis_terminate 1
-    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-cloud-connector/pom.xml
-      || travis_terminate 1
-    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-modeling/pom.xml
-      || travis_terminate 1
-    - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-dependencies/pom.xml
-      || travis_terminate 1
-    - docker build -f activiti-cloud-query/Dockerfile -q -t docker.io/activiti/activiti-cloud-query:$(cat
-      VERSION) activiti-cloud-query
-    - docker build -f example-cloud-connector/Dockerfile -q -t docker.io/activiti/example-cloud-connector:$(cat
-      VERSION) example-cloud-connector
-    - docker build -f example-runtime-bundle/Dockerfile -q -t docker.io/activiti/example-runtime-bundle:$(cat
-      VERSION) example-runtime-bundle
-    - docker build -f activiti-cloud-modeling/Dockerfile -q -t docker.io/activiti/activiti-cloud-modeling:$(cat
-      VERSION) activiti-cloud-modeling
-    - docker push docker.io/activiti/activiti-cloud-query:$(cat VERSION) || travis_terminate
-      1
-    - docker push docker.io/activiti/example-runtime-bundle:$(cat VERSION) || travis_terminate
-      1
-    - docker push docker.io/activiti/example-cloud-connector:$(cat VERSION) || travis_terminate
-      1
-    - docker push docker.io/activiti/activiti-cloud-modeling:$(cat VERSION) || travis_terminate
-      1
-    - make create-helm-charts-release-and-upload
-    - cp VERSION  activiti-cloud-dependencies/
-    - cd activiti-cloud-dependencies
-    - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn -q versions:set -Droot.log.level=off
-      -DnewVersion=${VERSION}  || travis_terminate 1
-    - make updatebot/push-version-dry || travis_terminate 1
-    - sleep 20
-    - make prepare-helm-chart || travis_terminate 1
-    - make run-helm-chart || travis_terminate 1
-    - cd -
-    - sleep 240
-    - cd activiti-cloud-acceptance-scenarios
-    - mvn -pl 'modeling-acceptance-tests' -Droot.log.level=off -q clean verify
-    - mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off -q clean verify
-    - cd -
+      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -DskipITs -DskipTests -f activiti-cloud-acceptance-scenarios/pom.xml
+      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-runtime-bundle/pom.xml
+      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-query/pom.xml
+      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-cloud-connector/pom.xml
+      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-modeling/pom.xml
+      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-dependencies/pom.xml
+      - echo "Building docker image for activiti-cloud-query..."
+      - docker build -f activiti-cloud-query/Dockerfile -q -t docker.io/activiti/activiti-cloud-query:$(cat VERSION) activiti-cloud-query
+      - echo "Building docker image for activiti-cloud-connector..."
+      - docker build -f example-cloud-connector/Dockerfile -q -t docker.io/activiti/example-cloud-connector:$(cat VERSION) example-cloud-connector
+      - echo "Building docker image for example-runtime-bundle..."
+      - docker build -f example-runtime-bundle/Dockerfile -q -t docker.io/activiti/example-runtime-bundle:$(cat VERSION) example-runtime-bundle
+      - echo "Building docker image for activiti-cloud-modeling..."
+      - docker build -f activiti-cloud-modeling/Dockerfile -q -t docker.io/activiti/activiti-cloud-modeling:$(cat VERSION) activiti-cloud-modeling
+      - make create-helm-charts-release-and-upload
+      - docker push docker.io/activiti/activiti-cloud-query:$(cat VERSION)
+      - docker push docker.io/activiti/example-runtime-bundle:$(cat VERSION)
+      - docker push docker.io/activiti/example-cloud-connector:$(cat VERSION)
+      - docker push docker.io/activiti/activiti-cloud-modeling:$(cat VERSION)
+      - cp VERSION  activiti-cloud-dependencies/
+      - cd activiti-cloud-dependencies
+      - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn -q versions:set -Droot.log.level=off -DnewVersion=${VERSION}
+      - make updatebot/push-version-dry
+      - sleep 20
+      - make prepare-helm-chart
+      - make run-helm-chart
+      - cd -
+
+      - |
+        attempt_counter=0
+        max_attempts=50
+        echo "Waiting for services to be up..."
+        until curl --silent --head --fail \
+                  ${GATEWAY_HOST}/modeling-service/v2/api-docs > /dev/null 2>&1 &&
+              curl --silent --head --fail \
+                   ${GATEWAY_HOST}/rb/v2/api-docs > /dev/null 2>&1 &&
+               curl --silent --head --fail \
+                    ${GATEWAY_HOST}/query/v2/api-docs > /dev/null 2>&1; do
+            if [ ${attempt_counter} -eq ${max_attempts} ];then
+              echo "Max attempts reached"
+              break
+            fi
+
+            printf '.'
+            attempt_counter=$((attempt_counter+1))
+            sleep 5
+        done
+
+      - cd activiti-cloud-acceptance-scenarios
+      - mvn -pl 'modeling-acceptance-tests' -Droot.log.level=off -q clean verify
+      - mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off -q clean verify
+
   - name: tag_updatebot
     stage: tag_updatebot
     script: |
