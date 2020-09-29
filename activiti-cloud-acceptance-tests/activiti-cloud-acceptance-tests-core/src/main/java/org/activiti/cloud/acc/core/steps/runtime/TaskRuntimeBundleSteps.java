@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.acc.core.steps.runtime;
 
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestBadRequestErrorIsThrownBy;
 import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
@@ -210,5 +212,17 @@ public class TaskRuntimeBundleSteps {
             .filter(cloudTask -> cloudTask.getContent().isStandalone() == standalone)
             .map(EntityModel::getContent)
             .collect(Collectors.toSet());
+    }
+    
+    @Step
+    public void assignTask(String id, AssignTaskPayload assignTaskPayload) { 
+        taskApiClient.assign(id, assignTaskPayload);
+    }
+
+    @Step
+    public void cannotAssignTask(String id, AssignTaskPayload assignTaskPayload) {
+        assertThatRestBadRequestErrorIsThrownBy(
+                () -> taskApiClient.assign(id, assignTaskPayload)
+        ).withMessageContaining("You cannot assign a task to " + assignTaskPayload.getAssignee());
     }
 }
