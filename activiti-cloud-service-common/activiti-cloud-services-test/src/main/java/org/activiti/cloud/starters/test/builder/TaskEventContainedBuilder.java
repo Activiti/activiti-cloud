@@ -183,6 +183,21 @@ public class TaskEventContainedBuilder {
         return task;
     }
 
+    public Task aTaskWithTwoGroupCandidates(String taskName,
+        String groupIdOne, String groupIdTwo,
+        ProcessInstance processInstance, String userName) {
+        TaskImpl task = buildTask(taskName,
+            Task.TaskStatus.CREATED,
+            processInstance);
+        task.setAssignee(userName);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+            new CloudTaskCandidateGroupAddedEventImpl(new TaskCandidateGroupImpl(groupIdOne,
+                task.getId())),
+            new CloudTaskCandidateGroupAddedEventImpl(new TaskCandidateGroupImpl(groupIdTwo,
+                task.getId())));
+        return task;
+    }
+
     public Task aTaskWithPriority(String taskName,
                                        int priority,
                                        ProcessInstance processInstance) {

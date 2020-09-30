@@ -132,6 +132,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private Date dueDateFrom;
 
     @JsonIgnore
+    @Transient
+    @QueryType(PropertyType.STRING)
+    private String candidateGroupId;
+
+    @JsonIgnore
     @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false,
             foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
