@@ -1718,7 +1718,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterTasksByCandidateGroupIds() {
+    public void shouldFilterTasksBySingleCandidateGroupIdOrListOfCandidateGroupIds() {
 
         //given
         Task firstTaskWithCandidateGroupInFilter = taskEventContainedBuilder
@@ -1737,55 +1737,34 @@ public class QueryTasksIT {
         eventsAggregator.sendAll();
 
         //then
-        String candidateGroupIdsToFilter = "testgroup";
-        shouldFilterTasksBySingleCandidateGroupId(firstTaskWithCandidateGroupInFilter.getId(),
-            candidateGroupIdsToFilter);
-
-        candidateGroupIdsToFilter = "testgroup,hrgroup";
-        shouldFilterTasksByCandidateGroupIdList(firstTaskWithCandidateGroupInFilter.getId(),
-            secondTaskWithCandidateGroupInFilter.getId(), candidateGroupIdsToFilter);
-
-
-    }
-
-    private void shouldFilterTasksBySingleCandidateGroupId(String taskId, String candidateGroupId) {
-
+        //query for single candidate groudId
         await().untilAsserted(() -> {
 
-            //when
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
-                .exchange(TASKS_URL + "?candidateGroupId=" + candidateGroupId,
+                .exchange(TASKS_URL + "?candidateGroupId=testgroup",
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE
                 );
-            //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks)
                 .extracting(Task::getId)
-                .containsExactly(taskId);
+                .containsExactly(firstTaskWithCandidateGroupInFilter.getId());
         });
 
-
-    }
-
-    private void shouldFilterTasksByCandidateGroupIdList(String taskIdOne, String taskIdTwo,
-        String candidateGroupIds) {
-
+        //query for multiple candidate groudIds
         await().untilAsserted(() -> {
 
-            //when
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
-                .exchange(TASKS_URL + "?candidateGroupId=" + candidateGroupIds,
+                .exchange(TASKS_URL + "?candidateGroupId=testgroup,hrgroup",
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE
                 );
 
-            //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -1793,7 +1772,8 @@ public class QueryTasksIT {
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks)
                 .extracting(Task::getId)
-                .containsExactly(taskIdOne, taskIdTwo);
+                .containsExactly(firstTaskWithCandidateGroupInFilter.getId(),
+                    secondTaskWithCandidateGroupInFilter.getId());
         });
 
     }
