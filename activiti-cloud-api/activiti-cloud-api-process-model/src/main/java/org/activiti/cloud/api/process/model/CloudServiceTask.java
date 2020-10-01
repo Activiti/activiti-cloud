@@ -17,6 +17,6 @@ package org.activiti.cloud.api.process.model;
 
 public interface CloudServiceTask extends CloudBPMNActivity {
 
-    CloudIntegrationContext getIintegrationContext();
+    CloudIntegrationContext getIntegrationContext();
 
 }

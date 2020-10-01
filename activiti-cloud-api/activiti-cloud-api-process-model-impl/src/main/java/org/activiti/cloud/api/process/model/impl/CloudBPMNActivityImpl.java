@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.api.process.model.impl;
 
+import java.util.Date;
 import java.util.Objects;
 
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
@@ -29,7 +30,13 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
     private String elementId;
     private String processDefinitionId;
     private String processInstanceId;
+    private String businessKey;
+    private String processDefinitionKey;
+    private Integer processDefinitionVersion;
     private CloudBPMNActivity.BPMNActivityStatus status;
+    private Date startedDate;
+    private Date completedDate;
+    private Date cancelledDate;
 
     public CloudBPMNActivityImpl() { }
 
@@ -118,17 +125,89 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
     public void setStatus(CloudBPMNActivity.BPMNActivityStatus status) {
         this.status = status;
     }
+
+    @Override
+    public String getBusinessKey() {
+        return businessKey;
+    }
+
+
+    public void setBusinessKey(String businessKey) {
+        this.businessKey = businessKey;
+    }
+
+
+    @Override
+    public String getProcessDefinitionKey() {
+        return processDefinitionKey;
+    }
+
+
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
+    }
+
+
+    @Override
+    public Integer getProcessDefinitionVersion() {
+        return processDefinitionVersion;
+    }
+
+
+    public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
+        this.processDefinitionVersion = processDefinitionVersion;
+    }
+
+
+    @Override
+    public Date getStartedDate() {
+        return startedDate;
+    }
+
+
+    public void setStartedDate(Date startedDate) {
+        this.startedDate = startedDate;
+    }
+
+
+    @Override
+    public Date getCompletedDate() {
+        return completedDate;
+    }
+
+
+    public void setCompletedDate(Date completedDate) {
+        this.completedDate = completedDate;
+    }
+
+
+    @Override
+    public Date getCancelledDate() {
+        return cancelledDate;
+    }
+
+
+    public void setCancelledDate(Date cancelledDate) {
+        this.cancelledDate = cancelledDate;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + Objects.hash(activityName,
                                                activityType,
+                                               businessKey,
+                                               cancelledDate,
+                                               completedDate,
                                                elementId,
                                                executionId,
                                                id,
                                                processDefinitionId,
+                                               processDefinitionKey,
+                                               processDefinitionVersion,
                                                processInstanceId,
+                                               startedDate,
                                                status);
         return result;
     }
@@ -147,12 +226,18 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
         CloudBPMNActivityImpl other = (CloudBPMNActivityImpl) obj;
         return Objects.equals(activityName, other.activityName) &&
                Objects.equals(activityType, other.activityType) &&
+               Objects.equals(businessKey, other.businessKey) &&
+               Objects.equals(cancelledDate, other.cancelledDate) &&
+               Objects.equals(completedDate, other.completedDate) &&
                Objects.equals(elementId, other.elementId) &&
                Objects.equals(executionId, other.executionId) &&
                Objects.equals(id, other.id) &&
                Objects.equals(processDefinitionId, other.processDefinitionId) &&
+               Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
+               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
                Objects.equals(processInstanceId, other.processInstanceId) &&
-               Objects.equals(status, other.status);
+               Objects.equals(startedDate, other.startedDate) &&
+               status == other.status;
     }
 
     @Override
@@ -172,9 +257,21 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
                .append(processDefinitionId)
                .append(", processInstanceId=")
                .append(processInstanceId)
+               .append(", businessKey=")
+               .append(businessKey)
+               .append(", processDefinitionKey=")
+               .append(processDefinitionKey)
+               .append(", processDefinitionVersion=")
+               .append(processDefinitionVersion)
                .append(", status=")
                .append(status)
-               .append(", super()=")
+               .append(", startedDate=")
+               .append(startedDate)
+               .append(", completedDate=")
+               .append(completedDate)
+               .append(", cancelledDate=")
+               .append(cancelledDate)
+               .append(", toString()=")
                .append(super.toString())
                .append("]");
         return builder.toString();
