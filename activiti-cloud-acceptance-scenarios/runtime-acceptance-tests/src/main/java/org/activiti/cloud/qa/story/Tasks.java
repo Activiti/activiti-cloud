@@ -427,8 +427,17 @@ public class Tasks {
 
     }
 
-    @When("the task does not contain candidate user $user in Query")
+    @When("the task contains candidate users $user in Query")
     public void checkTaskCandidateUsers(String user) {
+        String currentTaskId = Serenity.sessionVariableCalled("currentTaskId").toString();
+
+        List<String> taskCandidateUsers = taskQuerySteps.getCandidateUsers(currentTaskId);
+
+        assertThat(taskCandidateUsers).contains(user);
+    }
+
+    @When("the task does not contain candidate user $user in Query")
+    public void checkUserIsNotCandidate(String user) {
         String currentTaskId = Serenity.sessionVariableCalled("currentTaskId").toString();
 
         List<String> taskCandidateUsers = taskQuerySteps.getCandidateUsers(currentTaskId);
