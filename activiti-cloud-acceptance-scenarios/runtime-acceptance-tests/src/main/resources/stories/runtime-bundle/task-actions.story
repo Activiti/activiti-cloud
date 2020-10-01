@@ -214,3 +214,18 @@ And the user completes the task
 Then the status of the process and the task is changed to completed
 And the status of the task is COMPLETED in Audit and Query
 And the task contains candidate groups hr,testgroup in Query
+
+Scenario: current assignee of a task can reassign it to a candidate user 
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES
+And the task contains candidate users hruser in Query
+And the user claims the task
+And the user assign the task to hruser
+And another user is authenticated as hruser
+Then the assignee is hruser
+
+Scenario: current assignee of a task cannot reassign it to a user that is not a candidate
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
+When the task does not contain candidate user hruser in Query
+Then the user cannot assign the task to hruser

@@ -165,6 +165,7 @@ public class ProcessInstanceTasks {
     }
 
     @When("the assignee is $user")
+    @Then("the assignee is $user")
     public void checkAssignee(String user)throws Exception {
         assertThat(taskRuntimeBundleSteps.getTaskById(currentTask.getId()).getAssignee()).isEqualTo(user);
     }
@@ -172,6 +173,26 @@ public class ProcessInstanceTasks {
     @When("the user claims the task")
     public void claimTask() throws Exception {
         taskRuntimeBundleSteps.claimTask(currentTask.getId());
+    }
+
+    @When("the user assign the task to $assignee")
+    public void assignTask(String assignee) throws Exception {
+        taskRuntimeBundleSteps.assignTask(currentTask.getId(), 
+                TaskPayloadBuilder
+                        .assign()
+                        .withTaskId(currentTask.getId())
+                        .withAssignee(assignee)
+                        .build());
+    }
+
+    @Then("the user cannot assign the task to $user")
+    public void cannotAssignTask(String user) throws Exception {
+        taskRuntimeBundleSteps.cannotAssignTask(currentTask.getId(),
+                TaskPayloadBuilder
+                        .assign()
+                        .withTaskId(currentTask.getId())
+                        .withAssignee(user)
+                        .build());
     }
 
     @When("the user releases the task")
