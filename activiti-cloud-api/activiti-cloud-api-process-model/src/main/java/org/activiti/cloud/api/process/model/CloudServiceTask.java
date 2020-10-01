@@ -15,13 +15,8 @@
  */
 package org.activiti.cloud.api.process.model;
 
-import java.util.Date;
-
 public interface CloudServiceTask extends CloudBPMNActivity {
 
-    Date getStartedDate();
+    CloudIntegrationContext getIintegrationContext();
 
-    Date getCompletedDate();
-
-    Date getErrorDate();
 }
