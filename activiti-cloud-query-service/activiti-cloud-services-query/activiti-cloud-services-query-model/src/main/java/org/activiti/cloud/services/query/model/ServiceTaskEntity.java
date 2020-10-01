@@ -24,6 +24,8 @@ import org.activiti.cloud.api.process.model.CloudServiceTask;
 @Table(name="BPMN_ACTIVITY")
 public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
 
+    public ServiceTaskEntity() { }
+
     @Override
     public int hashCode() {
         return super.hashCode();

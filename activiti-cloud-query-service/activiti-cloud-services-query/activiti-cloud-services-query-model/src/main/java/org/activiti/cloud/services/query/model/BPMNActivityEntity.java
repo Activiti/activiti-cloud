@@ -29,6 +29,8 @@ import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 })
 public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudBPMNActivity {
 
+    public BPMNActivityEntity() { }
+
     public BPMNActivityEntity(String serviceName,
                               String serviceFullName,
                               String serviceVersion,
