@@ -16,11 +16,11 @@
 package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
+import org.activiti.cloud.services.query.model.QServiceTaskEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.ServiceTasksFilter;
 import org.springframework.data.domain.Pageable;
@@ -45,43 +45,43 @@ import com.querydsl.core.types.Predicate;
         })
 public class ServiceTaskAdminController {
 
-    private final BPMNActivityRepository bpmnActivityRepository;
+    private final ServiceTaskRepository serviceTaskRepository;
 
     private final ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
-    private final AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler;
 
     private final EntityFinder entityFinder;
 
 
-    public ServiceTaskAdminController(BPMNActivityRepository bpmnActivityRepository,
+    public ServiceTaskAdminController(ServiceTaskRepository serviceTaskRepository,
                                       ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                      AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler,
+                                      AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler,
                                       EntityFinder entityFinder) {
-        this.bpmnActivityRepository = bpmnActivityRepository;
+        this.serviceTaskRepository = serviceTaskRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.entityFinder = entityFinder;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudBPMNActivity>> findAll(@QuerydslPredicate(root = BPMNActivityEntity.class) Predicate predicate,
+    public PagedModel<EntityModel<CloudServiceTask>> findAll(@QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
                                                               Pageable pageable) {
 
         Predicate filter = new ServiceTasksFilter().extend(predicate);
 
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                     bpmnActivityRepository.findAll(filter,
+                                                     serviceTaskRepository.findAll(filter,
                                                                                     pageable),
                                                      taskRepresentationModelAssembler);
     }
 
     @RequestMapping(value = "/{serviceTaskId}", method = RequestMethod.GET)
-    public EntityModel<CloudBPMNActivity> findById(@PathVariable String serviceTaskId) {
+    public EntityModel<CloudServiceTask> findById(@PathVariable String serviceTaskId) {
 
-        Predicate filter = new ServiceTasksFilter().extend(QBPMNActivityEntity.bPMNActivityEntity.id.eq(serviceTaskId));
+        Predicate filter = new ServiceTasksFilter().extend(QServiceTaskEntity.serviceTaskEntity.id.eq(serviceTaskId));
 
-        BPMNActivityEntity entity = entityFinder.findOne(bpmnActivityRepository,
+        ServiceTaskEntity entity = entityFinder.findOne(serviceTaskRepository,
                                                          filter,
                                                          "Unable to find service task entity for the given id:'" + serviceTaskId + "'");
 

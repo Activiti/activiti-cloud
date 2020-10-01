@@ -16,30 +16,13 @@
 package org.activiti.cloud.services.query.model;
 
 import javax.persistence.Entity;
-import javax.persistence.Index;
 import javax.persistence.Table;
 
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
 
-@Entity(name="BPMNActivity")
-@Table(name="BPMN_ACTIVITY", indexes={
-    @Index(name="bpmn_activity_status_idx", columnList="status", unique=false),
-    @Index(name="bpmn_activity_processInstance_idx", columnList="processInstanceId", unique=false),
-    @Index(name="bpmn_activity_processInstance_elementId_idx", columnList="processInstanceId,elementId,executionId", unique=true)
-})
-public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudBPMNActivity {
-
-    public BPMNActivityEntity(String serviceName,
-                              String serviceFullName,
-                              String serviceVersion,
-                              String appName,
-                              String appVersion) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
-    }
+@Entity(name="ServiceTask")
+@Table(name="BPMN_ACTIVITY")
+public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
 
     @Override
     public int hashCode() {
@@ -63,7 +46,7 @@ public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudB
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("BPMNActivityEntity [toString()=").append(super.toString()).append("]");
+        builder.append("ServiceTaskEntity [toString()=").append(super.toString()).append("]");
         return builder.toString();
     }
 

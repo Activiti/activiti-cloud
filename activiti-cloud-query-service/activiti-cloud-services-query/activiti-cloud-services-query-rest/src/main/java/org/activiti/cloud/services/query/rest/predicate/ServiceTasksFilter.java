@@ -17,7 +17,7 @@ package org.activiti.cloud.services.query.rest.predicate;
 
 import javax.validation.constraints.NotNull;
 
-import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
+import org.activiti.cloud.services.query.model.QServiceTaskEntity;
 
 import com.querydsl.core.types.Predicate;
 
@@ -27,7 +27,7 @@ public class ServiceTasksFilter implements QueryDslPredicateFilter {
 
     @Override
     public Predicate extend(@NotNull Predicate currentPredicate) {
-        return QBPMNActivityEntity.bPMNActivityEntity.activityType.eq(SERVICE_TASK)
-                                                                  .and(currentPredicate);
+        return QServiceTaskEntity.serviceTaskEntity.activityType.eq(SERVICE_TASK)
+                                                                .and(currentPredicate);
     }
 }
