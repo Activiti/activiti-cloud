@@ -25,10 +25,10 @@ import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminSe
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminDiagramService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService;
 import org.activiti.cloud.acc.shared.service.BaseService;
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
@@ -96,23 +96,23 @@ public class ProcessQueryAdminSteps {
         assertThat(diagram).isEmpty();
     }
     @Step
-    public PagedModel<CloudBPMNActivity> getServiceTasks() {
+    public PagedModel<CloudServiceTask> getServiceTasks() {
         return processQueryAdminService.getServiceTasks();
     }
     @Step
-    public PagedModel<CloudBPMNActivity> getServiceTasksByQuery(Map<String, String> queryMap) {
+    public PagedModel<CloudServiceTask> getServiceTasksByQuery(Map<String, String> queryMap) {
         return processQueryAdminService.getServiceTasks(queryMap);
     }
     @Step
-    public CloudBPMNActivity getServiceTaskById(String serviceTaskId) {
+    public CloudServiceTask getServiceTaskById(String serviceTaskId) {
         return processQueryAdminService.getServiceTaskById(serviceTaskId);
     }
     @Step
-    public PagedModel<CloudBPMNActivity> getServiceTasks(String processInstanceId) {
+    public PagedModel<CloudServiceTask> getServiceTasks(String processInstanceId) {
         return processQueryAdminService.getServiceTasks(processInstanceId);
     }
     @Step
-    public PagedModel<CloudBPMNActivity> getServiceTasksByStatus(String processInstanceId,
+    public PagedModel<CloudServiceTask> getServiceTasksByStatus(String processInstanceId,
                                                                  String status) {
         return processQueryAdminService.getServiceTasksByStatus(processInstanceId,
                                                                 status);
