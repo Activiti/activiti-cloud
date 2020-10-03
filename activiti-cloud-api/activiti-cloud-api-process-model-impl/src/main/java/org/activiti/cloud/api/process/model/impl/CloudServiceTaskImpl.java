@@ -15,32 +15,15 @@
  */
 package org.activiti.cloud.api.process.model.impl;
 
-import java.util.Objects;
-
-import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 
 public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements CloudServiceTask {
 
-    private CloudIntegrationContext integrationContext;
-
     public CloudServiceTaskImpl() { }
 
     @Override
-    public CloudIntegrationContext getIntegrationContext() {
-        return integrationContext;
-    }
-
-    public void setIntegrationContext(CloudIntegrationContext integrationContext) {
-        this.integrationContext = integrationContext;
-    }
-
-    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(integrationContext);
-        return result;
+        return super.hashCode();
     }
 
     @Override
@@ -54,18 +37,13 @@ public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements Cloud
         if (getClass() != obj.getClass()) {
             return false;
         }
-        CloudServiceTaskImpl other = (CloudServiceTaskImpl) obj;
-        return Objects.equals(integrationContext, other.integrationContext);
+        return true;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudServiceTaskImpl [integrationContext=")
-               .append(integrationContext)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder.append("CloudServiceTaskImpl [toString()=").append(super.toString()).append("]");
         return builder.toString();
     }
 

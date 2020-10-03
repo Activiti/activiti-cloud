@@ -36,6 +36,14 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
 
     public ServiceTaskEntity() { }
 
+    public IntegrationContextEntity getIntegrationContext() {
+        return integrationContext;
+    }
+
+    public void setIntegrationContext(IntegrationContextEntity integrationContext) {
+        this.integrationContext = integrationContext;
+    }
+
     @Override
     public int hashCode() {
         return super.hashCode();
@@ -60,17 +68,6 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
         StringBuilder builder = new StringBuilder();
         builder.append("ServiceTaskEntity [toString()=").append(super.toString()).append("]");
         return builder.toString();
-    }
-
-
-    @Override
-    public IntegrationContextEntity getIntegrationContext() {
-        return integrationContext;
-    }
-
-
-    public void setIntegrationContext(IntegrationContextEntity integrationContext) {
-        this.integrationContext = integrationContext;
     }
 
 }
