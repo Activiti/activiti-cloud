@@ -100,7 +100,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")
-    private BPMNActivityEntity bpmnActivity;
+    private ServiceTaskEntity serviceTask;
 
     public IntegrationContextEntity() {
         this.id = UUID.randomUUID().toString();
@@ -452,22 +452,22 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
 
-    public BPMNActivityEntity getBpmnActivity() {
-        return bpmnActivity;
+    public ServiceTaskEntity getServiceTask() {
+        return serviceTask;
     }
 
 
-    public void setBpmnActivity(BPMNActivityEntity bpmnActivity) {
-        if (bpmnActivity == null) {
-            if (this.bpmnActivity != null) {
-                this.bpmnActivity.setIntegrationContext(null);
+    public void setServiceTask(ServiceTaskEntity serviceTask) {
+        if (serviceTask == null) {
+            if (this.serviceTask != null) {
+                this.serviceTask.setIntegrationContext(null);
             }
         }
         else {
-            bpmnActivity.setIntegrationContext(this);
+            serviceTask.setIntegrationContext(this);
         }
 
-        this.bpmnActivity = bpmnActivity;
+        this.serviceTask = serviceTask;
     }
 
     @Override

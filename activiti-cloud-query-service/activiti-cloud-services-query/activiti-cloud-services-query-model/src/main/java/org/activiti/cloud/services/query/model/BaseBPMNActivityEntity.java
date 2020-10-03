@@ -20,15 +20,11 @@ import java.util.Objects;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
 
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @MappedSuperclass
 public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
@@ -67,10 +63,6 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date cancelledDate;
-
-    @JsonIgnore
-    @OneToOne(mappedBy = "bpmnActivity", fetch = FetchType.LAZY, optional = true)
-    private IntegrationContextEntity integrationContext;
 
     /** The associated process definition key of the activity as in the process file */
     private String processDefinitionKey;
@@ -199,14 +191,6 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
         this.businessKey = businessKey;
     }
 
-    public IntegrationContextEntity getIntegrationContext() {
-        return integrationContext;
-    }
-
-    public void setIntegrationContext(IntegrationContextEntity integrationContext) {
-        this.integrationContext = integrationContext;
-    }
-
     public String getExecutionId() {
         return executionId;
     }
@@ -226,7 +210,6 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
                                                completedDate,
                                                elementId,
                                                id,
-                                               integrationContext,
                                                processDefinitionId,
                                                processDefinitionKey,
                                                processDefinitionVersion,
@@ -256,7 +239,6 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
                Objects.equals(completedDate, other.completedDate) &&
                Objects.equals(elementId, other.elementId) &&
                Objects.equals(id, other.id) &&
-               Objects.equals(integrationContext, other.integrationContext) &&
                Objects.equals(processDefinitionId, other.processDefinitionId) &&
                Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
@@ -291,8 +273,6 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
                .append(completedDate)
                .append(", cancelledDate=")
                .append(cancelledDate)
-               .append(", integrationContext=")
-               .append(integrationContext)
                .append(", processDefinitionKey=")
                .append(processDefinitionKey)
                .append(", processDefinitionVersion=")

@@ -16,13 +16,23 @@
 package org.activiti.cloud.services.query.model;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.activiti.cloud.api.process.model.CloudServiceTask;
+import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity(name="ServiceTask")
 @Table(name="BPMN_ACTIVITY")
+@Where(clause = "activity_type='serviceTask'")
 public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "serviceTask", fetch = FetchType.LAZY, optional = true)
+    private IntegrationContextEntity integrationContext;
 
     public ServiceTaskEntity() { }
 
@@ -50,6 +60,17 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
         StringBuilder builder = new StringBuilder();
         builder.append("ServiceTaskEntity [toString()=").append(super.toString()).append("]");
         return builder.toString();
+    }
+
+
+    @Override
+    public IntegrationContextEntity getIntegrationContext() {
+        return integrationContext;
+    }
+
+
+    public void setIntegrationContext(IntegrationContextEntity integrationContext) {
+        this.integrationContext = integrationContext;
     }
 
 }

@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.app.repository;
 import java.util.List;
 
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.QServiceTaskEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -31,8 +30,8 @@ import com.querydsl.core.types.dsl.StringPath;
 
 @RepositoryRestResource(exported = false)
 public interface ServiceTaskRepository extends PagingAndSortingRepository<ServiceTaskEntity, String>,
-                                                QuerydslPredicateExecutor<ServiceTaskEntity>,
-                                                QuerydslBinderCustomizer<QServiceTaskEntity> {
+                                               QuerydslPredicateExecutor<ServiceTaskEntity>,
+                                               QuerydslBinderCustomizer<QServiceTaskEntity> {
 
     @Override
     default void customize(QuerydslBindings bindings,
@@ -42,15 +41,15 @@ public interface ServiceTaskRepository extends PagingAndSortingRepository<Servic
                 (StringPath path, String value) -> path.eq(value));
     }
 
-    List<BPMNActivityEntity> findByProcessInstanceIdAndStatus(String processInstanceId,
-                                                              CloudBPMNActivity.BPMNActivityStatus status);
+    List<ServiceTaskEntity> findByProcessInstanceIdAndStatus(String processInstanceId,
+                                                             CloudBPMNActivity.BPMNActivityStatus status);
 
-    List<BPMNActivityEntity> findByProcessInstanceId(String processInstanceId);
+    List<ServiceTaskEntity> findByProcessInstanceId(String processInstanceId);
 
-    BPMNActivityEntity findByProcessInstanceIdAndElementId(String processInstanceId,
+    ServiceTaskEntity findByProcessInstanceIdAndElementId(String processInstanceId,
                                                            String elementId);
 
-    BPMNActivityEntity findByProcessInstanceIdAndElementIdAndExecutionId(String processInstanceId,
-                                                                         String elementId,
-                                                                         String executionId);
+    ServiceTaskEntity findByProcessInstanceIdAndElementIdAndExecutionId(String processInstanceId,
+                                                                        String elementId,
+                                                                        String executionId);
 }

@@ -22,7 +22,6 @@ import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.model.QServiceTaskEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.predicate.ServiceTasksFilter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
@@ -47,7 +46,7 @@ public class ServiceTaskAdminController {
 
     private final ServiceTaskRepository serviceTaskRepository;
 
-    private final ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;
+    private final ServiceTaskRepresentationModelAssembler representationModelAssembler;
 
     private final AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler;
 
@@ -55,36 +54,34 @@ public class ServiceTaskAdminController {
 
 
     public ServiceTaskAdminController(ServiceTaskRepository serviceTaskRepository,
-                                      ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
+                                      ServiceTaskRepresentationModelAssembler representationModelAssembler,
                                       AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler,
                                       EntityFinder entityFinder) {
         this.serviceTaskRepository = serviceTaskRepository;
-        this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
+        this.representationModelAssembler = representationModelAssembler;
         this.entityFinder = entityFinder;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudServiceTask>> findAll(@QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
-                                                              Pageable pageable) {
-
-        Predicate filter = new ServiceTasksFilter().extend(predicate);
+                                                             Pageable pageable) {
 
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                     serviceTaskRepository.findAll(filter,
-                                                                                    pageable),
-                                                     taskRepresentationModelAssembler);
+                                                     serviceTaskRepository.findAll(predicate,
+                                                                                   pageable),
+                                                     representationModelAssembler);
     }
 
     @RequestMapping(value = "/{serviceTaskId}", method = RequestMethod.GET)
     public EntityModel<CloudServiceTask> findById(@PathVariable String serviceTaskId) {
 
-        Predicate filter = new ServiceTasksFilter().extend(QServiceTaskEntity.serviceTaskEntity.id.eq(serviceTaskId));
+        Predicate filter = QServiceTaskEntity.serviceTaskEntity.id.eq(serviceTaskId);
 
         ServiceTaskEntity entity = entityFinder.findOne(serviceTaskRepository,
-                                                         filter,
-                                                         "Unable to find service task entity for the given id:'" + serviceTaskId + "'");
+                                                        filter,
+                                                        "Unable to find service task entity for the given id:'" + serviceTaskId + "'");
 
-        return taskRepresentationModelAssembler.toModel(entity);
+        return representationModelAssembler.toModel(entity);
     }
 }

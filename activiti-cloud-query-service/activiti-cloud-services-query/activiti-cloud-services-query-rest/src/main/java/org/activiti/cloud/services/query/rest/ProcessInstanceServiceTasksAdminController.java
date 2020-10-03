@@ -22,7 +22,6 @@ import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.predicate.ServiceTasksFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,14 +63,14 @@ public class ProcessInstanceServiceTasksAdminController {
 
     @RequestMapping(value = "/service-tasks", method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudServiceTask>> getTasks(@PathVariable String processInstanceId,
-                                                               @QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
-                                                               Pageable pageable) {
+                                                              @QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
+                                                              Pageable pageable) {
 
-        Predicate filter = new ServiceTasksFilter().extend(serviceTaskEntity.processInstanceId.eq(processInstanceId)
-                                                                                              .and(predicate));
+        Predicate filter = serviceTaskEntity.processInstanceId.eq(processInstanceId)
+                                                              .and(predicate);
 
         Page<ServiceTaskEntity> page = taskRepository.findAll(filter,
-                                                               pageable);
+                                                              pageable);
         return pagedCollectionModelAssembler.toModel(pageable,
                                                      page,
                                                      taskRepresentationModelAssembler);

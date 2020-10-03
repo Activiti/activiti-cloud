@@ -359,6 +359,9 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody()).extracting(CloudServiceTask::getId, CloudServiceTask::getElementId, CloudServiceTask::getActivityType)
                                                 .containsExactly(serviceTaskId, SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_TYPE);
+
+            //assertThat(responseEntity.getBody().getIntegrationContext()).isNotNull();
+
         });
     }
 
