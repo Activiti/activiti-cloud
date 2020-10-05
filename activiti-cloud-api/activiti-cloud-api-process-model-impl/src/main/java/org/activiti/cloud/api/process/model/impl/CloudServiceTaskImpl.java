@@ -19,8 +19,6 @@ import org.activiti.cloud.api.process.model.CloudServiceTask;
 
 public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements CloudServiceTask {
 
-    public CloudServiceTaskImpl() { }
-
     @Override
     public int hashCode() {
         return super.hashCode();

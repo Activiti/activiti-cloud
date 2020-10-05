@@ -34,8 +34,6 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
     @OneToOne(mappedBy = "serviceTask", fetch = FetchType.LAZY, optional = true)
     private IntegrationContextEntity integrationContext;
 
-    public ServiceTaskEntity() { }
-
     public IntegrationContextEntity getIntegrationContext() {
         return integrationContext;
     }
