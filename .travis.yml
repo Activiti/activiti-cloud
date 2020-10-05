@@ -2,6 +2,10 @@ import: Activiti/activiti-scripts:.travis.java.yml@master
 
 fail_fast: true
 
+cache:
+  directories:
+    - "${HOME}/.m2/repository"
+
 env:
   global:
   - ORG='activiti'
