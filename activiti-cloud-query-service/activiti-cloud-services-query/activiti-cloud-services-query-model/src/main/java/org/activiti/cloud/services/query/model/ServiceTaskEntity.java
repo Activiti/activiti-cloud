@@ -16,31 +16,30 @@
 package org.activiti.cloud.services.query.model;
 
 import javax.persistence.Entity;
-import javax.persistence.Index;
+import javax.persistence.FetchType;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
+import org.hibernate.annotations.Where;
 
-@Entity(name="BPMNActivity")
-@Table(name="BPMN_ACTIVITY", indexes={
-    @Index(name="bpmn_activity_status_idx", columnList="status", unique=false),
-    @Index(name="bpmn_activity_processInstance_idx", columnList="processInstanceId", unique=false),
-    @Index(name="bpmn_activity_processInstance_elementId_idx", columnList="processInstanceId,elementId,executionId", unique=true)
-})
-public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudBPMNActivity {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-    public BPMNActivityEntity() { }
+@Entity(name="ServiceTask")
+@Table(name="BPMN_ACTIVITY")
+@Where(clause = "activity_type='serviceTask'")
+public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
 
-    public BPMNActivityEntity(String serviceName,
-                              String serviceFullName,
-                              String serviceVersion,
-                              String appName,
-                              String appVersion) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
+    @JsonIgnore
+    @OneToOne(mappedBy = "serviceTask", fetch = FetchType.LAZY, optional = true)
+    private IntegrationContextEntity integrationContext;
+
+    public IntegrationContextEntity getIntegrationContext() {
+        return integrationContext;
+    }
+
+    public void setIntegrationContext(IntegrationContextEntity integrationContext) {
+        this.integrationContext = integrationContext;
     }
 
     @Override
@@ -65,7 +64,7 @@ public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudB
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("BPMNActivityEntity [toString()=").append(super.toString()).append("]");
+        builder.append("ServiceTaskEntity [toString()=").append(super.toString()).append("]");
         return builder.toString();
     }
 

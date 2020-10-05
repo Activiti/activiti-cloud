@@ -13,21 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.predicate;
+package org.activiti.cloud.api.process.model;
 
-import javax.validation.constraints.NotNull;
+public interface CloudServiceTask extends CloudBPMNActivity {
 
-import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
-
-import com.querydsl.core.types.Predicate;
-
-public class ServiceTasksFilter implements QueryDslPredicateFilter {
-
-    public static final String SERVICE_TASK = "serviceTask";
-
-    @Override
-    public Predicate extend(@NotNull Predicate currentPredicate) {
-        return QBPMNActivityEntity.bPMNActivityEntity.activityType.eq(SERVICE_TASK)
-                                                                  .and(currentPredicate);
-    }
 }
