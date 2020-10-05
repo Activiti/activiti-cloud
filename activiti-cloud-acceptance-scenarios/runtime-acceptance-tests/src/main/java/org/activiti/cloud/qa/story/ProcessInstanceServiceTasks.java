@@ -34,8 +34,8 @@ import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -85,7 +85,7 @@ public class ProcessInstanceServiceTasks {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
         await().untilAsserted(() -> {
-            PagedModel<CloudBPMNActivity> tasks = processQueryAdminSteps.getServiceTasks(processId);
+            PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
 
             assertThat(tasks.getContent())
                             .isNotEmpty()
@@ -100,7 +100,7 @@ public class ProcessInstanceServiceTasks {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
         await().untilAsserted(() -> {
-            PagedModel<CloudBPMNActivity> tasks = processQueryAdminSteps.getServiceTasks(processId);
+            PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
 
             assertThat(tasks.getContent()).hasSize(1);
 
@@ -109,10 +109,10 @@ public class ProcessInstanceServiceTasks {
                                         .next()
                                         .getId();
 
-            CloudBPMNActivity serviceTask = processQueryAdminSteps.getServiceTaskById(serviceTaskId);
+            CloudServiceTask serviceTask = processQueryAdminSteps.getServiceTaskById(serviceTaskId);
 
             assertThat(serviceTask).isNotNull()
-                                   .extracting(CloudBPMNActivity::getActivityType)
+                                   .extracting(CloudServiceTask::getActivityType)
                                    .isEqualTo("serviceTask");
         });
     }
@@ -123,7 +123,7 @@ public class ProcessInstanceServiceTasks {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
         await().untilAsserted(() -> {
-            PagedModel<CloudBPMNActivity> tasks = processQueryAdminSteps.getServiceTasks(processId);
+            PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
 
             assertThat(tasks.getContent()).hasSize(1);
 
@@ -145,11 +145,11 @@ public class ProcessInstanceServiceTasks {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
         await().untilAsserted(() -> {
-            PagedModel<CloudBPMNActivity> tasks = processQueryAdminSteps.getServiceTasksByStatus(processId,
+            PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasksByStatus(processId,
                                                                                                  status);
             assertThat(tasks.getContent()).isNotEmpty()
-                                          .extracting(CloudBPMNActivity::getActivityType, CloudBPMNActivity::getStatus)
-                                          .containsOnly(tuple("serviceTask", CloudBPMNActivity.BPMNActivityStatus.valueOf(status)));
+                                          .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getStatus)
+                                          .containsOnly(tuple("serviceTask", CloudServiceTask.BPMNActivityStatus.valueOf(status)));
         });
     }
 
@@ -166,14 +166,16 @@ public class ProcessInstanceServiceTasks {
                                                                .findFirst()
                                                                .orElseThrow();
         await().untilAsserted(() -> {
-            PagedModel<CloudBPMNActivity> tasks = processQueryAdminSteps.getServiceTasksByQuery(queryMap);
+            PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasksByQuery(queryMap);
             assertThat(tasks.getContent()).isNotEmpty()
-                                          .extracting(CloudBPMNActivity::getProcessDefinitionId,
-                                                      CloudBPMNActivity::getActivityType,
-                                                      CloudBPMNActivity::getStatus)
+                                          .extracting(CloudServiceTask::getProcessDefinitionId,
+                                                      CloudServiceTask::getProcessDefinitionKey,
+                                                      CloudServiceTask::getActivityType,
+                                                      CloudServiceTask::getStatus)
                                           .containsOnly(tuple(processDefinition.getId(),
+                                                              processDefinitionKey,
                                                               "serviceTask",
-                                                              CloudBPMNActivity.BPMNActivityStatus.valueOf(status)));
+                                                              CloudServiceTask.BPMNActivityStatus.valueOf(status)));
         });
     }
 
