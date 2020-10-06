@@ -1601,7 +1601,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_withCandidateUsers_by_ProcessInstance() {
+    public void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance() {
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
                                                                       "testuser",
@@ -1621,8 +1621,8 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks.iterator().next())
-                .extracting(Task::getName, Task::getCandidateUsers)
-                .contains(tuple(task1.getName(), Collections.singletonList("testuser")));
+                .extracting(Task::getName, Task::getCandidateUsers, Task::getCandidateGroups)
+                .contains(task1.getName(), Collections.singletonList("testuser"), Collections.emptyList());
         });
     }
 
