@@ -34,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
+    private static final int MAX_VARCHAR_255 = 255;
+
     public IntegrationErrorReceivedEventHandler(IntegrationContextRepository repository,
                                                 ServiceTaskRepository serviceTaskRepository,
                                                 EntityManager entityManager) {
@@ -52,7 +54,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
             entity.setErrorDate(new Date(integrationEvent.getTimestamp()));
             entity.setStatus(IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
             entity.setErrorCode(integrationEvent.getErrorCode());
-            entity.setErrorMessage(integrationEvent.getErrorMessage());
+            entity.setErrorMessage(mayBeTruncate(integrationEvent.getErrorMessage(), MAX_VARCHAR_255));
             entity.setErrorClassName(integrationEvent.getErrorClassName());
             entity.setStackTraceElements(integrationEvent.getStackTraceElements());
             entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
@@ -66,5 +68,12 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
     @Override
     public String getHandledEvent() {
         return IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name();
+    }
+
+    protected String mayBeTruncate(String input, Integer maxLength) {
+        return Optional.ofNullable(input)
+                       .filter(it -> it.length() > maxLength)
+                       .map(it -> it.substring(0, maxLength))
+                       .orElse(input);
     }
 }
