@@ -278,7 +278,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+        this.errorMessage = StringUtils.truncate(errorMessage, 255);
     }
 
     @Override
@@ -520,5 +520,4 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
                        .map(it -> (T) it.get(name))
                        .orElse(null);
     }
-
 }
