@@ -30,6 +30,8 @@ import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceEle
 @DiscriminatorValue(value = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
 public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity {
 
+    private static final int LENGTH_VARCHAR_255 = 255;
+
     protected static final String INTEGRATION_ERROR_RECEIVED_EVENT = "IntegrationErrorReceivedEvent";
 
     private String errorCode;
@@ -46,7 +48,7 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
         super(event);
 
         this.errorMessage = event.getErrorCode();
-        this.errorMessage = event.getErrorMessage();
+        this.errorMessage = StringUtils.truncate(event.getErrorMessage(), LENGTH_VARCHAR_255);
         this.errorClassName = event.getErrorClassName();
         this.stackTraceElements = event.getStackTraceElements();
     }
@@ -62,15 +64,20 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
     public String getErrorMessage() {
         return errorMessage;
     }
-
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = StringUtils.truncate(errorMessage, LENGTH_VARCHAR_255);
+    }
 
     public String getErrorClassName() {
         return errorClassName;
     }
 
-
     public List<StackTraceElement> getStackTraceElements() {
         return stackTraceElements;
+    }
+
+    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
+        this.stackTraceElements = stackTraceElements;
     }
 
     @Override
@@ -118,4 +125,5 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
                .append("]");
         return builder.toString();
     }
+
 }
