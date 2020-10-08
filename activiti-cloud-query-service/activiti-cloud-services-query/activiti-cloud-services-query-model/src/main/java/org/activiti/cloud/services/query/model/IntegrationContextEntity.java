@@ -51,6 +51,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 })
 public class IntegrationContextEntity extends ActivitiEntityMetadata implements CloudIntegrationContext {
 
+    public static final int ERROR_MESSAGE_LENGTH = 255;
+
     @Id
     private String id;
 
@@ -85,6 +87,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     private String errorCode;
 
+    @Column(length = ERROR_MESSAGE_LENGTH)
     private String errorMessage;
 
     private String errorClassName;
@@ -278,7 +281,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     public void setErrorMessage(String errorMessage) {
-        this.errorMessage = StringUtils.truncate(errorMessage, 255);
+        this.errorMessage = StringUtils.truncate(errorMessage, ERROR_MESSAGE_LENGTH);
     }
 
     @Override

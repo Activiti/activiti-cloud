@@ -17,7 +17,7 @@ package org.activiti.cloud.services.query.model;
 
 import java.util.Optional;
 
-class StringUtils {
+public class StringUtils {
 
     /**
      *   Truncate a String to the given length with no warnings or error raised if it is bigger.
