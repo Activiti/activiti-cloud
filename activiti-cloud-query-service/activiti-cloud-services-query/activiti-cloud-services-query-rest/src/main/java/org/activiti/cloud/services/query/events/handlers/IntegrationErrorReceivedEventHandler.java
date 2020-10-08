@@ -34,8 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
-    private static final int MAX_VARCHAR_255 = 255;
-
     public IntegrationErrorReceivedEventHandler(IntegrationContextRepository repository,
                                                 ServiceTaskRepository serviceTaskRepository,
                                                 EntityManager entityManager) {

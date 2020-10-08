@@ -1056,8 +1056,7 @@ public class AuditServiceIT {
                                                                                                                                error.getMessage(),
                                                                                                                                error.getClass().getName(),
                                                                                                                                Arrays.asList(error.getCause()
-
-                                                                                                                                             .getStackTrace()));
+                                                                                                                                                  .getStackTrace()));
         testEvents.add(cloudIntegrationErrorReceivedEvent);
 
 
