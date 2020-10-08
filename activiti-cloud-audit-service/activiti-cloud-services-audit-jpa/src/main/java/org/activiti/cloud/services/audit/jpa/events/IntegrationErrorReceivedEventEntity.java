@@ -50,7 +50,7 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
     public IntegrationErrorReceivedEventEntity(CloudIntegrationErrorReceivedEvent event) {
         super(event);
 
-        this.errorMessage = event.getErrorCode();
+        this.errorCode = event.getErrorCode();
         this.errorMessage = StringUtils.truncate(event.getErrorMessage(), ERROR_MESSAGE_LENGTH);
         this.errorClassName = event.getErrorClassName();
         this.stackTraceElements = event.getStackTraceElements();
