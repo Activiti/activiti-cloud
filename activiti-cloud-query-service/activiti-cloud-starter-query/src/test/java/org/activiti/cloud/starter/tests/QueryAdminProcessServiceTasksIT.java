@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import static org.activiti.cloud.services.query.model.IntegrationContextEntity.ERROR_MESSAGE_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -50,6 +51,7 @@ import org.activiti.cloud.services.query.app.repository.IntegrationContextReposi
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.model.StringUtils;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
@@ -75,6 +77,8 @@ import org.springframework.test.context.TestPropertySource;
 @DirtiesContext
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class QueryAdminProcessServiceTasksIT {
+
+    private static final String ERROR_MESSAGE = "An error occurred consuming ACS API with inputs {targetFolder={}, action=CREATE_FILE}. Cause: [405] during [GET] to [https://aae-3734-env.envalfresco.com/alfresco/api/-default-/public/alfresco/versions/1/nodes/] [NodesApiClient#getNode(String,List,String,List)]: [{\"error\":{\"errorKey\":\"framework.exception.UnsupportedResourceOperation\",\"statusCode\":405,\"briefSummary\":\"09070282 The operation is unsupported\",\"stackTrace\":\"For security reasons the stack trace is no longer displayed, but the property is kept for previous versions\",\"descriptionURL\":\"https://api-explorer.alfresco.com\"}}]";
 
     private static final String SERVICE_TASK_ELEMENT_ID = "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94";
 
@@ -417,7 +421,7 @@ public class QueryAdminProcessServiceTasksIT {
         });
 
         // and given
-        Throwable cause = new RuntimeException("Runtime Exception");
+        Throwable cause = new RuntimeException(ERROR_MESSAGE);
         CloudBpmnError error = new CloudBpmnError("ERROR_CODE", cause);
 
         eventsAggregator.addEvents(new CloudIntegrationErrorReceivedEventImpl(integrationContext,
@@ -449,7 +453,8 @@ public class QueryAdminProcessServiceTasksIT {
                                                                  SERVICE_TASK_TYPE,
                                                                  IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
                                                                  error.getErrorCode(),
-                                                                 error.getMessage(),
+                                                                 StringUtils.truncate(error.getMessage(),
+                                                                                      ERROR_MESSAGE_LENGTH),
                                                                  error.getClass().getName());
 
             assertThat(responseEntity.getBody().getStackTraceElements()).isNotEmpty();
