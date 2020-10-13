@@ -211,6 +211,7 @@ public class ModelServiceImplTest {
         when(modelTwo.getName()).thenReturn("name");
         when(modelTwo.getType()).thenReturn(modelType.getName());
         when(modelTwo.getScope()).thenReturn(null);
+        when(modelTwo.hasProjects()).thenReturn(true);
         when(modelTwo.getProjects()).thenReturn(Set.of(projectOne));
 
         when(modelOne.getId()).thenReturn("modelOneId");

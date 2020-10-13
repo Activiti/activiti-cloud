@@ -234,6 +234,16 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     }
 
     @Override
+    public boolean hasProjects() {
+        return getProjects() != null && !getProjects().isEmpty();
+    }
+
+    @Override
+    public boolean hasMultipleProjects() {
+        return getProjects() != null && getProjects().size() > 1;
+    }
+
+    @Override
     public List<ModelVersionEntity> getVersions() {
         return versions;
     }

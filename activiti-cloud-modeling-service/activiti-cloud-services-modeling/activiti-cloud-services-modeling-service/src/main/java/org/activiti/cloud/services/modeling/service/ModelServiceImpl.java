@@ -177,7 +177,7 @@ public class ModelServiceImpl implements ModelService{
             model.setScope(ModelScope.PROJECT);
         }
 
-        if(ModelScope.PROJECT.equals(model.getScope()) && model.getProjects()!=null && model.getProjects().size()>1){
+        if(ModelScope.PROJECT.equals(model.getScope()) && model.hasMultipleProjects()){
             throw new ModelScopeIntegrityException(
                 "A model at PROJECT scope can only be associated to one project");
         }
@@ -186,7 +186,7 @@ public class ModelServiceImpl implements ModelService{
     @Override
     public Model updateModel(Model modelToBeUpdated,
                              Model newModel) {
-        if(newModel.getProjects()!= null && !newModel.getProjects().isEmpty()){
+        if(newModel.hasProjects()){
             newModel.getProjects().stream().forEach(project -> checkIfModelNameExistsInProject((Project) project,newModel));
         }
         checkModelScopeIntegrity(newModel);
@@ -507,7 +507,7 @@ public class ModelServiceImpl implements ModelService{
         if(validateUsage) {
             validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, project));
         } else {
-            this.validateModelContent(model, fileContent, project);
+            validateModelContent(model, fileContent, project);
         }
     }
 
@@ -516,7 +516,7 @@ public class ModelServiceImpl implements ModelService{
         if(validateUsage) {
             validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, null));
         } else {
-            this.validateModelContent(model, fileContent);
+            validateModelContent(model, fileContent);
         }
     }
 
