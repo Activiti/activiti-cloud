@@ -24,10 +24,12 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.Task.TaskStatus;
@@ -979,6 +981,14 @@ public class QueryTasksIT {
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
 
+    private ResponseEntity<PagedModel<Task>> executeRequestGetTasks(ProcessInstance processInstance) {
+        return testRestTemplate.exchange("/v1/process-instances/{processInstanceId}/tasks",
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         PAGED_TASKS_RESPONSE_TYPE,
+                                         processInstance.getId());
+    }
+
     private ResponseEntity<Task> executeRequestGetTasksById(String id) {
         return testRestTemplate.exchange(TASKS_URL + "/" + id,
                 HttpMethod.GET,
@@ -1588,6 +1598,32 @@ public class QueryTasksIT {
                 .containsExactly(task1.getId());
         });
 
+    }
+
+    @Test
+    public void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance() {
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+                                                                      "testuser",
+                                                                      runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.iterator().next())
+                .extracting(Task::getName, Task::getCandidateUsers, Task::getCandidateGroups)
+                .contains(task1.getName(), Collections.singletonList("testuser"), Collections.emptyList());
+        });
     }
 
     @Test

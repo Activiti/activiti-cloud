@@ -111,6 +111,8 @@ import org.springframework.test.context.TestPropertySource;
 @ContextConfiguration(initializers ={ RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class AuditServiceIT {
 
+    private static final String ERROR_MESSAGE = "An error occurred consuming ACS API with inputs {targetFolder={}, action=CREATE_FILE}. Cause: [405] during [GET] to [https://aae-3734-env.envalfresco.com/alfresco/api/-default-/public/alfresco/versions/1/nodes/] [NodesApiClient#getNode(String,List,String,List)]: [{\"error\":{\"errorKey\":\"framework.exception.UnsupportedResourceOperation\",\"statusCode\":405,\"briefSummary\":\"09070282 The operation is unsupported\",\"stackTrace\":\"For security reasons the stack trace is no longer displayed, but the property is kept for previous versions\",\"descriptionURL\":\"https://api-explorer.alfresco.com\"}}]";
+
     @Autowired
     private EventsRestTemplate eventsRestTemplate;
 
@@ -1046,7 +1048,7 @@ public class AuditServiceIT {
 
         testEvents.add(cloudIntegrationResultReceivedEvent);
 
-        Error cause = new Error("Error Message");
+        Error cause = new Error(ERROR_MESSAGE);
         CloudBpmnError error = new CloudBpmnError("ERROR_CODE", cause);
 
         CloudIntegrationErrorReceivedEventImpl cloudIntegrationErrorReceivedEvent = new CloudIntegrationErrorReceivedEventImpl(integrationContext,
@@ -1056,6 +1058,7 @@ public class AuditServiceIT {
                                                                                                                                Arrays.asList(error.getCause()
                                                                                                                                                   .getStackTrace()));
         testEvents.add(cloudIntegrationErrorReceivedEvent);
+
 
         return testEvents;
     }

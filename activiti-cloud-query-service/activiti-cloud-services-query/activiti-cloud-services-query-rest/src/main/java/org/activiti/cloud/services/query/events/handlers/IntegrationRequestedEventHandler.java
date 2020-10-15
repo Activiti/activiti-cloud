@@ -24,8 +24,8 @@ import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +37,10 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
     private final static Logger logger = LoggerFactory.getLogger(IntegrationRequestedEventHandler.class);
 
     public IntegrationRequestedEventHandler(IntegrationContextRepository repository,
-                                            BPMNActivityRepository bpmnActivityRepository,
+                                            ServiceTaskRepository serviceTaskRepository,
                                             EntityManager entityManager) {
         super(repository,
-              bpmnActivityRepository,
+              serviceTaskRepository,
               entityManager);
     }
 

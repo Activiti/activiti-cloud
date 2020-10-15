@@ -15,16 +15,19 @@
  */
 package org.activiti.cloud.acc.core.services.query.admin;
 
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import java.util.Map;
+
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 import feign.Headers;
 import feign.Param;
+import feign.QueryMap;
 import feign.RequestLine;
 
 public interface ProcessQueryAdminService {
@@ -42,23 +45,23 @@ public interface ProcessQueryAdminService {
 
     @RequestLine("GET /admin/v1/service-tasks?sort=id,desc")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudBPMNActivity> getServiceTasks();
+    PagedModel<CloudServiceTask> getServiceTasks();
 
-    @RequestLine("GET /admin/v1/service-tasks?{query}")
+    @RequestLine("GET /admin/v1/service-tasks")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudBPMNActivity> getServiceTasksByQuery(@Param("query") String query);
+    PagedModel<CloudServiceTask> getServiceTasks(@QueryMap Map<String, String> queryMap);
 
     @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}")
     @Headers("Content-Type: application/json")
-    CloudBPMNActivity getServiceTaskById(@Param("serviceTaskId") String serviceTaskId);
+    CloudServiceTask getServiceTaskById(@Param("serviceTaskId") String serviceTaskId);
 
     @RequestLine("GET /admin/v1/process-instances/{processInstanceId}/service-tasks")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudBPMNActivity> getServiceTasks(@Param("processInstanceId") String processInstanceId);
+    PagedModel<CloudServiceTask> getServiceTasks(@Param("processInstanceId") String processInstanceId);
 
     @RequestLine("GET /admin/v1/process-instances/{processInstanceId}/service-tasks?status={status}")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudBPMNActivity> getServiceTasksByStatus(@Param("processInstanceId") String processInstanceId,
+    PagedModel<CloudServiceTask> getServiceTasksByStatus(@Param("processInstanceId") String processInstanceId,
                                                           @Param("status") String status);
 
     @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}/integration-context")
