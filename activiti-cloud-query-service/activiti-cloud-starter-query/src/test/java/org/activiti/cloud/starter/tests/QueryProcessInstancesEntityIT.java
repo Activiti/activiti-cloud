@@ -25,6 +25,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.Arrays;
+import java.util.List;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
@@ -576,15 +578,39 @@ public class QueryProcessInstancesEntityIT {
                 .aRunningProcessInstanceWithInitiator("third", "User3");
         eventsAggregator.sendAll();
 
-        shouldGetProcessInstancesFilteredBySingleInitiator(processInstanceInitiatorUser1.getId());
-        shouldGetProcessInstancesFilteredByInitiatorsList(processInstanceInitiatorUser1.getId(),
+        List<String> processInstanceIds = Arrays.asList(processInstanceInitiatorUser1.getId(),
                 processInstanceInitiatorUser2.getId());
+
+        shouldGetProcessInstancesFilteredBySingleValue(processInstanceInitiatorUser1.getId(), "initiator=User1");
+        shouldGetProcessInstancesFilteredByList(processInstanceIds,"initiator=User1,User2");
     }
-    
-    private void shouldGetProcessInstancesFilteredBySingleInitiator(String processId) {
+
+    @Test
+    public void shouldGetProcessInstancesFilteredByAppVersion() {
+
+        ProcessInstance processInstanceAppVersion1 = processInstanceBuilder
+                .aRunningProcessInstanceWithAppVersion("first", "1");
+        ProcessInstance processInstanceAppVersion2 = processInstanceBuilder
+                .aRunningProcessInstanceWithAppVersion("second", "2");
+        ProcessInstance processInstanceAppVersion3 = processInstanceBuilder
+                .aRunningProcessInstanceWithAppVersion("third", "3");
+        eventsAggregator.sendAll();
+        
+        List<String> processInstanceIds = List.of(processInstanceAppVersion1.getId(),
+                processInstanceAppVersion2.getId());
+
+        shouldGetProcessInstancesFilteredBySingleValue(processInstanceAppVersion1.getId(), "appVersion=1" );
+        shouldGetProcessInstancesFilteredByList(processInstanceIds, "appVersion=1,2");
+    }
+
+    private void shouldGetProcessInstancesFilteredBySingleValue(String processId, String queryString) {
+        shouldGetProcessInstancesFilteredByList(List.of(processId), queryString);
+    }
+
+    private void shouldGetProcessInstancesFilteredByList(List<String> processInstanceIds, String queryString) {
         await().untilAsserted(() -> {
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                    .exchange(PROC_URL + "?initiator=User1",
+                    .exchange(PROC_URL + "?" + queryString,
                             HttpMethod.GET,
                             keycloakTokenProducer.entityWithAuthorizationHeader(),
                             PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
@@ -596,27 +622,7 @@ public class QueryProcessInstancesEntityIT {
                     .getBody().getContent();
             assertThat(filteredProcessInstanceEntities)
                     .extracting(ProcessInstanceEntity::getId)
-                    .containsExactly(processId);
-        });
-    }
-    
-    private void shouldGetProcessInstancesFilteredByInitiatorsList(String processIdUser1, String  processIdUser2) {
-        await().untilAsserted(() -> {
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                    .exchange(PROC_URL + "?initiator=User1,User2",
-                            HttpMethod.GET,
-                            keycloakTokenProducer.entityWithAuthorizationHeader(),
-                            PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
-
-            assertThat(responseEntityFiltered).isNotNull();
-            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId)
-                    .containsExactly(processIdUser1,
-                            processIdUser2);
+                    .containsExactly(processInstanceIds.toArray(String[]::new));
         });
     }
 }
