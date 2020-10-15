@@ -574,8 +574,7 @@ public class QueryProcessInstancesEntityIT {
                 .aRunningProcessInstanceWithInitiator("first", "User1");
         ProcessInstance processInstanceInitiatorUser2 = processInstanceBuilder
                 .aRunningProcessInstanceWithInitiator("second", "User2");
-        ProcessInstance processInstanceInitiatorUser3 = processInstanceBuilder
-                .aRunningProcessInstanceWithInitiator("third", "User3");
+        processInstanceBuilder.aRunningProcessInstanceWithInitiator("third", "User3");
         eventsAggregator.sendAll();
 
         List<String> processInstanceIds = Arrays.asList(processInstanceInitiatorUser1.getId(),
@@ -592,8 +591,7 @@ public class QueryProcessInstancesEntityIT {
                 .aRunningProcessInstanceWithAppVersion("first", "1");
         ProcessInstance processInstanceAppVersion2 = processInstanceBuilder
                 .aRunningProcessInstanceWithAppVersion("second", "2");
-        ProcessInstance processInstanceAppVersion3 = processInstanceBuilder
-                .aRunningProcessInstanceWithAppVersion("third", "3");
+        processInstanceBuilder.aRunningProcessInstanceWithAppVersion("third", "3");
         eventsAggregator.sendAll();
         
         List<String> processInstanceIds = List.of(processInstanceAppVersion1.getId(),
