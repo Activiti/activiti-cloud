@@ -1753,4 +1753,65 @@ public class QueryTasksIT {
         });
     }
 
+    @Test
+    public void shouldFilterTasksBySingleCandidateGroupIdOrListOfCandidateGroupIds() {
+
+        //given
+        Task firstTaskWithCandidateGroupInFilter = taskEventContainedBuilder
+            .aTaskWithGroupCandidate("task one",
+                "testgroup",
+                runningProcessInstance);
+        Task taskWithCandidateGroupNotInFilter = taskEventContainedBuilder
+            .aTaskWithGroupCandidate("task two",
+                "testgroup2",
+                runningProcessInstance);
+        Task secondTaskWithCandidateGroupInFilter = taskEventContainedBuilder
+            .aTaskWithTwoGroupCandidates("task three",
+                "hrgroup", "testgroup4",
+                runningProcessInstance, "testuser");
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        //query for single candidate groudId
+        await().untilAsserted(() -> {
+
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?candidateGroupId=testgroup",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getId)
+                .containsExactly(firstTaskWithCandidateGroupInFilter.getId());
+        });
+
+        //query for multiple candidate groudIds
+        await().untilAsserted(() -> {
+
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?candidateGroupId=testgroup,hrgroup",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getId)
+                .containsExactly(firstTaskWithCandidateGroupInFilter.getId(),
+                    secondTaskWithCandidateGroupInFilter.getId());
+        });
+
+    }
+
 }
