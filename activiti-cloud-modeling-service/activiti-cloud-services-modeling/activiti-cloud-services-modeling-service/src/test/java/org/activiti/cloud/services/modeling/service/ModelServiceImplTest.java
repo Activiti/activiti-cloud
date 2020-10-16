@@ -344,7 +344,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_updateModelSuccessfully_when_updatingAValidModel() {
+    public void should_updateModelSuccessfully_when_updatingAValidModelWithProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
@@ -358,6 +358,28 @@ public class ModelServiceImplTest {
         modelService.updateModel(modelTwo, modelTwo);
 
         verify(modelRepository).updateModel(modelTwo,modelTwo);
+    }
+
+    @Test
+    public void should_updateModelSuccessfully_when_updatingAValidModelWithoutProject() {
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+
+        when(modelOne.getId()).thenReturn("modelOneId");
+        when(modelOne.getName()).thenReturn("name");
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.empty());
+
+        Model modelThree = new ModelImpl();
+        modelThree.setId("modelThreeId");
+        modelThree.setName("name");
+        modelThree.setType(modelType.getName());
+
+        when(modelRepository.updateModel(modelThree, modelThree)).thenReturn(modelThree);
+
+        modelService.updateModel(modelThree, modelThree);
+
+        verify(modelRepository).updateModel(modelThree,modelThree);
     }
 
     private ModelImpl createModelImpl() {
