@@ -507,7 +507,7 @@ public class ModelServiceImpl implements ModelService{
         if(validateUsage) {
             validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, project));
         } else {
-            validateModelContent(model, fileContent, project);
+            this.validateModelContent(model, fileContent, project);
         }
     }
 
@@ -516,7 +516,7 @@ public class ModelServiceImpl implements ModelService{
         if(validateUsage) {
             validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, null));
         } else {
-            validateModelContent(model, fileContent);
+            this.validateModelContent(model, fileContent);
         }
     }
 

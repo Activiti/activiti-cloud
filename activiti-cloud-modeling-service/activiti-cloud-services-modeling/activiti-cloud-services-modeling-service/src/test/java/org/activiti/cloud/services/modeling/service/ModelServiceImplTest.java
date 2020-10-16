@@ -86,13 +86,7 @@ public class ModelServiceImplTest {
     private Model modelOne;
 
     @Mock
-    private Model modelTwo;
-
-    @Mock
     private BpmnModel bpmnModelOne;
-
-    @Mock
-    private Project projectOne;
 
     @Mock
     private FlowElement flowElementOne;
@@ -112,14 +106,31 @@ public class ModelServiceImplTest {
     @Mock
     public Set<ModelUpdateListener> modelUpdateListeners;
 
+    private Model modelTwo;
+
+    private Project projectOne;
+
+    private ProcessModelType modelType;
+
     @BeforeEach
     public void setUp() {
         initMocks(this);
+
+        projectOne = new ProjectImpl();
+        projectOne.setId("projectOneId");
+        projectOne.setName("projectOne");
+
+        modelType = new ProcessModelType();
+        modelTwo = new ModelImpl();
+        modelTwo.setId("modelTwoId");
+        modelTwo.setName("name");
+        modelTwo.setType(modelType.getName());
+        modelTwo.setScope(ModelScope.PROJECT);
+        modelTwo.addProject(projectOne);
     }
 
     @Test
     public void should_returnTasksInAProjectByModelTypeAndTaskType() throws IOException, XMLStreamException {
-        ProcessModelType modelType = new ProcessModelType();
         UserTask userTaskOne = new UserTask();
         UserTask userTaskTwo = new UserTask();
         UserTask userTaskThree = new UserTask();
@@ -145,8 +156,6 @@ public class ModelServiceImplTest {
 
     @Test
     public void should_returnException_when_classTypeIsNotSpecified() {
-        ProcessModelType modelType = new ProcessModelType();
-
         assertThatThrownBy(() -> modelService.getTasksBy(projectOne, modelType, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Class task type it must not be null");
@@ -154,7 +163,6 @@ public class ModelServiceImplTest {
 
     @Test
     public void should_returnProcessesInAProjectByTypeAndModelType() throws IOException, XMLStreamException {
-        ProcessModelType modelType = new ProcessModelType();
         Page page = new PageImpl(asList(modelOne));
         Process processOne = new Process();
 
@@ -173,7 +181,6 @@ public class ModelServiceImplTest {
 
     @Test
     public void should_returnProcessExtensionsFileForTheModelGiven() throws IOException, XMLStreamException {
-        ProcessModelType modelType = new ProcessModelType();
         ModelImpl extensionModelImpl = createModelImpl();
         when(modelRepository.getModelType()).thenReturn(ModelImpl.class);
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
@@ -188,15 +195,13 @@ public class ModelServiceImplTest {
 
     @Test
     public void should_throwModelNameConflictException_when_creatingAModelWithSameNameInAProject() {
-        ProcessModelType modelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelOne));
-        when(modelTwo.getId()).thenReturn("modelTwoId");
-        when(modelTwo.getName()).thenReturn("name");
-        when(modelTwo.getType()).thenReturn(modelType.getName());
+
         when(modelOne.getId()).thenReturn("modelOneId");
         when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
+
 
         assertThatThrownBy(() -> modelService.createModel(projectOne, modelTwo))
             .isInstanceOf(ModelNameConflictException.class);
@@ -204,15 +209,7 @@ public class ModelServiceImplTest {
 
     @Test
     public void should_throwModelNameConflictException_when_updatingAModelWithSameNameInAProject() {
-        ProcessModelType modelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
-
-        when(modelTwo.getId()).thenReturn("modelTwoId");
-        when(modelTwo.getName()).thenReturn("name");
-        when(modelTwo.getType()).thenReturn(modelType.getName());
-        when(modelTwo.getScope()).thenReturn(null);
-        when(modelTwo.hasProjects()).thenReturn(true);
-        when(modelTwo.getProjects()).thenReturn(Set.of(projectOne));
 
         when(modelOne.getId()).thenReturn("modelOneId");
         when(modelOne.getName()).thenReturn("name");
@@ -248,7 +245,6 @@ public class ModelServiceImplTest {
 
     @Test
     public void should_throwException_when_validatingAnInvalidModelContentInProjectContext() throws Exception {
-        ProcessModelType modelType = new ProcessModelType();
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
@@ -263,7 +259,6 @@ public class ModelServiceImplTest {
     public void should_throwException_when_validatingAnInvalidModelContentFileInProjectContext() throws Exception {
         FileContent fileContent = new FileContent("testFile.txt", "txt", "".getBytes());
 
-        ProcessModelType modelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelOne.getType()).thenReturn(modelType.getName());
 
@@ -279,7 +274,6 @@ public class ModelServiceImplTest {
     public void should_throwException_when_validatingAnInvalidJSONModelContentFileInProjectContext() throws Exception {
         FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
 
-        ProcessModelType modelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelOne.getType()).thenReturn(modelType.getName());
 
@@ -293,7 +287,6 @@ public class ModelServiceImplTest {
 
     @Test
     public void should_throwException_when_validatingAnInvalidModelExtensionsInProjectContext() throws Exception {
-        ProcessModelType modelType = new ProcessModelType();
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelExtensionsService.findExtensionsValidators(modelType.getName())).thenReturn(List.of(modelExtensionsValidator));
@@ -324,7 +317,6 @@ public class ModelServiceImplTest {
     public void should_throwException_when_validatingAnInvalidJSONModelExtensionsFileInProjectContext() throws Exception {
         FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
 
-        ProcessModelType modelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelOne.getType()).thenReturn(modelType.getName());
 
@@ -338,15 +330,10 @@ public class ModelServiceImplTest {
 
     @Test
     public void should_allowModelsWithAndWithoutProject_when_creatingAModelWithProject() {
-        ProcessModelType modelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelTwo));
         when(modelRepository.createModel(modelTwo)).thenReturn(modelTwo);
         when(modelRepository.createModel(modelOne)).thenReturn(modelOne);
-
-        when(modelTwo.getId()).thenReturn("modelTwoId");
-        when(modelTwo.getName()).thenReturn("name");
-        when(modelTwo.getType()).thenReturn(modelType.getName());
 
         when(modelOne.getId()).thenReturn("modelOneId");
         when(modelOne.getName()).thenReturn("name");
@@ -354,6 +341,23 @@ public class ModelServiceImplTest {
 
         assertThat( modelService.createModel(projectOne, modelTwo)).isEqualTo(modelTwo);
         assertThat( modelService.createModel(null, modelOne)).isEqualTo(modelOne);
+    }
+
+    @Test
+    public void should_updateModelSuccessfully_when_updatingAValidModel() {
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+
+        when(modelOne.getId()).thenReturn("modelOneId");
+        when(modelOne.getName()).thenReturn("name");
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.empty());
+
+        when(modelRepository.updateModel(modelTwo, modelTwo)).thenReturn(modelTwo);
+
+        modelService.updateModel(modelTwo, modelTwo);
+
+        verify(modelRepository).updateModel(modelTwo,modelTwo);
     }
 
     private ModelImpl createModelImpl() {
