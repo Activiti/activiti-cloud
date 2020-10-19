@@ -3,6 +3,7 @@ install: true
 cache:
   directories:
   - "${HOME}/.m2/repository"
+  
 stages:
 - name: activiti-cloud-build
 - name: activiti-cloud-api
