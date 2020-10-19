@@ -4,7 +4,7 @@ cache:
   directories:
   - "${HOME}/.m2/repository"
 stages:
-- name: activiti-cloud-build
+- name: build all
 - name: activiti-cloud-api
 - name: activiti-cloud-service-common
 - name: activiti-cloud-acceptance-tests
@@ -13,9 +13,9 @@ stages:
   if: type != pull_request
 jobs:
   include:
-  - name: activiti-cloud-build
-    stage: activiti-cloud-build
-    script: travis_wait 120 ${MAVEN_CMD} -N && ${MAVEN_CMD} -f activiti-cloud-build/pom.xml
+  - name: build all
+    stage: build all
+    script: mvn clean install -B -DinstallAtEnd=true -DskipTests
   - name: activiti-cloud-api
     stage: activiti-cloud-api
     script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-api/pom.xml
