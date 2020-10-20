@@ -58,7 +58,6 @@ import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -373,7 +372,6 @@ public class QueryTasksIT {
         return executeGetTasksWithVariable(ADMIN_TASKS_URL, variableName, variableValue, status);
     }
 
-    @NotNull
     private <T> Collection<Task> executeGetTasksWithVariable(String tasksUrl, String variableName,
         T variableValue, TaskStatus status) {
         ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
