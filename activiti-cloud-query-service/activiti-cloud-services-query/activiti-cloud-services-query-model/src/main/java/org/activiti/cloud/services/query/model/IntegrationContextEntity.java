@@ -51,6 +51,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 })
 public class IntegrationContextEntity extends ActivitiEntityMetadata implements CloudIntegrationContext {
 
+    public static final int ERROR_MESSAGE_LENGTH = 255;
+
     @Id
     private String id;
 
@@ -85,6 +87,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     private String errorCode;
 
+    @Column(length = ERROR_MESSAGE_LENGTH)
     private String errorMessage;
 
     private String errorClassName;
@@ -100,7 +103,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")
-    private BPMNActivityEntity bpmnActivity;
+    private ServiceTaskEntity serviceTask;
 
     public IntegrationContextEntity() {
         this.id = UUID.randomUUID().toString();
@@ -278,7 +281,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+        this.errorMessage = StringUtils.truncate(errorMessage, ERROR_MESSAGE_LENGTH);
     }
 
     @Override
@@ -452,22 +455,22 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
 
-    public BPMNActivityEntity getBpmnActivity() {
-        return bpmnActivity;
+    public ServiceTaskEntity getServiceTask() {
+        return serviceTask;
     }
 
 
-    public void setBpmnActivity(BPMNActivityEntity bpmnActivity) {
-        if (bpmnActivity == null) {
-            if (this.bpmnActivity != null) {
-                this.bpmnActivity.setIntegrationContext(null);
+    public void setServiceTask(ServiceTaskEntity serviceTask) {
+        if (serviceTask == null) {
+            if (this.serviceTask != null) {
+                this.serviceTask.setIntegrationContext(null);
             }
         }
         else {
-            bpmnActivity.setIntegrationContext(this);
+            serviceTask.setIntegrationContext(this);
         }
 
-        this.bpmnActivity = bpmnActivity;
+        this.serviceTask = serviceTask;
     }
 
     @Override
@@ -520,5 +523,4 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
                        .map(it -> (T) it.get(name))
                        .orElse(null);
     }
-
 }

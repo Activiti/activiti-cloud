@@ -15,13 +15,20 @@
  */
 package org.activiti.cloud.acc.core.services.query.admin;
 
-import feign.Headers;
-import feign.RequestLine;
+import java.util.Map;
+
+import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+
+import feign.Headers;
+import feign.Param;
+import feign.QueryMap;
+import feign.RequestLine;
 
 public interface ProcessQueryAdminService {
 
@@ -35,4 +42,29 @@ public interface ProcessQueryAdminService {
 
     @RequestLine("DELETE /admin/v1/process-instances")
     CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances();
+
+    @RequestLine("GET /admin/v1/service-tasks?sort=id,desc")
+    @Headers("Content-Type: application/json")
+    PagedModel<CloudServiceTask> getServiceTasks();
+
+    @RequestLine("GET /admin/v1/service-tasks")
+    @Headers("Content-Type: application/json")
+    PagedModel<CloudServiceTask> getServiceTasks(@QueryMap Map<String, String> queryMap);
+
+    @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}")
+    @Headers("Content-Type: application/json")
+    CloudServiceTask getServiceTaskById(@Param("serviceTaskId") String serviceTaskId);
+
+    @RequestLine("GET /admin/v1/process-instances/{processInstanceId}/service-tasks")
+    @Headers("Content-Type: application/json")
+    PagedModel<CloudServiceTask> getServiceTasks(@Param("processInstanceId") String processInstanceId);
+
+    @RequestLine("GET /admin/v1/process-instances/{processInstanceId}/service-tasks?status={status}")
+    @Headers("Content-Type: application/json")
+    PagedModel<CloudServiceTask> getServiceTasksByStatus(@Param("processInstanceId") String processInstanceId,
+                                                          @Param("status") String status);
+
+    @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}/integration-context")
+    @Headers("Content-Type: application/json")
+    CloudIntegrationContext getCloudIntegrationContext(@Param("serviceTaskId") String serviceTaskId);
 }

@@ -16,13 +16,12 @@
 package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
+import org.activiti.cloud.services.query.model.QServiceTaskEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.predicate.ServiceTasksFilter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
@@ -45,46 +44,44 @@ import com.querydsl.core.types.Predicate;
         })
 public class ServiceTaskAdminController {
 
-    private final BPMNActivityRepository bpmnActivityRepository;
+    private final ServiceTaskRepository serviceTaskRepository;
 
-    private final ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;
+    private final ServiceTaskRepresentationModelAssembler representationModelAssembler;
 
-    private final AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler;
 
     private final EntityFinder entityFinder;
 
 
-    public ServiceTaskAdminController(BPMNActivityRepository bpmnActivityRepository,
-                                      ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                      AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler,
+    public ServiceTaskAdminController(ServiceTaskRepository serviceTaskRepository,
+                                      ServiceTaskRepresentationModelAssembler representationModelAssembler,
+                                      AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler,
                                       EntityFinder entityFinder) {
-        this.bpmnActivityRepository = bpmnActivityRepository;
-        this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
+        this.serviceTaskRepository = serviceTaskRepository;
+        this.representationModelAssembler = representationModelAssembler;
         this.entityFinder = entityFinder;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudBPMNActivity>> findAll(@QuerydslPredicate(root = BPMNActivityEntity.class) Predicate predicate,
-                                                              Pageable pageable) {
-
-        Predicate filter = new ServiceTasksFilter().extend(predicate);
+    public PagedModel<EntityModel<CloudServiceTask>> findAll(@QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
+                                                             Pageable pageable) {
 
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                     bpmnActivityRepository.findAll(filter,
-                                                                                    pageable),
-                                                     taskRepresentationModelAssembler);
+                                                     serviceTaskRepository.findAll(predicate,
+                                                                                   pageable),
+                                                     representationModelAssembler);
     }
 
     @RequestMapping(value = "/{serviceTaskId}", method = RequestMethod.GET)
-    public EntityModel<CloudBPMNActivity> findById(@PathVariable String serviceTaskId) {
+    public EntityModel<CloudServiceTask> findById(@PathVariable String serviceTaskId) {
 
-        Predicate filter = new ServiceTasksFilter().extend(QBPMNActivityEntity.bPMNActivityEntity.id.eq(serviceTaskId));
+        Predicate filter = QServiceTaskEntity.serviceTaskEntity.id.eq(serviceTaskId);
 
-        BPMNActivityEntity entity = entityFinder.findOne(bpmnActivityRepository,
-                                                         filter,
-                                                         "Unable to find service task entity for the given id:'" + serviceTaskId + "'");
+        ServiceTaskEntity entity = entityFinder.findOne(serviceTaskRepository,
+                                                        filter,
+                                                        "Unable to find service task entity for the given id:'" + serviceTaskId + "'");
 
-        return taskRepresentationModelAssembler.toModel(entity);
+        return representationModelAssembler.toModel(entity);
     }
 }

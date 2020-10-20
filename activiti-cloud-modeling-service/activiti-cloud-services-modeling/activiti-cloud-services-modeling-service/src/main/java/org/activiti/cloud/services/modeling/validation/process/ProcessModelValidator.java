@@ -16,15 +16,12 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.xml.stream.XMLStreamException;
-
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
@@ -73,7 +70,7 @@ public class ProcessModelValidator implements ModelContentValidator {
 
         if (!validationErrors.isEmpty()) {
             String messageError = "Semantic process model validation errors encountered: " + validationErrors;
-            log.error(messageError);
+            log.debug(messageError);
             throw new SemanticModelValidationException(messageError,
                                                        validationErrors);
         }
@@ -87,7 +84,7 @@ public class ProcessModelValidator implements ModelContentValidator {
                     .filter(XMLStreamException.class::isInstance)
                     .orElse(ex);
             String messageError = "Syntactic process model XML validation errors encountered: " + errorCause;
-            log.error(messageError);
+            log.debug(messageError);
             throw new SyntacticModelValidationException(messageError,
                                                         errorCause);
         }

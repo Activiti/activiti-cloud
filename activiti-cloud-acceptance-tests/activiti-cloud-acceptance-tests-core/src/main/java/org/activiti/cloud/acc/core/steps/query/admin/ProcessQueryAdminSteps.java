@@ -18,19 +18,24 @@ package org.activiti.cloud.acc.core.steps.query.admin;
 import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import net.thucydides.core.annotations.Step;
+import java.util.Map;
+
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminDiagramService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService;
 import org.activiti.cloud.acc.shared.service.BaseService;
+import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+
+import net.thucydides.core.annotations.Step;
 
 @EnableRuntimeFeignContext
 public class ProcessQueryAdminSteps {
@@ -89,5 +94,31 @@ public class ProcessQueryAdminSteps {
     @Step
     public void checkProcessInstanceNoDiagram(String diagram) {
         assertThat(diagram).isEmpty();
+    }
+    @Step
+    public PagedModel<CloudServiceTask> getServiceTasks() {
+        return processQueryAdminService.getServiceTasks();
+    }
+    @Step
+    public PagedModel<CloudServiceTask> getServiceTasksByQuery(Map<String, String> queryMap) {
+        return processQueryAdminService.getServiceTasks(queryMap);
+    }
+    @Step
+    public CloudServiceTask getServiceTaskById(String serviceTaskId) {
+        return processQueryAdminService.getServiceTaskById(serviceTaskId);
+    }
+    @Step
+    public PagedModel<CloudServiceTask> getServiceTasks(String processInstanceId) {
+        return processQueryAdminService.getServiceTasks(processInstanceId);
+    }
+    @Step
+    public PagedModel<CloudServiceTask> getServiceTasksByStatus(String processInstanceId,
+                                                                 String status) {
+        return processQueryAdminService.getServiceTasksByStatus(processInstanceId,
+                                                                status);
+    }
+    @Step
+    public CloudIntegrationContext getCloudIntegrationContext(String serviceTaskId) {
+        return processQueryAdminService.getCloudIntegrationContext(serviceTaskId);
     }
 }

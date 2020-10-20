@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static org.activiti.cloud.services.query.model.QBPMNActivityEntity.bPMNActivityEntity;
+import static org.activiti.cloud.services.query.model.QServiceTaskEntity.serviceTaskEntity;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.predicate.ServiceTasksFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,29 +48,29 @@ public class ProcessInstanceServiceTasksAdminController {
 
     private final ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
-    private final AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler;
 
-    private final BPMNActivityRepository taskRepository;
+    private final ServiceTaskRepository taskRepository;
 
     @Autowired
-    public ProcessInstanceServiceTasksAdminController(BPMNActivityRepository taskRepository,
+    public ProcessInstanceServiceTasksAdminController(ServiceTaskRepository taskRepository,
                                                       ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                                      AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedCollectionModelAssembler) {
+                                                      AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler) {
         this.taskRepository = taskRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
     @RequestMapping(value = "/service-tasks", method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudBPMNActivity>> getTasks(@PathVariable String processInstanceId,
-                                                               @QuerydslPredicate(root = BPMNActivityEntity.class) Predicate predicate,
-                                                               Pageable pageable) {
+    public PagedModel<EntityModel<CloudServiceTask>> getTasks(@PathVariable String processInstanceId,
+                                                              @QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
+                                                              Pageable pageable) {
 
-        Predicate filter = new ServiceTasksFilter().extend(bPMNActivityEntity.processInstanceId.eq(processInstanceId)
-                                                                                               .and(predicate));
+        Predicate filter = serviceTaskEntity.processInstanceId.eq(processInstanceId)
+                                                              .and(predicate);
 
-        Page<BPMNActivityEntity> page = taskRepository.findAll(filter,
-                                                               pageable);
+        Page<ServiceTaskEntity> page = taskRepository.findAll(filter,
+                                                              pageable);
         return pagedCollectionModelAssembler.toModel(pageable,
                                                      page,
                                                      taskRepresentationModelAssembler);
