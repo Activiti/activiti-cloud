@@ -19,7 +19,9 @@ stages:
 - name: tag_deploy_updatebot
   if: type != pull_request
 
+before_install: pip install --user awscli
 before_script: aws s3 sync ${S3_M2_REPOSITORY_DIR} ${M2_REPOSITORY_DIR} --quiet
+
 jobs:
   include:
   - name: build
