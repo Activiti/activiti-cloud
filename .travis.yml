@@ -14,7 +14,7 @@ jobs:
   include:
   - name: build
     stage: build
-    script: mvn clean install -B -DinstallAtEnd=true -DskipTests -DskipSwaggerGen
+    script: mvn clean install -B -DskipTests -DskipSwaggerGen
   - name: activiti-cloud-api
     stage: test
     script: ${MAVEN_TEST_CMD} -f activiti-cloud-api/pom.xml
