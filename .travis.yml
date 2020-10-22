@@ -29,7 +29,6 @@ jobs:
     script: |
       (
       set -e
-      thisShouldFailAndStopWithoutCallingNextCommand
       mvn clean install -B -DskipTests -DskipSwaggerGen
       aws s3 sync ${M2_REPOSITORY_DIR} ${S3_M2_REPOSITORY_DIR} --quiet --exclude "*" --include "org/activiti/*SNAPSHOT*" --exclude "*javadoc.jar*" --exclude "*sources.jar*"
       )
