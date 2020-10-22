@@ -1,5 +1,5 @@
 import: Activiti/activiti-scripts:.travis.java.yml@master
-
+install: skip
 before_cache:
   #  do not cache snapshots as they will come from AWS S3
   - find ${M2_REPOSITORY_DIR} -type d -name "*SNAPSHOT" -exec rm -rf {} +
