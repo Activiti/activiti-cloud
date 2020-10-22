@@ -12,7 +12,7 @@ env:
     - M2_REPOSITORY_DIR=${HOME}/.m2/repository
     - MAVEN_TEST_CMD="mvn clean verify -B -DinstallAtEnd=true"
     - S3_M2_REPOSITORY_DIR=${S3_BASE_DIR}/act-cloud/m2/repo/${TRAVIS_BUILD_ID}
-    - S3_JACCO_DIR=${S3_BASE_DIR}}/act-cloud/jacoco/${TRAVIS_BUILD_ID}
+    - S3_JACCO_DIR=${S3_BASE_DIR}/act-cloud/jacoco/${TRAVIS_BUILD_ID}
 stages:
 - name: build
 - name: test
