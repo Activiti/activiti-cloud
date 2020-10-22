@@ -26,9 +26,13 @@ jobs:
   include:
   - name: build
     stage: build
-    script:
-      - mvn clean install -B -DskipTests -DskipSwaggerGen
-      - aws s3 sync ${M2_REPOSITORY_DIR} ${S3_M2_REPOSITORY_DIR} --quiet --exclude "*" --include "org/activiti/*SNAPSHOT*" --exclude "*javadoc.jar*" --exclude "*sources.jar*"
+    script: |
+      (
+      set -e
+      thisShouldFailAndStopWithoutCallingNextCommand
+      mvn clean install -B -DskipTests -DskipSwaggerGen
+      aws s3 sync ${M2_REPOSITORY_DIR} ${S3_M2_REPOSITORY_DIR} --quiet --exclude "*" --include "org/activiti/*SNAPSHOT*" --exclude "*javadoc.jar*" --exclude "*sources.jar*"
+      )
   - name: activiti-cloud-api
     stage: test
     script: ${MAVEN_TEST_CMD} -f activiti-cloud-api/pom.xml
