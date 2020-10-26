@@ -131,7 +131,7 @@ public class QueryTaskEntityVariablesIT {
 
         variableEventContainedBuilder.anUpdatedVariable("varUpdated",
             "v2-up",
-            "string")
+            "beforeUpdateValue", "string")
             .onTask(task);
 
         variableEventContainedBuilder.aDeletedVariable("varDeleted",
@@ -284,10 +284,7 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldGetTaskVariablesAfterTaskCompleted() {
         //given
-        VariableInstanceImpl<String> var = new VariableInstanceImpl<>("var",
-            "string",
-            "value",
-            null);
+        VariableInstanceImpl<String> var = buildVariable("var", "string", "value");
         var.setTaskId(task.getId());
 
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
@@ -342,10 +339,7 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldNotCreateTaskVariableWithSameName() {
         //given
-        VariableInstanceImpl<String> var = new VariableInstanceImpl<>("varCreated",
-            "string",
-            "value",
-            null);
+        VariableInstanceImpl<String> var = buildVariable("varCreated", "string", "value");
         var.setTaskId(task.getId());
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
 
@@ -370,10 +364,7 @@ public class QueryTaskEntityVariablesIT {
                 );
         });
 
-        var = new VariableInstanceImpl<>("varCreated",
-            "string",
-            "new value",
-            null);
+        var = buildVariable("varCreated", "string", "new value");
         var.setTaskId(task.getId());
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
 
@@ -403,10 +394,7 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldReCreateVariableAfterItWasDeleted() {
         //given
-        VariableInstanceImpl<String> var = new VariableInstanceImpl<>("var",
-            "string",
-            "value",
-            null);
+        VariableInstanceImpl<String> var = buildVariable("var", "string", "value");
         var.setTaskId(task.getId());
 
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
@@ -444,10 +432,7 @@ public class QueryTaskEntityVariablesIT {
         });
 
         //Create a variable with the same name
-        var = new VariableInstanceImpl<>("var",
-            "string",
-            "new value",
-            null);
+        var = buildVariable("var", "string", "new value");
         var.setTaskId(task.getId());
         producer.send(new CloudVariableCreatedEventImpl(var));
 
@@ -469,6 +454,10 @@ public class QueryTaskEntityVariablesIT {
                 );
         });
 
+    }
+
+    private static <T> VariableInstanceImpl<T> buildVariable(String name, String type, T value) {
+        return new VariableInstanceImpl<>(name, type, value, null, null);
     }
 
 

@@ -114,7 +114,7 @@ public class QueryAdminVariablesIT {
         //given
         variableEventContainedBuilder.anUpdatedVariable("varUpdated",
                                                         "v2-up",
-                                                        "string")
+            "beforeUpdateValue", "string")
                 .onProcessInstance(runningProcessInstance);
 
         variableEventContainedBuilder.aDeletedVariable("varDeleted",
@@ -161,7 +161,7 @@ public class QueryAdminVariablesIT {
                 .onTask(task);
         variableEventContainedBuilder.anUpdatedVariable("varUpdated",
                                                         "v2-up",
-                                                        "string")
+            "beforeUpdateValue", "string")
                 .onTask(task);
 
         eventsAggregator.sendAll();

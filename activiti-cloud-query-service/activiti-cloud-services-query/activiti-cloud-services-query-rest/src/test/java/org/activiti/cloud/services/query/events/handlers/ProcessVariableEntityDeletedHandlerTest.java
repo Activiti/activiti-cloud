@@ -80,9 +80,8 @@ public class ProcessVariableEntityDeletedHandlerTest {
         verify(variableRepository).delete(variableEntity);
     }
 
-    private CloudVariableDeletedEvent buildVariableDeletedEvent() {
-        return new CloudVariableDeletedEventImpl(new VariableInstanceImpl<>("var", "string", "test",
-                                                                            UUID.randomUUID().toString()));
+    private static CloudVariableDeletedEvent buildVariableDeletedEvent() {
+        return new CloudVariableDeletedEventImpl(new VariableInstanceImpl<>("var", "string", "test", "procInstId", null));
     }
 
 }
