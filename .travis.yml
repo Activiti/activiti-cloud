@@ -1,67 +1,52 @@
-import: Activiti/activiti-scripts:.travis.java.yml@master
+import:
+  - source: Activiti/activiti-scripts:.travis.java.yml@master
+  - source: Activiti/activiti-scripts:.travis.awscli-install.yml@dev-elias-restructure-pipeline
+  - source: Activiti/activiti-scripts:.travis.maven-s3-config.yml@dev-elias-restructure-pipeline
 install: skip
-before_cache:
-  #  do not cache snapshots as they will come from AWS S3
-  - find ${M2_REPOSITORY_DIR} -type d -name "*SNAPSHOT" -exec rm -rf {} +
 cache:
   directories:
   - "${HOME}/.m2/repository"
 env:
   global:
-    - M2_REPOSITORY_DIR=${HOME}/.m2/repository
-    - MAVEN_TEST_CMD="mvn clean verify -B -DinstallAtEnd=true"
-    - S3_M2_REPOSITORY_DIR=${S3_BASE_DIR}/act-cloud/m2/repo/${TRAVIS_BUILD_ID}
-    - S3_JACCO_DIR=${S3_BASE_DIR}/act-cloud/jacoco/${TRAVIS_BUILD_ID}
+    - MAVEN_VERIFY_CMD="mvn verify -B -DinstallAtEnd=true"
 stages:
-- name: build
 - name: test
 - name: publish reports
 - name: tag_deploy_updatebot
   if: type != pull_request
 
-before_install: pip install --user awscli
-before_script: aws s3 sync ${S3_M2_REPOSITORY_DIR} ${M2_REPOSITORY_DIR} --quiet
-
 jobs:
   include:
-  - name: build
-    stage: build
-    script: |
-      (
-      set -e
-      mvn clean install -B -DskipTests -DskipSwaggerGen
-      aws s3 sync ${M2_REPOSITORY_DIR} ${S3_M2_REPOSITORY_DIR} --quiet --exclude "*" --include "org/activiti/*SNAPSHOT*" --exclude "*javadoc.jar*" --exclude "*sources.jar*"
-      )
   - name: activiti-cloud-api
     stage: test
-    script: ${MAVEN_TEST_CMD} -f activiti-cloud-api/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-api/pom.xml
   - name: activiti-cloud-service-common
     stage: test
-    script: ${MAVEN_TEST_CMD} -f activiti-cloud-service-common/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-service-common/pom.xml
   - name: activiti-cloud-acceptance-tests
     stage: test
-    script: ${MAVEN_TEST_CMD} -f activiti-cloud-acceptance-tests/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-acceptance-tests/pom.xml
   - name: activiti-cloud-runtime-bundle-service
     stage: test
-    script: ${MAVEN_TEST_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml
   - name: activiti-cloud-messages-service
     stage: test
-    script: ${MAVEN_TEST_CMD} -f activiti-cloud-messages-service/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-messages-service/pom.xml
   - name: activiti-cloud-query-service
     stage: test
-    script: ${MAVEN_TEST_CMD} -f activiti-cloud-query-service/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-query-service/pom.xml
   - name: activiti-cloud-notifications-graphql-service
     stage: test
-    script: ${MAVEN_TEST_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
   - name: activiti-cloud-audit-service
     stage: test
-    script: travis_wait 120 ${MAVEN_TEST_CMD} -f activiti-cloud-audit-service/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-audit-service/pom.xml
   - name: activiti-cloud-modeling-service
-    script: travis_wait 120 ${MAVEN_TEST_CMD} -f activiti-cloud-modeling-service/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-modeling-service/pom.xml
     stage: test
   - name: activiti-cloud-connectors
     stage: test
-    script: ${MAVEN_TEST_CMD} -f activiti-cloud-connectors/pom.xml
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-connectors/pom.xml
   - name: publish reports
     stage: publish reports
     before_script: aws s3 sync ${S3_JACCO_DIR} .
