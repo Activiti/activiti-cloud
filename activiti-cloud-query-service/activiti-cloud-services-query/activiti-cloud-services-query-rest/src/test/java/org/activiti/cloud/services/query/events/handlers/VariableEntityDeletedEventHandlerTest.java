@@ -61,7 +61,7 @@ public class VariableEntityDeletedEventHandlerTest {
         return new VariableInstanceImpl<>("var",
                                           "v1",
                                           "string",
-                                          UUID.randomUUID().toString(), null);
+                                          "procInstId", null);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class VariableEntityDeletedEventHandlerTest {
     }
 
     private static VariableInstanceImpl<String> buildVariableWithTaskId() {
-        return new VariableInstanceImpl<>("var", "v1", "string", UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        return new VariableInstanceImpl<>("var", "v1", "string", "procInstId", "taskId");
     }
 
     @Test

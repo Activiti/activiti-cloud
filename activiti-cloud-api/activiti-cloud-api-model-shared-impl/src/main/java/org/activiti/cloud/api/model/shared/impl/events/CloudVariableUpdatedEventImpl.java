@@ -31,12 +31,9 @@ public class CloudVariableUpdatedEventImpl<T> extends CloudVariableEventImpl imp
         this.previousValue = previousValue;
     }
 
-    public CloudVariableUpdatedEventImpl(String id,
-                                         Long timestamp,
-                                         VariableInstance entity) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudVariableUpdatedEventImpl(String id, Long timestamp, VariableInstance entity, T previousValue) {
+        super(id, timestamp, entity);
+        this.previousValue = previousValue;
     }
 
     @Override
