@@ -101,7 +101,7 @@ public class QueryProcessInstanceEntityVariablesIT {
 
         variableEventContainedBuilder.anUpdatedVariable("varUpdated",
                                                         "v2-up",
-                                                        "string")
+            "beforeUpdateValue", "string")
                 .onProcessInstance(runningProcessInstance);
 
         variableEventContainedBuilder.aDeletedVariable("varDeleted",
