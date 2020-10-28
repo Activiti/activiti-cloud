@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
 import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
@@ -43,7 +44,11 @@ public class VariableUpdatedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         VariableUpdatedEventEntity variableUpdatedEventEntity = (VariableUpdatedEventEntity) auditEventEntity;
 
-        return new CloudVariableUpdatedEventImpl<>(variableUpdatedEventEntity.getEventId(), variableUpdatedEventEntity.getTimestamp(),
-            variableUpdatedEventEntity.getVariableInstance(), variableUpdatedEventEntity.getPreviousValue().getValue());
+        String eventId = variableUpdatedEventEntity.getEventId();
+        Long timestamp = variableUpdatedEventEntity.getTimestamp();
+        VariableInstance variableInstance = variableUpdatedEventEntity.getVariableInstance();
+        Object previousValue = variableUpdatedEventEntity.getPreviousValue() != null ?
+            variableUpdatedEventEntity.getPreviousValue().getValue() : null;
+        return new CloudVariableUpdatedEventImpl<>(eventId, timestamp, variableInstance, previousValue);
     }
 }
