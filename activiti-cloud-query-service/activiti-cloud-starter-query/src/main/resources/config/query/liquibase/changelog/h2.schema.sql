@@ -229,6 +229,14 @@ create table integration_context
     primary key (id)
 );
 
+create table application
+(
+    id                         varchar(255) not null,
+    name                       varchar(255) not null,
+    version                    varchar(255),
+    primary key (id)
+);
+
 create index bpmn_activity_status_idx on bpmn_activity (status);
 create index bpmn_activity_processInstance_idx on bpmn_activity (process_instance_id);
 alter table bpmn_activity
