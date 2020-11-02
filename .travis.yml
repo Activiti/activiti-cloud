@@ -1,7 +1,7 @@
 import:
-  - source: Activiti/activiti-scripts:.travis.java.yml@dev-elias-restructure-pipeline
-  - source: Activiti/activiti-scripts:.travis.awscli-install.yml@dev-elias-restructure-pipeline
-  - source: Activiti/activiti-scripts:.travis.maven-s3-config.yml@dev-elias-restructure-pipeline
+  - source: Activiti/activiti-scripts:.travis.java.yml@master
+  - source: Activiti/activiti-scripts:.travis.awscli-install.yml@master
+  - source: Activiti/activiti-scripts:.travis.maven-s3-config.yml@master
 
 cache:
   directories:
