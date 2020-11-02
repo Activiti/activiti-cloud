@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 
 import javax.persistence.DiscriminatorValue;
@@ -26,11 +28,24 @@ public class VariableUpdatedEventEntity extends VariableAuditEventEntity {
 
     protected static final String VARIABLE_UPDATED_EVENT = "VariableUpdatedEvent";
 
+    @Convert(converter = VariableValueJpaConverter.class)
+    @Column(name = "variable_previous_value", columnDefinition = "text")
+    private VariableValue<?> previousValue;
+
     public VariableUpdatedEventEntity() {
     }
 
     public VariableUpdatedEventEntity(CloudVariableUpdatedEvent cloudEvent) {
         super(cloudEvent);
+        this.previousValue = new VariableValue<>(cloudEvent.getPreviousValue());
+    }
+
+    public VariableValue<?> getPreviousValue() {
+        return previousValue;
+    }
+
+    public void setPreviousValue(VariableValue<?> previousValue) {
+        this.previousValue = previousValue;
     }
 
     @Override

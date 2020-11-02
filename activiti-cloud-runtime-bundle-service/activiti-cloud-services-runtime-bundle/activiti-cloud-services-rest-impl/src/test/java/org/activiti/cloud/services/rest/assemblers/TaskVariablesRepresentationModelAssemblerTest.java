@@ -47,9 +47,7 @@ public class TaskVariablesRepresentationModelAssemblerTest {
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {
         //given
-        VariableInstance model = new VariableInstanceImpl<>("var", "string", "value", "procInstId");
-        ((VariableInstanceImpl) model).setTaskId("my-identifier");
-
+        VariableInstance model = new VariableInstanceImpl<>("var", "string", "value", "procInstId", "my-identifier");
         given(converter.from(model)).willReturn(new CloudVariableInstanceImpl<>(model));
 
         //when

@@ -54,17 +54,11 @@ public class VariableEventContainedBuilder {
         return value.getClass().getSimpleName().toLowerCase();
     }
 
-    public <T> VariableEventContainedBuilder anUpdatedVariable(String name,
-                                                               T value,
-                                                               String type) {
-        beforeUpdateVariableInstance = buildVariable(name,
-                                         type,
-                                         null);
-        variableInstance = buildVariable(name,
-                                                     type,
-                                                     value);
+    public <T> VariableEventContainedBuilder anUpdatedVariable(String name, T value, T beforeUpdateValue, String type) {
+        beforeUpdateVariableInstance = buildVariable(name, type, beforeUpdateValue);
+        variableInstance = buildVariable(name, type, value);
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(beforeUpdateVariableInstance),
-                                   new CloudVariableUpdatedEventImpl(variableInstance));
+                                   new CloudVariableUpdatedEventImpl<>(variableInstance, beforeUpdateValue));
         return this;
     }
 
@@ -79,13 +73,8 @@ public class VariableEventContainedBuilder {
         return this;
     }
 
-    private <T> VariableInstanceImpl<T> buildVariable(String name,
-                                                      String type,
-                                                      T value) {
-        return new VariableInstanceImpl<>(name,
-                                          type,
-                                          value,
-                                          null);
+    private <T> VariableInstanceImpl<T> buildVariable(String name, String type, T value) {
+        return new VariableInstanceImpl<>(name, type, value, null, null);
     }
 
     public VariableInstance onProcessInstance(ProcessInstance processInstance) {

@@ -161,7 +161,7 @@ public class AuditServiceIT {
         //given
         CloudVariableCreatedEventImpl variableCreatedEvent = new CloudVariableCreatedEventImpl(
             new VariableInstanceImpl<>("bigDecimalVar", "bigdecimal",
-                BigDecimal.valueOf(100, 2), UUID.randomUUID().toString()));
+                BigDecimal.valueOf(100, 2), UUID.randomUUID().toString(), null));
         producer.send(variableCreatedEvent);
 
         await().untilAsserted(() -> {

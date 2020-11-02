@@ -39,6 +39,7 @@ create table audit_event
     variable_instance          text,
     variable_name              varchar(255),
     variable_type              varchar(255),
+    variable_previous_value    text,
     message_subscription	   text,
     error_code				   varchar(255),
     error_message			   varchar(255),
