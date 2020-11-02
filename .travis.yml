@@ -1,52 +1,58 @@
-import: Activiti/activiti-scripts:.travis.java.yml@master
-install: true
+import:
+  - source: Activiti/activiti-scripts:.travis.java.yml@master
+  - source: Activiti/activiti-scripts:.travis.awscli-install.yml@master
+  - source: Activiti/activiti-scripts:.travis.maven-s3-config.yml@master
+
 cache:
   directories:
   - "${HOME}/.m2/repository"
+
+env:
+  global:
+    - MAVEN_VERIFY_CMD="mvn verify -B -DinstallAtEnd=true"
+
 stages:
-- name: activiti-cloud-build
-- name: activiti-cloud-api
-- name: activiti-cloud-service-common
-- name: activiti-cloud-acceptance-tests
-- name: activiti-cloud-services
+- name: test
+- name: publish reports
 - name: tag_deploy_updatebot
   if: type != pull_request
+
 jobs:
   include:
-  - name: activiti-cloud-build
-    stage: activiti-cloud-build
-    script: travis_wait 120 ${MAVEN_CMD} -N && ${MAVEN_CMD} -f activiti-cloud-build/pom.xml
   - name: activiti-cloud-api
-    stage: activiti-cloud-api
-    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-api/pom.xml
+    stage: test
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-api/pom.xml
   - name: activiti-cloud-service-common
-    stage: activiti-cloud-service-common
-    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-service-common/pom.xml
+    stage: test
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-service-common/pom.xml
   - name: activiti-cloud-acceptance-tests
-    stage: activiti-cloud-acceptance-tests
-    # acceptance tests depend on runtime bundle dependencies, so we need to build rb first - rb tests will be run in next stage
-    script: |
-      mvn clean install -B -DskipTests -DskipSwaggerGen -f activiti-cloud-runtime-bundle-service/pom.xml || travis_terminate 1
-      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml || travis_terminate 1
-  - name: activiti-cloud-runtime-bundle-service_and_activiti-cloud-messages-service
-    stage: activiti-cloud-services
-    script: |
-      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml || travis_terminate 1
-      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml || travis_terminate 1
-  - name: activiti-cloud-query-service_and_activiti-cloud-notifications-graphql-service
-    stage: activiti-cloud-services
-    script: |
-      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml || travis_terminate 1
-      travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml || travis_terminate 1
+    stage: test
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-acceptance-tests/pom.xml
+  - name: activiti-cloud-runtime-bundle-service
+    stage: test
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml
+  - name: activiti-cloud-messages-service
+    stage: test
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-messages-service/pom.xml
+  - name: activiti-cloud-query-service
+    stage: test
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-query-service/pom.xml
+  - name: activiti-cloud-notifications-graphql-service
+    stage: test
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
   - name: activiti-cloud-audit-service
-    stage: activiti-cloud-services
-    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml
+    stage: test
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-audit-service/pom.xml
   - name: activiti-cloud-modeling-service
-    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling-service/pom.xml
-    stage: activiti-cloud-services
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-modeling-service/pom.xml
+    stage: test
   - name: activiti-cloud-connectors
-    stage: activiti-cloud-services
-    script: travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
+    stage: test
+    script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-connectors/pom.xml
+  - name: publish reports
+    stage: publish reports
+    before_script: aws s3 sync ${S3_JACCO_DIR} .
+    script: bash <(curl -s https://codecov.io/bash)
   - name: tag_deploy_updatebot
     stage: tag_deploy_updatebot
     script: |
@@ -57,7 +63,8 @@ jobs:
       git push -f -q https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud.git v$(cat VERSION) || travis_terminate 1
       mvn clean deploy -DskipTests  || travis_terminate 1
       export VERSION=$(cat VERSION)| make updatebot/push-version || travis_terminate 1
-after_success: bash <(curl -s https://codecov.io/bash)
+after_success:
+  - aws s3 sync . ${S3_JACCO_DIR} --exclude "*" --include "*jacoco.xml"
 after_failure:
 - cat **/target/surefire-reports/*.xml | grep -B 1 -A 10 "<error"
 - cat **/target/failsafe-reports/*.xml | grep -B 1 -A 10 "<error"
