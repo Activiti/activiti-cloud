@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 /**
  * Implementation of {@link BpmnModelValidator} for validating Incoming and Outgoing flows
  */
-public class BpmnModelTaskValidator implements BpmnModelValidator{
+public class BpmnModelIncomingOutgoingFlowValidator implements BpmnModelValidator{
 
     public final String NO_INCOMING_FLOW_PROBLEM = "Task has no incoming flow";
     public final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Task has to have an incoming flow";
