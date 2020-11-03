@@ -64,5 +64,4 @@ public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
 
         return errors;
     }
-
 }
