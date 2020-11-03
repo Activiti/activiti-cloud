@@ -18,7 +18,7 @@ package org.activiti.cloud.services.modeling.validation.process;
 import java.util.stream.Stream;
 
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.Task;
+import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.ValidationContext;
@@ -31,8 +31,8 @@ public interface BpmnModelValidator extends ModelValidationErrorProducer {
     Stream<ModelValidationError> validate(BpmnModel bpmnModel,
                                           ValidationContext validationContext);
 
-    default <T extends Task> Stream<T> getTasks(BpmnModel bpmnModel,
-                                                Class<T> taskType) {
+    default <T extends FlowElement> Stream<T> getTasks(BpmnModel bpmnModel,
+                                                       Class<T> taskType) {
         return bpmnModel.getProcesses()
                 .stream()
                 .flatMap(process -> process.getFlowElements().stream())
