@@ -50,8 +50,8 @@ public class ApplicationDeployedEventHandler implements QueryEventHandler {
             );
             
             if(checkApplicationExist(application)) {
-                LOGGER.debug("Application " + application.getName() + " with version "
-                        + application.getName() + " already exists!");
+                LOGGER.debug("Application {} with version {} already exists!",
+                        application.getName(), application.getVersion());
                 return;
             }
          

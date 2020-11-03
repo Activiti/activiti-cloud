@@ -37,6 +37,8 @@ import org.mockito.Mock;
 
 public class ApplicationDeployedEventHandlerTest {
 
+    private static final String APPLICATION_DEPLOYED_EVENT_NAME= "SpringAutoDeployment";
+
     @InjectMocks
     private ApplicationDeployedEventHandler handler;
 
@@ -47,9 +49,7 @@ public class ApplicationDeployedEventHandlerTest {
     public void setUp() {
         initMocks(this);
     }
-
-    private static final String APPLICATION_DEPLOYED_EVENT_NAME= "SpringAutoDeployment";
-
+    
     @Test
     public void handleShouldStoreApplication() {
         //given
