@@ -1,4 +1,7 @@
-import: Activiti/activiti-scripts:.travis.java.yml@master
+import:
+  - source: Activiti/activiti-scripts:.travis.java.yml@master
+  - source: Activiti/activiti-scripts:.travis.awscli-install.yml@master
+  - source: Activiti/activiti-scripts:.travis.maven-s3-config.yml@master
 
 fail_fast: true
 
@@ -17,6 +20,7 @@ env:
   - HELM_REPO=stable
   - KUBERNETES_VERSION=1.14.8
   - TRAVIS_WAIT_TIMEOUT=${TRAVIS_WAIT_TIMEOUT:-180}
+
 before_script:
 - echo -e "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com" >>  ~/.git-credentials
 - curl -s https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz
@@ -34,74 +38,125 @@ before_script:
 - kubectl get ns || travis_terminate 1
 
 stages:
-- name: build
+- name: Build Docker
+- name: Run acceptance tests
 - name: tag_updatebot
   if: type != pull_request
 
-install: true
+install: skip
 
 jobs:
   include:
-  - name: build jars
-    stage: build
-    script:
-      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -DskipITs -DskipTests -f activiti-cloud-acceptance-scenarios/pom.xml
-      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-runtime-bundle/pom.xml
-      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-query/pom.xml
-      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f example-cloud-connector/pom.xml
-      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-modeling/pom.xml
-      - travis_wait ${TRAVIS_WAIT_TIMEOUT} ${MAVEN_CMD} -f activiti-cloud-dependencies/pom.xml
-      - echo "Building docker image for activiti-cloud-query..."
-      - docker build -f activiti-cloud-query/Dockerfile -q -t docker.io/activiti/activiti-cloud-query:$(cat VERSION) activiti-cloud-query
-      - echo "Building docker image for activiti-cloud-connector..."
-      - docker build -f example-cloud-connector/Dockerfile -q -t docker.io/activiti/example-cloud-connector:$(cat VERSION) example-cloud-connector
-      - echo "Building docker image for example-runtime-bundle..."
-      - docker build -f example-runtime-bundle/Dockerfile -q -t docker.io/activiti/example-runtime-bundle:$(cat VERSION) example-runtime-bundle
-      - echo "Building docker image for activiti-cloud-modeling..."
-      - docker build -f activiti-cloud-modeling/Dockerfile -q -t docker.io/activiti/activiti-cloud-modeling:$(cat VERSION) activiti-cloud-modeling
-      - make create-helm-charts-release-and-upload
-      - docker push docker.io/activiti/activiti-cloud-query:$(cat VERSION)
-      - docker push docker.io/activiti/example-runtime-bundle:$(cat VERSION)
-      - docker push docker.io/activiti/example-cloud-connector:$(cat VERSION)
-      - docker push docker.io/activiti/activiti-cloud-modeling:$(cat VERSION)
-      - cp VERSION  activiti-cloud-dependencies/
-      - cd activiti-cloud-dependencies
-      - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn -q versions:set -Droot.log.level=off -DnewVersion=${VERSION}
-      - make updatebot/push-version-dry
-      - sleep 20
-      - make prepare-helm-chart
-      - make run-helm-chart
-      - cd -
+  - name: Build Example Runtime Bundle
+    stage: Build Docker
+    script: |
+      (
+      set -e
+      mvn verify -B -pl example-runtime-bundle -am
+      echo "Building docker image for example-runtime-bundle..."
+      docker build -f example-runtime-bundle/Dockerfile -q -t docker.io/activiti/example-runtime-bundle:$(cat VERSION) example-runtime-bundle
+      docker push docker.io/activiti/example-runtime-bundle:$(cat VERSION)
+      )
 
-      - |
-        attempt_counter=0
-        max_attempts=50
-        echo "Waiting for services to be up..."
-        until curl --silent --head --fail \
-                  ${GATEWAY_HOST}/modeling-service/v2/api-docs > /dev/null 2>&1 &&
-              curl --silent --head --fail \
-                   ${GATEWAY_HOST}/rb/v2/api-docs > /dev/null 2>&1 &&
-               curl --silent --head --fail \
-                    ${GATEWAY_HOST}/query/v2/api-docs > /dev/null 2>&1; do
-            if [ ${attempt_counter} -eq ${max_attempts} ];then
-              echo "Max attempts reached"
-              break
-            fi
+  - name: Build Activity Cloud Query
+    stage: Build Docker
+    script: |
+      (
+      set -e
+      mvn verify -B -pl activiti-cloud-query -am
+      echo "Building docker image for activiti-cloud-query..."
+      docker build -f activiti-cloud-query/Dockerfile -q -t docker.io/activiti/activiti-cloud-query:$(cat VERSION) activiti-cloud-query
+      docker push docker.io/activiti/activiti-cloud-query:$(cat VERSION)
+      )
 
-            printf '.'
-            attempt_counter=$((attempt_counter+1))
-            sleep 5
-        done
+  - name: Build Example Cloud Connector
+    stage: Build Docker
+    script: |
+      (
+      set -e
+      mvn verify -B -pl example-cloud-connector -am
+      echo "Building docker image for activiti-cloud-connector..."
+      docker build -f example-cloud-connector/Dockerfile -q -t docker.io/activiti/example-cloud-connector:$(cat VERSION) example-cloud-connector
+      docker push docker.io/activiti/example-cloud-connector:$(cat VERSION)
+      )
 
-      - cd activiti-cloud-acceptance-scenarios
-      - mvn -pl 'modeling-acceptance-tests' -Droot.log.level=off -q clean verify
-      - mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off -q clean verify
-      - cd -
+  - name: Build Activiti Cloud Modeling
+    stage: Build Docker
+    script: |
+      (
+      set -e
+      mvn verify -B -pl activiti-cloud-modeling -am
+      echo "Building docker image for activiti-cloud-modeling..."
+      docker build -f activiti-cloud-modeling/Dockerfile -q -t docker.io/activiti/activiti-cloud-modeling:$(cat VERSION) activiti-cloud-modeling
+      docker push docker.io/activiti/activiti-cloud-modeling:$(cat VERSION)
+      )
+
+  - name: Run acceptance tests
+    stage: Run acceptance tests
+    after_script: cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart" &&  cd -
+    script: |
+      (
+      set -e
+      make create-helm-charts-release-and-upload
+      cp VERSION  activiti-cloud-dependencies/
+      cd activiti-cloud-dependencies
+      mvn -B versions:set -Droot.log.level=off -DnewVersion=${VERSION}
+      make updatebot/push-version-dry
+      cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example
+      cat requirements.yaml
+      rm -rf requirements.lock
+      rm -rf charts
+      rm -rf *.tgz
+      helm init --client-only
+      helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts
+
+      attempt_counter=0
+      max_attempts=25
+      echo "Waiting for chart dependencies..."
+      until helm dep up; do
+        if [ ${attempt_counter} -eq ${max_attempts} ];then
+          echo "/!\ Max attempts reached!"
+          break
+        fi
+        attempt_counter=$((attempt_counter+1))
+        sleep 5
+        echo "/!\.... Retrying `helm dep up` after updating repo: $attempt_counter out $max_attempts ...."
+        helm repo update
+      done
+      cd ${TRAVIS_BUILD_DIR}/activiti-cloud-dependencies
+
+
+      make run-helm-chart
+
+      attempt_counter=0
+      max_attempts=50
+      echo "Waiting for services to be up..."
+      until curl --silent --head --fail \
+                ${GATEWAY_HOST}/modeling-service/v2/api-docs > /dev/null 2>&1 &&
+            curl --silent --head --fail \
+                 ${GATEWAY_HOST}/rb/v2/api-docs > /dev/null 2>&1 &&
+             curl --silent --head --fail \
+                  ${GATEWAY_HOST}/query/v2/api-docs > /dev/null 2>&1; do
+          if [ ${attempt_counter} -eq ${max_attempts} ];then
+            echo "Max attempts reached"
+            break
+          fi
+
+          printf '.'
+          attempt_counter=$((attempt_counter+1))
+          sleep 5
+      done
+
+      cd ../activiti-cloud-acceptance-scenarios
+      mvn -pl 'modeling-acceptance-tests' -Droot.log.level=off verify
+      mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off verify
+      cd -
+      )
 
   - name: tag_updatebot
     stage: tag_updatebot
     script: |
-      mvn versions:set -q -DprocessAllModules=true -DgenerateBackupPoms=false  -DnewVersion=$(cat VERSION)
+      mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false  -DnewVersion=$(cat VERSION)
       mvn clean deploy -DskipTests
       git add -u
       git commit -m "Release $(cat VERSION)" --allow-empty
@@ -126,12 +181,7 @@ jobs:
                       activiti-cloud-connector ${VERSION} \
                       activiti-cloud-query ${VERSION} \
                       activiti-cloud-modeling ${VERSION}
-after_failure:
-- cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart"
-  &&  cd -
-after_success:
-- cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart"
-  &&  cd -
+
 before_install:
 - echo -e "https://$GITHUB_USER:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
 - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin
@@ -140,6 +190,7 @@ before_install:
 - export activiti_cloud_version=$(grep -oPm1 "(?<=<activiti-cloud.version>)[^<]+"
   "activiti-cloud-dependencies/pom.xml")
 - echo activiti_cloud_version=${activiti_cloud_version}
+
 notifications:
   slack:
     secure: J/ilLqmqXD7/4VpZZ3HxFrp5Ae6zJJuo6KjsxP5MN4kTxUhfAJvbrfoZfVioxsBX/qXGx/ckvq1WCzen13N+UrWcL+SiXBf9sTsiB4oB2O4mNV8COUAJThJxHvG6w1YFUYIFePD7s9Y6c+4idL5mLfzdthuzBcwn4lHM64iYcWFXqnOR0dJvChzZnbyrLYhOp5MJq9knDdiemKMNU7TI4sa+FTx4Uxj89/f0qKlw7Wd3cuvf1uSPOof+wy2r5ujPz3c5bvecXURcNUc2GLhNAv4TWMNrfY6jQCoCNC9pdmWHm2qcQjXmVqrM75527rOap9wuh1ZSk+fsh/ExiCUWMROB7An1I7Nqy0AdtjUXctuj0kGcjTyKEvVrUg8Eb0DLmFGANcmNvv28JTTokyM2AWx+Jma5ilDnNVZV1TCv++npFGaTMRSP9f3U3IKYDFzHdkjDRifvpQCrpp1Wj+RaGg8r1dRSyfG/3QoAGJ9CwlM1NxJY9SL7aR+aRLgQHSmdsWZWN+LL6ivLgu2OABjInZHDlzwLtDg1nHupbaxAb1lzxGPik52X5rZEkxUHiLHmCnyI94Yvf0L+jvM/Dko+ETGrTj4e1Qayv6ZxSU8ULsOV8gDeBcK5woaCTJsAzXvohz4vKl1YhZ5WP6vISz7sj/WetaPQyaBOLhfQnz+8O5k=
