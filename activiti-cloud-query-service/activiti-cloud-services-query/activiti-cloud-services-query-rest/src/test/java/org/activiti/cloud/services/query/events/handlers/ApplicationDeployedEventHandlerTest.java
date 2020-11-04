@@ -37,7 +37,7 @@ import org.mockito.Mock;
 
 public class ApplicationDeployedEventHandlerTest {
 
-    private static final String APPLICATION_DEPLOYED_EVENT_NAME= "SpringAutoDeployment";
+    private static final String APPLICATION_DEPLOYMENT_NAME= "SpringAutoDeployment";
 
     @InjectMocks
     private ApplicationDeployedEventHandler handler;
@@ -55,7 +55,7 @@ public class ApplicationDeployedEventHandlerTest {
         //given
         DeploymentImpl deployment = new DeploymentImpl();
         deployment.setId(UUID.randomUUID().toString());
-        deployment.setName(APPLICATION_DEPLOYED_EVENT_NAME);
+        deployment.setName(APPLICATION_DEPLOYMENT_NAME);
         deployment.setVersion(2);
 
         CloudApplicationDeployedEventImpl applicationDeployedEvent = new CloudApplicationDeployedEventImpl(
@@ -82,7 +82,7 @@ public class ApplicationDeployedEventHandlerTest {
         //given
         DeploymentImpl deployment = new DeploymentImpl();
         deployment.setId(UUID.randomUUID().toString());
-        deployment.setName(APPLICATION_DEPLOYED_EVENT_NAME);
+        deployment.setName(APPLICATION_DEPLOYMENT_NAME);
         deployment.setVersion(2);
 
         CloudApplicationDeployedEventImpl applicationDeployedFirstEvent = new CloudApplicationDeployedEventImpl(
