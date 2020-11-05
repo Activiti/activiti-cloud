@@ -27,8 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ApplicationDeployedEventHandler implements QueryEventHandler {
-
-    private static final String APPLICATION_DEPLOYMENT_NAME= "SpringAutoDeployment";
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationDeployedEventHandler.class);
 
     private ApplicationRepository applicationRepository;
@@ -42,21 +41,19 @@ public class ApplicationDeployedEventHandler implements QueryEventHandler {
         CloudApplicationDeployedEvent applicationDeployedEvent = (CloudApplicationDeployedEvent) event;
         Deployment deployment = applicationDeployedEvent.getEntity();
         LOGGER.debug("Handling application deployed event for " + deployment.getId());
-        if(deployment.getName().equals(APPLICATION_DEPLOYMENT_NAME)) {
-            ApplicationEntity application = new ApplicationEntity(
-                    deployment.getId(),
-                    applicationDeployedEvent.getAppName(),
-                    deployment.getVersion().toString()
-            );
-            
-            if(checkApplicationExist(application)) {
-                LOGGER.debug("Application {} with version {} already exists!",
-                        application.getName(), application.getVersion());
-                return;
-            }
-         
-            applicationRepository.save(application);
+        ApplicationEntity application = new ApplicationEntity(
+                deployment.getId(),
+                applicationDeployedEvent.getAppName(),
+                deployment.getVersion().toString()
+        );
+        
+        if(checkApplicationExist(application)) {
+            LOGGER.debug("Application {} with version {} already exists!",
+                    application.getName(), application.getVersion());
+            return;
         }
+     
+        applicationRepository.save(application);
     }
 
     @Override

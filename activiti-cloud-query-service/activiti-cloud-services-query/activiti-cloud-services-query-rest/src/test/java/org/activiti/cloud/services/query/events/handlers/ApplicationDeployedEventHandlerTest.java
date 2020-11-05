@@ -94,14 +94,11 @@ public class ApplicationDeployedEventHandlerTest {
         handler.handle(applicationDeployedFirstEvent);
 
         //then
-        ArgumentCaptor<ApplicationEntity> applicationCaptor = ArgumentCaptor
-                .forClass(ApplicationEntity.class);
-
-        verify(applicationRepository, never()).save(applicationCaptor.capture());
+        verify(applicationRepository, never()).save(any());
     }
 
     @Test
-    public void getHandledEventShouldReturnProcessDeployedEvent() {
+    public void getHandledEventShouldReturnApplicationDeployedEvent() {
         String handledEvent = handler.getHandledEvent();
 
         Assertions.assertThat(handledEvent)

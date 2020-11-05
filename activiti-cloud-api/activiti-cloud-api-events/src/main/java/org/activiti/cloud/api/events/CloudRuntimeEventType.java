@@ -75,5 +75,9 @@ public enum CloudRuntimeEventType {
     TIMER_SCHEDULED,
     VARIABLE_CREATED,
     VARIABLE_DELETED,
-    VARIABLE_UPDATED;
+    VARIABLE_UPDATED,
+    /**
+     * The runtime bundle has deployed an application
+     */
+    APPLICATION_DEPLOYED;
 }

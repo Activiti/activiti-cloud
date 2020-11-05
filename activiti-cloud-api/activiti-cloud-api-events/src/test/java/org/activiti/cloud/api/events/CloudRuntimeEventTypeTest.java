@@ -57,6 +57,7 @@ public class CloudRuntimeEventTypeTest {
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ProcessRuntimeEvent.ProcessEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(MessageDefinitionEvent.MessageDefinitionEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(MessageSubscriptionEvent.MessageSubscriptionEvents.class));
+        assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ApplicationEvent.ApplicationEvents.class));
     }
 
 }
