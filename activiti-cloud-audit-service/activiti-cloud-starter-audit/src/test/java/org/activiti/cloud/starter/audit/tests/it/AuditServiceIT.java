@@ -1062,12 +1062,12 @@ public class AuditServiceIT {
                                                                                                                                Arrays.asList(error.getCause()
                                                                                                                                                   .getStackTrace()));
         testEvents.add(cloudIntegrationErrorReceivedEvent);
-
-
+        
         DeploymentImpl deployment = new DeploymentImpl();
         deployment.setId("deploymentId");
         deployment.setVersion(1);
         deployment.setName("SpringAutoDeployment");
+        
         CloudApplicationDeployedEventImpl applicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
         testEvents.add(applicationDeployedEvent);
         
@@ -1178,21 +1178,16 @@ public class AuditServiceIT {
             Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
 
-           /*assertThat(retrievedEvents)
+           assertThat(retrievedEvents)
                     .extracting(
                             CloudRuntimeEvent::getEventType,
-                            CloudRuntimeEvent::getServiceName,
-                            CloudRuntimeEvent::getServiceVersion,
-                            CloudRuntimeEvent::getProcessDefinitionId,
                             event -> ((CloudApplicationDeployedEvent)event).getEntity().getId(),
                             event -> ((CloudApplicationDeployedEvent)event).getEntity().getName(),
                             event -> ((CloudApplicationDeployedEvent)event).getEntity().getVersion())
                             .contains(tuple(applicationDeployedEvent.getEventType(),
-                            applicationDeployedEvent.getServiceName(),
-                            applicationDeployedEvent.getServiceVersion(),
                             applicationDeployedEvent.getEntity().getId(),
                             applicationDeployedEvent.getEntity().getName(),
-                            applicationDeployedEvent.getEntity().getVersion())); */
+                            applicationDeployedEvent.getEntity().getVersion()));
         });
     }
 }

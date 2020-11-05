@@ -27,6 +27,7 @@ public class CloudApplicationDeployedEventImpl extends CloudRuntimeEventImpl<Dep
 
     public CloudApplicationDeployedEventImpl(Deployment entity) {
         super(entity);
+        setEntityId(entity.getId());
     }
     
     @Override

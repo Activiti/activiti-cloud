@@ -16,6 +16,7 @@
 package org.activiti.cloud.api.process.model.impl.conf;
 
 import org.activiti.api.process.model.Deployment;
+import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
@@ -27,7 +28,6 @@ import org.activiti.api.process.model.events.MessageSubscriptionEvent;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
-import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
 import org.activiti.cloud.api.process.model.*;
 import org.activiti.cloud.api.process.model.impl.*;
