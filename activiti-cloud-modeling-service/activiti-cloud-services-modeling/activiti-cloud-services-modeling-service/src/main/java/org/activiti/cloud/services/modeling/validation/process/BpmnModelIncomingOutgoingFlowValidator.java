@@ -33,15 +33,15 @@ import java.util.stream.Stream;
  */
 public class BpmnModelIncomingOutgoingFlowValidator implements BpmnModelValidator{
 
-    public final String NO_INCOMING_FLOW_PROBLEM = "Task has no incoming flow";
-    public final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Task has to have an incoming flow";
-    public final String NO_OUTGOING_FLOW_PROBLEM = "Task has no outgoing flow";
-    public final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Task has to have an outgoing flow";
-    public final String NO_INCOMING_FLOW_PROBLEM_START_EVENT = "Start event should not have incoming flow";
-    public final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION_START_EVENT = "Start event should not have incoming flow";
-    public final String NO_OUTGOING_FLOW_PROBLEM_END_EVENT = "End event should not have outgoing flow";
-    public final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION_END_EVENT = "End event should not have outgoing flow";
-    public final String TASK_FLOW_VALIDATOR_NAME = "BPMN Task flow validator";
+    public static final String NO_INCOMING_FLOW_PROBLEM = "Task has no incoming flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Task has to have an incoming flow";
+    public static final String NO_OUTGOING_FLOW_PROBLEM = "Task has no outgoing flow";
+    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Task has to have an outgoing flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_START_EVENT = "Start event should not have incoming flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION_START_EVENT = "Start event should not have incoming flow";
+    public static final String NO_OUTGOING_FLOW_PROBLEM_END_EVENT = "End event should not have outgoing flow";
+    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION_END_EVENT = "End event should not have outgoing flow";
+    public static final String TASK_FLOW_VALIDATOR_NAME = "BPMN Task flow validator";
 
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {

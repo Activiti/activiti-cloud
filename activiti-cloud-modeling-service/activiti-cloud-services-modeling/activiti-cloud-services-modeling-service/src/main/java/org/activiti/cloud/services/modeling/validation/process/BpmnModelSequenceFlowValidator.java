@@ -30,11 +30,11 @@ import java.util.stream.Stream;
  */
 public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
 
-    public final String NO_SOURCE_REF_PROBLEM_TITLE = "Sequence flow has no source reference";
-    public final String NO_SOURCE_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have an incoming flow";
-    public final String NO_TARGET_REF_PROBLEM_TITLE = "Sequence flow has no target reference";
-    public final String NO_TARGET_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have an outgoing flow";
-    public final String SEQUENCE_FLOW_VALIDATOR_NAME = "BPMN sequence flow validator";
+    public static final String NO_SOURCE_REF_PROBLEM_TITLE = "Sequence flow has no source reference";
+    public static final String NO_SOURCE_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have an incoming flow";
+    public static final String NO_TARGET_REF_PROBLEM_TITLE = "Sequence flow has no target reference";
+    public static final String NO_TARGET_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have an outgoing flow";
+    public static final String SEQUENCE_FLOW_VALIDATOR_NAME = "BPMN sequence flow validator";
 
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
