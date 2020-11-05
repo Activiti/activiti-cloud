@@ -20,27 +20,8 @@ import java.io.IOException;
 import javax.persistence.AttributeConverter;
 
 import org.activiti.api.model.shared.model.VariableInstance;
-import org.activiti.api.process.model.BPMNActivity;
-import org.activiti.api.process.model.BPMNError;
-import org.activiti.api.process.model.BPMNMessage;
-import org.activiti.api.process.model.BPMNSequenceFlow;
-import org.activiti.api.process.model.BPMNSignal;
-import org.activiti.api.process.model.BPMNTimer;
-import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.api.process.model.MessageSubscription;
-import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
-import org.activiti.api.runtime.model.impl.BPMNErrorImpl;
-import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
-import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
-import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
-import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
-import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
-import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
-import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
-import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
-import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.api.process.model.*;
+import org.activiti.api.runtime.model.impl.*;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.services.audit.api.AuditException;
@@ -98,6 +79,8 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
                                 MessageSubscriptionImpl.class);
             resolver.addMapping(IntegrationContext.class,
                                 IntegrationContextImpl.class);
+            resolver.addMapping(Deployment.class,
+                                DeploymentImpl.class);
 
             module.setAbstractTypes(resolver);
 

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.api.process.model.impl.conf;
 
+import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
@@ -26,52 +27,11 @@ import org.activiti.api.process.model.events.MessageSubscriptionEvent;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
-import org.activiti.cloud.api.process.model.CloudIntegrationContext;
-import org.activiti.cloud.api.process.model.CloudProcessDefinition;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.api.process.model.CloudServiceTask;
-import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinition;
-import org.activiti.cloud.api.process.model.IntegrationError;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.impl.CloudBPMNActivityImpl;
-import org.activiti.cloud.api.process.model.impl.CloudIntegrationContextImpl;
-import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
-import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
-import org.activiti.cloud.api.process.model.impl.CloudServiceTaskImpl;
-import org.activiti.cloud.api.process.model.impl.CloudStartMessageDeploymentDefinitionImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerCancelledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerExecutedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFailedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
+import org.activiti.api.process.model.events.ApplicationEvent;
+import org.activiti.api.runtime.model.impl.DeploymentImpl;
+import org.activiti.cloud.api.process.model.*;
+import org.activiti.cloud.api.process.model.impl.*;
+import org.activiti.cloud.api.process.model.impl.events.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -153,7 +113,8 @@ public class CloudProcessModelAutoConfiguration {
 
         module.registerSubtypes(new NamedType(CloudMessageSubscriptionCancelledEventImpl.class,
                                               MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name()));
-
+       module.registerSubtypes(new NamedType(CloudApplicationDeployedEventImpl.class,
+                ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name()));
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
             //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
             //once version 2.9.6 is related we can remove this @override method
@@ -181,6 +142,8 @@ public class CloudProcessModelAutoConfiguration {
                             CloudIntegrationContextImpl.class);
         resolver.addMapping(CloudServiceTask.class,
                             CloudServiceTaskImpl.class);
+        resolver.addMapping(Deployment.class,
+                DeploymentImpl.class);
 
         module.setAbstractTypes(resolver);
 
