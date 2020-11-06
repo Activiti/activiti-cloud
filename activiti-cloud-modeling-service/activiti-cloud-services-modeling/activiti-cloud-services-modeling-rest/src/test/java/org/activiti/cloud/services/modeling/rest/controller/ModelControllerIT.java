@@ -1356,4 +1356,25 @@ public class ModelControllerIT {
             .andExpect(jsonPath("$.extensions",
                 notNullValue()));
     }
+
+    @Test
+    public void should_returnConflict_when_creatingNewRelationshipWithSameModelName() throws Exception {
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project"));
+
+        Model projectContentModel = processModel(project, "model-with-same-name");
+        projectContentModel.setScope(ModelScope.PROJECT);
+        projectContentModel = (ModelEntity) modelRepository.createModel(projectContentModel);
+
+        Model globalContentModel = processModel("model-with-same-name");
+        globalContentModel.setScope(ModelScope.GLOBAL);
+        globalContentModel = (ModelEntity) modelRepository.createModel(globalContentModel);
+
+        ResultActions resultActions = mockMvc
+                .perform(put("/v1/projects/{projectId}/models/{modelId}", project.getId(), globalContentModel.getId()))
+                .andExpect(status().isConflict());
+
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+                .isEqualTo(String.format("A model with the same type already exists within the project with id: %s", project.getId()));
+    }
 }
