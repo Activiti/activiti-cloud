@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.validation;
 
+import java.util.List;
 import java.util.Set;
 
 import org.activiti.cloud.modeling.api.ConnectorModelType;
@@ -38,6 +39,7 @@ import org.activiti.cloud.services.modeling.validation.process.BpmnModelSequence
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUserTaskAssigneeValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelValidator;
+import org.activiti.cloud.services.modeling.validation.process.FlowNodeFlowsValidator;
 import org.activiti.cloud.services.modeling.validation.process.ProcessModelValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectConsistencyValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
@@ -177,8 +179,8 @@ public class ProcessModelValidatorConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator() {
-        return new BpmnModelIncomingOutgoingFlowValidator();
+    public BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator(List<FlowNodeFlowsValidator> flowNodeFlowsValidators) {
+        return new BpmnModelIncomingOutgoingFlowValidator(flowNodeFlowsValidators);
     }
 
 }
