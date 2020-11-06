@@ -40,6 +40,8 @@ before_script:
 stages:
 - name: Build Docker
 - name: Run acceptance tests
+- name: Publish helm charts
+  if: type != pull_request
 - name: tag_updatebot
   if: type != pull_request
 
@@ -97,35 +99,8 @@ jobs:
     script: |
       (
       set -e
-      make create-helm-charts-release-and-upload
-      cp VERSION  activiti-cloud-dependencies/
+      envsubst < .values_template.yml > current_build_values.yml
       cd activiti-cloud-dependencies
-      mvn -B versions:set -Droot.log.level=off -DnewVersion=${VERSION}
-      make updatebot/push-version-dry
-      cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example
-      cat requirements.yaml
-      rm -rf requirements.lock
-      rm -rf charts
-      rm -rf *.tgz
-      helm init --client-only
-      helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts
-
-      attempt_counter=0
-      max_attempts=25
-      echo "Waiting for chart dependencies..."
-      until helm dep up; do
-        if [ ${attempt_counter} -eq ${max_attempts} ];then
-          echo "/!\ Max attempts reached!"
-          break
-        fi
-        attempt_counter=$((attempt_counter+1))
-        sleep 5
-        echo "/!\.... Retrying `helm dep up` after updating repo: $attempt_counter out $max_attempts ...."
-        helm repo update
-      done
-      cd ${TRAVIS_BUILD_DIR}/activiti-cloud-dependencies
-
-
       make run-helm-chart
 
       attempt_counter=0
@@ -153,8 +128,18 @@ jobs:
       cd -
       )
 
+  - name: Publish helm charts
+    stage: Publish helm charts
+    branches:
+      only:
+        - develop
+    script: make create-helm-charts-release-and-upload
+
   - name: tag_updatebot
     stage: tag_updatebot
+    branches:
+      only:
+        - develop
     script: |
       mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false  -DnewVersion=$(cat VERSION)
       mvn clean deploy -DskipTests

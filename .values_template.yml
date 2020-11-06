@@ -1,0 +1,16 @@
+activiti-cloud-modeling:
+  backend:
+    image:
+      tag: ${VERSION}
+
+runtime-bundle:
+  image:
+    tag: ${VERSION}
+
+activiti-cloud-query:
+  image:
+    tag: ${VERSION}
+
+activiti-cloud-connector:
+  image:
+    tag: ${VERSION}

@@ -67,7 +67,7 @@ frontend:
   #       key: expose-keycloak-service-key
   image:
     repository: activiti/activiti-modeling-app
-    tag: 0.0.326
+    tag: 7.1.0-M10
     pullPolicy: Always
   resources:
     limits:
@@ -140,16 +140,16 @@ terminationGracePeriodSeconds: 20
 
 ingress:
   enabled: true
-  
+
   path: # configure base path for frontend and backend ingresses "/{{ .Release.Namespace }}"
-  
+
   backend:
     path: "/modeling-service"
     annotations: {}
     #nginx.ingress.kubernetes.io/rewrite-target: /
 
   ## Set to override global.gateway.host value, i.e. "modeler.{{ include \"common.gateway-domain\" . }}"
-  hostName: 
+  hostName:
 
   annotations: {}
 
@@ -166,7 +166,7 @@ ingress:
 #      nginx.ingress.kubernetes.io/rewrite-target: "/" #old version nginx
 
   ## Set this to true in order to enable TLS on the ingress record, i.e. true | false
-  tls: 
+  tls:
 
   ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
-  tlsSecret: 
+  tlsSecret:
