@@ -32,16 +32,16 @@ public class EndEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValid
     public static final String INTERMEDIATE_FLOW_VALIDATOR_NAME = "BPMN Intermediate Flow node validator";
 
     @Override
-    public List<ModelValidationError> validate(FlowNode flowNode, BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator) {
+    public List<ModelValidationError> validate(FlowNode flowNode) {
         List<ModelValidationError> errors = new ArrayList<>();
 
         if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
-            errors.add(bpmnModelIncomingOutgoingFlowValidator.createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
+            errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
                 NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
                 INTERMEDIATE_FLOW_VALIDATOR_NAME));
         }
         if (CollectionUtils.isNotEmpty(flowNode.getOutgoingFlows())) {
-            errors.add(bpmnModelIncomingOutgoingFlowValidator.createModelValidationError(OUTGOING_FLOW_ON_END_EVENT_PROBLEM,
+            errors.add(createModelValidationError(OUTGOING_FLOW_ON_END_EVENT_PROBLEM,
                 OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION,
                 INTERMEDIATE_FLOW_VALIDATOR_NAME));
         }

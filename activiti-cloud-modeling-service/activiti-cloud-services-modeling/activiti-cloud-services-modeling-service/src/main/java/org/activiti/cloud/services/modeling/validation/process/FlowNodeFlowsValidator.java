@@ -17,15 +17,16 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.cloud.modeling.api.ModelValidationError;
+import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 
 import java.util.List;
 
 /**
  * Interface for validating {@link FlowNode} objects
  */
-public interface FlowNodeFlowsValidator {
+public interface FlowNodeFlowsValidator extends ModelValidationErrorProducer {
 
-    List<ModelValidationError> validate (FlowNode flowNode, BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator);
+    List<ModelValidationError> validate (FlowNode flowNode);
 
     boolean canValidate(FlowNode flowNode);
 }

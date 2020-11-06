@@ -31,12 +31,6 @@ public class EndEventIncomingOutgoingFlowValidatorTest {
 
     private EndEventIncomingOutgoingFlowValidator endEventIncomingOutgoingFlowValidator;
 
-    @Mock
-    private FlowNode flowNode;
-
-    @Mock
-    private BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator;
-
     @BeforeEach
     void setUp() {
         endEventIncomingOutgoingFlowValidator = new EndEventIncomingOutgoingFlowValidator();
@@ -47,11 +41,8 @@ public class EndEventIncomingOutgoingFlowValidatorTest {
         BpmnModel bpmnModel = CreateBpmnModelTestHelper.createOneTaskTestProcess();
         EndEvent endEvent = (EndEvent) bpmnModel.getMainProcess().getFlowElement("theEnd");
         endEvent.setIncomingFlows(new ArrayList<>());
-        SequenceFlow OutgoingFlow = new SequenceFlow();
-        endEvent.getOutgoingFlows().add(OutgoingFlow);
 
-        assertThat(endEvent.getIncomingFlows()).isEmpty();
-        assertThat(endEventIncomingOutgoingFlowValidator.validate(flowNode, bpmnModelIncomingOutgoingFlowValidator)).extracting("problem")
+        assertThat(endEventIncomingOutgoingFlowValidator.validate(endEvent)).extracting("problem")
             .contains(EndEventIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM);
     }
 
@@ -59,12 +50,10 @@ public class EndEventIncomingOutgoingFlowValidatorTest {
     public void should_returnError_when_endEventOutgoingFlowIsNotEmpty() {
         BpmnModel bpmnModel = CreateBpmnModelTestHelper.createOneTaskTestProcess();
         EndEvent endEvent = (EndEvent) bpmnModel.getMainProcess().getFlowElement("theEnd");
-        endEvent.setIncomingFlows(new ArrayList<>());
         SequenceFlow outgoingFlow = new SequenceFlow();
         endEvent.getOutgoingFlows().add(outgoingFlow);
 
-        assertThat(endEvent.getOutgoingFlows()).isNotEmpty();
-        assertThat(endEventIncomingOutgoingFlowValidator.validate(flowNode, bpmnModelIncomingOutgoingFlowValidator)).extracting("problem")
+        assertThat(endEventIncomingOutgoingFlowValidator.validate(endEvent)).extracting("problem")
             .contains(EndEventIncomingOutgoingFlowValidator.OUTGOING_FLOW_ON_END_EVENT_PROBLEM);
     }
 

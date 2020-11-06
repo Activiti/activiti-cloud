@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import org.activiti.bpmn.model.EndEvent;
 import org.activiti.bpmn.model.FlowNode;
+import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -31,17 +33,17 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNo
     public static final String INTERMEDIATE_FLOW_VALIDATOR_NAME = "BPMN Intermediate Flow node validator";
 
     @Override
-    public List<ModelValidationError> validate(FlowNode flowNode, BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator) {
+    public List<ModelValidationError> validate(FlowNode flowNode) {
         List<ModelValidationError> errors = new ArrayList<>();
 
         if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
-            errors.add(bpmnModelIncomingOutgoingFlowValidator.createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
+            errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
                 NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
                 INTERMEDIATE_FLOW_VALIDATOR_NAME));
         }
 
         if (CollectionUtils.isEmpty(flowNode.getOutgoingFlows())) {
-            errors.add(bpmnModelIncomingOutgoingFlowValidator.createModelValidationError(NO_OUTGOING_FLOW_PROBLEM,
+            errors.add(createModelValidationError(NO_OUTGOING_FLOW_PROBLEM,
                 NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
                 INTERMEDIATE_FLOW_VALIDATOR_NAME));
         }
@@ -50,6 +52,6 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNo
 
     @Override
     public boolean canValidate(FlowNode flowNode) {
-        return true;
+        return !(flowNode instanceof StartEvent) && !(flowNode instanceof EndEvent);
     }
 }

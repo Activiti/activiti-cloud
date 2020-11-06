@@ -16,11 +16,9 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.UserTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import java.util.ArrayList;
 
@@ -29,12 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
 
     private IntermediateFlowNodeIncomingOutgoingFlowValidator intermediateFlowNodeIncomingOutgoingFlowValidator;
-
-    @Mock
-    private FlowNode flowNode;
-
-    @Mock
-    private BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator;
 
     @BeforeEach
     void setUp() {
@@ -47,7 +39,7 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         UserTask userTask = (UserTask) bpmnModel.getMainProcess().getFlowElement("theTask");
         userTask.setIncomingFlows(new ArrayList<>());
 
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(flowNode, bpmnModelIncomingOutgoingFlowValidator)).extracting("problem")
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask)).extracting("problem")
             .contains(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM);
     }
 
@@ -57,8 +49,7 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         UserTask userTask = (UserTask) bpmnModel.getMainProcess().getFlowElement("theTask");
         userTask.setOutgoingFlows(new ArrayList<>());
 
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(flowNode, bpmnModelIncomingOutgoingFlowValidator)).extracting("problem")
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask)).extracting("problem")
             .contains(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM);
     }
-
 }

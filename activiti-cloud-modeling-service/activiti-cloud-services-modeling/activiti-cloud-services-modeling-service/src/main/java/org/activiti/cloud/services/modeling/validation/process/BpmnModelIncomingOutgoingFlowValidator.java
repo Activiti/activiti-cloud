@@ -52,7 +52,7 @@ public class BpmnModelIncomingOutgoingFlowValidator implements BpmnModelValidato
 
         for (FlowNodeFlowsValidator validator: flowNodeFlowsValidators) {
             if (validator.canValidate(flowNode)){
-                errors.addAll(validator.validate(flowNode, this));
+                errors.addAll(validator.validate(flowNode));
             }
         }
         return errors;

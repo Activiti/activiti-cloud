@@ -16,12 +16,10 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.SequenceFlow;
 import org.activiti.bpmn.model.StartEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import java.util.ArrayList;
 
@@ -30,12 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StartEventIncomingOutgoingFlowValidatorTest {
 
     private StartEventIncomingOutgoingFlowValidator startEventIncomingOutgoingFlowValidator;
-
-    @Mock
-    private FlowNode flowNode;
-
-    @Mock
-    private BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator;
 
     @BeforeEach
     void setUp() {
@@ -47,11 +39,8 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
         BpmnModel bpmnModel = CreateBpmnModelTestHelper.createOneTaskTestProcess();
         StartEvent startEvent = (StartEvent) bpmnModel.getMainProcess().getFlowElement("start");
         startEvent.setOutgoingFlows(new ArrayList<>());
-        SequenceFlow incomingFlow = new SequenceFlow();
-        startEvent.getIncomingFlows().add(incomingFlow);
 
-        assertThat(startEvent.getOutgoingFlows()).isEmpty();
-        assertThat(startEventIncomingOutgoingFlowValidator.validate(flowNode, bpmnModelIncomingOutgoingFlowValidator)).extracting("problem")
+        assertThat(startEventIncomingOutgoingFlowValidator.validate(startEvent)).extracting("problem")
             .contains(StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM);
     }
 
@@ -59,12 +48,10 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
     public void should_returnError_when_startEventIncomingFlowIsNotEmpty() {
         BpmnModel bpmnModel = CreateBpmnModelTestHelper.createOneTaskTestProcess();
         StartEvent startEvent = (StartEvent) bpmnModel.getMainProcess().getFlowElement("start");
-        startEvent.setOutgoingFlows(new ArrayList<>());
         SequenceFlow incomingFlow = new SequenceFlow();
         startEvent.getIncomingFlows().add(incomingFlow);
 
-        assertThat(startEvent.getIncomingFlows()).isNotEmpty();
-        assertThat(startEventIncomingOutgoingFlowValidator.validate(flowNode, bpmnModelIncomingOutgoingFlowValidator)).extracting("problem")
+        assertThat(startEventIncomingOutgoingFlowValidator.validate(startEvent)).extracting("problem")
             .contains(StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM);
     }
 }
