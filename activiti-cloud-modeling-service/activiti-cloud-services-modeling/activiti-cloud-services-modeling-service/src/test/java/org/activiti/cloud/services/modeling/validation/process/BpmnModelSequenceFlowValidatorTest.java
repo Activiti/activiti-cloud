@@ -45,7 +45,7 @@ public class BpmnModelSequenceFlowValidatorTest {
         sequenceFlow.setSourceRef(null);
 
         assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
-            .contains(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM_TITLE);
+            .contains(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class BpmnModelSequenceFlowValidatorTest {
         sequenceFlow.setTargetRef(null);
 
         assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
-            .contains(BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM_TITLE);
+            .contains(BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM);
     }
 
     @Test
@@ -66,8 +66,8 @@ public class BpmnModelSequenceFlowValidatorTest {
         sequenceFlow.setTargetRef(null);
 
         assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
-            .contains(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM_TITLE,
-                BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM_TITLE);
+            .contains(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM,
+                BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM);
     }
 
     private static BpmnModel createOneTaskTestProcess() {

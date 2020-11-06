@@ -30,16 +30,16 @@ import java.util.stream.Stream;
  */
 public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
 
-    public static final String NO_SOURCE_REF_PROBLEM_TITLE = "Sequence flow has no source reference";
+    public static final String NO_SOURCE_REF_PROBLEM = "Sequence flow has no source reference";
     public static final String NO_SOURCE_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have an incoming flow";
-    public static final String NO_TARGET_REF_PROBLEM_TITLE = "Sequence flow has no target reference";
+    public static final String NO_TARGET_REF_PROBLEM = "Sequence flow has no target reference";
     public static final String NO_TARGET_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have an outgoing flow";
     public static final String SEQUENCE_FLOW_VALIDATOR_NAME = "BPMN sequence flow validator";
 
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
         List<ModelValidationError> errors = new ArrayList<>();
-        getTasks(bpmnModel,
+        getFlowElements(bpmnModel,
             SequenceFlow.class).forEach(sequenceFlow -> {
             errors.addAll(validateSequenceFlow(sequenceFlow));
         });
@@ -51,13 +51,13 @@ public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
 
         List<ModelValidationError> errors = new ArrayList<>();
         if (StringUtils.isEmpty(sequenceFlow.getSourceRef())) {
-            errors.add(createModelValidationError(NO_SOURCE_REF_PROBLEM_TITLE,
+            errors.add(createModelValidationError(NO_SOURCE_REF_PROBLEM,
                 NO_SOURCE_REF_PROBLEM_DESCRIPTION,
                 SEQUENCE_FLOW_VALIDATOR_NAME));
         }
 
         if (StringUtils.isEmpty(sequenceFlow.getTargetRef())) {
-            errors.add(createModelValidationError(NO_TARGET_REF_PROBLEM_TITLE,
+            errors.add(createModelValidationError(NO_TARGET_REF_PROBLEM,
                 NO_TARGET_REF_PROBLEM_DESCRIPTION,
                 SEQUENCE_FLOW_VALIDATOR_NAME));
         }

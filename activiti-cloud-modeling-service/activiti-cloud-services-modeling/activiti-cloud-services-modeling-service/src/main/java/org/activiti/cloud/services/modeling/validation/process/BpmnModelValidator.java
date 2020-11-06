@@ -31,7 +31,7 @@ public interface BpmnModelValidator extends ModelValidationErrorProducer {
     Stream<ModelValidationError> validate(BpmnModel bpmnModel,
                                           ValidationContext validationContext);
 
-    default <T extends FlowElement> Stream<T> getTasks(BpmnModel bpmnModel,
+    default <T extends FlowElement> Stream<T> getFlowElements(BpmnModel bpmnModel,
                                                        Class<T> taskType) {
         return bpmnModel.getProcesses()
                 .stream()

@@ -49,38 +49,22 @@ public class BpmnModelIncomingOutgoingFlowValidatorTest {
         SequenceFlow incomingFlow = new SequenceFlow();
         startEvent.getIncomingFlows().add(incomingFlow);
 
+        assertThat(startEvent.getOutgoingFlows()).isEmpty();
         assertThat(bpmnModelIncomingOutgoingFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
             .contains(BpmnModelIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM);
-
-        assertThat(startEvent.getIncomingFlows()).isNotEmpty();
     }
 
     @Test
     public void should_returnError_when_startEventIncomingFlowIsNotEmpty() {
         BpmnModel bpmnModel = createOneTaskTestProcess();
         StartEvent startEvent = (StartEvent) bpmnModel.getMainProcess().getFlowElement("start");
-        startEvent.setIncomingFlows(new ArrayList<>());
-        SequenceFlow OutgoingFlow = new SequenceFlow();
-        startEvent.getOutgoingFlows().add(OutgoingFlow);
-
-        assertThat(bpmnModelIncomingOutgoingFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
-            .contains(BpmnModelIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM);
-
-        assertThat(startEvent.getOutgoingFlows()).isNotEmpty();
-    }
-
-    @Test
-    public void should_returnError_when_endEventOutgoingFlowIsNotEmpty() {
-        BpmnModel bpmnModel = createOneTaskTestProcess();
-        EndEvent endEvent = (EndEvent) bpmnModel.getMainProcess().getFlowElement("theEnd");
-        endEvent.setOutgoingFlows(new ArrayList<>());
+        startEvent.setOutgoingFlows(new ArrayList<>());
         SequenceFlow incomingFlow = new SequenceFlow();
-        endEvent.getIncomingFlows().add(incomingFlow);
+        startEvent.getIncomingFlows().add(incomingFlow);
 
+        assertThat(startEvent.getIncomingFlows()).isNotEmpty();
         assertThat(bpmnModelIncomingOutgoingFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
-            .contains(BpmnModelIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM);
-
-        assertThat(endEvent.getIncomingFlows()).isNotEmpty();
+            .contains(BpmnModelIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM);
     }
 
     @Test
@@ -91,10 +75,22 @@ public class BpmnModelIncomingOutgoingFlowValidatorTest {
         SequenceFlow OutgoingFlow = new SequenceFlow();
         endEvent.getOutgoingFlows().add(OutgoingFlow);
 
+        assertThat(endEvent.getIncomingFlows()).isEmpty();
         assertThat(bpmnModelIncomingOutgoingFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
             .contains(BpmnModelIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM);
+    }
+
+    @Test
+    public void should_returnError_when_endEventOutgoingFlowIsNotEmpty() {
+        BpmnModel bpmnModel = createOneTaskTestProcess();
+        EndEvent endEvent = (EndEvent) bpmnModel.getMainProcess().getFlowElement("theEnd");
+        endEvent.setIncomingFlows(new ArrayList<>());
+        SequenceFlow outgoingFlow = new SequenceFlow();
+        endEvent.getOutgoingFlows().add(outgoingFlow);
 
         assertThat(endEvent.getOutgoingFlows()).isNotEmpty();
+        assertThat(bpmnModelIncomingOutgoingFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
+            .contains(BpmnModelIncomingOutgoingFlowValidator.OUTGOING_FLOW_ON_END_EVENT_PROBLEM);
     }
 
     @Test
