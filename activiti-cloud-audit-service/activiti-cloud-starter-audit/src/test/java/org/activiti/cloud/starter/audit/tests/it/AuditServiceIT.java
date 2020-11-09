@@ -1068,8 +1068,8 @@ public class AuditServiceIT {
         deployment.setVersion(1);
         deployment.setName("SpringAutoDeployment");
         
-        CloudApplicationDeployedEventImpl applicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
-        testEvents.add(applicationDeployedEvent);
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        testEvents.add(cloudApplicationDeployedEvent);
         
         return testEvents;
     }
@@ -1159,9 +1159,9 @@ public class AuditServiceIT {
         deployment.setVersion(1);
         deployment.setName("SpringAutoDeployment");
 
-        CloudApplicationDeployedEventImpl applicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
-        applicationDeployedEvent.setAppName("EventApplicationName");
-        coveredEvents.add(applicationDeployedEvent);
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        cloudApplicationDeployedEvent.setAppName("EventApplicationName");
+        coveredEvents.add(cloudApplicationDeployedEvent);
 
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
@@ -1178,16 +1178,16 @@ public class AuditServiceIT {
             Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
 
-           assertThat(retrievedEvents)
+            assertThat(retrievedEvents)
                     .extracting(
                             CloudRuntimeEvent::getEventType,
-                            event -> ((CloudApplicationDeployedEvent)event).getEntity().getId(),
-                            event -> ((CloudApplicationDeployedEvent)event).getEntity().getName(),
-                            event -> ((CloudApplicationDeployedEvent)event).getEntity().getVersion())
-                            .contains(tuple(applicationDeployedEvent.getEventType(),
-                            applicationDeployedEvent.getEntity().getId(),
-                            applicationDeployedEvent.getEntity().getName(),
-                            applicationDeployedEvent.getEntity().getVersion()));
+                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getId(),
+                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getName(),
+                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getVersion())
+                    .contains(tuple(cloudApplicationDeployedEvent.getEventType(),
+                            cloudApplicationDeployedEvent.getEntity().getId(),
+                            cloudApplicationDeployedEvent.getEntity().getName(),
+                            cloudApplicationDeployedEvent.getEntity().getVersion()));
         });
     }
 }
