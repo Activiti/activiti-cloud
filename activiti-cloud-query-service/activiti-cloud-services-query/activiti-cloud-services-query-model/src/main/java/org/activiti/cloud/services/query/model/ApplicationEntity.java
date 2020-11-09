@@ -19,10 +19,11 @@ import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.activiti.cloud.api.process.model.CloudApplication;
 
 @Entity(name = "Application")
 @Table(name = "APPLICATION")
-public class ApplicationEntity {
+public class ApplicationEntity implements CloudApplication{
     @Id
     private String id;
     private String version;

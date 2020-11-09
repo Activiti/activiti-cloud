@@ -16,6 +16,8 @@
 package org.activiti.cloud.conf;
 
 import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
+import org.activiti.cloud.services.query.rest.ApplicationAdminController;
+import org.activiti.cloud.services.query.rest.ApplicationController;
 import org.activiti.cloud.services.query.rest.CommonExceptionHandlerQuery;
 import org.activiti.cloud.services.query.rest.ServiceTaskIntegrationContextAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionAdminController;
@@ -66,7 +68,9 @@ import org.springframework.context.annotation.Import;
     TaskVariableController.class,
     ServiceTaskAdminController.class,
     ProcessInstanceServiceTasksAdminController.class,
-    ServiceTaskIntegrationContextAdminController.class
+    ServiceTaskIntegrationContextAdminController.class,
+    ApplicationController.class,
+    ApplicationAdminController.class
 })
 public class QueryRestControllersAutoConfiguration {
 
