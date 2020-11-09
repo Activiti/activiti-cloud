@@ -364,6 +364,32 @@ public class ModelValidationControllerIT {
     }
 
     @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelIntermediateFlowNodeWithInvalidFlow() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/invalid-intermediate-flowNode-flow.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/invalid-intermediate-flowNode-flow.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(12)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getValidatorSetName)
+                .contains(tuple("Intermediate Flow node has no incoming flow",
+                                "BPMN sequence flow validator"),
+                          tuple("Intermediate Flow node has no outgoing flow",
+                                "BPMN sequence flow validator"));
+    }
+
+    @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidCallActivityVariable() throws Exception {
         byte[] validContent = resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml");
         Model processModel = createModel(validContent);
