@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.audit.tests.it;
 
 import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
@@ -31,6 +32,7 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ApplicationDeployedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationErrorReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationRequestedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationResultReceivedEventConverter;
@@ -176,6 +178,8 @@ public class APIEventToEntityConvertersIT {
         converter = eventConverters.getConverterByEventTypeName(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name());
         assertThat(converter).isNotNull().isInstanceOf(IntegrationErrorReceivedEventConverter.class);
 
+        converter = eventConverters.getConverterByEventTypeName(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name());
+        assertThat(converter).isNotNull().isInstanceOf(ApplicationDeployedEventConverter.class);
 
     }
 
