@@ -286,7 +286,7 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithEmptySequenceFlow() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidSequenceFlow() throws Exception {
         byte[] validContent = resourceAsByteArray("process/invalid-sequence-flow.bpmn20.xml");
         Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
@@ -302,17 +302,12 @@ public class ModelValidationControllerIT {
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-                .hasSize(12)
-                .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getValidatorSetName)
-                .contains(tuple("Sequence flow has no source reference",
-                                "BPMN sequence flow validator"),
-                          tuple("Sequence flow has no target reference",
-                                "BPMN sequence flow validator"));
+                .extracting(ModelValidationError::getProblem)
+                .contains("Sequence flow has no source reference", "Sequence flow has no target reference");
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessModelStartEventWithInvalidFlow() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithInvalidFlow() throws Exception {
         byte[] validContent = resourceAsByteArray("process/invalid-startEvent-flow.bpmn20.xml");
         Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
@@ -328,13 +323,16 @@ public class ModelValidationControllerIT {
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-                .hasSize(12)
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getValidatorSetName)
-                .contains(tuple("Intermediate Flow node has no outgoing flow",
-                                "BPMN sequence flow validator"),
-                          tuple("Intermediate Flow node Start event should not have incoming flow",
-                                "BPMN sequence flow validator"));
+                .contains(tuple("Start event has no outgoing flow",
+                                "BPMN Start event validator"),
+                          tuple("Start event should not have incoming flow",
+                              "BPMN Start event validator"),
+                          tuple("End event has no incoming flow",
+                              "BPMN End event validator"),
+                          tuple("Intermediate Flow node has no incoming flow",
+                                "BPMN Intermediate Flow node validator"));
     }
 
     @Test
@@ -380,7 +378,7 @@ public class ModelValidationControllerIT {
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-                .hasSize(12)
+                .hasSize(6)
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getValidatorSetName)
                 .contains(tuple("Intermediate Flow node has no incoming flow",

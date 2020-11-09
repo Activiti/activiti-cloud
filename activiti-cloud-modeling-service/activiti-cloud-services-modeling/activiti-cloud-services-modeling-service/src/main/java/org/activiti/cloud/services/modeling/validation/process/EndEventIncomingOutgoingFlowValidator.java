@@ -25,11 +25,11 @@ import java.util.List;
 
 public class EndEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValidator {
 
-    public static final String NO_INCOMING_FLOW_PROBLEM = "Intermediate Flow node has no incoming flow";
-    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Intermediate Flow node has to have an incoming flow";
-    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM = "Intermediate Flow node End event should not have outgoing flow";
-    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION = "Intermediate Flow node End event should not have outgoing flow";
-    public static final String INTERMEDIATE_FLOW_VALIDATOR_NAME = "BPMN Intermediate Flow node validator";
+    public static final String NO_INCOMING_FLOW_PROBLEM = "End event has no incoming flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "End event has to have an incoming flow";
+    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM = "End event should not have outgoing flow";
+    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION = "End event should not have outgoing flow";
+    public static final String INTERMEDIATE_FLOW_VALIDATOR_NAME = "BPMN End event validator";
 
     @Override
     public List<ModelValidationError> validate(FlowNode flowNode) {

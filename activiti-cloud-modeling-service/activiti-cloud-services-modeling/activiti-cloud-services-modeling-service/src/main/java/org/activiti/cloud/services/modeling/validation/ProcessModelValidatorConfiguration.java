@@ -39,8 +39,11 @@ import org.activiti.cloud.services.modeling.validation.process.BpmnModelSequence
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUserTaskAssigneeValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelValidator;
+import org.activiti.cloud.services.modeling.validation.process.EndEventIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.FlowNodeFlowsValidator;
+import org.activiti.cloud.services.modeling.validation.process.IntermediateFlowNodeIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.ProcessModelValidator;
+import org.activiti.cloud.services.modeling.validation.process.StartEventIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectConsistencyValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.validation.ProcessValidator;
@@ -183,4 +186,21 @@ public class ProcessModelValidatorConfiguration {
         return new BpmnModelIncomingOutgoingFlowValidator(flowNodeFlowsValidators);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public StartEventIncomingOutgoingFlowValidator startEventIncomingOutgoingFlowValidator() {
+        return new StartEventIncomingOutgoingFlowValidator();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public EndEventIncomingOutgoingFlowValidator endEventIncomingOutgoingFlowValidator() {
+        return new EndEventIncomingOutgoingFlowValidator();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IntermediateFlowNodeIncomingOutgoingFlowValidator intermediateFlowNodeIncomingOutgoingFlowValidator() {
+        return new IntermediateFlowNodeIncomingOutgoingFlowValidator();
+    }
 }
