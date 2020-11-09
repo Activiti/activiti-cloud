@@ -308,10 +308,10 @@ public class ModelValidationControllerIT {
 
     @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithInvalidFlow() throws Exception {
-        byte[] validContent = resourceAsByteArray("process/invalid-startEvent-flow.bpmn20.xml");
+        byte[] validContent = resourceAsByteArray("process/invalid-flows.bpmn20.xml");
         Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
-                                                      resourceAsByteArray("process/invalid-startEvent-flow.bpmn20.xml"));
+                                                      resourceAsByteArray("process/invalid-flows.bpmn20.xml"));
 
         final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                                                       processModel.getId())
@@ -333,58 +333,6 @@ public class ModelValidationControllerIT {
                               "BPMN End event validator"),
                           tuple("Intermediate Flow node has no incoming flow",
                                 "BPMN Intermediate Flow node validator"));
-    }
-
-    @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessModelEndEventWithInvalidFlow() throws Exception {
-        byte[] validContent = resourceAsByteArray("process/invalid-endEvent-flow.bpmn20.xml");
-        Model processModel = createModel(validContent);
-        MockMultipartFile file = multipartProcessFile(processModel,
-                                                      resourceAsByteArray("process/invalid-endEvent-flow.bpmn20.xml"));
-
-        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
-                                                                      processModel.getId())
-                                                                    .file(file));
-
-        resultActions.andExpect(status().isBadRequest());
-
-        final Exception resolvedException = resultActions.andReturn().getResolvedException();
-        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
-        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
-        assertThat(semanticModelValidationException.getValidationErrors())
-                .hasSize(12)
-                .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getValidatorSetName)
-                .contains(tuple("Intermediate Flow node has no incoming flow",
-                                "BPMN sequence flow validator"),
-                          tuple("Intermediate Flow node End event should not have outgoing flow",
-                                "BPMN sequence flow validator"));
-    }
-
-    @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessModelIntermediateFlowNodeWithInvalidFlow() throws Exception {
-        byte[] validContent = resourceAsByteArray("process/invalid-intermediate-flowNode-flow.bpmn20.xml");
-        Model processModel = createModel(validContent);
-        MockMultipartFile file = multipartProcessFile(processModel,
-                                                      resourceAsByteArray("process/invalid-intermediate-flowNode-flow.bpmn20.xml"));
-
-        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
-                                                                      processModel.getId())
-                                                                    .file(file));
-
-        resultActions.andExpect(status().isBadRequest());
-
-        final Exception resolvedException = resultActions.andReturn().getResolvedException();
-        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
-        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
-        assertThat(semanticModelValidationException.getValidationErrors())
-                .hasSize(6)
-                .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getValidatorSetName)
-                .contains(tuple("Intermediate Flow node has no incoming flow",
-                                "BPMN sequence flow validator"),
-                          tuple("Intermediate Flow node has no outgoing flow",
-                                "BPMN sequence flow validator"));
     }
 
     @Test
