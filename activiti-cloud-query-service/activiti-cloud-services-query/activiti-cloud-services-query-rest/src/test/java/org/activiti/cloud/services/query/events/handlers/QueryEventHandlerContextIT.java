@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Map;
 
 import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
@@ -73,7 +74,8 @@ public class QueryEventHandlerContextIT {
                 SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name(),
                 IntegrationEvents.INTEGRATION_REQUESTED.name(),
                 IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name(),
-                IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()
+                IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name(),
+                ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name()
         );
         assertThat(handlers.get(ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name())).isInstanceOf(ProcessDeployedEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())).isInstanceOf(ProcessCreatedEventHandler.class);
@@ -104,5 +106,6 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(IntegrationEvents.INTEGRATION_REQUESTED.name())).isInstanceOf(IntegrationRequestedEventHandler.class);
         assertThat(handlers.get(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name())).isInstanceOf(IntegrationResultReceivedEventHandler.class);
         assertThat(handlers.get(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name())).isInstanceOf(IntegrationErrorReceivedEventHandler.class);
+        assertThat(handlers.get(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name())).isInstanceOf(ApplicationDeployedEventHandler.class);
     }
 }
