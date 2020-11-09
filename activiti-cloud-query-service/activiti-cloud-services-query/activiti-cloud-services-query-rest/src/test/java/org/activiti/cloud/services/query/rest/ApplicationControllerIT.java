@@ -18,11 +18,9 @@ package org.activiti.cloud.services.query.rest;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.querydsl.core.types.Predicate;
 import java.util.Collections;
 import java.util.UUID;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
@@ -32,10 +30,8 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
-import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
-import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,9 +73,6 @@ public class ApplicationControllerIT {
 
     @MockBean
     private SecurityPoliciesProperties securityPoliciesProperties;
-
-    @MockBean
-    private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @MockBean
     private TaskRepository taskRepository;
