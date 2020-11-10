@@ -21,6 +21,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployed
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +47,7 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class QueryApplicationEntityIT {
 
     private static final String APPS_URL = "/v1/applications";

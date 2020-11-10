@@ -30,7 +30,6 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
-import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.Test;
