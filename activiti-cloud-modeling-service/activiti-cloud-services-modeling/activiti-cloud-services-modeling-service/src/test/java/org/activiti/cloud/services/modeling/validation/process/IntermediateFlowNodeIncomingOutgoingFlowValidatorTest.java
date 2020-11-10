@@ -17,12 +17,14 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.UserTask;
+import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
 
@@ -39,8 +41,13 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         UserTask userTask = (UserTask) bpmnModel.getMainProcess().getFlowElement("theTask");
         userTask.setIncomingFlows(new ArrayList<>());
 
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask)).extracting("problem")
-            .contains(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM);
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getValidatorSetName)
+            .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM,
+                            IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
+                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME));
     }
 
     @Test
@@ -49,7 +56,12 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         UserTask userTask = (UserTask) bpmnModel.getMainProcess().getFlowElement("theTask");
         userTask.setOutgoingFlows(new ArrayList<>());
 
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask)).extracting("problem")
-            .contains(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM);
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getValidatorSetName)
+            .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
+                            IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
+                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME));
     }
 }

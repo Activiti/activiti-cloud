@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import org.activiti.bpmn.model.EndEvent;
+import org.activiti.bpmn.model.EventSubProcess;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -30,7 +31,7 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNo
     public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Intermediate Flow node has to have an incoming flow";
     public static final String NO_OUTGOING_FLOW_PROBLEM = "Intermediate Flow node has no outgoing flow";
     public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Intermediate Flow node has to have an outgoing flow";
-    public static final String INTERMEDIATE_FLOW_VALIDATOR_NAME = "BPMN Intermediate Flow node validator";
+    public static final String INTERMEDIATE_FLOWS_VALIDATOR_NAME = "BPMN Intermediate Flow node validator";
 
     @Override
     public List<ModelValidationError> validate(FlowNode flowNode) {
@@ -39,19 +40,21 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNo
         if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
             errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
                 NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
-                INTERMEDIATE_FLOW_VALIDATOR_NAME));
+                INTERMEDIATE_FLOWS_VALIDATOR_NAME));
         }
 
         if (CollectionUtils.isEmpty(flowNode.getOutgoingFlows())) {
             errors.add(createModelValidationError(NO_OUTGOING_FLOW_PROBLEM,
                 NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
-                INTERMEDIATE_FLOW_VALIDATOR_NAME));
+                INTERMEDIATE_FLOWS_VALIDATOR_NAME));
         }
         return errors;
     }
 
     @Override
     public boolean canValidate(FlowNode flowNode) {
-        return !(flowNode instanceof StartEvent) && !(flowNode instanceof EndEvent);
+        return !(flowNode instanceof StartEvent) &&
+            !(flowNode instanceof EndEvent) &&
+            !(flowNode instanceof EventSubProcess);
     }
 }

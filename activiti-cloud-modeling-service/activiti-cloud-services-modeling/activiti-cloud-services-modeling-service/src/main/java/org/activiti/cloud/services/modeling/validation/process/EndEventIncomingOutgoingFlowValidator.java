@@ -29,7 +29,7 @@ public class EndEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValid
     public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "End event has to have an incoming flow";
     public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM = "End event should not have outgoing flow";
     public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION = "End event should not have outgoing flow";
-    public static final String INTERMEDIATE_FLOW_VALIDATOR_NAME = "BPMN End event validator";
+    public static final String ENDEVENT_FLOWS_VALIDATOR_NAME = "BPMN End event validator";
 
     @Override
     public List<ModelValidationError> validate(FlowNode flowNode) {
@@ -38,12 +38,12 @@ public class EndEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValid
         if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
             errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
                 NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
-                INTERMEDIATE_FLOW_VALIDATOR_NAME));
+                ENDEVENT_FLOWS_VALIDATOR_NAME));
         }
         if (CollectionUtils.isNotEmpty(flowNode.getOutgoingFlows())) {
             errors.add(createModelValidationError(OUTGOING_FLOW_ON_END_EVENT_PROBLEM,
                 OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION,
-                INTERMEDIATE_FLOW_VALIDATOR_NAME));
+                ENDEVENT_FLOWS_VALIDATOR_NAME));
         }
         return errors;
     }

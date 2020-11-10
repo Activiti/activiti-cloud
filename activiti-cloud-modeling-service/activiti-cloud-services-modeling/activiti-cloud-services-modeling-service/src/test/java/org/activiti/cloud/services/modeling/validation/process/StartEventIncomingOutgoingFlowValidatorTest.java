@@ -18,12 +18,14 @@ package org.activiti.cloud.services.modeling.validation.process;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.SequenceFlow;
 import org.activiti.bpmn.model.StartEvent;
+import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class StartEventIncomingOutgoingFlowValidatorTest {
 
@@ -40,8 +42,13 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
         StartEvent startEvent = (StartEvent) bpmnModel.getMainProcess().getFlowElement("start");
         startEvent.setOutgoingFlows(new ArrayList<>());
 
-        assertThat(startEventIncomingOutgoingFlowValidator.validate(startEvent)).extracting("problem")
-            .contains(StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM);
+        assertThat(startEventIncomingOutgoingFlowValidator.validate(startEvent))
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getValidatorSetName)
+            .contains(tuple(StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
+                            StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
+                            StartEventIncomingOutgoingFlowValidator.STARTEVENT_FLOWS_VALIDATOR_NAME));
     }
 
     @Test
@@ -51,7 +58,12 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
         SequenceFlow incomingFlow = new SequenceFlow();
         startEvent.getIncomingFlows().add(incomingFlow);
 
-        assertThat(startEventIncomingOutgoingFlowValidator.validate(startEvent)).extracting("problem")
-            .contains(StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM);
+        assertThat(startEventIncomingOutgoingFlowValidator.validate(startEvent))
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getValidatorSetName)
+            .contains(tuple(StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM,
+                            StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION,
+                            StartEventIncomingOutgoingFlowValidator.STARTEVENT_FLOWS_VALIDATOR_NAME));
     }
 }

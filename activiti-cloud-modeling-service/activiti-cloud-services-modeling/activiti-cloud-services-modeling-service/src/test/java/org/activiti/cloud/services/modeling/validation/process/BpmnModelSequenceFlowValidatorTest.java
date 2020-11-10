@@ -17,11 +17,13 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.SequenceFlow;
+import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class BpmnModelSequenceFlowValidatorTest {
 
@@ -41,8 +43,13 @@ public class BpmnModelSequenceFlowValidatorTest {
         SequenceFlow sequenceFlow = (SequenceFlow) bpmnModel.getMainProcess().getFlowElement("testSequenceId");
         sequenceFlow.setSourceRef(null);
 
-        assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
-            .contains(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM);
+        assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext))
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getValidatorSetName)
+            .contains(tuple(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM,
+                            BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM_DESCRIPTION,
+                            BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME));
     }
 
     @Test
@@ -51,19 +58,12 @@ public class BpmnModelSequenceFlowValidatorTest {
         SequenceFlow sequenceFlow = (SequenceFlow) bpmnModel.getMainProcess().getFlowElement("testSequenceId");
         sequenceFlow.setTargetRef(null);
 
-        assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
-            .contains(BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM);
-    }
-
-    @Test
-    public void should_returnError_when_noSourceAndTargetReferenceAreSpecified() {
-        BpmnModel bpmnModel = CreateBpmnModelTestHelper.createOneTaskTestProcess();
-        SequenceFlow sequenceFlow = (SequenceFlow) bpmnModel.getMainProcess().getFlowElement("testSequenceId");
-        sequenceFlow.setSourceRef(null);
-        sequenceFlow.setTargetRef(null);
-
-        assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext)).extracting("problem")
-            .contains(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM,
-                BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM);
+        assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext))
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getValidatorSetName)
+            .contains(tuple(BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM,
+                            BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM_DESCRIPTION,
+                            BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME));
     }
 }

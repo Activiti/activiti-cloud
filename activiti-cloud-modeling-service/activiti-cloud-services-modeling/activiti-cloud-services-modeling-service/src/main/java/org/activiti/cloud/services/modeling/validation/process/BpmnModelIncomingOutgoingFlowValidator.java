@@ -40,13 +40,13 @@ public class BpmnModelIncomingOutgoingFlowValidator implements BpmnModelValidato
         List<ModelValidationError> errors = new ArrayList<>();
         getFlowElements(bpmnModel,
             FlowNode.class).forEach(flowNode -> {
-            errors.addAll(validateTaskFlow(flowNode));
+            errors.addAll(validateFlowNode(flowNode));
         });
 
         return errors.stream();
     }
 
-    private List<ModelValidationError> validateTaskFlow(FlowNode flowNode) {
+    private List<ModelValidationError> validateFlowNode(FlowNode flowNode) {
 
         List<ModelValidationError> errors = new ArrayList<>();
 
