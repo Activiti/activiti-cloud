@@ -54,7 +54,7 @@
              stripComments="true"/>
   </changeSet>
 
-  <changeSet author="activiti-audit" id="oracle-schema-m11" dbms="oracle">
+  <changeSet author="activiti-audit" id="alter4-oracle-schema-m11" dbms="oracle">
     <sqlFile dbms="oracle"
              encoding="utf8"
              path="changelog/04-alter.oracle.schema.m11.sql"
@@ -129,7 +129,7 @@
       stripComments="true"/>
   </changeSet>
 
-  <changeSet author="activiti-audit" id="alter-schema-m11" dbms="postgresql">
+  <changeSet author="activiti-audit" id="alter7-schema-m11" dbms="postgresql">
     <sqlFile dbms="postgresql"
              encoding="utf8"
              path="changelog/07-alter.pg.schema.m11.sql"
