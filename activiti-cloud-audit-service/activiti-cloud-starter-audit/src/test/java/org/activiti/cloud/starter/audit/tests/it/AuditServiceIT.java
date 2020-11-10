@@ -34,6 +34,7 @@ import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.events.MessageSubscriptionCancelledEvent;
+import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.TimerPayload;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
@@ -45,6 +46,7 @@ import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.api.runtime.model.impl.DeploymentImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
@@ -56,6 +58,7 @@ import org.activiti.cloud.api.model.shared.impl.conf.IgnoredRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
+import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
@@ -79,6 +82,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployedEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
@@ -1058,8 +1062,15 @@ public class AuditServiceIT {
                                                                                                                                Arrays.asList(error.getCause()
                                                                                                                                                   .getStackTrace()));
         testEvents.add(cloudIntegrationErrorReceivedEvent);
-
-
+        
+        DeploymentImpl deployment = new DeploymentImpl();
+        deployment.setId("deploymentId");
+        deployment.setVersion(1);
+        deployment.setName("SpringAutoDeployment");
+        
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        testEvents.add(cloudApplicationDeployedEvent);
+        
         return testEvents;
     }
 
@@ -1136,5 +1147,47 @@ public class AuditServiceIT {
         timerPayload.setExceptionMessage("Any message");
 
         return timerPayload;
+    }
+
+    @Test
+    public void shouldGetApplicationDeployedEvent() {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = new ArrayList<>();
+
+        DeploymentImpl deployment = new DeploymentImpl();
+        deployment.setId("deploymentId");
+        deployment.setVersion(1);
+        deployment.setName("SpringAutoDeployment");
+
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        cloudApplicationDeployedEvent.setAppName("EventApplicationName");
+        coveredEvents.add(cloudApplicationDeployedEvent);
+
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("eventType",
+                    ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name());
+
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
+            
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(1);
+
+            assertThat(retrievedEvents)
+                    .extracting(
+                            CloudRuntimeEvent::getEventType,
+                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getId(),
+                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getName(),
+                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getVersion())
+                    .contains(tuple(cloudApplicationDeployedEvent.getEventType(),
+                            cloudApplicationDeployedEvent.getEntity().getId(),
+                            cloudApplicationDeployedEvent.getEntity().getName(),
+                            cloudApplicationDeployedEvent.getEntity().getVersion()));
+        });
     }
 }

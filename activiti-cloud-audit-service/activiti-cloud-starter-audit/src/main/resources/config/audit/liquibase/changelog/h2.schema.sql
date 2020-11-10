@@ -46,5 +46,6 @@ create table audit_event
     error_class_name		   varchar(255),
     integration_context		   text,
     stack_trace_elements	   text,
+    deployment                 text,
     primary key (id)
 );

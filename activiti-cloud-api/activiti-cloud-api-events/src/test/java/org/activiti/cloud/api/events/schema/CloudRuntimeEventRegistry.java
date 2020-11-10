@@ -25,6 +25,7 @@ import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
@@ -111,6 +112,7 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudVariableCreatedEventImpl());
         eventImplementations.add(new CloudVariableUpdatedEventImpl());
         eventImplementations.add(new CloudVariableDeletedEventImpl());
+        eventImplementations.add(new CloudApplicationDeployedEventImpl());
         return eventImplementations
                 .stream()
                 .collect(Collectors.toMap(
