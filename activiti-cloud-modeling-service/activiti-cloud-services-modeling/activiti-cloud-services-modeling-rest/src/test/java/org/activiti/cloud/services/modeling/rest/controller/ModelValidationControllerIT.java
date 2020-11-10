@@ -349,34 +349,26 @@ public class ModelValidationControllerIT {
         resultActions.andExpect(status().is2xxSuccessful());
     }
 
-//    @Test
-//    public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithInvalidEmbeddedSubProcessFlow() throws Exception {
-//        byte[] validContent = resourceAsByteArray("process/invalid-embedded-sub-process.bpmn20.xml");
-//        Model processModel = createModel(validContent);
-//        MockMultipartFile file = multipartProcessFile(processModel,
-//            resourceAsByteArray("process/invalid-embedded-sub-process.bpmn20.xml"));
-//
-//        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
-//            processModel.getId())
-//            .file(file));
-//
-//        resultActions.andExpect(status().isBadRequest());
-//
-//        final Exception resolvedException = resultActions.andReturn().getResolvedException();
-//        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
-//        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
-//        assertThat(semanticModelValidationException.getValidationErrors())
-//            .extracting(ModelValidationError::getProblem,
-//                ModelValidationError::getValidatorSetName)
-//            .contains(tuple("Start event has no outgoing flow",
-//                "BPMN Start event validator"),
-//                tuple("Start event should not have incoming flow",
-//                    "BPMN Start event validator"),
-//                tuple("End event has no incoming flow",
-//                    "BPMN End event validator"),
-//                tuple("Intermediate Flow node has no incoming flow",
-//                    "BPMN Intermediate Flow node validator"));
-//    }
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithInvalidEmbeddedSubProcessFlow() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/invalid-embedded-sub-process.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+            resourceAsByteArray("process/invalid-embedded-sub-process.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+            processModel.getId())
+            .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .extracting(ModelValidationError::getProblem)
+            .contains("Intermediate Flow node has no incoming flow", "Intermediate Flow node has no outgoing flow");
+    }
 
     @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidCallActivityVariable() throws Exception {
