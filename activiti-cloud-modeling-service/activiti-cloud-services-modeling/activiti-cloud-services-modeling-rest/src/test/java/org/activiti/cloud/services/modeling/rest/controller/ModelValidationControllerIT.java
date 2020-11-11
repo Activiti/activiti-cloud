@@ -371,6 +371,27 @@ public class ModelValidationControllerIT {
     }
 
     @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithoutEndEvent() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/process-without-end-event.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+            resourceAsByteArray("process/process-without-end-event.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+            processModel.getId())
+            .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .extracting(ModelValidationError::getProblem, ModelValidationError::getDescription)
+            .contains(tuple("Intermediate Flow node has no outgoing flow", "Intermediate Flow node has to have an outgoing flow"));
+    }
+
+    @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidCallActivityVariable() throws Exception {
         byte[] validContent = resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml");
         Model processModel = createModel(validContent);
