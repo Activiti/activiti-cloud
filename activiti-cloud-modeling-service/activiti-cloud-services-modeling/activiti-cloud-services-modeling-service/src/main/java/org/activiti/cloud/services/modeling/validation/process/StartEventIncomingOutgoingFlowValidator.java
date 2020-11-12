@@ -28,7 +28,7 @@ public class StartEventIncomingOutgoingFlowValidator implements FlowNodeFlowsVal
     public static final String NO_OUTGOING_FLOW_PROBLEM = "Start event has no outgoing flow";
     public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Start event has to have an outgoing flow";
     public static final String INCOMING_FLOW_ON_START_EVENT_PROBLEM = "Start event should not have incoming flow";
-    public static final String INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION = "Start event has to have an empty incoming flow";
+    public static final String INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION = "Start event should not have incoming flow";
     public static final String START_EVENT_FLOWS_VALIDATOR_NAME = "BPMN Start event validator";
 
     @Override

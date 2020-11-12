@@ -31,9 +31,9 @@ import java.util.stream.Stream;
 public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
 
     public static final String NO_SOURCE_REF_PROBLEM = "Sequence flow has no source reference";
-    public static final String NO_SOURCE_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have an incoming flow";
+    public static final String NO_SOURCE_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have a source reference";
     public static final String NO_TARGET_REF_PROBLEM = "Sequence flow has no target reference";
-    public static final String NO_TARGET_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have an outgoing flow";
+    public static final String NO_TARGET_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have a target reference";
     public static final String SEQUENCE_FLOW_VALIDATOR_NAME = "BPMN sequence flow validator";
 
     @Override
