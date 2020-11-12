@@ -36,9 +36,12 @@ github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	rm -rf $$GITHUB_CHARTS_DIR || echo "try to remove $$GITHUB_CHARTS_DIR"
 	git clone -b "$(GITHUB_CHARTS_BRANCH)" https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-helm-charts.git $(GITHUB_CHARTS_DIR) --depth=1
-	cp "$(NAME)-$(VERSION).tgz" $(GITHUB_CHARTS_DIR)
+	mkdir $(GITHUB_CHARTS_DIR)/new-charts
+	cp "$(NAME)-$(VERSION).tgz" $(GITHUB_CHARTS_DIR)/new-charts
 	cd $(GITHUB_CHARTS_DIR) && \
-	   helm repo index . && \
+	   helm repo index new-charts --merge index.yaml && \
+	   cp new-charts/* . && \
+	   rm -fr new-charts && \
 	   git add . && \
 	   git status && \
 	   git commit -m "fix:(version) release $(NAME)-$(VERSION).tgz" && \
