@@ -29,7 +29,7 @@ public class StartEventIncomingOutgoingFlowValidator implements FlowNodeFlowsVal
     public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Start event has to have an outgoing flow";
     public static final String INCOMING_FLOW_ON_START_EVENT_PROBLEM = "Start event should not have incoming flow";
     public static final String INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION = "Start event has to have an empty incoming flow";
-    public static final String STARTEVENT_FLOWS_VALIDATOR_NAME = "BPMN Start event validator";
+    public static final String START_EVENT_FLOWS_VALIDATOR_NAME = "BPMN Start event validator";
 
     @Override
     public List<ModelValidationError> validate(FlowNode flowNode) {
@@ -38,12 +38,12 @@ public class StartEventIncomingOutgoingFlowValidator implements FlowNodeFlowsVal
         if (CollectionUtils.isEmpty(flowNode.getOutgoingFlows())) {
             errors.add(createModelValidationError(NO_OUTGOING_FLOW_PROBLEM,
                 NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
-                STARTEVENT_FLOWS_VALIDATOR_NAME));
+                START_EVENT_FLOWS_VALIDATOR_NAME));
         }
         if (CollectionUtils.isNotEmpty(flowNode.getIncomingFlows())) {
             errors.add(createModelValidationError(INCOMING_FLOW_ON_START_EVENT_PROBLEM,
                 INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION,
-                STARTEVENT_FLOWS_VALIDATOR_NAME));
+                START_EVENT_FLOWS_VALIDATOR_NAME));
         }
         return errors;
     }

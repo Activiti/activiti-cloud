@@ -49,7 +49,7 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
                         ModelValidationError::getValidatorSetName)
             .contains(tuple(StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
                             StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
-                            StartEventIncomingOutgoingFlowValidator.STARTEVENT_FLOWS_VALIDATOR_NAME));
+                            StartEventIncomingOutgoingFlowValidator.START_EVENT_FLOWS_VALIDATOR_NAME));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
                         ModelValidationError::getValidatorSetName)
             .contains(tuple(StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM,
                             StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION,
-                            StartEventIncomingOutgoingFlowValidator.STARTEVENT_FLOWS_VALIDATOR_NAME));
+                            StartEventIncomingOutgoingFlowValidator.START_EVENT_FLOWS_VALIDATOR_NAME));
     }
 
     @Test

@@ -336,7 +336,7 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_returnSuccessful_when_validatingProcessModelWithValidSubProcessFlow() throws Exception {
+    public void should_returnSuccessful_when_validatingProcessModelWithEventSubProcess() throws Exception {
         byte[] validContent = resourceAsByteArray("process/valid-event-subprocess.bpmn20.xml");
         Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
@@ -350,7 +350,7 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithInvalidEmbeddedSubProcessFlow() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithEmbeddedSubProcessWithoutIncomingAndOutgoingFlows() throws Exception {
         byte[] validContent = resourceAsByteArray("process/invalid-embedded-sub-process.bpmn20.xml");
         Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
