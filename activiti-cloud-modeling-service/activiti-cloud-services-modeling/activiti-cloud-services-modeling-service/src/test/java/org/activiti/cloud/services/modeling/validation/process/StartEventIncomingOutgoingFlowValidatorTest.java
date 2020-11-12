@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.EndEvent;
 import org.activiti.bpmn.model.SequenceFlow;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -65,5 +66,15 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
             .contains(tuple(StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM,
                             StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION,
                             StartEventIncomingOutgoingFlowValidator.STARTEVENT_FLOWS_VALIDATOR_NAME));
+    }
+
+    @Test
+    public void canValidate_should_returnTrue_when_itsAStartEvent() {
+        assertThat(startEventIncomingOutgoingFlowValidator.canValidate(new StartEvent())).isTrue();
+    }
+
+    @Test
+    public void canValidate_should_returnTrue_when_itsNotAStartEvent() {
+        assertThat(startEventIncomingOutgoingFlowValidator.canValidate(new EndEvent())).isFalse();
     }
 }

@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.validation.process;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.EndEvent;
 import org.activiti.bpmn.model.SequenceFlow;
+import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,4 +68,13 @@ public class EndEventIncomingOutgoingFlowValidatorTest {
                             EndEventIncomingOutgoingFlowValidator.ENDEVENT_FLOWS_VALIDATOR_NAME));
     }
 
+    @Test
+    public void canValidate_should_returnTrue_whenItsAnEndEvent() {
+        assertThat(endEventIncomingOutgoingFlowValidator.canValidate(new EndEvent())).isTrue();
+    }
+
+    @Test
+    public void canValidate_should_returnFalse_whenItsNotAnEndEvent() {
+        assertThat(endEventIncomingOutgoingFlowValidator.canValidate(new StartEvent())).isFalse();
+    }
 }

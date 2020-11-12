@@ -16,6 +16,10 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.EndEvent;
+import org.activiti.bpmn.model.EventSubProcess;
+import org.activiti.bpmn.model.StartEvent;
+import org.activiti.bpmn.model.SubProcess;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,5 +67,30 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
             .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
                             IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
                             IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME));
+    }
+
+    @Test
+    public void canValidate_should_returnTrue_whenItsNotStartEventEndEventOrEventSubprocess() {
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new UserTask())).isTrue();
+    }
+
+    @Test
+    public void canValidate_should_returnTrue_whenItsASubprocess() {
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new SubProcess())).isTrue();
+    }
+
+    @Test
+    public void canValidate_should_returnFalse_whenItsAStartEvent() {
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new StartEvent())).isFalse();
+    }
+
+    @Test
+    public void canValidate_should_returnFalse_whenItsAEndEvent() {
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new EndEvent())).isFalse();
+    }
+
+    @Test
+    public void canValidate_should_returnFalse_whenItsAEventSubprocess() {
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new EventSubProcess())).isFalse();
     }
 }
