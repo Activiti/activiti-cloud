@@ -1,0 +1,55 @@
+/*
+ * Copyright 2017-2020 Alfresco Software, Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.activiti.cloud.services.modeling.validation.process;
+
+import org.activiti.bpmn.model.EndEvent;
+import org.activiti.bpmn.model.FlowNode;
+import org.activiti.cloud.modeling.api.ModelValidationError;
+import org.apache.commons.collections.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class EndEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValidator {
+
+    public static final String NO_INCOMING_FLOW_PROBLEM = "End event has no incoming flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "End event has to have an incoming flow";
+    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM = "End event should not have outgoing flow";
+    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION = "End event should not have outgoing flow";
+    public static final String ENDEVENT_FLOWS_VALIDATOR_NAME = "BPMN End event validator";
+
+    @Override
+    public List<ModelValidationError> validate(FlowNode flowNode) {
+        List<ModelValidationError> errors = new ArrayList<>();
+
+        if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
+            errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
+                NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
+                ENDEVENT_FLOWS_VALIDATOR_NAME));
+        }
+        if (CollectionUtils.isNotEmpty(flowNode.getOutgoingFlows())) {
+            errors.add(createModelValidationError(OUTGOING_FLOW_ON_END_EVENT_PROBLEM,
+                OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION,
+                ENDEVENT_FLOWS_VALIDATOR_NAME));
+        }
+        return errors;
+    }
+
+    @Override
+    public boolean canValidate(FlowNode flowNode) {
+        return flowNode instanceof EndEvent;
+    }
+}

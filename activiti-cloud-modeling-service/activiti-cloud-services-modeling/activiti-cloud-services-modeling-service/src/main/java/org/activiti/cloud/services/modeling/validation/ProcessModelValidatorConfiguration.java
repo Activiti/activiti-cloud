@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.validation;
 
+import java.util.List;
 import java.util.Set;
 
 import org.activiti.cloud.modeling.api.ConnectorModelType;
@@ -32,11 +33,17 @@ import org.activiti.cloud.services.modeling.validation.extensions.TaskMappingsVa
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionMessageMappingValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelCallActivityValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelEngineValidator;
+import org.activiti.cloud.services.modeling.validation.process.BpmnModelIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelNameValidator;
+import org.activiti.cloud.services.modeling.validation.process.BpmnModelSequenceFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUserTaskAssigneeValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelValidator;
+import org.activiti.cloud.services.modeling.validation.process.EndEventIncomingOutgoingFlowValidator;
+import org.activiti.cloud.services.modeling.validation.process.FlowNodeFlowsValidator;
+import org.activiti.cloud.services.modeling.validation.process.IntermediateFlowNodeIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.ProcessModelValidator;
+import org.activiti.cloud.services.modeling.validation.process.StartEventIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectConsistencyValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.validation.ProcessValidator;
@@ -165,5 +172,35 @@ public class ProcessModelValidatorConfiguration {
                                          mpmnModelValidators,
                                          processModelContentConverter);
 
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BpmnModelSequenceFlowValidator bpmnModelSequenceFlowValidator() {
+        return new BpmnModelSequenceFlowValidator();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator(List<FlowNodeFlowsValidator> flowNodeFlowsValidators) {
+        return new BpmnModelIncomingOutgoingFlowValidator(flowNodeFlowsValidators);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public StartEventIncomingOutgoingFlowValidator startEventIncomingOutgoingFlowValidator() {
+        return new StartEventIncomingOutgoingFlowValidator();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public EndEventIncomingOutgoingFlowValidator endEventIncomingOutgoingFlowValidator() {
+        return new EndEventIncomingOutgoingFlowValidator();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IntermediateFlowNodeIncomingOutgoingFlowValidator intermediateFlowNodeIncomingOutgoingFlowValidator() {
+        return new IntermediateFlowNodeIncomingOutgoingFlowValidator();
     }
 }
