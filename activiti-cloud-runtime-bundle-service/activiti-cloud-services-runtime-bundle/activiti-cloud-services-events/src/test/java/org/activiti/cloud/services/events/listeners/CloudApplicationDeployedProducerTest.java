@@ -79,7 +79,7 @@ public class CloudApplicationDeployedProducerTest {
     }
 
     @Test
-    public void shouldSendMessageWithDeployedApplicationWhenWebApplicationTypeIsServlet() {
+    public void shouldSendMessageWithDeployedApplication() {
         //given
         Deployment deployment1 = mock(Deployment.class);
         Deployment deployment2 = mock(Deployment.class);

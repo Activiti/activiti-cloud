@@ -42,6 +42,7 @@ import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TAS
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_UPDATED;
+import static org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -71,6 +72,7 @@ import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
@@ -1110,4 +1112,23 @@ public class AuditProducerIT {
             null,
             responseType);
     }
+
+    @Test
+    public void shouldProduceEventsForApplicationDeployment() {
+        //when
+        List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+
+        assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+
+        //then
+        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = receivedEvents
+                .stream()
+                .filter(event -> APPLICATION_DEPLOYED.name().equals(event.getEventType().name()))
+                .map(CloudApplicationDeployedEvent.class::cast)
+                .collect(Collectors.toList());
+        assertThat(cloudApplicationDeployedEvents)
+                .extracting(event -> event.getEntity().getName())
+                .containsOnly("SpringAutoDeployment");
+    }
+
 }
