@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
+
 /**
  * Implementation of {@link BpmnModelValidator} for validating Sequence flow when empty source or target references are provided
  */
@@ -52,13 +54,13 @@ public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
         List<ModelValidationError> errors = new ArrayList<>();
         if (StringUtils.isEmpty(sequenceFlow.getSourceRef())) {
             errors.add(createModelValidationError(NO_SOURCE_REF_PROBLEM,
-                NO_SOURCE_REF_PROBLEM_DESCRIPTION,
+                format(NO_SOURCE_REF_PROBLEM_DESCRIPTION, sequenceFlow.getName(), sequenceFlow.getId()),
                 SEQUENCE_FLOW_VALIDATOR_NAME));
         }
 
         if (StringUtils.isEmpty(sequenceFlow.getTargetRef())) {
             errors.add(createModelValidationError(NO_TARGET_REF_PROBLEM,
-                NO_TARGET_REF_PROBLEM_DESCRIPTION,
+                format(NO_TARGET_REF_PROBLEM_DESCRIPTION, sequenceFlow.getName(), sequenceFlow.getId()),
                 SEQUENCE_FLOW_VALIDATOR_NAME));
         }
 

@@ -50,6 +50,13 @@ public class BpmnModelSequenceFlowValidatorTest {
             .contains(tuple(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM,
                             BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM_DESCRIPTION,
                             BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME));
+
+        assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext))
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription
+                        )
+            .contains(tuple(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM
+                            ));
     }
 
     @Test
