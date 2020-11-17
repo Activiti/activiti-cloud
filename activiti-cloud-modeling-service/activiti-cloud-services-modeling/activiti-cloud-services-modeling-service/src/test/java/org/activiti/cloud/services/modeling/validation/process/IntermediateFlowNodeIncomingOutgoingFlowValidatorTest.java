@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import org.activiti.bpmn.model.BoundaryEvent;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.EndEvent;
 import org.activiti.bpmn.model.EventSubProcess;
@@ -92,5 +93,10 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
     @Test
     public void canValidate_should_returnFalse_whenItsAEventSubprocess() {
         assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new EventSubProcess())).isFalse();
+    }
+
+    @Test
+    public void canValidate_should_returnFalse_whenItsABoundaryEvent() {
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new BoundaryEvent())).isFalse();
     }
 }
