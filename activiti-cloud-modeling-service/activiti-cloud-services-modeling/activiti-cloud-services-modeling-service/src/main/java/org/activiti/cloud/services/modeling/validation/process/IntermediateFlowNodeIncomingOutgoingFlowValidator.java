@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import org.activiti.bpmn.model.BoundaryEvent;
 import org.activiti.bpmn.model.EndEvent;
 import org.activiti.bpmn.model.EventSubProcess;
 import org.activiti.bpmn.model.FlowNode;
@@ -55,6 +56,7 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNo
     public boolean canValidate(FlowNode flowNode) {
         return !(flowNode instanceof StartEvent) &&
             !(flowNode instanceof EndEvent) &&
-            !(flowNode instanceof EventSubProcess);
+            !(flowNode instanceof EventSubProcess) &&
+            !(flowNode instanceof BoundaryEvent);
     }
 }
