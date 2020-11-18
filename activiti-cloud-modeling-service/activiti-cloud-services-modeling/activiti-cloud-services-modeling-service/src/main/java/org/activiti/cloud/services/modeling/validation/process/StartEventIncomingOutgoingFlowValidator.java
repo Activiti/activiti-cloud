@@ -23,12 +23,14 @@ import org.apache.commons.collections.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.String.format;
+
 public class StartEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValidator {
 
     public static final String NO_OUTGOING_FLOW_PROBLEM = "Start event has no outgoing flow";
-    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Start event has to have an outgoing flow";
+    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Start event id: '%s', name: '%s' has to have an outgoing flow";
     public static final String INCOMING_FLOW_ON_START_EVENT_PROBLEM = "Start event should not have incoming flow";
-    public static final String INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION = "Start event should not have incoming flow";
+    public static final String INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION = "Start event id: '%s', name: '%s' should not have incoming flow";
     public static final String START_EVENT_FLOWS_VALIDATOR_NAME = "BPMN Start event validator";
 
     @Override
@@ -37,12 +39,12 @@ public class StartEventIncomingOutgoingFlowValidator implements FlowNodeFlowsVal
 
         if (CollectionUtils.isEmpty(flowNode.getOutgoingFlows())) {
             errors.add(createModelValidationError(NO_OUTGOING_FLOW_PROBLEM,
-                NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
+                format(NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
                 START_EVENT_FLOWS_VALIDATOR_NAME));
         }
         if (CollectionUtils.isNotEmpty(flowNode.getIncomingFlows())) {
             errors.add(createModelValidationError(INCOMING_FLOW_ON_START_EVENT_PROBLEM,
-                INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION,
+                format(INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
                 START_EVENT_FLOWS_VALIDATOR_NAME));
         }
         return errors;

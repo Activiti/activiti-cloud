@@ -23,13 +23,15 @@ import org.apache.commons.collections.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.String.format;
+
 public class EndEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValidator {
 
     public static final String NO_INCOMING_FLOW_PROBLEM = "End event has no incoming flow";
-    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "End event has to have an incoming flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "End event id: '%s', name: '%s' has to have an incoming flow";
     public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM = "End event should not have outgoing flow";
-    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION = "End event should not have outgoing flow";
-    public static final String ENDEVENT_FLOWS_VALIDATOR_NAME = "BPMN End event validator";
+    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION = "End event id: '%s', name: '%s' should not have outgoing flow";
+    public static final String END_EVENT_FLOWS_VALIDATOR_NAME = "BPMN End event validator";
 
     @Override
     public List<ModelValidationError> validate(FlowNode flowNode) {
@@ -37,13 +39,13 @@ public class EndEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValid
 
         if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
             errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
-                NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
-                ENDEVENT_FLOWS_VALIDATOR_NAME));
+                format(NO_INCOMING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
+                END_EVENT_FLOWS_VALIDATOR_NAME));
         }
         if (CollectionUtils.isNotEmpty(flowNode.getOutgoingFlows())) {
             errors.add(createModelValidationError(OUTGOING_FLOW_ON_END_EVENT_PROBLEM,
-                OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION,
-                ENDEVENT_FLOWS_VALIDATOR_NAME));
+                format(OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
+                END_EVENT_FLOWS_VALIDATOR_NAME));
         }
         return errors;
     }

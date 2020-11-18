@@ -25,12 +25,15 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 public class StartEventIncomingOutgoingFlowValidatorTest {
 
     private StartEventIncomingOutgoingFlowValidator startEventIncomingOutgoingFlowValidator;
+    private final String startEventId = "start";
+    private final String startEventName = "startEventName";
 
     @BeforeEach
     void setUp() {
@@ -40,7 +43,8 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
     @Test
     public void should_returnError_when_startEventOutgoingFlowIsEmpty() {
         BpmnModel bpmnModel = CreateBpmnModelTestHelper.createOneTaskTestProcess();
-        StartEvent startEvent = (StartEvent) bpmnModel.getMainProcess().getFlowElement("start");
+        StartEvent startEvent = (StartEvent) bpmnModel.getMainProcess().getFlowElement(startEventId);
+        startEvent.setName(startEventName);
         startEvent.setOutgoingFlows(new ArrayList<>());
 
         assertThat(startEventIncomingOutgoingFlowValidator.validate(startEvent))
@@ -48,14 +52,15 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
                         ModelValidationError::getDescription,
                         ModelValidationError::getValidatorSetName)
             .contains(tuple(StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
-                            StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
+                            format(StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION, startEventName, startEventId),
                             StartEventIncomingOutgoingFlowValidator.START_EVENT_FLOWS_VALIDATOR_NAME));
     }
 
     @Test
     public void should_returnError_when_startEventIncomingFlowIsNotEmpty() {
         BpmnModel bpmnModel = CreateBpmnModelTestHelper.createOneTaskTestProcess();
-        StartEvent startEvent = (StartEvent) bpmnModel.getMainProcess().getFlowElement("start");
+        StartEvent startEvent = (StartEvent) bpmnModel.getMainProcess().getFlowElement(startEventId);
+        startEvent.setName(startEventName);
         SequenceFlow incomingFlow = new SequenceFlow();
         startEvent.getIncomingFlows().add(incomingFlow);
 
@@ -64,7 +69,7 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
                         ModelValidationError::getDescription,
                         ModelValidationError::getValidatorSetName)
             .contains(tuple(StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM,
-                            StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION,
+                            format(StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION, startEventName, startEventId),
                             StartEventIncomingOutgoingFlowValidator.START_EVENT_FLOWS_VALIDATOR_NAME));
     }
 
