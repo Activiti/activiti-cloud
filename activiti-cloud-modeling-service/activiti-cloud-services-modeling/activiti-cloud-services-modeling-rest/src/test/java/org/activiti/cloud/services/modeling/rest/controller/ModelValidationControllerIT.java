@@ -388,7 +388,7 @@ public class ModelValidationControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
             .extracting(ModelValidationError::getProblem, ModelValidationError::getDescription)
-            .contains(tuple("Intermediate Flow node has no outgoing flow", "Intermediate Flow node has to have an outgoing flow"));
+            .contains(tuple("Intermediate Flow node has no outgoing flow", "Intermediate Flow node id: 'TestTaskName', name: 'TestTaskId' has to have an outgoing flow"));
     }
 
     @Test
