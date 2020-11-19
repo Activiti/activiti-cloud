@@ -26,6 +26,7 @@ import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.rest.encoders.PageableQueryEncoder;
 import org.activiti.cloud.acc.core.services.audit.AuditService;
 import org.activiti.cloud.acc.core.services.audit.admin.AuditAdminService;
+import org.activiti.cloud.acc.core.services.query.ApplicationQueryService;
 import org.activiti.cloud.acc.core.services.query.ProcessModelQueryService;
 import org.activiti.cloud.acc.core.services.query.ProcessQueryDiagramService;
 import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
@@ -324,6 +325,15 @@ public class RuntimeFeignConfiguration {
     public ProcessQueryAdminDiagramService queryAdminDiagramService() {
         return baseFeignBuilder()
                 .target(ProcessQueryAdminDiagramService.class,
+                        runtimeTestsConfigurationProperties.getQueryUrl());
+    }
+
+    @Bean
+    public ApplicationQueryService applicationQueryService() {
+        return FeignRestDataClient
+                .builder(new JacksonEncoder(),
+                        new HalDecoder(objectMapper))
+                .target(ApplicationQueryService.class,
                         runtimeTestsConfigurationProperties.getQueryUrl());
     }
 

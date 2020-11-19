@@ -566,7 +566,12 @@ public class AuditSteps {
                                     timerId,
                                     processInstanceId));
         });
-    }     
+    }
+    
+    @Step
+    public Collection<CloudRuntimeEvent> getEventsByEventType(String eventType) throws Exception {
+        return auditService.getEvents("eventType:" + eventType).getContent();
+    }
 }
 
 
