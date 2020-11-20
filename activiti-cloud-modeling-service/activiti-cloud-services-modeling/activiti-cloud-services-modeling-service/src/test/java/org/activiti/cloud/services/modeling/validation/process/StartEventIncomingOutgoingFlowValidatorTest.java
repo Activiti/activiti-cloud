@@ -50,10 +50,12 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
         assertThat(startEventIncomingOutgoingFlowValidator.validate(startEvent))
             .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName)
+                        ModelValidationError::getValidatorSetName,
+                        ModelValidationError::getReferenceId)
             .contains(tuple(StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
                             format(StartEventIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION, startEventName, startEventId),
-                            StartEventIncomingOutgoingFlowValidator.START_EVENT_FLOWS_VALIDATOR_NAME));
+                            StartEventIncomingOutgoingFlowValidator.START_EVENT_FLOWS_VALIDATOR_NAME,
+                            startEventId));
     }
 
     @Test
@@ -67,10 +69,12 @@ public class StartEventIncomingOutgoingFlowValidatorTest {
         assertThat(startEventIncomingOutgoingFlowValidator.validate(startEvent))
             .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName)
+                        ModelValidationError::getValidatorSetName,
+                        ModelValidationError::getReferenceId)
             .contains(tuple(StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM,
                             format(StartEventIncomingOutgoingFlowValidator.INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION, startEventName, startEventId),
-                            StartEventIncomingOutgoingFlowValidator.START_EVENT_FLOWS_VALIDATOR_NAME));
+                            StartEventIncomingOutgoingFlowValidator.START_EVENT_FLOWS_VALIDATOR_NAME,
+                            startEventId));
     }
 
     @Test

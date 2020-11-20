@@ -40,12 +40,16 @@ public class EndEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValid
         if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
             errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
                 format(NO_INCOMING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
-                END_EVENT_FLOWS_VALIDATOR_NAME));
+                END_EVENT_FLOWS_VALIDATOR_NAME,
+                null,
+                flowNode.getId()));
         }
         if (CollectionUtils.isNotEmpty(flowNode.getOutgoingFlows())) {
             errors.add(createModelValidationError(OUTGOING_FLOW_ON_END_EVENT_PROBLEM,
                 format(OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
-                END_EVENT_FLOWS_VALIDATOR_NAME));
+                END_EVENT_FLOWS_VALIDATOR_NAME,
+                null,
+                flowNode.getId()));
         }
         return errors;
     }

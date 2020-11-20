@@ -40,12 +40,16 @@ public class StartEventIncomingOutgoingFlowValidator implements FlowNodeFlowsVal
         if (CollectionUtils.isEmpty(flowNode.getOutgoingFlows())) {
             errors.add(createModelValidationError(NO_OUTGOING_FLOW_PROBLEM,
                 format(NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
-                START_EVENT_FLOWS_VALIDATOR_NAME));
+                START_EVENT_FLOWS_VALIDATOR_NAME,
+                null,
+                flowNode.getId()));
         }
         if (CollectionUtils.isNotEmpty(flowNode.getIncomingFlows())) {
             errors.add(createModelValidationError(INCOMING_FLOW_ON_START_EVENT_PROBLEM,
                 format(INCOMING_FLOW_ON_START_EVENT_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
-                START_EVENT_FLOWS_VALIDATOR_NAME));
+                START_EVENT_FLOWS_VALIDATOR_NAME,
+                null,
+                flowNode.getId()));
         }
         return errors;
     }

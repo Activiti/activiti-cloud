@@ -302,8 +302,10 @@ public class ModelValidationControllerIT {
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-                .extracting(ModelValidationError::getProblem)
-                .contains("Sequence flow has no source reference", "Sequence flow has no target reference");
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getReferenceId)
+                .contains(tuple("Sequence flow has no source reference", "sid-75BFD70C-7949-441E-B85A-11C29A9BA0CD"),
+                          tuple("Sequence flow has no target reference", "sid-75BFD70C-7949-441E-B85A-11C29A9BA0CD"));
     }
 
     @Test
@@ -324,15 +326,20 @@ public class ModelValidationControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getValidatorSetName)
+                            ModelValidationError::getValidatorSetName,
+                            ModelValidationError::getReferenceId)
                 .contains(tuple("Start event has no outgoing flow",
-                                "BPMN Start event validator"),
+                                "BPMN Start event validator",
+                                "StartEvent_16jstbd"),
                           tuple("Start event should not have incoming flow",
-                              "BPMN Start event validator"),
+                                "BPMN Start event validator",
+                                "StartEvent_16jstbd"),
                           tuple("End event has no incoming flow",
-                              "BPMN End event validator"),
+                                "BPMN End event validator",
+                                "EndEvent_0amu64a"),
                           tuple("Intermediate Flow node has no incoming flow",
-                                "BPMN Intermediate Flow node validator"));
+                                "BPMN Intermediate Flow node validator",
+                                "Task_0w8xho6"));
     }
 
     @Test
@@ -366,8 +373,10 @@ public class ModelValidationControllerIT {
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-            .extracting(ModelValidationError::getProblem)
-            .contains("Intermediate Flow node has no incoming flow", "Intermediate Flow node has no outgoing flow");
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getReferenceId)
+            .contains(tuple("Intermediate Flow node has no incoming flow", "SubProcess_1j83p8h"),
+                      tuple("Intermediate Flow node has no outgoing flow", "SubProcess_1j83p8h"));
     }
 
     @Test
@@ -387,8 +396,12 @@ public class ModelValidationControllerIT {
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-            .extracting(ModelValidationError::getProblem, ModelValidationError::getDescription)
-            .contains(tuple("Intermediate Flow node has no outgoing flow", "Intermediate Flow node name: 'TestTaskName', id: 'TestTaskId' has to have an outgoing flow"));
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getReferenceId)
+            .contains(tuple("Intermediate Flow node has no outgoing flow",
+                            "Intermediate Flow node name: 'TestTaskName', id: 'TestTaskId' has to have an outgoing flow",
+                            "TestTaskId"));
     }
 
     @Test

@@ -34,6 +34,7 @@ public interface ModelValidationErrorProducer {
                                           problem,
                                           description,
                                           schema,
+                                          null,
                                           null);
     }
 
@@ -45,7 +46,21 @@ public interface ModelValidationErrorProducer {
                                           problem,
                                           description,
                                           schema,
-                                          errorCode);
+                                          errorCode,
+                                          null);
+    }
+
+    default ModelValidationError createModelValidationError(String problem,
+                                                            String description,
+                                                            String schema,
+                                                            String errorCode,
+                                                            String referenceId) {
+        return createModelValidationError(false,
+                                          problem,
+                                          description,
+                                          schema,
+                                          null,
+                                          referenceId);
     }
 
     default ModelValidationError createModelValidationError(boolean warning,
@@ -56,6 +71,7 @@ public interface ModelValidationErrorProducer {
                                           problem,
                                           description,
                                           schema,
+                                          null,
                                           null);
     }
 
@@ -63,29 +79,15 @@ public interface ModelValidationErrorProducer {
                                                             String problem,
                                                             String description,
                                                             String schema,
-                                                            String errorCode) {
+                                                            String errorCode,
+                                                            String referenceId) {
         ModelValidationError modelValidationError = new ModelValidationError();
         modelValidationError.setWarning(warning);
         modelValidationError.setProblem(problem);
         modelValidationError.setDescription(description);
         modelValidationError.setValidatorSetName(schema);
         modelValidationError.setErrorCode(errorCode);
-        return modelValidationError;
-    }
-
-    default ModelValidationError createModelValidationError(boolean warning,
-                                                            String problem,
-                                                            String description,
-                                                            String schema,
-                                                            String referenceId,
-                                                            String errorCode) {
-        ModelValidationError modelValidationError = new ModelValidationError();
-        modelValidationError.setWarning(warning);
-        modelValidationError.setProblem(problem);
-        modelValidationError.setDescription(description);
-        modelValidationError.setValidatorSetName(schema);
         modelValidationError.setReferenceId(referenceId);
-        modelValidationError.setErrorCode(errorCode);
         return modelValidationError;
     }
 }

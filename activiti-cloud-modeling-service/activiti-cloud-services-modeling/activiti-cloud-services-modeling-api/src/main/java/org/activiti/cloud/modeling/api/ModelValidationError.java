@@ -76,6 +76,7 @@ public class ModelValidationError {
     public void setReferenceId(String referenceId) {
         this.referenceId = referenceId;
     }
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

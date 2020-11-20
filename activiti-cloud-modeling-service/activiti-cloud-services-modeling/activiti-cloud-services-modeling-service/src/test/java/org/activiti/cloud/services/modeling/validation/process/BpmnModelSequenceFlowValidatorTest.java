@@ -56,7 +56,7 @@ public class BpmnModelSequenceFlowValidatorTest {
             .contains(tuple(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM,
                             format(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM_DESCRIPTION, testSequenceName, testSequenceId),
                             BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME,
-                            testSequenceName));
+                            testSequenceId));
     }
 
     @Test
@@ -69,9 +69,11 @@ public class BpmnModelSequenceFlowValidatorTest {
         assertThat(bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext))
             .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName)
+                        ModelValidationError::getValidatorSetName,
+                        ModelValidationError::getReferenceId)
             .contains(tuple(BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM,
                             format(BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM_DESCRIPTION, testSequenceName, testSequenceId),
-                            BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME));
+                            BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME,
+                            testSequenceId));
     }
 }

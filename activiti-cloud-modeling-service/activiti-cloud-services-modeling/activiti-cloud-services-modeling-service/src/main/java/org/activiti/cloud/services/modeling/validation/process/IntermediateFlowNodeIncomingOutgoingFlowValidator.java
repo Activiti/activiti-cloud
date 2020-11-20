@@ -43,13 +43,17 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNo
         if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
             errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
                 format(NO_INCOMING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
-                INTERMEDIATE_FLOWS_VALIDATOR_NAME));
+                INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                null,
+                flowNode.getId()));
         }
 
         if (CollectionUtils.isEmpty(flowNode.getOutgoingFlows())) {
             errors.add(createModelValidationError(NO_OUTGOING_FLOW_PROBLEM,
                 format(NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
-                INTERMEDIATE_FLOWS_VALIDATOR_NAME));
+                INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                null,
+                flowNode.getId()));
         }
         return errors;
     }

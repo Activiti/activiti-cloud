@@ -53,11 +53,13 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
             .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName)
+                        ModelValidationError::getValidatorSetName,
+                        ModelValidationError::getReferenceId)
             .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM,
                             format(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
                                    userTaskName, userTaskId),
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME));
+                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                            userTaskId));
     }
 
     @Test
@@ -70,11 +72,13 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
             .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName)
+                        ModelValidationError::getValidatorSetName,
+                        ModelValidationError::getReferenceId)
             .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
                             format(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
                                    userTaskName, userTaskId),
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME));
+                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                            userTaskId));
     }
 
     @Test
