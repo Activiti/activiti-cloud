@@ -72,4 +72,20 @@ public interface ModelValidationErrorProducer {
         modelValidationError.setErrorCode(errorCode);
         return modelValidationError;
     }
+
+    default ModelValidationError createModelValidationError(boolean warning,
+                                                            String problem,
+                                                            String description,
+                                                            String schema,
+                                                            String referenceId,
+                                                            String errorCode) {
+        ModelValidationError modelValidationError = new ModelValidationError();
+        modelValidationError.setWarning(warning);
+        modelValidationError.setProblem(problem);
+        modelValidationError.setDescription(description);
+        modelValidationError.setValidatorSetName(schema);
+        modelValidationError.setReferenceId(referenceId);
+        modelValidationError.setErrorCode(errorCode);
+        return modelValidationError;
+    }
 }

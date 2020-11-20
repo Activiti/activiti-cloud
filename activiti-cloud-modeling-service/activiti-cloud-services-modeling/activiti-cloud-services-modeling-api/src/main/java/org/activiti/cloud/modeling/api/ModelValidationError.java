@@ -27,6 +27,7 @@ public class ModelValidationError {
     private String description;
     private boolean isWarning;
     private String errorCode;
+    private String referenceId;
 
     public String getValidatorSetName() {
         return validatorSetName;
@@ -68,6 +69,13 @@ public class ModelValidationError {
         this.errorCode = errorCode;
     }
 
+    public String getReferenceId() {
+        return referenceId;
+    }
+
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
+    }
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
