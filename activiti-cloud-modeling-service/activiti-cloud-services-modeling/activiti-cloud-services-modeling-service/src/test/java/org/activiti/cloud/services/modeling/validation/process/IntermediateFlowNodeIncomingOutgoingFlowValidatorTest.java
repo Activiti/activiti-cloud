@@ -28,12 +28,15 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
 
     private IntermediateFlowNodeIncomingOutgoingFlowValidator intermediateFlowNodeIncomingOutgoingFlowValidator;
+    private final String userTaskId = "theTask";
+    private final String userTaskName = "userTaskName";
 
     @BeforeEach
     void setUp() {
@@ -43,31 +46,39 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
     @Test
     public void should_returnError_when_incomingFlowIsEmpty() {
         BpmnModel bpmnModel = CreateBpmnModelTestHelper.createOneTaskTestProcess();
-        UserTask userTask = (UserTask) bpmnModel.getMainProcess().getFlowElement("theTask");
+        UserTask userTask = (UserTask) bpmnModel.getMainProcess().getFlowElement(userTaskId);
+        userTask.setName(userTaskName);
         userTask.setIncomingFlows(new ArrayList<>());
 
         assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
             .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName)
+                        ModelValidationError::getValidatorSetName,
+                        ModelValidationError::getReferenceId)
             .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM,
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME));
+                            format(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
+                                   userTaskName, userTaskId),
+                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                            userTaskId));
     }
 
     @Test
     public void should_returnError_when_outgoingFlowIsEmpty() {
         BpmnModel bpmnModel = CreateBpmnModelTestHelper.createOneTaskTestProcess();
-        UserTask userTask = (UserTask) bpmnModel.getMainProcess().getFlowElement("theTask");
+        UserTask userTask = (UserTask) bpmnModel.getMainProcess().getFlowElement(userTaskId);
+        userTask.setName(userTaskName);
         userTask.setOutgoingFlows(new ArrayList<>());
 
         assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
             .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName)
+                        ModelValidationError::getValidatorSetName,
+                        ModelValidationError::getReferenceId)
             .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME));
+                            format(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
+                                   userTaskName, userTaskId),
+                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                            userTaskId));
     }
 
     @Test

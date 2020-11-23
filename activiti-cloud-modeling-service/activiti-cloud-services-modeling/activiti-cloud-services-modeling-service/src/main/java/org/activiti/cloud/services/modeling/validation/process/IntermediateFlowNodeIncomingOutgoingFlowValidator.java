@@ -26,12 +26,14 @@ import org.apache.commons.collections.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.String.format;
+
 public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNodeFlowsValidator {
 
     public static final String NO_INCOMING_FLOW_PROBLEM = "Intermediate Flow node has no incoming flow";
-    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Intermediate Flow node has to have an incoming flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Intermediate Flow node name: '%s', id: '%s' has to have an incoming flow";
     public static final String NO_OUTGOING_FLOW_PROBLEM = "Intermediate Flow node has no outgoing flow";
-    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Intermediate Flow node has to have an outgoing flow";
+    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Intermediate Flow node name: '%s', id: '%s' has to have an outgoing flow";
     public static final String INTERMEDIATE_FLOWS_VALIDATOR_NAME = "BPMN Intermediate Flow node validator";
 
     @Override
@@ -40,14 +42,18 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNo
 
         if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
             errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
-                NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
-                INTERMEDIATE_FLOWS_VALIDATOR_NAME));
+                format(NO_INCOMING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
+                INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                null,
+                flowNode.getId()));
         }
 
         if (CollectionUtils.isEmpty(flowNode.getOutgoingFlows())) {
             errors.add(createModelValidationError(NO_OUTGOING_FLOW_PROBLEM,
-                NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
-                INTERMEDIATE_FLOWS_VALIDATOR_NAME));
+                format(NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
+                INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                null,
+                flowNode.getId()));
         }
         return errors;
     }

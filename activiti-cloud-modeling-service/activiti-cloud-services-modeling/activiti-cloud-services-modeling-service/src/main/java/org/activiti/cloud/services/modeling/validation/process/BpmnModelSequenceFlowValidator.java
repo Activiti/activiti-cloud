@@ -25,15 +25,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
+
 /**
  * Implementation of {@link BpmnModelValidator} for validating Sequence flow when empty source or target references are provided
  */
 public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
 
     public static final String NO_SOURCE_REF_PROBLEM = "Sequence flow has no source reference";
-    public static final String NO_SOURCE_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have a source reference";
+    public static final String NO_SOURCE_REF_PROBLEM_DESCRIPTION = "Sequence flow name: '%s', id: '%s' has to have a source reference";
     public static final String NO_TARGET_REF_PROBLEM = "Sequence flow has no target reference";
-    public static final String NO_TARGET_REF_PROBLEM_DESCRIPTION = "Sequence flow has to have a target reference";
+    public static final String NO_TARGET_REF_PROBLEM_DESCRIPTION = "Sequence flow name: '%s', id: '%s' has to have a target reference";
     public static final String SEQUENCE_FLOW_VALIDATOR_NAME = "BPMN sequence flow validator";
 
     @Override
@@ -52,14 +54,18 @@ public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
         List<ModelValidationError> errors = new ArrayList<>();
         if (StringUtils.isEmpty(sequenceFlow.getSourceRef())) {
             errors.add(createModelValidationError(NO_SOURCE_REF_PROBLEM,
-                NO_SOURCE_REF_PROBLEM_DESCRIPTION,
-                SEQUENCE_FLOW_VALIDATOR_NAME));
+                format(NO_SOURCE_REF_PROBLEM_DESCRIPTION, sequenceFlow.getName(), sequenceFlow.getId()),
+                SEQUENCE_FLOW_VALIDATOR_NAME,
+                null,
+                sequenceFlow.getId()));
         }
 
         if (StringUtils.isEmpty(sequenceFlow.getTargetRef())) {
             errors.add(createModelValidationError(NO_TARGET_REF_PROBLEM,
-                NO_TARGET_REF_PROBLEM_DESCRIPTION,
-                SEQUENCE_FLOW_VALIDATOR_NAME));
+                format(NO_TARGET_REF_PROBLEM_DESCRIPTION, sequenceFlow.getName(), sequenceFlow.getId()),
+                SEQUENCE_FLOW_VALIDATOR_NAME,
+                null,
+                sequenceFlow.getId()));
         }
 
         return errors;
