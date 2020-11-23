@@ -50,5 +50,5 @@ create table audit_event
     primary key (id)
 );
 
-CREATE INDEX audit_event_event_id_idx ON audit_event(event_id);
+CREATE UNIQUE INDEX audit_event_event_id_idx ON audit_event(event_id);
 
