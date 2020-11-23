@@ -400,7 +400,7 @@ public class ModelValidationControllerIT {
                         ModelValidationError::getDescription,
                         ModelValidationError::getReferenceId)
             .contains(tuple("Intermediate Flow node has no outgoing flow",
-                            "Intermediate Flow node name: 'TestTaskName', id: 'TestTaskId' has to have an outgoing flow",
+                            "Name: 'TestTaskName', id: 'TestTaskId' has to have an outgoing flow",
                             "TestTaskId"));
     }
 

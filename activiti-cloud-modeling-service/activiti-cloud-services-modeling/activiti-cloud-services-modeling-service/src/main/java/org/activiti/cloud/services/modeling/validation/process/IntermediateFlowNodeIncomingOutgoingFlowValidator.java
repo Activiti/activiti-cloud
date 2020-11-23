@@ -31,9 +31,9 @@ import static java.lang.String.format;
 public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNodeFlowsValidator {
 
     public static final String NO_INCOMING_FLOW_PROBLEM = "Intermediate Flow node has no incoming flow";
-    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Intermediate Flow node name: '%s', id: '%s' has to have an incoming flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Name: '%s', id: '%s' has to have an incoming flow";
     public static final String NO_OUTGOING_FLOW_PROBLEM = "Intermediate Flow node has no outgoing flow";
-    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Intermediate Flow node name: '%s', id: '%s' has to have an outgoing flow";
+    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Name: '%s', id: '%s' has to have an outgoing flow";
     public static final String INTERMEDIATE_FLOWS_VALIDATOR_NAME = "BPMN Intermediate Flow node validator";
 
     @Override
