@@ -337,7 +337,7 @@ public class ModelValidationControllerIT {
                           tuple("End event has no incoming flow",
                                 "BPMN End event validator",
                                 "EndEvent_0amu64a"),
-                          tuple("Intermediate Flow node has no incoming flow",
+                          tuple("Flow node has no incoming flow",
                                 "BPMN Intermediate Flow node validator",
                                 "Task_0w8xho6"));
     }
@@ -375,8 +375,8 @@ public class ModelValidationControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
             .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getReferenceId)
-            .contains(tuple("Intermediate Flow node has no incoming flow", "SubProcess_1j83p8h"),
-                      tuple("Intermediate Flow node has no outgoing flow", "SubProcess_1j83p8h"));
+            .contains(tuple("Flow node has no incoming flow", "SubProcess_1j83p8h"),
+                      tuple("Flow node has no outgoing flow", "SubProcess_1j83p8h"));
     }
 
     @Test
@@ -399,8 +399,8 @@ public class ModelValidationControllerIT {
             .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
                         ModelValidationError::getReferenceId)
-            .contains(tuple("Intermediate Flow node has no outgoing flow",
-                            "Name: 'TestTaskName', id: 'TestTaskId' has to have an outgoing flow",
+            .contains(tuple("Flow node has no outgoing flow",
+                            "Flow node [name: 'TestTaskName', id: 'TestTaskId'] has to have an outgoing flow",
                             "TestTaskId"));
     }
 
