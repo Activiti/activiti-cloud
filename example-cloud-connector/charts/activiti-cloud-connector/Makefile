@@ -9,20 +9,17 @@ GITHUB_CHARTS_REPO := $(or $(GITHUB_CHARTS_REPO),$(shell git config --get remote
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
 build: clean
-	helm init --client-only
-	helm repo add charts_activiti https://activiti.github.io/activiti-cloud-charts/
-	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/
-	helm dependency build
+	helm dep up
 	helm lint
 
 install:
-	helm install . --name ${NAME}
+	helm install . ${NAME}
 
 upgrade: clean build
 	helm upgrade ${NAME} .
 
 delete:
-	helm delete --purge ${NAME}
+	helm delete ${NAME} --namespace ${PREVIEW_NAMESPACE}
 
 clean:
 	rm -rf requirements.lock

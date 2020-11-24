@@ -52,11 +52,7 @@ prepare-helm-chart:
 		rm -rf requirements.lock && \
 		rm -rf charts && \
 		rm -rf *.tgz && \
-        	helm init --client-only && \
-        	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
-        	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
-        	helm repo add alfresco-incubator https://kubernetes-charts.alfresco.com/incubator && \
-        	helm dependency build && \
+        	helm dep up && \
         	helm lint && \
 		helm package .
 
@@ -67,7 +63,7 @@ run-helm-chart:
             		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
             		--namespace ${PREVIEW_NAMESPACE} \
             		--wait
-								
+
 create-helm-charts-release-and-upload:
 	@for chart in $(charts) ; do \
 		cd $$chart ; \
@@ -76,7 +72,7 @@ create-helm-charts-release-and-upload:
 		make release; \
 		make github; \
 		cd - ; \
-	done 
+	done
 update-common-helm-chart-version:
 	@for chart in $(charts) ; do \
 		cd $$chart ; \

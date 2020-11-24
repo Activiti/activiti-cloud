@@ -40,24 +40,20 @@ prepare-helm-chart:
 		rm -rf requirements.lock && \
 		rm -rf charts && \
 		rm -rf *.tgz && \
-        	helm init --client-only && \
-        	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
-        	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
-        	helm repo add alfresco-incubator https://kubernetes-charts.alfresco.com/incubator && \
         	helm dep up && \
         	helm lint
 
 run-helm-chart: delete
-	helm init --client-only && \
+	cat ../current_build_values.yml && \
 	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
 	helm repo update && \
-	cat ../current_build_values.yml && \
+	kubectl create namespace ${PREVIEW_NAMESPACE} && \
 	helm upgrade ${PREVIEW_NAMESPACE} activiti-cloud-helm-charts/activiti-cloud-full-example \
 		--install \
 		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
 				--namespace ${PREVIEW_NAMESPACE} -f ../current_build_values.yml
 delete:
-	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
+	helm delete ${PREVIEW_NAMESPACE}  --namespace  ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
 	kubectl delete ns ${PREVIEW_NAMESPACE} || echo "try to remove namespace ${PREVIEW_NAMESPACE}"
 
 
