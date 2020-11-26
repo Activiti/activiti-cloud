@@ -18,6 +18,8 @@ package org.activiti.cloud.services.audit.liquibase;
 import javax.sql.DataSource;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ResourceLoaderAware;
@@ -30,6 +32,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 
 @Configuration
+@ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", matchIfMissing = true)
 @PropertySource("classpath:config/audit-liquibase.properties")
 public class ActivitiCloudAuditLiquibaseAutoConfiguration implements ResourceLoaderAware {
 
