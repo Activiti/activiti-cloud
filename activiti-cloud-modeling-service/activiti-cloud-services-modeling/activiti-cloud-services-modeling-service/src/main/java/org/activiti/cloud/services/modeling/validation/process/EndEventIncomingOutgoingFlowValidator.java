@@ -28,9 +28,9 @@ import static java.lang.String.format;
 public class EndEventIncomingOutgoingFlowValidator implements FlowNodeFlowsValidator {
 
     public static final String NO_INCOMING_FLOW_PROBLEM = "End event has no incoming flow";
-    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "End event name: '%s', id: '%s' has to have an incoming flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "End event [name: '%s', id: '%s'] has to have an incoming flow";
     public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM = "End event should not have outgoing flow";
-    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION = "End event name: '%s', id: '%s' should not have outgoing flow";
+    public static final String OUTGOING_FLOW_ON_END_EVENT_PROBLEM_DESCRIPTION = "End event [name: '%s', id: '%s'] should not have outgoing flow";
     public static final String END_EVENT_FLOWS_VALIDATOR_NAME = "BPMN End event validator";
 
     @Override
