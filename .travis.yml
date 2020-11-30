@@ -28,11 +28,11 @@ before_script:
 - kubectl get ns || travis_terminate 1
 
 stages:
-- name: Build Docker
-- name: Run acceptance tests
-- name: Publish helm charts
+- name: docker
+- name: test
+- name: publish
   if: type != pull_request
-- name: tag_updatebot
+- name: promote
   if: type != pull_request
 
 install: skip
@@ -40,58 +40,28 @@ install: skip
 jobs:
   include:
   - name: Build Example Runtime Bundle
-    stage: Build Docker
-    script: |
-      (
-      set -e
-      mvn verify -B -pl example-runtime-bundle -am
-      echo "Building docker image for example-runtime-bundle..."
-      docker build -f example-runtime-bundle/Dockerfile -q -t docker.io/activiti/example-runtime-bundle:$(cat VERSION) example-runtime-bundle
-      docker push docker.io/activiti/example-runtime-bundle:$(cat VERSION)
-      )
+    stage: docker
+    script: make docker/example-runtime-bundle
 
   - name: Build Activity Cloud Query
-    stage: Build Docker
-    script: |
-      (
-      set -e
-      mvn verify -B -pl activiti-cloud-query -am
-      echo "Building docker image for activiti-cloud-query..."
-      docker build -f activiti-cloud-query/Dockerfile -q -t docker.io/activiti/activiti-cloud-query:$(cat VERSION) activiti-cloud-query
-      docker push docker.io/activiti/activiti-cloud-query:$(cat VERSION)
-      )
+    stage: docker
+    script: make docker/activiti-cloud-query
 
   - name: Build Example Cloud Connector
-    stage: Build Docker
-    script: |
-      (
-      set -e
-      mvn verify -B -pl example-cloud-connector -am
-      echo "Building docker image for activiti-cloud-connector..."
-      docker build -f example-cloud-connector/Dockerfile -q -t docker.io/activiti/example-cloud-connector:$(cat VERSION) example-cloud-connector
-      docker push docker.io/activiti/example-cloud-connector:$(cat VERSION)
-      )
+    stage: docker
+    script: make docker/example-cloud-connector
 
   - name: Build Activiti Cloud Modeling
-    stage: Build Docker
-    script: |
-      (
-      set -e
-      mvn verify -B -pl activiti-cloud-modeling -am
-      echo "Building docker image for activiti-cloud-modeling..."
-      docker build -f activiti-cloud-modeling/Dockerfile -q -t docker.io/activiti/activiti-cloud-modeling:$(cat VERSION) activiti-cloud-modeling
-      docker push docker.io/activiti/activiti-cloud-modeling:$(cat VERSION)
-      )
+    stage: docker
+    script: make docker/activiti-cloud-modeling
 
-  - name: Run acceptance tests
-    stage: Run acceptance tests
-    after_script: cd activiti-cloud-dependencies && make delete|| echo "Trying to delete helm chart" &&  cd -
+  - name: Run Acceptance Tests
+    stage: test
+    after_script: make delete || echo "Trying to delete helm chart"
     script: |
       (
       set -e
-      envsubst < .values_template.yml > current_build_values.yml
-      cd activiti-cloud-dependencies
-      make run-helm-chart
+      make install
 
       attempt_counter=0
       max_attempts=50
@@ -111,60 +81,35 @@ jobs:
           attempt_counter=$((attempt_counter+1))
           sleep 5
       done
-
-      cd ../activiti-cloud-acceptance-scenarios
-      mvn -pl 'modeling-acceptance-tests' -Droot.log.level=off verify
-      mvn -pl 'runtime-acceptance-tests'  -Droot.log.level=off verify
-      cd -
+      
+      kubectl get po -n ${PREVIEW_NAMESPACE}
+      
+      make test/modeling-acceptance-tests
+      make test/runtime-acceptance-tests
       )
 
-  - name: Publish helm charts
-    stage: Publish helm charts
+  - name: Publish Helm Charts
+    stage: publish
     branches:
       only:
         - develop
-    script: make create-helm-charts-release-and-upload
+    script: make publish
 
-  - name: tag_updatebot
-    stage: tag_updatebot
+  - name: Promote Release
+    stage: promote
     branches:
       only:
         - develop
-    script: |
-      mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false  -DnewVersion=$(cat VERSION)
-      mvn clean deploy -DskipTests
-      git add -u
-      git commit -m "Release $(cat VERSION)" --allow-empty
-      git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)"|| travis_terminate 1;
-      git push -f -q https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git v$(cat VERSION)|| travis_terminate 1;
-      updatebot push-version --kind maven \
-                org.activiti.cloud:activiti-cloud-dependencies ${VERSION} \
-                org.activiti.cloud:activiti-cloud-modeling-dependencies ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-audit-dependencies ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-api-dependencies ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-parent ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-connectors-dependencies ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-messages-dependencies ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-modeling-dependencies ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-query-dependencies ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies ${activiti_cloud_version} \
-                org.activiti.cloud:activiti-cloud-service-common-dependencies ${activiti_cloud_version} \
-                --merge false;
-      updatebot push-version --kind helm activiti-cloud-dependencies ${VERSION} \
-                      runtime-bundle ${VERSION} \
-                      activiti-cloud-connector ${VERSION} \
-                      activiti-cloud-query ${VERSION} \
-                      activiti-cloud-modeling ${VERSION}
+    script: make promote
 
 before_install:
 - echo -e "https://$GITHUB_USER:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
 - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin
   "$DOCKER_REGISTRY"
 - curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear
-- export activiti_cloud_version=$(grep -oPm1 "(?<=<activiti-cloud.version>)[^<]+"
+- export ACTIVITI_CLOUD_VERSION=$(grep -oPm1 "(?<=<activiti-cloud.version>)[^<]+"
   "activiti-cloud-dependencies/pom.xml")
-- echo activiti_cloud_version=${activiti_cloud_version}
+- echo ACTIVITI_CLOUD_VERSION=${ACTIVITI_CLOUD_VERSION}
 
 notifications:
   slack:
