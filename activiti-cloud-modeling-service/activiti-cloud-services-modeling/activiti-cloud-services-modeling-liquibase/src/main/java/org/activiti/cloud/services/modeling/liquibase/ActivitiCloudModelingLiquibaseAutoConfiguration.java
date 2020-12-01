@@ -49,7 +49,7 @@ public class ActivitiCloudModelingLiquibaseAutoConfiguration implements Resource
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "spring.modeling.liquibase")
+    @ConfigurationProperties(prefix = "spring.liquibase")
     public LiquibaseProperties modelingLiquibaseProperties() {
         return new LiquibaseProperties();
     }
