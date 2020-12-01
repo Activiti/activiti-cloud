@@ -47,7 +47,8 @@ github:
 
 version:
 	sed -i -e "s/version:.*/version: $(VERSION)/" Chart.yaml
-	export VERSION=$(VERSION) && perl -0777 -pi -e '$$version = $$ENV{'VERSION'};s/repository: activiti\/activiti-cloud-modeling\n\s*tag: ([0-9]|[a-zA-Z]|\.)*/repository: activiti\/activiti-cloud-modeling\n    tag: $$version/' values.yaml
+	sed -i -e "/frontend:/,/backend:/s/tag: .*/tag: $(VERSION)/" values.yaml
+	sed -i -e "/backend:/,/  resources:/s/tag: .*/tag: $(VERSION)/" values.yaml
 
 common-helm-chart-version:
 	sed -i -e "s/version:.*/version: $(VERSION)/" requirements.yaml
