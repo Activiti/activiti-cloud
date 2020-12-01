@@ -14,7 +14,7 @@ CHARTS := "activiti-cloud-query/charts/activiti-cloud-query" \
 	      "example-cloud-connector/charts/activiti-cloud-connector" \
 	      "activiti-cloud-modeling/charts/activiti-cloud-modeling"
 
-updatebot:
+updatebot/push-version:
 	updatebot push-version --kind maven \
 		org.activiti.cloud:activiti-cloud-dependencies ${RELEASE_VERSION} \
 		org.activiti.cloud:activiti-cloud-modeling-dependencies ${ACTIVITI_CLOUD_VERSION} \
@@ -129,5 +129,5 @@ test/%:
 	cd activiti-cloud-acceptance-scenarios && \
 		mvn -pl '$(MODULE)' -Droot.log.level=off verify
 
-promote: version deploy tag updatebot
+promote: version deploy tag updatebot/push-version
 
