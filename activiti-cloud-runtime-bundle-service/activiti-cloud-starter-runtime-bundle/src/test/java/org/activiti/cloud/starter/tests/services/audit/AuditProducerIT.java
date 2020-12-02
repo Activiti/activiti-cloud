@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.tests.services.audit;
 
 import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
 import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
+import static org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED;
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED;
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
@@ -42,7 +43,6 @@ import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TAS
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_UPDATED;
-import static org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -118,9 +118,12 @@ public class AuditProducerIT {
 
     public static final String ROUTING_KEY_HEADER = "routingKey";
     public static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
-    public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS)
-        .flatMap(Stream::of)
-        .toArray(String[]::new);
+    public static final String[] REQIURED_EXECUTION_CONTEXT_HEADERS = {"processInstanceId", "processDefinitionId", "processDefinitionKey", "processDefinitionVersion", "deploymentId", "deploymentName", "appVersion"};
+    public static final String[] OPTIONAL_EXECUTION_CONTEXT_HEADERS = {"businessKey", "processName", "processDefinitionName"};
+
+    public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS, REQIURED_EXECUTION_CONTEXT_HEADERS)
+                                                              .flatMap(Stream::of)
+                                                              .toArray(String[]::new);
 
     public static final String AUDIT_PRODUCER_IT = "AuditProducerIT";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
@@ -202,6 +205,7 @@ public class AuditProducerIT {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(OPTIONAL_EXECUTION_CONTEXT_HEADERS);
 
             assertThat(receivedEvents)
                 .extracting(event -> event.getEventType().name())

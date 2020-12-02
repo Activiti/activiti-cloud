@@ -62,7 +62,7 @@ public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggre
     protected String getAttributeKey() {
         return MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS;
     }
-    
+
     @Override
     public void add(CloudRuntimeEvent<?, ?> element) {
         CommandContext commandContext = getCurrentCommandContext();
@@ -73,42 +73,58 @@ public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggre
         // Let's find and cache ExecutionContext for executionId
         ExecutionContext executionContext = resolveExecutionContext(commandContext, executionId);
 
-        // Let's inject execution context info into event using event execution process context 
+        // Let's inject execution context info into event using event execution process context
         if(executionContext != null) {
             ExecutionContextInfoAppender executionContextInfoAppender = createExecutionContextInfoAppender(executionContext);
 
             CloudRuntimeEventImpl<?,?> event = CloudRuntimeEventImpl.class.cast(element);
-            
+
             element = executionContextInfoAppender.appendExecutionContextInfoTo(event);
         }
 
         super.add(element);
-        
+
     }
-    
+
     protected ExecutionContext resolveExecutionContext(CommandContext commandContext, String executionId) {
-        
+
         if(executionId != null && commandContext.getGenericAttribute(executionId) == null) {
             ExecutionEntity executionEntity = commandContext.getExecutionEntityManager()
                                                             .findById(executionId);
-            
+
+            mayBeAddRootExecutionContext(commandContext,
+                                         executionEntity);
+
             ExecutionContext executionContext = createExecutionContext(executionEntity);
-            
+
             if (executionEntity != null) {
                 commandContext.addAttribute(executionId,
                                             executionContext);
             }
         }
-        
+
         return commandContext.getGenericAttribute(executionId);
-       
+
     }
-    
-    
+
+    protected void mayBeAddRootExecutionContext(CommandContext commandContext, ExecutionEntity executionEntity) {
+        ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT);
+
+        if(rootExecutionContext == null && executionEntity.getRootProcessInstanceId() != null) {
+            ExecutionEntity rootProcessInstance = commandContext.getExecutionEntityManager()
+                                                                .findById(executionEntity.getRootProcessInstanceId());
+
+            rootExecutionContext = createExecutionContext(rootProcessInstance);
+
+            commandContext.addAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT,
+                                        rootExecutionContext);
+        }
+    }
+
     protected ExecutionContextInfoAppender createExecutionContextInfoAppender(ExecutionContext executionContext) {
         return new ExecutionContextInfoAppender(executionContext);
     }
-    
+
     protected ExecutionContext createExecutionContext(ExecutionEntity executionEntity) {
         return new CachingExecutionContext(executionEntity);
     }
@@ -140,8 +156,8 @@ public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggre
             return ((CloudBPMNErrorReceivedEvent) element).getEntity().getProcessInstanceId();
         } else if(element instanceof CloudMessageSubscriptionCancelledEvent) {
             return ((CloudMessageSubscriptionCancelledEvent) element).getEntity().getProcessInstanceId();
-        }        
+        }
         return null;
     }
-    
+
 }
