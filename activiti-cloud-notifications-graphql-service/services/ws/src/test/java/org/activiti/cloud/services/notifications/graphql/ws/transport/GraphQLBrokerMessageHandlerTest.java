@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -232,11 +233,13 @@ public class GraphQLBrokerMessageHandlerTest {
         assertThat(completeLatch.await(2000, TimeUnit.MILLISECONDS)).isTrue();
 
         // then get last message
-        verify(this.clientOutboundChannel, times(count+1)).send(this.messageCaptor.capture());
+        await().untilAsserted(() -> {
+            verify(this.clientOutboundChannel, times(count+1)).send(this.messageCaptor.capture());
 
-        GraphQLMessage completeMessage = messageCaptor.getValue().getPayload();
+            GraphQLMessage completeMessage = messageCaptor.getValue().getPayload();
 
-        assertThat(completeMessage.getType()).isEqualTo(GraphQLMessageType.COMPLETE);
+            assertThat(completeMessage.getType()).isEqualTo(GraphQLMessageType.COMPLETE);
+        });
     }
 
     @Test
