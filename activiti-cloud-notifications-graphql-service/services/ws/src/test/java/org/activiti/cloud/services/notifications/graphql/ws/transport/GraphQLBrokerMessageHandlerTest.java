@@ -206,7 +206,7 @@ public class GraphQLBrokerMessageHandlerTest {
         CountDownLatch completeLatch = new CountDownLatch(1);
 
         // Simulate stomp relay  subscription stream
-        Flux<ExecutionResult> mockStompRelayObservable = Flux.interval(Duration.ofMillis(100), Duration.ofMillis(10))
+        Flux<ExecutionResult> mockStompRelayObservable = Flux.interval(Duration.ofSeconds(1), Duration.ofMillis(10))
                                                              .take(count)
                                                              .map(i -> {
                                                                  Map<String, Object> data = new HashMap<>();
