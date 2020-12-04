@@ -206,7 +206,7 @@ public class GraphQLBrokerMessageHandlerTest {
         CountDownLatch completeLatch = new CountDownLatch(1);
 
         // Simulate stomp relay  subscription stream
-        Flux<ExecutionResult> mockStompRelayObservable = Flux.interval(Duration.ZERO, Duration.ofMillis(20))
+        Flux<ExecutionResult> mockStompRelayObservable = Flux.interval(Duration.ofMillis(100), Duration.ofMillis(10))
                                                              .take(count)
                                                              .map(i -> {
                                                                  Map<String, Object> data = new HashMap<>();
@@ -229,10 +229,10 @@ public class GraphQLBrokerMessageHandlerTest {
 
         observable.verify(Duration.ofMinutes(2));
 
-        assertThat(completeLatch.await(4000, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(completeLatch.await(2000, TimeUnit.MILLISECONDS)).isTrue();
 
         // then get last message
-        verify(this.clientOutboundChannel, times(count)).send(this.messageCaptor.capture());
+        verify(this.clientOutboundChannel, times(count+1)).send(this.messageCaptor.capture());
 
         GraphQLMessage completeMessage = messageCaptor.getValue().getPayload();
 
