@@ -229,7 +229,7 @@ public class GraphQLBrokerMessageHandlerTest {
 
         observable.verify(Duration.ofMinutes(2));
 
-        assertThat(completeLatch.await(2000, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(completeLatch.await(4000, TimeUnit.MILLISECONDS)).isTrue();
 
         // then get last message
         verify(this.clientOutboundChannel, times(count)).send(this.messageCaptor.capture());
