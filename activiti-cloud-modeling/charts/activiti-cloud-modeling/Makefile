@@ -47,8 +47,7 @@ github:
 
 version:
 	sed -i -e "s/version:.*/version: $(VERSION)/" Chart.yaml
-	sed -i -e "/frontend:/,/backend:/s/tag: .*/tag: $(VERSION)/" values.yaml
-	sed -i -e "/backend:/,/  resources:/s/tag: .*/tag: $(VERSION)/" values.yaml
+	sed -i '/^.*repository: activiti\/activiti-cloud-modeling/{n;s/tag: .*/tag: $(VERSION)/}' values.yaml
 
 common-helm-chart-version:
 	sed -i -e "s/version:.*/version: $(VERSION)/" requirements.yaml

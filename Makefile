@@ -67,13 +67,13 @@ release:
 	sed -i -e "s/version:.*/version: $(VERSION)/" $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/Chart.yaml
 
 	@for CHART in $(CHARTS) ; do \
-		cd $$CHART; \
+		cd $$CHART && \
 		make version && \
 		make build && \
 		make release && \
 		rm $(CURRENT)/$(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/charts/$$(basename `pwd`)*.tgz && \
-		cp $$(basename `pwd`)*.tgz $(CURRENT)/$(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/charts || exit 1 \
-		cd - ; \
+		cp $$(basename `pwd`)*.tgz $(CURRENT)/$(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/charts || exit 1; \
+		cd -; \
 	done
 	
 	cat $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/Chart.yaml
