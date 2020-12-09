@@ -178,6 +178,8 @@ spec:
         - name: API_PATH_PREFIX
           value: "{{ .Values.backend.prefix }}"
 {{ include "activiti-cloud-modeling.extra-env-frontend" . | indent 8 }}
+        - name: SERVER_PORT
+          value: {{ .Values.service.frontend.internalPort | quote }}
         imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.frontend.internalPort }}
