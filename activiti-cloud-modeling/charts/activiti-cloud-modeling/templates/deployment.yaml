@@ -167,7 +167,7 @@ spec:
 {{- end }}
 {{- if .Values.frontend.basepath }}
         - name: BASE_PATH
-          value: "/{{ tpl .Values.frontend.basepath .}}/"
+          value: "/{{ tpl .Values.frontend.basepath .}}"
         - name: APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI
           value: "{{ include "common.gateway-url" . }}/{{ .Values.frontend.basepath }}/assets/silent-refresh.html"
         - name: APP_CONFIG_OAUTH2_REDIRECT_LOGIN

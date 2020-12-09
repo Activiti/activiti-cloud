@@ -47,7 +47,7 @@ service:
     internalPort: 8080
   frontend:
     externalPort: 80
-    internalPort: 80
+    internalPort: 8888
   annotations:
     fabric8.io/expose: "false"
     fabric8.io/ingress.annotations: "kubernetes.io/ingress.class: nginx"
@@ -67,7 +67,7 @@ frontend:
   #       key: expose-keycloak-service-key
   image:
     repository: activiti/activiti-modeling-app
-    tag: 7.1.0-M10
+    tag: master-931
     pullPolicy: Always
   resources:
     limits:
@@ -159,11 +159,8 @@ ingress:
 
   frontend:
     path: "/modeling"
-#    suffix: "" #old version nginx
-    suffix: "/?(.*)" #new versions nginx
-    annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: "/$1" #new version of nginx
-#      nginx.ingress.kubernetes.io/rewrite-target: "/" #old version nginx
+    suffix: ""
+    annotations: 
 
   ## Set this to true in order to enable TLS on the ingress record, i.e. true | false
   tls:
