@@ -17,13 +17,11 @@ package org.activiti.cloud.acc.core.steps.notifications;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import net.thucydides.core.annotations.Step;
+
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
@@ -31,10 +29,15 @@ import org.activiti.cloud.acc.shared.service.BaseService;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.thucydides.core.annotations.Step;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClient.WebsocketSender;
+import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.test.StepVerifier;
 
 @EnableRuntimeFeignContext
@@ -43,6 +46,9 @@ public class NotificationsSteps {
     private static final String GRAPHQL_WS = "graphql-ws";
     private static final String AUTHORIZATION = "Authorization";
     private static final Duration TIMEOUT = Duration.ofMillis(90000);
+    private static final WebsocketClientSpec graphqlWsClientSpec = WebsocketClientSpec.builder()
+                                                                                      .protocols(GRAPHQL_WS)
+                                                                                      .build();
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;
@@ -56,30 +62,30 @@ public class NotificationsSteps {
 
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     @Step
     public void checkServicesHealth() {
         assertThat(baseService.isServiceUp()).isTrue();
     }
-    
+
     public String getRuntimeBundleServiceName() {
         return properties.getRuntimeBundleServiceName();
     }
 
     @SuppressWarnings({"serial"})
     @Step
-    public ReplayProcessor<String> subscribe(String accessToken, 
-                                             String query, 
-                                             Map<String,Object> variables, 
+    public ReplayProcessor<String> subscribe(String accessToken,
+                                             String query,
+                                             Map<String,Object> variables,
                                              Consumer<Subscription> action) throws InterruptedException {
         ReplayProcessor<String> data = ReplayProcessor.create();
 
         WebsocketSender client = HttpClient.create()
                 .wiretap(true)
                 .headers(h -> h.add(AUTHORIZATION, "Bearer " + accessToken))
-                .websocket(GRAPHQL_WS)
+                .websocket(graphqlWsClientSpec)
                 .uri(properties.getGraphqlWsUrl());
-        
+
         Map<String, Object> json = new LinkedHashMap<String, Object>() {{
             put("type", "start");
             put("id", "1");
@@ -95,8 +101,8 @@ public class NotificationsSteps {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        
-        
+
+
         // handle start subscription
         client.handle((i, o) -> {
             o.sendString(Mono.just(startMessage))
@@ -125,11 +131,11 @@ public class NotificationsSteps {
 
     @Step
     public void verifyData(ReplayProcessor<String> data, String...messages) {
-        
+
         StepVerifier.create(data)
                     .expectNext(messages)
                     .expectComplete()
                     .verify(TIMEOUT);
     }
-    
+
 }
