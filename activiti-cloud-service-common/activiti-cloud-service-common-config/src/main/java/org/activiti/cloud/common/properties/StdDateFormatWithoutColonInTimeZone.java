@@ -22,7 +22,7 @@ public class StdDateFormatWithoutColonInTimeZone extends StdDateFormat {
     private static final long serialVersionUID = 1L;
 
     public StdDateFormatWithoutColonInTimeZone() {
-        withColonInTimeZone(false);
+        super(DEFAULT_TIMEZONE, DEFAULT_LOCALE, null, false);
     }
 
 
