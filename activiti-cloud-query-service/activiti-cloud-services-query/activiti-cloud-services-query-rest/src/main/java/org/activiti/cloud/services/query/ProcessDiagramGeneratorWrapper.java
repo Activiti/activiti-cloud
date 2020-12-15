@@ -80,6 +80,7 @@ public class ProcessDiagramGeneratorWrapper {
     public byte[] generateDiagram(BpmnModel bpmnModel) {
         return generateDiagram(bpmnModel,
                                emptyList(),
+                               emptyList(),
                                emptyList());
     }
 
@@ -92,10 +93,12 @@ public class ProcessDiagramGeneratorWrapper {
      */
     public byte[] generateDiagram(BpmnModel bpmnModel,
                                   List<String> highLightedActivities,
-                                  List<String> highLightedFlows) {
+                                  List<String> highLightedFlows,
+                                  List<String> currentActivities) {
         try (final InputStream imageStream = processDiagramGenerator.generateDiagram(bpmnModel,
                                                                                      highLightedActivities,
                                                                                      highLightedFlows,
+                                                                                     currentActivities,
                                                                                      getActivityFontName(),
                                                                                      getLabelFontName(),
                                                                                      getAnnotationFontName(),
