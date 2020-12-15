@@ -12,7 +12,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>2020.0.0-M6</spring-cloud.version>
+    <spring-cloud.version>2020.0.0-RC1</spring-cloud.version>
     <testcontainers.version>1.14.2</testcontainers.version>
   </properties>
   <dependencyManagement>
