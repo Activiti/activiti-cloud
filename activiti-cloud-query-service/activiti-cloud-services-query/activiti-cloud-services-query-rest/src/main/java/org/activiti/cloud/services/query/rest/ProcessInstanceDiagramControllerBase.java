@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import org.activiti.bpmn.BpmnAutoLayout;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
@@ -75,13 +76,15 @@ public abstract class ProcessInstanceDiagramControllerBase {
         if(!bpmnModel.hasDiagramInterchangeInfo())
             new BpmnAutoLayout(bpmnModel).execute();
 
-        List<String> highLightedActivities = resolveStartedActivitiesIds(processInstanceId);
+        List<String> highLightedActivities = resolveCompletedActivitiesIds(processInstanceId);
         List<String> highLightedFlows = resolveCompletedFlows(bpmnModel, processInstanceId);
+        List<String> currentActivities = resolveStartedActivitiesIds(processInstanceId);
 
         return new String(processDiagramGenerator.generateDiagram(bpmnModel,
-                                                                  highLightedActivities,
-                                                                  highLightedFlows),
-                          StandardCharsets.UTF_8);
+            highLightedActivities,
+            highLightedFlows,
+            currentActivities),
+            StandardCharsets.UTF_8);
     }
 
     protected List<String> resolveCompletedFlows(BpmnModel bpmnModel, String processInstanceId) {
@@ -95,6 +98,14 @@ public abstract class ProcessInstanceDiagramControllerBase {
 
     protected List<String> resolveStartedActivitiesIds(String processInstanceId) {
         return bpmnActivityRepository.findByProcessInstanceIdAndStatus(processInstanceId, CloudBPMNActivity.BPMNActivityStatus.STARTED)
+                                     .stream()
+                                     .map(BPMNActivityEntity::getElementId)
+                                     .distinct()
+                                     .collect(Collectors.toList());
+    }
+
+    protected List<String> resolveCompletedActivitiesIds(String processInstanceId) {
+        return bpmnActivityRepository.findByProcessInstanceIdAndStatus(processInstanceId, BPMNActivityStatus.COMPLETED)
                                      .stream()
                                      .map(BPMNActivityEntity::getElementId)
                                      .distinct()

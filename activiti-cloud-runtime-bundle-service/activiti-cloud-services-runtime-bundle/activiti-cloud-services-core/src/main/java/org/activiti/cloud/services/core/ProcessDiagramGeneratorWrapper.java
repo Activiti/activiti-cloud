@@ -67,8 +67,9 @@ public class ProcessDiagramGeneratorWrapper {
      */
     public byte[] generateDiagram(BpmnModel bpmnModel) {
         return generateDiagram(bpmnModel,
-                               emptyList(),
-                               emptyList());
+            emptyList(),
+            emptyList(),
+            emptyList());
     }
 
     /**
@@ -79,22 +80,24 @@ public class ProcessDiagramGeneratorWrapper {
      * @return the diagram for the given model
      */
     public byte[] generateDiagram(BpmnModel bpmnModel,
-                                  List<String> highLightedActivities,
-                                  List<String> highLightedFlows) {
+        List<String> highLightedActivities,
+        List<String> highLightedFlows,
+        List<String> currentActivities) {
         try (final InputStream imageStream = processDiagramGenerator.generateDiagram(bpmnModel,
-                                                                                     highLightedActivities,
-                                                                                     highLightedFlows,
-                                                                                     getActivityFontName(),
-                                                                                     getLabelFontName(),
-                                                                                     getAnnotationFontName(),
-                                                                                     isGenerateDefaultDiagram(),
-                                                                                     getDiagramImageFileName())) {
+            highLightedActivities,
+            highLightedFlows,
+            currentActivities,
+            getActivityFontName(),
+            getLabelFontName(),
+            getAnnotationFontName(),
+            isGenerateDefaultDiagram(),
+            getDiagramImageFileName())) {
             return StreamUtils.copyToByteArray(imageStream);
         } catch (ActivitiImageException e) {
             throw e;
         } catch (Exception e) {
             throw new ActivitiException("Error occurred while getting process diagram for model: " + bpmnModel,
-                                        e);
+                e);
         }
     }
 
