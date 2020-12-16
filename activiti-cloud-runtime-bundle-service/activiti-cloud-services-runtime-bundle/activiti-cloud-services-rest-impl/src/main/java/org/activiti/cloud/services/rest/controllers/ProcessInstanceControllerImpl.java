@@ -138,10 +138,11 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
         return new String(processDiagramGenerator.generateDiagram(bpmnModel,
-                                                                  processRuntime.processInstanceMeta(processInstance.getId())
-                                                                                .getActiveActivitiesIds(),
-                                                                  emptyList()),
-                          StandardCharsets.UTF_8);
+            processRuntime.processInstanceMeta(processInstance.getId())
+                .getActiveActivitiesIds(),
+            emptyList(),
+            emptyList()),
+            StandardCharsets.UTF_8);
     }
 
     @Override
