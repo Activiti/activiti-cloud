@@ -223,6 +223,10 @@
       <id>activiti-releases</id>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
     </repository>
+    <repository>
+      <id>activiti-snapshots</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
+    </repository>
   </repositories>
   <build>
     <pluginManagement>
