@@ -250,9 +250,10 @@ public class ProcessInstanceControllerImplIT {
         when(processInstanceMeta.getActiveActivitiesIds()).thenReturn(emptyList());
 
         when(processDiagramGenerator.generateDiagram(any(BpmnModel.class),
-                                                     anyList(),
-                                                     anyList()))
-                .thenReturn("diagram".getBytes());
+            anyList(),
+            anyList(),
+            anyList()))
+            .thenReturn("diagram".getBytes());
 
         mockMvc.perform(get("/v1/process-instances/{processInstanceId}/model",
                                  1).contentType("image/svg+xml"))
@@ -287,7 +288,7 @@ public class ProcessInstanceControllerImplIT {
         given(processInstanceMeta.getActiveActivitiesIds()).willReturn(emptyList());
 
         willThrow(new ActivitiInterchangeInfoNotFoundException("No interchange information found."))
-            .given(processDiagramGenerator).generateDiagram(bpmnModel, emptyList(), emptyList());
+            .given(processDiagramGenerator).generateDiagram(bpmnModel, emptyList(), emptyList(), emptyList());
 
         mockMvc.perform(get("/v1/process-instances/{processInstanceId}/model", processInstanceId)
             .contentType("image/svg+xml"))
