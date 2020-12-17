@@ -29,6 +29,7 @@ import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
+import org.activiti.cloud.api.process.model.CloudApplication;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -38,6 +39,7 @@ import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinitio
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.impl.CloudApplicationImpl;
 import org.activiti.cloud.api.process.model.impl.CloudBPMNActivityImpl;
 import org.activiti.cloud.api.process.model.impl.CloudIntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
@@ -188,6 +190,8 @@ public class CloudProcessModelAutoConfiguration {
                             CloudServiceTaskImpl.class);
         resolver.addMapping(Deployment.class,
                             DeploymentImpl.class);
+        resolver.addMapping(CloudApplication.class,
+                            CloudApplicationImpl.class);
 
         module.setAbstractTypes(resolver);
 
