@@ -21,7 +21,7 @@
     <module>activiti-cloud-starter-runtime-bundle-it</module>
   </modules>
   <properties>
-    <activiti.version>0.0.1-PR-3497-6683-SNAPSHOT</activiti.version>
+    <activiti.version>0.0.1-PR-3505-6694-SNAPSHOT</activiti.version>
   </properties>
   <dependencyManagement>
     <dependencies>
