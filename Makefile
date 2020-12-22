@@ -1,6 +1,7 @@
 RELEASE_VERSION := $(or $(shell cat VERSION), $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout))
 ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR := .git/activiti-cloud-full-chart
 ACTIVITI_CLOUD_FULL_EXAMPLE_DIR := $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR)/charts/activiti-cloud-full-example
+ACTIVITI_CLOUD_FULL_CHART_BRANCH := dependency-activiti-cloud-application-$(RELEASE_VERSION)
 
 updatebot/push-version:
 	updatebot push-version --kind maven \
@@ -40,16 +41,18 @@ delete:
 	kubectl delete ns ${PREVIEW_NAMESPACE} || echo "try to remove namespace ${PREVIEW_NAMESPACE}"
 
 clone-chart:
-	git clone https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-full-chart.git $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) -b master --depth 1
+	rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
+		git clone https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-full-chart.git $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) --depth 1
 
 create-pr: update-chart
 	cd $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
-	  git checkout -b dependency-activiti-cloud-application-$(RELEASE_VERSION) && \
+		git push -q origin :$(ACTIVITI_CLOUD_FULL_CHART_BRANCH) && \
+	  git checkout -q -b $(ACTIVITI_CLOUD_FULL_CHART_BRANCH) && \
 		helm-docs && \
 		git diff && \
 		git commit -am "Update 'activiti-cloud-application' dependency to $(RELEASE_VERSION)" && \
-		git push -qu origin HEAD && \
-		gh pr create --fill --base master --label activiti-cloud-application ${GH_PR_CREATE_OPTS}
+		git push -qu origin $(ACTIVITI_CLOUD_FULL_CHART_BRANCH) && \
+		gh pr create --fill --head $(ACTIVITI_CLOUD_FULL_CHART_BRANCH) --label updatebot ${GH_PR_CREATE_OPTS}
 
 update-chart: clone-chart
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
