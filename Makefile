@@ -46,7 +46,7 @@ clone-chart:
 
 create-pr: update-chart
 	cd $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
-		git push -q origin :$(ACTIVITI_CLOUD_FULL_CHART_BRANCH) && \
+		(git push -q origin :$(ACTIVITI_CLOUD_FULL_CHART_BRANCH) || true) && \
 	  git checkout -q -b $(ACTIVITI_CLOUD_FULL_CHART_BRANCH) && \
 		helm-docs && \
 		git diff && \
