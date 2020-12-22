@@ -10,7 +10,7 @@
             <timerEventDefinition>
                 <timeCycle>R2/PT1S</timeCycle>
             </timerEventDefinition>
-        </startEvent>    
+        </startEvent>
 
         <sequenceFlow id="flow1" sourceRef="theStart" targetRef="receive"/>
 

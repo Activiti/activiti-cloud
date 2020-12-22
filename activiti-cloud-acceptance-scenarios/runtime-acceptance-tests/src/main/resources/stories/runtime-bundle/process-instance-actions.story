@@ -137,4 +137,3 @@ And the user completes the task
 Then a variable was created with name processDefinitionVersion
 And a variable was created with name processDefinitionKey
 And a variable was created with name processDefinitionId
-

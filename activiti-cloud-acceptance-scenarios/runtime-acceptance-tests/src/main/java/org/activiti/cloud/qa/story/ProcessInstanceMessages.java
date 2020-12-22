@@ -49,16 +49,16 @@ public class ProcessInstanceMessages {
 
     @Steps
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
-    
+
     @Steps
     private ProcessQuerySteps processQuerySteps;
-    
+
     @Steps
     private AuditSteps auditSteps;
-    
+
     private ProcessInstance processInstance;
 
-    
+
     @Given("messages: generated unique sessionVariable called $variableName")
     public void generateUniqueBusinessId(String variableName) {
         Serenity.setSessionVariable(variableName).to(UUID.randomUUID().toString());
@@ -68,14 +68,14 @@ public class ProcessInstanceMessages {
     public void setSessionTimeoutSeconds(long timeoutSeconds) {
         Serenity.setSessionVariable("timeoutSeconds").to(timeoutSeconds);
     }
-    
+
     @When("messages: services are started")
     public void checkServicesStatus() {
         processRuntimeBundleSteps.checkServicesHealth();
         processQuerySteps.checkServicesHealth();
         auditSteps.checkServicesHealth();
     }
-    
+
     @When("messages: the user sends a start message named $messageName with businessKey value of $businessKey session variable")
     public void startMessage(String messageName, String businessKey) throws IOException, InterruptedException {
         String variableValue = Serenity.sessionVariableCalled(businessKey);
@@ -85,12 +85,12 @@ public class ProcessInstanceMessages {
                                                            .build();
 
         processInstance = processRuntimeBundleSteps.message(payload);
-        
+
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
     @Then("messages: the user sends a message named $messageName with correlationKey value of $correlationKey session variable")
-    public void receiveMessage(String messageName, String correlationKey) throws IOException, InterruptedException {      
+    public void receiveMessage(String messageName, String correlationKey) throws IOException, InterruptedException {
         String variableValue = Serenity.sessionVariableCalled(correlationKey);
         ReceiveMessagePayload payload = MessagePayloadBuilder.receive(messageName)
                                                              .withCorrelationKey(variableValue)
@@ -126,9 +126,9 @@ public class ProcessInstanceMessages {
     public void verifyTimerScheduleEventsEmitted(String eventType,
                                                  String messageName) throws Exception {
         long timeoutSeconds = sessionTimeoutSeconds();
-        
+
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
-        
+
         await()
                .atMost(timeoutSeconds, TimeUnit.SECONDS)
                .untilAsserted(() -> {
@@ -143,23 +143,23 @@ public class ProcessInstanceMessages {
                                                      messageName));
                });
     }
-    
+
     @Then("messages: the process with message events is completed")
     public void verifyProcessCompleted() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
-        
+
         processQuerySteps.checkProcessInstanceStatus(processId,
                                                      ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
-    
+
     @Then("messages: the process with definition key of '$processDefinitionKey' having businessKey value of '$sessionVariable' session variable has status '$status'")
     public void verifyProcessInstanceStatus(String processDefinitionKey,
                                             String sessionVariable,
                                             String status) throws Exception {
         long timeoutSeconds = sessionTimeoutSeconds();
-        
+
         String businessKey = Serenity.sessionVariableCalled(sessionVariable);
-        
+
         await()
                .atMost(timeoutSeconds, TimeUnit.SECONDS)
                .untilAsserted(() -> {
@@ -181,9 +181,9 @@ public class ProcessInstanceMessages {
                                      String sessionVariable) throws Exception {
 
         long timeoutSeconds = sessionTimeoutSeconds();
-        
+
         String businessKey = Serenity.sessionVariableCalled(sessionVariable);
-        
+
         await()
                .atMost(timeoutSeconds, TimeUnit.SECONDS)
                .untilAsserted(() -> {
@@ -197,17 +197,17 @@ public class ProcessInstanceMessages {
                                      .contains(messageName);
                });
     }
-    
-    
+
+
     private long sessionTimeoutSeconds() {
         long timeoutSeconds = Serenity.sessionVariableCalled("timeoutSeconds");
-        
+
         if (timeoutSeconds  < 0) {
             timeoutSeconds = 0;
         }
-        
+
         return timeoutSeconds;
 
     }
-    
+
 }

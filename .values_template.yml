@@ -1,7 +1,10 @@
 activiti-cloud-modeling:
-  backend:
-    image:
-      tag: ${VERSION}
+  image:
+    tag: ${VERSION}
+
+activiti-modeling-app:
+  image:
+    tag: ${VERSION}
 
 runtime-bundle:
   image:

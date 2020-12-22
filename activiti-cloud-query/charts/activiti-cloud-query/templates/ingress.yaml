@@ -1,3 +1,0 @@
-{{- template "common.ingress" (list . "activiti.query.ingress") -}}
-{{- define "activiti.query.ingress" -}}
-{{- end -}}

@@ -172,29 +172,29 @@ And the user claims the standalone task
 And the user releases the standalone task
 Then the status of the task is CREATED in RB and Query
 
-Scenario: save a task 
+Scenario: save a task
 Given the user is authenticated as testuser
 When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
 And the user claims the task
 And the user saves the task with variable status equal to approved
 Then task variable status has value approved
 
-Scenario: complete saved task 
+Scenario: complete saved task
 Given the user is authenticated as testuser
 When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
 And the user claims the task
 And the user saves the task with variable status equal to approved
 And the user completes the task
-Then the status of the process is changed to completed 
+Then the status of the process is changed to completed
 And query process instance variable status has value approved
 
 Scenario: complete saved task with outcome
 Given the user is authenticated as testuser
 When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
 And the user claims the task
-And the user saves the task with variable comments equal to lgtm 
+And the user saves the task with variable comments equal to lgtm
 And the user completes the task with variable outcome set to approved
-Then the status of the process is changed to completed 
+Then the status of the process is changed to completed
 And query process instance variable comments has value lgtm
 And query process instance variable outcome has value approved
 
@@ -215,7 +215,7 @@ Then the status of the process and the task is changed to completed
 And the status of the task is COMPLETED in Audit and Query
 And the task contains candidate groups hr,testgroup in Query
 
-Scenario: current assignee of a task can reassign it to a candidate user 
+Scenario: current assignee of a task can reassign it to a candidate user
 Given the user is authenticated as testuser
 When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES
 And the task contains candidate users hruser in Query

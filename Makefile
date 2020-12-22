@@ -1,18 +1,6 @@
-CURRENT=$(shell pwd)
-NAME := $(or $(APP_NAME),$(shell basename $(CURRENT)))
-OS := $(shell uname)
-ACTIVITI_CLOUD_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud.version>)[^<]+" "activiti-cloud-dependencies/pom.xml")
 RELEASE_VERSION := $(or $(shell cat VERSION), $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout))
-ACTIVITI_CLOUD_FULL_EXAMPLE_DIR := .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example
-ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(VERSION) \
-									  activiti-cloud-connector $(VERSION) \
-    								  activiti-cloud-query $(VERSION)  \
-    								  activiti-cloud-modeling $(VERSION)
-    
-CHARTS := "activiti-cloud-query/charts/activiti-cloud-query" \
-	      "example-runtime-bundle/charts/runtime-bundle" \
-	      "example-cloud-connector/charts/activiti-cloud-connector" \
-	      "activiti-cloud-modeling/charts/activiti-cloud-modeling"
+ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR := .git/activiti-cloud-full-chart
+ACTIVITI_CLOUD_FULL_EXAMPLE_DIR := $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR)/charts/activiti-cloud-full-example
 
 updatebot/push-version:
 	updatebot push-version --kind maven \
@@ -28,82 +16,56 @@ updatebot/push-version:
 		org.activiti.cloud:activiti-cloud-query-dependencies ${ACTIVITI_CLOUD_VERSION} \
 		org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies ${ACTIVITI_CLOUD_VERSION} \
 		org.activiti.cloud:activiti-cloud-service-common-dependencies ${ACTIVITI_CLOUD_VERSION} \
-		--merge false;
-                
-	updatebot push-version --kind helm activiti-cloud-dependencies ${RELEASE_VERSION} \
-		runtime-bundle ${RELEASE_VERSION} \
-		activiti-cloud-connector ${RELEASE_VERSION} \
-		activiti-cloud-query ${RELEASE_VERSION} \
-		activiti-cloud-modeling ${RELEASE_VERSION}
+		--merge false
 
-updatebot/update:
-	@echo doing updatebot update $(RELEASE_VERSION)
-	updatebot update
-
-updatebot/update-loop:
-	@echo doing updatebot update-loop $(RELEASE_VERSION)
-	updatebot update-loop --poll-time-ms 60000
+dependabot:
+	curl --silent --show-error --fail -X POST -H "Content-Type: application/json" \
+		-d "{\"name\":\"org.activiti.cloud:activiti-cloud-dependencies\", \"version\": \"$(RELEASE_VERSION)\", \"package-manager\": \"maven\"}" \
+		-H "Authorization: Personal ${GITHUB_TOKEN}" \
+		https://api.dependabot.com/release_notifications/private
 
 install: release
-	helm version
-	cd  $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
-            	helm upgrade ${PREVIEW_NAMESPACE} . \
-            		--install \
-            		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
-            		--namespace ${PREVIEW_NAMESPACE} \
-            		--create-namespace \
-            		--wait
+	echo helm $(helm version --short)
+	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
+		helm dep up && \
+		helm upgrade ${PREVIEW_NAMESPACE} . \
+			--install \
+			--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
+			--namespace ${PREVIEW_NAMESPACE} \
+			--create-namespace \
+			--wait
 
 delete:
-	helm delete ${PREVIEW_NAMESPACE} --namespace  ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
+	helm delete ${PREVIEW_NAMESPACE} --namespace ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
 	kubectl delete ns ${PREVIEW_NAMESPACE} || echo "try to remove namespace ${PREVIEW_NAMESPACE}"
 
-release: 
+clone-chart:
+	git clone https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-full-chart.git $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) -b master --depth 1
+
+create-pr: update-chart
+	cd $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
+	  git checkout -b dependency-activiti-cloud-application-$(RELEASE_VERSION) && \
+		helm-docs && \
+		git diff && \
+		git commit -am "Update 'activiti-cloud-application' dependency to $(RELEASE_VERSION)" && \
+		git push -qu origin HEAD && \
+		gh pr create --fill --base master --label activiti-cloud-application ${GH_PR_CREATE_OPTS}
+
+update-chart: clone-chart
+	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
+		yq write --inplace Chart.yaml 'version' $(RELEASE_VERSION) && \
+		env BACKEND_VERSION=$(RELEASE_VERSION) FRONTEND_VERSION=master make update-docker-images
+
+release: update-chart
 	echo "RELEASE_VERSION: $(RELEASE_VERSION)"
-	updatebot --dry push-version --kind helm activiti-cloud-dependencies $(RELEASE_VERSION)
-	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && helm dep up
-	updatebot --dry push-version --kind helm $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
+	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
+    helm dep up && \
+    helm lint && \
+    cat Chart.yaml && \
+	  cat values.yaml && \
+	  ls charts -la
 
-	sed -i -e "s/version:.*/version: $(VERSION)/" $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/Chart.yaml
-
-	@for CHART in $(CHARTS) ; do \
-		cd $$CHART && \
-		make version && \
-		make build && \
-		make release && \
-		rm $(CURRENT)/$(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/charts/$$(basename `pwd`)*.tgz && \
-		cp $$(basename `pwd`)*.tgz $(CURRENT)/$(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/charts || exit 1; \
-		cd -; \
-	done
-	
-	cat $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/Chart.yaml
-	cat $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/requirements.yaml
-	ls $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/charts -la
-	
-	cd  $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
-		rm -rf requirements.lock && \
-		rm -rf *.tgz && \
-		helm lint && \
-		helm package . || exit 1;
-	
-publish:
-	@for CHART in $(CHARTS) ; do \
-		cd $$CHART; \
-		make version && \
-		make build && \
-		make release && \
-		make github || exit 1; \
-		cd - ; \
-	done
-	
-update-common-helm-chart-version:
-	@for CHART in $(CHARTS) ; do \
-		cd $$CHART; \
-		make common-helm-chart-version || exit 1; \
-		cd -; \
-	done
-
-docker/%: 
+docker/%:
 	$(eval MODULE=$(word 2, $(subst /, ,$@)))
 
 	mvn verify -B -pl $(MODULE) -am
@@ -111,13 +73,22 @@ docker/%:
 	docker build -f $(MODULE)/Dockerfile -q -t docker.io/activiti/$(MODULE):$(RELEASE_VERSION) $(MODULE)
 	docker push docker.io/activiti/$(MODULE):$(RELEASE_VERSION)
 
+docker-delete/%:
+	$(eval MODULE=$(word 2, $(subst /, ,$@)))
+
+	@echo "Delete image from Docker Hub for $(MODULE):$(RELEASE_VERSION)..."
+	curl --silent --show-error --fail -X DELETE -u "$DOCKER_REGISTRY_USERNAME:$DOCKER_REGISTRY_PASSWORD" \
+		https://hub.docker.com/v2/repositories/activiti/$(MODULE)/tags/$(RELEASE_VERSION)
+
+docker-delete-all: docker-delete/example-runtime-bundle docker-delete/activiti-cloud-query docker-delete/example-cloud-connector docker-delete/activiti-cloud-modeling
+
 version:
-	mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false  -DnewVersion=$(RELEASE_VERSION)
+	mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$(RELEASE_VERSION)
 
 deploy:
 	mvn clean deploy -DskipTests
 
-tag: 
+tag:
 	git add -u
 	git commit -m "Release $(RELEASE_VERSION)" --allow-empty
 	git tag -fa v$(RELEASE_VERSION) -m "Release version $(RELEASE_VERSION)" || travis_terminate 1;
@@ -129,5 +100,4 @@ test/%:
 	cd activiti-cloud-acceptance-scenarios && \
 		mvn -pl '$(MODULE)' -Droot.log.level=off verify
 
-promote: version deploy tag updatebot/push-version
-
+promote: version deploy tag updatebot/push-version dependabot create-pr

@@ -1,3 +1,0 @@
-{{- template "common.service" (list . "activiti.query.service") -}}
-{{- define "activiti.query.service" -}}
-{{- end -}}

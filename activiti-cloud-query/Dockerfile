@@ -7,8 +7,8 @@ RUN ln -s /usr/lib/libfontconfig.so.1 /usr/lib/libfontconfig.so && \
     ln -s /lib/libc.musl-x86_64.so.1 /usr/lib/libc.musl-x86_64.so.1
 ENV LD_LIBRARY_PATH /usr/lib
 
-ENV PORT 8080	
-EXPOSE 8080	
-COPY target/*.jar /opt/app.jar	
-WORKDIR /opt	
+ENV PORT 8080
+EXPOSE 8080
+COPY target/*.jar /opt/app.jar
+WORKDIR /opt
 ENTRYPOINT exec java $JAVA_OPTS -jar app.jar

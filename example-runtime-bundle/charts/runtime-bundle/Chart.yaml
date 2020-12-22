@@ -1,5 +1,0 @@
-apiVersion: v1
-description: A Helm chart for Activiti Cloud Runtime Bundle Example
-icon: "https://raw.githubusercontent.com/Activiti/activiti-7-developers-guide/master/assets/Acitiviti_Icon_FullColor_GitHub_400x400.png"
-name: runtime-bundle
-version: 1.1.8

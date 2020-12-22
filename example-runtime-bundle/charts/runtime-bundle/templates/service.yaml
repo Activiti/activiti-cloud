@@ -1,3 +1,0 @@
-{{- template "common.service" (list . "activiti.rb.service") -}}
-{{- define "activiti.rb.service" -}}
-{{- end -}}

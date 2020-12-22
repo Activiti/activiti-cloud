@@ -177,7 +177,7 @@ public class ProcessInstanceTasks {
 
     @When("the user assign the task to $assignee")
     public void assignTask(String assignee) throws Exception {
-        taskRuntimeBundleSteps.assignTask(currentTask.getId(), 
+        taskRuntimeBundleSteps.assignTask(currentTask.getId(),
                 TaskPayloadBuilder
                         .assign()
                         .withTaskId(currentTask.getId())

@@ -15,4 +15,3 @@
     <logger name="org.springframework.web" level="INFO"/>
   </springProfile>
 </configuration>
-

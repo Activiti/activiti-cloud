@@ -46,62 +46,62 @@ public class ProcessInstanceErrorEvents {
 
     @Steps
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
-    
+
     @Steps
     private ProcessQuerySteps processQuerySteps;
-    
+
     @Steps
     private AuditSteps auditSteps;
-    
+
     private ProcessInstance processInstance;
-    
+
     @When("services are started")
     public void checkServicesStatus() {
         processRuntimeBundleSteps.checkServicesHealth();
         processQuerySteps.checkServicesHealth();
         auditSteps.checkServicesHealth();
     }
-    
+
     @When("the user starts a process with error events called $processName")
-    public void startProcess(String processName) throws IOException, InterruptedException {        
+    public void startProcess(String processName) throws IOException, InterruptedException {
         processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),false);
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
-    
+
     @Then("the user can see a task '$taskName' with a status $status")
     public void verifyTaskFromProcessInstance(String taskName,
                                               Task.TaskStatus status) {
-        
+
         String processId = Serenity.sessionVariableCalled("processInstanceId");
-        
+
         await().untilAsserted(() -> {
             Collection<CloudTask> tasks = processRuntimeBundleSteps.getTaskByProcessInstanceId(processId);
-    
+
             assertThat(tasks)
             .isNotEmpty()
             .extracting("status",
                         "name")
-            .containsExactly( 
+            .containsExactly(
                               tuple(status,
                                     taskName
-                              ));  
+                              ));
         });
     }
-    
+
     @Then("the user deletes the process with error events")
     public void deleteCurrentProcessInstance() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
         processRuntimeBundleSteps.deleteProcessInstance(processId);
     }
-    
+
     @Then("error events are emitted for the process")
     public void verifyErrorEventsForProcesses() throws Exception {
-       
+
         String processId = Serenity.sessionVariableCalled("processInstanceId");
-        
+
         await().untilAsserted(() -> {
-            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByProcessInstanceId(processId); 
-            
+            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByProcessInstanceId(processId);
+
             assertThat(events)
                     .filteredOn(CloudBPMNErrorReceivedEvent.class::isInstance)
                     .isNotEmpty()
@@ -119,20 +119,20 @@ public class ProcessInstanceErrorEvents {
                     )
                     .containsExactly(
                                      tuple(ERROR_RECEIVED,
-                                           processInstance.getProcessDefinitionId(), 
+                                           processInstance.getProcessDefinitionId(),
                                            processInstance.getId(),
                                            processInstance.getProcessDefinitionKey(),
                                            processInstance.getBusinessKey(),
-                                           processInstance.getProcessDefinitionId(), 
+                                           processInstance.getProcessDefinitionId(),
                                            processInstance.getId(),
                                            "123",
                                            "errorId",
                                            null,
                                            null
-                                     )); 
+                                     ));
         });
     }
-    
+
     private BPMNError bpmnError(CloudRuntimeEvent<?,?> event) {
         return CloudBPMNErrorReceivedEvent.class.cast(event).getEntity();
     }

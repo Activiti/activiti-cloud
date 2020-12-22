@@ -44,7 +44,7 @@ public class ProcessInstanceVariablesAdmin {
 
     @Steps
     private ProcessVariablesRuntimeBundleSteps processVariablesRuntimeBundleSteps;
-    
+
     @When("the admin starts the process $processName with variables $variableName1 and $variableName2")
     public void adminStartProcess(String processName, String variableName1, String variableName2) {
         Map<String, Object> variables = getVariablesMap(variableName1, variableName1, variableName2, variableName2);
@@ -69,7 +69,7 @@ public class ProcessInstanceVariablesAdmin {
 
         Serenity.setSessionVariable("updateVarsErrorMessages").to(updateVarsErrorMessages.getBody());
     }
-    
+
     @When("the admin delete the instance variable $variableName")
     public void adminDeleteVariables(String variableName) {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
@@ -78,11 +78,11 @@ public class ProcessInstanceVariablesAdmin {
                                                                       .removeVariables()
                                                                       .withVariableNames(variableName)
                                                                       .build();
-        
+
         processVariablesRuntimeAdminSteps.removeVariables(processInstanceId, removeProcessVariablesPayload);
     }
-    
- 
+
+
 
     @Then("the list of errors messages is empty")
     public void checkUpdateVarsErrorMessagesIsEmpty() {
@@ -92,7 +92,7 @@ public class ProcessInstanceVariablesAdmin {
             assertThat(updateVarsErrorMessages).isEmpty();
         }
     }
-    
+
     private Map<String, Object> getVariablesMap(String variableName1, String variableValue1, String variableName2, String variableValue2) {
         Map<String, Object> variables = new HashMap<>();
         variables.put(variableName1, variableValue1);

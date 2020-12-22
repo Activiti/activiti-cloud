@@ -1,6 +1,5 @@
 # Acceptance Tests Scenarios for Activiti Cloud
 
-
 This repo now includes a set of modules which contains different acceptances tests. This acceptance tests rely on having an environment to run against.
 
 In order to point to an environment you can export the following *ENVIRONMENT VARIABLES*
@@ -27,11 +26,11 @@ You can use our HELM charts hosted here: [Activiti Cloud HELM Charts](https://gi
 with all the services that are tested by these acceptance tests.
 
 
-In order to run these acceptance tests you can run: 
+In order to run these acceptance tests you can run:
 
 ```
 > mvn clean install -DskipTests && mvn -pl '!apps-acceptance-tests,!multiple-runtime-acceptance-tests,!security-policies-acceptance-tests' clean verify
 ```
 
-This will ignore the following modules: apps-acceptance-tests,multiple-runtime-acceptance-tests,security-policies-acceptance-tests and run all the others. 
+This will ignore the following modules: apps-acceptance-tests,multiple-runtime-acceptance-tests,security-policies-acceptance-tests and run all the others.
 This is extremely useful to control which tests run depending on your environment configurations and why you are trying to test.

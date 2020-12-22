@@ -32,7 +32,3 @@ Then the user can query tasks
 Scenario: getting events in audit
 Given the user is authenticated as hruser
 Then the user cannot get events for process with variables instances
-
-
-
-

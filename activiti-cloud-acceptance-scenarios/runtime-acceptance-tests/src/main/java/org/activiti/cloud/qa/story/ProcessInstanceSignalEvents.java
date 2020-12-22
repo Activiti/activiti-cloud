@@ -40,52 +40,52 @@ public class ProcessInstanceSignalEvents {
 
     @Steps
     private ProcessRuntimeBundleSteps runtimeBundleSteps;
-    
+
     @Steps
     private ProcessRuntimeAdminSteps runtimeBundleAdminSteps;
-    
+
     @Steps
     private ProcessQuerySteps processQuerySteps;
-    
+
     @Steps
     private AuditSteps auditSteps;
-    
+
     private CloudProcessInstance processInstanceCatchSignal;
     private CloudProcessInstance processInstanceBoundarySignal;
     private CloudProcessInstance processInstanceThrowSignal;
     private int checkCnt=0;
-    
+
     @When("services are started")
     public void checkServicesStatus() {
         runtimeBundleSteps.checkServicesHealth();
         processQuerySteps.checkServicesHealth();
         auditSteps.checkServicesHealth();
     }
-    
+
     @When("the user starts a process with intermediate catch signal")
     public void startSignalCatchProcess() {
         processInstanceCatchSignal = runtimeBundleSteps.startProcess("SignalCatchEventProcess");
         assertThat(processInstanceCatchSignal).isNotNull();
     }
-    
+
     @Then("the task '$taskName' is created")
     public void checkTaskIsCreated(String taskName) {
         List<Task> tasks = new ArrayList<>(
                 runtimeBundleSteps.getTaskByProcessInstanceId(processInstanceBoundarySignal.getId()));
         assertThat(tasks).isNotEmpty();
-        
+
         Task currentTask = tasks.get(0);
         assertThat(currentTask).isNotNull();
         assertThat(currentTask.getName()).isEqualTo(taskName);
-        
+
     }
-    
+
     @When("the user starts a process with a boundary signal")
     public void startBoundarySignalProcess() {
         processInstanceBoundarySignal = runtimeBundleSteps.startProcess("ProcessWithBoundarySignal");
         assertThat(processInstanceBoundarySignal).isNotNull();
     }
-    
+
     @When("the user starts a process with intermediate throw signal")
     public void startSignalThrowProcess() {
         processInstanceThrowSignal = runtimeBundleSteps.startProcess("SignalThrowEventProcess");
@@ -97,51 +97,51 @@ public class ProcessInstanceSignalEvents {
         processQuerySteps.checkProcessInstanceStatus(processInstanceThrowSignal.getId(),
                                                      ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
-    
+
     @Then("the process catching a signal is completed")
     public void sheckSignalCatchProcessInstance() throws Exception {
         processQuerySteps.checkProcessInstanceStatus(processInstanceCatchSignal.getId(),
-                                                     ProcessInstance.ProcessInstanceStatus.COMPLETED);       
+                                                     ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
-    
+
     @Then("the SIGNAL_RECEIVED event was catched up by intermediateCatchEvent process")
     public void sheckSignalReceivedEvent() throws Exception {
-        checkSignalEventReceivedByProcess(processInstanceCatchSignal);   
+        checkSignalEventReceivedByProcess(processInstanceCatchSignal);
     }
 
     @Then("the SIGNAL_RECEIVED event was catched up by boundary signal process")
     public void sheckBoundarySignalReceivedEvent() throws Exception {
-        checkSignalEventReceivedByProcess(processInstanceBoundarySignal);   
+        checkSignalEventReceivedByProcess(processInstanceBoundarySignal);
     }
-    
-    
+
+
     @Then("check number of processes with processDefinitionKey $processDefinitionKey")
     public void checkProcessCount(String processDefinitionKey) throws Exception {
         List<CloudProcessInstance> processes = getProcessesByProcessDefinitionKey(processDefinitionKey);
         checkCnt = processes.size();
     }
-    
+
     @Then("check number of processes with processDefinitionKey $processDefinitionKey increased")
     public void checkProcessCountIncreased(String processDefinitionKey) throws Exception {
         List<CloudProcessInstance> processes = getProcessesByProcessDefinitionKey(processDefinitionKey);
         assertThat(processes).isNotEmpty();
-        
+
         assertThat(processes.size()).isGreaterThan(checkCnt);
         checkCnt=processes.size();
     }
-  
+
 
     @When("the admin deletes boundary signal process")
-    public void deleteBoundarySignalProcesses() throws Exception {   
+    public void deleteBoundarySignalProcesses() throws Exception {
         runtimeBundleAdminSteps.deleteProcessInstance(processInstanceBoundarySignal.getId());
-       
+
     }
-    
+
     @Then("boundary signal process is deleted")
     public void verifyProcessInstanceIsDeleted() throws Exception {
-        runtimeBundleSteps.checkProcessInstanceNotFound(processInstanceBoundarySignal.getId());        
+        runtimeBundleSteps.checkProcessInstanceNotFound(processInstanceBoundarySignal.getId());
     }
-    
+
     public List<CloudProcessInstance> getProcessesByProcessDefinitionKey(String processDefinitionKey) throws Exception {
         return processQuerySteps
                 .getProcessInstancesByProcessDefinitionKey(processDefinitionKey)
@@ -149,13 +149,13 @@ public class ProcessInstanceSignalEvents {
                 .stream()
                 .collect(Collectors.toList());
     }
-    
-    public void checkSignalEventReceivedByProcess(CloudProcessInstance process) throws Exception  {   
+
+    public void checkSignalEventReceivedByProcess(CloudProcessInstance process) throws Exception  {
         assertThat(process).isNotNull();
-        
+
         Collection<CloudRuntimeEvent> receivedEvents = auditSteps.getEventsByProcessInstanceIdAndEventType(process.getId(),
                                                                                                            "SIGNAL_RECEIVED");
-        
+
         assertThat(receivedEvents)
           .isNotEmpty()
           .extracting( CloudRuntimeEvent::getEventType,
@@ -165,10 +165,10 @@ public class ProcessInstanceSignalEvents {
                     tuple(SIGNAL_RECEIVED,
                           process.getId(),
                           process.getProcessDefinitionKey()));
-            
- 
+
+
     }
-    
-    
+
+
 
 }
