@@ -14,7 +14,7 @@ env:
 stages:
 - name: test
 - name: deploy_preview
-  if: type = pull_request
+  if: type = pull_request AND head_branch =~ ^.*preview$
 - name: publish reports
 - name: tag_deploy_updatebot
   if: type != pull_request
