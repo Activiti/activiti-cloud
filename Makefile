@@ -31,6 +31,7 @@ install: release
 		helm dep up && \
 		helm upgrade ${PREVIEW_NAMESPACE} . \
 			--install \
+			--set global.gateway.http=false \
 			--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
 			--namespace ${PREVIEW_NAMESPACE} \
 			--create-namespace \
