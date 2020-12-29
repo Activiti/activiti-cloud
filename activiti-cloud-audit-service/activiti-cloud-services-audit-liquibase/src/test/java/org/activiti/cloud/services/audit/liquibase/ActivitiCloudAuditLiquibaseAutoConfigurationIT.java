@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.modeling.liquibase;
+package org.activiti.cloud.services.audit.liquibase;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,11 +21,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @SpringBootApplication
-public class ActivitiCloudModelingLiquibaseAutoConfigurationTest {
+class ActivitiCloudAuditLiquibaseAutoConfigurationIT {
 
     @Test
-    public void contextLoads() {
-
+    void contextLoads() {
     }
 
 }

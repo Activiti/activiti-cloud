@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.liquibase;
+package org.activiti.cloud.services.modeling.liquibase;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,10 +21,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @SpringBootApplication
-class ActivitiCloudQueryLiquibaseAutoConfigurationTest {
+public class ActivitiCloudModelingLiquibaseAutoConfigurationIT {
 
     @Test
-    void contextLoads() {
+    public void contextLoads() {
+
     }
 
 }
