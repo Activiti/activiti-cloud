@@ -54,7 +54,7 @@ jobs:
   - name: deploy preview
     stage: deploy_preview
     script: |
-      mvn versions:set -DnewVersion=$(cat VERSION) -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1
+      mvn versions:set -DnewVersion=$(cat VERSION)-SNAPSHOT -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1
       mvn clean deploy -DskipTests || travis_terminate 1
   - name: publish reports
     stage: publish reports
@@ -63,7 +63,7 @@ jobs:
   - name: tag_deploy_updatebot
     stage: tag_deploy_updatebot
     script: |
-      mvn versions:set -DnewVersion=$(cat VERSION) -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1    
+      mvn versions:set -DnewVersion=$(cat VERSION) -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1
       git add -u || travis_terminate 1
       git commit -m "Release $(cat VERSION)" --allow-empty || travis_terminate 1
       git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)" || travis_terminate 1
