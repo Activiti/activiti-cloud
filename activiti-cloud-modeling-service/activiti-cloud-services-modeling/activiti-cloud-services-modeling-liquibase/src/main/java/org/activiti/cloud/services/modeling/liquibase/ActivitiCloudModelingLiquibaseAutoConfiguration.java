@@ -17,15 +17,14 @@ package org.activiti.cloud.services.modeling.liquibase;
 
 import javax.sql.DataSource;
 
+import org.activiti.cloud.common.liquibase.SpringLiquibaseConfigurationSupport;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.io.ResourceLoader;
 
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
@@ -33,14 +32,8 @@ import liquibase.integration.spring.SpringLiquibase;
 @Configuration
 @ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", matchIfMissing = true)
 @PropertySource("classpath:config/modeling-liquibase.properties")
-public class ActivitiCloudModelingLiquibaseAutoConfiguration implements ResourceLoaderAware {
+public class ActivitiCloudModelingLiquibaseAutoConfiguration extends SpringLiquibaseConfigurationSupport {
 
-    private ResourceLoader resourceLoader;
-
-    @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
-    }
 
     @Bean
     @ConditionalOnMissingBean(name = "modelingLiquibase")
@@ -54,22 +47,4 @@ public class ActivitiCloudModelingLiquibaseAutoConfiguration implements Resource
         return new LiquibaseProperties();
     }
 
-    private SpringLiquibase buildSpringLiquibase(DataSource dataSource, LiquibaseProperties properties) {
-        SpringLiquibase liquibase = new SpringLiquibase();
-        liquibase.setDataSource(dataSource);
-        liquibase.setResourceLoader(resourceLoader);
-        liquibase.setChangeLog(properties.getChangeLog());
-        liquibase.setContexts(properties.getContexts());
-        liquibase.setDefaultSchema(properties.getDefaultSchema());
-        liquibase.setLiquibaseTablespace(properties.getLiquibaseTablespace());
-        liquibase.setDropFirst(properties.isDropFirst());
-        liquibase.setShouldRun(properties.isEnabled());
-        liquibase.setLabels(properties.getLabels());
-        liquibase.setChangeLogParameters(properties.getParameters());
-        liquibase.setRollbackFile(properties.getRollbackFile());
-        liquibase.setDatabaseChangeLogTable(properties.getDatabaseChangeLogTable());
-        liquibase.setDatabaseChangeLogLockTable(properties.getDatabaseChangeLogLockTable());
-        liquibase.setTestRollbackOnUpdate(properties.isTestRollbackOnUpdate());
-        return liquibase;
-    }
 }

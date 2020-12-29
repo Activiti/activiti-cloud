@@ -9,8 +9,8 @@
   
   <dependencies>
     <dependency>
-      <groupId>org.liquibase</groupId>
-      <artifactId>liquibase-core</artifactId>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-common-liquibase</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
