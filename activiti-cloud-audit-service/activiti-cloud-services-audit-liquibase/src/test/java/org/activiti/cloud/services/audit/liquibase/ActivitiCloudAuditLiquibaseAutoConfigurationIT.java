@@ -25,6 +25,7 @@ class ActivitiCloudAuditLiquibaseAutoConfigurationIT {
 
     @Test
     void contextLoads() {
+        // application context loads successfully
     }
 
 }

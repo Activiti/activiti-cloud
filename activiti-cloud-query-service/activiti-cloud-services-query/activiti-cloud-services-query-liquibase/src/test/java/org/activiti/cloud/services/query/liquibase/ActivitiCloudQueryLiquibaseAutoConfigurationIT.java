@@ -25,6 +25,7 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
 
     @Test
     void contextLoads() {
+        // application context loads successfully
     }
 
 }

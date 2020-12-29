@@ -25,7 +25,7 @@ public class ActivitiCloudModelingLiquibaseAutoConfigurationIT {
 
     @Test
     public void contextLoads() {
-
+        // application context loads successfully
     }
 
 }
