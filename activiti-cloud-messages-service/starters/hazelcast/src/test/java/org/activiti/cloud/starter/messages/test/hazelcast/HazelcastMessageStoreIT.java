@@ -28,7 +28,6 @@ import org.springframework.integration.hazelcast.store.HazelcastMessageStore;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.instance.HazelcastInstanceFactory;
 
 public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
@@ -42,23 +41,32 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
 
         @Bean
         public HazelcastInstance hazelcastInstance(Config hazelcastConfig) {
+            hazelcastConfig.getNetworkConfig()
+                           .setPublicAddress("localhost:5701");
+
             return Hazelcast.newHazelcastInstance(hazelcastConfig);
         }
 
         @Bean
         public HazelcastInstance hazelcastInstance2(Config hazelcastConfig) {
+            hazelcastConfig.getNetworkConfig()
+                           .setPublicAddress("localhost:5702");
+
             return Hazelcast.newHazelcastInstance(hazelcastConfig);
         }
 
         @Bean
         public HazelcastInstance hazelcastInstance3(Config hazelcastConfig) {
+            hazelcastConfig.getNetworkConfig()
+                           .setPublicAddress("localhost:5703");
+
             return Hazelcast.newHazelcastInstance(hazelcastConfig);
         }
     }
 
     @AfterAll
     public static void afterAll() {
-        HazelcastInstanceFactory.terminateAll();
+        Hazelcast.shutdownAll();
     }
 
 
