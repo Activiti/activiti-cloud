@@ -252,6 +252,9 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${maven-failsafe-plugin.version}</version>
+          <configuration>
+            <argLine>-Xmx2048m -XX:MaxPermSize=256m</argLine>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>com.mysema.maven</groupId>
