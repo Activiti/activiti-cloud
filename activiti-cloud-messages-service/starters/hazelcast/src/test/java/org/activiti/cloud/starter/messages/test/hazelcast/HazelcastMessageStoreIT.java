@@ -24,8 +24,11 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.integration.hazelcast.store.HazelcastMessageStore;
+import org.springframework.scheduling.annotation.Async;
 
 import com.hazelcast.config.Config;
+import com.hazelcast.config.JoinConfig;
+import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
@@ -44,13 +47,33 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
         public Config hazelcastConfig() {
             Config config = new Config();
 
+            //config.setProperty("hazelcast.initial.min.cluster.size", "3");
+
             config.getCPSubsystemConfig()
                   .setCPMemberCount(3);
+
+            NetworkConfig network = config.getNetworkConfig();
+            network.setPort(5701)
+                   .setPortCount(20);
+
+            network.setPortAutoIncrement(true);
+
+            JoinConfig join = network.getJoin();
+
+            join.getMulticastConfig()
+                .setEnabled(false);
+
+            join.getTcpIpConfig()
+                .setEnabled(true)
+                .addMember("localhost")
+                .addMember("localhost")
+                .addMember("localhost");
 
             return config;
         }
 
         @Bean(destroyMethod = "shutdown")
+        @Async
         public HazelcastInstance hazelcastInstance(Config hazelcastConfig) {
             hazelcastConfig.getNetworkConfig()
                            .setPublicAddress("localhost:5701");
@@ -59,6 +82,7 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
         }
 
         @Bean(destroyMethod = "shutdown")
+        @Async
         public HazelcastInstance hazelcastInstance2(Config hazelcastConfig) {
             hazelcastConfig.getNetworkConfig()
                            .setPublicAddress("localhost:5702");
@@ -67,6 +91,7 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
         }
 
         @Bean(destroyMethod = "shutdown")
+        @Async
         public HazelcastInstance hazelcastInstance3(Config hazelcastConfig) {
             hazelcastConfig.getNetworkConfig()
                            .setPublicAddress("localhost:5703");
