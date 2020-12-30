@@ -46,6 +46,9 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
         public Config hazelcastConfig() {
             Config config = new Config();
 
+            config.getGroupConfig()
+                  .setName(HazelcastMessageStoreIT.class.getSimpleName());
+
             config.getCPSubsystemConfig()
                   .setCPMemberCount(3);
 
