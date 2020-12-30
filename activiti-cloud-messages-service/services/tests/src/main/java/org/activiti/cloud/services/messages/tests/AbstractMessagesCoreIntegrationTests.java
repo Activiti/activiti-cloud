@@ -36,7 +36,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.activiti.api.process.model.builders.MessageEventPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.MessageDefinitionEvent.MessageDefinitionEvents;
@@ -70,9 +69,11 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -87,7 +88,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
                 "spring.cloud.stream.bindings.output.content-type=application/json"
         }
 )
-@DirtiesContext
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Import({
     AbstractMessagesCoreIntegrationTests.TestConfigurationContext.class
 })
