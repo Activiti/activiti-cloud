@@ -10,6 +10,7 @@ cache:
 env:
   global:
     - MAVEN_VERIFY_CMD="mvn verify -B -DinstallAtEnd=true"
+    - MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=128M -Djava.security.egd=file:/dev/./urandom"
 
 stages:
 - name: test
