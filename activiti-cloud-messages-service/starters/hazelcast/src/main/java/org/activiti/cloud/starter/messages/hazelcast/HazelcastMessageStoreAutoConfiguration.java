@@ -48,6 +48,9 @@ public class HazelcastMessageStoreAutoConfiguration {
         config.getCPSubsystemConfig()
               .setCPMemberCount(3);
 
+        config.getNetworkConfig()
+              .setPublicAddress("localhost:5701");
+
         return config;
     }
 
