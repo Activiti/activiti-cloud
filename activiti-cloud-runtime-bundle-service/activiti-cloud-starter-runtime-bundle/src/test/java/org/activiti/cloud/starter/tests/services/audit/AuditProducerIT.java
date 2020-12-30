@@ -118,10 +118,11 @@ public class AuditProducerIT {
 
     public static final String ROUTING_KEY_HEADER = "routingKey";
     public static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
-    public static final String[] REQIURED_EXECUTION_CONTEXT_HEADERS = {"processInstanceId", "processDefinitionId", "processDefinitionKey", "processDefinitionVersion", "deploymentId", "deploymentName", "appVersion"};
+    public static final String[] REQUIRED_EXECUTION_CONTEXT_HEADERS = {"processInstanceId", "processDefinitionId", "processDefinitionKey", "processDefinitionVersion", "deploymentId", "deploymentName", "appVersion"};
     public static final String[] OPTIONAL_EXECUTION_CONTEXT_HEADERS = {"businessKey", "processName", "processDefinitionName"};
 
-    public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS, REQIURED_EXECUTION_CONTEXT_HEADERS)
+    public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS,
+        REQUIRED_EXECUTION_CONTEXT_HEADERS)
                                                               .flatMap(Stream::of)
                                                               .toArray(String[]::new);
 
