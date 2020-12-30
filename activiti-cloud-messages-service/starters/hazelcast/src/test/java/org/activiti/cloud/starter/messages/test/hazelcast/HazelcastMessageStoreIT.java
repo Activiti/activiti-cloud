@@ -28,6 +28,7 @@ import org.springframework.integration.hazelcast.store.HazelcastMessageStore;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.instance.HazelcastInstanceFactory;
 
 public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
@@ -57,8 +58,9 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
 
     @AfterAll
     public static void afterAll() {
-        Hazelcast.shutdownAll();
+        HazelcastInstanceFactory.terminateAll();
     }
+
 
     @Test
     public void testMessageStore() throws Exception {
