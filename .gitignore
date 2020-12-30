@@ -45,3 +45,5 @@ config/
 requirements.lock
 **/charts/*.tgz
 /*.tgz
+
+.factorypath

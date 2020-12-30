@@ -69,8 +69,13 @@ release: update-chart
 	  cat values.yaml && \
 	  ls charts -la
 
+mvn/%:
+	$(eval MODULE=$(word 1, $(subst mvn/, ,$@)))
+
+	mvn clean verify package -B -pl $(MODULE) -am
+
 docker/%:
-	$(eval MODULE=$(word 2, $(subst /, ,$@)))
+	$(eval MODULE=$(word 1, $(subst docker/, ,$@)))
 
 	mvn verify -B -pl $(MODULE) -am
 	@echo "Building docker image for $(MODULE):$(RELEASE_VERSION)..."

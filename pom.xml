@@ -28,8 +28,10 @@
   </licenses>
   <modules>
     <module>example-runtime-bundle</module>
+    <module>activiti-cloud-query/liquibase</module>
     <module>activiti-cloud-query</module>
     <module>example-cloud-connector</module>
+    <module>activiti-cloud-modeling/liquibase</module>
     <module>activiti-cloud-modeling</module>
     <module>activiti-cloud-acceptance-scenarios</module>
     <module>activiti-cloud-dependencies</module>
@@ -83,6 +85,10 @@
     <repository>
       <id>activiti-releases</id>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+    </repository>
+    <repository>
+      <id>activiti-snapshots</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </repository>
   </repositories>
   <build>

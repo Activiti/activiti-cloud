@@ -2,6 +2,12 @@
 FROM openjdk:11.0.1-jre-slim-stretch
 ENV PORT 8080
 EXPOSE 8080
-COPY target/*.jar /opt/app.jar
+
 WORKDIR /opt
-ENTRYPOINT exec java $JAVA_OPTS -jar app.jar
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+COPY target/*.jar app.jar
+COPY liquibase/target/*.jar liquibase.jar
+
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["-jar", "app.jar"]
