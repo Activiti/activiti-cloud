@@ -47,7 +47,11 @@ public class HazelcastMessageStoreAutoConfiguration {
 
         config.getCPSubsystemConfig()
               .setCPMemberCount(3)
-              .setGroupSize(3);
+              .setGroupSize(3)
+              .setSessionHeartbeatIntervalSeconds(1)
+              .setMissingCPMemberAutoRemovalSeconds(10)
+              .setSessionTimeToLiveSeconds(5);
+
 
         return config;
     }
