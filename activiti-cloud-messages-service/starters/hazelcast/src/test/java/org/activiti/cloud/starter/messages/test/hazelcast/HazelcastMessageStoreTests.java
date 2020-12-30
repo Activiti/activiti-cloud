@@ -30,6 +30,10 @@ import com.hazelcast.core.HazelcastInstance;
 
 public class HazelcastMessageStoreTests extends AbstractMessagesCoreIntegrationTests {
 
+    static {
+        System.setProperty("java.security.egd", "file:/dev/./urandom");
+    }
+
     @SpringBootApplication
     static class MessagesApplication {
 
