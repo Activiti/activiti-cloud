@@ -13,6 +13,8 @@ env:
 
 stages:
 - name: test
+- name: deploy_preview
+  if: type = pull_request AND head_branch =~ ^.*preview$
 - name: publish reports
 - name: tag_deploy_updatebot
   if: type != pull_request
@@ -49,6 +51,11 @@ jobs:
   - name: activiti-cloud-connectors
     stage: test
     script: ${MAVEN_VERIFY_CMD} -f activiti-cloud-connectors/pom.xml
+  - name: deploy preview
+    stage: deploy_preview
+    script: |
+      mvn versions:set -DnewVersion=$(cat VERSION)-SNAPSHOT -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1
+      mvn clean deploy -DskipTests || travis_terminate 1
   - name: publish reports
     stage: publish reports
     before_script: aws s3 sync ${S3_JACCO_DIR} .
