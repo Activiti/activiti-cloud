@@ -70,7 +70,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -88,7 +87,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
                 "spring.cloud.stream.bindings.output.content-type=application/json"
         }
 )
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@DirtiesContext
 @Import({
     AbstractMessagesCoreIntegrationTests.TestConfigurationContext.class
 })
