@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.integration.hazelcast.store.HazelcastMessageStore;
 
 import com.hazelcast.config.Config;
@@ -37,6 +38,17 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
 
     @TestConfiguration
     static class HazelcastConfiguration {
+
+        @Bean
+        @Scope("prototype")
+        public Config hazelcastConfig() {
+            Config config = new Config();
+
+            config.getCPSubsystemConfig()
+                  .setCPMemberCount(3);
+
+            return config;
+        }
 
         @Bean(destroyMethod = "shutdown")
         public HazelcastInstance hazelcastInstance(Config hazelcastConfig) {
