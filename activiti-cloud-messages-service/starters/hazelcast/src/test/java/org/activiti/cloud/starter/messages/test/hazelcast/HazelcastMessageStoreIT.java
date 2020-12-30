@@ -18,7 +18,6 @@ package org.activiti.cloud.starter.messages.test.hazelcast;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -39,7 +38,7 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
     @TestConfiguration
     static class HazelcastConfiguration {
 
-        @Bean
+        @Bean(destroyMethod = "shutdown")
         public HazelcastInstance hazelcastInstance(Config hazelcastConfig) {
             hazelcastConfig.getNetworkConfig()
                            .setPublicAddress("localhost:5701");
@@ -47,7 +46,7 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
             return Hazelcast.newHazelcastInstance(hazelcastConfig);
         }
 
-        @Bean
+        @Bean(destroyMethod = "shutdown")
         public HazelcastInstance hazelcastInstance2(Config hazelcastConfig) {
             hazelcastConfig.getNetworkConfig()
                            .setPublicAddress("localhost:5702");
@@ -55,7 +54,7 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
             return Hazelcast.newHazelcastInstance(hazelcastConfig);
         }
 
-        @Bean
+        @Bean(destroyMethod = "shutdown")
         public HazelcastInstance hazelcastInstance3(Config hazelcastConfig) {
             hazelcastConfig.getNetworkConfig()
                            .setPublicAddress("localhost:5703");
@@ -63,12 +62,6 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
             return Hazelcast.newHazelcastInstance(hazelcastConfig);
         }
     }
-
-    @AfterAll
-    public static void afterAll() {
-        Hazelcast.shutdownAll();
-    }
-
 
     @Test
     public void testMessageStore() throws Exception {
