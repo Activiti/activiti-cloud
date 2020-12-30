@@ -253,7 +253,9 @@
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${maven-failsafe-plugin.version}</version>
           <configuration>
-            <argLine>-Xmx2048m -XX:MaxPermSize=256m</argLine>
+            <forkCount>1</forkCount>
+            <reuseForks>true</reuseForks>
+            <argLine>-Xmx4096m -XX:MaxPermSize=256m</argLine>
           </configuration>
         </plugin>
         <plugin>
