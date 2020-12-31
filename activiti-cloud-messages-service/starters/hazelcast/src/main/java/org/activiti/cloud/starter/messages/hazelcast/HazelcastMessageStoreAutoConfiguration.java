@@ -46,8 +46,7 @@ public class HazelcastMessageStoreAutoConfiguration {
         Config config = new Config();
 
         config.getCPSubsystemConfig()
-              .setCPMemberCount(3)
-              .setGroupSize(3);
+              .setCPMemberCount(3);
 
         return config;
     }
