@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +43,7 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
     static class HazelcastConfiguration {
 
         @Bean
-        @Scope("prototype")
+        @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
         public Config hazelcastConfig() {
             Config config = new Config();
 
