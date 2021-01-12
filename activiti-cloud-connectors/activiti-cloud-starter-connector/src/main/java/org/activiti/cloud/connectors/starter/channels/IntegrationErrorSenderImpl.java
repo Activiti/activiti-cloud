@@ -15,17 +15,24 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
+import org.activiti.cloud.connectors.starter.model.IntegrationFailedBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
 public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
     private final IntegrationErrorChannelResolver resolver;
+    private final AuditChannels auditChannels;
+    private final ConnectorProperties properties;
 
-    public IntegrationErrorSenderImpl(IntegrationErrorChannelResolver resolver) {
+    public IntegrationErrorSenderImpl(IntegrationErrorChannelResolver resolver, AuditChannels auditChannels, ConnectorProperties properties) {
         this.resolver = resolver;
+        this.auditChannels = auditChannels;
+        this.properties = properties;
     }
 
     @Override
@@ -35,5 +42,11 @@ public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
         MessageChannel destination = resolver.resolveDestination(request);
 
         destination.send(message);
+        sendAuditMessage(message.getPayload());
+    }
+
+    private void sendAuditMessage(IntegrationError integrationError) {
+        Message<CloudRuntimeEvent<?, ?>[]> message = IntegrationFailedBuilder.failureFor(integrationError, properties).buildMessage();
+        auditChannels.auditProducer().send(message);
     }
 }

@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.api.process.model.impl.conf;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
@@ -65,6 +73,8 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationExecutedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationFailedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
@@ -80,15 +90,6 @@ import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEv
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.jsontype.NamedType;
-import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @Configuration
 public class CloudProcessModelAutoConfiguration {
@@ -133,6 +134,10 @@ public class CloudProcessModelAutoConfiguration {
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name()));
         module.registerSubtypes(new NamedType(CloudIntegrationErrorReceivedEventImpl.class,
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()));
+        module.registerSubtypes(new NamedType(CloudIntegrationExecutedEventImpl.class,
+                                              IntegrationEvent.IntegrationEvents.INTEGRATION_EXECUTED.name()));
+        module.registerSubtypes(new NamedType(CloudIntegrationFailedEventImpl.class,
+                                              IntegrationEvent.IntegrationEvents.INTEGRATION_FAILED.name()));
 
         module.registerSubtypes(new NamedType(CloudBPMNTimerFiredEventImpl.class,
                                               BPMNTimerEvent.TimerEvents.TIMER_FIRED.name()));

@@ -15,7 +15,8 @@
  */
 package org.activiti.cloud.connectors.starter.configuration;
 
-import org.activiti.cloud.connectors.starter.channels.IntegrationRequestErrorChannelListener;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.connectors.starter.channels.AuditChannels;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolver;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolverImpl;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorDestinationBuilder;
@@ -24,6 +25,7 @@ import org.activiti.cloud.connectors.starter.channels.IntegrationErrorHandler;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorHandlerImpl;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSenderImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationRequestErrorChannelListener;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultChannelResolver;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultChannelResolverImpl;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinationBuilder;
@@ -39,10 +41,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Configuration
-@EnableBinding({ProcessRuntimeChannels.class})
+@EnableBinding({ProcessRuntimeChannels.class, AuditChannels.class})
 @PropertySource("classpath:activiti-cloud-connector.properties")
 @EnableConfigurationProperties(ConnectorProperties.class)
 public class ActivitiCloudConnectorAutoConfiguration {
@@ -84,8 +84,9 @@ public class ActivitiCloudConnectorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultSender integrationResultSender(IntegrationResultChannelResolver integrationChannelResolver) {
-        return new IntegrationResultSenderImpl(integrationChannelResolver);
+    public IntegrationResultSender integrationResultSender(IntegrationResultChannelResolver integrationChannelResolver, AuditChannels auditChannels,
+                                                           ConnectorProperties connectorProperties) {
+        return new IntegrationResultSenderImpl(integrationChannelResolver, auditChannels, connectorProperties);
     }
 
     @Bean
@@ -104,8 +105,9 @@ public class ActivitiCloudConnectorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorSender integrationErrorSender(IntegrationErrorChannelResolver integrationChannelResolver) {
-        return new IntegrationErrorSenderImpl(integrationChannelResolver);
+    public IntegrationErrorSender integrationErrorSender(IntegrationErrorChannelResolver integrationChannelResolver, AuditChannels auditChannels,
+                                                         ConnectorProperties connectorProperties) {
+        return new IntegrationErrorSenderImpl(integrationChannelResolver, auditChannels, connectorProperties);
     }
 
 }

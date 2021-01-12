@@ -21,12 +21,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.IntegrationError;
+import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationExecutedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationFailedEventImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.activiti.cloud.connectors.starter.model.IntegrationExecutedBuilder;
+import org.activiti.cloud.connectors.starter.model.IntegrationFailedBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -35,13 +35,13 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
-public class IntegrationResultSenderImplTest {
+public class IntegrationErrorSenderImplTest {
 
     @InjectMocks
-    private IntegrationResultSenderImpl integrationResultSender;
+    private IntegrationErrorSenderImpl integrationErrorSender;
 
     @Mock
-    private IntegrationResultChannelResolver resolver;
+    private IntegrationErrorChannelResolver resolver;
 
     @Mock
     AuditChannels auditChannels;
@@ -61,7 +61,7 @@ public class IntegrationResultSenderImplTest {
     }
 
     @Test
-    public void sendShouldSendMessageBasedOnTheTargetApplication() throws Exception {
+    public void shouldSendMessageBasedOnTheTargetApplication() throws Exception {
         //given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
@@ -70,23 +70,23 @@ public class IntegrationResultSenderImplTest {
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
-        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
-            integrationRequest.getIntegrationContext());
+        Throwable error = new Error("Boom!");
+        IntegrationError IntegrationError = new IntegrationErrorImpl(integrationRequest,error);
 
         given(resolver.resolveDestination(integrationRequest)).willReturn(messageChannel);
         given(auditChannels.auditProducer()).willReturn(auditMessageChannel);
 
-        Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
+        Message<IntegrationError> message = MessageBuilder.withPayload(IntegrationError).build();
 
         //when
-        integrationResultSender.send(message);
+        integrationErrorSender.send(message);
 
         //then
         verify(messageChannel).send(message);
     }
 
     @Test
-    public void shouldSendAuditMessageBasedOnTheIntegrationExecution() throws Exception {
+    public void shouldSendAuditMessageBasedOnTheIntegrationError() throws Exception {
         //given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
@@ -95,23 +95,23 @@ public class IntegrationResultSenderImplTest {
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
-        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
-            integrationRequest.getIntegrationContext());
+        Throwable error = new Error("Boom!");
+        IntegrationError IntegrationError = new IntegrationErrorImpl(integrationRequest,error);
 
         given(resolver.resolveDestination(integrationRequest)).willReturn(messageChannel);
         given(auditChannels.auditProducer()).willReturn(auditMessageChannel);
 
-        Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
-        Message<CloudRuntimeEvent<?, ?>[]> auditMessage = IntegrationExecutedBuilder.executionFor(message.getPayload(), properties).buildMessage();
+        Message<IntegrationError> message = MessageBuilder.withPayload(IntegrationError).build();
+        Message<CloudRuntimeEvent<?, ?>[]> auditMessage = IntegrationFailedBuilder.failureFor(message.getPayload(), properties).buildMessage();
 
         //when
-        integrationResultSender.send(message);
+        integrationErrorSender.send(message);
 
         //then
         verify(auditMessageChannel).send(
             argThat(audit ->
                 audit.getHeaders().get("integrationContextId").equals(auditMessage.getHeaders().get("integrationContextId")) &&
-                    ((CloudRuntimeEvent<?, ?>[])audit.getPayload())[0].getClass().equals(CloudIntegrationExecutedEventImpl.class) &&
+                    ((CloudRuntimeEvent<?, ?>[])audit.getPayload())[0].getClass().equals(CloudIntegrationFailedEventImpl.class) &&
                     ((CloudRuntimeEvent<?, ?>[])audit.getPayload())[0].getEntity().equals(((CloudRuntimeEvent<?, ?>[])auditMessage.getPayload())[0].getEntity())
                 )
         );
