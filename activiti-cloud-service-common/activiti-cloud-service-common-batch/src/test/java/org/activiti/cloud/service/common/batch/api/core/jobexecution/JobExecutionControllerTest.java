@@ -31,8 +31,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import javax.batch.operations.BatchRuntimeException;
 
-import org.activiti.cloud.service.common.batch.util.core.JobStarter;
+import org.activiti.cloud.service.common.batch.api.core.jobexecution.provider.DefaultJobExecutionProvider;
 import org.activiti.cloud.service.common.batch.util.core.JobConfig;
+import org.activiti.cloud.service.common.batch.util.core.JobStarter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +48,10 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -55,7 +59,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringJUnitWebConfig
 @RunWith(SpringRunner.class)
-@WebMvcTest
+@WebMvcTest(JobExecutionController.class)
 public class JobExecutionControllerTest {
 
     @Autowired
@@ -69,6 +73,21 @@ public class JobExecutionControllerTest {
 
     @MockBean
     private JobStarter adHocStarter;
+
+    @SpyBean
+    private JobExecutionService jobExecutionService;
+
+    @TestConfiguration
+    static class AdditionalConfig {
+
+        @Bean
+        public JobExecutionService jobExecutionService(JobExplorer jobExplorer,
+                                                       JobStarter jobStarter) {
+            return new JobExecutionService(jobExplorer,
+                                           new DefaultJobExecutionProvider(jobExplorer),
+                                           jobStarter);
+        }
+    }
 
     @Before
     public void setUp() {

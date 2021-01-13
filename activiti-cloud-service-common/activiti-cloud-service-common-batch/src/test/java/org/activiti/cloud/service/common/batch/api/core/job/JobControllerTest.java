@@ -18,6 +18,7 @@ package org.activiti.cloud.service.common.batch.api.core.job;
 
 import static org.activiti.cloud.service.common.batch.api.core.Fixtures.configureMock;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,12 +31,15 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest
+@WebMvcTest(JobController.class)
 public class JobControllerTest {
 
     @Autowired
@@ -46,6 +50,18 @@ public class JobControllerTest {
 
     @MockBean
     private JobStarter adHocStarter;
+
+    @SpyBean
+    private JobService jobService;
+
+    @TestConfiguration
+    static class AdditionalConfig {
+
+        @Bean
+        public JobService jobService(JobRegistry jobRegistry) {
+            return new JobService(jobRegistry);
+        }
+    }
 
     @Before
     public void setUp() {
@@ -58,6 +74,8 @@ public class JobControllerTest {
                .andDo(print())
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.*", hasSize(2)));
+
+        verify(jobService).jobs();
     }
 
 }
