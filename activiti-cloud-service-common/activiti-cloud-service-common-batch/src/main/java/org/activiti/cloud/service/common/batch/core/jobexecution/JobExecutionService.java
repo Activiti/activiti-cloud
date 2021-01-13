@@ -52,7 +52,7 @@ public class JobExecutionService {
         org.springframework.batch.core.JobExecution jobExecution = jobExplorer.getJobExecution(executionId);
         if (jobExecution == null)
             throw new NoSuchJobExecutionException("Could not find job execution with ID " + executionId);
-        return JobExecution.fromSpring(jobExecution);
+        return JobExecutionConverter.fromSpring(jobExecution);
 
     }
 
@@ -65,13 +65,13 @@ public class JobExecutionService {
                      maxNumberOfExecutionsPerJobName);
         return jobExecutionProvider.getJobExecutions(jobNameRegexp, exitCode, maxNumberOfExecutionsPerJobName)
                                    .stream()
-                                   .map(JobExecution::fromSpring)
+                                   .map(JobExecutionConverter::fromSpring)
                                    .collect(Collectors.toList());
 
     }
 
     public JobExecution launch(JobConfig jobConfig) {
-        return JobExecution.fromSpring(adHocStarter.start(jobConfig));
+        return JobExecutionConverter.fromSpring(adHocStarter.start(jobConfig));
     }
 
     public Job job(String jobName) {

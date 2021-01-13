@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.service.common.batch;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -42,7 +42,7 @@ import org.springframework.batch.core.explore.JobExplorer;
 
 public class Fixtures {
 
-    private static final List<String> JOB_NAMES = newArrayList("j1", "j2");
+    private static final List<String> JOB_NAMES = asList("j1", "j2");
 
     public static final String JOB_NAME_1 = "j1";
     public static final JobInstance ji11 = new JobInstance(11L, JOB_NAME_1);
@@ -75,38 +75,28 @@ public class Fixtures {
     }
 
     public static void configureForJobExecutionsService(JobExplorer jobExplorer) {
-        when(jobExplorer.getJobInstances(eq(JOB_NAME_1), anyInt(), anyInt())).thenReturn(newArrayList(ji11, ji12));
-        when(jobExplorer.getJobInstances(eq(JOB_NAME_2), anyInt(), anyInt())).thenReturn(newArrayList(ji21,
+        when(jobExplorer.getJobInstances(eq(JOB_NAME_1), anyInt(), anyInt())).thenReturn(asList(ji11, ji12));
+        when(jobExplorer.getJobInstances(eq(JOB_NAME_2), anyInt(), anyInt())).thenReturn(asList(ji21,
                                                                                                       ji22,
                                                                                                       ji23));
 
-        when(jobExplorer.getJobExecutions(ji11)).thenReturn(newArrayList(je11));
-        when(jobExplorer.getJobExecutions(ji12)).thenReturn(newArrayList(je12));
+        when(jobExplorer.getJobExecutions(ji11)).thenReturn(asList(je11));
+        when(jobExplorer.getJobExecutions(ji12)).thenReturn(asList(je12));
 
-        when(jobExplorer.getJobExecutions(ji21)).thenReturn(newArrayList(je21));
-        when(jobExplorer.getJobExecutions(ji22)).thenReturn(newArrayList(je22));
-        when(jobExplorer.getJobExecutions(ji23)).thenReturn(newArrayList(je23, je24));
+        when(jobExplorer.getJobExecutions(ji21)).thenReturn(asList(je21));
+        when(jobExplorer.getJobExecutions(ji22)).thenReturn(asList(je22));
+        when(jobExplorer.getJobExecutions(ji23)).thenReturn(asList(je23, je24));
     }
-
-//    public static void configureForJobExecutionsService(CachedJobExecutionProvider provider) {
-//        provider.accept(je11);
-//        provider.accept(je12);
-//
-//        provider.accept(je21);
-//        provider.accept(je22);
-//        provider.accept(je23);
-//        provider.accept(je24);
-//    }
 
     public static void configureForJobExecutionsService(JobExecutionProvider provider) {
         when(provider.getJobExecutions(ArgumentMatchers.<Optional<String>>any(),
                                        ArgumentMatchers.<Optional<String>>any(),
-                                       anyInt())).thenReturn(newArrayList(je11,
-                                                                          je12,
-                                                                          je21,
-                                                                          je22,
-                                                                          je23,
-                                                                          je24));
+                                       anyInt())).thenReturn(asList(je11,
+                                                                    je12,
+                                                                    je21,
+                                                                    je22,
+                                                                    je23,
+                                                                    je24));
     }
 
     public static JobExecution jobExecution(int id, JobInstance ji, ExitStatus exitStatus) {

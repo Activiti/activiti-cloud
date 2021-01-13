@@ -16,20 +16,12 @@
 
 package org.activiti.cloud.service.common.batch.domain;
 
-import static java.util.stream.Collectors.toList;
-
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-import org.activiti.cloud.service.common.batch.util.DateUtil;
 import org.springframework.batch.core.BatchStatus;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Throwables;
 import lombok.Builder;
 import lombok.Value;
 
@@ -39,23 +31,6 @@ public class JobExecution implements Comparable<JobExecution> {
 
     private static final String EXIT_CODE = "exitCode";
     private static final String EXIT_DESCRIPTION = "exitDescription";
-
-    public static JobExecution fromSpring(org.springframework.batch.core.JobExecution je) {
-        return JobExecution.builder()
-                           .jobId(je.getJobId())
-                           .id(je.getId())
-                           .jobName(je.getJobInstance().getJobName())
-                           .startTime(DateUtil.localDateTime(je.getStartTime()))
-                           .endTime(DateUtil.localDateTime(je.getEndTime()))
-                           .exitCode(je.getExitStatus() == null ? null : je.getExitStatus().getExitCode())
-                           .exitDescription(je.getExitStatus() == null ? null : je.getExitStatus().getExitDescription())
-                           .status(je.getStatus())
-                           .exceptions(je.getFailureExceptions()
-                                         .stream()
-                                         .map(e -> e.getMessage() + ": " + Throwables.getStackTraceAsString(e))
-                                         .collect(toList()))
-                           .build();
-    }
 
     private long id;
     private long jobId;
@@ -79,12 +54,5 @@ public class JobExecution implements Comparable<JobExecution> {
         return result;
     }
 
-    static class BatchStatusSerializer extends JsonSerializer<BatchStatus> {
 
-        @Override
-        public void serialize(BatchStatus batchStatus, JsonGenerator jsonGen, SerializerProvider serializerProvider)
-                                                                                                                     throws IOException {
-            jsonGen.writeString(batchStatus.name());
-        }
-    }
 }
