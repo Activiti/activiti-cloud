@@ -31,11 +31,10 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
-import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-@Component @RequiredArgsConstructor
+@RequiredArgsConstructor
 public class JobBuilder {
     private final JobRegistry jobRegistry;
     private final JobBuilderFactory jobs;

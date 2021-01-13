@@ -22,9 +22,7 @@ import java.util.Collection;
 
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class JobService {
 
     private final JobRegistry jobRegistry;

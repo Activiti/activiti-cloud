@@ -26,7 +26,6 @@ import java.util.Optional;
 import org.activiti.cloud.service.common.batch.api.core.SpringBatchRestCoreAutoConfiguration;
 import org.activiti.cloud.service.common.batch.util.core.JobConfig;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -40,17 +39,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 
-@ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED,
-        havingValue = "true",
-        matchIfMissing = true)
 @RestController
 @RequestMapping(value = "/jobExecutions",
                 produces = "application/hal+json")
+@ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED,
+                       havingValue = "true",
+                       matchIfMissing = true)
+@RequiredArgsConstructor
 public class JobExecutionController {
 
-    @Autowired
-    private JobExecutionService jobExecutionService;
+    private final JobExecutionService jobExecutionService;
 
     @Operation(summary = "Get all Spring batch job execution by ID")
     @GetMapping("/{id}")

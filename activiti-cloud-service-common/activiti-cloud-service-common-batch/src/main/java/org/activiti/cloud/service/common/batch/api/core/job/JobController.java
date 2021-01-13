@@ -22,8 +22,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.util.Collection;
 
 import org.activiti.cloud.service.common.batch.api.core.SpringBatchRestCoreAutoConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,17 +31,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 
-@ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED,
-        havingValue = "true",
-        matchIfMissing = true)
 @RestController
+@ConditionalOnWebApplication
+@ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED,
+                       havingValue = "true",
+                       matchIfMissing = true)
 @RequestMapping(value = "/jobs",
-        produces = "application/hal+json")
+                produces = "application/hal+json")
+@RequiredArgsConstructor
 public class JobController {
 
-    @Autowired
-    private JobService jobService;
+    private final JobService jobService;
 
     @Operation(summary = "Get a Spring Batch job by name")
     @GetMapping("/{jobName}")

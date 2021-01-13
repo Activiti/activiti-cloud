@@ -26,7 +26,6 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,12 +39,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@ConditionalOnProperty(name = "org.activiti.cloud.service.common.batch.api.core.api.core.controllerAdvice",
-        havingValue = "true",
-        matchIfMissing = true)
 @ControllerAdvice
 @Slf4j
-public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
+public class JobResponseControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleAnyException(Exception e, WebRequest request) {

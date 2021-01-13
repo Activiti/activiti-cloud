@@ -16,17 +16,10 @@
 
 package org.activiti.cloud.service.common.batch.api.core;
 
-import org.activiti.cloud.service.common.batch.api.core.job.JobController;
-import org.activiti.cloud.service.common.batch.api.core.jobexecution.JobExecutionController;
-import org.activiti.cloud.service.common.batch.util.core.JobStarter;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@EnableBatchProcessing
-@ComponentScan(basePackageClasses = {JobStarter.class, JobController.class, JobExecutionController.class})
 public class SpringBatchRestCoreTestApplication {
 
     public static void main(String[] args) {

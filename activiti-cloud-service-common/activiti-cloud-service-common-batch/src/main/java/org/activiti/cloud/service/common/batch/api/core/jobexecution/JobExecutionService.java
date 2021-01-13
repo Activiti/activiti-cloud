@@ -24,15 +24,13 @@ import javax.batch.operations.NoSuchJobExecutionException;
 
 import org.activiti.cloud.service.common.batch.api.core.job.Job;
 import org.activiti.cloud.service.common.batch.api.core.jobexecution.provider.JobExecutionProvider;
-import org.activiti.cloud.service.common.batch.util.core.JobStarter;
 import org.activiti.cloud.service.common.batch.util.core.JobConfig;
+import org.activiti.cloud.service.common.batch.util.core.JobStarter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class JobExecutionService {
 
     private final static Logger logger = LoggerFactory.getLogger(JobExecutionService.class);

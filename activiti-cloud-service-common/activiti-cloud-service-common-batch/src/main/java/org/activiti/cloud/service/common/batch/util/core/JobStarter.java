@@ -40,12 +40,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
 public class JobStarter {
 
     private final JobLocator jobLocator;

@@ -17,16 +17,29 @@
 package org.activiti.cloud.service.common.batch.api.core;
 
 import org.activiti.cloud.service.common.batch.api.core.job.JobController;
+import org.activiti.cloud.service.common.batch.api.core.job.JobService;
 import org.activiti.cloud.service.common.batch.api.core.jobexecution.JobExecutionController;
+import org.activiti.cloud.service.common.batch.api.core.jobexecution.JobExecutionService;
+import org.activiti.cloud.service.common.batch.api.core.jobexecution.JobResponseControllerAdvice;
+import org.activiti.cloud.service.common.batch.api.core.jobexecution.provider.DefaultJobExecutionProvider;
+import org.activiti.cloud.service.common.batch.api.core.jobexecution.provider.JobExecutionProvider;
+import org.activiti.cloud.service.common.batch.util.core.JobBuilder;
 import org.activiti.cloud.service.common.batch.util.core.JobStarter;
+import org.springframework.batch.core.configuration.JobLocator;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -36,9 +49,8 @@ import io.swagger.v3.oas.models.info.License;
 @Configuration
 @EnableBatchProcessing
 @ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED,
-        havingValue = "true",
-        matchIfMissing = true)
-@ComponentScan(basePackageClasses = {JobStarter.class, JobController.class, JobExecutionController.class})
+                       havingValue = "true",
+                       matchIfMissing = true)
 public class SpringBatchRestCoreAutoConfiguration {
 
     public static final String REST_API_ENABLED = "org.activiti.cloud.service.common.batch.enabled";
@@ -48,7 +60,72 @@ public class SpringBatchRestCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OpenAPI customOpenAPI() {
+    public JobExecutionProvider jobExecutionProvider(JobExplorer jobExplorer) {
+        return new DefaultJobExecutionProvider(jobExplorer);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JobService jobService(JobRegistry jobRegistry) {
+        return new JobService(jobRegistry);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JobController jobController(JobService jobService) {
+        return new JobController(jobService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JobExecutionController jobExecutionController(JobExecutionService jobExecutionService) {
+        return new JobExecutionController(jobExecutionService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JobExecutionService jobExecutionService(JobExplorer jobExplorer,
+                                                   JobExecutionProvider jobExecutionProvider,
+                                                   JobStarter adHocStarter) {
+        return new JobExecutionService(jobExplorer,
+                                       jobExecutionProvider,
+                                       adHocStarter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JobResponseControllerAdvice jobResponseControllerAdvice() {
+        return new JobResponseControllerAdvice();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JobBuilder jobBuilder(JobRegistry jobRegistry,
+                                 JobBuilderFactory jobs,
+                                 StepBuilderFactory steps,
+                                 Environment environment) {
+        return new JobBuilder(jobRegistry,
+                              jobs,
+                              steps,
+                              environment);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JobStarter jobStarter(JobLocator jobLocator,
+                      JobRepository jobRepository,
+                      @Value("${org.activiti.cloud.service.common.batch.api.core.addUniqueJobParameter:true}")
+                      boolean addUniqueJobParameter,
+                      JobRegistry jobRegistry) {
+        return new JobStarter(jobLocator,
+                              jobRepository,
+                              addUniqueJobParameter,
+                              jobRegistry);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "batchRestOpenAPI")
+    public OpenAPI batchRestOpenAPI() {
         return new OpenAPI().components(new Components())
                             .info(new Info().title("Spring Batch REST")
                                             .version(buildProperties == null ? null : String.format("%s  -  Build time %s",
