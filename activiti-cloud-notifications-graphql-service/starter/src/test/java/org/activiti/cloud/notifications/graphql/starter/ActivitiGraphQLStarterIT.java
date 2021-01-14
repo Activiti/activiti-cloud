@@ -15,11 +15,8 @@
  */
 package org.activiti.cloud.notifications.graphql.starter;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
@@ -66,7 +64,6 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.apache.groovy.util.Maps;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,11 +81,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ContextConfiguration;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
-import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClient.WebsocketSender;
+import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.test.StepVerifier;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -104,7 +107,9 @@ public class ActivitiGraphQLStarterIT {
     private static final String GRAPHQL_URL = "/graphql";
     private static final Duration TIMEOUT = Duration.ofMillis(20000);
 
-
+    private static final WebsocketClientSpec graphqlWsClientSpec = WebsocketClientSpec.builder()
+                                                                                      .protocols(GRAPHQL_WS)
+                                                                                      .build();
     @LocalServerPort
     private String port;
 
@@ -159,7 +164,7 @@ public class ActivitiGraphQLStarterIT {
         HttpClient.create()
                 .baseUrl("ws://localhost:" + port)
                 .wiretap(true)
-                .websocket(GRAPHQL_WS)
+                .websocket(graphqlWsClientSpec)
                 .uri(WS_GRAPHQL_URI)
                 .handle((i, o) -> {
                     o.sendString(Mono.just(initMessage))
@@ -255,7 +260,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -347,7 +352,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -441,7 +446,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -539,7 +544,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -724,7 +729,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -890,7 +895,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -968,7 +973,7 @@ public class ActivitiGraphQLStarterIT {
         HttpClient.create()
                 .baseUrl("ws://localhost:" + port)
                 .wiretap(true)
-                .websocket(GRAPHQL_WS)
+                .websocket(graphqlWsClientSpec)
                 .uri(WS_GRAPHQL_URI)
                 .handle((i, o) -> {
                     o.sendString(Mono.just(initMessage))
@@ -1004,7 +1009,7 @@ public class ActivitiGraphQLStarterIT {
                 .baseUrl("ws://localhost:" + port)
                 .wiretap(true)
                 //.headers(h -> h.add(AUTHORIZATION, auth)) // Anonymous request
-                .websocket(GRAPHQL_WS)
+                .websocket(graphqlWsClientSpec)
                 .uri(WS_GRAPHQL_URI)
                 .handle((i, o) -> {
                     o.sendString(Mono.just(initMessage))
