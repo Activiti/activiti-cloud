@@ -96,6 +96,13 @@ jobs:
           - develop
       script: make promote
 
+    - name: Deploy Preview
+      stage: deploy_preview
+      if: type = pull_request AND head_branch =~ ^.*preview$
+      script: |
+        mvn versions:set -DnewVersion=$(cat VERSION)-SNAPSHOT -DprocessAllModules=true -DgenerateBackupPoms=false  || travis_terminate 1
+        mvn clean deploy -pl activiti-cloud-dependencies/dependencies -am -DskipTests || travis_terminate 1
+
 notifications:
   slack:
     secure: J/ilLqmqXD7/4VpZZ3HxFrp5Ae6zJJuo6KjsxP5MN4kTxUhfAJvbrfoZfVioxsBX/qXGx/ckvq1WCzen13N+UrWcL+SiXBf9sTsiB4oB2O4mNV8COUAJThJxHvG6w1YFUYIFePD7s9Y6c+4idL5mLfzdthuzBcwn4lHM64iYcWFXqnOR0dJvChzZnbyrLYhOp5MJq9knDdiemKMNU7TI4sa+FTx4Uxj89/f0qKlw7Wd3cuvf1uSPOof+wy2r5ujPz3c5bvecXURcNUc2GLhNAv4TWMNrfY6jQCoCNC9pdmWHm2qcQjXmVqrM75527rOap9wuh1ZSk+fsh/ExiCUWMROB7An1I7Nqy0AdtjUXctuj0kGcjTyKEvVrUg8Eb0DLmFGANcmNvv28JTTokyM2AWx+Jma5ilDnNVZV1TCv++npFGaTMRSP9f3U3IKYDFzHdkjDRifvpQCrpp1Wj+RaGg8r1dRSyfG/3QoAGJ9CwlM1NxJY9SL7aR+aRLgQHSmdsWZWN+LL6ivLgu2OABjInZHDlzwLtDg1nHupbaxAb1lzxGPik52X5rZEkxUHiLHmCnyI94Yvf0L+jvM/Dko+ETGrTj4e1Qayv6ZxSU8ULsOV8gDeBcK5woaCTJsAzXvohz4vKl1YhZ5WP6vISz7sj/WetaPQyaBOLhfQnz+8O5k=
