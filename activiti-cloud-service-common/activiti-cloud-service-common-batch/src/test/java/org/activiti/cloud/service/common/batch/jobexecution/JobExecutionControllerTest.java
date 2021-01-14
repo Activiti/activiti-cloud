@@ -102,49 +102,49 @@ public class JobExecutionControllerTest {
     @Test
     public void jobExecutionById() throws Exception {
         when(jobExplorer.getJobExecution(je11.getId())).thenReturn(je11);
-        mockMvc.perform(get("/jobExecutions/" + je11.getId()))
+        mockMvc.perform(get("/job/executions/" + je11.getId()))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$..jobExecution", hasSize(1)));
     }
 
     @Test
     public void jobExecutionByIdNotFound() throws Exception {
-        mockMvc.perform(get("/jobExecutions/" + 10))
+        mockMvc.perform(get("/job/executions/" + 10))
                .andExpect(status().isNotFound())
                .andExpect(content().string("{\"status\":\"404 NOT_FOUND\",\"message\":\"Could not find job execution with ID 10\",\"exception\":\"NoSuchJobExecutionException\",\"detail\":\"\"}"));
     }
 
     @Test
     public void jobExecutions() throws Exception {
-        mockMvc.perform(get("/jobExecutions"))
+        mockMvc.perform(get("/job/executions"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$..jobExecution", hasSize(5)));
     }
 
     @Test
     public void successfulJobExecutions() throws Exception {
-        mockMvc.perform(get("/jobExecutions?exitCode=COMPLETED"))
+        mockMvc.perform(get("/job/executions?exitCode=COMPLETED"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$..jobExecution", hasSize(3)));
     }
 
     @Test
     public void failedJobExecutions() throws Exception {
-        mockMvc.perform(get("/jobExecutions?exitCode=FAILED"))
+        mockMvc.perform(get("/job/executions?exitCode=FAILED"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$..jobExecution", hasSize(3)));
     }
 
     @Test
     public void successfulJobExecutionsPerJob() throws Exception {
-        mockMvc.perform(get("/jobExecutions?jobName=j2&exitCode=COMPLETED"))
+        mockMvc.perform(get("/job/executions?jobName=j2&exitCode=COMPLETED"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$..jobExecution", hasSize(2)));
     }
 
     @Test
     public void successfulJobExecutionsPerJobAndLimited() throws Exception {
-        mockMvc.perform(get("/jobExecutions?jobName=j2&exitCode=COMPLETED&limitPerJob=1"))
+        mockMvc.perform(get("/job/executions?jobName=j2&exitCode=COMPLETED&limitPerJob=1"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$..jobExecution", hasSize(1)));
     }
@@ -181,7 +181,7 @@ public class JobExecutionControllerTest {
     public void jobFailsWithGenericException() throws Exception {
         when(adHocStarter.start(any(JobConfig.class))).thenThrow(new RuntimeException("msg",
                                                                                       new RuntimeException("cause")));
-        mockMvc.perform(post("/jobExecutions").contentType(APPLICATION_JSON).content("{\"name\":\"foo\"}"))
+        mockMvc.perform(post("/job/executions").contentType(APPLICATION_JSON).content("{\"name\":\"foo\"}"))
                .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()))
                .andExpect(content().string("{\"status\":\"500 INTERNAL_SERVER_ERROR\",\"message\":\"msg\",\"exception\":\"RuntimeException\",\"detail\":\"cause\"}"));
     }
@@ -189,7 +189,7 @@ public class JobExecutionControllerTest {
     private void assertJobExecutionExceptionToStatusMapping(JobExecutionException cause, HttpStatus expectedStatus)
                                                                                                                     throws Exception {
         when(adHocStarter.start(any(JobConfig.class))).thenThrow(new BatchRuntimeException("msg", cause));
-        mockMvc.perform(post("/jobExecutions").contentType(APPLICATION_JSON).content("{\"name\":\"foo\"}"))
+        mockMvc.perform(post("/job/executions").contentType(APPLICATION_JSON).content("{\"name\":\"foo\"}"))
                .andExpect(status().is(expectedStatus.value()))
                .andExpect(content().string(String.format("{\"status\":\"%s\",\"message\":\"%s\",\"exception\":\"%s\",\"detail\":\"%s\"}",
                                                          expectedStatus.toString(),

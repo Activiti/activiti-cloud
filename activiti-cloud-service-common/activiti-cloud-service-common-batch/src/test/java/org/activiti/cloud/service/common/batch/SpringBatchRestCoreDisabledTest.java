@@ -42,7 +42,7 @@ public class SpringBatchRestCoreDisabledTest {
 
     @Test
     public void jobExecutionsNotExposed() {
-        ResponseEntity<String> entity = restTemplate.getForEntity(url("/jobExecutions?exitCode=COMPLETED"),
+        ResponseEntity<String> entity = restTemplate.getForEntity(url("/job/executions?exitCode=COMPLETED"),
                                                                   String.class);
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }

@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
-@RequestMapping(value = "/jobExecutions", produces = "application/hal+json")
+@RequestMapping(value = "/job/executions", produces = "application/hal+json")
 @ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED, havingValue = "true", matchIfMissing = true)
 public class JobExecutionController {
     private final JobExecutionService jobExecutionService;

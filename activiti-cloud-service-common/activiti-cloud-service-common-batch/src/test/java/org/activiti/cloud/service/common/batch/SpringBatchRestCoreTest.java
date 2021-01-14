@@ -95,7 +95,7 @@ public class SpringBatchRestCoreTest {
         assertThat(je1.getExitCode()).isEqualTo(COMPLETED.getExitCode());
         assertThat(je2.getExitCode()).isEqualTo(COMPLETED.getExitCode());
 
-        assertThat(restTemplate.getForObject(url("/jobExecutions?exitCode=COMPLETED"), String.class)).contains("\"status\":\"COMPLETED\"")
+        assertThat(restTemplate.getForObject(url("/job/executions?exitCode=COMPLETED"), String.class)).contains("\"status\":\"COMPLETED\"")
                                                                                                      .contains("\"jobName\":\"ServerTest-job\"");
     }
 
@@ -106,7 +106,7 @@ public class SpringBatchRestCoreTest {
         assertThat(je.getExitCode()).isEqualTo(ExitStatus.FAILED.getExitCode());
         assertThat(je.getExitDescription()).contains(exceptionMessage);
 
-        assertThat(restTemplate.getForObject(url("/jobExecutions?exitCode=FAILED"), String.class))
+        assertThat(restTemplate.getForObject(url("/job/executions?exitCode=FAILED"), String.class))
                                                                                                   .contains("\"exitCode\":\"FAILED\",\"exitDescription\":\"java.lang.RuntimeException");
     }
 
@@ -117,7 +117,7 @@ public class SpringBatchRestCoreTest {
     }
 
     private JobExecution startJob(String propertyValue) {
-        ResponseEntity<JobExecutionResource> responseEntity = restTemplate.postForEntity(url("/jobExecutions"),
+        ResponseEntity<JobExecutionResource> responseEntity = restTemplate.postForEntity(url("/job/executions"),
                                                                                          jobConfig.toBuilder()
                                                                                                   .property(PROPERTY_NAME,
                                                                                                             propertyValue)
@@ -130,7 +130,7 @@ public class SpringBatchRestCoreTest {
     }
 
     private JobExecution startJobThatThrowsException(String exceptionMessage) {
-        ResponseEntity<JobExecutionResource> responseEntity = restTemplate.postForEntity(url("/jobExecutions"),
+        ResponseEntity<JobExecutionResource> responseEntity = restTemplate.postForEntity(url("/job/executions"),
                                                                                          jobConfig.toBuilder()
                                                                                                   .property(EXCEPTION_MESSAGE_PROPERTY_NAME,
                                                                                                             exceptionMessage)
