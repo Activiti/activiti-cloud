@@ -69,7 +69,7 @@ public class JobControllerTest {
 
     @Test
     public void jobs() throws Exception {
-        mockMvc.perform(get("/jobs"))
+        mockMvc.perform(get("/v1/admin/batch/jobs"))
                .andDo(print())
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.*", hasSize(2)));

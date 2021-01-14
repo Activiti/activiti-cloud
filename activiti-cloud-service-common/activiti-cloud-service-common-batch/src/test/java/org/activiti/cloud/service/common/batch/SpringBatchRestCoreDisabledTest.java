@@ -21,31 +21,19 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import org.activiti.cloud.service.common.batch.config.SpringBatchRestCoreAutoConfiguration;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT,
                 properties = {SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED + "=false"})
-public class SpringBatchRestCoreDisabledTest {
-
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
+public class SpringBatchRestCoreDisabledTest extends SpringBatchRestCoreTestSupport {
 
     @Test
     public void jobExecutionsNotExposed() {
-        ResponseEntity<String> entity = restTemplate.getForEntity(url("/job/executions?exitCode=COMPLETED"),
+        ResponseEntity<String> entity = restTemplate.getForEntity(url("/jobs/executions?exitCode=COMPLETED"),
                                                                   String.class);
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
-    private String url(String path) {
-        return "http://localhost:" + port + path;
-    }
 }

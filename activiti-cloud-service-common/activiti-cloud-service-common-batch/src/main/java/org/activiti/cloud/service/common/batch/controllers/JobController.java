@@ -36,8 +36,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @ConditionalOnWebApplication
-@ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED, havingValue = "true", matchIfMissing = true)
-@RequestMapping(value = "/jobs", produces = "application/hal+json")
+@ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED,
+                       havingValue = "true",
+                       matchIfMissing = true)
+@RequestMapping(value = "/v1/admin/batch/jobs", produces = "application/hal+json")
 public class JobController {
     private final JobService jobService;
 
@@ -46,15 +48,14 @@ public class JobController {
         this.jobService = jobService;
     }
 
-    @GetMapping("{jobName}")
+    @GetMapping("/{jobName}")
     public JobResource get(@PathVariable String jobName) {
         return new JobResource(jobService.job(jobName));
     }
 
-    @GetMapping()
+    @GetMapping
     public CollectionModel<JobResource> all() {
         Collection<JobResource> jobs = jobService.jobs().stream().map(JobResource::new).collect(toList());
         return new CollectionModel<>(jobs, linkTo(methodOn(JobController.class).all()).withSelfRel());
     }
-
 }

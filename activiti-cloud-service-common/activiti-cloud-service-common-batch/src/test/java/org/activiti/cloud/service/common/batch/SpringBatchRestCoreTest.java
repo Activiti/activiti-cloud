@@ -35,27 +35,19 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @TestPropertySource(properties = "ServerTest-property=0")
-public class SpringBatchRestCoreTest {
+public class SpringBatchRestCoreTest extends SpringBatchRestCoreTestSupport {
 
     private static final String JOB_NAME = "ServerTest-job";
     private static final String PROPERTY_NAME = "ServerTest-property";
     private static final String EXCEPTION_MESSAGE_PROPERTY_NAME = "ServerTest-exceptionMessage";
 
     private static Set<String> propertyValues = new ConcurrentSkipListSet<>();
-
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
 
     @Autowired
     private JobBuilder jobBuilder;
@@ -94,7 +86,7 @@ public class SpringBatchRestCoreTest {
         assertThat(je1.getExitCode()).isEqualTo(COMPLETED.getExitCode());
         assertThat(je2.getExitCode()).isEqualTo(COMPLETED.getExitCode());
 
-        assertThat(restTemplate.getForObject(url("/job/executions?exitCode=COMPLETED"), String.class)).contains("\"status\":\"COMPLETED\"")
+        assertThat(restTemplate.getForObject(url("/jobs/executions?exitCode=COMPLETED"), String.class)).contains("\"status\":\"COMPLETED\"")
                                                                                                      .contains("\"jobName\":\"ServerTest-job\"");
     }
 
@@ -105,12 +97,12 @@ public class SpringBatchRestCoreTest {
         assertThat(je.getExitCode()).isEqualTo(ExitStatus.FAILED.getExitCode());
         assertThat(je.getExitDescription()).contains(exceptionMessage);
 
-        assertThat(restTemplate.getForObject(url("/job/executions?exitCode=FAILED"), String.class))
+        assertThat(restTemplate.getForObject(url("/jobs/executions?exitCode=FAILED"), String.class))
                                                                                                   .contains("\"exitCode\":\"FAILED\",\"exitDescription\":\"java.lang.RuntimeException");
     }
 
     private JobExecution startJob(String propertyValue) {
-        ResponseEntity<JobExecutionResource> responseEntity = restTemplate.postForEntity(url("/job/executions"),
+        ResponseEntity<JobExecutionResource> responseEntity = restTemplate.postForEntity(url("/jobs/executions"),
                                                                                          jobConfig.toBuilder()
                                                                                                   .property(PROPERTY_NAME,
                                                                                                             propertyValue)
@@ -123,7 +115,7 @@ public class SpringBatchRestCoreTest {
     }
 
     private JobExecution startJobThatThrowsException(String exceptionMessage) {
-        ResponseEntity<JobExecutionResource> responseEntity = restTemplate.postForEntity(url("/job/executions"),
+        ResponseEntity<JobExecutionResource> responseEntity = restTemplate.postForEntity(url("/jobs/executions"),
                                                                                          jobConfig.toBuilder()
                                                                                                   .property(EXCEPTION_MESSAGE_PROPERTY_NAME,
                                                                                                             exceptionMessage)
@@ -135,7 +127,4 @@ public class SpringBatchRestCoreTest {
                              .getJobExecution();
     }
 
-    private String url(String path) {
-        return "http://localhost:" + port + path;
-    }
 }
