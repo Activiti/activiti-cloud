@@ -110,12 +110,6 @@ public class SpringBatchRestCoreTest {
                                                                                                   .contains("\"exitCode\":\"FAILED\",\"exitDescription\":\"java.lang.RuntimeException");
     }
 
-    @Test
-    public void swagger() {
-        assertThat(restTemplate.getForObject(url("v3/api-docs"), String.class))
-                                                                               .contains("\"openapi\":\"3.0.1\"");
-    }
-
     private JobExecution startJob(String propertyValue) {
         ResponseEntity<JobExecutionResource> responseEntity = restTemplate.postForEntity(url("/job/executions"),
                                                                                          jobConfig.toBuilder()

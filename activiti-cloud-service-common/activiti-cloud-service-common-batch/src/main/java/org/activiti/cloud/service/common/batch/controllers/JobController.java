@@ -34,8 +34,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-
 @RestController
 @ConditionalOnWebApplication
 @ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED, havingValue = "true", matchIfMissing = true)
@@ -48,13 +46,11 @@ public class JobController {
         this.jobService = jobService;
     }
 
-    @Operation(summary = "Get a Spring Batch job by name")
     @GetMapping("/{jobName}")
     public JobResource get(@PathVariable String jobName) {
         return new JobResource(jobService.job(jobName));
     }
 
-    @Operation(summary = "Get all Spring Batch jobs")
     @GetMapping
     public CollectionModel<JobResource> all() {
         Collection<JobResource> jobs = jobService.jobs().stream().map(JobResource::new).collect(toList());

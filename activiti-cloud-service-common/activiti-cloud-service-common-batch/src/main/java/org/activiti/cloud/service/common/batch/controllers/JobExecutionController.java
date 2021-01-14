@@ -40,8 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-
 @RestController
 @RequestMapping(value = "/job/executions", produces = "application/hal+json")
 @ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED, havingValue = "true", matchIfMissing = true)
@@ -52,32 +50,37 @@ public class JobExecutionController {
         this.jobExecutionService = jobExecutionService;
     }
 
-    @Operation(summary = "Get all Spring batch job execution by ID")
     @GetMapping("/{id}")
     public JobExecutionResource get(@PathVariable long id) {
         return new JobExecutionResource(jobExecutionService.jobExecution(id));
     }
 
-    @Operation(summary = "Find Spring batch job executions by job name and exit code")
     @GetMapping
     public CollectionModel<JobExecutionResource> all(@RequestParam(value = "jobName", required = false) String jobName, @RequestParam(value = "exitCode", required = false) String exitCode, @RequestParam(value = "limitPerJob", defaultValue = "3") Integer limitPerJob) {
-        Collection<JobExecutionResource> jobExecutions = jobExecutionService.jobExecutions(optional(jobName), optional(exitCode), limitPerJob).stream().map(JobExecutionResource::new).collect(toList());
+        Collection<JobExecutionResource> jobExecutions = jobExecutionService.jobExecutions(optionalOrEmpty(jobName),
+                                                                                           optionalOrEmpty(exitCode),
+                                                                                           limitPerJob).stream()
+                                                                                                       .map(JobExecutionResource::new)
+                                                                                                       .collect(toList());
+
         return new CollectionModel<>(jobExecutions, linkTo(methodOn(JobExecutionController.class).all(jobName, exitCode, limitPerJob)).withSelfRel().expand());
     }
 
-    private Optional<String> optional(String s) {
+    @PostMapping
+    public ResponseEntity<JobExecutionResource> put(@RequestBody JobConfig jobConfig) {
+        JobExecutionResource resource = new JobExecutionResource(jobExecutionService.launch(jobConfig));
+        boolean failed = resource.getJobExecution()
+                                 .getExitCode()
+                                 .equals(ExitStatus.FAILED.getExitCode());
+
+        return new ResponseEntity<>(resource, failed ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
+    }
+
+    private Optional<String> optionalOrEmpty(String s) {
         if (s != null) {
             s = s.trim();
             if (s.isEmpty()) s = null;
         }
         return Optional.ofNullable(s);
-    }
-
-    @Operation(summary = "Start a Spring Batch job execution")
-    @PostMapping
-    public ResponseEntity<JobExecutionResource> put(@RequestBody JobConfig jobConfig) {
-        JobExecutionResource resource = new JobExecutionResource(jobExecutionService.launch(jobConfig));
-        boolean failed = resource.getJobExecution().getExitCode().equals(ExitStatus.FAILED.getExitCode());
-        return new ResponseEntity<>(resource, failed ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
     }
 }

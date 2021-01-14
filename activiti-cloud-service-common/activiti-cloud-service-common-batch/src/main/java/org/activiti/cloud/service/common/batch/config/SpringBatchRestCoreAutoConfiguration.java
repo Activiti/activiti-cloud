@@ -41,11 +41,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
-
 @Configuration
 @EnableBatchProcessing
 @ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED,
@@ -123,16 +118,4 @@ public class SpringBatchRestCoreAutoConfiguration {
                               jobRegistry);
     }
 
-    @Bean
-    @ConditionalOnMissingBean(name = "batchRestOpenAPI")
-    public OpenAPI batchRestOpenAPI() {
-        return new OpenAPI().components(new Components())
-                            .info(new Info().title("Spring Batch REST")
-                                            .version(buildProperties == null ? null : String.format("%s  -  Build time %s",
-                                                                                                    buildProperties.getVersion(),
-                                                                                                    buildProperties.getTime()))
-                                            .description("REST API for controlling and viewing <a href=\"https://spring.io/projects/spring-batch\">" + "Spring Batch</a> jobs and their <a href=\"http://www.quartz-scheduler.org\">Quartz</a> schedules.")
-                                            .license(new License().name("Apache License 2.0")
-                                                                  .url("http://github.com/chrisgleissner/spring-batch-rest/blob/master/LICENSE")));
-    }
 }
