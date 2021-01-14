@@ -23,14 +23,14 @@ import java.util.Collection;
 
 import org.activiti.cloud.service.common.batch.core.job.JobService;
 import org.activiti.cloud.service.common.batch.domain.Job;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.configuration.JobRegistry;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class JobServiceTest {
 
     @Mock
@@ -38,7 +38,7 @@ public class JobServiceTest {
 
     private JobService jobService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         configureMock(jobRegistry);
         jobService = new JobService(jobRegistry);

@@ -16,9 +16,6 @@
 
 package org.activiti.cloud.service.common.batch.jobexecution;
 
-import static org.activiti.cloud.service.common.batch.Fixtures.configureForJobExecutionsService;
-import static org.activiti.cloud.service.common.batch.Fixtures.configureMock;
-import static org.activiti.cloud.service.common.batch.Fixtures.je11;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -31,14 +28,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import javax.batch.operations.BatchRuntimeException;
 
+import org.activiti.cloud.service.common.batch.Fixtures;
 import org.activiti.cloud.service.common.batch.controllers.JobExecutionController;
 import org.activiti.cloud.service.common.batch.core.JobStarter;
 import org.activiti.cloud.service.common.batch.core.jobexecution.JobExecutionService;
 import org.activiti.cloud.service.common.batch.core.jobexecution.provider.DefaultJobExecutionProvider;
 import org.activiti.cloud.service.common.batch.domain.JobConfig;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -55,12 +52,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringJUnitWebConfig
-@RunWith(SpringRunner.class)
 @WebMvcTest(JobExecutionController.class)
 public class JobExecutionControllerTest {
 
@@ -91,18 +84,18 @@ public class JobExecutionControllerTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        configureMock(jobExplorer);
-        configureForJobExecutionsService(jobExplorer);
-        configureMock(jobRegistry);
+        Fixtures.configureMock(jobExplorer);
+        Fixtures.configureForJobExecutionsService(jobExplorer);
+        Fixtures.configureMock(jobRegistry);
     }
 
     @Test
     public void jobExecutionById() throws Exception {
-        when(jobExplorer.getJobExecution(je11.getId())).thenReturn(je11);
-        mockMvc.perform(get("/job/executions/" + je11.getId()))
+        when(jobExplorer.getJobExecution(Fixtures.je11.getId())).thenReturn(Fixtures.je11);
+        mockMvc.perform(get("/job/executions/" + Fixtures.je11.getId()))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$..jobExecution", hasSize(1)));
     }

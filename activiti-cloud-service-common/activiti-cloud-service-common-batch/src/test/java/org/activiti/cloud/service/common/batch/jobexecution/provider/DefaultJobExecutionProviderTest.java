@@ -19,10 +19,13 @@ package org.activiti.cloud.service.common.batch.jobexecution.provider;
 import org.activiti.cloud.service.common.batch.Fixtures;
 import org.activiti.cloud.service.common.batch.core.jobexecution.provider.DefaultJobExecutionProvider;
 import org.activiti.cloud.service.common.batch.core.jobexecution.provider.JobExecutionProvider;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.batch.core.explore.JobExplorer;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DefaultJobExecutionProviderTest extends AbstractJobExecutionProviderTest {
 
     @Mock
@@ -30,7 +33,7 @@ public class DefaultJobExecutionProviderTest extends AbstractJobExecutionProvide
 
     private DefaultJobExecutionProvider provider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Fixtures.configureMock(jobExplorer);
         Fixtures.configureForJobExecutionsService(jobExplorer);

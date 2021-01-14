@@ -25,12 +25,15 @@ import java.util.Optional;
 
 import org.activiti.cloud.service.common.batch.Fixtures;
 import org.activiti.cloud.service.common.batch.core.jobexecution.provider.JobExecutionProvider;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.batch.core.JobExecution;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public abstract class AbstractJobExecutionProviderTest {
 
     public static final int MAX_NUMBER_OF_EXECUTIONS_PER_JOB_NAME = 5;

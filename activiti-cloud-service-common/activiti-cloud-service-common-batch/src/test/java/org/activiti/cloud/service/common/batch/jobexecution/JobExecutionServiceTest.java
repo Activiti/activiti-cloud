@@ -18,11 +18,6 @@ package org.activiti.cloud.service.common.batch.jobexecution;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Optional.empty;
-import static org.activiti.cloud.service.common.batch.Fixtures.JOB_NAME_1;
-import static org.activiti.cloud.service.common.batch.Fixtures.JOB_NAME_2;
-import static org.activiti.cloud.service.common.batch.Fixtures.configureForJobExecutionsService;
-import static org.activiti.cloud.service.common.batch.Fixtures.configureMock;
-import static org.activiti.cloud.service.common.batch.Fixtures.je11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -31,24 +26,25 @@ import java.util.Optional;
 
 import javax.batch.operations.NoSuchJobExecutionException;
 
+import org.activiti.cloud.service.common.batch.Fixtures;
 import org.activiti.cloud.service.common.batch.core.JobStarter;
 import org.activiti.cloud.service.common.batch.core.jobexecution.JobExecutionService;
 import org.activiti.cloud.service.common.batch.core.jobexecution.provider.DefaultJobExecutionProvider;
 import org.activiti.cloud.service.common.batch.domain.JobConfig;
 import org.activiti.cloud.service.common.batch.domain.JobExecution;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.explore.JobExplorer;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class JobExecutionServiceTest {
 
@@ -59,14 +55,14 @@ public class JobExecutionServiceTest {
     private DefaultJobExecutionProvider jobExecutionProvider;
     private JobExecutionService jobExecutionService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        configureMock(jobExplorer);
+        Fixtures.configureMock(jobExplorer);
         jobExecutionProvider = new DefaultJobExecutionProvider(jobExplorer);
-        configureMock(adHocStarter);
+        Fixtures.configureMock(adHocStarter);
 
-        configureForJobExecutionsService(jobExplorer);
-        when(jobExplorer.getJobExecution(je11.getId())).thenReturn(je11);
+        Fixtures.configureForJobExecutionsService(jobExplorer);
+        when(jobExplorer.getJobExecution(Fixtures.je11.getId())).thenReturn(Fixtures.je11);
 
         jobExecutionService = new JobExecutionService(jobExplorer, jobExecutionProvider, adHocStarter);
     }
@@ -86,18 +82,22 @@ public class JobExecutionServiceTest {
 
     @Test
     public void jobExecutionsId() {
-        JobExecution je = jobExecutionService.jobExecution(je11.getId());
+        JobExecution je = jobExecutionService.jobExecution(Fixtures.je11.getId());
         assertThat(je).isNotNull();
     }
 
-    @Test(expected = NoSuchJobExecutionException.class)
+    @Test
     public void jobExecutionsIdNotFound() {
-        jobExecutionService.jobExecution(10);
+        Assertions.assertThatExceptionOfType(NoSuchJobExecutionException.class).isThrownBy(() -> {
+            jobExecutionService.jobExecution(10);
+        });
     }
 
-    @Test(expected = NoSuchJobExecutionException.class)
+    @Test
     public void jobExecutionsIdNotFoundNegativeId() {
-        jobExecutionService.jobExecution(-1);
+        Assertions.assertThatExceptionOfType(NoSuchJobExecutionException.class).isThrownBy(() -> {
+            jobExecutionService.jobExecution(-1);
+        });
     }
 
     @Test
@@ -129,6 +129,6 @@ public class JobExecutionServiceTest {
                                                                          Optional.of(ExitStatus.COMPLETED.getExitCode()),
                                                                          1);
         Assertions.assertThat(jes).hasSize(2);
-        Assertions.assertThat(jes).extracting(je -> je.getJobName()).containsExactly(JOB_NAME_2, JOB_NAME_1);
+        Assertions.assertThat(jes).extracting(je -> je.getJobName()).containsExactly(Fixtures.JOB_NAME_2, Fixtures.JOB_NAME_1);
     }
 }

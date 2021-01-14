@@ -29,6 +29,12 @@
       <groupId>org.springframework.batch</groupId>
       <artifactId>spring-batch-test</artifactId>
       <scope>test</scope>
+      <exclusions>      
+        <exclusion>
+         <groupId>org.junit.vintage</groupId>
+         <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
+      </exclusions>      
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>

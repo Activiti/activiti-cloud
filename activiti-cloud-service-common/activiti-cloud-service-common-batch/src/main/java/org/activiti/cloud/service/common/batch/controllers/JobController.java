@@ -46,7 +46,7 @@ public class JobController {
         this.jobService = jobService;
     }
 
-    @GetMapping("/{jobName}")
+    @GetMapping("{jobName}")
     public JobResource get(@PathVariable String jobName) {
         return new JobResource(jobService.job(jobName));
     }
