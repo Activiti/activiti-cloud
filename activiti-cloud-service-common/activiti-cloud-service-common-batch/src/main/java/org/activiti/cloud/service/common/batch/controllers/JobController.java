@@ -51,7 +51,7 @@ public class JobController {
         return new JobResource(jobService.job(jobName));
     }
 
-    @GetMapping
+    @GetMapping()
     public CollectionModel<JobResource> all() {
         Collection<JobResource> jobs = jobService.jobs().stream().map(JobResource::new).collect(toList());
         return new CollectionModel<>(jobs, linkTo(methodOn(JobController.class).all()).withSelfRel());

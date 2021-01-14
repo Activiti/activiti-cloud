@@ -55,7 +55,7 @@ public class JobExecutionController {
         return new JobExecutionResource(jobExecutionService.jobExecution(id));
     }
 
-    @GetMapping
+    @GetMapping()
     public CollectionModel<JobExecutionResource> all(@RequestParam(value = "jobName", required = false) String jobName, @RequestParam(value = "exitCode", required = false) String exitCode, @RequestParam(value = "limitPerJob", defaultValue = "3") Integer limitPerJob) {
         Collection<JobExecutionResource> jobExecutions = jobExecutionService.jobExecutions(optionalOrEmpty(jobName),
                                                                                            optionalOrEmpty(exitCode),
@@ -66,7 +66,7 @@ public class JobExecutionController {
         return new CollectionModel<>(jobExecutions, linkTo(methodOn(JobExecutionController.class).all(jobName, exitCode, limitPerJob)).withSelfRel().expand());
     }
 
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<JobExecutionResource> put(@RequestBody JobConfig jobConfig) {
         JobExecutionResource resource = new JobExecutionResource(jobExecutionService.launch(jobConfig));
         boolean failed = resource.getJobExecution()

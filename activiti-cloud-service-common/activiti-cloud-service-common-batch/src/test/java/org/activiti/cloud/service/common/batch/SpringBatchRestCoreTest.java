@@ -29,9 +29,8 @@ import org.activiti.cloud.service.common.batch.core.JobBuilder;
 import org.activiti.cloud.service.common.batch.domain.JobConfig;
 import org.activiti.cloud.service.common.batch.domain.JobExecution;
 import org.activiti.cloud.service.common.batch.resources.JobExecutionResource;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +40,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @TestPropertySource(properties = "ServerTest-property=0")
 public class SpringBatchRestCoreTest {
@@ -56,8 +53,10 @@ public class SpringBatchRestCoreTest {
 
     @LocalServerPort
     private int port;
+
     @Autowired
     private TestRestTemplate restTemplate;
+
     @Autowired
     private JobBuilder jobBuilder;
 
@@ -65,7 +64,7 @@ public class SpringBatchRestCoreTest {
     private CountDownLatch jobExecutedOnce = new CountDownLatch(1);
     private AtomicBoolean firstExecution = new AtomicBoolean(true);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         if (firstExecution.compareAndSet(true, false)) {
             Job job = jobBuilder.createJob(JOB_NAME, propertyResolver -> {
