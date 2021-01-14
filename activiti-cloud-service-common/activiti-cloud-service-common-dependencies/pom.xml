@@ -107,6 +107,11 @@
         <artifactId>activiti-cloud-service-common-liquibase</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-service-common-batch</artifactId>      
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
