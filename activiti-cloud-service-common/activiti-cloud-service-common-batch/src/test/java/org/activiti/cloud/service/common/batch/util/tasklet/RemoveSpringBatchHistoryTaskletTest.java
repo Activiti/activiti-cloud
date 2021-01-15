@@ -40,8 +40,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ScriptException;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
+@SpringBootApplication
+@Transactional
 public class RemoveSpringBatchHistoryTaskletTest {
 
     @Autowired
@@ -53,7 +56,6 @@ public class RemoveSpringBatchHistoryTaskletTest {
     @Autowired
     private DataSource dataSource;
 
-    @SpringBootApplication
     @TestConfiguration
     static class TaskletConfiguration {
 
