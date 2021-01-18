@@ -17,7 +17,7 @@ package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileContent;
 import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
-import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
+import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.ATTACHMENT_PARAM_NAME;
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.UPLOAD_FILE_PARAM_NAME;
 import java.io.IOException;
 import java.util.Objects;
@@ -189,7 +189,7 @@ public class ModelController implements ModelRestApi {
     public void exportModel(
         HttpServletResponse response,
         @PathVariable String modelId,
-        @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
+        @RequestParam(name = ATTACHMENT_PARAM_NAME,
             required = false,
             defaultValue = "true") boolean attachment) throws IOException {
         Model model = findModelById(modelId);

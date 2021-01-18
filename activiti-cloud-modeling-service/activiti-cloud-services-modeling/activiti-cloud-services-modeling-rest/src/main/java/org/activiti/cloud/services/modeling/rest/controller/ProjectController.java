@@ -112,7 +112,7 @@ public class ProjectController implements ProjectRestApi {
     public void exportProject(
             HttpServletResponse response,
             @PathVariable String projectId,
-            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
+            @RequestParam(name = ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException {
         Project project = findProjectById(projectId);
@@ -123,11 +123,11 @@ public class ProjectController implements ProjectRestApi {
     }
 
     @Override
-    public void saveProjectAs(
+    public void copyProject(
             HttpServletResponse response,
             @PathVariable String projectId,
             @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name,
-            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
+            @RequestParam(name = ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException {
         Project project = findProjectById(projectId);

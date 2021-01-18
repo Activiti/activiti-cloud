@@ -859,13 +859,13 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_returnZipFileWithNewProjectName_when_savingProjectAs() throws Exception {
+    public void should_returnZipFileWithNewProjectName_when_copyingProject() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
 
         String projectName = "new-project-name";
 
         MvcResult response = mockMvc.perform(
-            get("/v1/projects/{projectId}/saveAs?name=" + projectName,
+            post("/v1/projects/{projectId}/copy?name=" + projectName,
                 project.getId()))
             .andExpect(status().isOk())
             .andReturn();
