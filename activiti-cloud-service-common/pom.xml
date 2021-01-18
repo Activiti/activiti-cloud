@@ -38,7 +38,6 @@
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
-    <commons-io.version>2.6</commons-io.version>
     <commons-lang.version>2.6</commons-lang.version>
     <guava.version>24.1.1-jre</guava.version>
     <java-semver.version>0.9.0</java-semver.version>
@@ -115,13 +114,6 @@
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
         <version>${commons-lang.version}</version>
-        <scope>runtime</scope>
-      </dependency>
-      <!-- required as the dependency set by batik is too old for apache httpclient used by resteasy in the keycloak client -->
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>${commons-io.version}</version>
         <scope>runtime</scope>
       </dependency>
       <!-- Fix SpringFox incompatibility with Spring HATEAOS 1.0 and Spring Boot 2.2 -->
