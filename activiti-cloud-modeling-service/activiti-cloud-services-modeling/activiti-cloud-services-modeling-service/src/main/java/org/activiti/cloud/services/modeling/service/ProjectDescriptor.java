@@ -53,6 +53,8 @@ public class ProjectDescriptor {
         return project.getName();
     }
 
+    public void setName(String name) { this.project.setName(name); }
+
     public String getVersion() {
         return project.getVersion();
     }

@@ -858,4 +858,26 @@ public class ProjectControllerIT {
             .andExpect(status().reason(is("Validation errors found in project's models")));
     }
 
+    @Test
+    public void should_returnZipFileWithNewProjectName_when_savingProjectAs() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
+
+        String projectName = "new-project-name";
+
+        MvcResult response = mockMvc.perform(
+            get("/v1/projects/{projectId}/saveAs?name=" + projectName,
+                project.getId()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertThatResponseContent(response)
+            .isFile()
+            .isZip()
+            .hasName("new-project-name.zip")
+            .hasEntries(
+                "new-project-name.json")
+            .hasJsonContentSatisfying("new-project-name.json",
+                jsonContent -> jsonContent
+                    .node("name").isStringEqualTo("new-project-name"));
+    }
 }

@@ -42,7 +42,8 @@ public interface ProjectService {
 
     Optional<Project> findProjectById(String projectId);
 
-    FileContent exportProject(Project project) throws IOException;
+    FileContent exportProject(Project project,
+                              String projectName) throws IOException;
 
     ProjectAccessControl getProjectAccessControl(Project project);
 

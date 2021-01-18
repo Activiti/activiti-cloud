@@ -79,6 +79,8 @@ public interface ProjectRestApi {
 
     String PROJECT_NAME_OVERRIDE_DESCR = "The name of the project that will override the current name of the project in the zip file";
 
+    String PROJECT_NAME_SAVEAS_DESCR = "The name of the project that will replace the original name of the project";
+
     String UPLOAD_FILE_PARAM_NAME = "file";
 
     String EXPORT_AS_ATTACHMENT_PARAM_NAME = "attachment";
@@ -162,6 +164,23 @@ public interface ProjectRestApi {
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;
+
+    @ApiOperation(
+            tags = PROJECTS,
+            value = "Save an project as zip file with chosen name",
+            notes = "This will create and download the zip with chosen name " +
+                    "containing the project folder and all related models.<br>")
+    @GetMapping(path = "/projects/{projectId}/saveAs")
+    void saveProjectAs(
+            HttpServletResponse response,
+            @ApiParam(value = EXPORT_PROJECT_ID_PARAM_DESCR, required = true)
+            @PathVariable String projectId,
+            @ApiParam(value = PROJECT_NAME_SAVEAS_DESCR)
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name,
+            @ApiParam(ATTACHMENT_API_PARAM_DESCR)
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
+                required = false,
+                defaultValue = "true") boolean attachment) throws IOException;
 
     @ApiOperation(
             tags = PROJECTS,

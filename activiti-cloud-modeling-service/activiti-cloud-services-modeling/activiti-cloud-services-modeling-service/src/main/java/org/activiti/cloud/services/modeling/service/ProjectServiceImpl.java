@@ -173,16 +173,17 @@ public class ProjectServiceImpl implements ProjectService {
      * Export an project to a zip file.
      *
      * @param project the project to export
+     * @param projectName the name for the project
      * @return the {@link FileContent} with zip content
      * @throws IOException in case of I/O error
      */
     @Override
-    public FileContent exportProject(Project project) throws IOException {
+    public FileContent exportProject(Project project, String projectName) throws IOException {
 
-        ProjectDescriptor projectDescriptor = buildDescriptor(project);
+        ProjectDescriptor projectDescriptor = buildDescriptor(project, projectName);
 
-        ZipBuilder zipBuilder = new ZipBuilder(project.getName())
-                .appendFile(descriptorJsonConverter.convertToJsonBytes(projectDescriptor), toJsonFilename(project.getName()));
+        ZipBuilder zipBuilder = new ZipBuilder(projectName)
+                .appendFile(descriptorJsonConverter.convertToJsonBytes(projectDescriptor), toJsonFilename(projectName));
 
         modelService.getAllModels(project).forEach(model -> modelTypeService.findModelTypeByName(model.getType()).map(ModelType::getFolderName).ifPresent(folderName -> {
             zipBuilder.appendFolder(folderName)
@@ -239,8 +240,11 @@ public class ProjectServiceImpl implements ProjectService {
         return !EXPRESSION_REGEX.matcher(v).find();
     }
 
-    private ProjectDescriptor buildDescriptor(Project project) {
+    private ProjectDescriptor buildDescriptor(Project project, String projectName) {
         ProjectDescriptor projectDescriptor = new ProjectDescriptor(project);
+        if (!projectName.equals(project.getName())) {
+            projectDescriptor.setName(projectName);
+        }
         ProjectAccessControl accessControl = getProjectAccessControl(project);
         projectDescriptor.setUsers(accessControl.getUsers());
         projectDescriptor.setGroups(accessControl.getGroups());

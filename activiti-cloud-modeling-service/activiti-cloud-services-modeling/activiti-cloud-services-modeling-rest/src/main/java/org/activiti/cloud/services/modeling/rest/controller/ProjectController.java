@@ -116,7 +116,22 @@ public class ProjectController implements ProjectRestApi {
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException {
         Project project = findProjectById(projectId);
-        FileContent fileContent = projectService.exportProject(project);
+        FileContent fileContent = projectService.exportProject(project, project.getName());
+        writeFileToResponse(response,
+                            fileContent,
+                            attachment);
+    }
+
+    @Override
+    public void saveProjectAs(
+            HttpServletResponse response,
+            @PathVariable String projectId,
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name,
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
+                    required = false,
+                    defaultValue = "true") boolean attachment) throws IOException {
+        Project project = findProjectById(projectId);
+        FileContent fileContent = projectService.exportProject(project, name);
         writeFileToResponse(response,
                             fileContent,
                             attachment);
