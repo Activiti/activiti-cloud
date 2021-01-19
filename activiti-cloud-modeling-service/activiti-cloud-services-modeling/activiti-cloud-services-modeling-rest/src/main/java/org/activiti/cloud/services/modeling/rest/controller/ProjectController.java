@@ -112,29 +112,22 @@ public class ProjectController implements ProjectRestApi {
     public void exportProject(
             HttpServletResponse response,
             @PathVariable String projectId,
-            @RequestParam(name = ATTACHMENT_PARAM_NAME,
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException {
         Project project = findProjectById(projectId);
-        FileContent fileContent = projectService.exportProject(project, project.getName());
+        FileContent fileContent = projectService.exportProject(project);
         writeFileToResponse(response,
                             fileContent,
                             attachment);
     }
 
     @Override
-    public void copyProject(
-            HttpServletResponse response,
+    public EntityModel<Project> copyProject(
             @PathVariable String projectId,
-            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name,
-            @RequestParam(name = ATTACHMENT_PARAM_NAME,
-                    required = false,
-                    defaultValue = "true") boolean attachment) throws IOException {
-        Project project = findProjectById(projectId);
-        FileContent fileContent = projectService.exportProject(project, name);
-        writeFileToResponse(response,
-                            fileContent,
-                            attachment);
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name) {
+        Project projectToCopy = findProjectById(projectId);
+        return representationModelAssembler.toModel(projectService.copyProject(projectToCopy, name));
     }
 
     @Override

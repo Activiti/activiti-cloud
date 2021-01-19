@@ -173,17 +173,16 @@ public class ProjectServiceImpl implements ProjectService {
      * Export an project to a zip file.
      *
      * @param project the project to export
-     * @param projectName the name for the project
      * @return the {@link FileContent} with zip content
      * @throws IOException in case of I/O error
      */
     @Override
-    public FileContent exportProject(Project project, String projectName) throws IOException {
+    public FileContent exportProject(Project project) throws IOException {
 
-        ProjectDescriptor projectDescriptor = buildDescriptor(project, projectName);
+        ProjectDescriptor projectDescriptor = buildDescriptor(project);
 
-        ZipBuilder zipBuilder = new ZipBuilder(projectName)
-                .appendFile(descriptorJsonConverter.convertToJsonBytes(projectDescriptor), toJsonFilename(projectName));
+        ZipBuilder zipBuilder = new ZipBuilder(project.getName())
+                .appendFile(descriptorJsonConverter.convertToJsonBytes(projectDescriptor), toJsonFilename(project.getName()));
 
         modelService.getAllModels(project).forEach(model -> modelTypeService.findModelTypeByName(model.getType()).map(ModelType::getFolderName).ifPresent(folderName -> {
             zipBuilder.appendFolder(folderName)
@@ -192,6 +191,12 @@ public class ProjectServiceImpl implements ProjectService {
                     .map(extensionFileContent -> zipBuilder.appendFile(extensionFileContent, folderName));
         }));
         return zipBuilder.toZipFileContent();
+    }
+
+    @Override
+    public Project copyProject(Project projectToCopy, String newProjectName) {
+        projectToCopy.setName(newProjectName);
+        return createProject(projectToCopy);
     }
 
     @Override
@@ -240,11 +245,8 @@ public class ProjectServiceImpl implements ProjectService {
         return !EXPRESSION_REGEX.matcher(v).find();
     }
 
-    private ProjectDescriptor buildDescriptor(Project project, String projectName) {
+    private ProjectDescriptor buildDescriptor(Project project) {
         ProjectDescriptor projectDescriptor = new ProjectDescriptor(project);
-        if (!projectName.equals(project.getName())) {
-            projectDescriptor.setName(projectName);
-        }
         ProjectAccessControl accessControl = getProjectAccessControl(project);
         projectDescriptor.setUsers(accessControl.getUsers());
         projectDescriptor.setGroups(accessControl.getGroups());

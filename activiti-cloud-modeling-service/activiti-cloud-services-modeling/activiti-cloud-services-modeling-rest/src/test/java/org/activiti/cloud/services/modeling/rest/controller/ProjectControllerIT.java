@@ -864,20 +864,11 @@ public class ProjectControllerIT {
 
         String projectName = "new-project-name";
 
-        MvcResult response = mockMvc.perform(
+        mockMvc.perform(
             post("/v1/projects/{projectId}/copy?name=" + projectName,
                 project.getId()))
             .andExpect(status().isOk())
-            .andReturn();
-
-        assertThatResponseContent(response)
-            .isFile()
-            .isZip()
-            .hasName("new-project-name.zip")
-            .hasEntries(
-                "new-project-name.json")
-            .hasJsonContentSatisfying("new-project-name.json",
-                jsonContent -> jsonContent
-                    .node("name").isStringEqualTo("new-project-name"));
+            .andExpect(jsonPath("$.name",
+                is("new-project-name")));
     }
 }

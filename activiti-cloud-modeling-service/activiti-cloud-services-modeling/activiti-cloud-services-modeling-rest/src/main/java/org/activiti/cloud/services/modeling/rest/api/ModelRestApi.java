@@ -18,7 +18,7 @@ package org.activiti.cloud.services.modeling.rest.api;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_SVG;
 import static org.activiti.cloud.services.modeling.rest.api.ModelRestApi.MODELS;
 import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.ATTACHMENT_API_PARAM_DESCR;
-import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.ATTACHMENT_PARAM_NAME;
+import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.EXPORT_AS_ATTACHMENT_PARAM_NAME;
 import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.UPLOAD_FILE_PARAM_NAME;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -232,7 +232,7 @@ public interface ModelRestApi {
             @ApiParam(value = EXPORT_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId,
             @ApiParam(ATTACHMENT_API_PARAM_DESCR)
-            @RequestParam(name = ATTACHMENT_PARAM_NAME,
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;
 

@@ -85,7 +85,7 @@ public interface ProjectRestApi {
 
     String UPLOAD_FILE_PARAM_NAME = "file";
 
-    String ATTACHMENT_PARAM_NAME = "attachment";
+    String EXPORT_AS_ATTACHMENT_PARAM_NAME = "attachment";
 
     String PROJECT_NAME_PARAM_NAME = "name";
 
@@ -163,26 +163,21 @@ public interface ProjectRestApi {
             @ApiParam(value = EXPORT_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(ATTACHMENT_API_PARAM_DESCR)
-            @RequestParam(name = ATTACHMENT_PARAM_NAME,
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;
 
     @ApiOperation(
             tags = PROJECTS,
-            value = "Copy an project as zip file with chosen name",
-            notes = "This will create and download the zip with chosen name " +
+            value = "Copy an project as a new project with chosen name",
+            notes = "This will create a new project with chosen name " +
                     "containing the project folder and all related models.<br>")
     @PostMapping(path = "/projects/{projectId}/copy")
-    void copyProject(
-            HttpServletResponse response,
+    EntityModel<Project> copyProject(
             @ApiParam(value = COPY_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(value = PROJECT_NAME_SAVEAS_DESCR)
-            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name,
-            @ApiParam(ATTACHMENT_API_PARAM_DESCR)
-            @RequestParam(name = ATTACHMENT_PARAM_NAME,
-                required = false,
-                defaultValue = "true") boolean attachment) throws IOException;
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name);
 
     @ApiOperation(
             tags = PROJECTS,
