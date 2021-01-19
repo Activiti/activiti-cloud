@@ -16,23 +16,23 @@
 package org.activiti.cloud.services.events.message;
 
 /**
- * Internal message header key names used in messages with IntegrationContext payload type  
+ * Internal message header key names used in messages with IntegrationContext payload type
  *
  */
 class ExecutionContextMessageHeaders {
-    
+
     public final static String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
-    public final static String BUSINESS_KEY = "businessKey";
-    public final static String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
-    public final static String PROCESS_INSTANCE_ID = "processInstanceId";
-    public final static String PROCESS_NAME = "processName";
-    public final static String PROCESS_DEFINITION_ID = "processDefinitionId";
-    public final static String PROCESS_DEFINITION_KEY = "processDefinitionKey";
-    public final static String PROCESS_DEFINITION_VERSION = "processDefinitionVersion";
-    public final static String PROCESS_DEFINITION_NAME = "processDefinitionName";
+    public final static String ROOT_BUSINESS_KEY = "rootBusinessKey";
+    public final static String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
+    public final static String ROOT_PROCESS_NAME = "rootProcessName";
+    public final static String ROOT_PROCESS_DEFINITION_ID = "rootProcessDefinitionId";
+    public final static String ROOT_PROCESS_DEFINITION_KEY = "rootProcessDefinitionKey";
+    public final static String ROOT_PROCESS_DEFINITION_VERSION = "rootProcessDefinitionVersion";
+    public final static String ROOT_PROCESS_DEFINITION_NAME = "rootProcessDefinitionName";
     public final static String DEPLOYMENT_ID = "deploymentId";
     public final static String DEPLOYMENT_NAME = "deploymentName";
+    public final static String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
     public final static String PARENT_PROCESS_INSTANCE_NAME = "parentProcessInstanceName";
     public final static String APP_VERSION = "appVersion";
-    
+
 }

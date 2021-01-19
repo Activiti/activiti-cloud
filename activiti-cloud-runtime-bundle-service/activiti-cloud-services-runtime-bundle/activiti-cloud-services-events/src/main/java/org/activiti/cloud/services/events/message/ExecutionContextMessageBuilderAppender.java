@@ -45,19 +45,19 @@ public class ExecutionContextMessageBuilderAppender implements MessageBuilderApp
 
 
             if(processInstance != null) { 
-                request.setHeader(ExecutionContextMessageHeaders.BUSINESS_KEY, processInstance.getBusinessKey())
-                    .setHeader(ExecutionContextMessageHeaders.PROCESS_INSTANCE_ID, processInstance.getId())
-                    .setHeader(ExecutionContextMessageHeaders.PROCESS_NAME, processInstance.getName());
+                request.setHeader(ExecutionContextMessageHeaders.ROOT_BUSINESS_KEY, processInstance.getBusinessKey())
+                    .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_INSTANCE_ID, processInstance.getId())
+                    .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_NAME, processInstance.getName());
                 
                 // Let's try extract parent process info from super execution if exists
                 applyParent(processInstance, request);
             }
 
             if(processDefinition != null) { 
-                request.setHeader(ExecutionContextMessageHeaders.PROCESS_DEFINITION_ID, processDefinition.getId())
-                    .setHeader(ExecutionContextMessageHeaders.PROCESS_DEFINITION_KEY, processDefinition.getKey())
-                    .setHeader(ExecutionContextMessageHeaders.PROCESS_DEFINITION_VERSION, processDefinition.getVersion())
-                    .setHeader(ExecutionContextMessageHeaders.PROCESS_DEFINITION_NAME, processDefinition.getName());
+                request.setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_ID, processDefinition.getId())
+                    .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_KEY, processDefinition.getKey())
+                    .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_VERSION, processDefinition.getVersion())
+                    .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_NAME, processDefinition.getName());
             }
 
             if(deploymentEntity != null) {
