@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.graphql.web;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,6 +29,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -72,12 +72,15 @@ public class ActivitiGraphQLControllerTest {
      */
     @BeforeEach
     public void setUp() {
-        when(executor.execute(any()))
+
+        when(executor.execute(Mockito.anyString()))
             .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
 
-        when(executor.execute(any(), any()))
+        when(executor.execute(Mockito.anyString(),Mockito.nullable(Map.class)))
             .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
 
+        when(executor.execute(Mockito.anyString(),Mockito.nullable(String.class),Mockito.nullable(Map.class)))
+            .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
     }
 
     private void ok(final GraphQLQueryRequest query) throws Exception, JsonProcessingException {
@@ -204,7 +207,7 @@ public class ActivitiGraphQLControllerTest {
         ok(new GraphQLQueryRequest("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}"));
 
         verify(executor)
-            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", null);
+            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", null, null);
     }
 
     @Test
@@ -225,7 +228,7 @@ public class ActivitiGraphQLControllerTest {
         ok(query);
 
         verify(executor)
-            .execute(query.getQuery(), variables);
+            .execute(query.getQuery(), null, variables);
     }
 
     // Json directly
@@ -235,7 +238,7 @@ public class ActivitiGraphQLControllerTest {
 
         ok(json);
 
-        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{ title genre }}", null);
+        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{ title genre }}", null, null);
     }
 
     @Test
@@ -244,7 +247,7 @@ public class ActivitiGraphQLControllerTest {
 
         ok(json);
 
-        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}", null);
+        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}", null, null);
     }
 
     @Test
@@ -253,7 +256,7 @@ public class ActivitiGraphQLControllerTest {
 
         ok(json);
 
-        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}", null);
+        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}", null, null);
     }
 
     @Test
@@ -262,7 +265,7 @@ public class ActivitiGraphQLControllerTest {
 
         ok(json);
 
-        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}", null);
+        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}", null, null);
     }
 
     // Form submitted data
