@@ -27,27 +27,25 @@ import org.activiti.cloud.service.common.batch.core.jobexecution.provider.Defaul
 import org.activiti.cloud.service.common.batch.core.jobexecution.provider.JobExecutionProvider;
 import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 @Configuration
-@EnableBatchProcessing
 @ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED,
                        havingValue = "true",
                        matchIfMissing = true)
-@PropertySource("classpath:config/activiti-cloud-common-batch.properties")
+@AutoConfigureAfter(ActivitiCloudCommonBatchAutoConfiguration.class)
 public class SpringBatchRestCoreAutoConfiguration {
 
     public static final String REST_API_ENABLED = "org.activiti.cloud.service.common.batch.enabled";

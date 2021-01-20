@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.activiti.cloud.service.common.batch.config.ActivitiCloudCommonBatchAutoConfiguration,\
 org.activiti.cloud.service.common.batch.config.SpringBatchRestCoreAutoConfiguration
