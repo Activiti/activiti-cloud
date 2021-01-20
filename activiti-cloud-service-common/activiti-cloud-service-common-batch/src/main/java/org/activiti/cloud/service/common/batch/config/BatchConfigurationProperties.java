@@ -18,8 +18,11 @@ package org.activiti.cloud.service.common.batch.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("activiti.cloud.batch")
+@ConfigurationProperties(BatchConfigurationProperties.ACTIVITI_CLOUD_BATCH_CONFIG_PREFIX)
 public class BatchConfigurationProperties {
+
+    public final static String ACTIVITI_CLOUD_BATCH_CONFIG_PREFIX = "activiti.cloud.batch";
+    public final static String ACTIVITI_CLOUD_BATCH_ENABLED = ACTIVITI_CLOUD_BATCH_CONFIG_PREFIX + ".enabled";
 
 	/**
 	 * Configures the automatic registration of job configurations.

@@ -23,7 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.activiti.cloud.service.common.batch.config.ActivitiCloudCommonBatchRestAutoConfiguration;
+import org.activiti.cloud.service.common.batch.config.BatchConfigurationProperties;
 import org.activiti.cloud.service.common.batch.core.jobexecution.JobExecutionService;
 import org.activiti.cloud.service.common.batch.domain.JobConfig;
 import org.activiti.cloud.service.common.batch.resources.JobExecutionResource;
@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/v1/admin/batch/jobs/executions",
                 produces = "application/hal+json")
-@ConditionalOnProperty(name = ActivitiCloudCommonBatchRestAutoConfiguration.REST_API_ENABLED,
+@ConditionalOnProperty(name = BatchConfigurationProperties.ACTIVITI_CLOUD_BATCH_ENABLED,
                        havingValue = "true",
                        matchIfMissing = true)
 public class JobExecutionController {
