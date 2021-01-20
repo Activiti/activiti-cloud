@@ -42,11 +42,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 @Configuration
-@ConditionalOnProperty(name = SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED,
+@ConditionalOnProperty(name = ActivitiCloudCommonBatchRestAutoConfiguration.REST_API_ENABLED,
                        havingValue = "true",
                        matchIfMissing = true)
 @AutoConfigureAfter(ActivitiCloudCommonBatchAutoConfiguration.class)
-public class SpringBatchRestCoreAutoConfiguration {
+public class ActivitiCloudCommonBatchRestAutoConfiguration {
 
     public static final String REST_API_ENABLED = "org.activiti.cloud.service.common.batch.enabled";
 

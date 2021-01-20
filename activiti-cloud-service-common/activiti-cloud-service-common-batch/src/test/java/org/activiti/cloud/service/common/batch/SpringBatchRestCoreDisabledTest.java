@@ -19,14 +19,14 @@ package org.activiti.cloud.service.common.batch;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-import org.activiti.cloud.service.common.batch.config.SpringBatchRestCoreAutoConfiguration;
+import org.activiti.cloud.service.common.batch.config.ActivitiCloudCommonBatchRestAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT,
-                properties = {SpringBatchRestCoreAutoConfiguration.REST_API_ENABLED + "=false"})
+                properties = {ActivitiCloudCommonBatchRestAutoConfiguration.REST_API_ENABLED + "=false"})
 public class SpringBatchRestCoreDisabledTest extends SpringBatchRestCoreTestSupport {
 
     @Test
