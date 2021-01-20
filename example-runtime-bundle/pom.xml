@@ -23,7 +23,7 @@
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>7.1.614</activiti-cloud.version>
-    <docker-maven-plugin.version>0.33.0</docker-maven-plugin.version>
+    <docker-maven-plugin.version>0.34.1</docker-maven-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
