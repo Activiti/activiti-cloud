@@ -51,6 +51,8 @@ public interface ModelService {
     Model updateModel(Model modelToBeUpdated,
                       Model newModel);
 
+    Model copyModel(Model modelToBeCopied, Project project);
+
     void deleteModel(Model model);
 
     Optional<Model> findModelById(String modelId);

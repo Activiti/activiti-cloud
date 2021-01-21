@@ -195,8 +195,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project copyProject(Project projectToCopy, String newProjectName) {
-        projectToCopy.setName(newProjectName);
-        return createProject(projectToCopy);
+        Project copiedProject = projectRepository.copyProject(projectToCopy, newProjectName);
+        List<Model> models = modelService.getAllModels(projectToCopy);
+
+        models.forEach(model -> {
+            modelService.copyModel(model, copiedProject);
+        });
+
+        return copiedProject;
     }
 
     @Override

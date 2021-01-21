@@ -81,7 +81,7 @@ public interface ProjectRestApi {
 
     String PROJECT_NAME_OVERRIDE_DESCR = "The name of the project that will override the current name of the project in the zip file";
 
-    String PROJECT_NAME_SAVEAS_DESCR = "The name of the project that will replace the original name of the project";
+    String PROJECT_NAME_COPY_DESCR = "The name of the project that will replace the original name of the project";
 
     String UPLOAD_FILE_PARAM_NAME = "file";
 
@@ -176,7 +176,7 @@ public interface ProjectRestApi {
     EntityModel<Project> copyProject(
             @ApiParam(value = COPY_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
-            @ApiParam(value = PROJECT_NAME_SAVEAS_DESCR)
+            @ApiParam(value = PROJECT_NAME_COPY_DESCR)
             @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name);
 
     @ApiOperation(

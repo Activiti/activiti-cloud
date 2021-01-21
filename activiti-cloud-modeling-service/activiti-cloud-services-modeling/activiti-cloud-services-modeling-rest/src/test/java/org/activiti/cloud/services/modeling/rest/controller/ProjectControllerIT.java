@@ -859,8 +859,9 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_returnZipFileWithNewProjectName_when_copyingProject() throws Exception {
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
+    public void should_returnNewProjectWithNewProjectName_when_copyingProject() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(projectWithDescription("project-with-models",
+            "Project with models to be copied"));
 
         String projectName = "new-project-name";
 
@@ -869,6 +870,22 @@ public class ProjectControllerIT {
                 project.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name",
-                is("new-project-name")));
+                is("new-project-name")))
+            .andExpect(jsonPath("$.description",
+                is("Project with models to be copied")));
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void should_throwConflictException_when_copyingProjectWithExistingName() throws Exception {
+        projectRepository.createProject(project("existing-project"));
+        Project project = projectRepository.createProject(project("project-to-copy"));
+
+        String projectName = "existing-project";
+
+        mockMvc.perform(
+            post("/v1/projects/{projectId}/copy?name=" + projectName,
+                project.getId()))
+            .andExpect(status().isConflict());
     }
 }
