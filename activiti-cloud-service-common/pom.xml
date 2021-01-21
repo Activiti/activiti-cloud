@@ -34,7 +34,7 @@
     <module>activiti-cloud-service-common-liquibase</module>
   </modules>
   <properties>
-    <activiti.version>7.1.289</activiti.version>
+    <activiti.version>7.1.290</activiti.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
