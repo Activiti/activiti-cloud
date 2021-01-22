@@ -14,7 +14,7 @@
   <name>Activiti Cloud :: Runtime API Parent</name>
   <packaging>pom</packaging>
   <properties>
-    <activiti.version>7.1.290</activiti.version>
+    <activiti.version>7.1.291</activiti.version>
   </properties>
   <modules>
     <module>activiti-cloud-api-dependencies</module>
