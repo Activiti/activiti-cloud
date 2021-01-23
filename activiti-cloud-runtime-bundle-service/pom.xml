@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>7.1.624</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>7.1.624</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud Runtime Bundle Service :: Parent</name>
   <modules>
@@ -21,7 +21,7 @@
     <module>activiti-cloud-starter-runtime-bundle-it</module>
   </modules>
   <properties>
-    <activiti.version>7.1.294</activiti.version>
+    <activiti.version>7.1.296</activiti.version>
   </properties>
   <dependencyManagement>
     <dependencies>
