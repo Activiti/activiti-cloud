@@ -196,6 +196,16 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     }
 
     @Override
+    public boolean hasProjects() {
+        return getProjects() != null && !getProjects().isEmpty();
+    }
+
+    @Override
+    public boolean hasMultipleProjects() {
+        return getProjects() != null && getProjects().size() > 1;
+    }
+
+    @Override
     public String toString() {
         return type + " MODEL [" + id + ", " + name + "]";
     }

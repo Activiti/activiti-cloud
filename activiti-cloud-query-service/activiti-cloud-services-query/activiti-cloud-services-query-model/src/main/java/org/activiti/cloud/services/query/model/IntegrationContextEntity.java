@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -35,8 +36,11 @@ import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity(name="IntegrationContext")
@@ -45,18 +49,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
     @Index(name="integration_context_processInstance_idx", columnList="processInstanceId", unique=false),
     @Index(name="integration_context_processInstance_elementId_idx", columnList="processInstanceId,clientId,executionId", unique=true)
 })
-public class IntegrationContextEntity extends ActivitiEntityMetadata {
+public class IntegrationContextEntity extends ActivitiEntityMetadata implements CloudIntegrationContext {
 
-    public static enum IntegrationContextStatus {
-        INTEGRATION_REQUESTED, INTEGRATION_RESULT_RECEIVED, INTEGRATION_ERROR_RECEIVED
-    }
+    public static final int ERROR_MESSAGE_LENGTH = 255;
 
     @Id
     private String id;
 
     @Convert(converter = MapOfStringObjectJsonConverter.class)
-    @Column(columnDefinition="text")
-    private Map<String, Object> inboundVariables = new HashMap<>();
+    @Column(columnDefinition="text", name = "inbound_variables")
+    private Map<String, Object> inBoundVariables = new HashMap<>();
 
     @Convert(converter = MapOfStringObjectJsonConverter.class)
     @Column(columnDefinition="text")
@@ -83,6 +85,9 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date errorDate;
 
+    private String errorCode;
+
+    @Column(length = ERROR_MESSAGE_LENGTH)
     private String errorMessage;
 
     private String errorClassName;
@@ -91,13 +96,14 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
     @Column(columnDefinition="text")
     private List<StackTraceElement> stackTraceElements;
 
+    @JsonFormat(shape = Shape.STRING)
     private IntegrationContextStatus status;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")
-    private BPMNActivityEntity bpmnActivity;
+    private ServiceTaskEntity serviceTask;
 
     public IntegrationContextEntity() {
         this.id = UUID.randomUUID().toString();
@@ -115,6 +121,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
               appVersion);
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -123,6 +130,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.id = id;
     }
 
+    @Override
     public String getProcessInstanceId() {
         return processInstanceId;
     }
@@ -131,6 +139,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.processInstanceId = processInstanceId;
     }
 
+    @Override
     public String getProcessDefinitionId() {
         return processDefinitionId;
     }
@@ -139,6 +148,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.processDefinitionId = processDefinitionId;
     }
 
+    @Override
     public String getClientId() {
         return clientId;
     }
@@ -147,6 +157,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.clientId = clientId;
     }
 
+    @Override
     public String getConnectorType() {
         return connectorType;
     }
@@ -155,18 +166,21 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.connectorType = connectorType;
     }
 
+    @Override
     public Map<String, Object> getInBoundVariables() {
-        return inboundVariables;
+        return inBoundVariables;
     }
 
     public void setInBoundVariables(Map<String, Object> inboundVariables) {
-        this.inboundVariables = inboundVariables;
+        this.inBoundVariables = inboundVariables;
     }
 
+    @Override
     public Map<String, Object> getOutBoundVariables() {
         return outBoundVariables;
     }
 
+    @Override
     public String getProcessDefinitionKey() {
         return processDefinitionKey;
     }
@@ -175,6 +189,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.processDefinitionKey = processDefinitionKey;
     }
 
+    @Override
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
     }
@@ -183,6 +198,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.processDefinitionVersion = processDefinitionVersion;
     }
 
+    @Override
     public String getClientName() {
         return clientName;
     }
@@ -192,6 +208,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.clientName = clientName;
     }
 
+    @Override
     public String getClientType() {
         return clientType;
     }
@@ -202,6 +219,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
     }
 
 
+    @Override
     public String getBusinessKey() {
         return businessKey;
     }
@@ -210,6 +228,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.businessKey = businessKey;
     }
 
+    @Override
     public String getParentProcessInstanceId() {
         return parentProcessInstanceId;
     }
@@ -218,14 +237,18 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.parentProcessInstanceId = parentProcessInstanceId;
     }
 
+    @Deprecated
+    @JsonIgnore
     public Map<String, Object> getInboundVariables() {
-        return inboundVariables;
+        return getInboundVariables();
     }
 
+    @Deprecated
     public void setInboundVariables(Map<String, Object> inboundVariables) {
-        this.inboundVariables = inboundVariables;
+        setInBoundVariables(inboundVariables);
     }
 
+    @Override
     public Date getRequestDate() {
         return requestDate;
     }
@@ -234,6 +257,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.requestDate = requestDate;
     }
 
+    @Override
     public Date getResultDate() {
         return resultDate;
     }
@@ -242,6 +266,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.resultDate = resultDate;
     }
 
+    @Override
     public Date getErrorDate() {
         return errorDate;
     }
@@ -250,14 +275,16 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.errorDate = errorDate;
     }
 
+    @Override
     public String getErrorMessage() {
         return errorMessage;
     }
 
     public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+        this.errorMessage = StringUtils.truncate(errorMessage, ERROR_MESSAGE_LENGTH);
     }
 
+    @Override
     public String getErrorClassName() {
         return errorClassName;
     }
@@ -266,6 +293,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.errorClassName = errorClassName;
     }
 
+    @Override
     public List<StackTraceElement> getStackTraceElements() {
         return stackTraceElements;
     }
@@ -276,6 +304,15 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
 
     public void setOutBoundVariables(Map<String, Object> outBoundVariables) {
         this.outBoundVariables = outBoundVariables;
+    }
+
+    @Override
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
     }
 
     @Override
@@ -291,7 +328,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
                                                errorDate,
                                                errorMessage,
                                                id,
-                                               inboundVariables,
+                                               inBoundVariables,
                                                outBoundVariables,
                                                parentProcessInstanceId,
                                                processDefinitionId,
@@ -327,7 +364,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
                Objects.equals(errorDate,other.errorDate) &&
                Objects.equals(errorMessage, other.errorMessage) &&
                Objects.equals(id, other.id) &&
-               Objects.equals(inboundVariables, other.inboundVariables) &&
+               Objects.equals(inBoundVariables, other.inBoundVariables) &&
                Objects.equals(outBoundVariables, other.outBoundVariables) &&
                Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) &&
                Objects.equals(processDefinitionId, other.processDefinitionId) &&
@@ -349,7 +386,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         builder.append("IntegrationContextEntity [id=")
                .append(id)
                .append(", inboundVariables=")
-               .append(inboundVariables != null ? toString(inboundVariables.entrySet(), maxLen) : null)
+               .append(inBoundVariables != null ? toString(inBoundVariables.entrySet(), maxLen) : null)
                .append(", outBoundVariables=")
                .append(outBoundVariables != null ? toString(outBoundVariables.entrySet(), maxLen) : null)
                .append(", processInstanceId=")
@@ -407,6 +444,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
     }
 
 
+    @Override
     public IntegrationContextStatus getStatus() {
         return status;
     }
@@ -417,24 +455,25 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
     }
 
 
-    public BPMNActivityEntity getBpmnActivity() {
-        return bpmnActivity;
+    public ServiceTaskEntity getServiceTask() {
+        return serviceTask;
     }
 
 
-    public void setBpmnActivity(BPMNActivityEntity bpmnActivity) {
-        if (bpmnActivity == null) {
-            if (this.bpmnActivity != null) {
-                this.bpmnActivity.setIntegrationContext(null);
+    public void setServiceTask(ServiceTaskEntity serviceTask) {
+        if (serviceTask == null) {
+            if (this.serviceTask != null) {
+                this.serviceTask.setIntegrationContext(null);
             }
         }
         else {
-            bpmnActivity.setIntegrationContext(this);
+            serviceTask.setIntegrationContext(this);
         }
 
-        this.bpmnActivity = bpmnActivity;
+        this.serviceTask = serviceTask;
     }
 
+    @Override
     public String getExecutionId() {
         return executionId;
     }
@@ -443,4 +482,45 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.executionId = executionId;
     }
 
+    @Override
+    public void addOutBoundVariable(String name,
+                                    Object value) {
+        outBoundVariables.put(name, value);
+    }
+    @Override
+    public void addOutBoundVariables(Map<String, Object> variables) {
+        outBoundVariables.putAll(variables);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getInBoundVariable(String name) {
+        return Optional.ofNullable(inBoundVariables)
+                       .map(it -> (T) inBoundVariables.get(name))
+                       .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getInBoundVariable(String name, Class<T> type) {
+        return Optional.ofNullable(inBoundVariables)
+                       .map(it -> (T) inBoundVariables.get(name))
+                       .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getOutBoundVariable(String name) {
+        return Optional.ofNullable(outBoundVariables)
+                       .map(it -> (T) it.get(name))
+                       .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getOutBoundVariable(String name, Class<T> type) {
+        return Optional.ofNullable(outBoundVariables)
+                       .map(it -> (T) it.get(name))
+                       .orElse(null);
+    }
 }

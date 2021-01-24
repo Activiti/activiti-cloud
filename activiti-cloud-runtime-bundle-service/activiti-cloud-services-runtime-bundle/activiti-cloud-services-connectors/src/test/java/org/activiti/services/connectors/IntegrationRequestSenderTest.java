@@ -39,7 +39,7 @@ import org.activiti.engine.impl.persistence.deploy.DeploymentManager;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
-import org.activiti.runtime.api.impl.VariablesMappingProvider;
+import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.activiti.services.test.DelegateExecutionBuilder;
 import org.assertj.core.api.Assertions;
@@ -104,7 +104,7 @@ public class IntegrationRequestSenderTest {
     private IntegrationContextEntity integrationContextEntity;
 
     @Mock
-    private VariablesMappingProvider inboundVariablesProvider;
+    private ExtensionsVariablesMappingProvider inboundVariablesProvider;
 
     private DelegateExecution delegateExecution;
 
@@ -219,7 +219,7 @@ public class IntegrationRequestSenderTest {
         given(eventsProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
 
         //when
-        integrationRequestSender.sendIntegrationRequest(integrationRequest);
+        integrationRequestSender.sendAuditEvent(integrationRequest);
 
         //then
         verify(auditProducer).send(auditMessageArgumentCaptor.capture());

@@ -1,0 +1,18 @@
+{
+  "id": "shouldDeliverMessagesViaRestApiModel",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "shouldDeliverMessagesViaRestApi": {
+      "properties": {},
+      "mappings": {
+        "Task_05bhhuh": {
+          "mappingType": "MAP_ALL"
+        },
+        "BoundaryEvent_0vax021": {
+          "mappingType": "MAP_ALL"
+        }
+      },
+      "constants": {}
+    }
+  }
+}

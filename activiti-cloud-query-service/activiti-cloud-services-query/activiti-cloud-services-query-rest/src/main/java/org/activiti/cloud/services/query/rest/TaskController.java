@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QTaskEntity;
@@ -84,7 +84,7 @@ public class TaskController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudTask>> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+    public PagedModel<EntityModel<QueryCloudTask>> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
                                                        @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
                                                        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                        VariableSearch variableSearch,
@@ -94,7 +94,7 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public EntityModel<CloudTask> findById(@PathVariable String taskId) {
+    public EntityModel<QueryCloudTask> findById(@PathVariable String taskId) {
 
         TaskEntity taskEntity = entityFinder.findById(taskRepository,
                                                       taskId,

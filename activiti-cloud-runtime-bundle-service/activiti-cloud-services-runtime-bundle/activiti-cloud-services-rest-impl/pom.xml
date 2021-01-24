@@ -100,10 +100,6 @@
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
-      <artifactId>activiti-image-generator</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti</groupId>
       <artifactId>activiti-json-converter</artifactId>
     </dependency>
     <dependency>

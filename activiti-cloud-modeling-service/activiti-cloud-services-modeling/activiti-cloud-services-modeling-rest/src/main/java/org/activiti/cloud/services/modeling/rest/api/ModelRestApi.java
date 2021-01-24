@@ -96,6 +96,10 @@ public interface ModelRestApi {
 
     String PROJECT_ID_PARAM_NAME = "projectId";
 
+    String MODEL_USED_PARAM_DESCR = "The model is going to be validated and checked used in other model";
+
+    String MODEL_USED_PARAM_NAME = "validateUsage";
+
     String INCLUDE_ORPHANS_PARAM_DESCR = "If true, then models with no relationship to any project are retrieved regardless of their scope";
 
     String INCLUDE_ORPHANS_PARAM_NAME = "includeOrphans";
@@ -251,7 +255,9 @@ public interface ModelRestApi {
             @ApiParam(VALIDATE_MODEL_FILE_PARAM_DESCR)
             @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
             @ApiParam(value=VALIDATE_PROJECT_ID_PARAM_DESCR, required = false)
-            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId) throws IOException;
+            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId,
+            @ApiParam(value= MODEL_USED_PARAM_DESCR, required = false)
+            @RequestParam(value= MODEL_USED_PARAM_DESCR,required = false) boolean isUsed) throws IOException;
 
     @ApiOperation(
             tags = MODELS,

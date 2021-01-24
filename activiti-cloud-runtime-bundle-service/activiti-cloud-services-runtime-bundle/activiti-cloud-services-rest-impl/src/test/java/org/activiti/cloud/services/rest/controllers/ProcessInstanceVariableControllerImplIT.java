@@ -124,11 +124,11 @@ public class ProcessInstanceVariableControllerImplIT {
         VariableInstanceImpl<String> name = new VariableInstanceImpl<>("name",
                                                                        String.class.getName(),
                                                                        "Paul",
-                                                                       PROCESS_INSTANCE_ID);
+                                                                       PROCESS_INSTANCE_ID, null);
         VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
                                                                        Integer.class.getName(),
                                                                        12,
-                                                                       PROCESS_INSTANCE_ID);
+                                                                       PROCESS_INSTANCE_ID, null);
         given(processRuntime.variables(any()))
                 .willReturn(Arrays.asList(name,
                                           age));

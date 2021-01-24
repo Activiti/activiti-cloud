@@ -15,16 +15,21 @@
  */
 package org.activiti.cloud.starters.test.builder;
 
+import java.util.Date;
 import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
-import org.activiti.cloud.api.task.model.impl.events.*;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
-import java.util.Date;
 
 public class TaskEventContainedBuilder {
 
@@ -73,6 +78,20 @@ public class TaskEventContainedBuilder {
 
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
                                    new CloudTaskAssignedEventImpl(task));
+        return task;
+    }
+
+    public Task anAssignedTaskWithDueDate(String taskName,
+        String username,
+        ProcessInstance processInstance, Date dueDate) {
+        TaskImpl task = buildTask(taskName,
+            Task.TaskStatus.ASSIGNED,
+            processInstance);
+        task.setAssignee(username);
+        task.setDueDate(dueDate);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+            new CloudTaskAssignedEventImpl(task));
         return task;
     }
 
@@ -164,6 +183,35 @@ public class TaskEventContainedBuilder {
         return task;
     }
 
+    public Task aTaskWithTwoGroupCandidates(String taskName,
+        String groupIdOne, String groupIdTwo,
+        ProcessInstance processInstance, String userName) {
+        TaskImpl task = buildTask(taskName,
+            Task.TaskStatus.CREATED,
+            processInstance);
+        task.setAssignee(userName);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+            new CloudTaskCandidateGroupAddedEventImpl(new TaskCandidateGroupImpl(groupIdOne,
+                task.getId())),
+            new CloudTaskCandidateGroupAddedEventImpl(new TaskCandidateGroupImpl(groupIdTwo,
+                task.getId())));
+        return task;
+    }
+
+    public Task aTaskWithPriority(String taskName,
+                                       int priority,
+                                       ProcessInstance processInstance) {
+        Task task = buildTask(taskName,
+                                  Task.TaskStatus.CREATED,
+                                  processInstance);
+
+        ((TaskImpl) task).setPriority(priority);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+                                   new CloudTaskCompletedEventImpl(task));
+        return task;
+    }
+
     private static TaskImpl buildTask(String taskName,
                                       Task.TaskStatus status,
                                       ProcessInstance processInstance) {
@@ -176,4 +224,34 @@ public class TaskEventContainedBuilder {
         }
         return task;
     }
+
+    public Task aCompletedTaskWithCompletedBy(String taskName,
+        ProcessInstance processInstance, String completedBy){
+
+        TaskImpl task = buildTask(taskName,
+            Task.TaskStatus.COMPLETED,
+            processInstance);
+        task.setCompletedBy(completedBy);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+            new CloudTaskAssignedEventImpl(task),
+            new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
+        return task;
+
+    }
+
+    public Task aCompletedTaskWithCompletionDate(String taskName,
+                                                 ProcessInstance processInstance,
+                                                 Date completedDate){
+        Task task = buildTask(taskName,
+            Task.TaskStatus.COMPLETED,
+            processInstance);
+
+        ((TaskImpl) task).setCompletedDate(completedDate);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+            new CloudTaskAssignedEventImpl(task),
+            new CloudTaskCompletedEventImpl("task-completed-event-id" + UUID.randomUUID().toString(), completedDate.getTime(), task));
+        return task;
+    }
+
 }

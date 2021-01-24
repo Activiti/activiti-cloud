@@ -47,7 +47,7 @@ public class ProcessInstanceVariablesRepresentationModelAssemblerTest {
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {
         //given
-        VariableInstance model = new VariableInstanceImpl<>("var", "string", "value", "my-identifier");
+        VariableInstance model = new VariableInstanceImpl<>("var", "string", "value", "my-identifier", null);
         given(converter.from(model)).willReturn(new CloudVariableInstanceImpl<>(model));
 
         //when

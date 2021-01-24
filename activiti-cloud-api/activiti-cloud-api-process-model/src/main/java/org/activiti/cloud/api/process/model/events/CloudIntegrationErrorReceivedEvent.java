@@ -19,6 +19,8 @@ import java.util.List;
 
 public interface CloudIntegrationErrorReceivedEvent extends CloudIntegrationEvent {
 
+    String getErrorCode();
+
     String getErrorMessage();
 
     String getErrorClassName();

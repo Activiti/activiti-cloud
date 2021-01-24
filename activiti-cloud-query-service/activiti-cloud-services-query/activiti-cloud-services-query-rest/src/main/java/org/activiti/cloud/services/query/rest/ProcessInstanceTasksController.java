@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -58,7 +58,7 @@ public class ProcessInstanceTasksController {
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudTask>> getTasks(@PathVariable String processInstanceId,
+    public PagedModel<EntityModel<QueryCloudTask>> getTasks(@PathVariable String processInstanceId,
                                                         Pageable pageable) {
         Page<TaskEntity> page = taskRepository.findAll(QTaskEntity.taskEntity.processInstanceId.eq(processInstanceId),
                                                        pageable);

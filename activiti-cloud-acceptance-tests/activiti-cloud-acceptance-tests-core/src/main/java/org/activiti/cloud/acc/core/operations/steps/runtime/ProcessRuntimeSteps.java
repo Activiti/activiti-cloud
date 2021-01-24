@@ -23,10 +23,11 @@ import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
-import org.activiti.cloud.acc.core.services.runtime.diagram.ProcessRuntimeDiagramService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.services.rest.api.ProcessInstanceApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeSteps {
@@ -35,14 +36,15 @@ public class ProcessRuntimeSteps {
     private RuntimeDirtyContextHandler dirtyContextHandler;
 
     @Autowired
-    private ProcessRuntimeService processRuntimeService;
+    private ProcessInstanceApiClient processInstanceApiClient;
 
     @Autowired
-    private ProcessRuntimeDiagramService processRuntimeDiagramService;
+    @Qualifier("runtimeBundleBaseService")
+    private BaseService baseService;
 
     @Step
     public void checkServicesHealth() {
-        assertThat(processRuntimeService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
 
     @Step
@@ -58,18 +60,19 @@ public class ProcessRuntimeSteps {
             payload.withVariable("test-variable-name", "test-variable-value");
         }
 
-        return dirtyContextHandler.dirty(processRuntimeService
-                .startProcess(payload.build()));
+        return dirtyContextHandler.dirty(processInstanceApiClient
+            .startProcess(payload.build())
+            .getContent());
     }
 
     @Step
     public void deleteProcessInstance(String processInstanceId) {
-        processRuntimeService.deleteProcess(processInstanceId);
+        processInstanceApiClient.deleteProcessInstance(processInstanceId);
     }
 
     @Step
     public void suspendProcessInstance(String processInstanceId){
-        processRuntimeService.suspendProcess(processInstanceId);
+        processInstanceApiClient.suspend(processInstanceId);
     }
 
 }

@@ -272,16 +272,17 @@
               "$ref": "#/definitions/mapping-property"
             }
           }
-        }
-      },
-      "anyOf": [
-        {
-          "required": ["inputs"]
         },
-        {
-          "required": ["outputs"]
+        "mappingType": {
+          "type": "string",
+          "enum": [
+            "MAP_ALL",
+            "MAP_ALL_INPUTS",
+            "MAP_ALL_OUTPUTS"
+          ],
+          "additionalProperties": false
         }
-      ]
+      }
     },
     "mapping-property": {
       "type": "object",

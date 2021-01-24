@@ -28,7 +28,6 @@ import org.springframework.integration.config.AbstractSimpleMessageHandlerFactor
 import org.springframework.integration.handler.advice.HandleMessageAdvice;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.support.locks.LockRegistry;
-import org.springframework.integration.support.management.AbstractMessageHandlerMetrics;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.scheduling.TaskScheduler;
@@ -48,12 +47,6 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
     private Long sendTimeout;
 
     private String outputChannelName;
-
-    private AbstractMessageHandlerMetrics metrics;
-
-    private Boolean statsEnabled;
-
-    private Boolean countsEnabled;
 
     private LockRegistry lockRegistry;
 
@@ -80,32 +73,30 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
     private Boolean expireGroupsUponTimeout;
 
     private Boolean completeGroupsWhenEmpty;
-    
+
     private Boolean popSequence;
 
     private Boolean releaseLockBeforeSend;
-    
+
     public MessageConnectorAggregatorFactoryBean() {
         super();
-        
+
         // defaults
         this.popSequence(false)
             .completeGroupsWhenEmpty(true)
             .expireGroupsUponCompletion(true)
-            .sendPartialResultOnExpiry(true)
-            .statsEnabled(true)
-            .countsEnabled(true);
+            .sendPartialResultOnExpiry(true);
     }
 
     public MessageConnectorAggregatorFactoryBean processorBean(MessageGroupProcessor processorBean) {
         this.processorBean = processorBean;
-        
+
         return this;
     }
 
     public MessageConnectorAggregatorFactoryBean expireGroupsUponCompletion(Boolean expireGroupsUponCompletion) {
         this.expireGroupsUponCompletion = expireGroupsUponCompletion;
-        
+
         return this;
     }
 
@@ -123,24 +114,6 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
 
     public MessageConnectorAggregatorFactoryBean outputChannel(MessageChannel outputChannel) {
         this.setOutputChannel(outputChannel);
-
-        return this;
-    }
-
-    public MessageConnectorAggregatorFactoryBean metrics(AbstractMessageHandlerMetrics metrics) {
-        this.metrics = metrics;
-
-        return this;
-    }
-
-    public MessageConnectorAggregatorFactoryBean statsEnabled(Boolean statsEnabled) {
-        this.statsEnabled = statsEnabled;
-
-        return this;
-    }
-
-    public MessageConnectorAggregatorFactoryBean countsEnabled(Boolean countsEnabled) {
-        this.countsEnabled = countsEnabled;
 
         return this;
     }
@@ -195,7 +168,7 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
 
     public MessageConnectorAggregatorFactoryBean discardChannelName(String discardChannelName) {
         this.discardChannelName = discardChannelName;
-    
+
         return this;
     }
 
@@ -234,19 +207,19 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
 
         return this;
     }
-    
+
     public MessageConnectorAggregatorFactoryBean beanFactory(BeanFactory beanFactory) {
         this.setBeanFactory(beanFactory);
-        
+
         return this;
     }
 
     public MessageConnectorAggregatorFactoryBean adviceChain(List<? extends HandleMessageAdvice> adviceChain) {
         this.setAdviceChain(Arrays.asList(adviceChain.toArray(new HandleMessageAdvice[] {})));
-        
+
         return this;
     }
-    
+
     @Override
     protected MessageConnectorAggregator createHandler() {
         MessageConnectorAggregator aggregator = new MessageConnectorAggregator(this.processorBean);
@@ -261,18 +234,6 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
 
         if (this.outputChannelName != null) {
             aggregator.setOutputChannelName(this.outputChannelName);
-        }
-
-        if (this.metrics != null) {
-            aggregator.configureMetrics(this.metrics);
-        }
-
-        if (this.statsEnabled != null) {
-            aggregator.setStatsEnabled(this.statsEnabled);
-        }
-
-        if (this.countsEnabled != null) {
-            aggregator.setCountsEnabled(this.countsEnabled);
         }
 
         if (this.lockRegistry != null) {
@@ -326,7 +287,7 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
         if (this.completeGroupsWhenEmpty != null) {
             aggregator.setCompleteGroupsWhenEmpty(this.completeGroupsWhenEmpty);
         }
-                
+
         if (this.popSequence != null) {
             aggregator.setPopSequence(this.popSequence);
         }

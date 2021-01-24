@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.api.ValidationContext;
@@ -58,11 +57,11 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
                     .build()
                     .validate(processExtensionJson);
         } catch (JSONException jsonException) {
-            log.error("Syntactic model JSON validation errors encountered",
+            log.debug("Syntactic model JSON validation errors encountered",
                       jsonException);
             throw new SyntacticModelValidationException(jsonException);
         } catch (ValidationException validationException) {
-            log.error("Semantic model validation errors encountered: " + validationException.toJSON(),
+            log.debug("Semantic model validation errors encountered: " + validationException.toJSON(),
                       validationException);
             throw new SemanticModelValidationException(validationException.getMessage(),
                                                        getValidationErrors(validationException, processExtensionJson));
@@ -71,7 +70,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
 
     private List<ModelValidationError> getValidationErrors(ValidationException validationException, JSONObject prcessExtenstionJson) {
         return getValidationExceptions(validationException)
-                .map(exception -> this.toModelValidationError(exception, prcessExtenstionJson))
+                .map(exception -> toModelValidationError(exception, prcessExtenstionJson))
                 .distinct()
                 .collect(Collectors.toList());
     }

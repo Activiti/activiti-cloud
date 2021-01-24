@@ -181,11 +181,11 @@
     <!-- plugin versions -->
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
     <assertj-assertions-generator-maven-plugin.version>2.0.0</assertj-assertions-generator-maven-plugin.version>
-    <build-helper-maven-plugin.version>3.1.0</build-helper-maven-plugin.version>
+    <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
     <docker-maven-plugin.version>0.33.0</docker-maven-plugin.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
     <git-commit-id-plugin.version>3.0.1</git-commit-id-plugin.version>
-    <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
@@ -196,18 +196,31 @@
     <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-    <maven-site-plugin.version>3.8.2</maven-site-plugin.version>
+    <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-    <spring-boot.version>2.2.8.RELEASE</spring-boot.version>
+    <spring-boot.version>2.4.2</spring-boot.version>
   </properties>
   <modules>
     <module>activiti-cloud-build-dependencies-parent</module>
   </modules>
   <repositories>
     <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
       <id>activiti-releases</id>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+    </repository>
+    <repository>
+      <id>activiti-snapshots</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </repository>
   </repositories>
   <build>
@@ -390,6 +403,7 @@ limitations under the License.]]>
           <showDeprecation>true</showDeprecation>
           <showWarnings>true</showWarnings>
           <optimize>true</optimize>
+          <forceJavacCompilerUse>true</forceJavacCompilerUse>
         </configuration>
       </plugin>
       <plugin>

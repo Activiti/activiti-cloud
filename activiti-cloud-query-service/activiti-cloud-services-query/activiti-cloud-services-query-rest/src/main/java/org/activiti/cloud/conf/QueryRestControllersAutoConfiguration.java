@@ -16,7 +16,10 @@
 package org.activiti.cloud.conf;
 
 import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
+import org.activiti.cloud.services.query.rest.ApplicationAdminController;
+import org.activiti.cloud.services.query.rest.ApplicationController;
 import org.activiti.cloud.services.query.rest.CommonExceptionHandlerQuery;
+import org.activiti.cloud.services.query.rest.ServiceTaskIntegrationContextAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminController;
@@ -24,11 +27,13 @@ import org.activiti.cloud.services.query.rest.ProcessInstanceController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDeleteController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDiagramAdminController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDiagramController;
+import org.activiti.cloud.services.query.rest.ProcessInstanceServiceTasksAdminController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceTasksController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceVariableAdminController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceVariableController;
 import org.activiti.cloud.services.query.rest.ProcessModelAdminController;
 import org.activiti.cloud.services.query.rest.ProcessModelController;
+import org.activiti.cloud.services.query.rest.ServiceTaskAdminController;
 import org.activiti.cloud.services.query.rest.TaskAdminController;
 import org.activiti.cloud.services.query.rest.TaskController;
 import org.activiti.cloud.services.query.rest.TaskDeleteController;
@@ -60,7 +65,12 @@ import org.springframework.context.annotation.Import;
     TaskController.class,
     TaskDeleteController.class,
     TaskVariableAdminController.class,
-    TaskVariableController.class
+    TaskVariableController.class,
+    ServiceTaskAdminController.class,
+    ProcessInstanceServiceTasksAdminController.class,
+    ServiceTaskIntegrationContextAdminController.class,
+    ApplicationController.class,
+    ApplicationAdminController.class
 })
 public class QueryRestControllersAutoConfiguration {
 
@@ -69,11 +79,11 @@ public class QueryRestControllersAutoConfiguration {
     public ProcessDiagramGenerator processDiagramGenerator() {
         return new DefaultProcessDiagramGenerator();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(ProcessDiagramGenerator processDiagramGenerator) {
         return new ProcessDiagramGeneratorWrapper(processDiagramGenerator);
-    }    
+    }
 
 }

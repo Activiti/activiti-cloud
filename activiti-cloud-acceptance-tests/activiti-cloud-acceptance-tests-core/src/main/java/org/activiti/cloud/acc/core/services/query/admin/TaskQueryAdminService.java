@@ -18,16 +18,12 @@ package org.activiti.cloud.acc.core.services.query.admin;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.cloud.acc.shared.service.BaseService;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
-import java.util.function.Predicate;
-
-public interface TaskQueryAdminService extends BaseService {
+public interface TaskQueryAdminService {
 
     @RequestLine("GET /admin/v1/tasks/{taskId}")
     @Headers("Accept: application/hal+json;charset=UTF-8")

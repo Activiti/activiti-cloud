@@ -74,4 +74,10 @@ public class ConnectorsITStreamHandlers {
     public IntegrationError getIntegrationError() {
         return integrationErrorReference.get();
     }
+
+    public void reset() {
+        integrationResultEventsCounter = new AtomicInteger();
+        integrationErrorEventProduced = new AtomicBoolean();
+        integrationErrorReference = new AtomicReference<>();
+    }
 }

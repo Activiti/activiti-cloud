@@ -32,11 +32,10 @@ public class VariablesJpaJsonConverterTest {
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
         //given
-        VariableInstanceImpl variable = new VariableInstanceImpl("var-name",
+        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>("var-name",
                                                                  "String",
                                                                  "my string value",
-                                                                 "proc-inst-id");
-        variable.setTaskId("task-id");
+                                                                 "proc-inst-id", "task-id");
 
         //when
         String jsonRepresentation = converter.convertToDatabaseColumn(variable);
@@ -81,8 +80,7 @@ public class VariablesJpaJsonConverterTest {
         VariableInstanceImpl variable = new VariableInstanceImpl("var-name",
                                                                  "Invoice",
                                                                  invoice,
-                                                                 "proc-inst-id");
-        variable.setTaskId("task-id");
+                                                                 "proc-inst-id", "task-id");
 
         //when
         String jsonRepresentation = converter.convertToDatabaseColumn(variable);

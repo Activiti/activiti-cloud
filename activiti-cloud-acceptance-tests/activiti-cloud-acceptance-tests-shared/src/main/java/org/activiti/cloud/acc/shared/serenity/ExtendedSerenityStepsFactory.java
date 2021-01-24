@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import net.serenitybdd.jbehave.SerenityStepFactory;
 import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.failures.FailingUponPendingStep;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.Steps;
 
@@ -36,7 +37,8 @@ public class ExtendedSerenityStepsFactory extends SerenityStepFactory {
         super(configuration,
               rootPackage,
               classLoader);
-        this.configuration = configuration;
+        this.configuration = configuration
+                .usePendingStepStrategy(new FailingUponPendingStep());
     }
 
     @Override

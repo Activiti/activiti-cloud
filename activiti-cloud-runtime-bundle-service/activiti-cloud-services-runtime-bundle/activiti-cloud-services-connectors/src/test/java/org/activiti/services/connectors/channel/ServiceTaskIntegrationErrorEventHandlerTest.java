@@ -41,7 +41,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.ExecutionQuery;
-import org.activiti.runtime.api.impl.VariablesMappingProvider;
+import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,7 +81,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Mock
-    private VariablesMappingProvider outboundVariablesProvider;
+    private ExtensionsVariablesMappingProvider outboundVariablesProvider;
 
     @Mock
     private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;

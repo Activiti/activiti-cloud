@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starters.test.builder;
 
+import java.util.Date;
 import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessInstance;
@@ -57,7 +58,39 @@ public class ProcessInstanceEventContainedBuilder {
         completedProcess.setName(name);
         completedProcess.setProcessDefinitionKey("my-proc");
         completedProcess.setProcessDefinitionId(UUID.randomUUID().toString());
+        completedProcess.setProcessDefinitionName("my-proc-definition-name");
         return completedProcess;
     }
 
+    public ProcessInstanceImpl aRunningProcessInstanceWithStartDate(String name, Date startDate) {
+        ProcessInstanceImpl processInstance = buildProcessInstance(name);
+        processInstance.setStartDate(startDate);
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
+            new CloudProcessStartedEventImpl(processInstance));
+        return processInstance;
+    }
+
+    public ProcessInstanceImpl aRunningProcessInstanceWithCompletedDate(String name, Date completedDate) {
+        ProcessInstanceImpl completedProcess = buildProcessInstance(name);
+        completedProcess.setCompletedDate(completedDate);
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(completedProcess),
+            new CloudProcessCompletedEventImpl(UUID.randomUUID().toString(), completedDate.getTime(), completedProcess));
+        return completedProcess;
+    }
+
+    public ProcessInstanceImpl aRunningProcessInstanceWithInitiator(String name, String initiator) {
+        ProcessInstanceImpl processInstance = buildProcessInstance(name);
+        processInstance.setInitiator(initiator);
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
+                new CloudProcessStartedEventImpl(processInstance));
+        return processInstance;
+    }
+
+    public ProcessInstanceImpl aRunningProcessInstanceWithAppVersion(String name, String appVersion) {
+        ProcessInstanceImpl processInstance = buildProcessInstance(name);
+        processInstance.setAppVersion(appVersion);
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
+                new CloudProcessStartedEventImpl(processInstance));
+        return processInstance;
+    }
 }

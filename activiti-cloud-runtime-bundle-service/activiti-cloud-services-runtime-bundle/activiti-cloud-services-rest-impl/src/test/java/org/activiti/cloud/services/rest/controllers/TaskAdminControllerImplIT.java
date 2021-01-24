@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -152,6 +153,20 @@ public class TaskAdminControllerImplIT {
         given(taskAdminRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete",
                                   1))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void assignTask() throws Exception {
+        given(taskAdminRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
+        AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign()
+                .withTaskId("1")
+                .withAssignee("assignee")
+                .build();
+
+        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/assign",
+                1).contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(assignTaskCmd)))
                 .andExpect(status().isOk());
     }
 

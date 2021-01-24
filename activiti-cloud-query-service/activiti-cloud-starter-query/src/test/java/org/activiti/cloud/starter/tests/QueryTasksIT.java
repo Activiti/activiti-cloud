@@ -21,11 +21,15 @@ import static org.awaitility.Awaitility.await;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.Task.TaskStatus;
@@ -54,7 +58,6 @@ import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -369,7 +372,6 @@ public class QueryTasksIT {
         return executeGetTasksWithVariable(ADMIN_TASKS_URL, variableName, variableValue, status);
     }
 
-    @NotNull
     private <T> Collection<Task> executeGetTasksWithVariable(String tasksUrl, String variableName,
         T variableValue, TaskStatus status) {
         ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
@@ -977,6 +979,14 @@ public class QueryTasksIT {
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
 
+    private ResponseEntity<PagedModel<Task>> executeRequestGetTasks(ProcessInstance processInstance) {
+        return testRestTemplate.exchange("/v1/process-instances/{processInstanceId}/tasks",
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         PAGED_TASKS_RESPONSE_TYPE,
+                                         processInstance.getId());
+    }
+
     private ResponseEntity<Task> executeRequestGetTasksById(String id) {
         return testRestTemplate.exchange(TASKS_URL + "/" + id,
                 HttpMethod.GET,
@@ -1460,6 +1470,345 @@ public class QueryTasksIT {
         assertThat(responseEntity.getBody()).containsExactly("testuser");
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
         assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
+
+    }
+
+    @Test
+    public void shouldFilterTasksForDueDate() {
+        //given
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date dueDate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+
+        //set due date as current date + 1
+        dueDate.setTime(now.getTime() + Duration.ofDays(1).toMillis());
+
+        Task assignedTask1 = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task1",
+            "testuser",
+            runningProcessInstance, new Date(now.getTime() - Duration.ofDays(1).toMillis()));
+        Task assignedTask2 = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task2",
+            "testuser",
+            runningProcessInstance, dueDate);
+        Task assignedTask3 = taskEventContainedBuilder.anAssignedTaskWithDueDate("Assigned task3",
+            "testuser",
+            runningProcessInstance, new Date(dueDate.getTime() + Duration.ofDays(2).toMillis()));
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            //set check date to current date
+            Date fromDate = now;
+            // to date, from date plus 2 days
+            Date toDate = new Date(dueDate.getTime() + Duration.ofDays(1).toMillis());
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?dueDateFrom=" + sdf.format(fromDate) + "&dueDateTo=" +
+                        sdf.format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getName)
+                .containsExactly(assignedTask2.getName());
+
+
+        });
+
+        await().untilAsserted(() -> {
+            //check for specific due date
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?dueDate=" + sdf.format(dueDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getName)
+                .containsExactly(assignedTask2.getName());
+
+
+        });
+
+    }
+
+    @Test
+    public void should_getTask_when_queryFilteredByProcessDefinitionName() {
+        //given
+        Task task1 = taskEventContainedBuilder.aCreatedTask("Task1",
+            runningProcessInstance);
+
+        Task task2 = taskEventContainedBuilder.aCreatedTask("Task2", null);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getId)
+                .contains(task1.getId(), task2.getId());
+        });
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?processDefinitionName={processDefinitionName}",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    "my-proc-definition-name");
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getId)
+                .containsExactly(task1.getId());
+        });
+
+    }
+
+    @Test
+    public void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance() {
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+                                                                      "testuser",
+                                                                      runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.iterator().next())
+                .extracting(Task::getName, Task::getCandidateUsers, Task::getCandidateGroups)
+                .contains(task1.getName(), Collections.singletonList("testuser"), Collections.emptyList());
+        });
+    }
+
+    @Test
+    public void shouldFilterTasksForCompletedBy() {
+
+        //Given
+        String completedByFirstUser = "hruser1";
+        String completedBySecondUser = "userXyz";
+
+        Task assignedTask = taskEventContainedBuilder
+            .aCompletedTaskWithCompletedBy("Assigned task1",
+                runningProcessInstance, completedByFirstUser);
+        taskEventContainedBuilder
+            .aCompletedTaskWithCompletedBy("Assigned task2",
+                runningProcessInstance, completedBySecondUser);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //check for specific completed by value
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?completedBy=" + completedByFirstUser,
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getCompletedBy)
+                .containsExactly(assignedTask.getCompletedBy());
+
+        });
+
+
+    }
+
+    @Test
+    public void should_getTask_when_queryFilteredByPriority() {
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithPriority("Task1", 20, runningProcessInstance);
+
+        taskEventContainedBuilder.aTaskWithPriority("Task2", 30, runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?priority={priority}",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    "20");
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId)
+                    .containsExactly(task1.getId());
+        });
+
+    }
+
+    @Test
+    public void shouldGetTaskListFilteredByCompletedDate() {
+        //given
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date completedDateToday = new Date();
+        Date completedDateTwoDaysAgo = new Date();
+        Date completedDateFiveDaysAfter = new Date();
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+
+        //Start a Task and set it's completed date as current date
+        completedDateToday.setTime(now.getTime());
+        Task task1 = taskEventContainedBuilder.aCompletedTaskWithCompletionDate("Task1", runningProcessInstance, completedDateToday);
+
+        //Start a Task and set it's completed date as current date minus two days
+        completedDateTwoDaysAgo.setTime(now.getTime() - Duration.ofDays(2).toMillis());
+        taskEventContainedBuilder.aCompletedTaskWithCompletionDate("Task2", runningProcessInstance, completedDateTwoDaysAgo);
+
+        //Start a Task and set it's completed date as current date plus five days
+        completedDateFiveDaysAfter.setTime(now.getTime() + Duration.ofDays(5).toMillis());
+        taskEventContainedBuilder.aCompletedTaskWithCompletionDate("Task3", runningProcessInstance, completedDateFiveDaysAfter);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            //set from date to yesterday date
+            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
+            // to date, from date plus 2 days
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" +
+                        sdf.format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<Task> filteredTaskEntities = responseEntity.getBody().getContent();
+            assertThat(filteredTaskEntities)
+                .extracting(Task::getId)
+                .containsExactly(task1.getId());
+        });
+    }
+
+    @Test
+    public void shouldFilterTasksBySingleCandidateGroupIdOrListOfCandidateGroupIds() {
+
+        //given
+        Task firstTaskWithCandidateGroupInFilter = taskEventContainedBuilder
+            .aTaskWithGroupCandidate("task one",
+                "testgroup",
+                runningProcessInstance);
+        Task taskWithCandidateGroupNotInFilter = taskEventContainedBuilder
+            .aTaskWithGroupCandidate("task two",
+                "testgroup2",
+                runningProcessInstance);
+        Task secondTaskWithCandidateGroupInFilter = taskEventContainedBuilder
+            .aTaskWithTwoGroupCandidates("task three",
+                "hrgroup", "testgroup4",
+                runningProcessInstance, "testuser");
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        //query for single candidate groudId
+        await().untilAsserted(() -> {
+
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?candidateGroupId=testgroup",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getId)
+                .containsExactly(firstTaskWithCandidateGroupInFilter.getId());
+        });
+
+        //query for multiple candidate groudIds
+        await().untilAsserted(() -> {
+
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?candidateGroupId=testgroup,hrgroup",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getId)
+                .containsExactly(firstTaskWithCandidateGroupInFilter.getId(),
+                    secondTaskWithCandidateGroupInFilter.getId());
+        });
 
     }
 

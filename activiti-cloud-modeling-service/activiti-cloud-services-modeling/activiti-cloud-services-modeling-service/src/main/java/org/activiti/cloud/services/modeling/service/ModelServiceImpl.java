@@ -33,7 +33,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import javax.xml.stream.XMLStreamException;
@@ -44,6 +46,7 @@ import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.process.ModelScope;
@@ -64,6 +67,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 
@@ -90,20 +94,27 @@ public class ModelServiceImpl implements ModelService{
 
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
+    private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
+
     @Autowired
     public ModelServiceImpl(ModelRepository modelRepository,
                             ModelTypeService modelTypeService,
                             ModelContentService modelContentService,
                             ModelExtensionsService modelExtensionsService,
                             JsonConverter<Model> jsonConverter,
-                            ProcessModelContentConverter processModelContentConverter) {
+                            ProcessModelContentConverter processModelContentConverter,
+                            Set<ModelUpdateListener> modelUpdateListeners) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
         this.jsonConverter = jsonConverter;
         this.modelExtensionsService = modelExtensionsService;
         this.processModelContentConverter = processModelContentConverter;
+        modelUpdateListenersMapByModelType = modelUpdateListeners
+            .stream()
+            .collect(Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName()));
     }
+
 
     @Override
     public List<Model> getAllModels(Project project) {
@@ -166,7 +177,7 @@ public class ModelServiceImpl implements ModelService{
             model.setScope(ModelScope.PROJECT);
         }
 
-        if(ModelScope.PROJECT.equals(model.getScope()) && model.getProjects()!=null && model.getProjects().size()>1){
+        if(ModelScope.PROJECT.equals(model.getScope()) && model.hasMultipleProjects()){
             throw new ModelScopeIntegrityException(
                 "A model at PROJECT scope can only be associated to one project");
         }
@@ -175,10 +186,13 @@ public class ModelServiceImpl implements ModelService{
     @Override
     public Model updateModel(Model modelToBeUpdated,
                              Model newModel) {
-        if(newModel.getProjects()!= null && !newModel.getProjects().isEmpty()){
+        if(newModel.hasProjects()){
             newModel.getProjects().stream().forEach(project -> checkIfModelNameExistsInProject((Project) project,newModel));
         }
         checkModelScopeIntegrity(newModel);
+
+        findModelUpdateListeners(modelToBeUpdated.getType()).stream().forEach(listener -> listener.execute(modelToBeUpdated, newModel));
+
         return modelRepository.updateModel(modelToBeUpdated,
                                            newModel);
     }
@@ -437,16 +451,25 @@ public class ModelServiceImpl implements ModelService{
     @Override
     public void validateModelContent(Model model,
                                      FileContent fileContent) {
-        ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
-                ? EMPTY_CONTEXT
-                : createValidationContext(model);
-
+        ValidationContext validationContext = getValidationContext(model, fileContent, null);
         validateModelContent(model.getType(),
                              fileContent.getFileContent(),
                              validationContext);
     }
 
 
+
+    private ValidationContext getValidationContext(Model model, FileContent fileContent, @Nullable Project project) {
+        if (!modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)) {
+            return EMPTY_CONTEXT;
+        }
+
+        if(project != null) {
+            return Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+        }
+
+        return createValidationContext(model);
+    }
 
     private ValidationContext createValidationContext(Project project) {
         return new ProjectValidationContext(getAllModels(project));
@@ -469,13 +492,39 @@ public class ModelServiceImpl implements ModelService{
     public void validateModelContent(Model model,
                                      FileContent fileContent,
                                      Project project) {
-        ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
-            ? EMPTY_CONTEXT
-            : Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+        ValidationContext validationContext = getValidationContext(model, fileContent, project);
 
         validateModelContent(model.getType(),
             fileContent.getFileContent(),
             validationContext);
+    }
+
+    @Override
+    public void validateModelContent(Model model,
+                                     FileContent fileContent,
+                                     Project project,
+                                     boolean validateUsage) {
+        if(validateUsage) {
+            validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, project));
+        } else {
+            this.validateModelContent(model, fileContent, project);
+        }
+    }
+
+    @Override
+    public void validateModelContent(Model model, FileContent fileContent, boolean validateUsage) {
+        if(validateUsage) {
+            validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, null));
+        } else {
+            this.validateModelContent(model, fileContent);
+        }
+    }
+
+    private void validateModelContentAndUsage(Model model,
+                                              byte[] modelContent,
+                                              ValidationContext validationContext) {
+        emptyIfNull(modelContentService.findModelValidators(model.getType())).stream().forEach(modelValidator -> modelValidator.validateModelContent(model, modelContent,
+            validationContext, true));
     }
 
     private void validateModelContent(String modelType,
@@ -549,5 +598,11 @@ public class ModelServiceImpl implements ModelService{
         return Optional.ofNullable(model.getType()).flatMap(modelTypeService::findModelTypeByName)
                 .orElseThrow(() -> new UnknownModelTypeException("Unknown model type: " + model.getType()));
     }
+
+    @Override
+    public List<ModelUpdateListener> findModelUpdateListeners(String modelType) {
+        return (List<ModelUpdateListener>) emptyIfNull(modelUpdateListenersMapByModelType.get(modelType));
+    }
+
 
 }

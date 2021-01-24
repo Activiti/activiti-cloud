@@ -24,9 +24,11 @@ import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.TaskQueryService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.CollectionModel;
 
@@ -39,9 +41,13 @@ public class TaskQuerySteps {
     @Autowired
     private TaskQueryService taskQueryService;
 
+    @Autowired
+    @Qualifier("queryBaseService")
+    private BaseService baseService;
+
     @Step
     public void checkServicesHealth() {
-        assertThat(taskQueryService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
 
     @Step

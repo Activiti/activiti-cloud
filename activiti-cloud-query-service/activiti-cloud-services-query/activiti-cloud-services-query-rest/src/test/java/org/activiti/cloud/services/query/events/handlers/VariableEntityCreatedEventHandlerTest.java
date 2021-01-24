@@ -88,12 +88,14 @@ public class VariableEntityCreatedEventHandlerTest {
                 .hasProcessInstance(processInstanceEntity);
     }
 
+    private static VariableInstanceImpl<String> buildVariable() {
+        return new VariableInstanceImpl<>("var", "string", "v1", "procInstId", null);
+    }
+
     @Test
     public void handleShouldCreateAndStoreTaskVariable() {
         //given
-        VariableInstanceImpl<String> variableInstance = buildVariable();
-        variableInstance.setTaskId(UUID.randomUUID().toString());
-        CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(variableInstance);
+        CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariableWithTaskId());
 
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
         when(entityManager.getReference(ProcessInstanceEntity.class,
@@ -123,11 +125,8 @@ public class VariableEntityCreatedEventHandlerTest {
                 .hasProcessInstance(processInstanceEntity);
     }
 
-    private VariableInstanceImpl<String> buildVariable() {
-        return new VariableInstanceImpl<>("var",
-                                          "string",
-                                          "v1",
-                                          UUID.randomUUID().toString());
+    private static VariableInstanceImpl<String> buildVariableWithTaskId() {
+        return new VariableInstanceImpl<>("var", "string", "v1", "procInstId", "taskId");
     }
 
     @Test

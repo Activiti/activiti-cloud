@@ -28,7 +28,11 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,51 +41,58 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = "/v1/process-instances", produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public interface ProcessInstanceController {
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping()
     PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(Pageable pageable);
 
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping(headers = "Content-type=application/json")
     EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload cmd);
 
-    @RequestMapping(value = "/{processInstanceId}/start", method = RequestMethod.POST)
-    EntityModel<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId,
-                                                          @RequestBody(required = false) StartProcessPayload payload);
+    @PostMapping(value = "/{processInstanceId}/start",
+        headers = "Content-type=application/json")
+    EntityModel<CloudProcessInstance> startCreatedProcess(@PathVariable(value = "processInstanceId") String processInstanceId,
+        @RequestBody(required = false) StartProcessPayload payload);
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PostMapping(value = "/create",
+        headers = "Content-type=application/json")
     EntityModel<CloudProcessInstance> createProcessInstance(@RequestBody CreateProcessInstancePayload cmd);
 
-    @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId);
+    @GetMapping(value = "/{processInstanceId}")
+    EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable(value = "processInstanceId") String processInstanceId);
 
-    @RequestMapping(value = "/{processInstanceId}/model",
-            method = RequestMethod.GET,
-            produces = "image/svg+xml")
+    @GetMapping(value = "/{processInstanceId}/model",
+        produces = "image/svg+xml")
     @ResponseBody
-    String getProcessDiagram(@PathVariable String processInstanceId);
+    String getProcessDiagram(@PathVariable(value = "processInstanceId") String processInstanceId);
 
-    @RequestMapping(value = "/signal", method = RequestMethod.POST)
+    @PostMapping(value = "/signal",
+        headers = "Content-type=application/json")
     ResponseEntity<Void> sendSignal(@RequestBody SignalPayload signalPayload);
 
-    @RequestMapping(value = "/message", method = RequestMethod.POST)
+    @PostMapping(value = "/message",
+        headers = "Content-type=application/json")
     EntityModel<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload);
 
-    @RequestMapping(value = "/message", method = RequestMethod.PUT)
+    @PutMapping(value = "/message",
+        headers = "Content-type=application/json")
     ResponseEntity<Void> receive(@RequestBody ReceiveMessagePayload receiveMessagePayload);
 
-    @RequestMapping(value = "{processInstanceId}/suspend", method = RequestMethod.POST)
-    EntityModel<CloudProcessInstance> suspend(@PathVariable String processInstanceId);
+    @PostMapping(value = "/{processInstanceId}/suspend",
+        headers = "Content-type=application/json")
+    EntityModel<CloudProcessInstance> suspend(@PathVariable(value = "processInstanceId") String processInstanceId);
 
-    @RequestMapping(value = "{processInstanceId}/resume", method = RequestMethod.POST)
-    EntityModel<CloudProcessInstance> resume(@PathVariable String processInstanceId);
+    @PostMapping(value = "/{processInstanceId}/resume",
+        headers = "Content-type=application/json")
+    EntityModel<CloudProcessInstance> resume(@PathVariable(value = "processInstanceId") String processInstanceId);
 
-    @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
-    EntityModel<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId);
+    @DeleteMapping(value = "/{processInstanceId}")
+    EntityModel<CloudProcessInstance> deleteProcessInstance(@PathVariable(value = "processInstanceId") String processInstanceId);
 
-    @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)
-    EntityModel<CloudProcessInstance> updateProcess(@PathVariable("processInstanceId") String processInstanceId,
-                                    @RequestBody UpdateProcessPayload payload);
+    @PutMapping(value = "/{processInstanceId}",
+        headers = "Content-type=application/json")
+    EntityModel<CloudProcessInstance> updateProcess(@PathVariable(value = "processInstanceId") String processInstanceId,
+        @RequestBody UpdateProcessPayload payload);
 
-    @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
-    PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable("processInstanceId") String processInstanceId,
-                                                         Pageable pageable);
+    @GetMapping(value = "/{processInstanceId}/subprocesses")
+    PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable(value = "processInstanceId") String processInstanceId,
+        Pageable pageable);
 }

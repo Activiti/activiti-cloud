@@ -21,8 +21,8 @@ import org.activiti.bpmn.model.Signal;
 import org.activiti.bpmn.model.SignalEventDefinition;
 import org.activiti.bpmn.model.ThrowEvent;
 import org.activiti.engine.impl.bpmn.behavior.IntermediateThrowSignalEventActivityBehavior;
+import org.activiti.engine.impl.bpmn.behavior.VariablesCalculator;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
-import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.spring.process.ProcessVariablesInitiator;
 import org.springframework.context.ApplicationContext;
 
@@ -31,10 +31,10 @@ public class CloudActivityBehaviorFactory extends MappingAwareActivityBehaviorFa
     private ApplicationContext applicationContext;
 
     public CloudActivityBehaviorFactory(ApplicationContext applicationContext,
-                                        VariablesMappingProvider variablesMappingProvider,
+                                        VariablesCalculator variablesCalculator,
                                         ProcessVariablesInitiator processVariablesInitiator
                                         ) {
-        super(variablesMappingProvider, processVariablesInitiator);
+        super(variablesCalculator, processVariablesInitiator);
         this.applicationContext = applicationContext;
     }
 
@@ -42,7 +42,6 @@ public class CloudActivityBehaviorFactory extends MappingAwareActivityBehaviorFa
     public IntermediateThrowSignalEventActivityBehavior createIntermediateThrowSignalEventActivityBehavior(ThrowEvent throwEvent,
                                                                                                            SignalEventDefinition signalEventDefinition,
                                                                                                            Signal signal) {
-        
         return (IntermediateThrowSignalEventActivityBehavior) applicationContext.getBean(DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME, applicationContext, signalEventDefinition, signal);
     }
 }

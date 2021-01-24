@@ -39,7 +39,7 @@ import org.springframework.messaging.Message;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.TopicProcessor;
+import reactor.extra.processor.TopicProcessor;
 
 /**
  * Notification Gateway configuration that enables messaging channel bindings
@@ -51,7 +51,7 @@ import reactor.core.publisher.TopicProcessor;
 @EnableConfigurationProperties(EngineEventsConsumerProperties.class)
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.notifications.graphql.events.enabled", matchIfMissing = true)
 @PropertySources({
-    @PropertySource(value = "classpath:META-INF/graphql-events.properties"), 
+    @PropertySource(value = "classpath:META-INF/graphql-events.properties"),
     @PropertySource(value = "classpath:graphql-events.properties", ignoreResourceNotFound = true)
 })
 public class EngineEventsConsumerAutoConfiguration {
@@ -88,7 +88,7 @@ public class EngineEventsConsumerAutoConfiguration {
         }
 
     }
-    
+
     @Configuration
     public static class EngineEventsFluxProcessorConfiguration implements SmartLifecycle {
 
@@ -142,5 +142,5 @@ public class EngineEventsConsumerAutoConfiguration {
             return running;
         }
     }
-    
+
 }

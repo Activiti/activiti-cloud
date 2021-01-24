@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Arrays;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -295,6 +296,24 @@ public class TasksIT {
 
         //then
         assertThat(subTasks.getContent()).extracting(CloudTask::getId).containsExactly(subTask.getId());
+    }
+
+    @Test
+    public void should_createTaskWithDueDateUsingFormatWithMilliSeconds() {
+        //given
+        String dueDateAsString = "2020-06-22T15:26:50.936Z";
+
+        Map<String, Object> payloadAsMap = new HashMap<>();
+        payloadAsMap.put("payloadType", "CreateTaskPayload");
+        payloadAsMap.put("name", "My task");
+        payloadAsMap.put("dueDate", dueDateAsString);
+
+        //when
+        CloudTask createdTask = taskRestTemplate.createTask(payloadAsMap);
+
+        //then
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getDueDate()).isEqualTo(dueDateAsString);
     }
 
     @Test
@@ -721,5 +740,27 @@ public class TasksIT {
         processInstanceRestTemplate.delete(processInstanceEntity);
     }
 
+    @Test
+    public void userShouldAssignCandidate() {
+        //given
+        CloudTask standaloneTask = taskRestTemplate.createTask(TaskPayloadBuilder.create()
+                .withName("task")
+                .withCandidateUsers(Arrays.asList("hruser", "testuser"))
+                .build());
+        taskRestTemplate.claim(standaloneTask);
+        
+        //when
+        AssignTaskPayload assignTaskPayload = TaskPayloadBuilder
+                .assign()
+                .withTaskId(standaloneTask.getId())
+                .withAssignee("testuser")
+                .build();
 
+        ResponseEntity<CloudTask> assignResponseEntity = taskRestTemplate.userAssignTask(assignTaskPayload);
+
+        //then
+        assertThat(assignResponseEntity).isNotNull();
+        assertThat(assignResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(assignResponseEntity.getBody().getAssignee()).isEqualTo("testuser");
+    }
 }

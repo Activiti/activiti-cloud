@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -107,10 +108,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   processModel.getId())
@@ -125,10 +123,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate",
@@ -235,10 +230,7 @@ public class ModelValidationControllerIT {
     @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidName() throws Exception {
         byte[] validContent = resourceAsByteArray("process/invalid-process-name.bpmn20.xml");
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(processModel,
                                                       resourceAsByteArray("process/invalid-process-name.bpmn20.xml"));
 
@@ -259,6 +251,210 @@ public class ModelValidationControllerIT {
                                 "DNS name validator"));
     }
 
+    private Model createModel(byte[] processContent) {
+        ProjectEntity project = (ProjectEntity) projectRepository
+            .createProject(project("project-test"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(processContent);
+        return modelRepository.createModel(generatedProcess);
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithEmptyCallActivity() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/call-activity-with-no-call-element.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/call-activity-with-no-call-element.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(2)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getValidatorSetName)
+                .contains(tuple("Call activity element must reference a process id present in the current project.",
+                                "Invalid call activity reference validator."),
+                          tuple("No call element found for call activity 'Task_1mbp1v0' in process 'process-1722e83c-8f2f-4ddb-85bd-563ef87d279e'",
+                                "Call activity must have a call element validator."));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidSequenceFlow() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/invalid-sequence-flow.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/invalid-sequence-flow.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getReferenceId)
+                .contains(tuple("Sequence flow has no source reference", "sid-75BFD70C-7949-441E-B85A-11C29A9BA0CD"),
+                          tuple("Sequence flow has no target reference", "sid-75BFD70C-7949-441E-B85A-11C29A9BA0CD"));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithInvalidFlow() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/invalid-flows.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/invalid-flows.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getValidatorSetName,
+                            ModelValidationError::getReferenceId)
+                .contains(tuple("Start event has no outgoing flow",
+                                "BPMN Start event validator",
+                                "StartEvent_16jstbd"),
+                          tuple("Start event should not have incoming flow",
+                                "BPMN Start event validator",
+                                "StartEvent_16jstbd"),
+                          tuple("End event has no incoming flow",
+                                "BPMN End event validator",
+                                "EndEvent_0amu64a"),
+                          tuple("Flow node has no incoming flow",
+                                "BPMN Intermediate Flow node validator",
+                                "Task_0w8xho6"));
+    }
+
+    @Test
+    public void should_returnSuccessful_when_validatingProcessModelWithEventSubProcess() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/valid-event-subprocess.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/valid-event-subprocess.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithEmbeddedSubProcessWithoutIncomingAndOutgoingFlows() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/invalid-embedded-sub-process.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+            resourceAsByteArray("process/invalid-embedded-sub-process.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+            processModel.getId())
+            .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getReferenceId)
+            .contains(tuple("Flow node has no incoming flow", "SubProcess_1j83p8h"),
+                      tuple("Flow node has no outgoing flow", "SubProcess_1j83p8h"));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithoutEndEvent() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/process-without-end-event.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+            resourceAsByteArray("process/process-without-end-event.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+            processModel.getId())
+            .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getReferenceId)
+            .contains(tuple("Flow node has no outgoing flow",
+                            "Flow node [name: 'TestTaskName', id: 'TestTaskId'] has to have an outgoing flow",
+                            "TestTaskId"));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidCallActivityVariable() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(1)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getValidatorSetName)
+                .contains(tuple("Call activity element must reference a process id present in the current project.",
+                                "Invalid call activity reference validator."));
+    }
+
+    @Test
+    public void should_returnSuccessful_when_validatingProcessModelWithValidCallActivityElement() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/RankMovie.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/call-activity-with-valid-call-element.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+        resultActions.andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void should_returnSuccessful_when_validatingProcessModelWithValidCallActivityVariable() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/call-activity-with-valid-variable-reference.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/call-activity-with-valid-variable-reference.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().is2xxSuccessful());
+    }
+
     @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidMappingContent() throws Exception {
 
@@ -277,24 +473,20 @@ public class ModelValidationControllerIT {
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-                .isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: #: only 0 subschema matches out of 2");
+                .isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: 2 schema violations found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
 
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-                .hasSize(4)
+                .hasSize(2)
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
                 .containsOnly(tuple("extraneous key [inputds] is not permitted",
                                     "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [inputds] is not permitted"),
                               tuple("extraneous key [outputss] is not permitted",
-                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"),
-                              tuple("required key [inputs] not found",
-                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: required key [inputs] not found"),
-                              tuple("required key [outputs] not found",
-                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: required key [outputs] not found"));
+                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"));
     }
 
     @Test
@@ -517,10 +709,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate",
@@ -546,10 +735,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate",
@@ -566,10 +752,7 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        ModelEntity generatedProcess = processModel(project, "process-model");
-        generatedProcess.setContent(validContent);
-        Model processModel = modelRepository.createModel(generatedProcess);
+        Model processModel = createModel(validContent);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate",

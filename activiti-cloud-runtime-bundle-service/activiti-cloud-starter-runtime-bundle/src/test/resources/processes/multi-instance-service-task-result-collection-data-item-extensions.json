@@ -1,0 +1,30 @@
+{
+  "id":"multi-instance-service-task-result-collection-data-item-model",
+  "name":"multi-instance-service-task-result-collection-data-item",
+  "extensions": {
+    "multi-instance-service-task-result-collection-data-item": {
+      "properties": {
+        "age-id": {
+          "id": "age-id",
+          "name": "age",
+          "type": "integer",
+          "value": 20
+        },
+        "name-id": {
+          "id": "name-id",
+          "name": "name",
+          "type": "string",
+          "value": "inName"
+        }
+      },
+      "mappings": {
+        "serviceTask": {
+          "inputs": {
+          },
+          "outputs": {
+          }
+        }
+      }
+    }
+  }
+}

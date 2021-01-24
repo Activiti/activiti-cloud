@@ -1,0 +1,21 @@
+{
+  "id": "callSimpleSubProcessModel",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "callSimpleSubProcess": {
+      "properties": {},
+      "mappings": {
+        "taskBeforeSubProcess": {
+          "mappingType": "MAP_ALL"
+        },
+        "callSubProcess": {
+          "mappingType": "MAP_ALL"
+        },
+        "taskAfterSubProcess": {
+          "mappingType": "MAP_ALL"
+        }
+      },
+      "constants": {}
+    }
+  }
+}

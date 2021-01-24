@@ -26,8 +26,10 @@ import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
 import org.springframework.messaging.Message;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+@Transactional
 public class MessageProducerCommandContextCloseListener implements CommandContextCloseListener {
 
     public static final String PROCESS_ENGINE_EVENTS = "processEngineEvents";
@@ -35,7 +37,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    
+
     public MessageProducerCommandContextCloseListener(ProcessEngineChannels producer,
             MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory,
             RuntimeBundleInfoAppender runtimeBundleInfoAppender ) {
@@ -50,14 +52,14 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         this.messageBuilderChainFactory = messageBuilderChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
-    
+
     @Override
     public void closed(CommandContext commandContext) {
         List<CloudRuntimeEvent<?, ?>> events = commandContext.getGenericAttribute(PROCESS_ENGINE_EVENTS);
-        
+
         if (events != null && !events.isEmpty()) {
 
-            // Add runtime bundle context attributes to every event 
+            // Add runtime bundle context attributes to every event
             CloudRuntimeEvent<?, ?>[] payload = events.stream()
                                                       .filter(CloudRuntimeEventImpl.class::isInstance)
                                                       .map(CloudRuntimeEventImpl.class::cast)

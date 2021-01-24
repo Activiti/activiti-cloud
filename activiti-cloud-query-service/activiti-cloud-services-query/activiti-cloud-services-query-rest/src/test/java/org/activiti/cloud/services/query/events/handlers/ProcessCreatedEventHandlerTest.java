@@ -66,7 +66,8 @@ public class ProcessCreatedEventHandlerTest {
                 .hasServiceName(event.getServiceName())
                 .hasProcessDefinitionKey(event.getEntity().getProcessDefinitionKey())
                 .hasStatus(ProcessInstance.ProcessInstanceStatus.CREATED)
-                .hasName(event.getEntity().getName());
+                .hasName(event.getEntity().getName())
+                .hasProcessDefinitionName(event.getEntity().getProcessDefinitionName());
     }
 
     private CloudProcessCreatedEvent buildProcessCreatedEvent() {

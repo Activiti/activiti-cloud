@@ -17,6 +17,7 @@
     <module>activiti-cloud-audit-dependencies</module>
     <module>activiti-cloud-services-audit-api</module>
     <module>activiti-cloud-services-audit-jpa</module>
+    <module>activiti-cloud-services-audit-liquibase</module>
     <module>activiti-cloud-starter-audit</module>
   </modules>
   <dependencyManagement>
