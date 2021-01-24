@@ -16,6 +16,7 @@
 package org.activiti.services.connectors.channel;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.activiti.api.process.model.IntegrationContext;
@@ -93,10 +94,14 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
                 if(CloudBpmnError.class.getName().equals(errorClassName)) {
                     if(execution.getActivityId().equals(clientId)) {
-                        CloudBpmnError cloudBpmnError = new CloudBpmnError(integrationError.getErrorMessage());
+                        // Fallback to error message for backward compatibility
+                        String errorCode = Optional.ofNullable(integrationError.getErrorCode())
+                                                   .orElse(integrationError.getErrorMessage());
+
+                        CloudBpmnError cloudBpmnError = new CloudBpmnError(errorCode,
+                                                                           integrationError.getErrorMessage());
                         cloudBpmnError.setStackTrace(integrationError.getStackTraceElements()
                                                                      .toArray(new StackTraceElement[] {}));
-
                         try {
                             managementService.executeCommand(new PropagateCloudBpmnErrorCmd(cloudBpmnError,
                                                                                             execution));
@@ -125,6 +130,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
     private void sendAuditMessage(IntegrationError integrationError) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationErrorReceivedEventImpl integrationErrorReceived = new CloudIntegrationErrorReceivedEventImpl(integrationError.getIntegrationContext(),
+                                                                                                                         integrationError.getErrorCode(),
                                                                                                                          integrationError.getErrorMessage(),
                                                                                                                          integrationError.getErrorClassName(),
                                                                                                                          integrationError.getStackTraceElements());

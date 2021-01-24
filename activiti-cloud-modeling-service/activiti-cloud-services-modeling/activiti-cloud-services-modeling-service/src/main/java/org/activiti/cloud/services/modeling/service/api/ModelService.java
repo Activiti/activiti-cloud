@@ -23,6 +23,7 @@ import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -113,11 +114,20 @@ public interface ModelService {
 
     void validateModelContent(Model model,
                               FileContent fileContent,
+                              boolean validateUsage);
+
+    void validateModelContent(Model model,
+                              FileContent fileContent,
                               ValidationContext validationContext);
 
     void validateModelContent(Model model,
                               FileContent fileContent,
                               Project project);
+
+    void validateModelContent(Model model,
+                              FileContent fileContent,
+                              Project project,
+                              boolean validateUsage);
 
     void validateModelExtensions(Model model,
                                  ValidationContext validationContext);
@@ -139,6 +149,8 @@ public interface ModelService {
     Page<Model> getGlobalModels(ModelType modelType,
                                 boolean includeOrphans,
                                 Pageable pageable);
+
+    public List<ModelUpdateListener> findModelUpdateListeners(String modelType);
 
     public static class ProjectAccessControl {
 

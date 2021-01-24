@@ -16,14 +16,15 @@
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,15 +39,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.websocket.Session;
 
-import graphql.ExecutionResult;
-import graphql.ExecutionResultImpl;
-import graphql.GraphQLError;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerChannelSubscriber;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerMessageHandler;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubscriptionRegistry;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSubscriptionExecutor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,6 +62,10 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
+
+import graphql.ExecutionResult;
+import graphql.ExecutionResultImpl;
+import graphql.GraphQLError;
 import reactor.core.Disposable;
 import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
@@ -204,12 +202,13 @@ public class GraphQLBrokerMessageHandlerTest {
     @Test
     public void testHandleStartMessageBrokerAvailableSendsData() throws InterruptedException {
         // given
+        Integer count = 100;
         Message<GraphQLMessage> message = startMessage("operationId", "sess1");
         CountDownLatch completeLatch = new CountDownLatch(1);
 
         // Simulate stomp relay  subscription stream
-        Flux<ExecutionResult> mockStompRelayObservable = Flux.interval(Duration.ZERO, Duration.ofMillis(20))
-                                                             .take(100)
+        Flux<ExecutionResult> mockStompRelayObservable = Flux.interval(Duration.ofSeconds(1), Duration.ofMillis(10))
+                                                             .take(count)
                                                              .map(i -> {
                                                                  Map<String, Object> data = new HashMap<>();
                                                                  data.put("key", i);
@@ -219,7 +218,7 @@ public class GraphQLBrokerMessageHandlerTest {
                                                              });
 
         StepVerifier observable = StepVerifier.create(mockStompRelayObservable)
-                .expectNextCount(100)
+                .expectNextCount(count)
                 .expectComplete();
 
         ExecutionResult executionResult = stubExecutionResult(mockStompRelayObservable, completeLatch);
@@ -234,11 +233,13 @@ public class GraphQLBrokerMessageHandlerTest {
         assertThat(completeLatch.await(2000, TimeUnit.MILLISECONDS)).isTrue();
 
         // then get last message
-        verify(this.clientOutboundChannel, atLeast(99)).send(this.messageCaptor.capture());
+        await().untilAsserted(() -> {
+            verify(this.clientOutboundChannel, times(count+1)).send(this.messageCaptor.capture());
 
-        GraphQLMessage completeMessage = messageCaptor.getValue().getPayload();
+            GraphQLMessage completeMessage = messageCaptor.getValue().getPayload();
 
-        assertThat(completeMessage.getType()).isEqualTo(GraphQLMessageType.COMPLETE);
+            assertThat(completeMessage.getType()).isEqualTo(GraphQLMessageType.COMPLETE);
+        });
     }
 
     @Test

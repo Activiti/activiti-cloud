@@ -15,19 +15,20 @@
  */
 package org.activiti.cloud.acc.shared.service;
 
-import feign.Headers;
-import feign.RequestLine;
 
 import java.util.Map;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 
 public interface BaseService {
 
-    @RequestLine("GET /actuator/health")
-    @Headers("Content-Type: application/json")
+    @GetMapping(value = "/actuator/health",
+        produces = MediaType.APPLICATION_JSON_VALUE,
+        consumes = MediaType.APPLICATION_JSON_VALUE)
     Map<String, Object> health();
 
     default boolean isServiceUp() {
-        Map<String, Object> appInfo = null;
+        Map<String, Object> appInfo;
         try {
             appInfo = health();
         } catch (Exception ex) {

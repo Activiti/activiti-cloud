@@ -40,7 +40,7 @@ public class ToCloudVariableEventConverter {
     }
 
     public CloudVariableUpdatedEvent from(VariableUpdatedEvent event) {
-        CloudVariableUpdatedEventImpl cloudEvent = new CloudVariableUpdatedEventImpl(event.getEntity());
+        CloudVariableUpdatedEventImpl cloudEvent = new CloudVariableUpdatedEventImpl<>(event.getEntity(), event.getPreviousValue());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }

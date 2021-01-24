@@ -48,6 +48,20 @@ public interface ModelValidationErrorProducer {
                                           errorCode);
     }
 
+    default ModelValidationError createModelValidationError(String problem,
+                                                            String description,
+                                                            String schema,
+                                                            String errorCode,
+                                                            String referenceId) {
+        ModelValidationError validationError = createModelValidationError(false,
+            problem,
+            description,
+            schema,
+            errorCode);
+        validationError.setReferenceId(referenceId);
+        return validationError;
+    }
+
     default ModelValidationError createModelValidationError(boolean warning,
                                                             String problem,
                                                             String description,

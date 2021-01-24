@@ -50,7 +50,7 @@ public class VariableEntityUpdatedEventHandlerTest {
     @Test
     public void handleShouldUseProcessVariableUpdateHandlerWhenNoTaskId() {
         //given
-        CloudVariableUpdatedEventImpl event = new CloudVariableUpdatedEventImpl(buildVariable());
+        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(buildVariable(), "v0");
         event.setServiceName("runtime-bundle-a");
 
         //when
@@ -69,19 +69,17 @@ public class VariableEntityUpdatedEventHandlerTest {
                 .hasType("string");
     }
 
-    private VariableInstanceImpl<String> buildVariable() {
+    private static VariableInstanceImpl<String> buildVariable() {
         return new VariableInstanceImpl<>("var",
                                           "string",
                                           "v1",
-                                          "10");
+                                          "10", null);
     }
 
     @Test
     public void handleShouldUseTaskVariableUpdateHandlerWhenTaskIdIsSet() {
         //given
-        VariableInstanceImpl<String> variableInstance = buildVariable();
-        variableInstance.setTaskId("20");
-        CloudVariableUpdatedEventImpl event = new CloudVariableUpdatedEventImpl(variableInstance);
+        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(buildVariableWithTaskId(), "v0");
         event.setServiceName("runtime-bundle-a");
 
         //when
@@ -98,6 +96,10 @@ public class VariableEntityUpdatedEventHandlerTest {
                 .hasValue("v1")
                 .hasServiceName("runtime-bundle-a")
                 .hasType("string");
+    }
+
+    private static VariableInstanceImpl<String> buildVariableWithTaskId() {
+        return new VariableInstanceImpl<>("var", "string", "v1", "10", "20");
     }
 
     @Test

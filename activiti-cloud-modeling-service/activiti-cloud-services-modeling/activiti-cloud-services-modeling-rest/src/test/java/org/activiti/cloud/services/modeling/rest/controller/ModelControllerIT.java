@@ -532,7 +532,60 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void should_thowBadRequestException_when_validatingProcessExtensionsWithInvalidMappingContent() throws Exception {
+    public void should_returnStatusNoContent_when_validatingProcessExtensionsWithValidMappingType() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+            "Process_x",
+            new Extensions(),
+            resourceAsByteArray("process/x-19022.bpmn20.xml")));
+
+        MockMultipartFile file = multipartExtensionsFile(
+            processModel,
+            resourceAsByteArray("process-extensions/valid-mappingType-extensions.json"));
+
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate/extensions",
+            processModel.getId())
+            .file(file))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void should_throwBadRequestException_when_validatingProcessExtensionsWithInvalidMappingType() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(
+            processModelWithExtensions(project,
+                "process-model",
+                new Extensions(),
+                resourceAsByteArray("process/x-19022.bpmn20.xml")));
+        MockMultipartFile file = multipartExtensionsFile(
+            processModel,
+            resourceAsByteArray("process-extensions/invalid-mappingType-extensions.json"));
+
+        final ResultActions resultActions = mockMvc
+            .perform(multipart("/v1/models/{model_id}/validate/extensions",
+                processModel.getId()).file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo("#/extensions/Process_test/mappings: 2 schema violations found");
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .hasSize(2)
+            .extracting(ModelValidationError::getProblem,
+                ModelValidationError::getDescription)
+            .containsOnly(tuple("WRONG_MAPPING_TYPE is not a valid enum value",
+                "#/extensions/Process_test/mappings/ServiceTask_06crg3b/mappingType: WRONG_MAPPING_TYPE is not a valid enum value"),
+                tuple("extraneous key [mappingTypo] is not permitted",
+                    "#/extensions/Process_test/mappings/ServiceTask_07fergb: extraneous key [mappingTypo] is not permitted"));
+
+    }
+
+    @Test
+    public void should_throwBadRequestException_when_validatingProcessExtensionsWithInvalidMappingContent() throws Exception {
 
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
         Model processModel = modelRepository.createModel(
@@ -548,24 +601,20 @@ public class ModelControllerIT {
                 .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
-        assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: #: only 0 subschema matches out of 2");
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: 2 schema violations found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
 
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-                .hasSize(4)
+                .hasSize(2)
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
                 .containsOnly(tuple("extraneous key [inputds] is not permitted",
                                     "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [inputds] is not permitted"),
                               tuple("extraneous key [outputss] is not permitted",
-                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"),
-                                tuple("required key [inputs] not found",
-                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: required key [inputs] not found"),
-                                tuple("required key [outputs] not found",
-                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: required key [outputs] not found"));
+                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"));
     }
 
     @Test
@@ -1306,5 +1355,26 @@ public class ModelControllerIT {
                 equalTo(PROCESS)))
             .andExpect(jsonPath("$.extensions",
                 notNullValue()));
+    }
+
+    @Test
+    public void should_returnConflict_when_creatingNewRelationshipWithSameModelName() throws Exception {
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project"));
+
+        Model projectContentModel = processModel(project, "model-with-same-name");
+        projectContentModel.setScope(ModelScope.PROJECT);
+        projectContentModel = (ModelEntity) modelRepository.createModel(projectContentModel);
+
+        Model globalContentModel = processModel("model-with-same-name");
+        globalContentModel.setScope(ModelScope.GLOBAL);
+        globalContentModel = (ModelEntity) modelRepository.createModel(globalContentModel);
+
+        ResultActions resultActions = mockMvc
+                .perform(put("/v1/projects/{projectId}/models/{modelId}", project.getId(), globalContentModel.getId()))
+                .andExpect(status().isConflict());
+
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+                .isEqualTo(String.format("A model with the same type already exists within the project with id: %s", project.getId()));
     }
 }

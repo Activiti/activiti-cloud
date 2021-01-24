@@ -15,7 +15,6 @@
  */
 package org.activiti.services.connectors.channel;
 
-import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,7 +44,6 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
-import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,9 +83,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Mock
-    private VariablesMappingProvider outboundVariablesProvider;
-
-    @Mock
     private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
 
     @Mock
@@ -111,7 +106,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     }
 
     @Test
-    public void receiveShouldTriggerTheExecutionAndDeleteTheRelatedIntegrationContext() {
+    public void receive_should_setVariablesTriggerExecutionAndDeleteRelatedIntegrationContext() {
         //given
         IntegrationContextEntityImpl integrationContextEntity = new IntegrationContextEntityImpl();
         integrationContextEntity.setExecutionId(EXECUTION_ID);
@@ -128,18 +123,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
 
-        given(outboundVariablesProvider.calculateOutPutVariables(buildMappingExecutionContext(PROC_DEF_ID,
-                                                                                              CLIENT_ID),
-                                                                 integrationContext.getOutBoundVariables()))
-                .willReturn(variables);
-
         //when
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
         verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
-        verify(runtimeService).trigger(EXECUTION_ID,
-                variables);
+        verify(runtimeService).setVariablesLocal(EXECUTION_ID, variables);
+        verify(runtimeService).trigger(EXECUTION_ID);
     }
 
     @Test

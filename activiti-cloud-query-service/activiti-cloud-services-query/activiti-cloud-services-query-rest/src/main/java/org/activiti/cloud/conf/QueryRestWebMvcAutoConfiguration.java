@@ -21,9 +21,12 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
+import org.activiti.cloud.services.query.rest.assembler.ApplicationRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
@@ -70,6 +73,17 @@ public class QueryRestWebMvcAutoConfiguration  {
         return new TaskRepresentationModelAssembler();
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceTaskRepresentationModelAssembler serviceTaskRepresentationModelAssembler() {
+        return new ServiceTaskRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IntegrationContextRepresentationModelAssembler integrationContextRepresentationModelAssembler() {
+        return new IntegrationContextRepresentationModelAssembler();
+    }
     @Bean
     @ConditionalOnMissingBean
     public TaskVariableRepresentationModelAssembler taskVariableRepresentationModelAssembler() {
@@ -163,5 +177,11 @@ public class QueryRestWebMvcAutoConfiguration  {
         TaskRepresentationModelAssembler taskRepresentationModelAssembler) {
         return new TaskControllerHelper(taskRepository, pagedCollectionModelAssembler,
             new QueryDslPredicateAggregator(), taskRepresentationModelAssembler);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ApplicationRepresentationModelAssembler applicationRepresentationModelAssembler() {
+        return new ApplicationRepresentationModelAssembler();
     }
 }

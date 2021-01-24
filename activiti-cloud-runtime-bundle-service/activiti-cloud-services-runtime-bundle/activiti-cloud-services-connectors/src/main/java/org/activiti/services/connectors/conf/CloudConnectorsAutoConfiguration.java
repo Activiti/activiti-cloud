@@ -27,7 +27,7 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.runtime.api.conf.ConnectorsAutoConfiguration;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
-import org.activiti.runtime.api.impl.VariablesMappingProvider;
+import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
@@ -54,20 +54,19 @@ public class CloudConnectorsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
-                                                                                             IntegrationContextService integrationContextService,
-                                                                                             ProcessEngineChannels processEngineChannels,
-                                                                                             RuntimeBundleProperties runtimeBundleProperties,
-                                                                                             RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                                                             VariablesMappingProvider outboundVariablesProvider,
-                                                                                             IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+    public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(
+        RuntimeService runtimeService,
+        IntegrationContextService integrationContextService,
+        ProcessEngineChannels processEngineChannels,
+        RuntimeBundleProperties runtimeBundleProperties,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         return new ServiceTaskIntegrationResultEventHandler(runtimeService,
                                                             integrationContextService,
                                                             processEngineChannels.auditProducer(),
                                                             runtimeBundleProperties,
                                                             runtimeBundleInfoAppender,
-                                                            outboundVariablesProvider,
-                                                            messageBuilderFactory);
+            messageBuilderFactory);
     }
 
     @Bean
@@ -113,7 +112,7 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean(name = LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME)
     public DefaultServiceTaskBehavior localServiceTaskBehavior(ApplicationContext applicationContext,
                                                                IntegrationContextBuilder integrationContextBuilder,
-                                                               VariablesMappingProvider outboundVariablesProvider) {
+                                                               ExtensionsVariablesMappingProvider outboundVariablesProvider) {
         // this bean is exposed under two different names (LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME and
         // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME) to allow MQServiceTaskBehavior
         // to use composition instead of inheritance, this will make maintenance easier as changes in constructor
@@ -132,11 +131,15 @@ public class CloudConnectorsAutoConfiguration {
                                                        ApplicationEventPublisher eventPublisher,
                                                        IntegrationContextBuilder integrationContextBuilder,
                                                        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                       DefaultServiceTaskBehavior defaultServiceTaskBehavior) {
-        return new MQServiceTaskBehavior(integrationContextManager,
-                                         eventPublisher,
-                                         integrationContextBuilder,
-                                         runtimeBundleInfoAppender,
-                                         defaultServiceTaskBehavior);
+                                                       DefaultServiceTaskBehavior defaultServiceTaskBehavior,
+        ExtensionsVariablesMappingProvider variablesMappingProvider) {
+        MQServiceTaskBehavior taskBehavior = new MQServiceTaskBehavior(
+            integrationContextManager,
+            eventPublisher,
+            integrationContextBuilder,
+            runtimeBundleInfoAppender,
+            defaultServiceTaskBehavior);
+        taskBehavior.setVariablesCalculator(variablesMappingProvider);
+        return taskBehavior;
     }
 }

@@ -38,7 +38,7 @@ public class BpmnModelUserTaskAssigneeValidator implements BpmnModelValidator {
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
                                                  ValidationContext validationContext) {
-        return getTasks(bpmnModel,
+        return getFlowElements(bpmnModel,
                         UserTask.class)
                 .map(this::validateTaskAssignedUser)
                 .filter(Optional::isPresent)

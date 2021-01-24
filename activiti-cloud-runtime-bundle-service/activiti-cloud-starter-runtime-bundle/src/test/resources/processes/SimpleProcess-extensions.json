@@ -1,0 +1,14 @@
+{
+  "id": "SimpleProcessModel",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "SimpleProcess": {
+      "properties": {},
+      "mappings": {
+        "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94": {
+          "mappingType": "MAP_ALL"
+        }
+      }
+    }
+  }
+}

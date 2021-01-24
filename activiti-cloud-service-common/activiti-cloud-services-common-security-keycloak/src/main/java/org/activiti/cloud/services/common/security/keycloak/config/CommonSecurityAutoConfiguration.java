@@ -58,6 +58,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -73,6 +74,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @ConditionalOnWebApplication
 @Import({KeycloakSpringBootConfigResolver.class})
 @ConditionalOnMissingBean(value = {KeycloakConfigResolver.class, SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
+@DependsOn({"keycloakConfigResolver"})
 public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigurerAdapter {
 
 
@@ -167,12 +169,6 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
     @ConditionalOnMissingBean
     public SecurityContextTokenProvider securityContextTokenProvider() {
         return new KeycloakSecurityContextTokenProvider();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public KeycloakConfigResolver KeycloakConfigResolver() {
-        return new KeycloakSpringBootConfigResolver();
     }
 
     @Bean

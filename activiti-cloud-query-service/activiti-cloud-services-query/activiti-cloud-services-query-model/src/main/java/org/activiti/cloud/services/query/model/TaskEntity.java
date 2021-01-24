@@ -15,8 +15,14 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,20 +36,26 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
-import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.querydsl.core.annotations.PropertyType;
+import com.querydsl.core.annotations.QueryType;
 
 @Entity(name = "Task")
 @Table(name = "TASK",
         indexes = {
                 @Index(name = "task_status_idx", columnList = "status", unique = false),
-                @Index(name = "task_processInstance_idx", columnList = "processInstanceId", unique = false)
+                @Index(name = "task_processInstance_idx", columnList = "processInstanceId", unique = false),
+                @Index(name = "task_processDefinitionName_idx", columnList = "processDefinitionName", unique = false)
         })
-public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
+public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask {
 
     /**
      * serialVersionUID
@@ -65,8 +77,10 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private String processDefinitionId;
     private String processInstanceId;
     private Integer processDefinitionVersion;
+    private String processDefinitionName;
     private String businessKey;
     private String taskDefinitionKey;
+    private String completedBy;
 
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
@@ -112,6 +126,23 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private Date completedFrom;
 
     @JsonIgnore
+    @Transient
+    @QueryType(PropertyType.DATETIME)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date dueDateTo;
+
+    @JsonIgnore
+    @Transient
+    @QueryType(PropertyType.DATETIME)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date dueDateFrom;
+
+    @JsonIgnore
+    @Transient
+    @QueryType(PropertyType.STRING)
+    private String candidateGroupId;
+
+    @JsonIgnore
     @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false,
             foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
@@ -121,13 +152,15 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
             foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Set<TaskCandidateUser> taskCandidateUsers;
+    @Fetch(FetchMode.SUBSELECT)
+    private Set<TaskCandidateUser> taskCandidateUsers = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
             foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Set<TaskCandidateGroup> taskCandidateGroups;
+    @Fetch(FetchMode.SUBSELECT)
+    private Set<TaskCandidateGroup> taskCandidateGroups = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
@@ -207,15 +240,20 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     }
 
     @Override
+    public String getProcessDefinitionName() {
+        return processDefinitionName;
+    }
+
+    @Override
     public String getProcessInstanceId() {
         return processInstanceId;
     }
-    
+
     @Override
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
     }
-    
+
     @Override
     public String getBusinessKey() {
         return businessKey;
@@ -274,11 +312,16 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
-    
+
+
+    public void setProcessDefinitionName(String processDefinitionName) {
+        this.processDefinitionName = processDefinitionName;
+    }
+
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
-    
+
     public void setStatus(TaskStatus status) {
         this.status = status;
     }
@@ -365,6 +408,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.taskCandidateUsers = taskCandidateUsers;
     }
 
+    @Override
     public List<String> getCandidateUsers(){
         return this.taskCandidateUsers != null ? this.taskCandidateUsers
                        .stream()
@@ -372,6 +416,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
                        .collect(Collectors.toList()) : Collections.emptyList();
     }
 
+    @Override
     public List<String> getCandidateGroups(){
         return this.taskCandidateGroups != null ? this.taskCandidateGroups
                        .stream()
@@ -419,7 +464,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setTaskDefinitionKey(String taskDefinitionKey) {
         this.taskDefinitionKey = taskDefinitionKey;
     }
-    
+
     @Override
     public Long getDuration() {
         return duration;
@@ -438,12 +483,12 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setCompletedDate(Date endDate) {
         this.completedDate = endDate;
     }
-    
+
     @Transient
     public Date getCreatedTo() {
         return createdTo;
     }
-   
+
     public void setCreatedTo(Date createdTo) {
         this.createdTo = createdTo;
     }
@@ -452,7 +497,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public Date getCreatedFrom() {
         return createdFrom;
     }
-   
+
     public void setCreatedFrom(Date createdFrom) {
         this.createdFrom = createdFrom;
     }
@@ -462,7 +507,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return lastClaimedTo;
     }
 
-    
+
     public void setLastClaimedTo(Date lastClaimedTo) {
         this.lastClaimedTo = lastClaimedTo;
     }
@@ -472,7 +517,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return lastClaimedFrom;
     }
 
-    
+
     public void setLastClaimedFrom(Date lastClaimedFrom) {
         this.lastClaimedFrom = lastClaimedFrom;
     }
@@ -481,7 +526,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public Date getCompletedTo() {
         return completedTo;
     }
-   
+
     public void setCompletedTo(Date completedTo) {
         this.completedTo = completedTo;
     }
@@ -494,10 +539,19 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setCompletedFrom(Date completedFrom) {
         this.completedFrom = completedFrom;
     }
-    
+
+    @Override
+    public String getCompletedBy(){
+        return completedBy;
+    }
+
+    public void setCompletedBy(String completedBy) {
+        this.completedBy = completedBy;
+    }
+
     public boolean isInFinalState(){
-        return  !(TaskStatus.CREATED.equals(status) || 
-                  TaskStatus.ASSIGNED.equals(status)|| 
+        return  !(TaskStatus.CREATED.equals(status) ||
+                  TaskStatus.ASSIGNED.equals(status)||
                   TaskStatus.SUSPENDED.equals(status));
     }
 
@@ -520,5 +574,5 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         TaskEntity other = (TaskEntity) obj;
         return Objects.equals(id, other.id);
     }
-    
+
 }

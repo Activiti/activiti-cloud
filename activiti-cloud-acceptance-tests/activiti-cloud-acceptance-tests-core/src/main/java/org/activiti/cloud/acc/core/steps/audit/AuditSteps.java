@@ -30,12 +30,14 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.audit.AuditService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
@@ -51,9 +53,13 @@ public class AuditSteps {
     @Autowired
     private AuditService auditService;
 
+    @Autowired
+    @Qualifier("auditBaseService")
+    private BaseService baseService;
+
     @Step
     public void checkServicesHealth() {
-        assertThat(auditService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
     
     @Step
@@ -560,7 +566,12 @@ public class AuditSteps {
                                     timerId,
                                     processInstanceId));
         });
-    }     
+    }
+    
+    @Step
+    public Collection<CloudRuntimeEvent> getEventsByEventType(String eventType) throws Exception {
+        return auditService.getEvents("eventType:" + eventType).getContent();
+    }
 }
 
 

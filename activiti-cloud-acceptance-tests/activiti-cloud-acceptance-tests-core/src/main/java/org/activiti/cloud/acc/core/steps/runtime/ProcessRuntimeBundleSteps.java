@@ -19,6 +19,7 @@ import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatR
 import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -26,7 +27,8 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-
+import java.util.stream.Collectors;
+import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
@@ -36,25 +38,36 @@ import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.runtime.model.impl.ProcessVariableValue;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.diagram.ProcessRuntimeDiagramService;
+import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.rest.api.ProcessDefinitionsApiClient;
+import org.activiti.cloud.services.rest.api.ProcessInstanceApiClient;
+import org.activiti.cloud.services.rest.api.ProcessInstanceTasksApiClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedModel;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.thucydides.core.annotations.Step;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.EntityModel;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeBundleSteps {
+
+    private static final Pageable DEFAULT_PAGEABLE = PageRequest.of(0, 100);
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;
 
     @Autowired
-    private ProcessRuntimeService processRuntimeService;
+    private ProcessInstanceApiClient processInstanceApiClient;
+
+    @Autowired
+    private ProcessInstanceTasksApiClient processInstanceTasksApiClient;
+
+    @Autowired
+    private ProcessDefinitionsApiClient processDefinitionsApiClient;
 
     @Autowired
     private ProcessRuntimeDiagramService processRuntimeDiagramService;
@@ -62,14 +75,18 @@ public class ProcessRuntimeBundleSteps {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    @Qualifier("runtimeBundleBaseService")
+    private BaseService baseService;
+
     @Step
     public void checkServicesHealth() {
-        assertThat(processRuntimeService.isServiceUp()).isTrue();
+        assertThat(baseService.isServiceUp()).isTrue();
     }
 
     @Step
     public CloudProcessInstance startProcess(StartProcessPayload payload) {
-        return dirtyContextHandler.dirty(processRuntimeService.startProcess(payload));
+        return dirtyContextHandler.dirty(processInstanceApiClient.startProcess(payload).getContent());
     }
 
     @Step
@@ -144,13 +161,13 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public void deleteProcessInstance(String id) {
-        processRuntimeService.deleteProcess(id);
+        processInstanceApiClient.deleteProcessInstance(id);
     }
 
     @Step
     public void checkProcessInstanceNotFound(String processInstanceId) {
         assertThatRestNotFoundErrorIsThrownBy(
-                () -> processRuntimeService.getProcessInstance(processInstanceId)
+                () -> processInstanceApiClient.getProcessInstanceById(processInstanceId).getContent()
         ).withMessageContaining("Unable to find process instance for the given id:'" + processInstanceId + "'");
     }
 
@@ -172,78 +189,97 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public void suspendProcessInstance(String processInstanceId) {
-        processRuntimeService.suspendProcess(processInstanceId);
+        processInstanceApiClient.suspend(processInstanceId);
     }
 
     @Step
     public void resumeProcessInstance(String processInstanceId) {
-        processRuntimeService.resumeProcess(processInstanceId);
+        processInstanceApiClient.resume(processInstanceId);
     }
 
     @Step
-    public PagedModel<CloudProcessInstance> getAllProcessInstances(){
-        return processRuntimeService.getAllProcessInstances();
+    public Collection<CloudProcessInstance> getAllProcessInstances(){
+        return processInstanceApiClient.getProcessInstances(DEFAULT_PAGEABLE)
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .collect(Collectors.toList());
     }
 
     @Step
     public CloudProcessInstance getProcessInstanceById(String id){
-        return processRuntimeService.getProcessInstance(id);
+        return processInstanceApiClient.getProcessInstanceById(id).getContent();
     }
 
     @Step
-    public PagedModel<CloudProcessInstance> getSubProcesses(String parentId){
-        return processRuntimeService.getSubProcesses(parentId);
+    public Collection<CloudProcessInstance> getSubProcesses(String parentId){
+        return processInstanceApiClient.subprocesses(parentId, DEFAULT_PAGEABLE)
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .collect(Collectors.toList());
     }
 
     @Step
-    public PagedModel<ProcessDefinition> getProcessDefinitions(){
-        return processRuntimeService.getProcessDefinitions();
+    public Collection<ProcessDefinition> getProcessDefinitions(){
+        return processDefinitionsApiClient.getProcessDefinitions(DEFAULT_PAGEABLE)
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .collect(Collectors.toList());
     }
 
     @Step
     public ProcessDefinition getProcessDefinitionByKey(String key){
-        return processRuntimeService.getProcessDefinitionByKey(key);
+        return processDefinitionsApiClient.getProcessDefinition(key).getContent();
     }
 
     @Step
     public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) {
-        return processRuntimeService
-                .getProcessInstanceTasks(processInstanceId).getContent();
+        return processInstanceTasksApiClient.getTasks(processInstanceId, DEFAULT_PAGEABLE)
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .collect(Collectors.toList());
     }
 
     @Step
     public CloudProcessInstance startProcessWithProcessInstanceName(String process,
-                                                                    String processName) {
-        return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
-                .start()
-                .withName(processName)
-                .withProcessDefinitionKey(process)
-                .build()));
+        String processName) {
+        return dirtyContextHandler.dirty(processInstanceApiClient.startProcess(ProcessPayloadBuilder
+            .start()
+            .withName(processName)
+            .withProcessDefinitionKey(process)
+            .build())
+            .getContent());
     }
 
     @Step
-    public void checkProcessInstanceName(String processInstanceId,
-                                         String processInstanceName) {
-        assertThat(processRuntimeService.getProcessInstance(processInstanceId).getName()).isEqualTo(processInstanceName);
+    public void checkProcessInstanceName(String processInstanceId, String processInstanceName) {
+        assertThat(processInstanceApiClient.getProcessInstanceById(processInstanceId)
+            .getContent()
+            .getName())
+            .isEqualTo(processInstanceName);
     }
 
 
     @Step
-    public CloudProcessInstance setProcessName(String processInstanceId, String processInstanceName){
-        return processRuntimeService.updateProcess(
-                processInstanceId,
-                ProcessPayloadBuilder.update().withName(processInstanceName).build());
+    public CloudProcessInstance setProcessName(String processInstanceId, String processInstanceName) {
+        return processInstanceApiClient.updateProcess(
+            processInstanceId,
+            ProcessPayloadBuilder.update().withName(processInstanceName).build())
+            .getContent();
 
     }
 
     @Step
     public CloudProcessInstance message(StartMessagePayload payload) throws IOException {
-        return dirtyContextHandler.dirty(processRuntimeService.message(payload));
+        return dirtyContextHandler.dirty(processInstanceApiClient.sendStartMessage(payload).getContent());
     }
 
     @Step
     public void message(ReceiveMessagePayload payload) throws IOException {
-        processRuntimeService.message(payload);
+        processInstanceApiClient.receive(payload);
     }
 
 }

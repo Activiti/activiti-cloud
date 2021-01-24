@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.querydsl.core.annotations.PropertyType;
+import com.querydsl.core.annotations.QueryType;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -43,8 +45,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 				@Index(name="pi_businessKey_idx", columnList="businessKey", unique=false),
 				@Index(name="pi_name_idx", columnList="name", unique=false),
 				@Index(name="pi_processDefinitionId_idx", columnList="processDefinitionId", unique=false),
-				@Index(name="pi_processDefinitionKey_idx", columnList="processDefinitionKey", unique=false)
-		})
+				@Index(name="pi_processDefinitionKey_idx", columnList="processDefinitionKey", unique=false),
+                @Index(name="pi_processDefinitionName_idx", columnList="processDefinitionName", unique=false)
+        })
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
@@ -58,7 +61,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @Enumerated(EnumType.STRING)
     private ProcessInstanceStatus status;
     private Integer processDefinitionVersion;
- 
+    private String processDefinitionName;
+    private Date completedDate;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModified;
 
@@ -72,12 +77,26 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
     private Date startFrom;
-    
+
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
     private Date startTo;
-    
+
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
+    @Transient
+    private Date completedTo;
+
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
+    @Transient
+    private Date completedFrom;
+
     @JsonIgnore
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
@@ -101,7 +120,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
         , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private List<BPMNSequenceFlowEntity> sequenceFlows;
-    
+
     private String parentId;
 
     public ProcessInstanceEntity() {
@@ -258,13 +277,22 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
-    
+
+    @Override
+    public String getProcessDefinitionName() {
+        return processDefinitionName;
+    }
+
+    public void setProcessDefinitionName(String processDefinitionName) {
+        this.processDefinitionName = processDefinitionName;
+    }
+
     @Transient
     public Date getStartFrom() {
         return startFrom;
     }
 
-    
+
     public void setStartFrom(Date startFrom) {
         this.startFrom = startFrom;
     }
@@ -274,33 +302,58 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         return startTo;
     }
 
-    
+
     public void setStartTo(Date startTo) {
         this.startTo = startTo;
     }
-    
+
+    @Override
+    public Date getCompletedDate() {
+        return completedDate;
+    }
+
+    public void setCompletedDate(Date endDate) {
+        this.completedDate = endDate;
+    }
+
+    public Date getCompletedTo() {
+        return completedTo;
+    }
+
+    public void setCompletedTo(Date completedTo) {
+        this.completedTo = completedTo;
+    }
+
+    public Date getCompletedFrom() {
+        return completedFrom;
+    }
+
+    public void setCompletedFrom(Date completedFrom) {
+        this.completedFrom = completedFrom;
+    }
+
     public boolean isInFinalState(){
-        return  !(ProcessInstanceStatus.CREATED.equals(status) || 
-                  ProcessInstanceStatus.RUNNING.equals(status)|| 
+        return  !(ProcessInstanceStatus.CREATED.equals(status) ||
+                  ProcessInstanceStatus.RUNNING.equals(status)||
                   ProcessInstanceStatus.SUSPENDED.equals(status));
     }
 
-    
+
     public Set<BPMNActivityEntity> getActivities() {
         return activities;
     }
 
-    
+
     public void setActivities(Set<BPMNActivityEntity> bpmnActivities) {
         this.activities = bpmnActivities;
     }
 
-    
+
     public List<BPMNSequenceFlowEntity> getSequenceFlows() {
         return sequenceFlows;
     }
 
-    
+
     public void setSequenceFlows(List<BPMNSequenceFlowEntity> sequenceFlows) {
         this.sequenceFlows = sequenceFlows;
     }
@@ -320,9 +373,13 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
                                                processDefinitionId,
                                                processDefinitionKey,
                                                processDefinitionVersion,
+                                               processDefinitionName,
                                                startDate,
                                                startFrom,
                                                startTo,
+                                               completedDate,
+                                               completedFrom,
+                                               completedTo,
                                                status);
         return result;
     }
@@ -336,24 +393,28 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         if (getClass() != obj.getClass())
             return false;
         ProcessInstanceEntity other = (ProcessInstanceEntity) obj;
-        return Objects.equals(businessKey, other.businessKey) && 
-               Objects.equals(id, other.id) && 
-               Objects.equals(initiator, other.initiator) && 
-               Objects.equals(lastModified, other.lastModified) && 
-               Objects.equals(lastModifiedFrom, other.lastModifiedFrom) && 
-               Objects.equals(lastModifiedTo, other.lastModifiedTo) && 
-               Objects.equals(name, other.name) && 
-               Objects.equals(parentId, other.parentId) && 
-               Objects.equals(processDefinitionId, other.processDefinitionId) && 
-               Objects.equals(processDefinitionKey, other.processDefinitionKey) && 
-               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) && 
-               Objects.equals(startDate, other.startDate) && 
-               Objects.equals(startFrom, other.startFrom) && 
-               Objects.equals(startTo, other.startTo) && 
-               status == other.status;
+        return Objects.equals(businessKey, other.businessKey) &&
+                Objects.equals(id, other.id) &&
+                Objects.equals(initiator, other.initiator) &&
+                Objects.equals(lastModified, other.lastModified) &&
+                Objects.equals(lastModifiedFrom, other.lastModifiedFrom) &&
+                Objects.equals(lastModifiedTo, other.lastModifiedTo) &&
+                Objects.equals(name, other.name) &&
+                Objects.equals(parentId, other.parentId) &&
+                Objects.equals(processDefinitionId, other.processDefinitionId) &&
+                Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
+                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
+                Objects.equals(processDefinitionName, other.processDefinitionName) &&
+                Objects.equals(startDate, other.startDate) &&
+                Objects.equals(startFrom, other.startFrom) &&
+                Objects.equals(startTo, other.startTo) &&
+                Objects.equals(completedDate, other.completedDate) &&
+                Objects.equals(completedFrom, other.completedFrom) &&
+                Objects.equals(completedTo, other.completedTo) &&
+                status == other.status;
     }
-    
 
-    
+
+
 
 }

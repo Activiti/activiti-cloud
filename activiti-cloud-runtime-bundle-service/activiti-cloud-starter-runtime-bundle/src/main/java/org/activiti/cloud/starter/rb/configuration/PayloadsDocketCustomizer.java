@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.rb.configuration;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
@@ -54,7 +55,8 @@ public class PayloadsDocketCustomizer implements DocketCustomizer {
                 .directModelSubstitute(CreateTaskVariablePayload.class, CreateTaskVariablePayloadApiModel.class)
                 .directModelSubstitute(UpdateTaskVariablePayload.class, UpdateTaskVariablePayloadApiModel.class)
                 .directModelSubstitute(UpdateTaskPayload.class, UpdateTaskPayloadApiModel.class)
-                .directModelSubstitute(SaveTaskPayload.class, SaveTaskPayloadApiModel.class);
+                .directModelSubstitute(SaveTaskPayload.class, SaveTaskPayloadApiModel.class)
+                .directModelSubstitute(CreateProcessInstancePayload.class, CreateProcessInstancePayloadApiModel.class);
     }
 
     @ApiModel("StartProcessPayload")
@@ -138,6 +140,12 @@ public class PayloadsDocketCustomizer implements DocketCustomizer {
     @ApiModel("SaveTaskPayload")
     public static class SaveTaskPayloadApiModel extends SaveTaskPayload {
         @ApiModelProperty(allowableValues = "SaveTaskPayload")
+        public String payloadType;
+    }
+
+    @ApiModel("CreateProcessInstancePayload")
+    public static class CreateProcessInstancePayloadApiModel extends CreateProcessInstancePayload {
+        @ApiModelProperty(allowableValues = "CreateProcessInstancePayload")
         public String payloadType;
     }
 }

@@ -19,7 +19,7 @@ import com.querydsl.core.types.Predicate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
@@ -70,7 +70,7 @@ public class TaskAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudTask>> findAll(
+    public PagedModel<EntityModel<QueryCloudTask>> findAll(
         @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
         @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
         @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
@@ -82,7 +82,7 @@ public class TaskAdminController {
     }
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public EntityModel<CloudTask> findById(@PathVariable String taskId) {
+    public EntityModel<QueryCloudTask> findById(@PathVariable String taskId) {
 
         TaskEntity taskEntity = entityFinder.findById(taskRepository,
                                                       taskId,

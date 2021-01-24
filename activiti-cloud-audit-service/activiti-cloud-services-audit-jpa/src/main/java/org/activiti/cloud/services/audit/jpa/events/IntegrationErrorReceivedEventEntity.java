@@ -30,9 +30,15 @@ import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceEle
 @DiscriminatorValue(value = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
 public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity {
 
+    private static final int ERROR_MESSAGE_LENGTH = 255;
+
     protected static final String INTEGRATION_ERROR_RECEIVED_EVENT = "IntegrationErrorReceivedEvent";
 
+    private String errorCode;
+
+    @Column(length = ERROR_MESSAGE_LENGTH)
     private String errorMessage;
+
     private String errorClassName;
 
     @Convert(converter = ListOfStackTraceElementsJpaJsonConverter.class)
@@ -44,30 +50,44 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
     public IntegrationErrorReceivedEventEntity(CloudIntegrationErrorReceivedEvent event) {
         super(event);
 
-        this.errorMessage = event.getErrorMessage();
+        this.errorCode = event.getErrorCode();
+        this.errorMessage = StringUtils.truncate(event.getErrorMessage(), ERROR_MESSAGE_LENGTH);
         this.errorClassName = event.getErrorClassName();
         this.stackTraceElements = event.getStackTraceElements();
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
     }
 
     public String getErrorMessage() {
         return errorMessage;
     }
-
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = StringUtils.truncate(errorMessage, ERROR_MESSAGE_LENGTH);
+    }
 
     public String getErrorClassName() {
         return errorClassName;
     }
 
-
     public List<StackTraceElement> getStackTraceElements() {
         return stackTraceElements;
+    }
+
+    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
+        this.stackTraceElements = stackTraceElements;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(errorClassName, errorMessage, stackTraceElements);
+        result = prime * result + Objects.hash(errorCode, errorClassName, errorMessage, stackTraceElements);
         return result;
     }
 
@@ -83,7 +103,8 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
             return false;
         }
         IntegrationErrorReceivedEventEntity other = (IntegrationErrorReceivedEventEntity) obj;
-        return Objects.equals(errorClassName, other.errorClassName) &&
+        return Objects.equals(errorCode, other.errorCode) &&
+               Objects.equals(errorClassName, other.errorClassName) &&
                Objects.equals(errorMessage, other.errorMessage) &&
                Objects.equals(stackTraceElements, other.stackTraceElements);
     }
@@ -93,6 +114,8 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
         final int maxLen = 10;
         StringBuilder builder = new StringBuilder();
         builder.append("IntegrationErrorReceivedEventEntity [errorMessage=")
+               .append(errorCode)
+               .append(", errorCode=")
                .append(errorMessage)
                .append(", errorClassName=")
                .append(errorClassName)
@@ -105,4 +128,5 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
                .append("]");
         return builder.toString();
     }
+
 }

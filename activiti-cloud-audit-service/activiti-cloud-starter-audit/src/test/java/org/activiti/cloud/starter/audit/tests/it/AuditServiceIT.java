@@ -28,11 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.events.MessageSubscriptionCancelledEvent;
+import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.TimerPayload;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
@@ -44,6 +46,7 @@ import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.api.runtime.model.impl.DeploymentImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
@@ -54,6 +57,8 @@ import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.api.model.shared.impl.conf.IgnoredRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
+import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
@@ -77,6 +82,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployedEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
@@ -108,6 +114,8 @@ import org.springframework.test.context.TestPropertySource;
 @Import(EventsRestTemplate.class)
 @ContextConfiguration(initializers ={ RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class AuditServiceIT {
+
+    private static final String ERROR_MESSAGE = "An error occurred consuming ACS API with inputs {targetFolder={}, action=CREATE_FILE}. Cause: [405] during [GET] to [https://aae-3734-env.envalfresco.com/alfresco/api/-default-/public/alfresco/versions/1/nodes/] [NodesApiClient#getNode(String,List,String,List)]: [{\"error\":{\"errorKey\":\"framework.exception.UnsupportedResourceOperation\",\"statusCode\":405,\"briefSummary\":\"09070282 The operation is unsupported\",\"stackTrace\":\"For security reasons the stack trace is no longer displayed, but the property is kept for previous versions\",\"descriptionURL\":\"https://api-explorer.alfresco.com\"}}]";
 
     @Autowired
     private EventsRestTemplate eventsRestTemplate;
@@ -157,7 +165,7 @@ public class AuditServiceIT {
         //given
         CloudVariableCreatedEventImpl variableCreatedEvent = new CloudVariableCreatedEventImpl(
             new VariableInstanceImpl<>("bigDecimalVar", "bigdecimal",
-                BigDecimal.valueOf(100, 2), UUID.randomUUID().toString()));
+                BigDecimal.valueOf(100, 2), UUID.randomUUID().toString(), null));
         producer.send(variableCreatedEvent);
 
         await().untilAsserted(() -> {
@@ -1044,15 +1052,25 @@ public class AuditServiceIT {
 
         testEvents.add(cloudIntegrationResultReceivedEvent);
 
-        Error error = new Error("Error Message");
-        error.fillInStackTrace();
+        Error cause = new Error(ERROR_MESSAGE);
+        CloudBpmnError error = new CloudBpmnError("ERROR_CODE", cause);
 
         CloudIntegrationErrorReceivedEventImpl cloudIntegrationErrorReceivedEvent = new CloudIntegrationErrorReceivedEventImpl(integrationContext,
+                                                                                                                               error.getErrorCode(),
                                                                                                                                error.getMessage(),
                                                                                                                                error.getClass().getName(),
-                                                                                                                               Arrays.asList(error.getStackTrace()));
+                                                                                                                               Arrays.asList(error.getCause()
+                                                                                                                                                  .getStackTrace()));
         testEvents.add(cloudIntegrationErrorReceivedEvent);
-
+        
+        DeploymentImpl deployment = new DeploymentImpl();
+        deployment.setId("deploymentId");
+        deployment.setVersion(1);
+        deployment.setName("SpringAutoDeployment");
+        
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        testEvents.add(cloudApplicationDeployedEvent);
+        
         return testEvents;
     }
 
@@ -1129,5 +1147,47 @@ public class AuditServiceIT {
         timerPayload.setExceptionMessage("Any message");
 
         return timerPayload;
+    }
+
+    @Test
+    public void shouldGetApplicationDeployedEvent() {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = new ArrayList<>();
+
+        DeploymentImpl deployment = new DeploymentImpl();
+        deployment.setId("deploymentId");
+        deployment.setVersion(1);
+        deployment.setName("SpringAutoDeployment");
+
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        cloudApplicationDeployedEvent.setAppName("EventApplicationName");
+        coveredEvents.add(cloudApplicationDeployedEvent);
+
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("eventType",
+                    ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name());
+
+            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
+            
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(1);
+
+            assertThat(retrievedEvents)
+                    .extracting(
+                            CloudRuntimeEvent::getEventType,
+                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getId(),
+                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getName(),
+                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getVersion())
+                    .contains(tuple(cloudApplicationDeployedEvent.getEventType(),
+                            cloudApplicationDeployedEvent.getEntity().getId(),
+                            cloudApplicationDeployedEvent.getEntity().getName(),
+                            cloudApplicationDeployedEvent.getEntity().getVersion()));
+        });
     }
 }

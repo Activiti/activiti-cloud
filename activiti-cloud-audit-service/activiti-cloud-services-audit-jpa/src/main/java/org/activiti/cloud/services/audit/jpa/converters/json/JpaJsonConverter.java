@@ -26,6 +26,7 @@ import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.api.process.model.BPMNTimer;
+import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -36,6 +37,7 @@ import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
+import org.activiti.api.runtime.model.impl.DeploymentImpl;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
@@ -98,6 +100,8 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
                                 MessageSubscriptionImpl.class);
             resolver.addMapping(IntegrationContext.class,
                                 IntegrationContextImpl.class);
+            resolver.addMapping(Deployment.class,
+                                DeploymentImpl.class);
 
             module.setAbstractTypes(resolver);
 

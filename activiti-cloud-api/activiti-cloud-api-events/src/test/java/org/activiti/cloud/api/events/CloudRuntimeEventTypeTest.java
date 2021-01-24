@@ -30,6 +30,7 @@ import org.activiti.api.process.model.events.MessageSubscriptionEvent;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
+import org.activiti.api.process.model.events.ApplicationEvent;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,6 +58,7 @@ public class CloudRuntimeEventTypeTest {
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ProcessRuntimeEvent.ProcessEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(MessageDefinitionEvent.MessageDefinitionEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(MessageSubscriptionEvent.MessageSubscriptionEvents.class));
+        assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ApplicationEvent.ApplicationEvents.class));
     }
 
 }

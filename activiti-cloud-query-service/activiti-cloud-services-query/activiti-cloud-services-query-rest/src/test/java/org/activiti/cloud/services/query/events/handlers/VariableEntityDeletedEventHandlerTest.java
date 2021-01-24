@@ -57,25 +57,27 @@ public class VariableEntityDeletedEventHandlerTest {
         verify(processVariableDeletedHandler).handle(event);
     }
 
-    private VariableInstanceImpl<String> buildVariable() {
+    private static VariableInstanceImpl<String> buildVariable() {
         return new VariableInstanceImpl<>("var",
                                           "v1",
                                           "string",
-                                          UUID.randomUUID().toString());
+                                          "procInstId", null);
     }
 
     @Test
     public void handleShouldUseProcessVariableDeleteHandlerWhenTaskIdIsPresent() {
         //given
-        VariableInstanceImpl<String> variableInstance = buildVariable();
-        variableInstance.setTaskId(UUID.randomUUID().toString());
-        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(variableInstance);
+        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(buildVariableWithTaskId());
 
         //when
         handler.handle(event);
 
         //then
         verify(taskVariableDeletedEventHandler).handle(event);
+    }
+
+    private static VariableInstanceImpl<String> buildVariableWithTaskId() {
+        return new VariableInstanceImpl<>("var", "v1", "string", "procInstId", "taskId");
     }
 
     @Test
