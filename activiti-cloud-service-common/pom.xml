@@ -44,7 +44,7 @@
     <keycloak.version>12.0.2</keycloak.version>
     <logstash.version>6.4</logstash.version>
     <spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
-    <springfox.version>2.8.0</springfox.version>
+    <springfox.version>3.0.0</springfox.version>
     <swagger.version>1.5.20</swagger.version>
     <xstream.version>1.4.15</xstream.version>
     <json-unit.version>2.22.1</json-unit.version>
