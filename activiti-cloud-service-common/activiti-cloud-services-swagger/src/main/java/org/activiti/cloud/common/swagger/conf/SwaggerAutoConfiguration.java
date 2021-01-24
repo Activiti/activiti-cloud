@@ -43,7 +43,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * <pre>
  *     &#64;Bean
  *     public Predicate&#60;RequestHandler&#62; apiSelector() {
- *         return RequestHandlerSelectors.basePackage("org.activiti.cloud.services")::apply;
+ *         return RequestHandlerSelectors.basePackage("org.activiti.cloud.services");
  *     }
  *  </pre>
  *

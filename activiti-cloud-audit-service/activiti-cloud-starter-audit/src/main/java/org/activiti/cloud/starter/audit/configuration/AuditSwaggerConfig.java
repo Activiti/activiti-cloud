@@ -47,7 +47,7 @@ public class AuditSwaggerConfig {
     @Bean
     @ConditionalOnMissingBean
     public Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.audit")::apply;
+        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.audit");
     }
 
     @Bean
