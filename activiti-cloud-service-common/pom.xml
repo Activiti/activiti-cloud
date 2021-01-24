@@ -35,16 +35,13 @@
   </modules>
   <properties>
     <activiti.version>7.1.299</activiti.version>
-    <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
-    <guava.version>30.1-jre</guava.version>
     <java-semver.version>0.9.0</java-semver.version>
     <keycloak.version>12.0.2</keycloak.version>
     <logstash.version>6.4</logstash.version>
-    <spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
-    <springfox.version>2.8.0</springfox.version>
+    <springfox.version>3.0.0</springfox.version>
     <swagger.version>1.5.20</swagger.version>
     <xstream.version>1.4.15</xstream.version>
     <json-unit.version>2.22.1</json-unit.version>
@@ -116,72 +113,15 @@
         <version>${commons-lang.version}</version>
         <scope>runtime</scope>
       </dependency>
-      <!-- Fix SpringFox incompatibility with Spring HATEAOS 1.0 and Spring Boot 2.2 -->
-      <dependency>
-        <groupId>org.springframework.plugin</groupId>
-        <artifactId>spring-plugin-core</artifactId>
-        <version>${spring-plugin.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.plugin</groupId>
-        <artifactId>spring-plugin-metadata</artifactId>
-        <version>${spring-plugin.version}</version>
-      </dependency>
-      <!-- SpringFox dependencies -->
       <dependency>
         <groupId>io.springfox</groupId>
-        <artifactId>springfox-core</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-spi</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-schema</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-spring-web</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-swagger2</artifactId>
-        <version>${springfox.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-spring-web</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-schema</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-swagger-ui</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-swagger-common</artifactId>
+        <artifactId>springfox-boot-starter</artifactId>
         <version>${springfox.version}</version>
       </dependency>
       <dependency>
         <groupId>io.swagger</groupId>
         <artifactId>swagger-annotations</artifactId>
         <version>${swagger.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
       </dependency>
       <!-- Keycloak dependencies -->
       <dependency>

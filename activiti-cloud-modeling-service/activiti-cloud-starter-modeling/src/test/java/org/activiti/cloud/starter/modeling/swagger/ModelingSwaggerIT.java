@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.starter.modeling.swagger;
 
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,7 +51,7 @@ public class ModelingSwaggerIT {
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
             .andExpect(jsonPath("$.info.title").value("Activiti Cloud Starter :: Modeling ReST API"))
             .andExpect(jsonPath("$['paths']['/v1/projects/{projectId}/models']['get']['parameters'][*]['name']",
-                contains("projectId", "type", "skipCount", "maxItems", "sort")));
+                containsInAnyOrder("projectId", "type", "skipCount", "maxItems", "sort")));
     }
 
 }

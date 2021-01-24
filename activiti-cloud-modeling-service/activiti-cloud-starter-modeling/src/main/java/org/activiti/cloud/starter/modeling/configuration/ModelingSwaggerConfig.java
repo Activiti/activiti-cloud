@@ -46,7 +46,7 @@ public class ModelingSwaggerConfig {
     @Bean
     @ConditionalOnMissingBean
     public Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.modeling.rest")::apply;
+        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.modeling.rest");
     }
 
 }
