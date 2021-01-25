@@ -25,69 +25,7 @@
     </dependency>
     <dependency>
       <groupId>io.springfox</groupId>
-      <artifactId>springfox-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-spring-web</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-schema</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-swagger2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-swagger-ui</artifactId>
+      <artifactId>springfox-boot-starter</artifactId>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/classes</outputDirectory>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>io.springfox</groupId>
-                  <artifactId>springfox-spring-web</artifactId>
-                  <!-- excludes are probably not necessary -->
-                  <!-- <excludes>**/Foo.class,**/Bar.class</excludes> -->
-                </artifactItem>
-                <artifactItem>
-                  <groupId>io.springfox</groupId>
-                  <artifactId>springfox-schema</artifactId>
-                  <!-- excludes are probably not necessary -->
-                  <!-- <excludes>**/Foo.class,**/Bar.class</excludes> -->
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.mycila</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>src/main/java/springfox/**</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

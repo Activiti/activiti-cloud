@@ -36,6 +36,8 @@ import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuil
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
@@ -71,7 +73,6 @@ import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1056,7 +1057,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("PROJECT")))
             .andExpect(jsonPath("$.projectIds", hasSize(1)))
-            .andExpect(jsonPath("$.projectIds", Matchers.contains(parentProject.getId())));
+            .andExpect(jsonPath("$.projectIds", contains(parentProject.getId())));
     }
 
     @Test
@@ -1090,7 +1091,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("GLOBAL")))
             .andExpect(jsonPath("$.projectIds", hasSize(2)))
-            .andExpect(jsonPath("$.projectIds", Matchers.containsInAnyOrder(parentProjectOne.getId(),parentProjectTwo.getId())));
+            .andExpect(jsonPath("$.projectIds", containsInAnyOrder(parentProjectOne.getId(), parentProjectTwo.getId())));
     }
 
     @Test
@@ -1235,7 +1236,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope",is("PROJECT")))
             .andExpect(jsonPath("$.projectIds", hasSize(1)))
-            .andExpect(jsonPath("$.projectIds", Matchers.contains(project.getId())));
+            .andExpect(jsonPath("$.projectIds", contains(project.getId())));
     }
 
     @Test
@@ -1262,7 +1263,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("GLOBAL")))
             .andExpect(jsonPath("$.projectIds", hasSize(2)))
-            .andExpect(jsonPath("$.projectIds", Matchers.containsInAnyOrder(parentProject.getId(), project.getId())));
+            .andExpect(jsonPath("$.projectIds", containsInAnyOrder(parentProject.getId(), project.getId())));
     }
 
     @Test
@@ -1295,7 +1296,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("PROJECT")))
             .andExpect(jsonPath("$.projectIds", hasSize(1)))
-            .andExpect(jsonPath("$.projectIds", Matchers.contains(project.getId())));
+            .andExpect(jsonPath("$.projectIds", contains(project.getId())));
     }
 
     @Test
@@ -1312,7 +1313,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("GLOBAL")))
             .andExpect(jsonPath("$.projectIds", hasSize(1)))
-            .andExpect(jsonPath("$.projectIds", Matchers.contains(parentProject.getId())));
+            .andExpect(jsonPath("$.projectIds", contains(parentProject.getId())));
     }
 
     @Test
