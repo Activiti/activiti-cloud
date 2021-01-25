@@ -52,7 +52,7 @@ public class ProjectDescriptor {
     public String getName() {
         return project.getName();
     }
-
+    
     public String getVersion() {
         return project.getVersion();
     }

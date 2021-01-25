@@ -198,6 +198,11 @@ public class ModelServiceImpl implements ModelService{
     }
 
     @Override
+    public Model copyModel(Model modelToBeCopied, Project project) {
+        return modelRepository.copyModel(modelToBeCopied, project);
+    }
+
+    @Override
     public void deleteModel(Model model) {
         modelRepository.deleteModel(model);
     }
