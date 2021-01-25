@@ -40,7 +40,7 @@
     <commons-lang.version>2.6</commons-lang.version>
     <java-semver.version>0.9.0</java-semver.version>
     <keycloak.version>12.0.2</keycloak.version>
-    <logstash.version>6.4</logstash.version>
+    <logstash.version>6.6</logstash.version>
     <springfox.version>3.0.0</springfox.version>
     <swagger.version>1.5.20</swagger.version>
     <xstream.version>1.4.15</xstream.version>
