@@ -68,6 +68,8 @@ public interface ProjectRestApi {
 
     String EXPORT_PROJECT_ID_PARAM_DESCR = "The id of the project to export";
 
+    String COPY_PROJECT_ID_PARAM_DESCR = "The id of the project to copy";
+
     String VALIDATE_PROJECT_ID_PARAM_DESCR = "The id of the project to validate";
 
     String ATTACHMENT_API_PARAM_DESCR =
@@ -78,6 +80,8 @@ public interface ProjectRestApi {
     String PROJECT_NAME_PARAM_DESCR = "The name or part of the name to filter projects";
 
     String PROJECT_NAME_OVERRIDE_DESCR = "The name of the project that will override the current name of the project in the zip file";
+
+    String PROJECT_NAME_COPY_DESCR = "The name of the project that will replace the original name of the project";
 
     String UPLOAD_FILE_PARAM_NAME = "file";
 
@@ -162,6 +166,18 @@ public interface ProjectRestApi {
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;
+
+    @ApiOperation(
+            tags = PROJECTS,
+            value = "Copy an project as a new project with chosen name",
+            notes = "This will create a new project with chosen name " +
+                    "containing the project folder and all related models.<br>")
+    @PostMapping(path = "/projects/{projectId}/copy")
+    EntityModel<Project> copyProject(
+            @ApiParam(value = COPY_PROJECT_ID_PARAM_DESCR, required = true)
+            @PathVariable String projectId,
+            @ApiParam(value = PROJECT_NAME_COPY_DESCR)
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name);
 
     @ApiOperation(
             tags = PROJECTS,

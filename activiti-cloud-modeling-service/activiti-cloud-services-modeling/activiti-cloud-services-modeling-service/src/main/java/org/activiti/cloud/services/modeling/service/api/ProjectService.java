@@ -44,6 +44,9 @@ public interface ProjectService {
 
     FileContent exportProject(Project project) throws IOException;
 
+    Project copyProject(Project projectToCopy,
+                        String newProjectName);
+
     ProjectAccessControl getProjectAccessControl(Project project);
 
     Project importProject(MultipartFile file, @Nullable String name) throws IOException;

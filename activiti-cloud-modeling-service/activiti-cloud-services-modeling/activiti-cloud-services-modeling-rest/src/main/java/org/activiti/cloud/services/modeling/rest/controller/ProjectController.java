@@ -123,6 +123,14 @@ public class ProjectController implements ProjectRestApi {
     }
 
     @Override
+    public EntityModel<Project> copyProject(
+            @PathVariable String projectId,
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name) {
+        Project projectToCopy = findProjectById(projectId);
+        return representationModelAssembler.toModel(projectService.copyProject(projectToCopy, name));
+    }
+
+    @Override
     public void validateProject(
             @ApiParam(VALIDATE_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId) throws IOException {

@@ -62,6 +62,13 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Strin
     }
 
     @Override
+    default ProjectEntity copyProject(ProjectEntity projectToCopy, String newProjectName) {
+        ProjectEntity projectEntityClone = new ProjectEntity(newProjectName);
+        projectEntityClone.setDescription(projectToCopy.getDescription());
+        return save(projectEntityClone);
+    }
+
+    @Override
     default void deleteProject(ProjectEntity project) {
         delete(project);
     }
