@@ -672,7 +672,7 @@ public class ModelControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
-                .containsExactlyInAnyOrder(tuple("expected type: Number, found: String",
+                .containsExactlyInAnyOrder(tuple("expected type: Integer, found: String",
                                        "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"));
     }
 
