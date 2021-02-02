@@ -984,7 +984,7 @@ public class ActivitiGraphQLStarterIT {
                     return i.receive().asString();
                 })
                 .log("client-received")
-                .take(1)
+                .take(2)
                 .subscribeWith(output)
                 .collectList()
                 .doOnError(i -> System.err.println("Failed requesting server: " + i))
