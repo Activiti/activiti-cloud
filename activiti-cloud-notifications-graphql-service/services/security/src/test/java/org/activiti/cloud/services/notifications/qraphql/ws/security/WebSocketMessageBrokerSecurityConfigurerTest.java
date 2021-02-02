@@ -39,7 +39,7 @@ public class WebSocketMessageBrokerSecurityConfigurerTest {
     @Test
     public void testContextLoads() {
         assertThat(configuration.getEndpoint()).isEqualTo("/ws/graphql");
-        assertThat(configuration.getAuthorities()).isEqualTo(new String[]{"ACTIVITI_ADMIN"});
+        assertThat(configuration.getAuthorities()).containsExactly("ACTIVITI_USER", "ACTIVITI_ADMIN");
         assertThat(configuration.sameOriginDisabled()).isTrue();
     }
 
