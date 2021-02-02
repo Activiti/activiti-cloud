@@ -954,7 +954,7 @@ public class ActivitiGraphQLStarterIT {
 
 
     @Test
-    public void testGraphqlWsSubprotocolServerWithUserRoleNotAuthorized()
+    public void testGraphqlWsSubprotocolServerWithUserRoleAuthorized()
             throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
@@ -990,12 +990,19 @@ public class ActivitiGraphQLStarterIT {
                 .doOnError(i -> System.err.println("Failed requesting server: " + i))
                 .subscribe();
 
-        String expected = objectMapper.writeValueAsString(GraphQLMessage.builder()
-                                                                  .type(GraphQLMessageType.CONNECTION_ERROR)
-                                                                  .build());
+        String ackMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
+                                                                    .type(GraphQLMessageType.CONNECTION_ACK)
+                                                                    .build());
+
+        String kaMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
+                                                                   .type(GraphQLMessageType.KA)
+                                                                   .build());
+
         StepVerifier.create(output)
-                .expectNext(expected)
-                .verifyComplete();
+                .expectNext(ackMessage)
+                .expectNext(kaMessage)
+                .expectComplete()
+                .verify(TIMEOUT);        
     }
 
     @Test
