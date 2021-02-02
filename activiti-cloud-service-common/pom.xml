@@ -44,7 +44,7 @@
     <springfox.version>3.0.0</springfox.version>
     <swagger.version>1.5.20</swagger.version>
     <xstream.version>1.4.15</xstream.version>
-    <json-unit.version>2.23.0</json-unit.version>
+    <json-unit.version>2.24.0</json-unit.version>
   </properties>
   <dependencyManagement>
     <dependencies>
