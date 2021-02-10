@@ -36,7 +36,6 @@ import org.springframework.integration.handler.AbstractMessageProducingHandler;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.advice.HandleMessageAdvice;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
-import org.springframework.integration.support.channel.HeaderChannelRegistry;
 import org.springframework.messaging.Message;
 
 public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
@@ -68,17 +67,12 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
                                             .orElse(new String[] {});
     }
 
-    HeaderChannelRegistry r;
-
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
         return this.from(processor.input())
                    .headerFilter(inputHeadersToRemove)
                    .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
-                                        .enrichHeaders(enricher -> enricher.defaultOverwrite(true)
-                                                                           .header(DISCARD_CHANNEL, DISCARD_CHANNEL)
-                                                                           .header(ERROR_CHANNEL, ERROR_CHANNEL)
-                                                                           .header(REPLY_CHANNEL, REPLY_CHANNEL))
+                                        .enrichHeaders(enricher -> enricher.headerChannelsToString())
                                         .filter(Message.class,
                                                 this::filterMessage,
                                                 filterSpec -> filterSpec.id(FILTER_MESSAGE)
