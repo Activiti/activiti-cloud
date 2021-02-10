@@ -20,11 +20,11 @@ import static org.springframework.integration.IntegrationMessageHeaderAccessor.C
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
+import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
 import org.springframework.integration.annotation.Filter;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -52,27 +52,26 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     private final MessageConnectorAggregator aggregator;
     private final IdempotentReceiverInterceptor interceptor;
     private final HandleMessageAdvice[] advices;
-    private final String[] inputHeadersToRemove;
+    private final MessageAggregatorProperties properties;
 
     public MessageConnectorIntegrationFlow(MessageConnectorProcessor processor,
                                            MessageConnectorAggregator aggregator,
                                            IdempotentReceiverInterceptor interceptor,
                                            List<? extends HandleMessageAdvice> advices,
-                                           String[] inputHeadersToRemove) {
+                                           MessageAggregatorProperties properties) {
         this.processor = processor;
         this.aggregator = aggregator;
         this.interceptor = interceptor;
         this.advices = advices.toArray(new HandleMessageAdvice[] {});
-        this.inputHeadersToRemove = Optional.ofNullable(inputHeadersToRemove)
-                                            .orElse(new String[] {});
+        this.properties = properties;
     }
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
         return this.from(processor.input())
-                   .headerFilter(inputHeadersToRemove)
+                   .headerFilter(properties.getInputHeadersToRemove())
                    .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
-                                        .enrichHeaders(enricher -> enricher.headerChannelsToString())
+                                        .enrichHeaders(enricher -> enricher.headerChannelsToString(properties.getHeaderChannelsTimeToLiveExpression()))
                                         .filter(Message.class,
                                                 this::filterMessage,
                                                 filterSpec -> filterSpec.id(FILTER_MESSAGE)

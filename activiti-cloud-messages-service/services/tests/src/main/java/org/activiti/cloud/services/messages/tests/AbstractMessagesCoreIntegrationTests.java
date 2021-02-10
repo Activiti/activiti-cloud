@@ -148,8 +148,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     }
 
     @Test
-    public void shouldConfigureInputHeadersToRemove() throws InterruptedException, JsonProcessingException {
+    public void shouldConfigureInputHeadersToRemove() {
         assertThat(messageAggregatorProperties.getInputHeadersToRemove()).contains("kafka_consumer");
+    }
+
+    @Test
+    public void shouldConfigureHeaderChannelsTimeToLiveExpression() {
+        assertThat(messageAggregatorProperties.getHeaderChannelsTimeToLiveExpression()).contains("headers['headerChannelsTTL'] ?: 120000");
     }
 
     @Test

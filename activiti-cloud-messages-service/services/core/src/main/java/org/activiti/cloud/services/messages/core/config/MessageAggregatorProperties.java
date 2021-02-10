@@ -40,7 +40,12 @@ public class MessageAggregatorProperties {
     /**
      * Comma separated list of input headers to be removed, i.e. kafka_consumer
      */
-    private String[] inputHeadersToRemove;
+    private String[] inputHeadersToRemove = new String[] {};
+
+    /**
+     * HeaderChannelRegistry reaper delay so that the the channel mapping is retained for at least the specified time, i.e.
+     */
+    private String headerChannelsTimeToLiveExpression = null;
 
 
     public Expression getGroupTimeout() {
@@ -65,6 +70,16 @@ public class MessageAggregatorProperties {
 
     public void setInputHeadersToRemove(String[] headersToRemove) {
         this.inputHeadersToRemove = headersToRemove;
+    }
+
+
+    public String getHeaderChannelsTimeToLiveExpression() {
+        return headerChannelsTimeToLiveExpression;
+    }
+
+
+    public void setHeaderChannelsTimeToLiveExpression(String headerChannelsTimeToLiveExpression) {
+        this.headerChannelsTimeToLiveExpression = headerChannelsTimeToLiveExpression;
     }
 
 }

@@ -111,7 +111,7 @@ public class MessagesCoreAutoConfiguration {
                                                    aggregator,
                                                    interceptor,
                                                    adviceChain,
-                                                   properties.getInputHeadersToRemove());
+                                                   properties);
     }
 
     @Bean
