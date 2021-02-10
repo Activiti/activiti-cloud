@@ -20,6 +20,7 @@ import static org.springframework.integration.IntegrationMessageHeaderAccessor.C
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
@@ -35,6 +36,7 @@ import org.springframework.integration.handler.AbstractMessageProducingHandler;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.advice.HandleMessageAdvice;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
+import org.springframework.integration.support.channel.HeaderChannelRegistry;
 import org.springframework.messaging.Message;
 
 public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
@@ -43,33 +45,46 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     private static final String AGGREGATOR = "aggregator";
     private static final String ENRICH_HEADERS = "enrichHeaders";
     private static final String FILTER_MESSAGE = "filterMessage";
-    public final static String DISCARD_CHANNEL = "discardChannel";
-    
+    public static final String DISCARD_CHANNEL = "discardChannel";
+    public static final String REPLY_CHANNEL = "replyChannel";
+    public static final String ERROR_CHANNEL = "errorChannel";
+
     private final MessageConnectorProcessor processor;
     private final MessageConnectorAggregator aggregator;
     private final IdempotentReceiverInterceptor interceptor;
     private final HandleMessageAdvice[] advices;
+    private final String[] inputHeadersToRemove;
 
     public MessageConnectorIntegrationFlow(MessageConnectorProcessor processor,
                                            MessageConnectorAggregator aggregator,
                                            IdempotentReceiverInterceptor interceptor,
-                                           List<? extends HandleMessageAdvice> advices) {
+                                           List<? extends HandleMessageAdvice> advices,
+                                           String[] inputHeadersToRemove) {
         this.processor = processor;
         this.aggregator = aggregator;
         this.interceptor = interceptor;
         this.advices = advices.toArray(new HandleMessageAdvice[] {});
+        this.inputHeadersToRemove = Optional.ofNullable(inputHeadersToRemove)
+                                            .orElse(new String[] {});
     }
+
+    HeaderChannelRegistry r;
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
         return this.from(processor.input())
+                   .headerFilter(inputHeadersToRemove)
                    .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
+                                        .enrichHeaders(enricher -> enricher.defaultOverwrite(true)
+                                                                           .header(DISCARD_CHANNEL, DISCARD_CHANNEL)
+                                                                           .header(ERROR_CHANNEL, ERROR_CHANNEL)
+                                                                           .header(REPLY_CHANNEL, REPLY_CHANNEL))
                                         .filter(Message.class,
                                                 this::filterMessage,
                                                 filterSpec -> filterSpec.id(FILTER_MESSAGE)
                                                                         .discardChannel(DISCARD_CHANNEL))
                                         .enrichHeaders(enricher -> enricher.id(ENRICH_HEADERS)
-                                                                           .headerFunction(CORRELATION_ID, 
+                                                                           .headerFunction(CORRELATION_ID,
                                                                                            this::enrichHeaders))
                                         .transform(Transformers.fromJson(MessageEventPayload.class))
                                         .handle(this.aggregator(),
@@ -83,11 +98,11 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
                                                 .replyTimeout(0L)
                                                 .advice(interceptor));
     }
-    
+
     public AbstractMessageProducingHandler aggregator() {
         return this.aggregator;
     }
-    
+
     @ServiceActivator
     public void aggregator(Message<?> message) {
         aggregator.handleMessage(message);
@@ -103,5 +118,5 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     public String enrichHeaders(Message<?> message) {
         return Correlations.getCorrelationId(message);
     }
-    
+
 }

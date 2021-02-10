@@ -88,10 +88,10 @@ public class MessagesCoreAutoConfiguration {
     private static final String CONTROL_BUS = "controlBus";
     private static final String CONTROL_BUS_FLOW = "controlBusFlow";
     private static final String MESSAGE_CONNECTOR_INTEGRATION_FLOW = "messageConnectorIntegrationFlow";
-    
+
     @Autowired
     private MessageAggregatorProperties properties;
-    
+
     @Bean
     @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
     public IntegrationFlow controlBusFlow() {
@@ -99,20 +99,21 @@ public class MessagesCoreAutoConfiguration {
                                .controlBus(spec -> spec.id(CONTROL_BUS))
                                .get();
     }
-    
+
     @Bean
     @DependsOn(MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN)
     @ConditionalOnMissingBean(name = MESSAGE_CONNECTOR_INTEGRATION_FLOW)
     public IntegrationFlow messageConnectorIntegrationFlow(MessageConnectorProcessor processor,
                                                            MessageConnectorAggregator aggregator,
                                                            IdempotentReceiverInterceptor interceptor,
-                                                           List<MessageConnectorHandlerAdvice> adviceChain) { 
+                                                           List<MessageConnectorHandlerAdvice> adviceChain) {
         return new MessageConnectorIntegrationFlow(processor,
                                                    aggregator,
                                                    interceptor,
-                                                   adviceChain);
+                                                   adviceChain,
+                                                   properties.getInputHeadersToRemove());
     }
-    
+
     @Bean
     @ConditionalOnMissingBean(name = DISCARD_CHANNEL)
     public MessageChannel discardChannel() {
@@ -144,13 +145,13 @@ public class MessagesCoreAutoConfiguration {
     public LockTemplate lockTemplate(LockRegistry lockRegistry) {
         return new LockTemplate(lockRegistry);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CorrelationStrategy correlationStrategy() {
-        return new HeaderAttributeCorrelationStrategy(IntegrationMessageHeaderAccessor.CORRELATION_ID); 
+        return new HeaderAttributeCorrelationStrategy(IntegrationMessageHeaderAccessor.CORRELATION_ID);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean(name = "metadataStoreKeyStrategy")
     public MessageProcessor<String> metadataStoreKeyStrategy() {
@@ -159,7 +160,7 @@ public class MessagesCoreAutoConfiguration {
                             .orElseGet(() -> m.getHeaders().getId()
                                                            .toString());
     }
-    
+
     @Bean
     @ConditionalOnMissingBean(name = "messageReceivedHandlerAdvice")
     public MessageConnectorHandlerAdvice messageReceivedHandlerAdvice(MessageGroupStore messageStore,
@@ -179,7 +180,7 @@ public class MessagesCoreAutoConfiguration {
                                                       correlationStrategy,
                                                       lockTemplate);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public MetadataStoreSelector metadataStoreSelector(ConcurrentMetadataStore metadataStore,
@@ -187,14 +188,14 @@ public class MessagesCoreAutoConfiguration {
         return new MetadataStoreSelector(metadataStoreKeyStrategy,
                                          metadataStore);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public IdempotentReceiverInterceptor idempotentReceiverInterceptor(MetadataStoreSelector metadataStoreSelector) {
         IdempotentReceiverInterceptor interceptor = new IdempotentReceiverInterceptor(metadataStoreSelector);
-        
+
         interceptor.setDiscardChannelName("errorChannel");
-        
+
         return interceptor;
     }
 
@@ -206,7 +207,7 @@ public class MessagesCoreAutoConfiguration {
                            .then(new ReceiveMessagePayloadGroupProcessor(messageGroupStore))
                            .build();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public MessageGroupProcessor messageConnectorPayloadGroupProcessor(MessageGroupProcessorChain messageGroupProcessorChain) {
@@ -220,19 +221,19 @@ public class MessagesCoreAutoConfiguration {
                            .first(new MessageSentReleaseHandler())
                            .build();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ReleaseStrategy messageConnectorReleaseStrategy(MessageGroupReleaseChain messageGroupReleaseChain) {
         return new MessageGroupReleaseStrategyChain(messageGroupReleaseChain);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public PlatformTransactionManager transactionManager() {
       return new PseudoTransactionManager();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public MessageGroupStore messageStore() {
@@ -244,12 +245,12 @@ public class MessagesCoreAutoConfiguration {
     public ConcurrentMetadataStore metadataStore() {
         return new SimpleMetadataStore();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public LockRegistry lockRegistry() {
         return new DefaultLockRegistry();
-    }    
-    
-    
+    }
+
+
 }

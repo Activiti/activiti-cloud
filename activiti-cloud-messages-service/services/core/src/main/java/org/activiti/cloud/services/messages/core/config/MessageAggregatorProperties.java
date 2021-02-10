@@ -20,7 +20,7 @@ import org.springframework.expression.Expression;
 
 /**
  * Configuration properties for the Messages Service.
- * 
+ *
  */
 @ConfigurationProperties(MessageAggregatorProperties.PREFIX)
 public class MessageAggregatorProperties {
@@ -36,7 +36,12 @@ public class MessageAggregatorProperties {
      * Persistence message store entity: table prefix in RDBMS, collection name in MongoDb, etc
      */
     private String messageStoreEntity;
-    
+
+    /**
+     * Comma separated list of input headers to be removed, i.e. kafka_consumer
+     */
+    private String[] inputHeadersToRemove;
+
 
     public Expression getGroupTimeout() {
         return this.groupTimeout;
@@ -52,6 +57,14 @@ public class MessageAggregatorProperties {
 
     public void setMessageStoreEntity(String messageStoreEntity) {
         this.messageStoreEntity = messageStoreEntity;
+    }
+
+    public String[] getInputHeadersToRemove() {
+        return inputHeadersToRemove;
+    }
+
+    public void setInputHeadersToRemove(String[] headersToRemove) {
+        this.inputHeadersToRemove = headersToRemove;
     }
 
 }
