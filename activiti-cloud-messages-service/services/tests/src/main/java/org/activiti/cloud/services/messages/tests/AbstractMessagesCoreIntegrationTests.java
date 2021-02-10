@@ -43,6 +43,7 @@ import org.activiti.api.process.model.events.MessageSubscriptionEvent.MessageSub
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
+import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -123,6 +124,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     protected PlatformTransactionManager transactionManager;
 
     @Autowired
+    protected MessageAggregatorProperties messageAggregatorProperties;
+
+    @Autowired
     protected AbstractMessageChannel output;
 
     @TestConfiguration
@@ -141,6 +145,11 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             return MessageChannels.queue()
                                   .get();
         }
+    }
+
+    @Test
+    public void shouldConfigureInputHeadersToRemove() throws InterruptedException, JsonProcessingException {
+        assertThat(messageAggregatorProperties.getInputHeadersToRemove()).contains("kafka_consumer");
     }
 
     @Test
