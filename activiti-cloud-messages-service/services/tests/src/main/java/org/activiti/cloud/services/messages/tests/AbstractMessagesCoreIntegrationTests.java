@@ -154,7 +154,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @Test
     public void shouldConfigureHeaderChannelsTimeToLiveExpression() {
-        assertThat(messageAggregatorProperties.getHeaderChannelsTimeToLiveExpression()).contains("headers['headerChannelsTTL'] ?: 120000");
+        assertThat(messageAggregatorProperties.getHeaderChannelsTimeToLiveExpression()).contains("headers['headerChannelsTTL']?:60000");
     }
 
     @Test
