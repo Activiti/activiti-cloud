@@ -24,6 +24,7 @@ import java.util.Objects;
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
+import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
 import org.springframework.integration.annotation.Filter;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -43,33 +44,40 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     private static final String AGGREGATOR = "aggregator";
     private static final String ENRICH_HEADERS = "enrichHeaders";
     private static final String FILTER_MESSAGE = "filterMessage";
-    public final static String DISCARD_CHANNEL = "discardChannel";
-    
+    public static final String DISCARD_CHANNEL = "discardChannel";
+    public static final String REPLY_CHANNEL = "replyChannel";
+    public static final String ERROR_CHANNEL = "errorChannel";
+
     private final MessageConnectorProcessor processor;
     private final MessageConnectorAggregator aggregator;
     private final IdempotentReceiverInterceptor interceptor;
     private final HandleMessageAdvice[] advices;
+    private final MessageAggregatorProperties properties;
 
     public MessageConnectorIntegrationFlow(MessageConnectorProcessor processor,
                                            MessageConnectorAggregator aggregator,
                                            IdempotentReceiverInterceptor interceptor,
-                                           List<? extends HandleMessageAdvice> advices) {
+                                           List<? extends HandleMessageAdvice> advices,
+                                           MessageAggregatorProperties properties) {
         this.processor = processor;
         this.aggregator = aggregator;
         this.interceptor = interceptor;
         this.advices = advices.toArray(new HandleMessageAdvice[] {});
+        this.properties = properties;
     }
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
         return this.from(processor.input())
+                   .headerFilter(properties.getInputHeadersToRemove())
                    .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
+                                        .enrichHeaders(enricher -> enricher.headerChannelsToString(properties.getHeaderChannelsTimeToLiveExpression()))
                                         .filter(Message.class,
                                                 this::filterMessage,
                                                 filterSpec -> filterSpec.id(FILTER_MESSAGE)
                                                                         .discardChannel(DISCARD_CHANNEL))
                                         .enrichHeaders(enricher -> enricher.id(ENRICH_HEADERS)
-                                                                           .headerFunction(CORRELATION_ID, 
+                                                                           .headerFunction(CORRELATION_ID,
                                                                                            this::enrichHeaders))
                                         .transform(Transformers.fromJson(MessageEventPayload.class))
                                         .handle(this.aggregator(),
@@ -83,11 +91,11 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
                                                 .replyTimeout(0L)
                                                 .advice(interceptor));
     }
-    
+
     public AbstractMessageProducingHandler aggregator() {
         return this.aggregator;
     }
-    
+
     @ServiceActivator
     public void aggregator(Message<?> message) {
         aggregator.handleMessage(message);
@@ -103,5 +111,5 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     public String enrichHeaders(Message<?> message) {
         return Correlations.getCorrelationId(message);
     }
-    
+
 }
