@@ -15,14 +15,14 @@
  */
 package org.activiti.cloud.modeling.api.process;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Model extensions
@@ -39,6 +39,9 @@ public class Extensions {
 
     @JsonProperty("constants")
     private Map<String,  Map<String, Constant>> constants = new HashMap<>();
+
+    @JsonProperty("templates")
+    private Map<String,  Map<String, Constant>> templates = new HashMap<>();
 
     public Map<String, ProcessVariable> getProcessVariables() {
         return processVariables;
@@ -64,13 +67,20 @@ public class Extensions {
         this.constants = constants;
     }
 
+    public Map<String, Map<String, Constant>> getTemplates() {
+        return templates;
+    }
+
+    public void setTemplates(Map<String, Map<String, Constant>> templates) {
+        this.templates = templates;
+    }
+
     public Map<String,Object> getAsMap(){
         Map<String,Object> extensions = new HashMap<>();
         extensions.put("properties",this.processVariables);
         extensions.put("mappings",this.variablesMappings);
         extensions.put("constants",this.constants);
+        extensions.put("templates",this.templates);
         return extensions;
     }
-
-
 }
