@@ -1,0 +1,17 @@
+{
+  "id": "process-db995012-b417-4cea-a981",
+  "extensions": {
+    "Process_test": {
+      "templates": {
+        "Task1": {
+          "type": "file",
+          "value": null
+        },
+        "Task2": {
+          "type": "something",
+          "value": "file1"
+        }
+      }
+    }
+  }
+}
