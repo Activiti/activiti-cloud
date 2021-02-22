@@ -856,4 +856,54 @@ public class ModelValidationControllerIT {
                 "The extensions for process 'Process_RankMovieId' contains INPUTS mappings to task 'Task_1spvopd' referencing an unknown connector action 'movies.getMovieDesc'",
                 "The extensions for process 'Process_RankMovieId' contains OUTPUTS mappings to task 'Task_1spvopd' referencing an unknown connector action 'movies.getMovieDesc'");
     }
+
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessExtensionsWithValidTemplateType() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "Process_x",
+                                                                                    new Extensions(),
+                                                                                    resourceAsByteArray("process/x-19022.bpmn20.xml")));
+
+        MockMultipartFile file = multipartExtensionsFile(processModel,
+                                                         resourceAsByteArray("process-extensions/valid-templates-extensions.json"));
+
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate/extensions",
+                                  processModel.getId()).file(file))
+               .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidTemplatesContent() throws Exception {
+
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-templates-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "process-model",
+                                                                                    new Extensions()));
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
+                                   processModel.getId()).file(file));
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+                .isEqualTo("#/extensions/Process_test/templates: 2 schema violations found");
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(2)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsOnly(tuple("something is not a valid enum value",
+                                    "#/extensions/Process_test/templates/Task2/type: something is not a valid enum value"),
+                              tuple("expected type: String, found: Null",
+                                    "#/extensions/Process_test/templates/Task1/value: expected type: String, found: Null"));
+    }
 }

@@ -54,10 +54,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -86,6 +87,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
@@ -1378,4 +1381,5 @@ public class ModelControllerIT {
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
                 .isEqualTo(String.format("A model with the same type already exists within the project with id: %s", project.getId()));
     }
+
 }
