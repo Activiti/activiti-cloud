@@ -43,6 +43,15 @@ import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TAS
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_UPDATED;
+import static org.activiti.cloud.services.events.message.ExecutionContextMessageHeaders.DEPLOYMENT_NAME;
+import static org.activiti.cloud.services.events.message.ExecutionContextMessageHeaders.DEPLOYMENT_VERSION;
+import static org.activiti.cloud.services.events.message.ExecutionContextMessageHeaders.ROOT_BUSINESS_KEY;
+import static org.activiti.cloud.services.events.message.ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_ID;
+import static org.activiti.cloud.services.events.message.ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_KEY;
+import static org.activiti.cloud.services.events.message.ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_NAME;
+import static org.activiti.cloud.services.events.message.ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_VERSION;
+import static org.activiti.cloud.services.events.message.ExecutionContextMessageHeaders.ROOT_PROCESS_INSTANCE_ID;
+import static org.activiti.cloud.services.events.message.ExecutionContextMessageHeaders.ROOT_PROCESS_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -63,6 +72,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.runtime.model.impl.ApplicationElementImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.TaskCandidateGroup;
@@ -112,17 +122,18 @@ import org.springframework.test.context.TestPropertySource;
     initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class AuditProducerIT {
 
+    private static final int VERSION_1 = 1;
     private static final String SIMPLE_SUB_PROCESS1 = "simpleSubProcess1";
     private static final String SIMPLE_SUB_PROCESS2 = "simpleSubProcess2";
     private static final String CALL_TWO_SUB_PROCESSES = "callTwoSubProcesses";
 
     public static final String ROUTING_KEY_HEADER = "routingKey";
     public static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
-    public static final String[] REQUIRED_EXECUTION_CONTEXT_HEADERS = {"rootProcessInstanceId", "rootProcessDefinitionId", "rootProcessDefinitionKey", "rootProcessDefinitionVersion", "deploymentId", "deploymentName", "appVersion"};
+    public static final String[] REQUIRED_EXECUTION_CONTEXT_HEADERS = {"rootProcessInstanceId", "rootProcessDefinitionId", "rootProcessDefinitionKey", "rootProcessDefinitionVersion", "deploymentId", "deploymentName", "deploymentVersion"};
     public static final String[] OPTIONAL_EXECUTION_CONTEXT_HEADERS = {"rootBusinessKey", "rootProcessName", "rootProcessDefinitionName"};
 
     public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS,
-        REQUIRED_EXECUTION_CONTEXT_HEADERS)
+                                                                  REQUIRED_EXECUTION_CONTEXT_HEADERS)
                                                               .flatMap(Stream::of)
                                                               .toArray(String[]::new);
 
@@ -670,7 +681,15 @@ public class AuditProducerIT {
     @Test
     public void testTwoSubProcesses() {
         //given
-        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(processDefinitionIds.get(CALL_TWO_SUB_PROCESSES));
+        String businessKey = "testBusinessKey";
+        String processDefinitionId =  processDefinitionIds.get(CALL_TWO_SUB_PROCESSES);
+        String processName = "Test " + CALL_TWO_SUB_PROCESSES;
+        StartProcessPayload payload = new StartProcessPayloadBuilder().withProcessDefinitionId(processDefinitionId)
+                                                                      .withName(processName)
+                                                                      .withBusinessKey(businessKey)
+                                                                      .build();
+
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(payload);
 
         String processInstanceId = processInstance.getBody().getId();
 
@@ -688,7 +707,25 @@ public class AuditProducerIT {
         String subProcessId2 = subprocessIds.get(1);
 
         await().untilAsserted(() -> {
-            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS)
+                                                          .extracting(ROOT_PROCESS_INSTANCE_ID,
+                                                                      ROOT_PROCESS_NAME,
+                                                                      ROOT_PROCESS_DEFINITION_ID,
+                                                                      ROOT_PROCESS_DEFINITION_KEY,
+                                                                      ROOT_PROCESS_DEFINITION_NAME,
+                                                                      ROOT_PROCESS_DEFINITION_VERSION,
+                                                                      DEPLOYMENT_NAME,
+                                                                      DEPLOYMENT_VERSION,
+                                                                      ROOT_BUSINESS_KEY)
+                                                          .containsExactly(processInstanceId,
+                                                                           processName,
+                                                                           processDefinitionId,
+                                                                           CALL_TWO_SUB_PROCESSES,
+                                                                           CALL_TWO_SUB_PROCESSES,
+                                                                           VERSION_1,
+                                                                           "SpringAutoDeployment",
+                                                                           VERSION_1,
+                                                                           businessKey);
 
             assertThat(streamHandler.getLatestReceivedEvents())
                 .extracting(CloudRuntimeEvent::getEventType,
@@ -724,7 +761,6 @@ public class AuditProducerIT {
                 );
         });
 
-        // Clean up
         // Clean up
         runtimeService.deleteProcessInstance(subProcessId1, "Clean up");
         runtimeService.deleteProcessInstance(subProcessId2, "Clean up");
