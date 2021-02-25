@@ -78,7 +78,7 @@ public class ExecutionContextMessageBuilderAppenderTest {
                 .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_NAME, MOCK_PROCESS_DEFINITION_NAME)
                 .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_ID, MOCK_DEPLOYMENT_ID)
                 .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, MOCK_DEPLOYMENT_NAME)
-                .containsEntry(ExecutionContextMessageHeaders.APP_VERSION, MOCK_APP_VERSION);
+                .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_VERSION, MOCK_APP_VERSION);
 
     }
 

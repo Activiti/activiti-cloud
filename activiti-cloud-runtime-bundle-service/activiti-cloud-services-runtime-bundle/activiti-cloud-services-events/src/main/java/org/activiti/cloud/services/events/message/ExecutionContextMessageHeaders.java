@@ -19,7 +19,7 @@ package org.activiti.cloud.services.events.message;
  * Internal message header key names used in messages with IntegrationContext payload type
  *
  */
-class ExecutionContextMessageHeaders {
+public class ExecutionContextMessageHeaders {
 
     public final static String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
     public final static String ROOT_BUSINESS_KEY = "rootBusinessKey";
@@ -31,8 +31,7 @@ class ExecutionContextMessageHeaders {
     public final static String ROOT_PROCESS_DEFINITION_NAME = "rootProcessDefinitionName";
     public final static String DEPLOYMENT_ID = "deploymentId";
     public final static String DEPLOYMENT_NAME = "deploymentName";
+    public final static String DEPLOYMENT_VERSION = "deploymentVersion";
     public final static String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
     public final static String PARENT_PROCESS_INSTANCE_NAME = "parentProcessInstanceName";
-    public final static String APP_VERSION = "appVersion";
-
 }
