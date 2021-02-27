@@ -30,23 +30,23 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.events.MessageSubscriptionCancelledEvent;
-import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.TimerPayload;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
 import org.activiti.api.runtime.model.impl.BPMNErrorImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
+import org.activiti.api.runtime.model.impl.DeploymentImpl;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
-import org.activiti.api.runtime.model.impl.DeploymentImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
@@ -65,6 +65,7 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
@@ -82,7 +83,6 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployedEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
@@ -912,7 +912,7 @@ public class AuditServiceIT {
                                                                "104",
                                                                "manually cancelled"));
 
-        BPMNActivityImpl bpmnActivityStarted = new BPMNActivityImpl("1",
+        BPMNActivityImpl bpmnActivityStarted = new BPMNActivityImpl("bpmnActivityStarted1",
                                                                     "My Service Task",
                                                                     "Service Task");
 
@@ -924,7 +924,7 @@ public class AuditServiceIT {
 
         testEvents.add(cloudBPMNActivityStartedEvent);
 
-        BPMNActivityImpl bpmnActivityStarted2 = new BPMNActivityImpl("2",
+        BPMNActivityImpl bpmnActivityStarted2 = new BPMNActivityImpl("bpmnActivityStarted2",
                                                                      "My User Task",
                                                                      "User Task");
 
@@ -936,7 +936,7 @@ public class AuditServiceIT {
 
         testEvents.add(cloudBPMNActivityStartedEvent2);
 
-        BPMNActivityImpl bpmnActivityStarted3 = new BPMNActivityImpl("2",
+        BPMNActivityImpl bpmnActivityStarted3 = new BPMNActivityImpl("bpmnActivityStarted3",
                                                                      "My User Task",
                                                                      "User Task");
 
@@ -987,7 +987,7 @@ public class AuditServiceIT {
 
         testEvents.add(cloudProcessStartedEvent);
 
-        testEvents.add(new CloudProcessSuspendedEventImpl("ProcessStartedEventId",
+        testEvents.add(new CloudProcessSuspendedEventImpl("ProcessSuspendedEventId",
                                            System.currentTimeMillis(),
                                            processInstanceStarted));
 
@@ -1062,15 +1062,15 @@ public class AuditServiceIT {
                                                                                                                                Arrays.asList(error.getCause()
                                                                                                                                                   .getStackTrace()));
         testEvents.add(cloudIntegrationErrorReceivedEvent);
-        
+
         DeploymentImpl deployment = new DeploymentImpl();
         deployment.setId("deploymentId");
         deployment.setVersion(1);
         deployment.setName("SpringAutoDeployment");
-        
+
         CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
         testEvents.add(cloudApplicationDeployedEvent);
-        
+
         return testEvents;
     }
 
@@ -1173,7 +1173,7 @@ public class AuditServiceIT {
                     ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name());
 
             ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
-            
+
             //then
             Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
