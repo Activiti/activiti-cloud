@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 @Transactional
 public class MessageProducerCommandContextCloseListener implements CommandContextCloseListener {
 
+    public static final String ROOT_EXECUTION_CONTEXT = "rootExecutionContext";
     public static final String PROCESS_ENGINE_EVENTS = "processEngineEvents";
 
     private final ProcessEngineChannels producer;
@@ -58,6 +59,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         List<CloudRuntimeEvent<?, ?>> events = commandContext.getGenericAttribute(PROCESS_ENGINE_EVENTS);
 
         if (events != null && !events.isEmpty()) {
+            ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(ROOT_EXECUTION_CONTEXT);
 
             // Add runtime bundle context attributes to every event
             CloudRuntimeEvent<?, ?>[] payload = events.stream()
@@ -67,7 +69,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
                                                       .toArray(CloudRuntimeEvent<?, ?>[]::new);
 
             // Inject message headers with null execution context as there may be events from several process instances
-            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderChainFactory.create(null)
+            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderChainFactory.create(rootExecutionContext)
                                                                                    .withPayload(payload)
                                                                                    .build();
             // Send message to audit producer channel
