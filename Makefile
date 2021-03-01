@@ -1,4 +1,7 @@
 RELEASE_VERSION := $(or $(shell cat VERSION), $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout))
+ifeq ($(FRONT_RELEASE_VERSION),)
+FRONT_RELEASE_VERSION := master
+endif
 ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR := .git/activiti-cloud-full-chart
 ACTIVITI_CLOUD_FULL_EXAMPLE_DIR := $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR)/charts/activiti-cloud-full-example
 ACTIVITI_CLOUD_FULL_CHART_BRANCH := dependency-activiti-cloud-application-$(RELEASE_VERSION)
@@ -58,7 +61,7 @@ create-pr: update-chart
 update-chart: clone-chart
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
 		yq write --inplace Chart.yaml 'version' $(RELEASE_VERSION) && \
-		env BACKEND_VERSION=$(RELEASE_VERSION) FRONTEND_VERSION=master make update-docker-images
+		env BACKEND_VERSION=$(RELEASE_VERSION) FRONTEND_VERSION=$(FRONT_RELEASE_VERSION) make update-docker-images
 
 release: update-chart
 	echo "RELEASE_VERSION: $(RELEASE_VERSION)"
