@@ -61,7 +61,8 @@
     <bpmn:endEvent id="EndEvent_08jb76l">
       <bpmn:incoming>SequenceFlow_18k8ej0</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_1vtyt8s" name="IntermediateCloud&#10;Message3">
+    <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_1vtyt8s" name="IntermediateCloud
+&#10;Message3">
       <bpmn:incoming>SequenceFlow_1o51o9m</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_18k8ej0</bpmn:outgoing>
       <bpmn:messageEventDefinition messageRef="Message_1sgleex" activiti:correlationKey="${execution.processInstanceBusinessKey}" />
