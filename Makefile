@@ -53,7 +53,7 @@ create-pr: update-chart
 update-chart: clone-chart
 	$(eval FRONTEND_VERSION ?= master)
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
-		yq write --inplace Chart.yaml 'version' $(RELEASE_VERSION) && \
+		env VERSION=$(RELEASE_VERSION) make version && \
 		env BACKEND_VERSION=$(RELEASE_VERSION) FRONTEND_VERSION=$(FRONTEND_VERSION) make update-docker-images
 
 release: update-chart
