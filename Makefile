@@ -24,17 +24,17 @@ install: release
 	echo helm $(helm version --short)
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
 		helm dep up && \
-		helm upgrade ${PREVIEW_NAMESPACE} . \
+		helm upgrade ${PREVIEW_NAME} . \
 			--install \
 			--set global.gateway.http=false \
 			--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
-			--namespace ${PREVIEW_NAMESPACE} \
+			--namespace ${PREVIEW_NAME} \
 			--create-namespace \
 			--wait
 
 delete:
-	helm uninstall ${PREVIEW_NAMESPACE} --namespace ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
-	kubectl delete ns ${PREVIEW_NAMESPACE} || echo "try to remove namespace ${PREVIEW_NAMESPACE}"
+	helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME} || echo "try to remove helm chart"
+	kubectl delete ns ${PREVIEW_NAME} || echo "try to remove namespace ${PREVIEW_NAME}"
 
 clone-chart:
 	rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \

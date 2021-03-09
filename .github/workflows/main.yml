@@ -96,16 +96,16 @@ jobs:
           echo set BRANCH_NAME=$BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
+      - name: Set PREVIEW_NAME env variable
+        run: |
+          PREVIEW_NAME=${BRANCH_NAME:0:28}-$GITHUB_RUN_NUMBER
+          echo set PREVIEW_NAME=$PREVIEW_NAME
+          echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
+
       - name: Set preview version
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          echo 0.0.1-$BRANCH_NAME-$GITHUB_RUN_NUMBER-SNAPSHOT > VERSION
-
-      - name: Set PREVIEW_NAMESPACE env variable
-        run: |
-          PREVIEW_NAMESPACE=$BRANCH_NAME-$GITHUB_RUN_NUMBER
-          echo set PREVIEW_NAMESPACE=$PREVIEW_NAMESPACE
-          echo "PREVIEW_NAMESPACE=$PREVIEW_NAMESPACE" >> $GITHUB_ENV
+          echo 0.0.1-$PREVIEW_NAME-SNAPSHOT > VERSION
 
       - name: Set VERSION env variable
         run: |
@@ -154,8 +154,8 @@ jobs:
           export SSO_PROTOCOL=https
           export GATEWAY_PROTOCOL=https
           export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN
+          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
 
           make install
 
@@ -178,7 +178,7 @@ jobs:
             sleep 5
           done
 
-          kubectl get all -n $PREVIEW_NAMESPACE
+          kubectl get all -n $PREVIEW_NAME
 
           make test/modeling-acceptance-tests
           make test/runtime-acceptance-tests
