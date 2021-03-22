@@ -2,7 +2,7 @@ pull_request_rules:
   - name: automatic merge with strict
     conditions:
       - author=alfresco-build-user
-      - status-success=CI / build (pull_request)
+      - status-success=build
       - label!=do-not-merge
     actions:
       merge:
