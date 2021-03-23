@@ -64,6 +64,11 @@
   </changeSet>
 
   <changeSet author="activiti-audit" id="alter5-oracle-schema-m11" dbms="oracle">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <indexExists indexName="audit_event_event_id_idx"/>
+      </not>
+    </preConditions>  
     <sqlFile dbms="oracle"
              encoding="utf8"
              path="changelog/05-alter.oracle.schema.m11.sql"
@@ -71,7 +76,6 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
-
 
   <changeSet author="activiti-audit"
              id="initial-schema-m3" dbms="postgresql">
