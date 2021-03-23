@@ -34,12 +34,12 @@
     <module>activiti-cloud-service-common-liquibase</module>
   </modules>
   <properties>
-    <activiti.version>7.1.314</activiti.version>
+    <activiti.version>7.1.318</activiti.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <java-semver.version>0.9.0</java-semver.version>
-    <keycloak.version>12.0.3</keycloak.version>
+    <keycloak.version>12.0.4</keycloak.version>
     <resteasy.version>3.13.2.Final</resteasy.version>
     <logstash.version>6.6</logstash.version>
     <springfox.version>3.0.0</springfox.version>
