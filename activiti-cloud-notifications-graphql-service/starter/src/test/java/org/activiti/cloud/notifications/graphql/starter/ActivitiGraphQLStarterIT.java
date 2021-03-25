@@ -172,7 +172,15 @@ public class ActivitiGraphQLStarterIT {
                             .log("client-send")
                             .subscribe();
 
-                    return i.receive().asString();
+                    return i.aggregateFrames()
+                            .receive()
+                            .asString()
+                            .doOnCancel(() -> {
+                                // Let's close websocket and complete data processor
+                                o.sendClose()
+                                 .doOnTerminate(output::onComplete)
+                                 .subscribe();
+                            });
                 })
                 .log("client-received")
                 .take(2)
@@ -270,16 +278,23 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1, event2))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1, event2))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        // Let's close websocket and complete data processor
+                        o.sendClose()
+                         .doOnTerminate(data::onComplete)
+                         .subscribe();
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -362,16 +377,23 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                       // Let's close websocket and complete data processor
+                        o.sendClose()
+                         .doOnTerminate(data::onComplete)
+                         .subscribe();
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -456,16 +478,23 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        // Let's close websocket and complete data processor
+                        o.sendClose()
+                         .doOnTerminate(data::onComplete)
+                         .subscribe();
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -554,16 +583,23 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .timeout(Duration.ofSeconds(2))
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .timeout(Duration.ofSeconds(2))
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        // Let's close websocket and complete data processor
+                        o.sendClose()
+                         .doOnTerminate(data::onComplete)
+                         .subscribe();
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -739,17 +775,24 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder
-                                                                     .withPayload(Arrays.array(event1, event2, event3, event4, event5, event6))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder
+                                                             .withPayload(Arrays.array(event1, event2, event3, event4, event5, event6))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                       // Let's close websocket and complete data processor
+                        o.sendClose()
+                         .doOnTerminate(data::onComplete)
+                         .subscribe();
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -905,19 +948,26 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1, event2, event3))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1, event2, event3))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        // Let's close websocket and complete data processor
+                        o.sendClose()
+                         .doOnTerminate(data::onComplete)
+                         .subscribe();
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
-                .collectList()
-                .subscribe();
+        .collectList()
+        .subscribe();
 
         // then
         Map<String, Object> message = Maps.of("data",
@@ -981,7 +1031,15 @@ public class ActivitiGraphQLStarterIT {
                             .log("client-send")
                             .subscribe();
 
-                    return i.receive().asString();
+                    return i.aggregateFrames()
+                            .receive()
+                            .asString()
+                            .doOnCancel(() -> {
+                                // Let's close websocket and complete data processor
+                                o.sendClose()
+                                 .doOnTerminate(output::onComplete)
+                                 .subscribe();
+                            });
                 })
                 .log("client-received")
                 .take(2)
@@ -1002,7 +1060,7 @@ public class ActivitiGraphQLStarterIT {
                 .expectNext(ackMessage)
                 .expectNext(kaMessage)
                 .expectComplete()
-                .verify(TIMEOUT);        
+                .verify(TIMEOUT);
     }
 
     @Test
@@ -1024,7 +1082,15 @@ public class ActivitiGraphQLStarterIT {
                             .log("client-send")
                             .subscribe();
 
-                    return i.receive().asString();
+                    return i.aggregateFrames()
+                            .receive()
+                            .asString()
+                            .doOnCancel(() -> {
+                                // Let's close websocket and complete data processor
+                                o.sendClose()
+                                 .doOnTerminate(output::onComplete)
+                                 .subscribe();
+                            });
                 })
                 .log("client-received")
                 .take(1)
