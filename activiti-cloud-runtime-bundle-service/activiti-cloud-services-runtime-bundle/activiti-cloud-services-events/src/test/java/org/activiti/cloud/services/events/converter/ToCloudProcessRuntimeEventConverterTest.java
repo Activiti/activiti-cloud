@@ -17,20 +17,25 @@ package org.activiti.cloud.services.events.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.runtime.event.impl.BPMNSignalReceivedEventImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
+import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
+import org.activiti.engine.impl.util.ProcessDefinitionUtil;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 public class ToCloudProcessRuntimeEventConverterTest {
 
@@ -47,6 +52,14 @@ public class ToCloudProcessRuntimeEventConverterTest {
 
     @Test
     public void fromShouldConvertInternalProcessStartedEventToExternalEvent() {
+
+        final ProcessDefinitionEntityImpl processDefinition = new ProcessDefinitionEntityImpl();
+        processDefinition.setName("myProcessDefName");
+
+        final ToCloudProcessRuntimeEventConverter spy = Mockito.spy(converter);
+
+        doReturn(processDefinition).when(spy).getProcessDefinition("myProcessDef");
+
         //given
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
@@ -57,13 +70,14 @@ public class ToCloudProcessRuntimeEventConverterTest {
         event.setNestedProcessInstanceId("2");
 
         //when
-        CloudProcessStartedEvent processStarted = converter.from(event);
+        CloudProcessStartedEvent processStarted = spy.from(event);
 
         //then
         assertThat(processStarted).isInstanceOf(CloudProcessStartedEvent.class);
 
         assertThat(processStarted.getEntity().getId()).isEqualTo("10");
         assertThat(processStarted.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");
+        assertThat(processStarted.getEntity().getProcessDefinitionName()).isEqualTo("myProcessDefName");
         assertThat(processStarted.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
         assertThat(processStarted.getNestedProcessInstanceId()).isEqualTo("2");
 

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
 import org.activiti.api.process.model.events.BPMNActivityCompletedEvent;
 import org.activiti.api.process.model.events.BPMNActivityStartedEvent;
@@ -40,6 +41,7 @@ import org.activiti.api.process.runtime.events.ProcessResumedEvent;
 import org.activiti.api.process.runtime.events.ProcessStartedEvent;
 import org.activiti.api.process.runtime.events.ProcessSuspendedEvent;
 import org.activiti.api.process.runtime.events.ProcessUpdatedEvent;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
@@ -65,6 +67,7 @@ import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;
 import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.api.process.model.events.CloudStartMessageDeployedEvent;
+import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
@@ -90,6 +93,8 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEve
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
+import org.activiti.engine.impl.util.ProcessDefinitionUtil;
+import org.activiti.engine.repository.ProcessDefinition;
 
 public class ToCloudProcessRuntimeEventConverter {
 
@@ -103,8 +108,25 @@ public class ToCloudProcessRuntimeEventConverter {
         CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl(event.getEntity(),
                                                                                                  event.getNestedProcessDefinitionId(),
                                                                                                  event.getNestedProcessInstanceId());
+        final ProcessInstance entity = cloudProcessStartedEvent.getEntity();
+
+        if (entity != null && entity.getProcessDefinitionName() == null) {
+            final ProcessDefinition definition = getProcessDefinition(entity.getProcessDefinitionId());
+
+            if (entity instanceof CloudProcessInstanceImpl) {
+                ((CloudProcessInstanceImpl) entity).setProcessDefinitionName(definition.getName());
+            }
+            else if (entity instanceof ProcessInstanceImpl) {
+                ((ProcessInstanceImpl) entity).setProcessDefinitionName(definition.getName());
+            }
+        }
+
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessStartedEvent);
         return cloudProcessStartedEvent;
+    }
+
+    protected ProcessDefinition getProcessDefinition(String processDefinitionId) {
+        return ProcessDefinitionUtil.getProcessDefinition(processDefinitionId);
     }
 
     public CloudProcessCreatedEvent from(ProcessCreatedEvent event) {
