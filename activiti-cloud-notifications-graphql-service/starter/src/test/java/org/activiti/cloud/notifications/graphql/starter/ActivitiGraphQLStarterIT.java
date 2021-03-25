@@ -92,6 +92,7 @@ import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.netty.http.client.WebsocketClientSpec;
+import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -176,10 +177,7 @@ public class ActivitiGraphQLStarterIT {
                             .receive()
                             .asString()
                             .doOnCancel(() -> {
-                                // Let's close websocket and complete data processor
-                                o.sendClose()
-                                 .doOnTerminate(output::onComplete)
-                                 .subscribe();
+                                closeWebSocketAnCompleteDataProcessor(output, o);
                             });
                 })
                 .log("client-received")
@@ -289,10 +287,7 @@ public class ActivitiGraphQLStarterIT {
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
                     .doOnCancel(() -> {
-                        // Let's close websocket and complete data processor
-                        o.sendClose()
-                         .doOnTerminate(data::onComplete)
-                         .subscribe();
+                        closeWebSocketAnCompleteDataProcessor(data, o);
                     })
                     .subscribeWith(data);
         }) // stop subscription
@@ -319,6 +314,13 @@ public class ActivitiGraphQLStarterIT {
                 .expectNext(dataMessage)
                 .expectComplete()
                 .verify(TIMEOUT);
+    }
+
+    private void closeWebSocketAnCompleteDataProcessor(ReplayProcessor<String> data,
+        WebsocketOutbound webSocketOutbound) {
+        webSocketOutbound.sendClose()
+            .doOnTerminate(data::onComplete)
+            .subscribe();
     }
 
     @Test
@@ -388,10 +390,7 @@ public class ActivitiGraphQLStarterIT {
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
                     .doOnCancel(() -> {
-                       // Let's close websocket and complete data processor
-                        o.sendClose()
-                         .doOnTerminate(data::onComplete)
-                         .subscribe();
+                        closeWebSocketAnCompleteDataProcessor(data, o);
                     })
                     .subscribeWith(data);
         }) // stop subscription
@@ -489,10 +488,7 @@ public class ActivitiGraphQLStarterIT {
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
                     .doOnCancel(() -> {
-                        // Let's close websocket and complete data processor
-                        o.sendClose()
-                         .doOnTerminate(data::onComplete)
-                         .subscribe();
+                        closeWebSocketAnCompleteDataProcessor(data, o);
                     })
                     .subscribeWith(data);
         }) // stop subscription
@@ -594,10 +590,7 @@ public class ActivitiGraphQLStarterIT {
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
                     .doOnCancel(() -> {
-                        // Let's close websocket and complete data processor
-                        o.sendClose()
-                         .doOnTerminate(data::onComplete)
-                         .subscribe();
+                        closeWebSocketAnCompleteDataProcessor(data, o);
                     })
                     .subscribeWith(data);
         }) // stop subscription
@@ -787,10 +780,7 @@ public class ActivitiGraphQLStarterIT {
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
                     .doOnCancel(() -> {
-                       // Let's close websocket and complete data processor
-                        o.sendClose()
-                         .doOnTerminate(data::onComplete)
-                         .subscribe();
+                        closeWebSocketAnCompleteDataProcessor(data, o);
                     })
                     .subscribeWith(data);
         }) // stop subscription
@@ -959,10 +949,7 @@ public class ActivitiGraphQLStarterIT {
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
                     .doOnCancel(() -> {
-                        // Let's close websocket and complete data processor
-                        o.sendClose()
-                         .doOnTerminate(data::onComplete)
-                         .subscribe();
+                        closeWebSocketAnCompleteDataProcessor(data, o);
                     })
                     .subscribeWith(data);
         }) // stop subscription
@@ -1035,10 +1022,7 @@ public class ActivitiGraphQLStarterIT {
                             .receive()
                             .asString()
                             .doOnCancel(() -> {
-                                // Let's close websocket and complete data processor
-                                o.sendClose()
-                                 .doOnTerminate(output::onComplete)
-                                 .subscribe();
+                                closeWebSocketAnCompleteDataProcessor(output, o);
                             });
                 })
                 .log("client-received")
@@ -1086,10 +1070,7 @@ public class ActivitiGraphQLStarterIT {
                             .receive()
                             .asString()
                             .doOnCancel(() -> {
-                                // Let's close websocket and complete data processor
-                                o.sendClose()
-                                 .doOnTerminate(output::onComplete)
-                                 .subscribe();
+                                closeWebSocketAnCompleteDataProcessor(output, o);
                             });
                 })
                 .log("client-received")
