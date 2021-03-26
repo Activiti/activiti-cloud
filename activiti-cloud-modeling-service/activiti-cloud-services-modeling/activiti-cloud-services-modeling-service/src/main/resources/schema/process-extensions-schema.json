@@ -20,9 +20,37 @@
         "properties": { "$ref": "#/definitions/properties" },
         "mappings": { "$ref": "#/definitions/mappings" },
         "constants": { "$ref": "#/definitions/constants" },
+        "templates": { "$ref": "#/definitions/templates" },
         "assignments": { "$ref": "#/definitions/assignments" }
       }
     },
+    "templates": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/template"
+        }
+      }
+    },
+    "template": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "file",
+            "variable"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },    
     "properties": {
       "type": "object",
       "patternProperties": {

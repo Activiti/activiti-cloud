@@ -24,10 +24,12 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.Task.TaskStatus;
@@ -56,7 +58,6 @@ import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -371,7 +372,6 @@ public class QueryTasksIT {
         return executeGetTasksWithVariable(ADMIN_TASKS_URL, variableName, variableValue, status);
     }
 
-    @NotNull
     private <T> Collection<Task> executeGetTasksWithVariable(String tasksUrl, String variableName,
         T variableValue, TaskStatus status) {
         ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
@@ -977,6 +977,14 @@ public class QueryTasksIT {
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_TASKS_RESPONSE_TYPE);
+    }
+
+    private ResponseEntity<PagedModel<Task>> executeRequestGetTasks(ProcessInstance processInstance) {
+        return testRestTemplate.exchange("/v1/process-instances/{processInstanceId}/tasks",
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         PAGED_TASKS_RESPONSE_TYPE,
+                                         processInstance.getId());
     }
 
     private ResponseEntity<Task> executeRequestGetTasksById(String id) {
@@ -1591,6 +1599,32 @@ public class QueryTasksIT {
     }
 
     @Test
+    public void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance() {
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+                                                                      "testuser",
+                                                                      runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.iterator().next())
+                .extracting(Task::getName, Task::getCandidateUsers, Task::getCandidateGroups)
+                .contains(task1.getName(), Collections.singletonList("testuser"), Collections.emptyList());
+        });
+    }
+
+    @Test
     public void shouldFilterTasksForCompletedBy() {
 
         //Given
@@ -1715,6 +1749,67 @@ public class QueryTasksIT {
                 .extracting(Task::getId)
                 .containsExactly(task1.getId());
         });
+    }
+
+    @Test
+    public void shouldFilterTasksBySingleCandidateGroupIdOrListOfCandidateGroupIds() {
+
+        //given
+        Task firstTaskWithCandidateGroupInFilter = taskEventContainedBuilder
+            .aTaskWithGroupCandidate("task one",
+                "testgroup",
+                runningProcessInstance);
+        Task taskWithCandidateGroupNotInFilter = taskEventContainedBuilder
+            .aTaskWithGroupCandidate("task two",
+                "testgroup2",
+                runningProcessInstance);
+        Task secondTaskWithCandidateGroupInFilter = taskEventContainedBuilder
+            .aTaskWithTwoGroupCandidates("task three",
+                "hrgroup", "testgroup4",
+                runningProcessInstance, "testuser");
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        //query for single candidate groudId
+        await().untilAsserted(() -> {
+
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?candidateGroupId=testgroup",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getId)
+                .containsExactly(firstTaskWithCandidateGroupInFilter.getId());
+        });
+
+        //query for multiple candidate groudIds
+        await().untilAsserted(() -> {
+
+            ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
+                .exchange(TASKS_URL + "?candidateGroupId=testgroup,hrgroup",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                .extracting(Task::getId)
+                .containsExactly(firstTaskWithCandidateGroupInFilter.getId(),
+                    secondTaskWithCandidateGroupInFilter.getId());
+        });
+
     }
 
 }

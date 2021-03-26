@@ -15,11 +15,8 @@
  */
 package org.activiti.cloud.notifications.graphql.starter;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
@@ -66,7 +64,6 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.apache.groovy.util.Maps;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,11 +81,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ContextConfiguration;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
-import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClient.WebsocketSender;
+import reactor.netty.http.client.WebsocketClientSpec;
+import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -104,7 +108,9 @@ public class ActivitiGraphQLStarterIT {
     private static final String GRAPHQL_URL = "/graphql";
     private static final Duration TIMEOUT = Duration.ofMillis(20000);
 
-
+    private static final WebsocketClientSpec graphqlWsClientSpec = WebsocketClientSpec.builder()
+                                                                                      .protocols(GRAPHQL_WS)
+                                                                                      .build();
     @LocalServerPort
     private String port;
 
@@ -159,7 +165,7 @@ public class ActivitiGraphQLStarterIT {
         HttpClient.create()
                 .baseUrl("ws://localhost:" + port)
                 .wiretap(true)
-                .websocket(GRAPHQL_WS)
+                .websocket(graphqlWsClientSpec)
                 .uri(WS_GRAPHQL_URI)
                 .handle((i, o) -> {
                     o.sendString(Mono.just(initMessage))
@@ -167,7 +173,12 @@ public class ActivitiGraphQLStarterIT {
                             .log("client-send")
                             .subscribe();
 
-                    return i.receive().asString();
+                    return i.aggregateFrames()
+                            .receive()
+                            .asString()
+                            .doOnCancel(() -> {
+                                closeWebSocketAnCompleteDataProcessor(output, o);
+                            });
                 })
                 .log("client-received")
                 .take(2)
@@ -255,7 +266,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -265,16 +276,20 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1, event2))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1, event2))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        closeWebSocketAnCompleteDataProcessor(data, o);
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -299,6 +314,13 @@ public class ActivitiGraphQLStarterIT {
                 .expectNext(dataMessage)
                 .expectComplete()
                 .verify(TIMEOUT);
+    }
+
+    private void closeWebSocketAnCompleteDataProcessor(ReplayProcessor<String> data,
+        WebsocketOutbound webSocketOutbound) {
+        webSocketOutbound.sendClose()
+            .doOnTerminate(data::onComplete)
+            .subscribe();
     }
 
     @Test
@@ -347,7 +369,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -357,16 +379,20 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        closeWebSocketAnCompleteDataProcessor(data, o);
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -441,7 +467,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -451,16 +477,20 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        closeWebSocketAnCompleteDataProcessor(data, o);
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -539,7 +569,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -549,16 +579,20 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .timeout(Duration.ofSeconds(2))
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .timeout(Duration.ofSeconds(2))
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        closeWebSocketAnCompleteDataProcessor(data, o);
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -724,7 +758,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -734,17 +768,21 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder
-                                                                     .withPayload(Arrays.array(event1, event2, event3, event4, event5, event6))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder
+                                                             .withPayload(Arrays.array(event1, event2, event3, event4, event5, event6))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        closeWebSocketAnCompleteDataProcessor(data, o);
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
                 .collectList()
                 .subscribe();
@@ -890,7 +928,7 @@ public class ActivitiGraphQLStarterIT {
                                          .baseUrl("ws://localhost:" + port)
                                          .wiretap(true)
                                          .headers(h -> h.add(AUTHORIZATION, auth))
-                                         .websocket(GRAPHQL_WS)
+                                         .websocket(graphqlWsClientSpec)
                                          .uri(WS_GRAPHQL_URI);
 
         // start subscription
@@ -900,19 +938,23 @@ public class ActivitiGraphQLStarterIT {
                     .log("start")
                     .subscribe();
 
-            return i.receive()
-                           .asString()
-                           .log("data")
-                           .take(1)
-                           .doOnSubscribe(s -> producerChannel.output()
-                                                       .send(MessageBuilder.withPayload(Arrays.array(event1, event2, event3))
-                                                                     .setHeader("routingKey", "eventProducer")
-                                                                     .build()))
-                           .delaySubscription(Duration.ofSeconds(1))
-                           .subscribeWith(data);
+            return i.aggregateFrames()
+                    .receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                               .send(MessageBuilder.withPayload(Arrays.array(event1, event2, event3))
+                                                             .setHeader("routingKey", "eventProducer")
+                                                             .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .doOnCancel(() -> {
+                        closeWebSocketAnCompleteDataProcessor(data, o);
+                    })
+                    .subscribeWith(data);
         }) // stop subscription
-                .collectList()
-                .subscribe();
+        .collectList()
+        .subscribe();
 
         // then
         Map<String, Object> message = Maps.of("data",
@@ -949,7 +991,7 @@ public class ActivitiGraphQLStarterIT {
 
 
     @Test
-    public void testGraphqlWsSubprotocolServerWithUserRoleNotAuthorized()
+    public void testGraphqlWsSubprotocolServerWithUserRoleAuthorized()
             throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
@@ -968,7 +1010,7 @@ public class ActivitiGraphQLStarterIT {
         HttpClient.create()
                 .baseUrl("ws://localhost:" + port)
                 .wiretap(true)
-                .websocket(GRAPHQL_WS)
+                .websocket(graphqlWsClientSpec)
                 .uri(WS_GRAPHQL_URI)
                 .handle((i, o) -> {
                     o.sendString(Mono.just(initMessage))
@@ -976,21 +1018,33 @@ public class ActivitiGraphQLStarterIT {
                             .log("client-send")
                             .subscribe();
 
-                    return i.receive().asString();
+                    return i.aggregateFrames()
+                            .receive()
+                            .asString()
+                            .doOnCancel(() -> {
+                                closeWebSocketAnCompleteDataProcessor(output, o);
+                            });
                 })
                 .log("client-received")
-                .take(1)
+                .take(2)
                 .subscribeWith(output)
                 .collectList()
                 .doOnError(i -> System.err.println("Failed requesting server: " + i))
                 .subscribe();
 
-        String expected = objectMapper.writeValueAsString(GraphQLMessage.builder()
-                                                                  .type(GraphQLMessageType.CONNECTION_ERROR)
-                                                                  .build());
+        String ackMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
+                                                                    .type(GraphQLMessageType.CONNECTION_ACK)
+                                                                    .build());
+
+        String kaMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
+                                                                   .type(GraphQLMessageType.KA)
+                                                                   .build());
+
         StepVerifier.create(output)
-                .expectNext(expected)
-                .verifyComplete();
+                .expectNext(ackMessage)
+                .expectNext(kaMessage)
+                .expectComplete()
+                .verify(TIMEOUT);
     }
 
     @Test
@@ -1004,7 +1058,7 @@ public class ActivitiGraphQLStarterIT {
                 .baseUrl("ws://localhost:" + port)
                 .wiretap(true)
                 //.headers(h -> h.add(AUTHORIZATION, auth)) // Anonymous request
-                .websocket(GRAPHQL_WS)
+                .websocket(graphqlWsClientSpec)
                 .uri(WS_GRAPHQL_URI)
                 .handle((i, o) -> {
                     o.sendString(Mono.just(initMessage))
@@ -1012,7 +1066,12 @@ public class ActivitiGraphQLStarterIT {
                             .log("client-send")
                             .subscribe();
 
-                    return i.receive().asString();
+                    return i.aggregateFrames()
+                            .receive()
+                            .asString()
+                            .doOnCancel(() -> {
+                                closeWebSocketAnCompleteDataProcessor(output, o);
+                            });
                 })
                 .log("client-received")
                 .take(1)

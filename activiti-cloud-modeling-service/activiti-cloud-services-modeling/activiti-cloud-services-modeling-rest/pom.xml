@@ -12,6 +12,10 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-common-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-modeling-core</artifactId>
     </dependency>
     <dependency>

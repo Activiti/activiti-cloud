@@ -12,8 +12,8 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>Hoxton.SR5</spring-cloud.version>
-    <testcontainers.version>1.14.2</testcontainers.version>
+    <spring-cloud.version>2020.0.1</spring-cloud.version>
+    <testcontainers.version>1.15.2</testcontainers.version>
   </properties>
   <dependencyManagement>
     <dependencies>

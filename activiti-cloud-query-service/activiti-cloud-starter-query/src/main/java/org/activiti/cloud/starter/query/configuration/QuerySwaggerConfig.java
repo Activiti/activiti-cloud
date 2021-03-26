@@ -47,7 +47,7 @@ public class QuerySwaggerConfig {
     @Bean
     @ConditionalOnMissingBean
     public Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.rest")::apply;
+        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.rest");
     }
 
     @Bean

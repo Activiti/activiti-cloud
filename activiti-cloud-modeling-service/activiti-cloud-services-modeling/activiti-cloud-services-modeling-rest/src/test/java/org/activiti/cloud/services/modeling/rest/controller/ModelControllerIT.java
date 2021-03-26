@@ -36,6 +36,8 @@ import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuil
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
@@ -52,10 +54,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -71,7 +74,6 @@ import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +87,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
@@ -671,7 +675,7 @@ public class ModelControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
-                .containsExactlyInAnyOrder(tuple("expected type: Number, found: String",
+                .containsExactlyInAnyOrder(tuple("expected type: Integer, found: String",
                                        "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"));
     }
 
@@ -1056,7 +1060,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("PROJECT")))
             .andExpect(jsonPath("$.projectIds", hasSize(1)))
-            .andExpect(jsonPath("$.projectIds", Matchers.contains(parentProject.getId())));
+            .andExpect(jsonPath("$.projectIds", contains(parentProject.getId())));
     }
 
     @Test
@@ -1090,7 +1094,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("GLOBAL")))
             .andExpect(jsonPath("$.projectIds", hasSize(2)))
-            .andExpect(jsonPath("$.projectIds", Matchers.containsInAnyOrder(parentProjectOne.getId(),parentProjectTwo.getId())));
+            .andExpect(jsonPath("$.projectIds", containsInAnyOrder(parentProjectOne.getId(), parentProjectTwo.getId())));
     }
 
     @Test
@@ -1235,7 +1239,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope",is("PROJECT")))
             .andExpect(jsonPath("$.projectIds", hasSize(1)))
-            .andExpect(jsonPath("$.projectIds", Matchers.contains(project.getId())));
+            .andExpect(jsonPath("$.projectIds", contains(project.getId())));
     }
 
     @Test
@@ -1262,7 +1266,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("GLOBAL")))
             .andExpect(jsonPath("$.projectIds", hasSize(2)))
-            .andExpect(jsonPath("$.projectIds", Matchers.containsInAnyOrder(parentProject.getId(), project.getId())));
+            .andExpect(jsonPath("$.projectIds", containsInAnyOrder(parentProject.getId(), project.getId())));
     }
 
     @Test
@@ -1295,7 +1299,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("PROJECT")))
             .andExpect(jsonPath("$.projectIds", hasSize(1)))
-            .andExpect(jsonPath("$.projectIds", Matchers.contains(project.getId())));
+            .andExpect(jsonPath("$.projectIds", contains(project.getId())));
     }
 
     @Test
@@ -1312,7 +1316,7 @@ public class ModelControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.scope", is("GLOBAL")))
             .andExpect(jsonPath("$.projectIds", hasSize(1)))
-            .andExpect(jsonPath("$.projectIds", Matchers.contains(parentProject.getId())));
+            .andExpect(jsonPath("$.projectIds", contains(parentProject.getId())));
     }
 
     @Test
@@ -1356,4 +1360,26 @@ public class ModelControllerIT {
             .andExpect(jsonPath("$.extensions",
                 notNullValue()));
     }
+
+    @Test
+    public void should_returnConflict_when_creatingNewRelationshipWithSameModelName() throws Exception {
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project"));
+
+        Model projectContentModel = processModel(project, "model-with-same-name");
+        projectContentModel.setScope(ModelScope.PROJECT);
+        projectContentModel = (ModelEntity) modelRepository.createModel(projectContentModel);
+
+        Model globalContentModel = processModel("model-with-same-name");
+        globalContentModel.setScope(ModelScope.GLOBAL);
+        globalContentModel = (ModelEntity) modelRepository.createModel(globalContentModel);
+
+        ResultActions resultActions = mockMvc
+                .perform(put("/v1/projects/{projectId}/models/{modelId}", project.getId(), globalContentModel.getId()))
+                .andExpect(status().isConflict());
+
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+                .isEqualTo(String.format("A model with the same type already exists within the project with id: %s", project.getId()));
+    }
+
 }

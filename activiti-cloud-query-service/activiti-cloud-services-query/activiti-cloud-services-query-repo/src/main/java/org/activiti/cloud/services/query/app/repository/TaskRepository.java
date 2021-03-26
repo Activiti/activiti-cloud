@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.dsl.StringPath;
+import java.util.Arrays;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -45,6 +46,9 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, S
         bindings.bind(root.completedTo).first((path, value) -> root.completedDate.before(value));
         bindings.bind(root.dueDateFrom).first((path, value) -> root.dueDate.after(value));
         bindings.bind(root.dueDateTo).first((path, value) -> root.dueDate.before(value));
+        bindings.bind(root.candidateGroupId)
+            .first((path, value) -> root.taskCandidateGroups.any().groupId.in(Arrays
+                .asList(value.split(","))));
 
         bindings.bind(root.name).first((path, value) -> path.like("%" + value.toString() + "%"));
         bindings.bind(root.description)

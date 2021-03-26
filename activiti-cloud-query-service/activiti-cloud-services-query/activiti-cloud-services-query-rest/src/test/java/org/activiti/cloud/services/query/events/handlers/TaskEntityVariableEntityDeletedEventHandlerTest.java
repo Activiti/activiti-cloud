@@ -64,9 +64,7 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
         //given
         VariableInstanceImpl<String> variableInstance = new VariableInstanceImpl<>("var",
                                                                                    "string",
-                                                                                   "v1",
-                                                                                   UUID.randomUUID().toString());
-        variableInstance.setTaskId(UUID.randomUUID().toString());
+                                                                                   "v1", "procInstId", "taskId");
         CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(variableInstance);
 
         TaskVariableEntity variableEntity = new TaskVariableEntity();

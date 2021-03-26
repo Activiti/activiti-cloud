@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToRespo
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.UPLOAD_FILE_PARAM_NAME;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -29,6 +30,7 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.process.ModelScope;
+import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.rest.api.ModelRestApi;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationModelAssembler;
@@ -265,6 +267,9 @@ public class ModelController implements ModelRestApi {
             modelToBeUpdated.setScope(ModelScope.valueOf(scope));
         }
 
+        if (Objects.isNull(scope) && modelToBeUpdated.getScope().equals(ModelScope.GLOBAL)) {
+            checkIfModelNameExistInProject(project, modelToBeUpdated);
+        }
         modelToBeUpdated.addProject(project);
 
         return representationModelAssembler.toModel(modelService.updateModel(modelToBeUpdated, modelToBeUpdated));
@@ -290,7 +295,6 @@ public class ModelController implements ModelRestApi {
                 model));
     }
 
-
     public Model findModelById(String modelId) {
         Optional<Model> optionalModel = modelService.findModelById(modelId);
         return optionalModel
@@ -301,5 +305,17 @@ public class ModelController implements ModelRestApi {
         Optional<ModelType> optionalModelType = modelTypeService.findModelTypeByName(type);
         return optionalModelType
             .orElseThrow(() -> new ServerWebInputException("Unknown model type: " + type));
+    }
+
+    private void checkIfModelNameExistInProject(Project project, Model modelToBeUpdated) {
+        if (modelService.getAllModels(project).stream().anyMatch(
+                storedModel -> hasSameModelName(storedModel, modelToBeUpdated))) {
+            throw new ModelNameConflictException(
+                    "A model with the same type already exists within the project with id: " + (project != null ? project.getId() : "null"));
+        }
+    }
+
+    private boolean hasSameModelName(Model storedModel, Model modelToBeUpdated) {
+        return storedModel.getType().equals(modelToBeUpdated.getType()) && storedModel.getName().equals(modelToBeUpdated.getName());
     }
 }

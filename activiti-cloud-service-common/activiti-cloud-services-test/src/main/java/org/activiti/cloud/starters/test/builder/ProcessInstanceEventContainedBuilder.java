@@ -85,4 +85,12 @@ public class ProcessInstanceEventContainedBuilder {
                 new CloudProcessStartedEventImpl(processInstance));
         return processInstance;
     }
+
+    public ProcessInstanceImpl aRunningProcessInstanceWithAppVersion(String name, String appVersion) {
+        ProcessInstanceImpl processInstance = buildProcessInstance(name);
+        processInstance.setAppVersion(appVersion);
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
+                new CloudProcessStartedEventImpl(processInstance));
+        return processInstance;
+    }
 }

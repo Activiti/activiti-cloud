@@ -21,6 +21,7 @@ import javax.persistence.EntityManager;
 
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
+import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -28,11 +29,13 @@ import org.activiti.cloud.services.query.app.repository.IntegrationContextReposi
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.events.handlers.ApplicationDeployedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.BPMNActivityCancelledEventHandler;
 import org.activiti.cloud.services.query.events.handlers.BPMNActivityCompletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.BPMNActivityStartedEventHandler;
@@ -187,9 +190,9 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCreatedEventHandler taskCreatedEventHandler(TaskRepository taskRepository, 
+    public TaskCreatedEventHandler taskCreatedEventHandler(TaskRepository taskRepository,
                                                            ProcessInstanceRepository processInstanceRepository) {
-        return new TaskCreatedEventHandler(taskRepository, 
+        return new TaskCreatedEventHandler(taskRepository,
                                             processInstanceRepository);
     }
 
@@ -276,30 +279,30 @@ public class EventHandlersAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public IntegrationResultReceivedEventHandler integrationResultReceivedEventHandler(IntegrationContextRepository integrationContextRepository,
-                                                                                       BPMNActivityRepository bpmnActivityRepository,
+                                                                                       ServiceTaskRepository serviceTaskRepository,
                                                                                        EntityManager entityManager) {
         return new IntegrationResultReceivedEventHandler(integrationContextRepository,
-                                                         bpmnActivityRepository,
+                                                         serviceTaskRepository,
                                                          entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public IntegrationRequestedEventHandler integrationRequestedEventHandler(IntegrationContextRepository integrationContextRepository,
-                                                                             BPMNActivityRepository bpmnActivityRepository,
+                                                                             ServiceTaskRepository serviceTaskRepository,
                                                                              EntityManager entityManager) {
         return new IntegrationRequestedEventHandler(integrationContextRepository,
-                                                    bpmnActivityRepository,
+                                                    serviceTaskRepository,
                                                     entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public IntegrationErrorReceivedEventHandler integrationErrorReceivedEventHandler(IntegrationContextRepository integrationContextRepository,
-                                                                                     BPMNActivityRepository bpmnActivityRepository,
+                                                                                     ServiceTaskRepository serviceTaskRepository,
                                                                                      EntityManager entityManager) {
         return new IntegrationErrorReceivedEventHandler(integrationContextRepository,
-                                                        bpmnActivityRepository,
+                                                        serviceTaskRepository,
                                                         entityManager);
     }
 
@@ -308,5 +311,12 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public QueryEventHandlerContext queryEventHandlerContext(Set<QueryEventHandler> handlers) {
         return new QueryEventHandlerContext(handlers);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ApplicationDeployedEventHandler applicationDeployedEventHandler(
+            ApplicationRepository applicationRepository) {
+        return new ApplicationDeployedEventHandler(applicationRepository);
     }
 }

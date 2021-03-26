@@ -66,4 +66,8 @@ public interface Model<A extends Project, U> extends Auditable<U> {
     ModelScope getScope();
 
     void setScope(ModelScope scope);
+
+    boolean hasProjects();
+
+    boolean hasMultipleProjects();
 }

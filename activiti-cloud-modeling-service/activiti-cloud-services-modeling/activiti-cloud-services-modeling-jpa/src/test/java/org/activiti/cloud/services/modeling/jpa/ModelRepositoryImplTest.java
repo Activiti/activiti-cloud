@@ -53,6 +53,8 @@ public class ModelRepositoryImplTest {
         model = new ModelEntity();
         model.setId("testModelId");
         model.setName("testNameId");
+        model.addProject(project);
+        model.addProject(new ProjectEntity());
     }
 
     @Test
@@ -65,6 +67,8 @@ public class ModelRepositoryImplTest {
         verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(project.getId(), model.getName(), processModelType.getName());
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId()).isEqualTo(model.getId());
+        assertThat(result.get().hasProjects()).isTrue();
+        assertThat(result.get().hasMultipleProjects()).isTrue();
     }
 
     @Test

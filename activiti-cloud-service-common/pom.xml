@@ -31,23 +31,21 @@
     <module>activiti-cloud-service-error-handlers</module>
     <module>activiti-cloud-services-test-security-keycloak</module>
     <module>activiti-cloud-services-test-containers</module>
+    <module>activiti-cloud-service-common-liquibase</module>
   </modules>
   <properties>
-    <activiti.version>7.1.272</activiti.version>
-    <!-- dependencies -->
+    <activiti.version>7.1.321</activiti.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
-    <commons-configuration.version>1.8</commons-configuration.version>
+    <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
-    <guava.version>24.1.1-jre</guava.version>
     <java-semver.version>0.9.0</java-semver.version>
-    <keycloak.version>10.0.2</keycloak.version>
-    <logstash.version>4.11</logstash.version>
-    <resteasy.version>3.9.1.Final</resteasy.version>
-    <spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
-    <springfox.version>2.8.0</springfox.version>
+    <keycloak.version>12.0.4</keycloak.version>
+    <resteasy.version>3.13.2.Final</resteasy.version>
+    <logstash.version>6.6</logstash.version>
+    <springfox.version>3.0.0</springfox.version>
     <swagger.version>1.5.20</swagger.version>
-    <xstream.version>1.4.11.1</xstream.version>
-    <json-unit.version>2.17.0</json-unit.version>
+    <xstream.version>1.4.16</xstream.version>
+    <json-unit.version>2.25.0</json-unit.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -116,72 +114,15 @@
         <version>${commons-lang.version}</version>
         <scope>runtime</scope>
       </dependency>
-      <!-- Fix SpringFox incompatibility with Spring HATEAOS 1.0 and Spring Boot 2.2 -->
-      <dependency>
-        <groupId>org.springframework.plugin</groupId>
-        <artifactId>spring-plugin-core</artifactId>
-        <version>${spring-plugin.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.plugin</groupId>
-        <artifactId>spring-plugin-metadata</artifactId>
-        <version>${spring-plugin.version}</version>
-      </dependency>
-      <!-- SpringFox dependencies -->
       <dependency>
         <groupId>io.springfox</groupId>
-        <artifactId>springfox-core</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-spi</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-schema</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-spring-web</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-swagger2</artifactId>
-        <version>${springfox.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-spring-web</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-schema</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-swagger-ui</artifactId>
-        <version>${springfox.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-swagger-common</artifactId>
+        <artifactId>springfox-boot-starter</artifactId>
         <version>${springfox.version}</version>
       </dependency>
       <dependency>
         <groupId>io.swagger</groupId>
         <artifactId>swagger-annotations</artifactId>
         <version>${swagger.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
       </dependency>
       <!-- Keycloak dependencies -->
       <dependency>
@@ -191,13 +132,10 @@
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-client</artifactId>
+        <artifactId>resteasy-bom</artifactId>
         <version>${resteasy.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jackson2-provider</artifactId>
-        <version>${resteasy.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>com.github.zafarkhaja</groupId>

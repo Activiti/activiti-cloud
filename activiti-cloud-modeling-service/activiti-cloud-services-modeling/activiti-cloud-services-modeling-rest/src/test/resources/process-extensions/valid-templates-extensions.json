@@ -1,0 +1,21 @@
+{
+  "id": "process-db995012-b417-4cea-a981",
+  "extensions": {
+    "Process_test": {
+      "templates": {
+        "Task1": {
+          "type": "file",
+          "value": "file://c/project/email.html"
+        },
+        "Task2": {
+          "type": "variable",
+          "value": "file1"
+        },
+        "@": {
+          "type": "file",
+          "value": "classpath:email.html"
+        }
+      }
+    }
+  }
+}

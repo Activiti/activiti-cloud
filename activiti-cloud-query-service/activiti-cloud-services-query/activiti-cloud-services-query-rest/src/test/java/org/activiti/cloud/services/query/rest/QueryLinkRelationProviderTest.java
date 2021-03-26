@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.services.query.model.ActivitiEntityMetadata;
+import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
@@ -77,6 +78,15 @@ public class QueryLinkRelationProviderTest {
     }
 
     @Test
+    public void getItemResourceRelForShouldReturnApplicationWhenIsApplicationEntity() {
+        //when
+        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(ApplicationEntity.class);
+
+        //then
+        assertThat(itemResourceRel.value()).isEqualTo("application");
+    }
+
+    @Test
     public void getCollectionResourceRelForShouldReturnProcessDefinitionsWhenIsProcessDefinitionEntity() {
         //when
         LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(ProcessDefinitionEntity.class);
@@ -119,6 +129,15 @@ public class QueryLinkRelationProviderTest {
 
         //then
         assertThat(collectionResourceRel.value()).isEqualTo("variables");
+    }
+
+    @Test
+    public void getCollectionResourceRelForShouldReturnApplicationsWhenIsApplicationEntity() {
+        //when
+        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(ApplicationEntity.class);
+
+        //then
+        assertThat(collectionResourceRel.value()).isEqualTo("applications");
     }
 
     @Test
@@ -174,4 +193,14 @@ public class QueryLinkRelationProviderTest {
         //then
         assertThat(supports).isFalse();
     }
+
+    @Test
+    public void shouldSupportApplicationEntity() {
+        //when
+        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ApplicationEntity.class));
+
+        //then
+        assertThat(supports).isTrue();
+    }
+    
 }

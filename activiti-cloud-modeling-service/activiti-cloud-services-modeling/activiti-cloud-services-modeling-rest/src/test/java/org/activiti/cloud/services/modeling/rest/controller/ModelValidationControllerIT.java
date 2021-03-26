@@ -286,6 +286,125 @@ public class ModelValidationControllerIT {
     }
 
     @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidSequenceFlow() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/invalid-sequence-flow.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/invalid-sequence-flow.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getReferenceId)
+                .contains(tuple("Sequence flow has no source reference", "sid-75BFD70C-7949-441E-B85A-11C29A9BA0CD"),
+                          tuple("Sequence flow has no target reference", "sid-75BFD70C-7949-441E-B85A-11C29A9BA0CD"));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithInvalidFlow() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/invalid-flows.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/invalid-flows.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getValidatorSetName,
+                            ModelValidationError::getReferenceId)
+                .contains(tuple("Start event has no outgoing flow",
+                                "BPMN Start event validator",
+                                "StartEvent_16jstbd"),
+                          tuple("Start event should not have incoming flow",
+                                "BPMN Start event validator",
+                                "StartEvent_16jstbd"),
+                          tuple("End event has no incoming flow",
+                                "BPMN End event validator",
+                                "EndEvent_0amu64a"),
+                          tuple("Flow node has no incoming flow",
+                                "BPMN Intermediate Flow node validator",
+                                "Task_0w8xho6"));
+    }
+
+    @Test
+    public void should_returnSuccessful_when_validatingProcessModelWithEventSubProcess() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/valid-event-subprocess.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/valid-event-subprocess.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        resultActions.andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithEmbeddedSubProcessWithoutIncomingAndOutgoingFlows() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/invalid-embedded-sub-process.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+            resourceAsByteArray("process/invalid-embedded-sub-process.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+            processModel.getId())
+            .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getReferenceId)
+            .contains(tuple("Flow node has no incoming flow", "SubProcess_1j83p8h"),
+                      tuple("Flow node has no outgoing flow", "SubProcess_1j83p8h"));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelEventWithoutEndEvent() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/process-without-end-event.bpmn20.xml");
+        Model processModel = createModel(validContent);
+        MockMultipartFile file = multipartProcessFile(processModel,
+            resourceAsByteArray("process/process-without-end-event.bpmn20.xml"));
+
+        final ResultActions resultActions = mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+            processModel.getId())
+            .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getReferenceId)
+            .contains(tuple("Flow node has no outgoing flow",
+                            "Flow node [name: 'TestTaskName', id: 'TestTaskId'] has to have an outgoing flow",
+                            "TestTaskId"));
+    }
+
+    @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidCallActivityVariable() throws Exception {
         byte[] validContent = resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml");
         Model processModel = createModel(validContent);
@@ -424,7 +543,7 @@ public class ModelValidationControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
-                .containsExactly(tuple("expected type: Number, found: String",
+                .containsExactly(tuple("expected type: Integer, found: String",
                                        "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"));
     }
 
@@ -736,5 +855,55 @@ public class ModelValidationControllerIT {
             .contains(
                 "The extensions for process 'Process_RankMovieId' contains INPUTS mappings to task 'Task_1spvopd' referencing an unknown connector action 'movies.getMovieDesc'",
                 "The extensions for process 'Process_RankMovieId' contains OUTPUTS mappings to task 'Task_1spvopd' referencing an unknown connector action 'movies.getMovieDesc'");
+    }
+
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessExtensionsWithValidTemplateType() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "Process_x",
+                                                                                    new Extensions(),
+                                                                                    resourceAsByteArray("process/x-19022.bpmn20.xml")));
+
+        MockMultipartFile file = multipartExtensionsFile(processModel,
+                                                         resourceAsByteArray("process-extensions/valid-templates-extensions.json"));
+
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate/extensions",
+                                  processModel.getId()).file(file))
+               .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidTemplatesContent() throws Exception {
+
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-templates-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "process-model",
+                                                                                    new Extensions()));
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
+                                   processModel.getId()).file(file));
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+                .isEqualTo("#/extensions/Process_test/templates: 2 schema violations found");
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(2)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsOnly(tuple("something is not a valid enum value",
+                                    "#/extensions/Process_test/templates/Task2/type: something is not a valid enum value"),
+                              tuple("expected type: String, found: Null",
+                                    "#/extensions/Process_test/templates/Task1/value: expected type: String, found: Null"));
     }
 }

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import static org.activiti.cloud.services.query.model.IntegrationContextEntity.ERROR_MESSAGE_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -26,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
 import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
@@ -36,6 +36,7 @@ import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
@@ -50,6 +51,7 @@ import org.activiti.cloud.services.query.app.repository.IntegrationContextReposi
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.model.StringUtils;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
@@ -76,16 +78,18 @@ import org.springframework.test.context.TestPropertySource;
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class QueryAdminProcessServiceTasksIT {
 
+    private static final String ERROR_MESSAGE = "An error occurred consuming ACS API with inputs {targetFolder={}, action=CREATE_FILE}. Cause: [405] during [GET] to [https://aae-3734-env.envalfresco.com/alfresco/api/-default-/public/alfresco/versions/1/nodes/] [NodesApiClient#getNode(String,List,String,List)]: [{\"error\":{\"errorKey\":\"framework.exception.UnsupportedResourceOperation\",\"statusCode\":405,\"briefSummary\":\"09070282 The operation is unsupported\",\"stackTrace\":\"For security reasons the stack trace is no longer displayed, but the property is kept for previous versions\",\"descriptionURL\":\"https://api-explorer.alfresco.com\"}}]";
+
     private static final String SERVICE_TASK_ELEMENT_ID = "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94";
 
     private static final String SERVICE_TASK_TYPE = "serviceTask";
 
     private static final String PROC_URL = "/admin/v1/process-instances";
 
-    private static final ParameterizedTypeReference<PagedModel<CloudBPMNActivity>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudBPMNActivity>>() {
+    private static final ParameterizedTypeReference<PagedModel<CloudServiceTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudServiceTask>>() {
     };
 
-    private static final ParameterizedTypeReference<CloudBPMNActivity> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudBPMNActivity>() { };
+    private static final ParameterizedTypeReference<CloudServiceTask> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudServiceTask>() { };
 
     private static final ParameterizedTypeReference<CloudIntegrationContext> SINGLE_INT_CONTEXT_RESPONSE_TYPE = new ParameterizedTypeReference<CloudIntegrationContext>() { };
 
@@ -166,7 +170,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks",
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks",
                                                                                        HttpMethod.GET,
                                                                                        keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                        PAGED_TASKS_RESPONSE_TYPE);
@@ -174,7 +178,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent()).hasSize(1)
-                                                             .extracting(BPMNActivity::getActivityType)
+                                                             .extracting(CloudServiceTask::getActivityType)
                                                              .contains(SERVICE_TASK_TYPE);
         });
     }
@@ -195,7 +199,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
                                                                                                      HttpMethod.GET,
                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                      PAGED_TASKS_RESPONSE_TYPE,
@@ -204,7 +208,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent()).hasSize(1)
-                                                             .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
+                                                             .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
                                                              .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
         });
 
@@ -220,7 +224,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
                                                                                                      HttpMethod.GET,
                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                      PAGED_TASKS_RESPONSE_TYPE,
@@ -229,7 +233,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent()).hasSize(1)
-                                                             .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
+                                                             .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
                                                              .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
         });
     }
@@ -250,7 +254,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks",
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks",
                                                                                        HttpMethod.GET,
                                                                                        keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                        PAGED_TASKS_RESPONSE_TYPE);
@@ -258,7 +262,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent()).hasSize(1)
-                                                             .extracting(BPMNActivity::getActivityType)
+                                                             .extracting(CloudServiceTask::getActivityType)
                                                              .contains(SERVICE_TASK_TYPE);
         });
     }
@@ -280,7 +284,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks?status={status}",
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks?status={status}",
                                                                                        HttpMethod.GET,
                                                                                        keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                        PAGED_TASKS_RESPONSE_TYPE,
@@ -289,7 +293,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent()).hasSize(1)
-                                                             .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
+                                                             .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
                                                              .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
         });
 
@@ -305,7 +309,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks?status={status}",
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks?status={status}",
                                                                                        HttpMethod.GET,
                                                                                        keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                        PAGED_TASKS_RESPONSE_TYPE,
@@ -314,7 +318,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent()).hasSize(1)
-                                                             .extracting(CloudBPMNActivity::getStatus, BPMNActivity::getActivityType)
+                                                             .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
                                                              .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
         });
 
@@ -336,7 +340,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
 
-            ResponseEntity<PagedModel<CloudBPMNActivity>> serviceTasksResponse = testRestTemplate.exchange("/admin/v1/service-tasks",
+            ResponseEntity<PagedModel<CloudServiceTask>> serviceTasksResponse = testRestTemplate.exchange("/admin/v1/service-tasks",
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_TASKS_RESPONSE_TYPE);
@@ -350,14 +354,14 @@ public class QueryAdminProcessServiceTasksIT {
                                                        .getId();
 
             //when
-            ResponseEntity<CloudBPMNActivity> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/" + serviceTaskId,
+            ResponseEntity<CloudServiceTask> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/" + serviceTaskId,
                                                                                     HttpMethod.GET,
                                                                                     keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                     SINGLE_TASK_RESPONSE_TYPE);
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody()).extracting(CloudBPMNActivity::getId, BPMNActivity::getElementId, BPMNActivity::getActivityType)
+            assertThat(responseEntity.getBody()).extracting(CloudServiceTask::getId, CloudServiceTask::getElementId, CloudServiceTask::getActivityType)
                                                 .containsExactly(serviceTaskId, SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_TYPE);
         });
     }
@@ -376,7 +380,7 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
 
-        ResponseEntity<PagedModel<CloudBPMNActivity>> serviceTasksResponse = testRestTemplate.exchange("/admin/v1/service-tasks",
+        ResponseEntity<PagedModel<CloudServiceTask>> serviceTasksResponse = testRestTemplate.exchange("/admin/v1/service-tasks",
                                                                                                        HttpMethod.GET,
                                                                                                        keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                        PAGED_TASKS_RESPONSE_TYPE);
@@ -417,7 +421,7 @@ public class QueryAdminProcessServiceTasksIT {
         });
 
         // and given
-        Throwable cause = new RuntimeException("Runtime Exception");
+        Throwable cause = new RuntimeException(ERROR_MESSAGE);
         CloudBpmnError error = new CloudBpmnError("ERROR_CODE", cause);
 
         eventsAggregator.addEvents(new CloudIntegrationErrorReceivedEventImpl(integrationContext,
@@ -449,7 +453,8 @@ public class QueryAdminProcessServiceTasksIT {
                                                                  SERVICE_TASK_TYPE,
                                                                  IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
                                                                  error.getErrorCode(),
-                                                                 error.getMessage(),
+                                                                 StringUtils.truncate(error.getMessage(),
+                                                                                      ERROR_MESSAGE_LENGTH),
                                                                  error.getClass().getName());
 
             assertThat(responseEntity.getBody().getStackTraceElements()).isNotEmpty();
@@ -476,7 +481,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await().untilAsserted(() -> {
            //when
-           ResponseEntity<PagedModel<CloudBPMNActivity>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks",
+           ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/service-tasks",
                                                                                          HttpMethod.GET,
                                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                          PAGED_TASKS_RESPONSE_TYPE);

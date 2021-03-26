@@ -36,7 +36,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.activiti.api.process.model.builders.MessageEventPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.MessageDefinitionEvent.MessageDefinitionEvents;
@@ -44,6 +43,7 @@ import org.activiti.api.process.model.events.MessageSubscriptionEvent.MessageSub
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
+import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -73,6 +73,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -123,6 +124,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     protected PlatformTransactionManager transactionManager;
 
     @Autowired
+    protected MessageAggregatorProperties messageAggregatorProperties;
+
+    @Autowired
     protected AbstractMessageChannel output;
 
     @TestConfiguration
@@ -141,6 +145,16 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             return MessageChannels.queue()
                                   .get();
         }
+    }
+
+    @Test
+    public void shouldConfigureInputHeadersToRemove() {
+        assertThat(messageAggregatorProperties.getInputHeadersToRemove()).contains("kafka_consumer");
+    }
+
+    @Test
+    public void shouldConfigureHeaderChannelsTimeToLiveExpression() {
+        assertThat(messageAggregatorProperties.getHeaderChannelsTimeToLiveExpression()).contains("headers['headerChannelsTTL']?:60000");
     }
 
     @Test

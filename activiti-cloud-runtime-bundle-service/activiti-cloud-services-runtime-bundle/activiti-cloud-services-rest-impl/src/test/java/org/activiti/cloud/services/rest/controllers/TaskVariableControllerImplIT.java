@@ -112,13 +112,11 @@ public class TaskVariableControllerImplIT {
         VariableInstanceImpl<String> name = new VariableInstanceImpl<>("name",
                                                                        String.class.getName(),
                                                                        "Paul",
-                                                                       PROCESS_INSTANCE_ID);
-        name.setTaskId(TASK_ID);
+                                                                       PROCESS_INSTANCE_ID, TASK_ID);
         VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
                                                                        Integer.class.getName(),
                                                                        12,
-                                                                       PROCESS_INSTANCE_ID);
-        age.setTaskId(TASK_ID);
+                                                                       PROCESS_INSTANCE_ID, TASK_ID);
         given(taskRuntime.variables(any())).willReturn(Arrays.asList(name,
                                                                      age));
         this.mockMvc.perform(get("/v1/tasks/{taskId}/variables",

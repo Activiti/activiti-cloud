@@ -73,7 +73,8 @@ public interface TaskController {
     @GetMapping(value = "/{taskId}/subtasks")
     PagedModel<EntityModel<CloudTask>> getSubtasks(Pageable pageable, @PathVariable(value = "taskId") String taskId);
 
-    @PostMapping(value = "/{taskId}/assign")
+    @PostMapping(value = "/{taskId}/assign",
+        headers = "Content-type=application/json")
     EntityModel<CloudTask> assign(@PathVariable("taskId") String taskId,
                                   @RequestBody AssignTaskPayload assignTaskPayload);
 }

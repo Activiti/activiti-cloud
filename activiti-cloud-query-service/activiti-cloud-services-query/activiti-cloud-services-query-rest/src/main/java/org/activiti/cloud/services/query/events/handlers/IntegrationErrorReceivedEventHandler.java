@@ -25,20 +25,20 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
     public IntegrationErrorReceivedEventHandler(IntegrationContextRepository repository,
-                                                BPMNActivityRepository bpmnActivityRepository,
+                                                ServiceTaskRepository serviceTaskRepository,
                                                 EntityManager entityManager) {
         super(repository,
-              bpmnActivityRepository,
+              serviceTaskRepository,
               entityManager);
     }
 
@@ -58,8 +58,8 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
             entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
             entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
-            BPMNActivityEntity bpmnActivityEntity = entity.getBpmnActivity();
-            bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
+            ServiceTaskEntity serviceTaskEntity = entity.getServiceTask();
+            serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
         });
     }
 

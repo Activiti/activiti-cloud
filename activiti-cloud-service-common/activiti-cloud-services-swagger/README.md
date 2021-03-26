@@ -21,7 +21,7 @@ swagger specification files:
 ```
 @Bean
 public Predicate<RequestHandler> apiSelector() {
-    return RequestHandlerSelectors.basePackage("org.activiti.cloud.services")::apply;
+    return RequestHandlerSelectors.basePackage("org.activiti.cloud.services");
 }
 ```
 

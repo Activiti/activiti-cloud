@@ -21,10 +21,10 @@ import javax.persistence.EntityManager;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +33,14 @@ public abstract class BaseIntegrationEventHandler {
     private final static Logger logger = LoggerFactory.getLogger(BaseIntegrationEventHandler.class);
 
     protected final IntegrationContextRepository integrationContextRepository;
-    protected final BPMNActivityRepository bpmnActivityRepository;
+    protected final ServiceTaskRepository serviceTaskRepository;
     protected final EntityManager entityManager;
 
     public BaseIntegrationEventHandler(IntegrationContextRepository integrationContextRepository,
-                                       BPMNActivityRepository bpmnActivityRepository,
+                                       ServiceTaskRepository serviceTaskRepository,
                                        EntityManager entityManager) {
         this.integrationContextRepository = integrationContextRepository;
-        this.bpmnActivityRepository = bpmnActivityRepository;
+        this.serviceTaskRepository = serviceTaskRepository;
         this.entityManager = entityManager;
     }
 
@@ -53,11 +53,11 @@ public abstract class BaseIntegrationEventHandler {
                                                                                                                         integrationContext.getExecutionId());
         // Let's create entity if does not exists
         if(entity == null) {
-            BPMNActivityEntity bpmnActivityEntity = bpmnActivityRepository.findByProcessInstanceIdAndElementIdAndExecutionId(integrationContext.getProcessInstanceId(),
+            ServiceTaskEntity serviceTaskEntity = serviceTaskRepository.findByProcessInstanceIdAndElementIdAndExecutionId(integrationContext.getProcessInstanceId(),
                                                                                                                              integrationContext.getClientId(),
                                                                                                                              integrationContext.getExecutionId());
-            if (bpmnActivityEntity != null) {
-                logger.debug("Found BPMNActivityEntity: {}", bpmnActivityEntity);
+            if (serviceTaskEntity != null) {
+                logger.debug("Found BPMNActivityEntity: {}", serviceTaskEntity);
 
                 entity = new IntegrationContextEntity(event.getServiceName(),
                                                       event.getServiceFullName(),
@@ -65,7 +65,7 @@ public abstract class BaseIntegrationEventHandler {
                                                       event.getAppName(),
                                                       event.getAppVersion());
                 // Let use event id to persist integration context
-                entity.setId(bpmnActivityEntity.getId());
+                entity.setId(serviceTaskEntity.getId());
                 entity.setClientId(integrationContext.getClientId());
                 entity.setClientName(integrationContext.getClientName());
                 entity.setClientType(integrationContext.getClientType());
@@ -76,7 +76,7 @@ public abstract class BaseIntegrationEventHandler {
                 entity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
                 entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
                 entity.setBusinessKey(integrationContext.getBusinessKey());
-                entity.setBpmnActivity(bpmnActivityEntity);
+                entity.setServiceTask(serviceTaskEntity);
 
                 entityManager.persist(entity);
             } else {
