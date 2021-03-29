@@ -63,6 +63,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private Integer processDefinitionVersion;
     private String processDefinitionName;
     private Date completedDate;
+    private Date suspendedDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModified;
@@ -96,6 +97,18 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @QueryType(PropertyType.DATETIME)
     @Transient
     private Date completedFrom;
+
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
+    @Transient
+    private Date suspendedTo;
+
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @QueryType(PropertyType.DATETIME)
+    @Transient
+    private Date suspendedFrom;
 
     @JsonIgnore
     @OneToMany(fetch=FetchType.LAZY)
@@ -332,6 +345,31 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.completedFrom = completedFrom;
     }
 
+//    @Override
+    public Date getSuspendedDate() {
+        return suspendedDate;
+    }
+
+    public void setSuspendedDate(Date suspendedDate) {
+        this.suspendedDate = suspendedDate;
+    }
+
+    public Date getSuspendedTo() {
+        return suspendedTo;
+    }
+
+    public void setSuspendedTo(Date suspendedTo) {
+        this.suspendedTo = suspendedTo;
+    }
+
+    public Date getSuspendedFrom() {
+        return suspendedFrom;
+    }
+
+    public void setSuspendedFrom(Date suspendedFrom) {
+        this.suspendedFrom = suspendedFrom;
+    }
+
     public boolean isInFinalState(){
         return  !(ProcessInstanceStatus.CREATED.equals(status) ||
                   ProcessInstanceStatus.RUNNING.equals(status)||
@@ -380,6 +418,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
                                                completedDate,
                                                completedFrom,
                                                completedTo,
+                                               suspendedDate,
+                                               suspendedFrom,
+                                               suspendedTo,
                                                status);
         return result;
     }
@@ -411,6 +452,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
                 Objects.equals(completedDate, other.completedDate) &&
                 Objects.equals(completedFrom, other.completedFrom) &&
                 Objects.equals(completedTo, other.completedTo) &&
+                Objects.equals(suspendedDate, other.suspendedDate) &&
+                Objects.equals(suspendedFrom, other.suspendedFrom) &&
+                Objects.equals(suspendedTo, other.suspendedTo) &&
                 status == other.status;
     }
 
