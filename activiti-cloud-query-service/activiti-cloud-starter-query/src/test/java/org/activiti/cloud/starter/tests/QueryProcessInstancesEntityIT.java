@@ -569,7 +569,7 @@ public class QueryProcessInstancesEntityIT {
 
     @Test
     public void shouldGetProcessInstancesFilteredByInitiator() {
-        
+
         ProcessInstance processInstanceInitiatorUser1 = processInstanceBuilder
                 .aRunningProcessInstanceWithInitiator("first", "User1");
         ProcessInstance processInstanceInitiatorUser2 = processInstanceBuilder
@@ -593,12 +593,69 @@ public class QueryProcessInstancesEntityIT {
                 .aRunningProcessInstanceWithAppVersion("second", "2");
         processInstanceBuilder.aRunningProcessInstanceWithAppVersion("third", "3");
         eventsAggregator.sendAll();
-        
+
         List<String> processInstanceIds = List.of(processInstanceAppVersion1.getId(),
                 processInstanceAppVersion2.getId());
 
         shouldGetProcessInstancesFilteredBySingleValue(processInstanceAppVersion1.getId(), "appVersion=1" );
         shouldGetProcessInstancesFilteredByList(processInstanceIds, "appVersion=1,2");
+    }
+
+    @Test
+    public void shouldGetProcessInstancesFilteredBySuspendedDate() {
+        //given
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        Date suspendedDateToday = new Date();
+        Date suspendedDateTwoDaysAgo = new Date();
+        Date suspendedDateFiveDaysAfter = new Date();
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+
+        //Start a process and set it's suspended date as current date
+        suspendedDateToday.setTime(now.getTime());
+        ProcessInstance processInstanceSuspendedToday = processInstanceBuilder
+            .aRunningProcessInstanceWithSuspendedDate("suspendedDateToday", suspendedDateToday);
+
+        //Start a process and set it's suspended date as current date minus two days
+        suspendedDateTwoDaysAgo.setTime(now.getTime() - Duration.ofDays(2).toMillis());
+        processInstanceBuilder.aRunningProcessInstanceWithSuspendedDate("suspendedDateTwoDaysAgo", suspendedDateTwoDaysAgo);
+
+        //Start a process and set it's suspended date as current date plus five days
+        suspendedDateFiveDaysAfter.setTime(now.getTime() + Duration.ofDays(5).toMillis());
+        processInstanceBuilder.aRunningProcessInstanceWithSuspendedDate("suspendedDateFiveDaysAfter", suspendedDateFiveDaysAfter);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            //set from date to yesterday date
+            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
+            // to date, from date plus 2 days
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
+                .exchange(PROC_URL + "?suspendedFrom=" + sdf.format(fromDate) + "&suspendedTo=" + sdf
+                        .format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getName)
+                .containsExactly(processInstanceSuspendedToday.getName());
+        });
     }
 
     private void shouldGetProcessInstancesFilteredBySingleValue(String processId, String queryString) {

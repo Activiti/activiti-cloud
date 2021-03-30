@@ -345,7 +345,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.completedFrom = completedFrom;
     }
 
-//    @Override
     public Date getSuspendedDate() {
         return suspendedDate;
     }
