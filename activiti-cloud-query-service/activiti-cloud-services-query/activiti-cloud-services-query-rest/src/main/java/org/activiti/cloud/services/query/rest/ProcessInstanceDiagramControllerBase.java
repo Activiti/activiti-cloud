@@ -115,7 +115,7 @@ public abstract class ProcessInstanceDiagramControllerBase {
     }
 
     protected List<String> resolveErroredActivitiesIds(String processInstanceId) {
-        return bpmnActivityRepository.findByProcessInstanceIdAndStatus(processInstanceId, BPMNActivityStatus.COMPLETED)
+        return bpmnActivityRepository.findByProcessInstanceIdAndStatus(processInstanceId, BPMNActivityStatus.ERROR)
             .stream()
             .map(BPMNActivityEntity::getElementId)
             .distinct()
