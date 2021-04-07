@@ -87,6 +87,7 @@ public class ProcessDiagramGeneratorWrapper {
             highLightedActivities,
             highLightedFlows,
             currentActivities,
+            emptyList(),
             getActivityFontName(),
             getLabelFontName(),
             getAnnotationFontName(),

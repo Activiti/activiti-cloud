@@ -79,11 +79,13 @@ public abstract class ProcessInstanceDiagramControllerBase {
         List<String> highLightedActivities = resolveCompletedActivitiesIds(processInstanceId);
         List<String> highLightedFlows = resolveCompletedFlows(bpmnModel, processInstanceId);
         List<String> currentActivities = resolveStartedActivitiesIds(processInstanceId);
+        List<String> erroredActivities = resolveErroredActivitiesIds(processInstanceId);
 
         return new String(processDiagramGenerator.generateDiagram(bpmnModel,
             highLightedActivities,
             highLightedFlows,
-            currentActivities),
+            currentActivities,
+            erroredActivities),
             StandardCharsets.UTF_8);
     }
 
@@ -110,6 +112,14 @@ public abstract class ProcessInstanceDiagramControllerBase {
                                      .map(BPMNActivityEntity::getElementId)
                                      .distinct()
                                      .collect(Collectors.toList());
+    }
+
+    protected List<String> resolveErroredActivitiesIds(String processInstanceId) {
+        return bpmnActivityRepository.findByProcessInstanceIdAndStatus(processInstanceId, BPMNActivityStatus.ERROR)
+            .stream()
+            .map(BPMNActivityEntity::getElementId)
+            .distinct()
+            .collect(Collectors.toList());
     }
 
     protected String resolveProcessDefinitionId(String processInstanceId) {
