@@ -458,6 +458,7 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
+        // Filter using date range
         await().untilAsserted(() -> {
 
             //when
@@ -469,6 +470,29 @@ public class QueryProcessInstancesEntityIT {
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
                 .exchange(PROC_URL + "?startFrom=" + sdf.format(fromDate) + "&startTo=" + sdf
                         .format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getId,
+                    ProcessInstanceEntity::getStatus)
+                .containsExactly(tuple(processInstanceStartedNextDay.getId(),
+                    ProcessInstanceStatus.RUNNING));
+        });
+
+        // Filter using static date
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
+                .exchange(PROC_URL + "?startDate=" + sdf.format(nextDay),
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
@@ -517,6 +541,7 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
+        // Filter using date range
         await().untilAsserted(() -> {
 
             //when
@@ -528,6 +553,27 @@ public class QueryProcessInstancesEntityIT {
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
                 .exchange(PROC_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" + sdf
                         .format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getName)
+                .containsExactly(processInstanceCompletedToday.getName());
+        });
+
+        // Filter using static date
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
+                .exchange(PROC_URL + "?completedDate=" + sdf.format(completedDateToday),
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
@@ -631,6 +677,7 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
+        // Filter using date range
         await().untilAsserted(() -> {
 
             //when
@@ -642,6 +689,27 @@ public class QueryProcessInstancesEntityIT {
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
                 .exchange(PROC_URL + "?suspendedFrom=" + sdf.format(fromDate) + "&suspendedTo=" + sdf
                         .format(toDate),
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody().getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getName)
+                .containsExactly(processInstanceSuspendedToday.getName());
+        });
+
+        // Filter using static date
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
+                .exchange(PROC_URL + "?suspendedDate=" + sdf.format(suspendedDateToday),
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);

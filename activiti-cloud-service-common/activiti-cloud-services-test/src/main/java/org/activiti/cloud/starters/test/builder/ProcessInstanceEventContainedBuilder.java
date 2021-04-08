@@ -71,6 +71,7 @@ public class ProcessInstanceEventContainedBuilder {
         suspendedProcess.setProcessDefinitionKey("my-proc");
         suspendedProcess.setProcessDefinitionId(UUID.randomUUID().toString());
         suspendedProcess.setProcessDefinitionName("my-proc-definition-name");
+        suspendedProcess.setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
         return suspendedProcess;
     }
 

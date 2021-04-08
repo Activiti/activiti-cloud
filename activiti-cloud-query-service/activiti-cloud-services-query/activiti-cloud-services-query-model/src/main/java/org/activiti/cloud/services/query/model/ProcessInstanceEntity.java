@@ -56,13 +56,16 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private String processDefinitionId;
     private String processDefinitionKey;
     private String initiator;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date startDate;
     private String businessKey;
     @Enumerated(EnumType.STRING)
     private ProcessInstanceStatus status;
     private Integer processDefinitionVersion;
     private String processDefinitionName;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date completedDate;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date suspendedDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
