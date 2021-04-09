@@ -200,4 +200,24 @@
         stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-query"
+             id="alter11-schema-m13" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/11-alter.pg.schema.7.1.0-m13.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="alter8-oracle-schema-m13" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/08-alter.oracle.schema.7.1.0-m13.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
 </databaseChangeLog>

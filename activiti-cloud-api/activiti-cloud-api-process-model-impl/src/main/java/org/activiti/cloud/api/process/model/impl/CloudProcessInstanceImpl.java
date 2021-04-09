@@ -35,6 +35,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     private Integer processDefinitionVersion;
     private String processDefinitionName;
     private Date completedDate;
+    private Date suspendedDate;
 
     public CloudProcessInstanceImpl() {
     }
@@ -88,6 +89,14 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
 
     public void setCompletedDate(Date completedDate) {
         this.completedDate = completedDate;
+    }
+
+    public Date getSuspendedDate() {
+        return suspendedDate;
+    }
+
+    public void setSuspendedDate(Date suspendedDate) {
+        this.suspendedDate = suspendedDate;
     }
 
     @Override

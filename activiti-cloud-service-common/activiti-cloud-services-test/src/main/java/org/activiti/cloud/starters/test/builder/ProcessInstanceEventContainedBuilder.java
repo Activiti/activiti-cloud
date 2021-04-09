@@ -19,9 +19,11 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 
@@ -62,6 +64,17 @@ public class ProcessInstanceEventContainedBuilder {
         return completedProcess;
     }
 
+    private CloudProcessInstanceImpl buildSuspendedProcessInstance(String name) {
+        CloudProcessInstanceImpl suspendedProcess = new CloudProcessInstanceImpl();
+        suspendedProcess.setId(UUID.randomUUID().toString());
+        suspendedProcess.setName(name);
+        suspendedProcess.setProcessDefinitionKey("my-proc");
+        suspendedProcess.setProcessDefinitionId(UUID.randomUUID().toString());
+        suspendedProcess.setProcessDefinitionName("my-proc-definition-name");
+        suspendedProcess.setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
+        return suspendedProcess;
+    }
+
     public ProcessInstanceImpl aRunningProcessInstanceWithStartDate(String name, Date startDate) {
         ProcessInstanceImpl processInstance = buildProcessInstance(name);
         processInstance.setStartDate(startDate);
@@ -92,5 +105,13 @@ public class ProcessInstanceEventContainedBuilder {
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
                 new CloudProcessStartedEventImpl(processInstance));
         return processInstance;
+    }
+
+    public CloudProcessInstanceImpl aRunningProcessInstanceWithSuspendedDate(String name, Date suspendedDate) {
+        CloudProcessInstanceImpl suspendedProcess = buildSuspendedProcessInstance(name);
+        suspendedProcess.setSuspendedDate(suspendedDate);
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(suspendedProcess),
+            new CloudProcessSuspendedEventImpl(UUID.randomUUID().toString(), suspendedDate.getTime(), suspendedProcess));
+        return suspendedProcess;
     }
 }
