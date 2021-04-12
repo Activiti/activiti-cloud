@@ -891,7 +891,7 @@ public class ModelValidationControllerIT {
                                    processModel.getId()).file(file));
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-                .isEqualTo("#/extensions/Process_test/templates: 2 schema violations found");
+                .isEqualTo("#/extensions/Process_test/templates/tasks: 2 schema violations found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
@@ -902,8 +902,8 @@ public class ModelValidationControllerIT {
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
                 .containsOnly(tuple("something is not a valid enum value",
-                                    "#/extensions/Process_test/templates/Task2/type: something is not a valid enum value"),
+                                    "#/extensions/Process_test/templates/tasks/Task2/assignee/type: something is not a valid enum value"),
                               tuple("expected type: String, found: Null",
-                                    "#/extensions/Process_test/templates/Task1/value: expected type: String, found: Null"));
+                                    "#/extensions/Process_test/templates/tasks/Task1/assignee/value: expected type: String, found: Null"));
     }
 }

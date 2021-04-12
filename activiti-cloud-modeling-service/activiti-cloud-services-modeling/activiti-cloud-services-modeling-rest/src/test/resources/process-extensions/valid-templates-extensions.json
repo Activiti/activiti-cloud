@@ -3,17 +3,37 @@
   "extensions": {
     "Process_test": {
       "templates": {
-        "Task1": {
-          "type": "file",
-          "value": "file://c/project/email.html"
+        "tasks": {
+          "Task1": {
+            "assignee": {
+              "type": "file",
+              "value": "file://c/project/email.html"
+            },
+            "candidate": {
+              "type": "variable",
+              "value": "candidateTemplate"
+            }
+          },
+          "Task2": {
+            "assignee": {
+              "type": "variable",
+              "value": "file1"
+            },
+            "candidate": {
+              "type": "variable",
+              "value": "candidateTemplate"
+            }
+          }
         },
-        "Task2": {
-          "type": "variable",
-          "value": "file1"
-        },
-        "@": {
-          "type": "file",
-          "value": "classpath:email.html"
+        "default": {
+          "assignee": {
+            "type": "file",
+            "value": "classpath:email.html"
+          },
+          "candidate": {
+            "type": "variable",
+            "value": "candidateTemplate"
+          }
         }
       }
     }
