@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.modeling.api.process;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -41,7 +42,7 @@ public class Extensions {
     private Map<String,  Map<String, Constant>> constants = new HashMap<>();
 
     @JsonProperty("templates")
-    private Map<String,  Map<String, Constant>> templates = new HashMap<>();
+    private TemplatesDefinition templates = new TemplatesDefinition();
 
     public Map<String, ProcessVariable> getProcessVariables() {
         return processVariables;
@@ -67,15 +68,15 @@ public class Extensions {
         this.constants = constants;
     }
 
-    public Map<String, Map<String, Constant>> getTemplates() {
+    public TemplatesDefinition getTemplates() {
         return templates;
     }
 
-    public void setTemplates(Map<String, Map<String, Constant>> templates) {
+    public void setTemplates(TemplatesDefinition templates) {
         this.templates = templates;
     }
 
-    public Map<String,Object> getAsMap(){
+    public Map<String,Object> getAsMap() {
         Map<String,Object> extensions = new HashMap<>();
         extensions.put("properties",this.processVariables);
         extensions.put("mappings",this.variablesMappings);
