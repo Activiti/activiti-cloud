@@ -100,12 +100,11 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
                                                   extensionMapping,
                                                   taskConstants,
                                                   context))
-                .orElseGet(() -> Stream.of(createModelValidationError(
-                        format(UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM,
-                               taskId),
-                        format(UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION,
-                               processId,
-                               taskId))));
+                .orElseGet(() -> Stream.of(
+                    new ModelValidationError(format(UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM,
+                        taskId), format(UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION,
+                        processId,
+                        taskId))));
     }
 
     private Stream<ModelValidationError> validateTaskMappings(

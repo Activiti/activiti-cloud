@@ -34,6 +34,7 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -97,18 +98,18 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     }
 
     private void validateInvalidContent() {
-        SemanticModelValidationException exception = new SemanticModelValidationException(Collections
-                .singletonList(genericNonJsonContentValidator.createModelValidationError("Content invalid",
-                                                                                         "The content is invalid!!")));
+      SemanticModelValidationException exception = new SemanticModelValidationException(Collections
+                .singletonList(
+                    new ModelValidationError("Content invalid", "The content is invalid!!")));
 
         doThrow(exception).when(genericNonJsonContentValidator).validateModelContent(any(byte[].class),
                                                                                      any(ValidationContext.class));
     }
 
     private void validateInvalidExtensions() {
-        SemanticModelValidationException exception = new SemanticModelValidationException(Collections
-                .singletonList(genericNonJsonContentValidator.createModelValidationError("Extensions invalid",
-                                                                                         "The extensions are invalid!!")));
+      SemanticModelValidationException exception = new SemanticModelValidationException(Collections
+                .singletonList(
+                    new ModelValidationError("Extensions invalid", "The extensions are invalid!!")));
 
         doThrow(exception).when(genericNonJsonExtensionsValidator).validateModelExtensions(any(byte[].class),
                                                                                            any(ValidationContext.class));

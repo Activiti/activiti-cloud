@@ -43,9 +43,8 @@ public class BpmnModelEngineValidator implements BpmnModelValidator {
     }
 
     private ModelValidationError toModelValidationError(ValidationError validationError) {
-        return createModelValidationError(validationError.isWarning(),
-                                          validationError.getProblem(),
-                                          validationError.getDefaultDescription(),
-                                          validationError.getValidatorSetName());
+        return new ModelValidationError(validationError.getProblem(),
+            validationError.getDefaultDescription(), validationError.getValidatorSetName(),
+            validationError.isWarning());
     }
 }

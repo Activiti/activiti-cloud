@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.modeling.api;
 
 /**
@@ -21,31 +22,13 @@ package org.activiti.cloud.modeling.api;
 public interface ModelValidationErrorProducer {
 
     default ModelValidationError createModelValidationError(String problem,
-                                                            String description) {
-        return createModelValidationError(problem,
-                                          description,
-                                          null);
-    }
-
-    default ModelValidationError createModelValidationError(String problem,
-                                                            String description,
-                                                            String schema) {
-        return createModelValidationError(false,
-                                          problem,
-                                          description,
-                                          schema,
-                                          null);
-    }
-
-    default ModelValidationError createModelValidationError(String problem,
                                                             String description,
                                                             String schema,
                                                             String errorCode) {
-        return createModelValidationError(false,
-                                          problem,
-                                          description,
-                                          schema,
-                                          errorCode);
+        ModelValidationError modelValidationError = new ModelValidationError(problem, description,
+            schema);
+        modelValidationError.setErrorCode(errorCode);
+        return modelValidationError;
     }
 
     default ModelValidationError createModelValidationError(String problem,
@@ -53,37 +36,11 @@ public interface ModelValidationErrorProducer {
                                                             String schema,
                                                             String errorCode,
                                                             String referenceId) {
-        ModelValidationError validationError = createModelValidationError(false,
-            problem,
-            description,
-            schema,
-            errorCode);
+
+        ModelValidationError validationError = new ModelValidationError(problem, description, schema);
+        validationError.setErrorCode(errorCode);
         validationError.setReferenceId(referenceId);
         return validationError;
     }
 
-    default ModelValidationError createModelValidationError(boolean warning,
-                                                            String problem,
-                                                            String description,
-                                                            String schema) {
-        return createModelValidationError(warning,
-                                          problem,
-                                          description,
-                                          schema,
-                                          null);
-    }
-
-    default ModelValidationError createModelValidationError(boolean warning,
-                                                            String problem,
-                                                            String description,
-                                                            String schema,
-                                                            String errorCode) {
-        ModelValidationError modelValidationError = new ModelValidationError();
-        modelValidationError.setWarning(warning);
-        modelValidationError.setProblem(problem);
-        modelValidationError.setDescription(description);
-        modelValidationError.setValidatorSetName(schema);
-        modelValidationError.setErrorCode(errorCode);
-        return modelValidationError;
-    }
 }

@@ -43,7 +43,7 @@ public class ProjectConsistencyValidator implements ProjectValidator {
                 .stream()
                 .findFirst()
                 .map(model -> Stream.<ModelValidationError>empty())
-                .orElseGet(() -> Stream.of(createModelValidationError(EMPTY_PROJECT_PROBLEM,
-                                                                      EMPTY_PROJECT_DESCRIPTION)));
+                .orElseGet(() -> Stream.of(
+                    new ModelValidationError(EMPTY_PROJECT_PROBLEM, EMPTY_PROJECT_DESCRIPTION)));
     }
 }
