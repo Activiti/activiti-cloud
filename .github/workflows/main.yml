@@ -337,6 +337,7 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: |
           echo -e "https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
+          echo $VERSION > VERSION
           make promote
         env:
           GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
