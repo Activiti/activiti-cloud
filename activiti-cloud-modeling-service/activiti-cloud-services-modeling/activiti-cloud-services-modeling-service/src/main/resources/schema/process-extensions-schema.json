@@ -26,14 +26,31 @@
     },
     "templates": {
       "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tasks" : {"$ref" :  "#/definitions/taskTemplates"},
+        "default" : {"$ref": "#/definitions/taskTemplate"}
+      }
+    },
+    "taskTemplates" : {
+      "type": "object",
       "patternProperties": {
         ".*": {
-          "$ref": "#/definitions/template"
+          "$ref": "#/definitions/taskTemplate"
         }
+      }
+    },
+    "taskTemplate" : {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "assignee" : {"$ref" :  "#/definitions/template"},
+        "candidate" : {"$ref" :  "#/definitions/template"}
       }
     },
     "template": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "type": {
           "type": "string",
@@ -50,7 +67,7 @@
         "type",
         "value"
       ]
-    },    
+    },
     "properties": {
       "type": "object",
       "patternProperties": {
