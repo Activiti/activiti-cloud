@@ -78,11 +78,10 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
                 .map(bpmnModel -> validateBpmnModel(model,
                                                           context,
                                                           bpmnModel))
-                .orElseGet(() -> Stream.of(createModelValidationError(
-                        format(UNKNOWN_PROCESS_ID_VALIDATION_ERROR_PROBLEM,
-                               model.getId()),
-                        format(UNKNOWN_PROCESS_ID_VALIDATION_ERROR_DESCRIPTION,
-                               model.getId()))))
+                .orElseGet(() -> Stream.of(
+                    new ModelValidationError(format(UNKNOWN_PROCESS_ID_VALIDATION_ERROR_PROBLEM,
+                        model.getId()), format(UNKNOWN_PROCESS_ID_VALIDATION_ERROR_DESCRIPTION,
+                        model.getId()))))
                 .collect(Collectors.toList());
     }
 

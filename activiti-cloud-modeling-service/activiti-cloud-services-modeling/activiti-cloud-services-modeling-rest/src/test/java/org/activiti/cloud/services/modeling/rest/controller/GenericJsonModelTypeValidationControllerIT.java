@@ -34,6 +34,7 @@ import org.activiti.cloud.modeling.api.JsonModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
+import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -97,18 +98,18 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     private void validateInvalidContent() {
-        SemanticModelValidationException exception = new SemanticModelValidationException(Collections
-                .singletonList(genericJsonContentValidator.createModelValidationError("Content invalid",
-                                                                                      "The content is invalid!!")));
+      SemanticModelValidationException exception = new SemanticModelValidationException(Collections
+                .singletonList(
+                    new ModelValidationError("Content invalid", "The content is invalid!!")));
 
         doThrow(exception).when(genericJsonContentValidator).validateModelContent(any(byte[].class),
                                                                                   any(ValidationContext.class));
     }
 
     private void validateInvalidExtensions() {
-        SemanticModelValidationException exception = new SemanticModelValidationException(Collections
-                .singletonList(genericJsonContentValidator.createModelValidationError("Extensions invalid",
-                                                                                      "The extensions are invalid!!")));
+      SemanticModelValidationException exception = new SemanticModelValidationException(Collections
+                .singletonList(
+                    new ModelValidationError("Extensions invalid", "The extensions are invalid!!")));
 
         doThrow(exception).when(genericJsonExtensionsValidator).validateModelExtensions(any(byte[].class),
                                                                                         any(ValidationContext.class));
@@ -400,8 +401,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
     @Test
     public void should_throwExceptionAndCallGenericJsonContentUsageValidatorA_when_validatingInvalidModelContent() throws IOException {
-        SemanticModelValidationException exception = new SemanticModelValidationException(Collections
-            .singletonList(genericJsonContentValidator.createModelValidationError("Content invalid", "The content is invalid!!")));
+      SemanticModelValidationException exception = new SemanticModelValidationException(Collections
+            .singletonList(new ModelValidationError("Content invalid", "The content is invalid!!")));
 
         doThrow(exception).when(genericJsonContentValidator).validateModelContent(any(Model.class), any(byte[].class), any(ValidationContext.class), any(boolean.class));
 

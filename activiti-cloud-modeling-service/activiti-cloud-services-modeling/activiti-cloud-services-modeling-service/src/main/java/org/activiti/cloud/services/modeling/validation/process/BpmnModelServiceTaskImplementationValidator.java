@@ -109,9 +109,9 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
                 .filter(implementation -> implementation.equals(serviceTask.getImplementation()))
                 .findFirst()
                 .map(implementation -> Optional.<ModelValidationError>empty())
-                .orElseGet(() -> Optional.of(createModelValidationError(INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
-                                                                        format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
-                                                                               serviceTask.getId()),
-                                                                        SERVICE_USER_TASK_VALIDATOR_NAME)));
+                .orElseGet(() -> Optional.of(
+                    new ModelValidationError(INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
+                        format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
+                            serviceTask.getId()), SERVICE_USER_TASK_VALIDATOR_NAME)));
     }
 }

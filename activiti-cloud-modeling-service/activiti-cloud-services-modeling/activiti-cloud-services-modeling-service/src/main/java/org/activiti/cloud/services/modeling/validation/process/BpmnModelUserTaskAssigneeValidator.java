@@ -53,8 +53,8 @@ public class BpmnModelUserTaskAssigneeValidator implements BpmnModelValidator {
             return Optional.empty();
         }
 
-        return Optional.of(createModelValidationError(NO_ASSIGNEE_PROBLEM_TITLE,
-                                                      NO_ASSIGNEE_DESCRIPTION,
-                                                      USER_TASK_ASSIGNEE_VALIDATOR_NAME));
+        return Optional.of(
+            new ModelValidationError(NO_ASSIGNEE_PROBLEM_TITLE, NO_ASSIGNEE_DESCRIPTION,
+                USER_TASK_ASSIGNEE_VALIDATOR_NAME));
     }
 }

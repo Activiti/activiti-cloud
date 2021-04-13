@@ -106,9 +106,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
         String schema = Optional.ofNullable(validationException.getViolatedSchema())
                 .map(Schema::getSchemaLocation)
                 .orElse(null);
-        return createModelValidationError(validationException.getErrorMessage(),
-                                          description,
-                                          schema);
+        return new ModelValidationError(validationException.getErrorMessage(), description, schema);
     }
 
     private String resolveExpression(String message, String  pointerToViolation, JSONObject prcessExtenstionJson) {

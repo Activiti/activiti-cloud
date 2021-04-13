@@ -26,7 +26,6 @@ import org.activiti.cloud.modeling.api.process.ProcessVariable;
 import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Optional;
@@ -77,14 +76,13 @@ public class ProcessExtensionsProcessVariablesValidator implements ProcessExtens
                                                                           String processId,
                                                                           Set<String> availableProcessVariables) {
         Object variableName = action == INPUTS ? processVariableMapping.getValue() : processVariableMappingKey;
-        return processVariableMapping.getType() == VARIABLE &&
+      return processVariableMapping.getType() == VARIABLE &&
                 !availableProcessVariables.contains(variableName) ?
-                Optional.of(createModelValidationError(
-                        format(UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_PROBLEM,
-                               variableName),
-                        format(UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_DESCRIPTION,
-                               processId,
-                               variableName))) :
+                Optional.of(new ModelValidationError(
+                    format(UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_PROBLEM,
+                        variableName), format(UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_DESCRIPTION,
+                    processId,
+                    variableName))) :
                 Optional.empty();
     }
 

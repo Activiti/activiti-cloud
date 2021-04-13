@@ -82,17 +82,16 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
         Optional<String> implementationTask = getTaskImplementation(taskMapping.getFlowNode());
 
         if (implementationTask.isPresent() && isConnector(implementationTask) && !availableConnectorActions.containsKey(implementationTask.get())) {
-            return Optional.of(createModelValidationError(
-                format(UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_PROBLEM,
-                    taskMapping.getAction().name(),
-                    taskMapping.getFlowNode().getId(),
-                    implementationTask.get()),
-                format(UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_DESCRIPTION,
-                    taskMapping.getProcessId(),
-                    taskMapping.getAction().name(),
-                    taskMapping.getFlowNode().getId(),
-                    implementationTask.get())
-            )).stream();
+          return Optional.of(
+              new ModelValidationError(format(UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_PROBLEM,
+                  taskMapping.getAction().name(),
+                  taskMapping.getFlowNode().getId(),
+                  implementationTask.get()),
+                  format(UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_DESCRIPTION,
+                      taskMapping.getProcessId(),
+                      taskMapping.getAction().name(),
+                      taskMapping.getFlowNode().getId(),
+                      implementationTask.get()))).stream();
         }
 
         return taskMapping
@@ -136,7 +135,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                     .filter(parameter -> parameter.equals(connectorParameterName))
                     .findFirst()
                     .map(parameter -> Optional.<ModelValidationError>empty())
-                    .orElseGet(() -> Optional.of(createModelValidationError(
+                    .orElseGet(() -> Optional.of(new ModelValidationError(
                         format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM,
                             actionType.name().toLowerCase(),
                             connectorParameterName),

@@ -104,13 +104,12 @@ public class BpmnModelCallActivityValidator implements BpmnModelValidator {
         String calledElement = callActivity.getCalledElement();
 
         if (isEmpty(calledElement)) {
-            return Optional.of(createModelValidationError(format(NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM,
-                                                                 callActivity.getId(),
-                                                                 mainProcess),
-                                                          format(NO_REFERENCE_FOR_CALL_ACTIVITY_DESCRIPTION,
-                                                                 callActivity.getId(),
-                                                                 mainProcess),
-                                                          NO_REFERENCE_FOR_CALL_ACTIVITY_REFERENCE_NAME)
+            return Optional.of(
+                new ModelValidationError(format(NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM,
+                    callActivity.getId(),
+                    mainProcess), format(NO_REFERENCE_FOR_CALL_ACTIVITY_DESCRIPTION,
+                    callActivity.getId(),
+                    mainProcess), NO_REFERENCE_FOR_CALL_ACTIVITY_REFERENCE_NAME)
             );
         }
         else if (calledElement.matches(expressionRegex)) {
@@ -120,13 +119,13 @@ public class BpmnModelCallActivityValidator implements BpmnModelValidator {
             String calledElementId = calledElement.replace("process-",
                                                            "");
             return !availableProcessesIds.contains(calledElementId) ?
-                    Optional.of(createModelValidationError(INVALID_CALL_ACTIVITY_REFERENCE_PROBLEM,
-                                                           format(INVALID_CALL_ACTIVITY_REFERENCE_DESCRIPTION,
-                                                                  callActivity.getId(),
-                                                                  calledElementId,
-                                                                  mainProcess,
-                                                                  INVALID_CALL_ACTIVITY_REFERENCE_NAME),
-                                                           INVALID_CALL_ACTIVITY_REFERENCE_NAME)) : Optional.empty();
+                    Optional.of(new ModelValidationError(INVALID_CALL_ACTIVITY_REFERENCE_PROBLEM,
+                        format(INVALID_CALL_ACTIVITY_REFERENCE_DESCRIPTION,
+                            callActivity.getId(),
+                            calledElementId,
+                            mainProcess,
+                            INVALID_CALL_ACTIVITY_REFERENCE_NAME),
+                        INVALID_CALL_ACTIVITY_REFERENCE_NAME)) : Optional.empty();
         }
     }
 }

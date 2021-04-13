@@ -25,9 +25,28 @@ public class ModelValidationError {
     private String validatorSetName;
     private String problem;
     private String description;
-    private boolean isWarning;
+    private boolean isWarning = false;
     private String errorCode;
     private String referenceId;
+
+    public ModelValidationError() {
+    }
+
+    public ModelValidationError(String problem, String description) {
+        this.problem = problem;
+        this.description = description;
+    }
+
+    public ModelValidationError(String problem, String description, String validatorSetName) {
+        this(problem, description);
+        this.validatorSetName = validatorSetName;
+    }
+
+    public ModelValidationError(String problem, String description, String validatorSetName,
+        boolean isWarning) {
+        this(problem, description, validatorSetName);
+        this.isWarning = isWarning;
+    }
 
     public String getValidatorSetName() {
         return validatorSetName;
@@ -76,7 +95,7 @@ public class ModelValidationError {
     public void setReferenceId(String referenceId) {
         this.referenceId = referenceId;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

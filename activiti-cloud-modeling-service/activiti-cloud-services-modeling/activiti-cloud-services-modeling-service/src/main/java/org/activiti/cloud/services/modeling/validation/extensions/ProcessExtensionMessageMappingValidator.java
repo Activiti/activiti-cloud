@@ -80,10 +80,10 @@ public class ProcessExtensionMessageMappingValidator implements ProcessExtension
     private List<ModelValidationError> validate(MappingModel mappingModel) {
         return mappingModel.getProcessVariableMappings().entrySet().stream()
             .filter((variable) -> !variable.getKey().matches(PAYLOAD_PATTERN))
-            .map(variable -> createModelValidationError(
-                format(INVALID_PAYLOAD_NAME_ERROR, mappingModel.getFlowNode().getName(), mappingModel.getProcessId()),
-                format(INVALID_PAYLOAD_NAME_ERROR_DESCRIPTION, mappingModel.getProcessId(), mappingModel.getFlowNode().getId(), variable.getKey())
-            ))
+            .map(
+                variable -> new ModelValidationError(
+                    format(INVALID_PAYLOAD_NAME_ERROR, mappingModel.getFlowNode().getName(), mappingModel.getProcessId()),
+                    format(INVALID_PAYLOAD_NAME_ERROR_DESCRIPTION, mappingModel.getProcessId(), mappingModel.getFlowNode().getId(), variable.getKey())))
             .collect(Collectors.toList());
     }
 
