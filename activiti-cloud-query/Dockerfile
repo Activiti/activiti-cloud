@@ -13,8 +13,10 @@ EXPOSE 8080
 WORKDIR /opt
 COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
-COPY target/*.jar app.jar
+
 COPY liquibase/target/*.jar liquibase.jar
+COPY rabbitmq/target/*.jar app-rabbitmq.jar
+COPY kafka/target/*.jar app-kafka.jar
 
 ENTRYPOINT ["./entrypoint.sh"]
-CMD ["-jar", "app.jar"]
+CMD ["-jar", "app-rabbitmq.jar"]

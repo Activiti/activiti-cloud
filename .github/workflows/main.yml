@@ -14,6 +14,7 @@ on:
 env:
   CLUSTER_NAME: activiti
   CLUSTER_DOMAIN: envalfresco.com
+  GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
 
 jobs:
 
@@ -30,8 +31,12 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     needs: pre-commit
+    # Map a step output to a job output
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+      branch-name: ${{ steps.set-branch-name.outputs.branch-name }}
+      preview-name: ${{ steps.set-preview-name.outputs.preview-name }}
     steps:
-
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.8.0
         with:
@@ -89,35 +94,41 @@ jobs:
           echo $(jx-release-version) > VERSION
 
       - name: Set BRANCH_NAME env variable
+        id: set-branch-name
         run: |
           BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF}
           BRANCH_NAME=${BRANCH_NAME#refs/heads/}
           BRANCH_NAME=$(echo ${BRANCH_NAME/\//-} | tr '[:upper:]' '[:lower:]')
           echo set BRANCH_NAME=$BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "::set-output name=branch-name::$BRANCH_NAME"
 
       - name: Set PREVIEW_NAME env variable
+        id: set-preview-name
         run: |
-          PREVIEW_NAME=${BRANCH_NAME:0:28}-$GITHUB_RUN_NUMBER
+          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=${BRANCH_NAME:0:28}-$GITHUB_RUN_NUMBER
           echo set PREVIEW_NAME=$PREVIEW_NAME
           echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
+          echo "::set-output name=preview-name::$PREVIEW_NAME"
 
       - name: Set preview version
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          echo 0.0.1-$PREVIEW_NAME-SNAPSHOT > VERSION
+          echo 0.0.1-$PREVIEW_NAME-$GITHUB_RUN_NUMBER-SNAPSHOT > VERSION
 
       - name: Set VERSION env variable
+        id: set-version
         run: |
           VERSION=$(cat VERSION)
           echo set VERSION=$VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "::set-output name=version::$VERSION"
 
       - name: Build Example Runtime Bundle
         run: make docker/example-runtime-bundle
 
       - name: Build Activity Cloud Query
-        run: make mvn/activiti-cloud-query/liquibase docker/activiti-cloud-query
+        run: make docker/activiti-cloud-query
 
       - name: Build Example Cloud Connector
         run: make docker/example-cloud-connector
@@ -127,6 +138,48 @@ jobs:
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
+
+  test:
+    runs-on: ubuntu-20.04
+    needs: build
+    strategy:
+      matrix:
+        messaging-broker: [rabbitmq, kafka]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Java JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      # step required for https://github.com/nektos/act/issues/161 to run locally with https://github.com/nektos/act
+      - name: Set up Maven
+        if: ${{ env.ACT }}
+        run: |
+          apt-get update && apt-get install -y libfontconfig1
+          curl -fsSL https://www-eu.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
+            | tar xz -C /usr/share
+          ln -s /usr/share/apache-maven-$MAVEN_VERSION/bin/mvn /usr/bin/mvn
+        env:
+          MAVEN_VERSION: 3.6.3
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Configure Maven
+        run: |
+          echo "MAVEN_USERNAME=$MAVEN_USERNAME" >> $GITHUB_ENV
+          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> $GITHUB_ENV
+          echo "MAVEN_CLI_OPTS=-s $GITHUB_WORKSPACE/settings.xml -B -ntp" >> $GITHUB_ENV
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
@@ -149,7 +202,30 @@ jobs:
           secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
           context: ${{ env.CLUSTER_NAME }}
 
-      - name: Run Acceptance Tests
+      - name: Setup environment for ${{ matrix.messaging-broker }}
+        env:
+          MESSAGING_BROKER: ${{ matrix.messaging-broker }}
+          PREVIEW_NAME: ${{ needs.build.outputs.preview-name }}-${{ matrix.messaging-broker }}
+          BRANCH_NAME: ${{ needs.build.outputs.branch-name }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          echo "MESSAGING_BROKER=$MESSAGING_BROKER" >> $GITHUB_ENV
+          echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo $VERSION > VERSION
+
+          echo MESSAGING_BROKER=$MESSAGING_BROKER
+          echo PREVIEW_NAME=$PREVIEW_NAME
+          echo BRANCH_NAME=$BRANCH_NAME
+          echo VERSION=$VERSION
+
+      - name: Delete preview for ${{ matrix.messaging-broker }}
+        if: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+        run: |
+          kubectl delete ns $PREVIEW_NAME || true
+
+      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
         run: |
           export SSO_PROTOCOL=https
           export GATEWAY_PROTOCOL=https
@@ -163,9 +239,9 @@ jobs:
           max_attempts=50
           echo "Waiting for services to be up..."
           until \
-            curl --silent --head --fail $GATEWAY_HOST/modeling-service/actuator/health > /dev/null 2>&1 && \
-            curl --silent --head --fail $GATEWAY_HOST/rb/actuator/health > /dev/null 2>&1 && \
-            curl --silent --head --fail $GATEWAY_HOST/query/actuator/health > /dev/null 2>&1
+            curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/modeling-service/actuator/health > /dev/null 2>&1 && \
+            curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/rb/actuator/health > /dev/null 2>&1 && \
+            curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/query/actuator/health > /dev/null 2>&1
           do
             if [ ${attempt_counter} -eq ${max_attempts} ]
             then
@@ -183,16 +259,63 @@ jobs:
           make test/modeling-acceptance-tests
           make test/runtime-acceptance-tests
 
-      - name: Delete Helm chart
-        if: ${{ always() }}
+      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
+        if: ${{ !contains(github.head_ref, 'preview') }}
         run: make delete
 
       - name: Delete Docker images
-        if: ${{ always() && github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' && !contains(github.head_ref, 'preview') }}
         run: make docker-delete-all
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+  promote:
+    runs-on: ubuntu-20.04
+    needs: [build,test]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Java JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      # step required for https://github.com/nektos/act/issues/161 to run locally with https://github.com/nektos/act
+      - name: Set up Maven
+        if: ${{ env.ACT }}
+        run: |
+          apt-get update && apt-get install -y libfontconfig1
+          curl -fsSL https://www-eu.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
+            | tar xz -C /usr/share
+          ln -s /usr/share/apache-maven-$MAVEN_VERSION/bin/mvn /usr/bin/mvn
+        env:
+          MAVEN_VERSION: 3.6.3
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Configure Maven
+        run: |
+          echo "MAVEN_USERNAME=$MAVEN_USERNAME" >> $GITHUB_ENV
+          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> $GITHUB_ENV
+          echo "MAVEN_CLI_OPTS=-s $GITHUB_WORKSPACE/settings.xml -B -ntp" >> $GITHUB_ENV
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.5.2
+
+      - name: Set up yq
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-yq@v1.1.0
 
       - name: Configure git user
         if: ${{ github.event_name == 'push' }}
@@ -218,9 +341,12 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          VERSION: ${{ needs.build.outputs.version }}
 
       - name: Deploy preview
         if: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
         run: |
           mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
           mvn $MAVEN_CLI_OPTS deploy -pl activiti-cloud-dependencies/dependencies -am -DskipTests
+        env:
+          VERSION: ${{ needs.build.outputs.version }}

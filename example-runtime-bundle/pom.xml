@@ -2,6 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <packaging>pom</packaging>
+  <modules>
+    <module>starter</module>
+    <module>rabbitmq</module>
+    <module>kafka</module>
+  </modules>
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-application</artifactId>
@@ -24,6 +30,7 @@
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>7.1.671</activiti-cloud.version>
     <docker-maven-plugin.version>0.34.1</docker-maven-plugin.version>
+    <start-class>org.activiti.cloud.runtime.RuntimeBundleApplication</start-class>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -41,16 +48,27 @@
         <scope>import</scope>
         <type>pom</type>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>example-runtime-bundle-starter</artifactId>
+        <version>7.1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>example-runtime-bundle-rabbitmq</artifactId>
+        <version>7.1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>example-runtime-bundle-kafka</artifactId>
+        <version>7.1.0-SNAPSHOT</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -112,11 +130,7 @@
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
-        <property>
-          <name>skipITs</name>
-          <value>false</value>
-        </property>
+        <activeByDefault>true</activeByDefault>
       </activation>
       <build>
         <plugins>
@@ -134,56 +148,6 @@
                 <goals>
                   <goal>integration-test</goal>
                   <goal>verify</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>io.fabric8</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <version>${docker-maven-plugin.version}</version>
-            <configuration>
-              <images>
-                <image>
-                  <name>activiti/activiti-keycloak</name>
-                  <alias>activiti-keycloak</alias>
-                  <run>
-                    <ports>
-                      <port>8180:8180</port>
-                    </ports>
-                    <wait>
-                      <log>Keycloak .* started in</log>
-                      <time>40000</time>
-                      <shutdown>5000</shutdown>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-                <image>
-                  <name>rabbitmq:management</name>
-                  <alias>activiti-rabbitmq</alias>
-                  <run>
-                    <ports>
-                      <port>5672:5672</port>
-                      <port>15672:15672</port>
-                    </ports>
-                    <wait>
-                      <log>Server startup complete</log>
-                      <time>20000</time>
-                      <shutdown>3000</shutdown>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-              </images>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>start</goal>
-                  <goal>stop</goal>
-                  <goal>remove</goal>
                 </goals>
               </execution>
             </executions>

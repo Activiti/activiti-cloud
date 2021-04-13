@@ -3,6 +3,9 @@ pull_request_rules:
     conditions:
       - author=alfresco-build-user
       - status-success=build
+      - status-success=test (rabbitmq)
+      - status-success=test (kafka)
+      - status-success=promote
       - label!=do-not-merge
     actions:
       merge:
@@ -14,6 +17,9 @@ pull_request_rules:
       - "#review-requested=0"
       - "#changes-requested-reviews-by=0"
       - status-success=build
+      - status-success=test (rabbitmq)
+      - status-success=test (kafka)
+      - status-success=promote
       - status-success=license/cla
       - label!=do-not-merge
     actions:

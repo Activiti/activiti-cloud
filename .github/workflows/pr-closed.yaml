@@ -1,0 +1,44 @@
+name: Close PR
+
+# only trigger on pull request closed events
+on:
+  pull_request:
+    types: [ closed ]
+
+env:
+  CLUSTER_NAME: activiti
+  CLUSTER_DOMAIN: envalfresco.com
+  GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+
+jobs:
+  cleanup:
+    if: ${{ contains(github.head_ref, 'preview') }}
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        messaging-broker: [rabbitmq, kafka]
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: v1.19.6
+
+      - name: Set up rancher
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.1.0
+        with:
+          url: ${{ secrets.RANCHER2_URL }}
+          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          context: ${{ env.CLUSTER_NAME }}
+
+      - name: Set PREVIEW_NAME env variable for ${{ matrix.messaging-broker }}
+        id: set-preview-name
+        run: |
+          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=${BRANCH_NAME:0:28}-$GITHUB_RUN_NUMBER
+          echo set PREVIEW_NAME=$PREVIEW_NAME-${{ matrix.messaging-broker }}
+          echo "PREVIEW_NAME=$PREVIEW_NAME-${{ matrix.messaging-broker }}" >> $GITHUB_ENV
+
+      - name: Delete preview for ${{ matrix.messaging-broker }}
+        run: |
+          echo PR #${{ github.event.pull_request.number }} has been closed
+          kubectl delete ns $PREVIEW_NAME || true
