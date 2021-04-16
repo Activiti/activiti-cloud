@@ -136,9 +136,6 @@ jobs:
       - name: Build Activiti Cloud Modeling
         run: make mvn/activiti-cloud-modeling/liquibase docker/activiti-cloud-modeling
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-
   test:
     runs-on: ubuntu-20.04
     needs: build
