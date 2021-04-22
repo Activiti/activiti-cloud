@@ -42,19 +42,22 @@ public class ActivitiAuditProducerEnvironmentPostProcessor implements Environmen
         PropertySource<?> system = environment.getPropertySources()
                                               .get(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
 
-        Map<String, Object> activitiAuditProducerProperties = new LinkedHashMap<>();
+        // TODO enable partitioned producer conditionally based on system environment property
+        if (true) {
+            Map<String, Object> activitiAuditProducerProperties = new LinkedHashMap<>();
 
-        activitiAuditProducerProperties.put("spring.cloud.stream.bindings.auditProducer.producer.partitionKeyExtractorName",
-                                            "activitiAuditProducerPartitionKeyExtractor");
-        activitiAuditProducerProperties.put("spring.cloud.stream.bindings.queryConsumer.consumer.partitioned",
-                                            "true");
-        activitiAuditProducerProperties.put("spring.cloud.stream.bindings.auditConsumer.consumer.partitioned",
-                                            "true");
+            activitiAuditProducerProperties.put("spring.cloud.stream.bindings.auditProducer.producer.partitionKeyExtractorName",
+                                                "activitiAuditProducerPartitionKeyExtractor");
+            activitiAuditProducerProperties.put("spring.cloud.stream.bindings.queryConsumer.consumer.partitioned",
+                                                "true");
+            activitiAuditProducerProperties.put("spring.cloud.stream.bindings.auditConsumer.consumer.partitioned",
+                                                "true");
 
-        environment.getPropertySources()
-                   .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                             new MapPropertySource("activitiAuditProducerPropertySource",
-                                                   activitiAuditProducerProperties));
+            environment.getPropertySources()
+                       .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+                                 new MapPropertySource("activitiAuditProducerPropertySource",
+                                                       activitiAuditProducerProperties));
+        }
 
     }
 }
