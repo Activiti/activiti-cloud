@@ -1,3 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundleAutoConfiguration,\
-  org.activiti.cloud.starter.rb.configuration.ActivitiCloudEngineAutoConfiguration
+    org.activiti.cloud.starter.rb.configuration.ActivitiCloudEngineAutoConfiguration
+
+org.springframework.boot.env.EnvironmentPostProcessor=\
+    org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerEnvironmentPostProcessor

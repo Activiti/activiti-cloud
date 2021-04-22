@@ -24,11 +24,13 @@ import java.util.UUID;
 
 public class ActivitiAuditProducerPartitionKeyExtractor implements PartitionKeyExtractorStrategy {
 
+    public static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
+
     @Override
     public Object extractKey(Message<?> message) {
         // Use processInstanceId header to route message between partitions or use random hash value if missing
         String rootProcessInstance = message.getHeaders()
-                                            .get("rootProcessInstanceId",
+                                            .get(ROOT_PROCESS_INSTANCE_ID,
                                                  String.class);
 
         return Optional.ofNullable(rootProcessInstance)
