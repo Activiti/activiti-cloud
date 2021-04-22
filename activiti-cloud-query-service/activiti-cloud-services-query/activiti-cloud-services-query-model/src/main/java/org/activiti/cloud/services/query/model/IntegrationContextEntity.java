@@ -25,16 +25,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -97,6 +88,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private List<StackTraceElement> stackTraceElements;
 
     @JsonFormat(shape = Shape.STRING)
+    @Enumerated(EnumType.STRING)
     private IntegrationContextStatus status;
 
     @JsonIgnore
