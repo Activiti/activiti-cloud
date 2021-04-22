@@ -20,12 +20,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import static org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerPartitionKeyExtractor.ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME;
+
 @Configuration
 @Import(RuntimeBundleSwaggerConfig.class)
 public class ActivitiRuntimeBundleAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(name="activitiAuditProducerPartitionKeyExtractor")
+    @ConditionalOnMissingBean(name=ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME)
     public ActivitiAuditProducerPartitionKeyExtractor activitiAuditProducerPartitionKeyExtractor() {
         return new ActivitiAuditProducerPartitionKeyExtractor();
     }

@@ -28,8 +28,10 @@ import org.springframework.core.env.PropertySource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
+import static org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerPartitionKeyExtractor.ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME;
 
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class ActivitiAuditProducerEnvironmentPostProcessor implements EnvironmentPostProcessor {
@@ -42,22 +44,25 @@ public class ActivitiAuditProducerEnvironmentPostProcessor implements Environmen
         PropertySource<?> system = environment.getPropertySources()
                                               .get(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
 
-        // TODO enable partitioned producer conditionally based on system environment property
-        if (true) {
+        Boolean isPartitioned = Optional.ofNullable(system.getProperty("ACT_AUDIT_PRODUCER_PARTITONED"))
+                                        .map(Object::toString)
+                                        .map(Boolean::parseBoolean)
+                                        .orElse(false);
+
+        // enable partitioned producer conditionally based on system environment property
+        if (isPartitioned) {
             Map<String, Object> activitiAuditProducerProperties = new LinkedHashMap<>();
 
             activitiAuditProducerProperties.put("spring.cloud.stream.bindings.auditProducer.producer.partitionKeyExtractorName",
-                                                "activitiAuditProducerPartitionKeyExtractor");
+                                                ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME);
             activitiAuditProducerProperties.put("spring.cloud.stream.bindings.queryConsumer.consumer.partitioned",
                                                 "true");
             activitiAuditProducerProperties.put("spring.cloud.stream.bindings.auditConsumer.consumer.partitioned",
                                                 "true");
-
             environment.getPropertySources()
                        .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
                                  new MapPropertySource("activitiAuditProducerPropertySource",
                                                        activitiAuditProducerProperties));
         }
-
     }
 }

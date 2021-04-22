@@ -24,6 +24,8 @@ import java.util.UUID;
 
 public class ActivitiAuditProducerPartitionKeyExtractor implements PartitionKeyExtractorStrategy {
 
+    public static final String ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME = "activitiAuditProducerPartitionKeyExtractor";
+
     public static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
 
     @Override
