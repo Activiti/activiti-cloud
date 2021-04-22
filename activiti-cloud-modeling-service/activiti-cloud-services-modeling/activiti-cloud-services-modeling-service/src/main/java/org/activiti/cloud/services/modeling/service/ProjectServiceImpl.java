@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.getConten
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -267,7 +268,6 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElse(Optional.empty());
     }
 
-
     private void convertZipElementToModelObject(ZipStream.ZipStreamEntry zipEntry, @Nullable String name, FileContent fileContent, ProjectHolder projectHolder) {
         Optional<String> folderName = zipEntry.getFolderName(0);
 
@@ -302,18 +302,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project createdProject = projectHolder.getProjectMetadata().map(this::createProject)
                 .orElseThrow(() -> new ImportProjectException("No valid project entry found to import: " + file.getOriginalFilename()));
 
-        projectHolder.getModelJsonFiles().forEach(modelJsonFile -> {
-            importJSONModelFiles(projectHolder, createdProject, modelJsonFile);
-        });
-
-        projectHolder.getModelContentFiles().forEach(modelXmlFile ->
-                importXMLModelFiles(projectHolder, createdProject, modelXmlFile.getModelType(), modelXmlFile.getFileContent()));
-
-        Map<Model, FileContent> createdProcesses = createXMLModelFiles(projectHolder, createdProject);
-        createdProcesses.keySet().forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
-
-        modelService.cleanModelIdList();
-        return createdProject;
+        return importModelsFromProjectHolder(createdProject, projectHolder);
     }
 
     private void importJSONModelFiles(ProjectHolder projectHolder,
@@ -452,4 +441,34 @@ public class ProjectServiceImpl implements ProjectService {
 
         return validationErrors.stream();
     }
+
+    @Override
+    public Project createProjectFromTemplate(final InputStream inputStream, final String name) throws IOException {
+        ProjectHolder projectHolder = new ProjectHolder();
+
+        ZipStream.of(inputStream)
+                .forEach(zipEntry -> createFileContentFromZipEntry(zipEntry)
+                        .ifPresent(fileContent -> convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
+
+        Project createdProject = projectHolder.getProjectMetadata().map(this::createProject)
+                .orElseThrow(() -> new ImportProjectException("No valid project entry found to create from template: " + "test"));
+
+        return importModelsFromProjectHolder(createdProject, projectHolder);
+    }
+
+    private Project importModelsFromProjectHolder(Project project, ProjectHolder projectHolder){
+        projectHolder.getModelJsonFiles().forEach(modelJsonFile -> {
+            importJSONModelFiles(projectHolder, project, modelJsonFile);
+        });
+
+        projectHolder.getModelContentFiles().forEach(modelXmlFile ->
+                importXMLModelFiles(projectHolder, project, modelXmlFile.getModelType(), modelXmlFile.getFileContent()));
+
+        Map<Model, FileContent> createdProcesses = createXMLModelFiles(projectHolder, project);
+        createdProcesses.keySet().forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
+
+        modelService.cleanModelIdList();
+        return project;
+    }
+
 }

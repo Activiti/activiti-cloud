@@ -89,6 +89,12 @@ public interface ProjectRestApi {
 
     String PROJECT_NAME_PARAM_NAME = "name";
 
+    String CREATE_FROM_EXAMPLE_PROJECT_ID = "exampleProjectId";
+
+    String CREATE_FROM_EXAMPLE_PROJECT_ID_PARAM_DESCR = "The example project id of the source example project";
+
+    String PROJECT_NAME_CREATE_FROM_EXAMPLE_DESCR = "The name for the new project created from an example project";
+
     @ApiOperation(
             tags = PROJECTS,
             value = "List projects",
@@ -186,4 +192,17 @@ public interface ProjectRestApi {
     void validateProject(
             @ApiParam(VALIDATE_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId) throws IOException;
+
+    @ApiOperation(
+            tags = PROJECTS,
+            value = "Create an project from example",
+            notes = "This will download an example project (zip) and create a new project with chosen name")
+    @PostMapping(path = "/projects/example")
+    @ResponseStatus(CREATED)
+    EntityModel<Project> createProjectFromExample(
+            @ApiParam(value = CREATE_FROM_EXAMPLE_PROJECT_ID_PARAM_DESCR)
+            @RequestParam(name = CREATE_FROM_EXAMPLE_PROJECT_ID) String exampleProjectId,
+            @ApiParam(value = PROJECT_NAME_CREATE_FROM_EXAMPLE_DESCR)
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name
+    ) throws IOException;
 }

@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.modeling.configuration;
+package org.activiti.cloud.services.modeling.service.api;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
+import java.io.File;
+import java.util.List;
+import java.util.Optional;
+import org.activiti.cloud.modeling.api.templates.ExampleProject;
 
-@Configuration
-@Import(ModelingSwaggerConfig.class)
-@PropertySource("classpath:activiti-cloud-modeling.properties")
-public class ActivitiModelingAutoConfiguration {
+/**
+ * Business logic related to ExampleProject entities
+ */
+public interface ExampleProjectService {
+
+    Optional<File> getExampleProjectContentById(String exampleProjectId);
+
+    List<ExampleProject> getExampleProjects();
 
 }

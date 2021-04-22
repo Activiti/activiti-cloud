@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.service;
 import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
+import org.activiti.cloud.modeling.api.templates.ExampleProject;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.api.ModelContentConverter;
@@ -30,17 +31,24 @@ import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
+import org.activiti.cloud.services.modeling.service.api.ExampleProjectService;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class ModelingServiceAutoConfiguration {
+
+    @Value("${activiti.cloud.modeling.templates.endpoint}")
+    private String templatesEndpoint;
 
     @Bean
     public ModelContentService modelContentService(Set<ModelContentValidator> modelValidators,
@@ -108,5 +116,16 @@ public class ModelingServiceAutoConfiguration {
                                       projectValidators);
 
     }
+
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        return builder.build();
+    }
+
+    @Bean
+    public ExampleProjectService exampleProjectService(JsonConverter<ExampleProject> jsonConverter, RestTemplate restTemplate) {
+        return new ExampleProjectServiceImpl(templatesEndpoint, jsonConverter, restTemplate);
+    }
+
 
 }

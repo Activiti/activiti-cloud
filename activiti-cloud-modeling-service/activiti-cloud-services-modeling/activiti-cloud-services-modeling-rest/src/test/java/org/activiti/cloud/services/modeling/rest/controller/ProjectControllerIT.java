@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsFile;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.extensions;
@@ -38,6 +39,10 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,6 +57,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -70,8 +76,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -79,6 +89,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
@@ -110,6 +122,9 @@ public class ProjectControllerIT {
 
     @Autowired
     private ModelJpaRepository modelJpaRepository;
+
+    @MockBean
+    private RestTemplate restTemplate;
 
     @BeforeEach
     public void setUp() {
@@ -887,5 +902,59 @@ public class ProjectControllerIT {
             post("/v1/projects/{projectId}/copy?name=" + projectName,
                 project.getId()))
             .andExpect(status().isConflict());
+    }
+    
+    @Test
+    public void should_throwBadRequestException_when_creatingFromExampleProjectWithoutParamExampleProjectId() throws Exception {
+        mockMvc.perform(
+                post("/v1/projects/example?name=name"))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("Required String parameter 'exampleProjectId' is not present")));
+    }
+
+    @Test
+    public void should_throwBadRequestException_when_creatingFromExampleProjectWithoutParamName() throws Exception {
+        mockMvc.perform(
+                post("/v1/projects/example?exampleProjectId=exampleProjectId"))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("Required String parameter 'name' is not present")));
+    }
+
+    @Test
+    public void should_throwBadRequestException_when_creatingFromExampleProjectEmptyName() throws Exception {
+        when(restTemplate.getForEntity(anyString(), any())).thenThrow(new RestClientException("Connection refused"));
+        mockMvc.perform(
+                post("/v1/projects/example?name=name&exampleProjectId=exampleProjectId"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void should_returnStatusCreated_when_creatingProjectFromExampleProject() throws Exception {
+        String entry = "{ \"list\": { \"entries\": [ { \"entry\": { \"id\": \"exampleProjectId\", \"extensions\": "
+                + "{ \"content\": { \"url\": \"project-xy.zip\" } } } } ] } }";
+        ResponseEntity<JsonNode> responseEntity = new ResponseEntity<>(mapper.readTree(entry), HttpStatus.OK);
+
+        when(restTemplate.getForEntity(anyString(), eq(JsonNode.class))).thenReturn(responseEntity);
+        when(restTemplate.execute(eq("project-xy.zip"), eq(HttpMethod.GET), any(), any())).thenReturn(resourceAsFile("project/project-xy.zip"));
+
+        mockMvc.perform(
+                post("/v1/projects/example?name=created-from-example&exampleProjectId=exampleProjectId"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name", equalTo("created-from-example")));
+    }
+
+    @Test
+    public void should_throwConflictException_when_creatingProjectFromExampleProjectWithExistingName() throws Exception {
+        String entry = "{ \"list\": { \"entries\": [ { \"entry\": { \"id\": \"exampleProjectId\", \"extensions\": "
+                + "{ \"content\": { \"url\": \"project-xy.zip\" } } } } ] } }";
+        ResponseEntity<JsonNode> responseEntity = new ResponseEntity<>(mapper.readTree(entry), HttpStatus.OK);
+
+        projectRepository.createProject(project("existing-project"));
+        when(restTemplate.getForEntity(anyString(), eq(JsonNode.class))).thenReturn(responseEntity);
+        when(restTemplate.execute(eq("project-xy.zip"), eq(HttpMethod.GET), any(), any())).thenReturn(resourceAsFile("project/project-xy.zip"));
+
+        mockMvc.perform(
+                post("/v1/projects/example?name=existing-project&exampleProjectId=exampleProjectId"))
+                .andExpect(status().isConflict());
     }
 }

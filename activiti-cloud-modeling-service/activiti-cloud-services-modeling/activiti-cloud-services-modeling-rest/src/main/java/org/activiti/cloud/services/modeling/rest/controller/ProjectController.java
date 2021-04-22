@@ -15,29 +15,31 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.rest.api.ProjectRestApi;
 import org.activiti.cloud.services.modeling.rest.assembler.ProjectRepresentationModelAssembler;
+import org.activiti.cloud.services.modeling.service.api.ExampleProjectService;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
 
 /**
  * Controller for {@link Project} resources
@@ -51,13 +53,17 @@ public class ProjectController implements ProjectRestApi {
 
     private final AlfrescoPagedModelAssembler<Project> pagedCollectionModelAssembler;
 
+    private final ExampleProjectService exampleProjectService;
+
     @Autowired
     public ProjectController(ProjectService projectService,
-                             ProjectRepresentationModelAssembler representationModelAssembler,
-                             AlfrescoPagedModelAssembler<Project> pagedCollectionModelAssembler) {
+            ProjectRepresentationModelAssembler representationModelAssembler,
+            AlfrescoPagedModelAssembler<Project> pagedCollectionModelAssembler,
+            ExampleProjectService exampleProjectService) {
         this.projectService = projectService;
         this.representationModelAssembler = representationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
+        this.exampleProjectService = exampleProjectService;
     }
 
     @Override
@@ -138,8 +144,22 @@ public class ProjectController implements ProjectRestApi {
         projectService.validateProject(project);
     }
 
+    @Override
+    public EntityModel<Project> createProjectFromExample(
+            @RequestParam(name = CREATE_FROM_EXAMPLE_PROJECT_ID) final String exampleProjectId,
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME) final String name)
+            throws IOException {
+        return representationModelAssembler
+                .toModel(projectService.createProjectFromTemplate(new FileInputStream(getProjectExampleContent(exampleProjectId)), name));
+    }
+
     public Project findProjectById(String projectId) {
         return projectService.findProjectById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
+    }
+
+    private File getProjectExampleContent(String exampleProjectId) {
+        return exampleProjectService.getExampleProjectContentById(exampleProjectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Example project content not found: " + exampleProjectId));
     }
 }

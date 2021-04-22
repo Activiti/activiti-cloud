@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.modeling.api.templates.ExampleProject;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.process.Extensions;
 
@@ -68,4 +69,11 @@ public class JsonConverterConfiguration {
         return new JsonConverter<>(Extensions.class,
                                    objectMapper);
     }
+
+    @Bean
+    public JsonConverter<ExampleProject> exampleProjectJsonConverter(ObjectMapper objectMapper) {
+        return new JsonConverter<>(ExampleProject.class,
+                objectMapper);
+    }
+
 }
