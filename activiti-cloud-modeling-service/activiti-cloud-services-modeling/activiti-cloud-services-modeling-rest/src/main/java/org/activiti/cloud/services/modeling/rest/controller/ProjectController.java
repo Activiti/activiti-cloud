@@ -146,11 +146,11 @@ public class ProjectController implements ProjectRestApi {
 
     @Override
     public EntityModel<Project> createProjectFromExample(
-            @RequestParam(name = CREATE_FROM_EXAMPLE_PROJECT_ID) final String exampleProjectId,
-            @RequestParam(name = PROJECT_NAME_PARAM_NAME) final String name)
+            @RequestParam(name = CREATE_FROM_EXAMPLE_PROJECT_ID) String exampleProjectId,
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name)
             throws IOException {
         return representationModelAssembler
-                .toModel(projectService.createProjectFromTemplate(new FileInputStream(getProjectExampleContent(exampleProjectId)), name));
+                .toModel(projectService.createProjectFromTemplate(new FileInputStream(getProjectExampleContent(exampleProjectId)), name, exampleProjectId));
     }
 
     public Project findProjectById(String projectId) {

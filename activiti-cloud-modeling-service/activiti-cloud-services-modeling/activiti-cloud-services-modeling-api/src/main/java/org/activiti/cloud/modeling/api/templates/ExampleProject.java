@@ -29,7 +29,7 @@ public class ExampleProject {
     public ExampleProject() {
     }
 
-    public ExampleProject(final String id) {
+    public ExampleProject(String id) {
         this.id = id;
     }
 
@@ -37,7 +37,7 @@ public class ExampleProject {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -45,7 +45,7 @@ public class ExampleProject {
         return extensions;
     }
 
-    public void setExtensions(final ExampleProjectExtension extensions) {
+    public void setExtensions(ExampleProjectExtension extensions) {
         this.extensions = extensions;
     }
 }

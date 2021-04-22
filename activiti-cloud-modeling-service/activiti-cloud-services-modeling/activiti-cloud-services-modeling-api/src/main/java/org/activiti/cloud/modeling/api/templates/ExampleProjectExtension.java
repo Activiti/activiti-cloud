@@ -28,7 +28,7 @@ public class ExampleProjectExtension {
     public ExampleProjectExtension() {
     }
 
-    public ExampleProjectExtension(final ExampleProjectContent content) {
+    public ExampleProjectExtension(ExampleProjectContent content) {
         this.content = content;
     }
 
@@ -36,7 +36,7 @@ public class ExampleProjectExtension {
         return content;
     }
 
-    public void setContent(final ExampleProjectContent content) {
+    public void setContent(ExampleProjectContent content) {
         this.content = content;
     }
 }

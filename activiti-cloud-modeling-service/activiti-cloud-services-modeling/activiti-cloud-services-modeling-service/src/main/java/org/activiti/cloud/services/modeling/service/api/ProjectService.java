@@ -54,5 +54,5 @@ public interface ProjectService {
 
     void validateProject(Project project);
 
-    Project createProjectFromTemplate(InputStream inputStream, @Nullable String name) throws IOException;
+    Project createProjectFromTemplate(InputStream inputStream, String name, String templateId) throws IOException;
 }

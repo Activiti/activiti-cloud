@@ -53,14 +53,14 @@ public class ExampleProjectServiceImpl implements ExampleProjectService {
     private final RestTemplate restTemplate;
 
     @Autowired
-    public ExampleProjectServiceImpl(String templatesEndpoint, final JsonConverter<ExampleProject> jsonConverter, final RestTemplate restTemplate) {
+    public ExampleProjectServiceImpl(String templatesEndpoint, JsonConverter<ExampleProject> jsonConverter, RestTemplate restTemplate) {
         this.templatesEndpoint = templatesEndpoint;
         this.jsonConverter = jsonConverter;
         this.restTemplate = restTemplate;
     }
 
     @Override
-    public Optional<File> getExampleProjectContentById(final String exampleProjectId) {
+    public Optional<File> getExampleProjectContentById(String exampleProjectId) {
         Optional<ExampleProject> result = getExampleProjects().stream().filter(exampleProject -> exampleProject.getId().equals(exampleProjectId)).findAny();
         if (!result.isPresent()) {
             return Optional.empty();

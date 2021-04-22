@@ -443,7 +443,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project createProjectFromTemplate(final InputStream inputStream, final String name) throws IOException {
+    public Project createProjectFromTemplate(InputStream inputStream, String name, String templateId) throws IOException {
         ProjectHolder projectHolder = new ProjectHolder();
 
         ZipStream.of(inputStream)
@@ -451,7 +451,7 @@ public class ProjectServiceImpl implements ProjectService {
                         .ifPresent(fileContent -> convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
 
         Project createdProject = projectHolder.getProjectMetadata().map(this::createProject)
-                .orElseThrow(() -> new ImportProjectException("No valid project entry found to create from template: " + "test"));
+                .orElseThrow(() -> new ImportProjectException("No valid project entry found to create from template: " + templateId));
 
         return importModelsFromProjectHolder(createdProject, projectHolder);
     }

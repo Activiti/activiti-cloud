@@ -30,7 +30,7 @@ public class ExampleProjectContent {
     public ExampleProjectContent() {
     }
 
-    public ExampleProjectContent(final String url, final Integer sizeInBytes, final String mimeType) {
+    public ExampleProjectContent(String url, Integer sizeInBytes, String mimeType) {
         this.url = url;
         this.sizeInBytes = sizeInBytes;
         this.mimeType = mimeType;
@@ -40,7 +40,7 @@ public class ExampleProjectContent {
         return url;
     }
 
-    public void setUrl(final String url) {
+    public void setUrl(String url) {
         this.url = url;
     }
 
@@ -48,7 +48,7 @@ public class ExampleProjectContent {
         return sizeInBytes;
     }
 
-    public void setSizeInBytes(final Integer sizeInBytes) {
+    public void setSizeInBytes(Integer sizeInBytes) {
         this.sizeInBytes = sizeInBytes;
     }
 
@@ -56,7 +56,7 @@ public class ExampleProjectContent {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 }
