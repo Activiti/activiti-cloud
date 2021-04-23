@@ -116,7 +116,7 @@ jobs:
       - name: Run updatebot
         if: ${{ github.event_name == 'push' }}
         run: |
-          echo -e "https://$BOT_GITHUB_USERNAME:$BOT_GITHUB_TOKEN@github.com" >>  ~/.git-credentials
+          echo -e "https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
           updatebot push-version --kind maven \
             org.activiti.cloud:activiti-cloud-audit-dependencies $VERSION \
             org.activiti.cloud:activiti-cloud-api-dependencies $VERSION \
