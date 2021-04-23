@@ -19,7 +19,6 @@ import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToRespo
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import io.swagger.annotations.ApiParam;
