@@ -24,14 +24,14 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
-import org.springframework.core.env.PropertySource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
 import static org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerPartitionKeyExtractor.ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME;
+import static org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerPartitionKeyExtractor.ACTIVITI_CLOUD_MESSAGING_PARTITIONED;
+import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
 
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class ActivitiAuditProducerEnvironmentPostProcessor implements EnvironmentPostProcessor {
@@ -41,28 +41,23 @@ public class ActivitiAuditProducerEnvironmentPostProcessor implements Environmen
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment,
                                        SpringApplication application) {
-        PropertySource<?> system = environment.getPropertySources()
-                                              .get(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
+        Optional<Boolean> isPartitioned = Optional.ofNullable(environment.getProperty(ACTIVITI_CLOUD_MESSAGING_PARTITIONED,
+                                                                                      Boolean.class));
 
-        Boolean isPartitioned = Optional.ofNullable(system.getProperty("ACT_AUDIT_PRODUCER_PARTITONED"))
-                                        .map(Object::toString)
-                                        .map(Boolean::parseBoolean)
-                                        .orElse(false);
+        logger.warn("Configuring " + ACTIVITI_CLOUD_MESSAGING_PARTITIONED + "={}", isPartitioned);
 
-        // enable partitioned producer conditionally based on system environment property
-        if (isPartitioned) {
-            Map<String, Object> activitiAuditProducerProperties = new LinkedHashMap<>();
+        // enable partitioned producer conditionally based on configuration property
+        isPartitioned.filter(Boolean.TRUE::equals)
+                     .ifPresent(value -> {
+                         Map<String, Object> properties = new LinkedHashMap<>();
 
-            activitiAuditProducerProperties.put("spring.cloud.stream.bindings.auditProducer.producer.partitionKeyExtractorName",
-                                                ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME);
-            activitiAuditProducerProperties.put("spring.cloud.stream.bindings.queryConsumer.consumer.partitioned",
-                                                "true");
-            activitiAuditProducerProperties.put("spring.cloud.stream.bindings.auditConsumer.consumer.partitioned",
-                                                "true");
-            environment.getPropertySources()
-                       .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                                 new MapPropertySource("activitiAuditProducerPropertySource",
-                                                       activitiAuditProducerProperties));
-        }
+                         properties.put("spring.cloud.stream.bindings.auditProducer.producer.partitionKeyExtractorName",
+                                        ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME);
+
+                         environment.getPropertySources()
+                                    .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+                                              new MapPropertySource(ActivitiAuditProducerEnvironmentPostProcessor.class.getSimpleName(),
+                                                                    properties));
+                     });
     }
 }

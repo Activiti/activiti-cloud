@@ -24,8 +24,8 @@ import java.util.UUID;
 
 public class ActivitiAuditProducerPartitionKeyExtractor implements PartitionKeyExtractorStrategy {
 
+    public static final String ACTIVITI_CLOUD_MESSAGING_PARTITIONED = "activiti.cloud.messaging.partitioned";
     public static final String ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME = "activitiAuditProducerPartitionKeyExtractor";
-
     public static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
 
     @Override
@@ -38,6 +38,4 @@ public class ActivitiAuditProducerPartitionKeyExtractor implements PartitionKeyE
         return Optional.ofNullable(rootProcessInstance)
                        .orElse(UUID.randomUUID().toString());
     }
-
-    PartitionHandler ph;
 }
