@@ -294,7 +294,7 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Override
     public Project importProject(MultipartFile file, @Nullable String name) throws IOException {
-        return importModelsFromProjectHolder(getProjectHolderFromZipStream(ZipStream.of(file), name), file.getOriginalFilename());
+        return importModelsFromProjectHolder(getProjectHolderFromZipStream(ZipStream.of(file), name));
     }
 
     /**
@@ -302,13 +302,12 @@ public class ProjectServiceImpl implements ProjectService {
      *
      * @param file the InputStream zip file to import from
      * @param name the name of the new project that will be set if provided
-     * @param id the id from the original template
      * @return the imported project
      * @throws IOException in case of InputStream access error
      */
     @Override
-    public Project importProject(InputStream file, String name, String id) throws IOException {
-        return importModelsFromProjectHolder(getProjectHolderFromZipStream(ZipStream.of(file), name), id);
+    public Project importProject(InputStream file, String name) throws IOException {
+        return importModelsFromProjectHolder(getProjectHolderFromZipStream(ZipStream.of(file), name));
     }
 
     private void importJSONModelFiles(ProjectHolder projectHolder,
@@ -448,9 +447,10 @@ public class ProjectServiceImpl implements ProjectService {
         return validationErrors.stream();
     }
 
-    private Project importModelsFromProjectHolder(ProjectHolder projectHolder, String id){
+    private Project importModelsFromProjectHolder(ProjectHolder projectHolder) {
         Project project = projectHolder.getProjectMetadata().map(this::createProject)
-                .orElseThrow(() -> new ImportProjectException("No valid project entry found to import: " + id));
+                .orElseThrow(() ->
+                        new ImportProjectException("No valid project entry found to import"));
 
         projectHolder.getModelJsonFiles().forEach(modelJsonFile -> {
             importJSONModelFiles(projectHolder, project, modelJsonFile);
@@ -470,8 +470,8 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectHolder projectHolder = new ProjectHolder();
 
         stream.forEach(zipEntry -> createFileContentFromZipEntry(zipEntry)
-                        .ifPresent(fileContent -> convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
+                .ifPresent(fileContent -> convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
 
-        return  projectHolder;
+        return projectHolder;
     }
 }

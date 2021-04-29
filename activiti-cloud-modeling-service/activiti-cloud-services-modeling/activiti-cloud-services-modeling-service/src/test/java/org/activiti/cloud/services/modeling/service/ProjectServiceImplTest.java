@@ -183,7 +183,7 @@ public class ProjectServiceImplTest {
         projectValidators.add(new ProjectNameValidator());
         when(projectRepository.createProject(any())).thenReturn(project);
 
-        projectService.importProject(file.get(), "new-project-name", "template-id");
+        projectService.importProject(file.get(), "new-project-name");
 
         verify(jsonConverter, times(1)).tryConvertToEntity(any(byte[].class));
         verify(modelTypeService, times(4)).findModelTypeByFolderName("processes");
@@ -199,9 +199,9 @@ public class ProjectServiceImplTest {
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
 
         Exception exception = assertThrows(ImportProjectException.class, () -> {
-            projectService.importProject(file.get(), "new-project-name", "template-id");
+            projectService.importProject(file.get(), "new-project-name");
         });
-        String expectedMessage = "No valid project entry found to import: template-id";
+        String expectedMessage = "No valid project entry found to import";
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));

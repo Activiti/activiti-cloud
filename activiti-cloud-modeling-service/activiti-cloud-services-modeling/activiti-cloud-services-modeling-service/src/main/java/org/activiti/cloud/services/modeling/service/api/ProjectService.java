@@ -52,7 +52,7 @@ public interface ProjectService {
 
     Project importProject(MultipartFile file, @Nullable String name) throws IOException;
 
-    Project importProject(final InputStream file, String name, String id) throws IOException;
+    Project importProject(final InputStream file, String name) throws IOException;
 
     void validateProject(Project project);
 }
