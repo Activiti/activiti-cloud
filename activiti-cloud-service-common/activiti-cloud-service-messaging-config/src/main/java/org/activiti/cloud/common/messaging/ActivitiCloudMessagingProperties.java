@@ -30,11 +30,11 @@ public class ActivitiCloudMessagingProperties {
     public static final String ACTIVITI_CLOUD_MESSAGING_PREFIX = "activiti.cloud.messaging";
 
     public enum MessagingBroker {
-        rabbit, kafka
+        rabbitmq, kafka
     }
 
     @NotNull
-    private MessagingBroker broker = MessagingBroker.rabbit;
+    private MessagingBroker broker = MessagingBroker.rabbitmq;
 
     @NotNull
     private Boolean partitioned = false;
