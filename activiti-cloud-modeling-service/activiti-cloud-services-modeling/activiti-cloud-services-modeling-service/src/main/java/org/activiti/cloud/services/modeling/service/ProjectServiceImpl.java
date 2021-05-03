@@ -298,7 +298,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     /**
-     * Import an project form a zip inputstream.
+     * Import a project from a zip inputstream.
      *
      * @param file the InputStream zip file to import from
      * @param name the name of the new project that will be set if provided
