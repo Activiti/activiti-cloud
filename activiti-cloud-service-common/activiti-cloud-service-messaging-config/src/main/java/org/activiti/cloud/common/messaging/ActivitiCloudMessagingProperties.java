@@ -17,10 +17,15 @@
 package org.activiti.cloud.common.messaging;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.Objects;
 
 @ConfigurationProperties(prefix = ActivitiCloudMessagingProperties.ACTIVITI_CLOUD_MESSAGING_PREFIX)
+@Validated
 public class ActivitiCloudMessagingProperties {
     public static final String ACTIVITI_CLOUD_MESSAGING_PREFIX = "activiti.cloud.messaging";
 
@@ -28,14 +33,23 @@ public class ActivitiCloudMessagingProperties {
         rabbitmq, kafka
     }
 
+    @NotNull
     private MessagingBroker broker = MessagingBroker.rabbitmq;
-    private boolean partitioned = false;
-    private int partitionCount = 1;
-    private int instanceIndex = 0;
+
+    @NotNull
+    private Boolean partitioned = false;
+
+    @NotNull
+    @Positive
+    private Integer partitionCount = 1;
+
+    @NotNull
+    @Min(0)
+    private Integer instanceIndex = 0;
 
     ActivitiCloudMessagingProperties() { }
 
-    public boolean isPartitioned() {
+    public Boolean isPartitioned() {
         return partitioned;
     }
 
@@ -68,22 +82,22 @@ public class ActivitiCloudMessagingProperties {
             return false;
         }
         ActivitiCloudMessagingProperties that = (ActivitiCloudMessagingProperties) o;
-        return partitioned == that.partitioned &&
-            Objects.equals(partitionCount, that.partitionCount) &&
-            Objects.equals(instanceIndex, that.instanceIndex);
+        return broker == that.broker && Objects.equals(partitioned, that.partitioned) && Objects.equals(partitionCount, that.partitionCount) && Objects.equals(instanceIndex, that.instanceIndex);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(partitioned, partitionCount, instanceIndex);
+        return Objects.hash(broker, partitioned, partitionCount, instanceIndex);
     }
 
     @Override
     public String toString() {
-        return "ActivitiMessagingBrokerProperties{" +
-            "partitioned=" + partitioned +
+        return "ActivitiCloudMessagingProperties{" +
+            "broker=" + broker +
+            ", partitioned=" + partitioned +
             ", partitionCount=" + partitionCount +
             ", instanceIndex=" + instanceIndex +
             '}';
     }
+
 }
