@@ -48,8 +48,7 @@ public class ActivitiAuditProducerEnvironmentPostProcessor implements Environmen
         logger.warn("Configuring " + ACTIVITI_CLOUD_MESSAGING_PARTITIONED + "={}", isPartitioned);
 
         Integer partitionCount = environment.getProperty(ACTIVITI_CLOUD_MESSAGING_PARTITION_COUNT,
-                                                         Integer.class,
-                                                         2);
+                                                         Integer.class);
 
         // enable partitioned producer conditionally based on configuration property
         isPartitioned.filter(Boolean.TRUE::equals)
