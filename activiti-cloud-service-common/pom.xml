@@ -32,7 +32,7 @@
     <module>activiti-cloud-services-test-containers</module>
     <module>activiti-cloud-service-common-liquibase</module>
     <module>activiti-cloud-service-messaging-config</module>
-    <module>activiti-cloud-stream-binders-starter</module>
+    <module>activiti-cloud-service-messaging-starter</module>
   </modules>
   <properties>
     <activiti.version>7.1.336</activiti.version>

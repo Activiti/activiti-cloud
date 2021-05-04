@@ -10,9 +10,13 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>activiti-cloud-stream-binders-starter</artifactId>
+  <artifactId>activiti-cloud-service-messaging-starter</artifactId>
 
   <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-config</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>

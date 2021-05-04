@@ -109,12 +109,12 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-stream-binders-starter</artifactId>
+        <artifactId>activiti-cloud-service-messaging-config</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-service-messaging-config</artifactId>
+        <artifactId>activiti-cloud-service-messaging-starter</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

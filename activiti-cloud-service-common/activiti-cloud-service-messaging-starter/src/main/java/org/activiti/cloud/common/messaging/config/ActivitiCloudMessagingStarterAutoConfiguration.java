@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.stream.binders.config;
+package org.activiti.cloud.common.messaging.config;
 
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+@Configuration
+@PropertySource("classpath:config/activiti-cloud-stream-binders-configuration.properties")
+public class ActivitiCloudMessagingStarterAutoConfiguration {
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
-public class CloudStreamBindersAutoConfigurationIT {
-
-    @Value("${spring.cloud.stream.default-binder}")
-    private String defaultBinder;
-
-    @Test
-    public void should_haveRabbitAsDefaultBinder() {
-        assertThat(defaultBinder).isEqualTo("rabbit");
-    }
 }

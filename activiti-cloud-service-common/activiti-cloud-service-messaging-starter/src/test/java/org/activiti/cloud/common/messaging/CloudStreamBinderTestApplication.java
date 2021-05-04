@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.stream.binders.config;
+package org.activiti.cloud.common.messaging;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@Configuration
-@PropertySource("classpath:config/activiti-cloud-stream-binders-configuration.properties")
-public class CloudStreamBindersAutoConfiguration {
+@SpringBootApplication
+public class CloudStreamBinderTestApplication {
 
 }
