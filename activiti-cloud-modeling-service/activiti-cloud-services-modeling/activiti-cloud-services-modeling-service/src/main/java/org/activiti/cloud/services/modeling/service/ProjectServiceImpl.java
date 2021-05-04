@@ -294,7 +294,9 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Override
     public Project importProject(MultipartFile file, @Nullable String name) throws IOException {
-        return importModelsFromProjectHolder(getProjectHolderFromZipStream(ZipStream.of(file), name));
+        try (InputStream inputStream = file.getInputStream()) {
+            return importModelsFromProjectHolder(getProjectHolderFromZipStream(ZipStream.of(inputStream), name));
+        }
     }
 
     /**
