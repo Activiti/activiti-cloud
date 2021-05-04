@@ -765,7 +765,7 @@ public class ProjectControllerIT {
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
-                .andExpect(status().reason(is("No valid project entry found to import: project-xy-invalid.zip")));
+                .andExpect(status().reason(is("No valid project entry found to import")));
     }
 
     @Test
