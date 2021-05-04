@@ -13,7 +13,7 @@
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
     <spring-cloud.version>2020.0.1</spring-cloud.version>
-    <testcontainers.version>1.15.2</testcontainers.version>
+    <testcontainers.version>1.15.3</testcontainers.version>
   </properties>
   <dependencyManagement>
     <dependencies>
