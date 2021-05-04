@@ -32,6 +32,7 @@
     <module>activiti-cloud-services-test-security-keycloak</module>
     <module>activiti-cloud-services-test-containers</module>
     <module>activiti-cloud-service-common-liquibase</module>
+    <module>activiti-cloud-service-messaging-config</module>
   </modules>
   <properties>
     <activiti.version>7.1.333</activiti.version>

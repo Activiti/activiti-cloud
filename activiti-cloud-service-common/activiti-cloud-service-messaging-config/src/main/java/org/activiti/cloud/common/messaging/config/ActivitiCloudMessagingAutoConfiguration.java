@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.audit.configuration;
 
+package org.activiti.cloud.common.messaging.config;
+
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@Import(AuditSwaggerConfig.class)
-@PropertySource("classpath:audit-messaging.properties")
-public class ActivitiAuditAutoConfiguration {
-
+@EnableConfigurationProperties(ActivitiCloudMessagingProperties.class)
+@PropertySource("classpath:activiti-cloud-messaging.properties")
+public class ActivitiCloudMessagingAutoConfiguration {
 }
