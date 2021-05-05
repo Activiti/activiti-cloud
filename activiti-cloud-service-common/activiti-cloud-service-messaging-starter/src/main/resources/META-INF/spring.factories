@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+  org.activiti.cloud.common.messaging.config.ActivitiMessagingEnvironmentPostProcessor
