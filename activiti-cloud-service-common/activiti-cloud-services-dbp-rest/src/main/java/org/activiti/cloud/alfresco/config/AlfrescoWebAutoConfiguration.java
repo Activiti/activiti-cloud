@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.alfresco.config;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
@@ -49,7 +51,7 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
     private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
     private final int defaultPageSize;
 
-    public AlfrescoWebAutoConfiguration(PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver,
+    public AlfrescoWebAutoConfiguration(@Lazy PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver,
                                         @Value("${spring.data.rest.default-page-size:100}") int defaultPageSize) {
         this.pageableHandlerMethodArgumentResolver = pageableHandlerMethodArgumentResolver;
         this.defaultPageSize = defaultPageSize;
@@ -80,14 +82,14 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public ExtendedPageMetadataConverter extendedPageMetadataConverter(){
+    public ExtendedPageMetadataConverter extendedPageMetadataConverter() {
         return new ExtendedPageMetadataConverter();
     }
 
     @Bean
     public <T> AlfrescoPagedModelAssembler<T> alfrescoPagedModelAssembler(@Autowired(required = false) HateoasPageableHandlerMethodArgumentResolver resolver,
                                                                                   @Autowired(required = false) UriComponents baseUri,
-                                                                                  ExtendedPageMetadataConverter extendedPageMetadataConverter){
+                                                                                  ExtendedPageMetadataConverter extendedPageMetadataConverter) {
         return new AlfrescoPagedModelAssembler<>(resolver, baseUri, extendedPageMetadataConverter);
     }
 

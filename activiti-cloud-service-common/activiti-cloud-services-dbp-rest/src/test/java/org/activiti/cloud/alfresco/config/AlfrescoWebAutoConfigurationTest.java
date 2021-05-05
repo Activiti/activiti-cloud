@@ -23,7 +23,9 @@ import java.util.List;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.EntityModel;
@@ -35,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class AlfrescoWebAutoConfigurationTest {
 
     private AlfrescoWebAutoConfiguration configurer;
@@ -44,7 +47,6 @@ public class AlfrescoWebAutoConfigurationTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         configurer = new AlfrescoWebAutoConfiguration(pageableHandlerMethodArgumentResolver, 100);
     }
 
