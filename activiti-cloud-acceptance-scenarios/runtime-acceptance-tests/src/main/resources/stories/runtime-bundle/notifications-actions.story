@@ -20,6 +20,7 @@ Scenario: complete a process instance that sends a signal with subscription to S
 
 Given the user is authenticated as testadmin
 And notifications: session variable called businessKey with value set to *
+And notifications: session variable called process with value set to SIGNAL_START_EVENT_PROCESS
 When notifications: the user subscribes to SIGNAL_RECEIVED notifications
 And notifications: the user starts a process SIGNAL_THROW_PROCESS_INSTANCE
 Then notifications: verify process instance started response
@@ -32,6 +33,7 @@ Scenario: complete a process instance with intermediate timer subscription to TI
 
 Given the user is authenticated as testadmin
 And notifications: session variable called businessKey with value set to businessKey
+And notifications: session variable called process with value set to INTERMEDIATE_TIMER_EVENT_PROCESS
 When notifications: the user subscribes to TIMER_SCHEDULED,TIMER_FIRED,TIMER_EXECUTED notifications
 And notifications: the user starts a process INTERMEDIATE_TIMER_EVENT_PROCESS
 Then notifications: verify process instance started response
@@ -45,6 +47,7 @@ Scenario: complete a process instance with boundary timer subscription to TIMER 
 
 Given the user is authenticated as testadmin
 And notifications: session variable called businessKey with value set to businessKey
+And notifications: session variable called process with value set to BOUNDARY_TIMER_EVENT_PROCESS
 When notifications: the user subscribes to TIMER_SCHEDULED,TIMER_FIRED,TIMER_EXECUTED notifications
 And notifications: the user starts a process BOUNDARY_TIMER_EVENT_PROCESS
 Then notifications: verify process instance started response

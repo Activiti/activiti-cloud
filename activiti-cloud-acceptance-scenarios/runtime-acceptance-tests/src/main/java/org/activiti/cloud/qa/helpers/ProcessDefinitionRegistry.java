@@ -55,6 +55,8 @@ public class ProcessDefinitionRegistry {
             "ConnectorProcess");
         put("SIGNAL_THROW_PROCESS_INSTANCE",
             "SignalThrowEventProcess");
+        put("SIGNAL_START_EVENT_PROCESS",
+            "SignalStartEventProcess");
         put("PROCESS_INSTANCE_WITH_CALL_ACTIVITIES",
             "parentproc-8e992556-5785-4ee0-9fe7-354decfea4a8");
         put("Process Information",

@@ -142,6 +142,7 @@ jobs:
     strategy:
       matrix:
         messaging-broker: [rabbitmq, kafka]
+        messaging-partitioned: [partitioned, non-partitioned]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -202,17 +203,22 @@ jobs:
       - name: Setup environment for ${{ matrix.messaging-broker }}
         env:
           MESSAGING_BROKER: ${{ matrix.messaging-broker }}
-          PREVIEW_NAME: ${{ needs.build.outputs.preview-name }}-${{ matrix.messaging-broker }}
+          MESSAGING_PARTITIONED: ${{ matrix.messaging-partitioned }}
+          PREVIEW_NAME: ${{ needs.build.outputs.preview-name }}
           BRANCH_NAME: ${{ needs.build.outputs.branch-name }}
           VERSION: ${{ needs.build.outputs.version }}
         run: |
           echo "MESSAGING_BROKER=$MESSAGING_BROKER" >> $GITHUB_ENV
-          echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
+          echo "MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED" >> $GITHUB_ENV
+          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}" >> $GITHUB_ENV
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo $VERSION > VERSION
 
+          source $GITHUB_ENV
+
           echo MESSAGING_BROKER=$MESSAGING_BROKER
+          echo MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED
           echo PREVIEW_NAME=$PREVIEW_NAME
           echo BRANCH_NAME=$BRANCH_NAME
           echo VERSION=$VERSION

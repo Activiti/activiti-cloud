@@ -15,8 +15,29 @@
  */
 package org.activiti.cloud.qa.story;
 
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
-import static org.assertj.core.api.Assertions.assertThat;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.serenitybdd.core.Serenity;
+import net.thucydides.core.annotations.Steps;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.builders.MessagePayloadBuilder;
+import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
+import org.activiti.cloud.acc.core.steps.notifications.NotificationsSteps;
+import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
+import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acc.shared.model.AuthToken;
+import org.activiti.cloud.acc.shared.rest.TokenHolder;
+import org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry;
+import org.jbehave.core.annotations.Given;
+import org.jbehave.core.annotations.Then;
+import org.jbehave.core.annotations.When;
+import org.reactivestreams.Subscription;
+import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.ReplayProcessor;
+import reactor.test.StepVerifier;
+import reactor.test.StepVerifier.Step;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -30,29 +51,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.builders.MessagePayloadBuilder;
-import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
-import org.activiti.api.process.model.payloads.StartMessagePayload;
-import org.activiti.cloud.acc.core.steps.notifications.NotificationsSteps;
-import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
-import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
-import org.activiti.cloud.acc.shared.model.AuthToken;
-import org.activiti.cloud.acc.shared.rest.TokenHolder;
-import org.jbehave.core.annotations.Given;
-import org.jbehave.core.annotations.Then;
-import org.jbehave.core.annotations.When;
-import org.reactivestreams.Subscription;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.ReplayProcessor;
-import reactor.test.StepVerifier;
-import reactor.test.StepVerifier.Step;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceNotifications {
 
@@ -104,10 +104,15 @@ public class ProcessInstanceNotifications {
     public void subscribeToEventTypesNotifications(String eventTypesString) throws IOException, InterruptedException {
 
         String businessKey = sessionVariableCalled("businessKey", String.class).orElse("*");
+        String processDefinitionKey = sessionVariableCalled("process", String.class)
+                                                            .map(ProcessDefinitionRegistry::processDefinitionKeyMatcher)
+                                                            .orElse("*");
+
         String[] eventTypes = eventTypesString.split(",");
 
         ReplayProcessor<String> subscription = subscribe(eventTypes,
-                                                         businessKey);
+                                                         businessKey,
+                                                         processDefinitionKey);
 
         stepVerifier = StepVerifier.create(subscription)
                                    .expectSubscription();
@@ -119,10 +124,15 @@ public class ProcessInstanceNotifications {
                                                                                  String variableName) throws IOException, InterruptedException {
 
         String businessKey = sessionVariableCalled(variableName, String.class).orElse(null);
+        String processDefinitionKey = sessionVariableCalled("process", String.class)
+                                                            .map(ProcessDefinitionRegistry::processDefinitionKeyMatcher)
+                                                            .orElse("*");
+
         String[] eventTypes = eventTypesString.split(",");
 
         ReplayProcessor<String> subscription = subscribe(eventTypes,
-                                                         businessKey);
+                                                         businessKey,
+                                                         processDefinitionKey);
 
         stepVerifier = StepVerifier.create(subscription)
                                    .expectSubscription();
@@ -299,7 +309,7 @@ public class ProcessInstanceNotifications {
         return objectMapper.writeValueAsString(objectMapPayload);
     }
 
-    private ReplayProcessor<String> subscribe(String[] eventTypes, String businessKey) throws InterruptedException {
+    private ReplayProcessor<String> subscribe(String[] eventTypes, String businessKey, String processDefinitionKey) throws InterruptedException {
         String serviceName = notificationsSteps.getRuntimeBundleServiceName();
         long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
         long sessionTimeoutSeconds = sessionTimeoutSeconds();
@@ -310,8 +320,8 @@ public class ProcessInstanceNotifications {
         AuthToken authToken = TokenHolder.getAuthToken();
 
         // TODO: add processDefinitionKey when signal events are fixed
-        String query = "subscription($serviceName: String!, $eventTypes: [EngineEventType!], $businessKey: String!) {" +
-                        "  engineEvents(serviceName: [$serviceName], eventType: $eventTypes, businessKey: [$businessKey]) {" +
+        String query = "subscription($serviceName: String!, $eventTypes: [EngineEventType!], $businessKey: String!, $processDefinitionKey: String!) {" +
+                        "  engineEvents(serviceName: [$serviceName], eventType: $eventTypes, businessKey: [$businessKey], processDefinitionKey: [$processDefinitionKey]) {" +
                         "    serviceName " +
                         "    processDefinitionKey " +
                         "    eventType " +
@@ -322,6 +332,7 @@ public class ProcessInstanceNotifications {
             put("serviceName", serviceName);
             put("eventTypes", eventTypes);
             put("businessKey", businessKey);
+            put("processDefinitionKey", processDefinitionKey);
         }};
 
         Consumer<Subscription> action = countDownLatchAction(countDownLatch,
@@ -341,6 +352,7 @@ public class ProcessInstanceNotifications {
 
         return data;
     }
+
 
     @SuppressWarnings("serial")
     class ObjectMap extends LinkedHashMap<String, Object> {
