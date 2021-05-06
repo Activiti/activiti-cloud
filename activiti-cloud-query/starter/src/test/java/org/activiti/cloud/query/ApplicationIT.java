@@ -23,9 +23,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 public class ApplicationIT {
 
-	@Test
-	public void contextLoads() throws Exception {
+    @Test
+    public void contextLoads() {
 
-	}
+    }
 
 }

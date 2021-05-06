@@ -36,7 +36,7 @@ install: release
 			--values $(MESSAGING_PARTITIONED)-values.yaml \
 			--namespace ${PREVIEW_NAME} \
 			--create-namespace \
-			--wait \
+			--atomic \
 			--timeout 6m
 
 delete:

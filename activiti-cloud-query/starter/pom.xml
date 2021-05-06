@@ -11,11 +11,11 @@
 
   <artifactId>activiti-cloud-query-starter</artifactId>
 
-  <properties>
-    <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-  </properties>
-
   <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-starter</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-stream-test-support</artifactId>

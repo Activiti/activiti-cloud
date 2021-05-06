@@ -15,8 +15,7 @@ COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
 COPY liquibase/target/*.jar liquibase.jar
-COPY rabbitmq/target/*.jar app-rabbitmq.jar
-COPY kafka/target/*.jar app-kafka.jar
+COPY starter/target/*.jar app.jar
 
 ENTRYPOINT ["./entrypoint.sh"]
-CMD ["-jar", "app-rabbitmq.jar"]
+CMD ["-jar", "app.jar"]
