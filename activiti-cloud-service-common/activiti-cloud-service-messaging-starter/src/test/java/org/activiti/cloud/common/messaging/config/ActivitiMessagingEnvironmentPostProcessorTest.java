@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.ActivitiMessagingEnvironmentPostProcessor.MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY;
+import static org.activiti.cloud.common.messaging.config.ActivitiMessagingEnvironmentPostProcessor.SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -51,12 +53,12 @@ public class ActivitiMessagingEnvironmentPostProcessorTest {
         verify(propertySources).addAfter(eq(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME),
             captor.capture());
         assertThat(captor.getValue().getProperty(
-            ActivitiMessagingEnvironmentPostProcessor.SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY))
+            SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY))
             .isEqualTo("rabbit");
     }
 
     @Test
-    public void should_setDefaultBinderToKafka_when_brokerIsKafka() {
+    public void should_setDefaultBinderToKafkaAndDisableRabbitHelfCheck_when_brokerIsKafka() {
         //given
         final MutablePropertySources propertySources = mock(MutablePropertySources.class);
         final ConfigurableEnvironment environment = buildEnvironment(
@@ -70,9 +72,11 @@ public class ActivitiMessagingEnvironmentPostProcessorTest {
         //then
         verify(propertySources).addAfter(eq(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME),
             captor.capture());
-        assertThat(captor.getValue().getProperty(
-            ActivitiMessagingEnvironmentPostProcessor.SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY))
+        assertThat(captor.getValue().getProperty(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY))
             .isEqualTo("kafka");
+
+        assertThat(captor.getValue().getProperty(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY))
+            .isEqualTo(false);
     }
 
     private ConfigurableEnvironment buildEnvironment(MessagingBroker broker,
