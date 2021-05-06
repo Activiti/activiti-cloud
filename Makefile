@@ -36,7 +36,8 @@ install: release
 			--values $(MESSAGING_PARTITIONED)-values.yaml \
 			--namespace ${PREVIEW_NAME} \
 			--create-namespace \
-			--wait
+			--wait \
+			--timeout 6m
 
 delete:
 	helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME} || echo "try to remove helm chart"
