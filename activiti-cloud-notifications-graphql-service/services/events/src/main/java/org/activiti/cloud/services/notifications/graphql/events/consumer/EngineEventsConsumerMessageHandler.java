@@ -54,7 +54,7 @@ public class EngineEventsConsumerMessageHandler {
                     List<Map<String, Object>> events = message.getPayload();
                     String routingKey = (String) message.getHeaders().get("routingKey");
 
-                    logger.info("Recieved source message with routingKey: {}", routingKey);
+                    logger.debug("Recieved source message {} with routingKey: {}", message, routingKey);
 
                     return Flux.fromIterable(transformer.transform(events))
                                    .collectList()
