@@ -63,7 +63,6 @@ public class EngineEventsConsumerMessageHandler {
                 })
                 .doOnNext(processorSink::tryEmitNext)
                 .doOnError(error -> logger.error("Error handling message ", error))
-                .retry(3)
                 .subscribe();
     }
 }
