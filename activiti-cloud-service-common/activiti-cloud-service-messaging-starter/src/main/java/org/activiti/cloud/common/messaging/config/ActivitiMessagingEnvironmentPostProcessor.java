@@ -18,7 +18,8 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties.MessagingBroker;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -29,6 +30,7 @@ public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPos
 
     protected static final String ACTIVITI_CLOUD_MESSAGING_BROKER_KEY = "activiti.cloud.messaging.broker";
     protected static final String SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY = "spring.cloud.stream.default-binder";
+    protected static final String MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY = "management.health.rabbit.enabled";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment,
@@ -39,9 +41,17 @@ public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPos
         environment
             .getPropertySources()
             .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, new MapPropertySource(
-                this.getClass().getSimpleName(),
-                Collections.singletonMap(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY,
-                    resolveDefaultBinder(messagingBroker))));
+                this.getClass().getSimpleName(), resolvePropertiesToSet(messagingBroker)));
+    }
+
+    private Map<String, Object> resolvePropertiesToSet(MessagingBroker messagingBroker) {
+        Map<String, Object> extraProperties = new HashMap<>();
+        if (MessagingBroker.kafka.equals(messagingBroker)) {
+            extraProperties.put(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY, false);
+        }
+        extraProperties.put(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY,
+            resolveDefaultBinder(messagingBroker));
+        return extraProperties;
     }
 
     private String resolveDefaultBinder(MessagingBroker messagingBroker) {
