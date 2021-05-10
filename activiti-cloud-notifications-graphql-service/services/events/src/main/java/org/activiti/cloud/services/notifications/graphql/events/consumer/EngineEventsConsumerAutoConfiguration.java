@@ -33,6 +33,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -90,7 +91,7 @@ public class EngineEventsConsumerAutoConfiguration {
         @ConditionalOnMissingBean(name = "engineEventsIntegrationFlow")
         public IntegrationFlow engineEventsIntegrationFlow(EngineEventsConsumerMessageHandler engineEventsMessageHandler) {
             return IntegrationFlows.from(EngineEventsConsumerChannels.SOURCE)
-                                   .log()
+                                   .log(LoggingHandler.Level.DEBUG)
                                    .handle(engineEventsMessageHandler)
                                    .get();
         }
