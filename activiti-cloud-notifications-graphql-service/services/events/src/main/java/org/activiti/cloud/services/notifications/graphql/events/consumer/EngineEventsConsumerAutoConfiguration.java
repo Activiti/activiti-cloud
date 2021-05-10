@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
@@ -35,16 +31,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
-
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.extra.processor.TopicProcessor;
+import reactor.core.publisher.Sinks;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Notification Gateway configuration that enables messaging channel bindings
  * and scans for MessagingGateway on interfaces to create GatewayProxyFactoryBeans.
- *
  */
 @Configuration
 @EnableBinding(EngineEventsConsumerChannels.class)
@@ -83,23 +83,29 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public EngineEventsConsumerMessageHandler engineEventsMessageHandler(Transformer engineEventsTransformer,
-                                                                             FluxSink<Message<List<EngineEvent>>> engineEventsSink) {
+                                                                             Sinks.Many<Message<List<EngineEvent>>> engineEventsSink) {
             return new EngineEventsConsumerMessageHandler(engineEventsTransformer, engineEventsSink);
         }
 
+        @Bean
+        @ConditionalOnMissingBean(name = "engineEventsIntegrationFlow")
+        public IntegrationFlow engineEventsIntegrationFlow(EngineEventsConsumerMessageHandler engineEventsMessageHandler) {
+            return IntegrationFlows.from(EngineEventsConsumerChannels.SOURCE)
+                                   .log(LoggingHandler.Level.DEBUG)
+                                   .handle(engineEventsMessageHandler)
+                                   .get();
+        }
     }
 
     @Configuration
     public static class EngineEventsFluxProcessorConfiguration implements SmartLifecycle {
 
         private final List<Subscriber<Message<List<EngineEvent>>>> subscribers = new ArrayList<>();
-        private boolean running;
+        private boolean running = false;
 
-        private TopicProcessor<Message<List<EngineEvent>>> engineEventsProcessor = TopicProcessor.<Message<List<EngineEvent>>>builder()
-                                                                                                 .autoCancel(false)
-                                                                                                 .share(true)
-                                                                                                 .bufferSize(1024)
-                                                                                                 .build();
+        private Sinks.Many<Message<List<EngineEvent>>> engineEventsProcessor = Sinks.many()
+                                                                                    .multicast()
+                                                                                    .directBestEffort();
         @Autowired
         public EngineEventsFluxProcessorConfiguration() {
         }
@@ -112,26 +118,28 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public Flux<Message<List<EngineEvent>>> engineEventsFlux() {
-            return engineEventsProcessor.publish()
-                                        .autoConnect(0);
+            return engineEventsProcessor.asFlux();
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public FluxSink<Message<List<EngineEvent>>> engineEventsSink() {
-            return engineEventsProcessor.sink();
+        public Sinks.Many<Message<List<EngineEvent>>> engineEventsSink() {
+            return engineEventsProcessor;
         }
 
         @Override
         public void start() {
-            subscribers.forEach(s -> engineEventsProcessor.subscribe(s));
-            running = true;
+            if(!running) {
+                subscribers.forEach(s -> engineEventsFlux().subscribe(s));
+
+                running = true;
+            }
         }
 
         @Override
         public void stop() {
             try {
-                engineEventsProcessor.onComplete();
+                engineEventsProcessor.tryEmitComplete();
             } finally {
                 running = false;
             }

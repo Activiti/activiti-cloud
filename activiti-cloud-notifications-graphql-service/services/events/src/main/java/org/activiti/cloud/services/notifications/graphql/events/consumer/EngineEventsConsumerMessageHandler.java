@@ -24,26 +24,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
 
 public class EngineEventsConsumerMessageHandler {
 
     private static Logger logger = LoggerFactory.getLogger(EngineEventsConsumerMessageHandler.class);
 
-    private final FluxSink<Message<List<EngineEvent>>> processorSink;
+    private final Sinks.Many<Message<List<EngineEvent>>> processorSink;
     private final Transformer transformer;
 
     public EngineEventsConsumerMessageHandler(Transformer transformer,
-                                      FluxSink<Message<List<EngineEvent>>> engineEventsSink)
+                                              Sinks.Many<Message<List<EngineEvent>>> engineEventsSink)
     {
         this.processorSink = engineEventsSink;
         this.transformer = transformer;
     }
 
-    @StreamListener(EngineEventsConsumerChannels.SOURCE)
+    @ServiceActivator
     public void receive(Message<List<Map<String, Object>>> input) {
 
         // Let's process and transform message from input stream
@@ -52,16 +54,15 @@ public class EngineEventsConsumerMessageHandler {
                     List<Map<String, Object>> events = message.getPayload();
                     String routingKey = (String) message.getHeaders().get("routingKey");
 
-                    logger.info("Recieved source message with routingKey: {}", routingKey);
+                    logger.debug("Recieved source message {} with routingKey: {}", message, routingKey);
 
                     return Flux.fromIterable(transformer.transform(events))
                                    .collectList()
                                    .map(list -> MessageBuilder.<List<EngineEvent>>createMessage(list,
                                                                                                 message.getHeaders()));
                 })
-                .doOnNext(processorSink::next)
+                .doOnNext(processorSink::tryEmitNext)
                 .doOnError(error -> logger.error("Error handling message ", error))
-                .retry()
                 .subscribe();
     }
 }
