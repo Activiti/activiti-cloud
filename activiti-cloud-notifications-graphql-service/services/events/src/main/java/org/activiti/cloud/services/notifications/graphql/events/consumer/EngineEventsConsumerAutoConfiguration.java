@@ -101,7 +101,7 @@ public class EngineEventsConsumerAutoConfiguration {
         public Sinks.Many<Message<List<EngineEvent>>> engineEventsSink() {
             return Sinks.many()
                         .multicast()
-                        .onBackpressureBuffer(1024*10,
+                        .onBackpressureBuffer(1,
                                               false);
         }
 
@@ -110,7 +110,7 @@ public class EngineEventsConsumerAutoConfiguration {
         public Flux<Message<List<EngineEvent>>> engineEventsFlux(Sinks.Many<Message<List<EngineEvent>>> engineEventsSink) {
             return engineEventsSink.asFlux()
                                    .publish()
-                                   .autoConnect();
+                                   .autoConnect(0);
         }
     }
 
