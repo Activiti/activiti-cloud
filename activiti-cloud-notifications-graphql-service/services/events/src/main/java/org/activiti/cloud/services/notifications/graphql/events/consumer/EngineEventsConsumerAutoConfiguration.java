@@ -101,7 +101,8 @@ public class EngineEventsConsumerAutoConfiguration {
         public Sinks.Many<Message<List<EngineEvent>>> engineEventsSink() {
             return Sinks.many()
                         .multicast()
-                        .directBestEffort();
+                        .onBackpressureBuffer(1024*10,
+                                              false);
         }
 
         @Bean
