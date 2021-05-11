@@ -105,8 +105,7 @@ public class EngineEventsConsumerAutoConfiguration {
 
         private Sinks.Many<Message<List<EngineEvent>>> engineEventsProcessor = Sinks.many()
                                                                                     .multicast()
-                                                                                    .onBackpressureBuffer(1024,
-                                                                                                          false);
+                                                                                    .directBestEffort();
         @Autowired
         public EngineEventsFluxProcessorConfiguration() {
         }
@@ -119,7 +118,9 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public Flux<Message<List<EngineEvent>>> engineEventsFlux() {
-            return engineEventsProcessor.asFlux();
+            return engineEventsProcessor.asFlux()
+                                        .publish()
+                                        .autoConnect();
         }
 
         @Bean
