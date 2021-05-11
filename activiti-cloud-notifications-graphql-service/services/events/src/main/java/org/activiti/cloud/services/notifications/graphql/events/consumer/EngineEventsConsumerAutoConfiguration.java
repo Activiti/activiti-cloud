@@ -105,7 +105,8 @@ public class EngineEventsConsumerAutoConfiguration {
 
         private Sinks.Many<Message<List<EngineEvent>>> engineEventsProcessor = Sinks.many()
                                                                                     .multicast()
-                                                                                    .directBestEffort();
+                                                                                    .onBackpressureBuffer(1024,
+                                                                                                          false);
         @Autowired
         public EngineEventsFluxProcessorConfiguration() {
         }
