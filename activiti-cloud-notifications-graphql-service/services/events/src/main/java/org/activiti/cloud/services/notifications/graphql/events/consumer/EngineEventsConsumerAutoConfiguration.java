@@ -91,9 +91,25 @@ public class EngineEventsConsumerAutoConfiguration {
         @ConditionalOnMissingBean(name = "engineEventsIntegrationFlow")
         public IntegrationFlow engineEventsIntegrationFlow(EngineEventsConsumerMessageHandler engineEventsMessageHandler) {
             return IntegrationFlows.from(EngineEventsConsumerChannels.SOURCE)
-                                   .log(LoggingHandler.Level.DEBUG)
+                                   .log(LoggingHandler.Level.INFO)
                                    .handle(engineEventsMessageHandler)
                                    .get();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public Sinks.Many<Message<List<EngineEvent>>> engineEventsSink() {
+            return Sinks.many()
+                        .multicast()
+                        .directBestEffort();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public Flux<Message<List<EngineEvent>>> engineEventsFlux(Sinks.Many<Message<List<EngineEvent>>> engineEventsSink) {
+            return engineEventsSink.asFlux()
+                                   .publish()
+                                   .autoConnect();
         }
     }
 
@@ -103,11 +119,14 @@ public class EngineEventsConsumerAutoConfiguration {
         private final List<Subscriber<Message<List<EngineEvent>>>> subscribers = new ArrayList<>();
         private boolean running = false;
 
-        private Sinks.Many<Message<List<EngineEvent>>> engineEventsProcessor = Sinks.many()
-                                                                                    .multicast()
-                                                                                    .directBestEffort();
+        private final Sinks.Many<Message<List<EngineEvent>>> engineEventsProcessor;
+        private final Flux<Message<List<EngineEvent>>> engineEventsFlux;
+
         @Autowired
-        public EngineEventsFluxProcessorConfiguration() {
+        public EngineEventsFluxProcessorConfiguration(Sinks.Many<Message<List<EngineEvent>>> engineEventsProcessor,
+                                                     Flux<Message<List<EngineEvent>>> engineEventsFlux) {
+            this.engineEventsProcessor = engineEventsProcessor;
+            this.engineEventsFlux = engineEventsFlux;
         }
 
         @Autowired(required = false)
@@ -115,24 +134,10 @@ public class EngineEventsConsumerAutoConfiguration {
             this.subscribers.addAll(subscribers);
         }
 
-        @Bean
-        @ConditionalOnMissingBean
-        public Flux<Message<List<EngineEvent>>> engineEventsFlux() {
-            return engineEventsProcessor.asFlux()
-                                        .publish()
-                                        .autoConnect();
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        public Sinks.Many<Message<List<EngineEvent>>> engineEventsSink() {
-            return engineEventsProcessor;
-        }
-
         @Override
         public void start() {
-            if(!running) {
-                subscribers.forEach(s -> engineEventsFlux().subscribe(s));
+            if (!running) {
+                subscribers.forEach(s -> engineEventsFlux.subscribe(s));
 
                 running = true;
             }
