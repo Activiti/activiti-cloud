@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import org.activiti.cloud.services.modeling.validation.JsonSchemaFlattener;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -46,8 +47,8 @@ public class SchemaProvider {
     public JSONObject getJsonSchemaForType() {
         JSONObject schema = null;
         if (schemaFileName != null) {
-            try {
-                schema = new JsonSchemaFlattener().flatten(new JSONObject(new JSONTokener(new ClassPathResource(schemaFileName).getInputStream())));
+            try (InputStream inputStream = new ClassPathResource(schemaFileName).getInputStream()) {
+                schema = new JsonSchemaFlattener().flatten(new JSONObject(new JSONTokener(inputStream)));
             } catch (IOException e) {
                 logger.error("Unable to read schema for model type {} in file {}: {}", modelType, schemaFileName, e);
             }
