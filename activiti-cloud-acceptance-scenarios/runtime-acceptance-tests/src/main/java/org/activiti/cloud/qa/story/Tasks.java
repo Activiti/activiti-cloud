@@ -17,6 +17,7 @@
 package org.activiti.cloud.qa.story;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.awaitility.Awaitility.await;
 
 import java.util.ArrayList;
@@ -460,8 +461,10 @@ public class Tasks {
     }
 
     private void waitForTask(String currentTaskId) {
-        await().untilAsserted(() ->
-            assertThat(taskQuerySteps.getTaskById(currentTaskId)).isNotNull()
+        await().untilAsserted(() -> {
+                final Throwable throwable = catchThrowable(() -> taskQuerySteps.getTaskById(currentTaskId));
+                assertThat(throwable).isNull();
+            }
         );
     }
 
