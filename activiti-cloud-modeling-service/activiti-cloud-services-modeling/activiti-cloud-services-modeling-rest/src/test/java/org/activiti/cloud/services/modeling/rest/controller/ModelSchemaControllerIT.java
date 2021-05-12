@@ -43,7 +43,7 @@ public class ModelSchemaControllerIT {
     @Autowired
     private WebApplicationContext webApplicationContext;
     @Autowired
-    SchemaService schemaService;
+    private SchemaService schemaService;
 
     @BeforeEach
     public void setUp() {

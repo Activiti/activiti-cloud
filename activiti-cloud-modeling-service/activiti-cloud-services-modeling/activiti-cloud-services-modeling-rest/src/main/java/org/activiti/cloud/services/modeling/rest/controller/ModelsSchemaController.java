@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ModelsSchemaController implements ModelsSchemaRestApi {
 
     @Autowired
-    SchemaService schemaService;
+    private SchemaService schemaService;
 
     @Override
     public ResponseEntity<String> getSchema(String modelType) {
