@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.qa.story;
 
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -132,12 +134,19 @@ public class ProcessInstanceServiceTasks {
                                         .next()
                                         .getId();
 
+            waitForIntegrationContext(serviceTaskId);
             CloudIntegrationContext serviceTask = processQueryAdminSteps.getCloudIntegrationContext(serviceTaskId);
 
             assertThat(serviceTask).isNotNull()
                                    .extracting(CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
                                    .containsOnly("ServiceTask", CloudIntegrationContext.IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
         });
+    }
+
+    private void waitForIntegrationContext(String serviceTaskId) {
+        final Throwable throwable = catchThrowable(
+            () -> processQueryAdminSteps.getCloudIntegrationContext(serviceTaskId));
+        assertThat(throwable).isNull();
     }
 
     @Then("the user can get list of service tasks with status of $status")
@@ -263,7 +272,6 @@ public class ProcessInstanceServiceTasks {
                                      ));
         });
     }
-
 
     private IntegrationContext integrationContext(CloudRuntimeEvent<?,?> event) {
         return CloudIntegrationEvent.class.cast(event).getEntity();
