@@ -17,6 +17,7 @@ package org.activiti.cloud.services.modeling.rest.config;
 
 import org.activiti.cloud.services.modeling.rest.controller.ModelController;
 import org.activiti.cloud.services.modeling.rest.controller.ModelingRestExceptionHandler;
+import org.activiti.cloud.services.modeling.rest.controller.ModelsSchemaController;
 import org.activiti.cloud.services.modeling.rest.controller.ProjectController;
 import org.activiti.cloud.services.modeling.rest.validation.ValidationControllerAdvice;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -29,6 +30,7 @@ import org.springframework.context.annotation.Import;
 @Import({
     ModelController.class,
     ProjectController.class,
+    ModelsSchemaController.class,
     ModelingRestExceptionHandler.class,
     ValidationControllerAdvice.class
 })
