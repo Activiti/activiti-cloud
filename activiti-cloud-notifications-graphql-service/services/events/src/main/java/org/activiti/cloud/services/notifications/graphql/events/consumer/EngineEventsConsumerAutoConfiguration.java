@@ -21,6 +21,8 @@ import org.activiti.cloud.services.notifications.graphql.events.model.EngineEven
 import org.activiti.cloud.services.notifications.graphql.events.transformer.EngineEventsTransformer;
 import org.activiti.cloud.services.notifications.graphql.events.transformer.Transformer;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -40,6 +42,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Notification Gateway configuration that enables messaging channel bindings
@@ -89,7 +92,7 @@ public class EngineEventsConsumerAutoConfiguration {
         @ConditionalOnMissingBean
         public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(EngineEventsConsumerMessageHandler engineEventsMessageHandler) {
             return IntegrationFlows.from(EngineEventsConsumerChannels.SOURCE)
-                                   .log(LoggingHandler.Level.INFO)
+                                   .log(LoggingHandler.Level.DEBUG)
                                    .transform(engineEventsMessageHandler)
                                    .toReactivePublisher();
         }
@@ -104,8 +107,9 @@ public class EngineEventsConsumerAutoConfiguration {
 
     @Configuration
     public static class EngineEventsFluxProcessorConfiguration implements SmartLifecycle {
+        private static Logger logger = LoggerFactory.getLogger(EngineEventsFluxProcessorConfiguration.class);
 
-        private Disposable control = null;
+        private Optional<Disposable> control = Optional.empty();
 
         private final ConnectableFlux<Message<List<EngineEvent>>> engineEventsFlux;
 
@@ -116,21 +120,23 @@ public class EngineEventsConsumerAutoConfiguration {
 
         @Override
         public void start() {
-            if (control == null) {
-                control = engineEventsFlux.connect();
+            if (control.isEmpty()) {
+                logger.info("Connect engineEvents to the message event source");
+                control = Optional.of(engineEventsFlux.connect());
             }
         }
 
         @Override
         public void stop() {
-            if (!control.isDisposed()) {
-                control.dispose();
-            }
+            control.ifPresent(disposable -> {
+                logger.info("Dispose of engineEvents stream");
+                disposable.dispose();
+            });
         }
 
         @Override
         public boolean isRunning() {
-            return control != null;
+            return control.isPresent();
         }
     }
 
