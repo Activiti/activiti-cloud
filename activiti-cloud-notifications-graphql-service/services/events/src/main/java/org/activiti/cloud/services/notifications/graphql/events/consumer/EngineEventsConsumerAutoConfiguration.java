@@ -99,13 +99,14 @@ public class EngineEventsConsumerAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public ConnectableFlux<Message<List<EngineEvent>>> engineEventsFlux(Publisher<Message<List<EngineEvent>>> engineEventsPublisher) {
+        public Flux<Message<List<EngineEvent>>> engineEventsFlux(Publisher<Message<List<EngineEvent>>> engineEventsPublisher) {
             return Flux.from(engineEventsPublisher)
-                       .publish();
+                       .publish()
+                       .autoConnect();
         }
     }
 
-    @Configuration
+    //@Configuration
     public static class EngineEventsFluxProcessorConfiguration implements SmartLifecycle {
         private static Logger logger = LoggerFactory.getLogger(EngineEventsFluxProcessorConfiguration.class);
 
