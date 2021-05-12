@@ -35,34 +35,21 @@ public class EngineEventsConsumerMessageHandler {
 
     private static Logger logger = LoggerFactory.getLogger(EngineEventsConsumerMessageHandler.class);
 
-    private final Sinks.Many<Message<List<EngineEvent>>> processorSink;
     private final Transformer transformer;
 
-    public EngineEventsConsumerMessageHandler(Transformer transformer,
-                                              Sinks.Many<Message<List<EngineEvent>>> engineEventsSink)
+    public EngineEventsConsumerMessageHandler(Transformer transformer)
     {
-        this.processorSink = engineEventsSink;
         this.transformer = transformer;
     }
 
-    @ServiceActivator
-    public void receive(Message<List<Map<String, Object>>> input) {
+    @org.springframework.integration.annotation.Transformer
+    public Message<List<EngineEvent>> receive(Message<List<Map<String, Object>>> message) {
+        List<Map<String, Object>> events = message.getPayload();
+        String routingKey = (String) message.getHeaders().get("routingKey");
 
-        // Let's process and transform message from input stream
-        Flux.just(input)
-                .flatMapSequential(message -> {
-                    List<Map<String, Object>> events = message.getPayload();
-                    String routingKey = (String) message.getHeaders().get("routingKey");
+        logger.debug("Recieved source message {} with routingKey: {}", message, routingKey);
 
-                    logger.debug("Recieved source message {} with routingKey: {}", message, routingKey);
-
-                    return Flux.fromIterable(transformer.transform(events))
-                                   .collectList()
-                                   .map(list -> MessageBuilder.<List<EngineEvent>>createMessage(list,
-                                                                                                message.getHeaders()));
-                })
-                .doOnNext(processorSink::tryEmitNext)
-                .doOnError(error -> logger.error("Error handling message ", error))
-                .subscribe();
+        return MessageBuilder.<List<EngineEvent>>createMessage(transformer.transform(events),
+                                                               message.getHeaders());
     }
 }
