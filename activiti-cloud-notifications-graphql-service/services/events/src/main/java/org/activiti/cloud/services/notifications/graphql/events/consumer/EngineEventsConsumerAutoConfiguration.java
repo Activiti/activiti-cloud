@@ -105,40 +105,4 @@ public class EngineEventsConsumerAutoConfiguration {
                        .autoConnect();
         }
     }
-
-    //@Configuration
-    public static class EngineEventsFluxProcessorConfiguration implements SmartLifecycle {
-        private static Logger logger = LoggerFactory.getLogger(EngineEventsFluxProcessorConfiguration.class);
-
-        private Optional<Disposable> control = Optional.empty();
-
-        private final ConnectableFlux<Message<List<EngineEvent>>> engineEventsFlux;
-
-        @Autowired
-        public EngineEventsFluxProcessorConfiguration(ConnectableFlux<Message<List<EngineEvent>>> engineEventsFlux) {
-            this.engineEventsFlux = engineEventsFlux;
-        }
-
-        @Override
-        public void start() {
-            if (control.isEmpty()) {
-                logger.info("Connect engineEvents to the message event source");
-                control = Optional.of(engineEventsFlux.connect());
-            }
-        }
-
-        @Override
-        public void stop() {
-            control.ifPresent(disposable -> {
-                logger.info("Dispose of engineEvents stream");
-                disposable.dispose();
-            });
-        }
-
-        @Override
-        public boolean isRunning() {
-            return control.isPresent();
-        }
-    }
-
 }
