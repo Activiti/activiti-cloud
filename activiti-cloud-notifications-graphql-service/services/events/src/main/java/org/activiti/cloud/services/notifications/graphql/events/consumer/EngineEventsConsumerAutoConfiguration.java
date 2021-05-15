@@ -21,14 +21,11 @@ import org.activiti.cloud.services.notifications.graphql.events.model.EngineEven
 import org.activiti.cloud.services.notifications.graphql.events.transformer.EngineEventsTransformer;
 import org.activiti.cloud.services.notifications.graphql.events.transformer.Transformer;
 import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -36,13 +33,13 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
-import reactor.core.Disposable;
-import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Notification Gateway configuration that enables messaging channel bindings
@@ -61,6 +58,7 @@ public class EngineEventsConsumerAutoConfiguration {
     @Configuration
     public static class DefaultEngineEventsConsumerConfiguration {
 
+        public static final String ENGINE_EVENTS_FLUX_SCHEDULER = "engineEventsScheduler";
         private final EngineEventsConsumerProperties properties;
 
         @Autowired
@@ -99,10 +97,19 @@ public class EngineEventsConsumerAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public Flux<Message<List<EngineEvent>>> engineEventsFlux(Publisher<Message<List<EngineEvent>>> engineEventsPublisher) {
+        public Flux<Message<List<EngineEvent>>> engineEventsFlux(Publisher<Message<List<EngineEvent>>> engineEventsPublisher,
+                                                                 Scheduler engineEventsScheduler) {
             return Flux.from(engineEventsPublisher)
                        .publish()
-                       .autoConnect();
+                       .autoConnect(0)
+                       .share()
+                       .publishOn(engineEventsScheduler);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean(name = ENGINE_EVENTS_FLUX_SCHEDULER)
+        public Scheduler engineEventsScheduler() {
+            return Schedulers.boundedElastic();
         }
     }
 }
