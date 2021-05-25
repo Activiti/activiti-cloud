@@ -18,15 +18,17 @@ package org.activiti.cloud.qa.story;
 
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import feign.FeignException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
+import net.thucydides.core.steps.StepEventBus;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
@@ -134,7 +136,7 @@ public class ProcessInstanceServiceTasks {
                                         .next()
                                         .getId();
 
-            waitForIntegrationContext(serviceTaskId);
+            assertThatHasIntegrationContext(serviceTaskId);
             CloudIntegrationContext serviceTask = processQueryAdminSteps.getCloudIntegrationContext(serviceTaskId);
 
             assertThat(serviceTask).isNotNull()
@@ -143,10 +145,18 @@ public class ProcessInstanceServiceTasks {
         });
     }
 
-    private void waitForIntegrationContext(String serviceTaskId) {
-        final Throwable throwable = catchThrowable(
-            () -> processQueryAdminSteps.getCloudIntegrationContext(serviceTaskId));
-        assertThat(throwable).isNull();
+    private void assertThatHasIntegrationContext(String serviceTaskId) {
+        FeignException thrown = catchThrowableOfType(
+            () -> processQueryAdminSteps.getCloudIntegrationContext(serviceTaskId),
+            FeignException.class);
+        if (thrown != null) {
+            //It's important to clear step failures after an Exception, otherwise,
+            //the step will be marked to be skipped and any subsequent call to
+            //processQueryAdminSteps will return mocks instead of calling the real endpoint.
+            //Without clearing step failures the await block become useless.
+            StepEventBus.getEventBus().clearStepFailures();
+        }
+        assertThat(thrown).isNull();
     }
 
     @Then("the user can get list of service tasks with status of $status")
