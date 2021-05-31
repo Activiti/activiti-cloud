@@ -16,30 +16,29 @@
 
 package org.activiti.cloud.starter.tests.conf;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.runtime.RuntimeITConfiguration;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.*;
-
-@RunWith(SpringRunner.class)
 @SpringBootTest(
     properties = {"spring.activiti.process-definition-location-prefix=classpath*:/invalid-processes/"},
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @ContextConfiguration(classes = RuntimeITConfiguration.class,
     initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@DirtiesContext
 public class NeverFailDeploymentStrategyIT {
 
     @Autowired
