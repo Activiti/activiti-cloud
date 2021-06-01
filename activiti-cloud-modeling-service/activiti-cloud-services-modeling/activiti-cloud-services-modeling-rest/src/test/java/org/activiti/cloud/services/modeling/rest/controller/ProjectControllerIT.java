@@ -466,7 +466,8 @@ public class ProjectControllerIT {
                             ModelValidationError::getDescription,
                             ModelValidationError::getValidatorSetName)
                 .containsOnly(tuple("No assignee for user task",
-                                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task",
+                                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
+                                            + "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77'",
                                     "BPMN user task assignee validator"));
     }
 
