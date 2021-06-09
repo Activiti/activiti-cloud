@@ -22,6 +22,7 @@ import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -32,7 +33,9 @@ import java.util.stream.Stream;
 public class BpmnModelUserTaskAssigneeValidator implements BpmnModelValidator {
 
     public final String NO_ASSIGNEE_PROBLEM_TITLE = "No assignee for user task";
-    public final String NO_ASSIGNEE_DESCRIPTION = "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task with id: '%s'";
+    public final String NO_ASSIGNEE_DESCRIPTION = "One of the attributes 'assignee','candidateUsers' or"
+            + " 'candidateGroups' are mandatory on user task with id: '%s' %s";
+    public final String NO_ASSIGNEE_DESCRIPTION_NAME = "and name: '%s'";
     public final String USER_TASK_ASSIGNEE_VALIDATOR_NAME = "BPMN user task assignee validator";
 
     @Override
@@ -54,7 +57,12 @@ public class BpmnModelUserTaskAssigneeValidator implements BpmnModelValidator {
         }
 
         return Optional.of(
-            new ModelValidationError(NO_ASSIGNEE_PROBLEM_TITLE, String.format(NO_ASSIGNEE_DESCRIPTION, userTask.getId()),
-                USER_TASK_ASSIGNEE_VALIDATOR_NAME));
+                new ModelValidationError(NO_ASSIGNEE_PROBLEM_TITLE, getNoAssigneeErrorDescription(userTask),
+                        USER_TASK_ASSIGNEE_VALIDATOR_NAME));
+    }
+
+    private String getNoAssigneeErrorDescription(UserTask userTask) {
+        return String.format(NO_ASSIGNEE_DESCRIPTION, userTask.getId(),
+                (StringUtils.hasLength(userTask.getName()) ? String.format(NO_ASSIGNEE_DESCRIPTION_NAME, userTask.getName()) : "and empty name"));
     }
 }

@@ -467,8 +467,33 @@ public class ProjectControllerIT {
                             ModelValidationError::getValidatorSetName)
                 .containsOnly(tuple("No assignee for user task",
                                     "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
-                                            + "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77'",
+                                            + "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77' and name: 'x'",
                                     "BPMN user task assignee validator"));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeAndTaskNoNameShouldReturnErrors() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
+        modelService.importSingleModel(project,
+                processModelType,
+                processFileContent("process-model",
+                        resourceAsByteArray("process/no-assignee-task-no-name.bpmn20.xml")));
+
+        MvcResult response = mockMvc.perform(
+                get("/v1/projects/{projectId}/validate",
+                        project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
+                .hasSize(1)
+                .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getValidatorSetName)
+                .containsOnly(tuple("No assignee for user task",
+                        "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
+                                + "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77' and empty name",
+                        "BPMN user task assignee validator"));
     }
 
     @Test
