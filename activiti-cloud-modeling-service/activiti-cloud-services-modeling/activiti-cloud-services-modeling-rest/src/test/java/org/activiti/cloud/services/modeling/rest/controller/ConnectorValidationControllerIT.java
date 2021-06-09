@@ -298,4 +298,19 @@ public class ConnectorValidationControllerIT {
                 .hasValidationErrors("extraneous key [invalid] is not permitted");
     }
 
+    @Test
+    public void should_returnStatusNoContent_when_validatingConnectorEventWithModel() throws IOException {
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+
+        given()
+                .multiPart("file",
+                        "connector-with-event-model.json",
+                        resourceAsByteArray("connector/connector-with-event-model.json"),
+                        "text/plain")
+                .post("/v1/models/{modelId}/validate",
+                        connectorModel.getId())
+                .then()
+                .expect(status().isNoContent())
+                .body(isEmptyString());
+    }
 }
