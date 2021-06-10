@@ -47,7 +47,12 @@
           "type": "string"
         },
         "inputs": { "$ref": "#/definitions/connector-parameters" },
-        "outputs": { "$ref": "#/definitions/connector-parameters" }
+        "outputs": { "$ref": "#/definitions/connector-parameters" },
+        "model": {
+          "description": "JSON schema to map feature output",
+          "type": "object",
+          "additionalProperties": true
+        }
       },
       "required": [ "id", "name" ]
     },
