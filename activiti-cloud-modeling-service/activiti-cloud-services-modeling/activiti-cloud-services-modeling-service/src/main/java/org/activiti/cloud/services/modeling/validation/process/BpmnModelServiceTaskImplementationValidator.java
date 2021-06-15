@@ -61,6 +61,8 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
 
         availableImplementations.add("script.EXECUTE");
 
+        availableImplementations.add("email-service.SEND");
+
         return getFlowElements(bpmnModel,
                         ServiceTask.class)
                 .filter(serviceTask -> serviceTask.getImplementation() != null)
