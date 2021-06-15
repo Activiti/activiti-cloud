@@ -111,7 +111,8 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
     private boolean isConnector(Optional<String> implementationTask) {
         return implementationTask.isPresent()
             && !implementationTask.get().equals("dmn-connector.EXECUTE_TABLE")
-            && !implementationTask.get().equals("script.EXECUTE");
+            && !implementationTask.get().equals("script.EXECUTE")
+            && !implementationTask.get().equals("email-service.SEND");
     }
 
     private Optional<ModelValidationError> validateTaskMappings(String processId,
