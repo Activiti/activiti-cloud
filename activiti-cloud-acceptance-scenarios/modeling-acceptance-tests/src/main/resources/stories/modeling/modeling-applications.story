@@ -41,7 +41,7 @@ Then the project should contain validation errors
 Scenario: validate an invalid project containing user task with no assignee
 Given the user is authenticated as modeler
 And an project 'mission-europe' with process model 'spacex-usertask-with-no-assignee'
-Then the project should have validation errors with message "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task"
+Then the project should have validation errors with message "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task with id: 'UserTask_1tfjds5' and empty name"
 
 Scenario: validate an invalid project containing service task with invalid implementation
 Given the user is authenticated as modeler
