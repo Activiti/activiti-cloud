@@ -24,6 +24,7 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.Message;
 
 public class CloudProcessDeployedProducer {
 
@@ -48,10 +49,13 @@ public class CloudProcessDeployedProducer {
     }
 
     protected void sendCloudProcessDeployedEvent(CloudProcessDeployedEvent cloudProcessDeployedEvent) {
-        producer.auditProducer().send(
-            runtimeBundleMessageBuilderFactory.create()
-                                              .withPayload(new CloudRuntimeEvent<?, ?>[] { cloudProcessDeployedEvent })
-                                              .build());
+        CloudRuntimeEvent<?, ?>[] payload = new CloudRuntimeEvent<?, ?>[]{cloudProcessDeployedEvent};
+
+        Message<?> message = runtimeBundleMessageBuilderFactory.create()
+                                                               .withPayload(payload)
+                                                               .build();
+        producer.auditProducer()
+                .send(message);
     }
 
     protected CloudProcessDeployedEvent toCloudProcessDeployedEvent(ProcessDeployedEvent processDeployedEvent) {
