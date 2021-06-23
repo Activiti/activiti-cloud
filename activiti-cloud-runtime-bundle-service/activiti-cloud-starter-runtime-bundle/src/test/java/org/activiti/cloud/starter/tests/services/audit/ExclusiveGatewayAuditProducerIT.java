@@ -95,8 +95,6 @@ public class ExclusiveGatewayAuditProducerIT {
 
     @BeforeEach
     public void setUp() {
-        streamHandler.clear();
-
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);

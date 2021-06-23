@@ -40,7 +40,7 @@ public class AuditConsumerStreamHandler {
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
     public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?,?> ... events) {
         latestReceivedEvents = new ArrayList<>(Arrays.asList(events));
-        allReceivedEvents.addAll(Arrays.asList(events));
+        allReceivedEvents.addAll(latestReceivedEvents);
         receivedHeaders = new LinkedHashMap<>(headers);
     }
 
@@ -61,5 +61,4 @@ public class AuditConsumerStreamHandler {
         latestReceivedEvents.clear();
         receivedHeaders.clear();
     }
-
 }
