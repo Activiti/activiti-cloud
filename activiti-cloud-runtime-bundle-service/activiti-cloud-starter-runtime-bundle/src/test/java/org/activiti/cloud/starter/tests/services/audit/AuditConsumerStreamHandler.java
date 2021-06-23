@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Headers;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Profile(AUDIT_PRODUCER_IT)
 @TestComponent
@@ -34,12 +35,11 @@ public class AuditConsumerStreamHandler {
     private Map<String, Object> receivedHeaders = new HashMap<>();
 
     private List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
-    private List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
+    private List<CloudRuntimeEvent<?,?>> allReceivedEvents = new CopyOnWriteArrayList<>();
 
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
     public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?,?> ... events) {
         latestReceivedEvents = new ArrayList<>(Arrays.asList(events));
-        allReceivedEvents = new ArrayList<>(allReceivedEvents);
         allReceivedEvents.addAll(Arrays.asList(events));
         receivedHeaders = new LinkedHashMap<>(headers);
     }

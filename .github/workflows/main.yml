@@ -60,7 +60,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build with Maven
-        run: mvn -B verify
+        run: mvn -B clean install
 
       - name: Install jx-release-version
         if: ${{ github.event_name == 'push' }}
