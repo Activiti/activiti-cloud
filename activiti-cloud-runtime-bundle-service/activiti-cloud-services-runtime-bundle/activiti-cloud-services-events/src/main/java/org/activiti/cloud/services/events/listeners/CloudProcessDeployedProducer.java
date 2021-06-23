@@ -15,8 +15,10 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import org.activiti.api.process.model.events.ProcessDeployedEvent;
 import org.activiti.api.runtime.event.impl.ProcessDeployedEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -39,18 +41,25 @@ public class CloudProcessDeployedProducer {
 
     @EventListener
     public void sendProcessDeployedEvents(ProcessDeployedEvents processDeployedEvents) {
-        producer.auditProducer().send(
-                runtimeBundleMessageBuilderFactory.create()
-                        .withPayload(
-                                processDeployedEvents.getProcessDeployedEvents()
-                                        .stream()
-                                        .map(processDeployedEvent -> {
-                                            CloudProcessDeployedEventImpl cloudProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDeployedEvent.getEntity());
-                                            cloudProcessDeployedEvent.setProcessModelContent(processDeployedEvent.getProcessModelContent());
-                                            runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDeployedEvent);
-                                            return cloudProcessDeployedEvent;
-                                        })
-                                        .toArray(CloudRuntimeEvent<?, ?>[]::new))
-                        .build());
+        processDeployedEvents.getProcessDeployedEvents()
+                             .stream()
+                             .map(this::toCloudProcessDeployedEvent)
+                             .forEach(this::sendCloudProcessDeployedEvent);
     }
+
+    protected void sendCloudProcessDeployedEvent(CloudProcessDeployedEvent cloudProcessDeployedEvent) {
+        producer.auditProducer().send(
+            runtimeBundleMessageBuilderFactory.create()
+                                              .withPayload(new CloudRuntimeEvent<?, ?>[] { cloudProcessDeployedEvent })
+                                              .build());
+    }
+
+    protected CloudProcessDeployedEvent toCloudProcessDeployedEvent(ProcessDeployedEvent processDeployedEvent) {
+        CloudProcessDeployedEventImpl cloudProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDeployedEvent.getEntity());
+        cloudProcessDeployedEvent.setProcessModelContent(processDeployedEvent.getProcessModelContent());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDeployedEvent);
+
+        return cloudProcessDeployedEvent;
+    }
+
 }
