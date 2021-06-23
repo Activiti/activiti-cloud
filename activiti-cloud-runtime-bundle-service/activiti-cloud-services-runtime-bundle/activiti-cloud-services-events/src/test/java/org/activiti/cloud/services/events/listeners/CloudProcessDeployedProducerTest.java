@@ -36,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -88,7 +89,7 @@ public class CloudProcessDeployedProducerTest {
                                                                                                          "content1"),
                                                                             new ProcessDeployedEventImpl(def2,
                                                                                                          "content2"));
-        given(messageBuilderAppenderChain.withPayload(any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
+        given(messageBuilderAppenderChain.withPayload(any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[1]));
 
         //when
         processDeployedProducer.sendProcessDeployedEvents(new ProcessDeployedEvents(processDeployedEventList));
@@ -96,10 +97,13 @@ public class CloudProcessDeployedProducerTest {
         //then
         verify(runtimeBundleInfoAppender,
                times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
-        verify(auditProducer).send(any());
+        verify(auditProducer, times(2)).send(any());
 
-        verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
-        List<CloudProcessDeployedEvent> cloudProcessDeployedEvents = Arrays.stream(messagePayloadCaptor.getValue())
+        verify(messageBuilderAppenderChain,
+               times(2)).withPayload(messagePayloadCaptor.capture());
+
+        List<CloudProcessDeployedEvent> cloudProcessDeployedEvents = messagePayloadCaptor.getAllValues().stream()
+                .map(payload -> payload[0])
                 .map(CloudProcessDeployedEvent.class::cast)
                 .collect(Collectors.toList());
         assertThat(cloudProcessDeployedEvents)
