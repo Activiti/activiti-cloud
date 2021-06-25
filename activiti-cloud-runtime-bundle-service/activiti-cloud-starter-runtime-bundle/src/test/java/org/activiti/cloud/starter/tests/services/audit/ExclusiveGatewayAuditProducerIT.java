@@ -104,7 +104,7 @@ public class ExclusiveGatewayAuditProducerIT {
         for (CloudProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getKey(), pd.getId());
         }
-
+        System.out.println("setUp:" + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
     }
 
     private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {

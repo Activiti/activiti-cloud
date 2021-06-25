@@ -25,28 +25,23 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Headers;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Profile(AUDIT_PRODUCER_IT)
 @TestComponent
 @EnableBinding(AuditConsumer.class)
 public class AuditConsumerStreamHandler {
 
-    private Map<String, Object> receivedHeaders = new HashMap<>();
+    private volatile Map<String, Object> receivedHeaders = new HashMap<>();
 
-    private List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
-    private List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
 
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
     public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?,?> ... events) {
-        System.out.println("receive: " + Thread.currentThread() + ",streamHandler: " + this + ", events: " + events.length);
         latestReceivedEvents = new ArrayList<>(Arrays.asList(events));
-
-        System.out.println("before addAll: " + Thread.currentThread() + ",streamHandler: " + this + ", allReceivedEvents: " + allReceivedEvents.size());
-
         allReceivedEvents = new ArrayList<>(allReceivedEvents);
         allReceivedEvents.addAll(latestReceivedEvents);
-
-        System.out.println("after addAll: " + Thread.currentThread() + ",streamHandler: " + this + ", allReceivedEvents: " + allReceivedEvents.size());
         receivedHeaders = new LinkedHashMap<>(headers);
     }
 
