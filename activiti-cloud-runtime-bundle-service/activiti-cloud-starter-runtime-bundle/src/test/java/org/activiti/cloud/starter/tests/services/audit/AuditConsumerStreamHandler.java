@@ -38,9 +38,12 @@ public class AuditConsumerStreamHandler {
 
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
     public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?,?> ... events) {
+        System.out.println("receive: " + Thread.currentThread() + ",streamHandler: " + this + ", events: " + events);
         latestReceivedEvents = new ArrayList<>(Arrays.asList(events));
         allReceivedEvents = new ArrayList<>(allReceivedEvents);
         allReceivedEvents.addAll(latestReceivedEvents);
+
+        System.out.println("after receive: " + Thread.currentThread() + ",streamHandler: " + this + ", allReceivedEvents: " + allReceivedEvents);
         receivedHeaders = new LinkedHashMap<>(headers);
     }
 
