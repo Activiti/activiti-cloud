@@ -26,11 +26,16 @@ import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFac
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.Message;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 public class CloudProcessDeployedProducer {
 
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private ProcessEngineChannels producer;
     private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
+    private int chunkSize = 100;
 
     public CloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                         ProcessEngineChannels producer,
@@ -42,20 +47,31 @@ public class CloudProcessDeployedProducer {
 
     @EventListener
     public void sendProcessDeployedEvents(ProcessDeployedEvents processDeployedEvents) {
+        final AtomicInteger counter = new AtomicInteger();
+
         processDeployedEvents.getProcessDeployedEvents()
                              .stream()
-                             .map(this::toCloudProcessDeployedEvent)
+                             .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize))
+                             .values()
+                             .stream()
+                             .map(this::toCloudProcessDeployedEvents)
                              .forEach(this::sendCloudProcessDeployedEvent);
     }
 
-    protected void sendCloudProcessDeployedEvent(CloudProcessDeployedEvent cloudProcessDeployedEvent) {
-        CloudRuntimeEvent<?, ?>[] payload = new CloudRuntimeEvent<?, ?>[]{cloudProcessDeployedEvent};
+    protected void sendCloudProcessDeployedEvent(List<CloudProcessDeployedEvent> cloudProcessDeployedEvents) {
+        CloudRuntimeEvent<?, ?>[] payload = cloudProcessDeployedEvents.toArray(new CloudRuntimeEvent<?, ?>[]{ });
 
         Message<?> message = runtimeBundleMessageBuilderFactory.create()
                                                                .withPayload(payload)
                                                                .build();
         producer.auditProducer()
                 .send(message);
+    }
+
+    protected List<CloudProcessDeployedEvent> toCloudProcessDeployedEvents(List<ProcessDeployedEvent> processDeployedEvents) {
+        return processDeployedEvents.stream()
+                                    .map(this::toCloudProcessDeployedEvent)
+                                    .collect(Collectors.toList());
     }
 
     protected CloudProcessDeployedEvent toCloudProcessDeployedEvent(ProcessDeployedEvent processDeployedEvent) {

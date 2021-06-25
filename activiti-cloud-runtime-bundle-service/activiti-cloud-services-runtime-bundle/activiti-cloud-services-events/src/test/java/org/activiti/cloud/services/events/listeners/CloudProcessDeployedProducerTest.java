@@ -27,15 +27,15 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderAppenderChain;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.assertj.core.util.Streams;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -88,21 +88,18 @@ public class CloudProcessDeployedProducerTest {
                                                                                                          "content1"),
                                                                             new ProcessDeployedEventImpl(def2,
                                                                                                          "content2"));
-        given(messageBuilderAppenderChain.withPayload(any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[1]));
+        given(messageBuilderAppenderChain.withPayload(any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
 
         //when
         processDeployedProducer.sendProcessDeployedEvents(new ProcessDeployedEvents(processDeployedEventList));
 
         //then
-        verify(runtimeBundleInfoAppender,
-               times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
-        verify(auditProducer, times(2)).send(any());
+        verify(runtimeBundleInfoAppender, times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
+        verify(auditProducer).send(any());
 
-        verify(messageBuilderAppenderChain,
-               times(2)).withPayload(messagePayloadCaptor.capture());
-
-        List<CloudProcessDeployedEvent> cloudProcessDeployedEvents = messagePayloadCaptor.getAllValues().stream()
-                .map(payload -> payload[0])
+        List<CloudProcessDeployedEvent> cloudProcessDeployedEvents = Arrays.asList(messagePayloadCaptor.getValue())
+                .stream()
                 .map(CloudProcessDeployedEvent.class::cast)
                 .collect(Collectors.toList());
         assertThat(cloudProcessDeployedEvents)
