@@ -120,9 +120,9 @@ public class ExclusiveGatewayAuditProducerIT {
     @Test
     public void testProcessExecutionWithExclusiveGateway() {
         //when
-        System.out.println("Before clear:" + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents());
+        System.out.println("Before clear:" + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
         streamHandler.getAllReceivedEvents().clear();
-        System.out.println("After clear: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents());
+        System.out.println("After clear: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
 
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             new StartProcessPayloadBuilder()
@@ -149,13 +149,13 @@ public class ExclusiveGatewayAuditProducerIT {
         CloudTask task = processInstanceRestTemplate.getTasks(processInstance).getBody().iterator().next();
         String taskId = task.getId();
 
-        System.out.println("Before Await: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents());
+        System.out.println("Before Await: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
 
         await().untilAsserted(() -> {
 
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
-            System.out.println("Await: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents());
+            System.out.println("Await: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
 
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
