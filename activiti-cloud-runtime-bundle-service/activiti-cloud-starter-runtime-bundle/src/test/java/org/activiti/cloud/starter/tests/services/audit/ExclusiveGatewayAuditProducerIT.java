@@ -121,6 +121,8 @@ public class ExclusiveGatewayAuditProducerIT {
     public void testProcessExecutionWithExclusiveGateway() {
         //when
         streamHandler.getAllReceivedEvents().clear();
+        System.out.println("Thread: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents());
+
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             new StartProcessPayloadBuilder()
                 .withProcessDefinitionKey(EXCLUSIVE_GATEWAY_PROCESS)
@@ -149,6 +151,8 @@ public class ExclusiveGatewayAuditProducerIT {
         await().untilAsserted(() -> {
 
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+
+            System.out.println("Await thread: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents());
 
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
