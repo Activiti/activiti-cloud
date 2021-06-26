@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Headers;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Profile(AUDIT_PRODUCER_IT)
 @TestComponent
