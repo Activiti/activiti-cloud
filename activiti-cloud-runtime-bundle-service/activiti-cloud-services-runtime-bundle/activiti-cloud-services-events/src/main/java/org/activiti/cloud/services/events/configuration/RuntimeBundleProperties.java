@@ -18,11 +18,16 @@ package org.activiti.cloud.services.events.configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 
 @Configuration
 @ConfigurationProperties(prefix = "activiti.cloud.runtime-bundle")
+@Validated
 public class RuntimeBundleProperties {
-	
+
     @Value("${spring.application.name}")
     private String rbSpringAppName;
 
@@ -35,8 +40,9 @@ public class RuntimeBundleProperties {
     @Value("${activiti.cloud.application.name:}")
     private String appName;
 
+    @Valid
     private RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
-    
+
     public String getRbSpringAppName() {
         return rbSpringAppName;
     }
@@ -89,7 +95,11 @@ public class RuntimeBundleProperties {
 
     public static class RuntimeBundleEventsProperties {
 
+
         private boolean integrationAuditEventsEnabled = true;
+
+        @Positive
+        private int chunkSize = 100;
 
         public boolean isIntegrationAuditEventsEnabled() {
             return integrationAuditEventsEnabled;
@@ -98,5 +108,14 @@ public class RuntimeBundleProperties {
         public void setIntegrationAuditEventsEnabled(boolean integrationAuditEventsEnabled) {
             this.integrationAuditEventsEnabled = integrationAuditEventsEnabled;
         }
+
+        public Integer getChunkSize() {
+            return chunkSize;
+        }
+
+        public void setChunkSize(Integer chunkSize) {
+            this.chunkSize = chunkSize;
+        }
+
     }
 }
