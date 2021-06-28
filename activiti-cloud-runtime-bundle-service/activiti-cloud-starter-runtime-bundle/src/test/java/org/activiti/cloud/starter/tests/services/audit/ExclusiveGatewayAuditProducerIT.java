@@ -15,22 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
-import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.*;
-import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
-import static org.activiti.api.task.model.events.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_UPDATED;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
@@ -64,6 +48,19 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.util.*;
 
+import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
+import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.*;
+import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
+import static org.activiti.api.task.model.events.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.*;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -92,7 +89,6 @@ public class ExclusiveGatewayAuditProducerIT {
     @Autowired
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
-
     @BeforeEach
     public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
@@ -104,7 +100,6 @@ public class ExclusiveGatewayAuditProducerIT {
         for (CloudProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getKey(), pd.getId());
         }
-        System.out.println("setUp:" + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
     }
 
     private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
@@ -120,9 +115,7 @@ public class ExclusiveGatewayAuditProducerIT {
     @Test
     public void testProcessExecutionWithExclusiveGateway() {
         //when
-        System.out.println("Before clear:" + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
         streamHandler.getAllReceivedEvents().clear();
-        System.out.println("After clear: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
 
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             new StartProcessPayloadBuilder()
@@ -149,13 +142,8 @@ public class ExclusiveGatewayAuditProducerIT {
         CloudTask task = processInstanceRestTemplate.getTasks(processInstance).getBody().iterator().next();
         String taskId = task.getId();
 
-        System.out.println("Before Await: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
-
         await().untilAsserted(() -> {
-
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
-
-            System.out.println("Await: " + Thread.currentThread() + ",streamHandler: " + streamHandler + ", streamHandler.getAllReceivedEvents(): " + streamHandler.getAllReceivedEvents().size());
 
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
