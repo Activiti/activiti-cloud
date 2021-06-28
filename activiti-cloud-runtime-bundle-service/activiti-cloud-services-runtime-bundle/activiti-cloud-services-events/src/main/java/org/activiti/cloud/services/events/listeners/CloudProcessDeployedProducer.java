@@ -21,6 +21,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.springframework.context.event.EventListener;
@@ -35,14 +36,17 @@ public class CloudProcessDeployedProducer {
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private ProcessEngineChannels producer;
     private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
-    private int chunkSize = 100;
+    private int chunkSize;
 
     public CloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                         ProcessEngineChannels producer,
-                                        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
+                                        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
+                                        RuntimeBundleProperties properties) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.producer = producer;
         this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
+        this.chunkSize = properties.getEventsProperties()
+                                   .getChunkSize();
     }
 
     @EventListener
@@ -80,6 +84,14 @@ public class CloudProcessDeployedProducer {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDeployedEvent);
 
         return cloudProcessDeployedEvent;
+    }
+
+    public int getChunkSize() {
+        return chunkSize;
+    }
+
+    public void setChunkSize(int chunkSize) {
+        this.chunkSize = chunkSize;
     }
 
 }
