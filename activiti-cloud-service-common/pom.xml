@@ -45,7 +45,7 @@
     <logstash.version>6.6</logstash.version>
     <springfox.version>3.0.0</springfox.version>
     <swagger.version>1.5.20</swagger.version>
-    <xstream.version>1.4.16</xstream.version>
+    <xstream.version>1.4.17</xstream.version>
     <json-unit.version>2.25.0</json-unit.version>
   </properties>
   <dependencyManagement>
