@@ -24,26 +24,22 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Headers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Profile(AUDIT_PRODUCER_IT)
 @TestComponent
 @EnableBinding(AuditConsumer.class)
 public class AuditConsumerStreamHandler {
 
-    private Map<String, Object> receivedHeaders = new HashMap<>();
+    private volatile Map<String, Object> receivedHeaders = new HashMap<>();
 
-    private List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
-    private List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
 
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
     public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?,?> ... events) {
         latestReceivedEvents = new ArrayList<>(Arrays.asList(events));
+        allReceivedEvents = new ArrayList<>(allReceivedEvents);
         allReceivedEvents.addAll(latestReceivedEvents);
         receivedHeaders = new LinkedHashMap<>(headers);
     }
@@ -65,5 +61,4 @@ public class AuditConsumerStreamHandler {
         latestReceivedEvents.clear();
         receivedHeaders.clear();
     }
-
 }

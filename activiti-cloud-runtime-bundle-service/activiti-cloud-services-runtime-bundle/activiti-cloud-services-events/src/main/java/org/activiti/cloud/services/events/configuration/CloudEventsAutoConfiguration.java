@@ -76,7 +76,7 @@ import org.springframework.context.annotation.PropertySources;
     @PropertySource(value="classpath:/activiti-audit-producer.properties", ignoreResourceNotFound = true) // optional override
 })
 public class CloudEventsAutoConfiguration {
-    
+
     @Bean
     @ConditionalOnMissingBean
     public RuntimeBundleInfoAppender runtimeBundleInfoAppender(RuntimeBundleProperties properties) {
@@ -88,7 +88,7 @@ public class CloudEventsAutoConfiguration {
     public CloudRuntimeEventMessageBuilderFactory cloudRuntimeEventMessageBuilderFactory(RuntimeBundleProperties properties) {
         return new CloudRuntimeEventMessageBuilderFactory(properties);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory(RuntimeBundleProperties properties) {
@@ -265,7 +265,7 @@ public class CloudEventsAutoConfiguration {
                                                                    ProcessEngineEventsAggregator eventsAggregator) {
         return new CloudProcessUpdatedProducer(eventConverter,
                                                eventsAggregator);
-    } 
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -320,7 +320,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudActivityCancelledProducer(converter,
                                                   eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudSignalReceivedProducer cloudSignalReceivedProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -328,7 +328,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudSignalReceivedProducer(converter,
                                                eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudTimerFiredProducer cloudTimerFiredProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -336,7 +336,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudTimerFiredProducer(converter,
                                            eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudTimerScheduledProducer cloudTimerScheduledProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -344,7 +344,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudTimerScheduledProducer(converter,
                                                eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudTimerCancelledProducer cloudTimerCancelledProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -352,7 +352,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudTimerCancelledProducer(converter,
                                                eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudTimerFailedProducer cloudTimerFailedProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -360,7 +360,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudTimerFailedProducer(converter,
                                             eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudTimerExecutedProducer cloudTimerExecutedProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -368,7 +368,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudTimerExecutedProducer(converter,
                                               eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudTimerRetriesDecrementedProducer cloudTimerRetriesDecrementedProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -389,10 +389,12 @@ public class CloudEventsAutoConfiguration {
     @Bean
     public CloudProcessDeployedProducer cloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                                      ProcessEngineChannels processEngineChannels,
-                                                                     RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
+                                                                     RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
+                                                                     RuntimeBundleProperties properties) {
         return new CloudProcessDeployedProducer(runtimeBundleInfoAppender,
                                                 processEngineChannels,
-                                                runtimeBundleMessageBuilderFactory);
+                                                runtimeBundleMessageBuilderFactory,
+                                                properties);
     }
 
     @Bean
@@ -400,7 +402,7 @@ public class CloudEventsAutoConfiguration {
     public RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory(RuntimeBundleProperties properties) {
         return new RuntimeBundleMessageBuilderFactory(properties);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudMessageSentProducer cloudMessageSentProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -408,7 +410,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudMessageSentProducer(converter,
                                             eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudMessageWaitingProducer cloudMessageWaitingProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -416,7 +418,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudMessageWaitingProducer(converter,
                                                eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudMessageReceivedProducer cloudMessageReceivedProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -424,7 +426,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudMessageReceivedProducer(converter,
                                                 eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudErrorReceivedProducer cloudErrorReceivedProducer(ToCloudProcessRuntimeEventConverter converter,
@@ -432,7 +434,7 @@ public class CloudEventsAutoConfiguration {
         return new CloudErrorReceivedProducer(converter,
                                               eventsAggregator);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public CloudMessageSubscriptionCancelledProducer cloudMessageSubscriptionCancelledProducer(ToCloudProcessRuntimeEventConverter converter,
