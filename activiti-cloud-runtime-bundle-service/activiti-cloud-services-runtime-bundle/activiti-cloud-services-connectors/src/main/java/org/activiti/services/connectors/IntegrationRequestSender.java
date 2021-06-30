@@ -15,8 +15,6 @@
  */
 package org.activiti.services.connectors;
 
-import java.util.stream.Stream;
-
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
@@ -28,6 +26,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+
+import java.util.stream.Stream;
 
 public class IntegrationRequestSender {
     public static final String CONNECTOR_TYPE = "connectorType";
@@ -56,10 +56,11 @@ public class IntegrationRequestSender {
     public void sendIntegrationRequest(IntegrationRequest event) {
 
         resolver.resolveDestination(event.getIntegrationContext().getConnectorType()).send(buildIntegrationRequestMessage(event));
+
+        sendAuditEvent(event);
     }
 
     //send audit event is included in the the transaction because the audit chanel is transacted
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void sendAuditEvent(IntegrationRequest integrationRequest) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationRequestedEventImpl integrationRequested = new CloudIntegrationRequestedEventImpl(integrationRequest.getIntegrationContext());
