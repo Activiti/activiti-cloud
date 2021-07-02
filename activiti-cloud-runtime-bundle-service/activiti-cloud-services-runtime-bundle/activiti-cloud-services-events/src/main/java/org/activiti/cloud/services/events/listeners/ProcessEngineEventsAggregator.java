@@ -22,15 +22,7 @@ import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
-import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
-import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
-import org.activiti.cloud.api.process.model.events.CloudBPMNSignalEvent;
-import org.activiti.cloud.api.process.model.events.CloudBPMNTimerEvent;
-import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
-import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
-import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
-import org.activiti.cloud.api.process.model.events.CloudSequenceFlowEvent;
+import org.activiti.cloud.api.process.model.events.*;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
@@ -156,6 +148,8 @@ public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggre
             return ((CloudBPMNErrorReceivedEvent) element).getEntity().getProcessInstanceId();
         } else if(element instanceof CloudMessageSubscriptionCancelledEvent) {
             return ((CloudMessageSubscriptionCancelledEvent) element).getEntity().getProcessInstanceId();
+        } else if(element instanceof CloudIntegrationEvent) {
+            return ((CloudIntegrationEvent) element).getEntity().getProcessInstanceId();
         }
         return null;
     }
