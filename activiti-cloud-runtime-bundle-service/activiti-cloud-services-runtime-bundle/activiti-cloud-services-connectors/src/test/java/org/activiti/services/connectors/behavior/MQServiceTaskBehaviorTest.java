@@ -17,9 +17,11 @@ package org.activiti.services.connectors.behavior;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
@@ -36,10 +38,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class MQServiceTaskBehaviorTest {
@@ -75,6 +74,9 @@ public class MQServiceTaskBehaviorTest {
     @Mock
     private DefaultServiceTaskBehavior defaultServiceTaskBehavior;
 
+    @Mock
+    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+
     @Captor
     private ArgumentCaptor<IntegrationRequestImpl> integrationRequestCaptor;
 
@@ -85,7 +87,8 @@ public class MQServiceTaskBehaviorTest {
                                                  eventPublisher,
                                                  integrationContextBuilder,
                                                  runtimeBundleInfoAppender,
-                                                 defaultServiceTaskBehavior));
+                                                 defaultServiceTaskBehavior,
+                                                 processEngineEventsAggregator));
     }
 
     @Test
@@ -139,6 +142,8 @@ public class MQServiceTaskBehaviorTest {
                 .isEqualTo(integrationContext);
 
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequest);
+
+        verify(processEngineEventsAggregator).add(any(CloudIntegrationRequestedEvent.class));
     }
 
     @Test
