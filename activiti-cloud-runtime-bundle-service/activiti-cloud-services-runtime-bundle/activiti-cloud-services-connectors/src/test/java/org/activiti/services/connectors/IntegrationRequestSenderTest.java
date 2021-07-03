@@ -15,15 +15,6 @@
  */
 package org.activiti.services.connectors;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -53,6 +44,12 @@ import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 public class IntegrationRequestSenderTest {
 
     private static final String MY_PARENT_PROC_ID = "my-parent-proc-id";
@@ -63,6 +60,7 @@ public class IntegrationRequestSenderTest {
     private static final String SPRING_APP_NAME = "springAppName";
     private static final String CONNECTOR_TYPE = "payment";
     private static final String EXECUTION_ID = "execId";
+    private static final String ROOT_PROC_INST_ID = "rootProcInstId";
     private static final String PROC_INST_ID = "procInstId";
     private static final String PROC_DEF_ID = "procDefId";
     private static final String BUSINESS_KEY = "my-business-key";
@@ -173,6 +171,7 @@ public class IntegrationRequestSenderTest {
         delegateExecution = DelegateExecutionBuilder.anExecution()
                                                     .withServiceTask(serviceTask)
                                                     .withProcessDefinitionId(PROC_DEF_ID)
+                                                    .withRootProcessInstanceId(ROOT_PROC_INST_ID)
                                                     .withProcessInstanceId(PROC_INST_ID)
                                                     .withBusinessKey(BUSINESS_KEY)
                                                     .withProcessDefinitionKey(MY_PROC_DEF_KEY)
@@ -237,6 +236,7 @@ public class IntegrationRequestSenderTest {
             .containsEntry("businessKey", BUSINESS_KEY)
             .containsEntry("connectorType", PAYMENT_CONNECTOR_TYPE)
             .containsEntry("integrationContextId", INTEGRATION_CONTEXT_ID)
+            .containsEntry("rootProcessInstanceId", ROOT_PROC_INST_ID)
             .containsEntry("processInstanceId", PROC_INST_ID)
             .containsEntry("processDefinitionId", PROC_DEF_ID)
             .containsEntry("appName", APP_NAME)
@@ -248,6 +248,7 @@ public class IntegrationRequestSenderTest {
         CloudIntegrationRequestedEventImpl integrationRequested = (CloudIntegrationRequestedEventImpl) (message.getPayload())[0];
 
         assertThat(integrationRequested.getEntity().getId()).isEqualTo(INTEGRATION_CONTEXT_ID);
+        assertThat(integrationRequested.getEntity().getRootProcessInstanceId()).isEqualTo(ROOT_PROC_INST_ID);
         assertThat(integrationRequested.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(integrationRequested.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequested);

@@ -15,24 +15,14 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.persistence.*;
-
-import org.activiti.cloud.api.process.model.CloudIntegrationContext;
-import org.springframework.format.annotation.DateTimeFormat;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.activiti.cloud.api.process.model.CloudIntegrationContext;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.persistence.*;
+import java.util.*;
 
 @Entity(name="IntegrationContext")
 @Table(name="INTEGRATION_CONTEXT", indexes={
@@ -55,6 +45,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @Column(columnDefinition="text")
     private Map<String, Object> outBoundVariables = new HashMap<>();
 
+    private String rootProcessInstanceId;
     private String processInstanceId;
     private String parentProcessInstanceId;
     private String executionId;
@@ -120,6 +111,15 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return this.rootProcessInstanceId;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     @Override
@@ -326,6 +326,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
                                                processDefinitionId,
                                                processDefinitionKey,
                                                processDefinitionVersion,
+                                               rootProcessInstanceId,
                                                processInstanceId,
                                                executionId,
                                                requestDate,
@@ -363,7 +364,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
                Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
                Objects.equals(processInstanceId, other.processInstanceId) &&
-               Objects.equals(executionId, other.executionId) &&
+               Objects.equals(rootProcessInstanceId, other.rootProcessInstanceId) &&
                Objects.equals(executionId, other.executionId) &&
                Objects.equals(requestDate, other.requestDate) &&
                Objects.equals(resultDate, other.resultDate) &&
@@ -381,6 +382,8 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
                .append(inBoundVariables != null ? toString(inBoundVariables.entrySet(), maxLen) : null)
                .append(", outBoundVariables=")
                .append(outBoundVariables != null ? toString(outBoundVariables.entrySet(), maxLen) : null)
+               .append(", rootProcessInstanceId=")
+               .append(rootProcessInstanceId)
                .append(", processInstanceId=")
                .append(processInstanceId)
                .append(", executionId=")

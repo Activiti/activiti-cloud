@@ -203,6 +203,7 @@ create table integration_context
     process_definition_id      	varchar(255),
     process_definition_key     	varchar(255),
     process_definition_version 	integer,
+    root_process_instance_id   	varchar(255),
     process_instance_id        	varchar(255),
     execution_id	        	varchar(255),
     parent_process_instance_id  varchar(255),

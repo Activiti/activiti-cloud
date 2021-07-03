@@ -30,10 +30,10 @@ public class DelegateExecutionBuilder {
         private DelegateExecutionBuilder() {
             execution = mock(ExecutionEntity.class);
             processInstance = mock(ExecutionEntity.class);
-            
+
             when(execution.getProcessInstance()).thenReturn(processInstance);
         }
-        
+
         public static DelegateExecutionBuilder anExecution() {
             return new DelegateExecutionBuilder();
         }
@@ -53,11 +53,16 @@ public class DelegateExecutionBuilder {
             return this;
         }
 
+        public DelegateExecutionBuilder withRootProcessInstanceId(String rootProcessInstanceId) {
+            when(execution.getRootProcessInstanceId()).thenReturn(rootProcessInstanceId);
+            return this;
+        }
+
         public DelegateExecutionBuilder withBusinessKey(String businessKey) {
             when(execution.getProcessInstanceBusinessKey()).thenReturn(businessKey);
             return this;
         }
-        
+
         public DelegateExecutionBuilder withFlowNodeId(String flowNodeId) {
             when(execution.getCurrentActivityId()).thenReturn(flowNodeId);
             return this;
@@ -67,7 +72,7 @@ public class DelegateExecutionBuilder {
             when(execution.getCurrentFlowElement()).thenReturn(serviceTask);
             return this;
         }
-        
+
         public DelegateExecution build() {
             return execution;
         }
@@ -86,5 +91,5 @@ public class DelegateExecutionBuilder {
             when(processInstance.getParentProcessInstanceId()).thenReturn(parentProcessInstanceId);
             return this;
         }
-        
+
 }
