@@ -36,6 +36,8 @@ public class IntegrationContextMessageBuilderAppender implements MessageBuilderA
                 .setHeader(IntegrationContextMessageHeaders.CONNECTOR_TYPE, integrationContext.getConnectorType())
                 .setHeader(IntegrationContextMessageHeaders.BUSINESS_KEY, integrationContext.getBusinessKey())
                 .setHeader(IntegrationContextMessageHeaders.INTEGRATION_CONTEXT_ID, integrationContext.getId())
+                // FIXME: temporary measure to ensure correct message partitioning for integration context events
+                .setHeader(IntegrationContextMessageHeaders.ROOT_PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
                 .setHeader(IntegrationContextMessageHeaders.PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
                 .setHeader(IntegrationContextMessageHeaders.EXECUTION_ID, integrationContext.getExecutionId())
                 .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())

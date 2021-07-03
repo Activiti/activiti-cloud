@@ -15,8 +15,6 @@
  */
 package org.activiti.services.connectors.message;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -25,10 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class IntegrationContextMessageBuilderAppenderTest {
 
     private static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
+    private static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
     private static final String PROCESS_INSTANCE_ID = "processInstanceId";
     private static final int _1 = 1;
     private static final String PROCESS_DEFINITION_KEY = "processDefinitionKey";
@@ -63,6 +64,7 @@ public class IntegrationContextMessageBuilderAppenderTest {
             .containsEntry(IntegrationContextMessageHeaders.CONNECTOR_TYPE, integrationContext.getConnectorType())
             .containsEntry(IntegrationContextMessageHeaders.BUSINESS_KEY, integrationContext.getBusinessKey())
             .containsEntry(IntegrationContextMessageHeaders.INTEGRATION_CONTEXT_ID, integrationContext.getId())
+            .containsEntry(IntegrationContextMessageHeaders.ROOT_PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
             .containsEntry(IntegrationContextMessageHeaders.PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
             .containsEntry(IntegrationContextMessageHeaders.PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
             .containsEntry(IntegrationContextMessageHeaders.PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
