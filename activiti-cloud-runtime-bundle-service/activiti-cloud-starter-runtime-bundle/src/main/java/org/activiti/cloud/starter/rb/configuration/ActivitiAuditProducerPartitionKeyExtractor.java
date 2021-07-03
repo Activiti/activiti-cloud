@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import org.springframework.cloud.stream.binder.PartitionHandler;
 import org.springframework.cloud.stream.binder.PartitionKeyExtractorStrategy;
 import org.springframework.messaging.Message;
 
@@ -28,15 +27,22 @@ public class ActivitiAuditProducerPartitionKeyExtractor implements PartitionKeyE
     public static final String ACTIVITI_CLOUD_MESSAGING_PARTITIONED = "activiti.cloud.messaging.partitioned";
     public static final String ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME = "activitiAuditProducerPartitionKeyExtractor";
     public static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
+    public static final String PROCESS_INSTANCE_ID = "processInstanceId";
 
     @Override
     public Object extractKey(Message<?> message) {
-        // Use processInstanceId header to route message between partitions or use random hash value if missing
+        // Use rootProcessInstanceId header to route message between partitions
         String rootProcessInstance = message.getHeaders()
                                             .get(ROOT_PROCESS_INSTANCE_ID,
                                                  String.class);
 
+        // Try to fallback to processInstanceId header to route message between partitions
+        String processInstanceId = message.getHeaders()
+                                          .get(PROCESS_INSTANCE_ID,
+                                               String.class);
+
         return Optional.ofNullable(rootProcessInstance)
-                       .orElse(UUID.randomUUID().toString());
+                       .orElseGet(() -> Optional.ofNullable(processInstanceId)
+                                                .orElse(UUID.randomUUID().toString()));
     }
 }
