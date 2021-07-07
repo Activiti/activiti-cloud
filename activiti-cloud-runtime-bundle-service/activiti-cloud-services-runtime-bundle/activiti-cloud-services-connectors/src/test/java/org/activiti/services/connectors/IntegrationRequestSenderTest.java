@@ -15,6 +15,14 @@
  */
 package org.activiti.services.connectors;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -43,12 +51,6 @@ import org.mockito.Spy;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class IntegrationRequestSenderTest {
 
@@ -231,8 +233,7 @@ public class IntegrationRequestSenderTest {
             .containsKey("messagePayloadType")
             .containsEntry("parentProcessInstanceId",MY_PARENT_PROC_ID)
             .containsEntry("processDefinitionKey", MY_PROC_DEF_KEY)
-            .containsEntry("processDefinitionVersion",
-                           PROC_DEF_VERSION)
+            .containsEntry("processDefinitionVersion", PROC_DEF_VERSION)
             .containsEntry("businessKey", BUSINESS_KEY)
             .containsEntry("connectorType", PAYMENT_CONNECTOR_TYPE)
             .containsEntry("integrationContextId", INTEGRATION_CONTEXT_ID)
