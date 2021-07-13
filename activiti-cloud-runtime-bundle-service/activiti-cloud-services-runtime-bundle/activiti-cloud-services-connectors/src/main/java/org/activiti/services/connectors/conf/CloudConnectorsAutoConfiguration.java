@@ -19,6 +19,7 @@ package org.activiti.services.connectors.conf;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
@@ -132,13 +133,14 @@ public class CloudConnectorsAutoConfiguration {
                                                        IntegrationContextBuilder integrationContextBuilder,
                                                        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                        DefaultServiceTaskBehavior defaultServiceTaskBehavior,
-        ExtensionsVariablesMappingProvider variablesMappingProvider) {
-        MQServiceTaskBehavior taskBehavior = new MQServiceTaskBehavior(
-            integrationContextManager,
-            eventPublisher,
-            integrationContextBuilder,
-            runtimeBundleInfoAppender,
-            defaultServiceTaskBehavior);
+                                                       ExtensionsVariablesMappingProvider variablesMappingProvider,
+                                                       ProcessEngineEventsAggregator processEngineEventsAggregator) {
+        MQServiceTaskBehavior taskBehavior = new MQServiceTaskBehavior(integrationContextManager,
+                                                                       eventPublisher,
+                                                                       integrationContextBuilder,
+                                                                       runtimeBundleInfoAppender,
+                                                                       defaultServiceTaskBehavior,
+                                                                       processEngineEventsAggregator);
         taskBehavior.setVariablesCalculator(variablesMappingProvider);
         return taskBehavior;
     }

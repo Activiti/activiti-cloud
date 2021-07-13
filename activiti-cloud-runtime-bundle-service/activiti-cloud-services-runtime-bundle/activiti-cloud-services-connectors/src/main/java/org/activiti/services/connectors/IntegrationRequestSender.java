@@ -52,12 +52,11 @@ public class IntegrationRequestSender {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendIntegrationRequest(IntegrationRequest event) {
-
-        resolver.resolveDestination(event.getIntegrationContext().getConnectorType()).send(buildIntegrationRequestMessage(event));
-
-        sendAuditEvent(event);
+        resolver.resolveDestination(event.getIntegrationContext()
+                                         .getConnectorType()).send(buildIntegrationRequestMessage(event));
     }
 
+    @Deprecated
     public void sendAuditEvent(IntegrationRequest integrationRequest) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationRequestedEventImpl integrationRequested = new CloudIntegrationRequestedEventImpl(integrationRequest.getIntegrationContext());
