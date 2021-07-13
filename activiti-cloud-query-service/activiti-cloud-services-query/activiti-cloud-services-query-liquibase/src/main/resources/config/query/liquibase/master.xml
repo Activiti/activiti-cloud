@@ -211,7 +211,7 @@
   </changeSet>
 
   <changeSet author="activiti-query"
-             id="alter12-schema-m14" dbms="postgresql">
+             id="alter12-schema-m15" dbms="postgresql">
     <sqlFile dbms="postgresql"
              encoding="utf8"
              path="changelog/12-alter.pg.schema.7.1.0-m15.sql"
