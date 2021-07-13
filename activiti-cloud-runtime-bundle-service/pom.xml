@@ -21,7 +21,7 @@
     <module>activiti-cloud-starter-runtime-bundle-it</module>
   </modules>
   <properties>
-    <activiti.version>0.0.1-dev-igdianov-GH-3684-preview-207-SNAPSHOT</activiti.version>
+    <activiti.version>7.1.341</activiti.version>
   </properties>
   <dependencyManagement>
     <dependencies>
