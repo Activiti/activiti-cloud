@@ -392,8 +392,10 @@ public class QueryAdminProcessServiceTasksIT {
                                                             .iterator()
                                                             .next();
 
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setProcessInstanceId(process.getId());
+        integrationContext.setRootProcessInstanceId(rootProcessInstanceId);
         integrationContext.setExecutionId(serviceTask.getExecutionId());
         integrationContext.setClientId(serviceTask.getElementId());
         integrationContext.setClientType(serviceTask.getActivityType());
@@ -416,8 +418,17 @@ public class QueryAdminProcessServiceTasksIT {
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody()).extracting(CloudIntegrationContext::getClientId, CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
-                                                .containsExactly(SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_TYPE, IntegrationContextStatus.INTEGRATION_REQUESTED);
+            assertThat(responseEntity.getBody())
+                .extracting(
+                    CloudIntegrationContext::getClientId,
+                    CloudIntegrationContext::getClientType,
+                    CloudIntegrationContext::getRootProcessInstanceId,
+                    CloudIntegrationContext::getStatus)
+                .containsExactly(
+                    SERVICE_TASK_ELEMENT_ID,
+                    SERVICE_TASK_TYPE,
+                    rootProcessInstanceId,
+                    IntegrationContextStatus.INTEGRATION_REQUESTED);
         });
 
         // and given

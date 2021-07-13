@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Optional;
-
-import javax.persistence.EntityManager;
-
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
@@ -27,6 +23,9 @@ import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.persistence.EntityManager;
+import java.util.Optional;
 
 public abstract class BaseIntegrationEventHandler {
 
@@ -72,6 +71,7 @@ public abstract class BaseIntegrationEventHandler {
                 entity.setConnectorType(integrationContext.getConnectorType());
                 entity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
                 entity.setProcessInstanceId(integrationContext.getProcessInstanceId());
+                entity.setRootProcessInstanceId(integrationContext.getRootProcessInstanceId());
                 entity.setExecutionId(integrationContext.getExecutionId());
                 entity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
                 entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
