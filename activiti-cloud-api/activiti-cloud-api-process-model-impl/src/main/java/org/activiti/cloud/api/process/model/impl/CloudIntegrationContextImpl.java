@@ -15,10 +15,16 @@
  */
 package org.activiti.cloud.api.process.model.impl;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
-
-import java.util.*;
 
 public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implements CloudIntegrationContext {
 
