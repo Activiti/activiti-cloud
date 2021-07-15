@@ -83,6 +83,11 @@ public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable
     }
 
     @Override
+    public Pageable withPage(int pageNumber) {
+        return pageable.withPage(pageNumber);
+    }
+
+    @Override
     public long getOffset() {
         return skipCount;
     }

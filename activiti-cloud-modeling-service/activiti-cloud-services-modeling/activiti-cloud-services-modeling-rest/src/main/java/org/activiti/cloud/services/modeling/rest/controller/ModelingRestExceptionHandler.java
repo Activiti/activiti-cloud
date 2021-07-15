@@ -38,6 +38,7 @@ import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Bean;
@@ -70,9 +71,9 @@ public class ModelingRestExceptionHandler {
         return new DefaultErrorAttributes() {
             @Override
             public Map<String, Object> getErrorAttributes(WebRequest webRequest,
-                                                          boolean includeStackTrace) {
+                                                          ErrorAttributeOptions options) {
                 Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest,
-                                                                               includeStackTrace);
+                        options);
                 Stream<ModelValidationError> bindingErrors = Optional.ofNullable((List<ObjectError>) errorAttributes.get("errors"))
                         .map(this::transformBindingErrors)
                         .orElse(Stream.empty());
