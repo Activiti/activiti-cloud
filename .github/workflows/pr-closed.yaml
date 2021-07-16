@@ -12,11 +12,12 @@ env:
 
 jobs:
   cleanup:
-    if: ${{ contains(github.head_ref, 'preview') }}
     runs-on: ubuntu-20.04
     strategy:
+      fail-fast: false
       matrix:
         messaging-broker: [rabbitmq, kafka]
+        messaging-partitioned: [partitioned, non-partitioned]
     steps:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
@@ -31,12 +32,14 @@ jobs:
           secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
           context: ${{ env.CLUSTER_NAME }}
 
-      - name: Set PREVIEW_NAME env variable for ${{ matrix.messaging-broker }}
+      - name: Set PREVIEW_NAME env variable
         id: set-preview-name
+        env:
+          MESSAGING_BROKER: ${{ matrix.messaging-broker }}
+          MESSAGING_PARTITIONED: ${{ matrix.messaging-partitioned }}
         run: |
-          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=${BRANCH_NAME:0:28}-$GITHUB_RUN_NUMBER
-          echo set PREVIEW_NAME=$PREVIEW_NAME-${{ matrix.messaging-broker }}
-          echo "PREVIEW_NAME=$PREVIEW_NAME-${{ matrix.messaging-broker }}" >> $GITHUB_ENV
+          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
+          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}" >> $GITHUB_ENV
 
       - name: Delete preview for ${{ matrix.messaging-broker }}
         run: |

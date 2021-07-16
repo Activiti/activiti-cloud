@@ -140,6 +140,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: build
     strategy:
+      fail-fast: false
       matrix:
         messaging-broker: [rabbitmq, kafka]
         messaging-partitioned: [partitioned, non-partitioned]
@@ -263,15 +264,33 @@ jobs:
           make test/runtime-acceptance-tests
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-        if: ${{ !contains(github.head_ref, 'preview') }}
-        run: make delete
+        if: ${{ always() }}
+        env:
+          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+        run: |
+            if [ $IS_PREVIEW = true ]
+            then
+                echo "Skipping delete Helm release for preview"
+            else
+                echo "Delete Helm release"
+                make delete
+            fi
 
       - name: Delete Docker images
-        if: ${{ github.event_name == 'pull_request' && !contains(github.head_ref, 'preview') }}
-        run: make docker-delete-all
+        if: ${{ always() }}
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+        run: |
+            if [ $IS_PREVIEW = true ]
+            then
+                echo "Skipping delete Docker images for preview"
+            else
+                echo "Delete Docker images"
+                make docker-delete-all
+            fi
+
 
   promote:
     runs-on: ubuntu-20.04

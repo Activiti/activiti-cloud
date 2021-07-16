@@ -13,7 +13,7 @@ And the process with timer events is completed
 
 Scenario: check a process instance with start timer event
 Given the user is authenticated as hruser
-Then the query returns 2 processes called START_TIMER_EVENT_PROCESS with timeout 10 seconds
+Then the query returns 2 processes called START_TIMER_EVENT_PROCESS with timeout 60 seconds
 And timer events are emitted for processes called START_TIMER_EVENT_PROCESS
 
 Scenario: check a process instance with boundary timer event
