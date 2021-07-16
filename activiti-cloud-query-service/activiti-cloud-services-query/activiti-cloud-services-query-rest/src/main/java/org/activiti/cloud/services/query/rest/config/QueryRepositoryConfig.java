@@ -15,7 +15,17 @@
  */
 package org.activiti.cloud.services.query.rest.config;
 
-import org.activiti.cloud.services.query.model.*;
+import org.activiti.cloud.services.query.model.ApplicationEntity;
+import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
+import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessModelEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroup;
+import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy.RepositoryDetectionStrategies;
@@ -42,6 +52,7 @@ public class QueryRepositoryConfig implements RepositoryRestConfigurer {
                 .exposeIdsFor(BPMNActivityEntity.class)
                 .exposeIdsFor(TaskCandidateGroup.class)
                 .exposeIdsFor(TaskCandidateUser.class)
+                .exposeIdsFor(ServiceTaskEntity.class)
                 .exposeIdsFor(ApplicationEntity.class);
     }
 
