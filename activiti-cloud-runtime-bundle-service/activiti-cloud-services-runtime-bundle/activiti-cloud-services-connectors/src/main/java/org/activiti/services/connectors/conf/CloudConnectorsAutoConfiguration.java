@@ -60,14 +60,14 @@ public class CloudConnectorsAutoConfiguration {
         IntegrationContextService integrationContextService,
         ProcessEngineChannels processEngineChannels,
         RuntimeBundleProperties runtimeBundleProperties,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+        ManagementService managementService,
+        ProcessEngineEventsAggregator processEngineEventsAggregator) {
         return new ServiceTaskIntegrationResultEventHandler(runtimeService,
                                                             integrationContextService,
                                                             processEngineChannels.auditProducer(),
                                                             runtimeBundleProperties,
-                                                            runtimeBundleInfoAppender,
-            messageBuilderFactory);
+                                                            managementService,
+                                                            processEngineEventsAggregator);
     }
 
     @Bean
@@ -77,15 +77,13 @@ public class CloudConnectorsAutoConfiguration {
                                                                                            ProcessEngineChannels processEngineChannels,
                                                                                            ManagementService managementService,
                                                                                            RuntimeBundleProperties runtimeBundleProperties,
-                                                                                           RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                                                           IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+                                                                                           ProcessEngineEventsAggregator processEngineEventsAggregator) {
         return new ServiceTaskIntegrationErrorEventHandler(runtimeService,
                                                            integrationContextService,
                                                            processEngineChannels.auditProducer(),
                                                            managementService,
                                                            runtimeBundleProperties,
-                                                           runtimeBundleInfoAppender,
-                                                           messageBuilderFactory);
+                                                           processEngineEventsAggregator);
     }
 
     @Bean
@@ -134,13 +132,15 @@ public class CloudConnectorsAutoConfiguration {
                                                        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                        DefaultServiceTaskBehavior defaultServiceTaskBehavior,
                                                        ExtensionsVariablesMappingProvider variablesMappingProvider,
-                                                       ProcessEngineEventsAggregator processEngineEventsAggregator) {
+                                                       ProcessEngineEventsAggregator processEngineEventsAggregator,
+                                                       RuntimeBundleProperties runtimeBundleProperties) {
         MQServiceTaskBehavior taskBehavior = new MQServiceTaskBehavior(integrationContextManager,
                                                                        eventPublisher,
                                                                        integrationContextBuilder,
                                                                        runtimeBundleInfoAppender,
                                                                        defaultServiceTaskBehavior,
-                                                                       processEngineEventsAggregator);
+                                                                       processEngineEventsAggregator,
+                                                                       runtimeBundleProperties);
         taskBehavior.setVariablesCalculator(variablesMappingProvider);
         return taskBehavior;
     }

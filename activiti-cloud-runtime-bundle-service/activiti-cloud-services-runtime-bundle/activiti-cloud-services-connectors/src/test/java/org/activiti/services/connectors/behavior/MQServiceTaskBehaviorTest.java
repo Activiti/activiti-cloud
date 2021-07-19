@@ -15,6 +15,15 @@
  */
 package org.activiti.services.connectors.behavior;
 
+import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
+import static org.activiti.test.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
@@ -34,12 +43,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
-
-import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
-import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class MQServiceTaskBehaviorTest {
 
@@ -88,7 +91,8 @@ public class MQServiceTaskBehaviorTest {
                                                  integrationContextBuilder,
                                                  runtimeBundleInfoAppender,
                                                  defaultServiceTaskBehavior,
-                                                 processEngineEventsAggregator));
+                                                 processEngineEventsAggregator,
+                                                 runtimeBundleProperties));
     }
 
     @Test

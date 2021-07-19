@@ -19,6 +19,7 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -43,19 +44,22 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private final DefaultServiceTaskBehavior defaultServiceTaskBehavior;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
+    private final RuntimeBundleProperties runtimeBundleProperties;
 
     public MQServiceTaskBehavior(IntegrationContextManager integrationContextManager,
                                  ApplicationEventPublisher eventPublisher,
                                  IntegrationContextBuilder integrationContextBuilder,
                                  RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                  DefaultServiceTaskBehavior defaultServiceTaskBehavior,
-                                 ProcessEngineEventsAggregator processEngineEventsAggregator) {
+                                 ProcessEngineEventsAggregator processEngineEventsAggregator,
+                                 RuntimeBundleProperties runtimeBundleProperties) {
         this.integrationContextManager = integrationContextManager;
         this.eventPublisher = eventPublisher;
         this.integrationContextBuilder = integrationContextBuilder;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.defaultServiceTaskBehavior = defaultServiceTaskBehavior;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
+        this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
     @Override
@@ -68,16 +72,18 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
 
             IntegrationContext integrationContext = integrationContextBuilder.from(integrationContextEntity,
                                                                                    execution);
-            aggregateCloudIntegrationRequestedEvent(integrationContext);
-
             publishSpringEvent(integrationContext);
+
+            aggregateCloudIntegrationRequestedEvent(integrationContext);
         }
     }
 
     private void aggregateCloudIntegrationRequestedEvent(IntegrationContext integrationContext) {
-        CloudIntegrationRequestedEventImpl cloudEvent = new CloudIntegrationRequestedEventImpl(integrationContext);
+        if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
+            CloudIntegrationRequestedEventImpl cloudEvent = new CloudIntegrationRequestedEventImpl(integrationContext);
 
-        processEngineEventsAggregator.add(cloudEvent);
+            processEngineEventsAggregator.add(cloudEvent);
+        }
     }
 
     /**
