@@ -90,6 +90,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                         try {
                             managementService.executeCommand(new TriggerIntegrationContextErrorCmd(integrationError,
                                                                                                    execution));
+                            return;
                         } catch(Throwable cause) {
                             LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
                         }
@@ -107,6 +108,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
                     "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
                 LOGGER.warn(message);
             }
+
+            managementService.executeCommand(new AggregateIntegrationErrorReceivedEventCmd(integrationError));
         }
     }
 
