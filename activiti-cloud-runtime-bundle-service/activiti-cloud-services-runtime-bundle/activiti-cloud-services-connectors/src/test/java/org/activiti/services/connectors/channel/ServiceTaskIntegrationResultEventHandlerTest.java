@@ -24,10 +24,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.util.Collections;
-import java.util.Map;
-
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -37,22 +33,39 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.events.message.MessageBuilderAppenderChain;
+import org.activiti.engine.ActivitiEngineAgenda;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.delegate.event.ActivitiEventDispatcher;
+import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.interceptor.Command;
+import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class ServiceTaskIntegrationResultEventHandlerTest {
 
@@ -67,7 +80,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @InjectMocks
     private ServiceTaskIntegrationResultEventHandler handler;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RuntimeService runtimeService;
 
     @Mock
@@ -76,32 +89,50 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Mock
     private MessageChannel auditProducer;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RuntimeBundleProperties runtimeBundleProperties;
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Mock
-    private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
+    private ManagementService managementService;
 
     @Mock
     private IntegrationContextMessageBuilderFactory messageBuilderFactory;
 
     @Captor
-    private ArgumentCaptor<Message<CloudRuntimeEvent<?, ?>[]>> messageCaptor;
+    private ArgumentCaptor<CloudRuntimeEvent<?, ?>> messageCaptor;
 
     @Mock
     private ExecutionQuery executionQuery;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private CommandContext commandContext;
+
+    @Mock
+    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+
+    private static MockedStatic<Context> context;
+
+    @BeforeAll
+    public static void init() {
+        context = Mockito.mockStatic(Context.class);
+    }
+
+    @AfterAll
+    public static void close() {
+        context.close();
+    }
+
     @BeforeEach
     public void setUp() {
         initMocks(this);
-        when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
+        when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
         when(runtimeBundleProperties.getServiceFullName()).thenReturn("myApp");
-        when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
-        when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
-        when(executionQuery.list()).thenReturn(Collections.emptyList());
+        when(runtimeService.createExecutionQuery()
+                           .executionId(anyString())
+                           .list()).thenReturn(Collections.emptyList());
         when(messageBuilderFactory.create(any())).thenReturn(new MessageBuilderAppenderChain());
     }
 
@@ -114,10 +145,35 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContextEntity.setProcessInstanceId(PROC_INST_ID);
         integrationContextEntity.setProcessDefinitionId(PROC_DEF_ID);
 
+        ProcessEngineConfigurationImpl processEngineConfiguration = mock(ProcessEngineConfigurationImpl.class);
+        when(processEngineConfiguration.getEventDispatcher()).thenReturn(mock(ActivitiEventDispatcher.class));
+
+        ActivitiEngineAgenda agenda = mock(ActivitiEngineAgenda.class);
+
+        context.when(Context::getProcessEngineConfiguration).thenReturn(processEngineConfiguration);
+        context.when(Context::getAgenda).thenReturn(agenda);
+
+        ExecutionEntity executionEntity = mock(ExecutionEntity.class);
+        given(executionEntity.getId()).willReturn(EXECUTION_ID);
+
+        given(commandContext.getExecutionEntityManager().findById(anyString())).willReturn(executionEntity);
+
+        given(managementService.executeCommand(any())).willAnswer(invocation -> {
+            Command<Void> command = invocation.getArgument(0);
+
+            command.execute(commandContext);
+
+           return null;
+        });
+
+        List<Execution> executions = Collections.singletonList(executionEntity);
+
         given(integrationContextService.findById(ENTITY_ID))
                 .willReturn(integrationContextEntity);
-        given(executionQuery.list()).willReturn(Collections.singletonList(mock(ExecutionEntity.class)));
-        given(executionQuery.list().get(0).getActivityId()).willReturn(CLIENT_ID);
+        when(runtimeService.createExecutionQuery()
+                            .executionId(anyString())
+                            .list()).thenReturn(executions);
+        when(executions.get(0).getActivityId()).thenReturn(CLIENT_ID);
         Map<String, Object> variables = Collections.singletonMap("var1",
                 "v");
 
@@ -128,8 +184,9 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         //then
         verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
-        verify(runtimeService).setVariablesLocal(EXECUTION_ID, variables);
-        verify(runtimeService).trigger(EXECUTION_ID);
+        verify(executionEntity).setVariableLocal("var1", variables.get("var1"), false);
+        verify(agenda).planTriggerExecutionOperation(executionEntity);
+        verify(processEngineEventsAggregator).add(any(CloudRuntimeEvent.class));
     }
 
     @Test
@@ -159,6 +216,34 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContextEntity.setProcessInstanceId(PROC_INST_ID);
         integrationContextEntity.setProcessDefinitionId(PROC_DEF_ID);
 
+        ProcessEngineConfigurationImpl processEngineConfiguration = mock(ProcessEngineConfigurationImpl.class);
+        when(processEngineConfiguration.getEventDispatcher()).thenReturn(mock(ActivitiEventDispatcher.class));
+
+        ActivitiEngineAgenda agenda = mock(ActivitiEngineAgenda.class);
+
+        context.when(Context::getProcessEngineConfiguration).thenReturn(processEngineConfiguration);
+        context.when(Context::getAgenda).thenReturn(agenda);
+
+        ExecutionEntity executionEntity = mock(ExecutionEntity.class);
+        given(executionEntity.getId()).willReturn(EXECUTION_ID);
+
+        given(commandContext.getExecutionEntityManager().findById(anyString())).willReturn(executionEntity);
+
+        given(managementService.executeCommand(any())).willAnswer(invocation -> {
+            Command<Void> command = invocation.getArgument(0);
+
+            command.execute(commandContext);
+
+            return null;
+        });
+
+        List<Execution> executions = Collections.singletonList(executionEntity);
+
+        when(runtimeService.createExecutionQuery()
+                           .executionId(anyString())
+                           .list()).thenReturn(executions);
+        when(executions.get(0).getActivityId()).thenReturn(CLIENT_ID);
+
         given(integrationContextService.findById(ENTITY_ID)).willReturn(integrationContextEntity);
         Map<String, Object> variables = Collections.singletonMap("var1",
                 "v");
@@ -174,9 +259,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         handler.receive(integrationResultEvent);
 
         //then
-        verify(auditProducer).send(messageCaptor.capture());
-        Message<CloudRuntimeEvent<?, ?>[]> message = messageCaptor.getValue();
-        CloudIntegrationResultReceivedEventImpl event = (CloudIntegrationResultReceivedEventImpl) message.getPayload()[0];
+        verify(processEngineEventsAggregator).add(messageCaptor.capture());
+        CloudIntegrationResultReceivedEventImpl event = (CloudIntegrationResultReceivedEventImpl) messageCaptor.getValue();
         assertThat(event.getEntity().getId()).isEqualTo(ENTITY_ID);
         assertThat(event.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(event.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
@@ -191,6 +275,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     private IntegrationContextImpl buildIntegrationContext(Map<String, Object> variables) {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setExecutionId(EXECUTION_ID);
         integrationContext.setId(ENTITY_ID);
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);

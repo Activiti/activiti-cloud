@@ -18,39 +18,58 @@ package org.activiti.services.connectors.channel;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.util.Collections;
-import java.util.Map;
-
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.events.message.MessageBuilderAppenderChain;
+import org.activiti.engine.ActivitiEngineAgenda;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.delegate.event.ActivitiEventDispatcher;
+import org.activiti.engine.impl.bpmn.helper.ErrorPropagation;
+import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.interceptor.Command;
+import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
+import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class ServiceTaskIntegrationErrorEventHandlerTest {
 
@@ -74,7 +93,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     @Mock
     private MessageChannel auditProducer;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RuntimeBundleProperties runtimeBundleProperties;
 
     @Mock
@@ -84,26 +103,75 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     private ExtensionsVariablesMappingProvider outboundVariablesProvider;
 
     @Mock
-    private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
-
-    @Mock
     private IntegrationContextMessageBuilderFactory messageBuilderFactory;
 
     @Captor
-    private ArgumentCaptor<Message<CloudRuntimeEvent<?, ?>[]>> messageCaptor;
+    private ArgumentCaptor<CloudRuntimeEvent<?, ?>> messageCaptor;
 
     @Mock
     private ExecutionQuery executionQuery;
 
+    @Mock
+    private ManagementService managementService;
+
+    @Mock
+    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private CommandContext commandContext;
+
+    private static MockedStatic<Context> context;
+    private static MockedStatic<ErrorPropagation> errorPropagation;
+
+    @BeforeAll
+    public static void init() {
+        context = Mockito.mockStatic(Context.class);
+        errorPropagation = Mockito.mockStatic(ErrorPropagation.class);
+    }
+
+    @AfterAll
+    public static void close() {
+        context.close();
+        errorPropagation.close();
+    }
+
     @BeforeEach
     public void setUp() {
         initMocks(this);
-        when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
         when(runtimeBundleProperties.getServiceFullName()).thenReturn("myApp");
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
         when(executionQuery.list()).thenReturn(Collections.emptyList());
         when(messageBuilderFactory.create(any())).thenReturn(new MessageBuilderAppenderChain());
+
+        ProcessEngineConfigurationImpl processEngineConfiguration = mock(ProcessEngineConfigurationImpl.class);
+        when(processEngineConfiguration.getEventDispatcher()).thenReturn(mock(ActivitiEventDispatcher.class));
+
+        ActivitiEngineAgenda agenda = mock(ActivitiEngineAgenda.class);
+
+        context.when(Context::getProcessEngineConfiguration).thenReturn(processEngineConfiguration);
+        context.when(Context::getAgenda).thenReturn(agenda);
+
+        ExecutionEntity executionEntity = mock(ExecutionEntity.class);
+        given(executionEntity.getId()).willReturn(EXECUTION_ID);
+
+        given(commandContext.getExecutionEntityManager().findById(anyString())).willReturn(executionEntity);
+
+        given(managementService.executeCommand(any())).willAnswer(invocation -> {
+            Command<Void> command = invocation.getArgument(0);
+
+            command.execute(commandContext);
+
+            return null;
+        });
+
+        List<Execution> executions = Collections.singletonList(executionEntity);
+
+        when(runtimeService.createExecutionQuery()
+                           .executionId(anyString())
+                           .list()).thenReturn(executions);
+        when(executions.get(0).getActivityId()).thenReturn(CLIENT_ID);
+
     }
 
     @Test
@@ -125,15 +193,14 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
 
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(new IntegrationRequestImpl(integrationContext),
-                                                                           new Error("Test Error"));
+                                                                           new CloudBpmnError("Test Error"));
 
         //when
         handler.receive(integrationErrorEvent);
 
         //then
-        verify(auditProducer).send(messageCaptor.capture());
-        Message<CloudRuntimeEvent<?, ?>[]> message = messageCaptor.getValue();
-        CloudIntegrationErrorReceivedEventImpl event = (CloudIntegrationErrorReceivedEventImpl) message.getPayload()[0];
+        verify(processEngineEventsAggregator).add(messageCaptor.capture());
+        CloudIntegrationErrorReceivedEventImpl event = (CloudIntegrationErrorReceivedEventImpl) messageCaptor.getValue();
         assertThat(event.getEntity().getId()).isEqualTo(ENTITY_ID);
         assertThat(event.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(event.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
@@ -144,6 +211,9 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         assertThat(event.getEntity().getClientType()).isEqualTo(CLIENT_TYPE);
 
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(event);
+
+        // then
+        errorPropagation.verify(() -> ErrorPropagation.propagateError(eq("Test Error"), any()));
     }
 
     private IntegrationContextImpl buildIntegrationContext(Map<String, Object> variables) {
