@@ -66,29 +66,41 @@ public class ServiceTaskIntegrationResultEventHandler {
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     public void receive(IntegrationResult integrationResult) {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
+        IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());
 
         String executionId = integrationContext.getExecutionId();
         List<Execution> executions = runtimeService.createExecutionQuery()
                                                    .executionId(executionId)
                                                    .list();
-        if (executions.size() > 0) {
-            Execution execution = executions.get(0);
+        if (integrationContextEntity != null) {
+            integrationContextService.deleteIntegrationContext(integrationContextEntity);
 
-            if(execution.getActivityId().equals(integrationContext.getClientId())) {
-                managementService.executeCommand(new TriggerIntegrationContextExecutionCmd(integrationContext));
-            } else {
-                LOGGER.warn("Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
-                             integrationContext.getClientId(),
-                             integrationResult,
-                             execution.getId());
+            if (executions.size() > 0) {
+                Execution execution = executions.get(0);
+
+
+                if (execution.getActivityId()
+                             .equals(integrationContext.getClientId())) {
+                    managementService.executeCommand(new TriggerIntegrationContextExecutionCmd(integrationContext));
+
+                    return;
+                }
+                else {
+                    LOGGER.warn("Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
+                                integrationContext.getClientId(),
+                                integrationResult,
+                                execution.getId());
+                }
             }
-        } else {
-            String message = "No task is in this RB is waiting for integration result with execution id `" +
-                executionId +
-                ", flow node id `" + integrationContext.getClientId() +
-                "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
-            LOGGER.warn(message);
+            else {
+                String message = "No task is in this RB is waiting for integration result with execution id `" +
+                    executionId +
+                    ", flow node id `" + integrationContext.getClientId() +
+                    "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
+                LOGGER.warn(message);
+            }
         }
+        managementService.executeCommand(new AggregateIntegrationResultReceivedEventCmd(integrationContext));
     }
 
     class TriggerIntegrationContextExecutionCmd extends CompositeCommand {
@@ -97,30 +109,12 @@ public class ServiceTaskIntegrationResultEventHandler {
             String executionId = integrationContext.getExecutionId();
             Map<String, Object> variables = integrationContext.getOutBoundVariables();
 
-            add(new DeleteIntegrationContextCmd(integrationContext));
+            add(new AggregateIntegrationResultReceivedEventCmd(integrationContext));
             add(new SetExecutionVariablesCmd(executionId,
                                              variables,
                                              true));
             add(new TriggerCmd(executionId,
                                null));
-            add(new AggregateIntegrationResultReceivedEventCmd(integrationContext));
-        }
-    }
-
-    class DeleteIntegrationContextCmd implements Command<Void> {
-        private final IntegrationContext integrationContext;
-
-        DeleteIntegrationContextCmd(IntegrationContext integrationContext) {
-            this.integrationContext = integrationContext;
-        }
-
-        @Override
-        public Void execute(CommandContext commandContext) {
-            IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());
-
-            integrationContextService.deleteIntegrationContext(integrationContextEntity);
-
-            return null;
         }
     }
 
