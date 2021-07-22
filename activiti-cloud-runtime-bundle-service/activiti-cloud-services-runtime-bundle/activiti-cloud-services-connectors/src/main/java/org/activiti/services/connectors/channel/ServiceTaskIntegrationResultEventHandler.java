@@ -78,7 +78,6 @@ public class ServiceTaskIntegrationResultEventHandler {
             if (executions.size() > 0) {
                 Execution execution = executions.get(0);
 
-
                 if (execution.getActivityId()
                              .equals(integrationContext.getClientId())) {
                     managementService.executeCommand(new TriggerIntegrationContextExecutionCmd(integrationContext));
