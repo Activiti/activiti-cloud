@@ -16,7 +16,6 @@
 
 package org.activiti.services.connectors.conf;
 
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
@@ -58,13 +57,11 @@ public class CloudConnectorsAutoConfiguration {
     public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        ProcessEngineChannels processEngineChannels,
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator) {
         return new ServiceTaskIntegrationResultEventHandler(runtimeService,
                                                             integrationContextService,
-                                                            processEngineChannels.auditProducer(),
                                                             runtimeBundleProperties,
                                                             managementService,
                                                             processEngineEventsAggregator);
@@ -74,13 +71,11 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
                                                                                            IntegrationContextService integrationContextService,
-                                                                                           ProcessEngineChannels processEngineChannels,
                                                                                            ManagementService managementService,
                                                                                            RuntimeBundleProperties runtimeBundleProperties,
                                                                                            ProcessEngineEventsAggregator processEngineEventsAggregator) {
         return new ServiceTaskIntegrationErrorEventHandler(runtimeService,
                                                            integrationContextService,
-                                                           processEngineChannels.auditProducer(),
                                                            managementService,
                                                            runtimeBundleProperties,
                                                            processEngineEventsAggregator);
@@ -88,14 +83,10 @@ public class CloudConnectorsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationRequestSender integrationRequestSender(RuntimeBundleProperties runtimeBundleProperties,
-                                                             ProcessEngineChannels processEngineChannels,
-                                                             BinderAwareChannelResolver resolver,
+    public IntegrationRequestSender integrationRequestSender(BinderAwareChannelResolver resolver,
                                                              RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                              IntegrationContextMessageBuilderFactory messageBuilderFactory) {
-        return new IntegrationRequestSender(runtimeBundleProperties,
-                                            processEngineChannels.auditProducer(),
-                                            resolver,
+        return new IntegrationRequestSender(resolver,
                                             runtimeBundleInfoAppender,
                                             messageBuilderFactory);
     }

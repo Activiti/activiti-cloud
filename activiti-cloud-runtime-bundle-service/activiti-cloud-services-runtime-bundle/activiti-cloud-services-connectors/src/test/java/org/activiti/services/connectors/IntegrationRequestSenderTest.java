@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -52,7 +51,6 @@ public class IntegrationRequestSenderTest {
 
     private static final String MY_PARENT_PROC_ID = "my-parent-proc-id";
     private static final String MY_PROC_DEF_KEY = "my-proc-def-key";
-    private static final String PAYMENT_CONNECTOR_TYPE = "payment";
     private static final String SERVICE_VERSION = "serviceVersion";
     private static final String SERVICE_TYPE = "serviceType";
     private static final String SPRING_APP_NAME = "springAppName";
@@ -74,9 +72,6 @@ public class IntegrationRequestSenderTest {
 
     @Mock
     private MessageChannel integrationProducer;
-
-    @Mock
-    private MessageChannel auditProducer;
 
     @Spy
     private RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties() {
@@ -105,9 +100,6 @@ public class IntegrationRequestSenderTest {
     private DelegateExecution delegateExecution;
 
     @Captor
-    private ArgumentCaptor<Message<CloudRuntimeEvent<?,?>[]>> auditMessageArgumentCaptor;
-
-    @Captor
     private ArgumentCaptor<Message<IntegrationRequest>> integrationRequestMessageCaptor;
 
     private IntegrationRequestImpl integrationRequest;
@@ -119,9 +111,7 @@ public class IntegrationRequestSenderTest {
         configureDeploymentManager();
         messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
 
-        integrationRequestSender = new IntegrationRequestSender(runtimeBundleProperties,
-                                                                auditProducer,
-                                                                resolver,
+        integrationRequestSender = new IntegrationRequestSender(resolver,
                                                                 runtimeBundleInfoAppender,
                                                                 messageBuilderFactory);
 

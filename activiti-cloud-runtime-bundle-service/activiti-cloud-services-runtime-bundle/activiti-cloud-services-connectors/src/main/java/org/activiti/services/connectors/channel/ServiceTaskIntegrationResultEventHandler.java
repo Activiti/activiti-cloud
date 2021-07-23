@@ -33,7 +33,6 @@ import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.MessageChannel;
 
 import java.util.List;
 import java.util.Map;
@@ -44,20 +43,17 @@ public class ServiceTaskIntegrationResultEventHandler {
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
-    private final MessageChannel auditProducer;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        MessageChannel auditProducer,
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
-        this.auditProducer = auditProducer;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;

@@ -60,7 +60,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.springframework.messaging.MessageChannel;
 
 import java.util.Collections;
 import java.util.List;
@@ -84,9 +83,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Mock
     private IntegrationContextService integrationContextService;
-
-    @Mock
-    private MessageChannel auditProducer;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RuntimeBundleProperties runtimeBundleProperties;

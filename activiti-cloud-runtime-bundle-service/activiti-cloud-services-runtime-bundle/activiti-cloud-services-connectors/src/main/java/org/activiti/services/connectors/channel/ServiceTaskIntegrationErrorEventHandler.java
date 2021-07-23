@@ -34,7 +34,6 @@ import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.MessageChannel;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,20 +44,17 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
-    private final MessageChannel auditProducer;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     public ServiceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
-                                                    IntegrationContextService integrationContextService,
-                                                    MessageChannel auditProducer,
-                                                    ManagementService managementService,
-                                                    RuntimeBundleProperties runtimeBundleProperties,
-                                                    ProcessEngineEventsAggregator processEngineEventsAggregator) {
+                                                   IntegrationContextService integrationContextService,
+                                                   ManagementService managementService,
+                                                   RuntimeBundleProperties runtimeBundleProperties,
+                                                   ProcessEngineEventsAggregator processEngineEventsAggregator) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
-        this.auditProducer = auditProducer;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
