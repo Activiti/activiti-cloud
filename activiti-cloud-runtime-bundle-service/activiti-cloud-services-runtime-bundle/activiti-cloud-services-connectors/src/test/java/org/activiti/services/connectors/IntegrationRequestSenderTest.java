@@ -16,10 +16,8 @@
 package org.activiti.services.connectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -28,7 +26,6 @@ import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -41,7 +38,6 @@ import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.activiti.services.test.DelegateExecutionBuilder;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -201,57 +197,4 @@ public class IntegrationRequestSenderTest {
         assertThat(integrationRequestMessage.getHeaders().get(IntegrationRequestSender.CONNECTOR_TYPE)).isEqualTo(CONNECTOR_TYPE);
     }
 
-    @Test
-    public void shouldNotSendIntegrationAuditEventWhenIntegrationAuditEventsAreDisabled() {
-        //given
-        given(eventsProperties.isIntegrationAuditEventsEnabled()).willReturn(false);
-
-        //when
-        integrationRequestSender.sendIntegrationRequest(integrationRequest);
-
-        //then
-        verify(auditProducer,
-               never()).send(any());
-    }
-
-    @Test
-    public void shouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() {
-        //given
-        given(eventsProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
-
-        //when
-        integrationRequestSender.sendAuditEvent(integrationRequest);
-
-        //then
-        verify(auditProducer).send(auditMessageArgumentCaptor.capture());
-
-        Message<CloudRuntimeEvent<?, ?>[]>  message = auditMessageArgumentCaptor.getValue();
-        assertThat(message.getPayload()[0]).isInstanceOf(CloudIntegrationRequestedEventImpl.class);
-
-        Assertions.assertThat(message.getHeaders())
-            .containsKey("routingKey")
-            .containsKey("messagePayloadType")
-            .containsEntry("parentProcessInstanceId",MY_PARENT_PROC_ID)
-            .containsEntry("processDefinitionKey", MY_PROC_DEF_KEY)
-            .containsEntry("processDefinitionVersion", PROC_DEF_VERSION)
-            .containsEntry("businessKey", BUSINESS_KEY)
-            .containsEntry("connectorType", PAYMENT_CONNECTOR_TYPE)
-            .containsEntry("integrationContextId", INTEGRATION_CONTEXT_ID)
-            .containsEntry("rootProcessInstanceId", ROOT_PROC_INST_ID)
-            .containsEntry("processInstanceId", PROC_INST_ID)
-            .containsEntry("processDefinitionId", PROC_DEF_ID)
-            .containsEntry("appName", APP_NAME)
-            .containsEntry("serviceName",SPRING_APP_NAME)
-            .containsEntry("serviceType",SERVICE_TYPE)
-            .containsEntry("serviceVersion",SERVICE_VERSION)
-            .containsEntry("serviceFullName",APP_NAME);
-
-        CloudIntegrationRequestedEventImpl integrationRequested = (CloudIntegrationRequestedEventImpl) (message.getPayload())[0];
-
-        assertThat(integrationRequested.getEntity().getId()).isEqualTo(INTEGRATION_CONTEXT_ID);
-        assertThat(integrationRequested.getEntity().getRootProcessInstanceId()).isEqualTo(ROOT_PROC_INST_ID);
-        assertThat(integrationRequested.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
-        assertThat(integrationRequested.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequested);
-    }
 }

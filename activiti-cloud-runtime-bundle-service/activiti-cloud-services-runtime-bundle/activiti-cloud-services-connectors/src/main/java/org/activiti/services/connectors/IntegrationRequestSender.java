@@ -15,9 +15,7 @@
  */
 package org.activiti.services.connectors;
 
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
@@ -26,8 +24,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-
-import java.util.stream.Stream;
 
 public class IntegrationRequestSender {
     public static final String CONNECTOR_TYPE = "connectorType";
@@ -54,22 +50,6 @@ public class IntegrationRequestSender {
     public void sendIntegrationRequest(IntegrationRequest event) {
         resolver.resolveDestination(event.getIntegrationContext()
                                          .getConnectorType()).send(buildIntegrationRequestMessage(event));
-    }
-
-    @Deprecated
-    public void sendAuditEvent(IntegrationRequest integrationRequest) {
-        if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationRequestedEventImpl integrationRequested = new CloudIntegrationRequestedEventImpl(integrationRequest.getIntegrationContext());
-            runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequested);
-
-            CloudRuntimeEvent<?,?>[] payload = Stream.of(integrationRequested)
-                                                     .toArray(CloudRuntimeEvent[]::new);
-
-            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderFactory.create(integrationRequested.getEntity())
-                                                                              .withPayload(payload)
-                                                                              .build();
-            auditProducer.send(message);
-        }
     }
 
     private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {
