@@ -104,12 +104,12 @@ public class ServiceTaskIntegrationResultEventHandler {
             String executionId = integrationContext.getExecutionId();
             Map<String, Object> variables = integrationContext.getOutBoundVariables();
 
-            add(new AggregateIntegrationResultReceivedEventCmd(integrationContext));
             add(new SetExecutionVariablesCmd(executionId,
                                              variables,
                                              true));
             add(new TriggerCmd(executionId,
                                null));
+            add(new AggregateIntegrationResultReceivedEventCmd(integrationContext));
         }
     }
 
