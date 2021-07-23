@@ -278,7 +278,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
 
         IntegrationContextEntityImpl integrationContextEntity = new IntegrationContextEntityImpl();
-        String executionId = EXECUTION_ID;
 
         List<Execution> executions = Collections.singletonList(executionEntity);
 
