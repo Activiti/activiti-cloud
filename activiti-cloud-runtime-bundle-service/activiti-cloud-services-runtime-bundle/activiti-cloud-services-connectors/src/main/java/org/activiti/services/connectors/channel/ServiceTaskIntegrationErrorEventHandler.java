@@ -114,9 +114,9 @@ public class ServiceTaskIntegrationErrorEventHandler {
         TriggerIntegrationContextErrorCmd(IntegrationError integrationError,
                                           DelegateExecution execution) {
 
+            add(new AggregateIntegrationErrorReceivedEventCmd(integrationError));
             add(new PropagateCloudBpmnErrorCmd(integrationError,
                                                execution));
-            add(new AggregateIntegrationErrorReceivedEventCmd(integrationError));
         }
     }
 

@@ -15,16 +15,41 @@
  */
 package org.activiti.cloud.api.process.model;
 
-import java.util.Date;
-
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
+
+import java.util.Date;
 
 public interface CloudBPMNActivity extends CloudRuntimeEntity,
         BPMNActivity {
 
     public static enum BPMNActivityStatus {
-        STARTED, COMPLETED, CANCELLED, ERROR
+        STARTED {
+            @Override
+            public boolean isFinalState() {
+                return false;
+            }
+        },
+        COMPLETED {
+            @Override
+            public boolean isFinalState() {
+                return true;
+            }
+        },
+        CANCELLED {
+            @Override
+            public boolean isFinalState() {
+                return true;
+            }
+        },
+        ERROR {
+            @Override
+            public boolean isFinalState() {
+                return true;
+            }
+        };
+
+        public abstract boolean isFinalState();
     }
 
     String getId();
