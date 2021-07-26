@@ -94,8 +94,8 @@ public class ServiceTaskIntegrationResultEventHandler {
                     "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
                 LOGGER.warn(message);
             }
+            managementService.executeCommand(new AggregateIntegrationResultReceivedEventCmd(integrationContext));
         }
-        managementService.executeCommand(new AggregateIntegrationResultReceivedEventCmd(integrationContext));
     }
 
     class TriggerIntegrationContextExecutionCmd extends CompositeCommand {

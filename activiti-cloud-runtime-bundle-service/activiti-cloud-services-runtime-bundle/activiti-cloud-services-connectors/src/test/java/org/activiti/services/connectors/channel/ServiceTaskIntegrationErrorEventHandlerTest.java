@@ -46,6 +46,7 @@ import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -102,6 +103,9 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
     @Captor
     private ArgumentCaptor<CloudRuntimeEvent<?, ?>> messageCaptor;
+
+    @Captor
+    private ArgumentCaptor<CommandContextCloseListener> listenerArgumentCaptor;
 
     @Mock
     private ExecutionQuery executionQuery;
@@ -192,8 +196,12 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
         //when
         handler.receive(integrationErrorEvent);
-
         //then
+
+        verify(commandContext).addCloseListener(listenerArgumentCaptor.capture());
+        CommandContextCloseListener listener = listenerArgumentCaptor.getValue();
+        listener.closing(commandContext);
+
         verify(processEngineEventsAggregator).add(messageCaptor.capture());
         CloudIntegrationErrorReceivedEventImpl event = (CloudIntegrationErrorReceivedEventImpl) messageCaptor.getValue();
         assertThat(event.getEntity().getId()).isEqualTo(ENTITY_ID);
