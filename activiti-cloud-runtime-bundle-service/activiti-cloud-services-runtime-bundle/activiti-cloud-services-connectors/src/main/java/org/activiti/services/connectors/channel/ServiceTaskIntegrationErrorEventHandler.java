@@ -27,7 +27,6 @@ import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.helper.ErrorPropagation;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -146,7 +145,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
     }
 
-    class AggregateIntegrationErrorReceivedClosingEventCmd implements Command<Void> {
+    class AggregateIntegrationErrorReceivedClosingEventCmd extends CommandContextCloseListenerAdapter implements Command<Void>{
         private final AggregateIntegrationErrorReceivedEventCmd delegate;
 
         AggregateIntegrationErrorReceivedClosingEventCmd(IntegrationError integrationError) {
@@ -155,30 +154,13 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
         @Override
         public Void execute(CommandContext commandContext) {
-            commandContext.addCloseListener(new CommandContextCloseListener() {
-
-                @Override
-                public void closing(CommandContext commandContext) {
-                    delegate.execute(commandContext);
-                }
-
-                @Override
-                public void afterSessionsFlush(CommandContext commandContext) {
-                    // noop
-                }
-
-                @Override
-                public void closed(CommandContext commandContext) {
-                    // noop
-                }
-
-                @Override
-                public void closeFailure(CommandContext commandContext) {
-                    // noop
-                }
-            });
+            commandContext.addCloseListener(this);
 
             return null;
+        }
+        @Override
+        public void closing(CommandContext commandContext) {
+            delegate.execute(commandContext);
         }
     }
 
