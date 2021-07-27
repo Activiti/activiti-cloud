@@ -36,6 +36,7 @@ import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEvent
 import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
 import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionCancelledEventMessageProducer;
 import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.activiti.engine.RuntimeService;
 import org.junit.jupiter.api.BeforeAll;
@@ -48,8 +49,8 @@ import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,32 +69,21 @@ import static org.mockito.Mockito.verify;
     })
 @DirtiesContext
 @Testcontainers
-public class MessageEventsIT {
+@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class})
+class MessageEventsIT {
 
     @Container
     private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:10");
 
-    @Container
-    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
-
     private static final String BOUNDARY_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1 = "BoundarySubprocessThrowCatchMessageIT_Process1";
-
     private static final String EVENT_SUBPROCESS_NON_INTERRUPTING_THROW_CATCH_MESSAGE_IT_PROCESS1 = "EventSubprocessNonInterruptingThrowCatchMessageIT_Process1";
-
     private static final String EVENT_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1 = "EventSubprocessThrowCatchMessageIT_Process1";
-
     private static final String BOUNDARY_THROW_CATCH_MESSAGE_IT_PROCESS1 = "BoundaryThrowCatchMessageIT_Process1";
-
     private static final String THROW_CATCH_MESSAGE_IT_PROCESS1 = "ThrowCatchMessageIT_Process1";
-
     private static final String CORRELATION_ID = "correlationId";
-
     private static final String CORRELATION_KEY = "correlationKey";
-
     private static final String BUSINESS_KEY = "businessKey";
-
     private static final String INTERMEDIATE_CATCH_MESSAGE_PROCESS = "IntermediateCatchMessageProcess";
-
     private static final String INTERMEDIATE_THROW_MESSAGE_PROCESS = "IntermediateThrowMessageProcess";
 
     @SpringBootApplication
@@ -107,8 +97,6 @@ public class MessageEventsIT {
         System.setProperty("spring.datasource.url", postgresContainer.getJdbcUrl());
         System.setProperty("spring.datasource.username", postgresContainer.getUsername());
         System.setProperty("spring.datasource.password", postgresContainer.getPassword());
-        System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
-        System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
     }
 
     @Autowired
@@ -124,7 +112,7 @@ public class MessageEventsIT {
     private BpmnMessageWaitingEventMessageProducer bpmnMessageWaitingEventMessageProducer;
 
     @SpyBean
-    private StartMessageCmdExecutor startMessageСmdExecutor;
+    private StartMessageCmdExecutor startMessageCmdExecutor;
 
     @SpyBean
     private ReceiveMessageCmdExecutor receiveMessageCmdExecutor;
@@ -200,7 +188,7 @@ public class MessageEventsIT {
             verify(bpmnMessageReceivedEventMessageProducer, times(1)).onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(1)).execute(any());
-            verify(startMessageСmdExecutor, never()).execute(any());
+            verify(startMessageCmdExecutor, never()).execute(any());
         });
     }
 
@@ -218,7 +206,7 @@ public class MessageEventsIT {
         //then
         await().untilAsserted(() -> {
             verify(bpmnMessageSentEventMessageProducer, times(3)).onEvent(any());
-            verify(startMessageСmdExecutor, times(2)).execute(any());
+            verify(startMessageCmdExecutor, times(2)).execute(any());
             verify(bpmnMessageWaitingEventMessageProducer, times(1)).onEvent(any());
             verify(receiveMessageCmdExecutor, times(1)).execute(any());
             verify(bpmnMessageReceivedEventMessageProducer, times(3)).onEvent(any());
@@ -243,7 +231,7 @@ public class MessageEventsIT {
             verify(bpmnMessageReceivedEventMessageProducer, times(3)).onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(1)).execute(any());
-            verify(startMessageСmdExecutor, times(2)).execute(any());
+            verify(startMessageCmdExecutor, times(2)).execute(any());
         });
     }
 
@@ -269,7 +257,7 @@ public class MessageEventsIT {
                 .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(processInstances)).execute(any());
-            verify(startMessageСmdExecutor, times(2 * processInstances)).execute(any());
+            verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
         });
     }
 
@@ -294,7 +282,7 @@ public class MessageEventsIT {
                 .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(processInstances)).execute(any());
-            verify(startMessageСmdExecutor, times(2 * processInstances)).execute(any());
+            verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
         });
     }
 
@@ -319,7 +307,7 @@ public class MessageEventsIT {
                 .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(processInstances)).execute(any());
-            verify(startMessageСmdExecutor, times(2 * processInstances)).execute(any());
+            verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
         });
 
     }
@@ -346,7 +334,7 @@ public class MessageEventsIT {
                 .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(2 * processInstances)).execute(any());
-            verify(startMessageСmdExecutor, times(2 * processInstances)).execute(any());
+            verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
         });
 
     }
@@ -374,7 +362,7 @@ public class MessageEventsIT {
                 .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(2 * processInstances)).execute(any());
-            verify(startMessageСmdExecutor, times(2 * processInstances)).execute(any());
+            verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
         });
     }
 
@@ -405,7 +393,7 @@ public class MessageEventsIT {
             verify(bpmnMessageReceivedEventMessageProducer, times(processInstances)).onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(processInstances)).execute(any());
-            verify(startMessageСmdExecutor, never()).execute(any());
+            verify(startMessageCmdExecutor, never()).execute(any());
         });
     }
 
@@ -436,7 +424,7 @@ public class MessageEventsIT {
             verify(bpmnMessageReceivedEventMessageProducer, times(processInstances)).onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(processInstances)).execute(any());
-            verify(startMessageСmdExecutor, never()).execute(any());
+            verify(startMessageCmdExecutor, never()).execute(any());
         });
     }
 
