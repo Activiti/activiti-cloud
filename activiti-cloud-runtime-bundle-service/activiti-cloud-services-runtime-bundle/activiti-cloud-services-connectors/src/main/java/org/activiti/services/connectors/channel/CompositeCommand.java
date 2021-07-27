@@ -21,7 +21,7 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 
 import java.util.ArrayList;
 
-public class CompositeCommand extends ArrayList<Command<?>> implements Command<Void> {
+class CompositeCommand extends ArrayList<Command<?>> implements Command<Void> {
 
     @Override
     public Void execute(CommandContext commandContext) {
