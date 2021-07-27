@@ -23,7 +23,7 @@ import org.testcontainers.containers.RabbitMQContainer;
 public class RabbitMQContainerApplicationInitializer implements
         ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.7.25-management-alpine")
+    private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.8.9-management-alpine")
             .withReuse(true);
 
     @Override
