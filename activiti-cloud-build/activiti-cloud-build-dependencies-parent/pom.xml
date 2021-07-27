@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud</groupId>
@@ -17,6 +17,27 @@
   </properties>
   <dependencyManagement>
     <dependencies>
+      <!-- 26/07/2021
+  After upgrading spring-boot from 2.5.2 to 2.5.3, the
+  build started failing because it was not anymore able
+  to create the ApplicationContext.
+  The error reported was:
+
+Caused by: org.springframework.context.ApplicationContextException: Failed to start bean 'inputBindingLifecycle'; nested exception is java.lang.NoSuchMethodError: org.springframework.integration.amqp.inbound.AmqpInboundChannelAdapter.<init>(Lorg/springframework/amqp/rabbit/listener/AbstractMessageListenerContainer;)V
+at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:181)
+
+  The issue seems to be caused by this change in spring-integration-amqp:
+
+  https://github.com/spring-projects/spring-integration/commit/76f77ccd2c5f94e000495357e66c4f99fffc6010
+
+  Since the issue happens only due to the dependencies imported for testing it has been fixed rolling
+  back the library spring-integration-amqp the the previous version (5.5.1)
+      -->
+      <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-amqp</artifactId>
+        <version>5.5.1</version>
+      </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-bom</artifactId>
@@ -38,6 +59,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
     </dependencies>
   </dependencyManagement>
 </project>
