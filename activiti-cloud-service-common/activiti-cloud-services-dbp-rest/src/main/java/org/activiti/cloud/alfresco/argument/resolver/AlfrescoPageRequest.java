@@ -49,14 +49,11 @@ public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable
 
     @Override
     public int getPageNumber() {
-        int pageNumber;
         if (skipCount % getPageSize() == 0) {
-            pageNumber = Math.toIntExact(skipCount / getPageSize());
+            return Math.toIntExact(skipCount / getPageSize());
         } else {
-            pageNumber = Math.toIntExact(skipCount / getPageSize()) + 1;
+            return Math.toIntExact(skipCount / getPageSize()) + 1;
         }
-
-        return pageNumber;
     }
 
     @Override
