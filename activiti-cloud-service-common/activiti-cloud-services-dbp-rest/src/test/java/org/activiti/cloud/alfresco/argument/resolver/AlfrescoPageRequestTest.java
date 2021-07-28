@@ -16,10 +16,12 @@
 package org.activiti.cloud.alfresco.argument.resolver;
 
 import static org.activiti.test.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 class AlfrescoPageRequestTest {
@@ -150,14 +152,37 @@ class AlfrescoPageRequestTest {
     void getSortShouldReuseBasePageableSort() {
         //given
         Sort sort = mock(Sort.class);
-
         PageRequest basePage = PageRequest.of(0, 10, sort);
-
         AlfrescoPageRequest alfrescoPageRequest =
             new AlfrescoPageRequest(0, 10, basePage);
 
         //then
         assertThat(alfrescoPageRequest).hasSort(sort);
+    }
+
+    @Test
+    void withPage_ReturnsAPageWithMaxItemTimesPageNumber() {
+        //given
+        AlfrescoPageRequest alfrescoPageRequest =
+            new AlfrescoPageRequest(4, 10, null);
+
+        //then
+        Pageable actual = alfrescoPageRequest.withPage(4);
+
+        assertThat(actual).hasOffset(40).hasPageSize(10);
+    }
+
+    @Test
+    void withPage_WithNegativePageNumberThrowsException() {
+        //given
+        AlfrescoPageRequest alfrescoPageRequest =
+            new AlfrescoPageRequest(4, 10, null);
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+            () -> alfrescoPageRequest.withPage(-4));
+
+
     }
 
 }
