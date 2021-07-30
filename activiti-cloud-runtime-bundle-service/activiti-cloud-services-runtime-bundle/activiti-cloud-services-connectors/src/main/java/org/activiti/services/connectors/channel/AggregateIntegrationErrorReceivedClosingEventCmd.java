@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2010-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,26 @@
 
 package org.activiti.services.connectors.channel;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 
-class CompositeCommand implements Command<Void> {
+class AggregateIntegrationErrorReceivedClosingEventCmd extends CommandContextCloseListenerAdapter implements Command<Void> {
 
-    static CompositeCommand of(Command<?>... commands) {
-        return  new CompositeCommand(Arrays.asList(commands));
-    }
+    private final AggregateIntegrationErrorReceivedEventCmd aggregateIntegrationErrorReceivedEventCmd;
 
-    private List<Command<?>> commands;
-
-    private CompositeCommand(List<Command<?>> commands) {
-        this.commands = commands;
+    AggregateIntegrationErrorReceivedClosingEventCmd(AggregateIntegrationErrorReceivedEventCmd aggregateIntegrationErrorReceivedEventCmd) {
+        this.aggregateIntegrationErrorReceivedEventCmd = aggregateIntegrationErrorReceivedEventCmd;
     }
 
     @Override
     public Void execute(CommandContext commandContext) {
-        commands.forEach(command -> command.execute(commandContext));
+        commandContext.addCloseListener(this);
+
         return null;
     }
 
-    public List<Command<?>> getCommands() {
-        return Collections.unmodifiableList(commands);
+    @Override
+    public void closing(CommandContext commandContext) {
+        aggregateIntegrationErrorReceivedEventCmd.execute(commandContext);
     }
 }

@@ -13,29 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.services.connectors.channel;
 
-
+import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
 import org.activiti.engine.impl.cmd.TriggerCmd;
-import org.activiti.engine.impl.interceptor.Command;
-import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
-
-import java.util.List;
-import java.util.Map;
 
 public class ServiceTaskIntegrationResultEventHandler {
 
@@ -76,59 +71,35 @@ public class ServiceTaskIntegrationResultEventHandler {
 
                 if (execution.getActivityId()
                              .equals(integrationContext.getClientId())) {
-                    managementService.executeCommand(new TriggerIntegrationContextExecutionCmd(integrationContext));
-
+                    triggerIntegrationContextExecution(integrationContext);
                     return;
-                }
-                else {
+                } else {
                     LOGGER.warn("Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
                                 integrationContext.getClientId(),
                                 integrationResult,
                                 execution.getId());
                 }
-            }
-            else {
+            } else {
                 String message = "No task is in this RB is waiting for integration result with execution id `" +
                     executionId +
                     ", flow node id `" + integrationContext.getClientId() +
                     "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
                 LOGGER.warn(message);
             }
-            managementService.executeCommand(new AggregateIntegrationResultReceivedEventCmd(integrationContext));
+            managementService.executeCommand(new AggregateIntegrationResultReceivedEventCmd(
+                integrationContext, runtimeBundleProperties, processEngineEventsAggregator));
         }
     }
 
-    class TriggerIntegrationContextExecutionCmd extends CompositeCommand {
-
-        TriggerIntegrationContextExecutionCmd(IntegrationContext integrationContext) {
-            String executionId = integrationContext.getExecutionId();
-            Map<String, Object> variables = integrationContext.getOutBoundVariables();
-
-            add(new SetExecutionVariablesCmd(executionId,
-                                             variables,
-                                             true));
-            add(new TriggerCmd(executionId,
-                               null));
-            add(new AggregateIntegrationResultReceivedEventCmd(integrationContext));
-        }
+    private void triggerIntegrationContextExecution(IntegrationContext integrationContext) {
+        managementService.executeCommand(
+            CompositeCommand.of(
+                new SetExecutionVariablesCmd(integrationContext.getExecutionId(),
+                    integrationContext.getOutBoundVariables(), true),
+                new TriggerCmd(integrationContext.getExecutionId(), null),
+                new AggregateIntegrationResultReceivedEventCmd(integrationContext,
+                    runtimeBundleProperties, processEngineEventsAggregator)
+            ));
     }
 
-    class AggregateIntegrationResultReceivedEventCmd implements Command<Void> {
-        private final IntegrationContext integrationContext;
-
-        AggregateIntegrationResultReceivedEventCmd(IntegrationContext integrationContext) {
-            this.integrationContext = integrationContext;
-        }
-
-        @Override
-        public Void execute(CommandContext commandContext) {
-            if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-                CloudIntegrationResultReceivedEventImpl integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(integrationContext);
-
-                processEngineEventsAggregator.add(integrationResultReceived);
-            }
-
-            return null;
-        }
-    }
 }
