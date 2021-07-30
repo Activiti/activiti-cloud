@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
-public class RuntimeBundleSwaggerITSupport {
+class RuntimeBundleSwaggerITSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,7 +51,7 @@ public class RuntimeBundleSwaggerITSupport {
      * This is not a test. It's actually generating the swagger.json and yaml definition of the service. It is used by maven generate-swagger profile build.
      */
     @Test
-    public void generateSwagger() throws Exception {
+    void generateSwagger() throws Exception {
         mockMvc.perform(get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
             .andDo((result) -> {
                 JsonNode jsonNodeTree = objectMapper
