@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.messages.integration.tests;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.StartMessageDeploymentDefinition;
@@ -53,6 +49,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,11 +64,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {
-        "spring.datasource.platform=postgresql",
-        "spring.application.name=messages-app",
-        "spring.jmx.enabled=false",
-    })
+        properties = {
+                "spring.datasource.platform=postgresql",
+                "spring.application.name=messages-app",
+                "spring.jmx.enabled=false",
+        })
 @DirtiesContext
 @Testcontainers
 @ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class})
@@ -85,19 +87,6 @@ class MessageEventsIT {
     private static final String BUSINESS_KEY = "businessKey";
     private static final String INTERMEDIATE_CATCH_MESSAGE_PROCESS = "IntermediateCatchMessageProcess";
     private static final String INTERMEDIATE_THROW_MESSAGE_PROCESS = "IntermediateThrowMessageProcess";
-
-    @SpringBootApplication
-    @ActivitiRuntimeBundle
-    static class Application {
-
-    }
-
-    @BeforeAll
-    public static void beforeAll() {
-        System.setProperty("spring.datasource.url", postgresContainer.getJdbcUrl());
-        System.setProperty("spring.datasource.username", postgresContainer.getUsername());
-        System.setProperty("spring.datasource.password", postgresContainer.getPassword());
-    }
 
     @Autowired
     private RuntimeService runtimeService;
@@ -129,54 +118,68 @@ class MessageEventsIT {
     @Autowired
     private MessageGroupStore messageGroupStore;
 
+    @SuppressWarnings("unused")
+    @SpringBootApplication
+    @ActivitiRuntimeBundle
+    static class Application {
+        /* no op */
+    }
+
+    @BeforeAll
+    public static void beforeAll() {
+        System.setProperty("spring.datasource.url", postgresContainer.getJdbcUrl());
+        System.setProperty("spring.datasource.username", postgresContainer.getUsername());
+        System.setProperty("spring.datasource.password", postgresContainer.getPassword());
+    }
+
     @Test
-    public void shouldProduceStartMessageDeployedEvents() {
+    void shouldProduceStartMessageDeployedEvents() {
         // given
         String expectedStartEventNames[] = {
-            "EventSubprocessThrowEndMessage",
-            "EventSubprocessStartProcess3",
-            "BoundaryThrowEndMessage",
-            "BoundaryThrowIntermediateMessage",
-            "EventSubprocessNonInterruptingThrowEndMessage",
-            "EventSubprocessStartProcessNonInterrupting3",
-            "ThrowEndMessage",
-            "ThrowIntermediateMessage",
-            "BoundarySubprocessThrowEndMessage",
-            "SartBoundarySubprocessThrowIntermediateMessage"
+                "EventSubprocessThrowEndMessage",
+                "EventSubprocessStartProcess3",
+                "BoundaryThrowEndMessage",
+                "BoundaryThrowIntermediateMessage",
+                "EventSubprocessNonInterruptingThrowEndMessage",
+                "EventSubprocessStartProcessNonInterrupting3",
+                "ThrowEndMessage",
+                "ThrowIntermediateMessage",
+                "BoundarySubprocessThrowEndMessage",
+                "SartBoundarySubprocessThrowIntermediateMessage"
         };
 
         // when
         ArgumentCaptor<StartMessageDeployedEvent> argumentCaptor = ArgumentCaptor
-            .forClass(StartMessageDeployedEvent.class);
+                .forClass(StartMessageDeployedEvent.class);
 
         // then
         verify(startMessageDeployedEventMessageProducer, atLeast(expectedStartEventNames.length))
-            .onEvent(argumentCaptor.capture());
+                .onEvent(argumentCaptor.capture());
 
         assertThat(argumentCaptor.getAllValues()).extracting(StartMessageDeployedEvent::getEntity)
-            .extracting(StartMessageDeploymentDefinition::getMessageSubscription)
-            .extracting(StartMessageSubscription::getEventName)
-            .contains(expectedStartEventNames);
+                .extracting(StartMessageDeploymentDefinition::getMessageSubscription)
+                .extracting(StartMessageSubscription::getEventName)
+                .contains(expectedStartEventNames);
 
         Stream.of(expectedStartEventNames)
-            .forEach(messageName -> {
-                String groupId = "messages-app:" + messageName;
-                assertThat(messageGroupStore.getMessagesForGroup(groupId)).hasSize(1);
-            });
+                .forEach(messageName -> {
+                    String groupId = "messages-app:" + messageName;
+                    assertThat(messageGroupStore.getMessagesForGroup(groupId)).hasSize(1);
+                });
     }
 
     @Test
-    public void shouldThrowCatchBpmnMessage() {
+    void shouldThrowCatchBpmnMessage() {
         //given
         StartProcessPayload throwProcessPayload = ProcessPayloadBuilder.start()
-            .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
-            .withBusinessKey(BUSINESS_KEY)
-            .build();
+                .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
+                .withBusinessKey(BUSINESS_KEY)
+                .build();
 
         StartProcessPayload catchProcessPayload = ProcessPayloadBuilder.start()
-            .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-            .withBusinessKey(BUSINESS_KEY)
-            .build();
+                .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                .withBusinessKey(BUSINESS_KEY)
+                .build();
         //when
         commandEndpoint.execute(throwProcessPayload);
         commandEndpoint.execute(catchProcessPayload);
@@ -193,13 +196,13 @@ class MessageEventsIT {
     }
 
     @Test
-    public void shouldCompleteComplexBpmnMessageEventProcessWithIntermediateCatchEvent() {
+    void shouldCompleteComplexBpmnMessageEventProcessWithIntermediateCatchEvent() {
         //given
         StartProcessPayload throwProcessPayload = ProcessPayloadBuilder.start()
-            .withProcessDefinitionKey(THROW_CATCH_MESSAGE_IT_PROCESS1)
-            .withBusinessKey(BUSINESS_KEY)
-            .withVariable(CORRELATION_KEY, CORRELATION_ID)
-            .build();
+                .withProcessDefinitionKey(THROW_CATCH_MESSAGE_IT_PROCESS1)
+                .withBusinessKey(BUSINESS_KEY)
+                .withVariable(CORRELATION_KEY, CORRELATION_ID)
+                .build();
         //when
         commandEndpoint.execute(throwProcessPayload);
 
@@ -215,12 +218,12 @@ class MessageEventsIT {
     }
 
     @Test
-    public void shouldCompleteComplexBpmnMessageEventProcessWithBoundaryCatchEvent() {
+    void shouldCompleteComplexBpmnMessageEventProcessWithBoundaryCatchEvent() {
         //given
         StartProcessPayload throwProcessPayload = ProcessPayloadBuilder.start()
-            .withProcessDefinitionKey(BOUNDARY_THROW_CATCH_MESSAGE_IT_PROCESS1)
-            .withBusinessKey(BUSINESS_KEY)
-            .build();
+                .withProcessDefinitionKey(BOUNDARY_THROW_CATCH_MESSAGE_IT_PROCESS1)
+                .withBusinessKey(BUSINESS_KEY)
+                .build();
         //when
         commandEndpoint.execute(throwProcessPayload);
 
@@ -237,24 +240,24 @@ class MessageEventsIT {
 
 
     @Test
-    public void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithIntermediateCatchEvent() {
+    void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithIntermediateCatchEvent() {
         // given
         int processInstances = 10;
 
         //when
         IntStream.rangeClosed(1, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(THROW_CATCH_MESSAGE_IT_PROCESS1)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(THROW_CATCH_MESSAGE_IT_PROCESS1)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .forEach(commandEndpoint::execute);
 
         // then
         await().untilAsserted(() -> {
             verify(bpmnMessageSentEventMessageProducer, times(3 * processInstances)).onEvent(any());
             verify(bpmnMessageWaitingEventMessageProducer, times(processInstances)).onEvent(any());
             verify(bpmnMessageReceivedEventMessageProducer, times(3 * processInstances))
-                .onEvent(any());
+                    .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(processInstances)).execute(any());
             verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
@@ -262,24 +265,24 @@ class MessageEventsIT {
     }
 
     @Test
-    public void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithBoundaryTaskMessageCatchEvent() {
+    void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithBoundaryTaskMessageCatchEvent() {
         // given
         int processInstances = 10;
 
         //when
         IntStream.rangeClosed(1, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(BOUNDARY_THROW_CATCH_MESSAGE_IT_PROCESS1)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(BOUNDARY_THROW_CATCH_MESSAGE_IT_PROCESS1)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .forEach(commandEndpoint::execute);
 
         // then
         await().untilAsserted(() -> {
             verify(bpmnMessageSentEventMessageProducer, times(3 * processInstances)).onEvent(any());
             verify(bpmnMessageWaitingEventMessageProducer, times(processInstances)).onEvent(any());
             verify(bpmnMessageReceivedEventMessageProducer, times(3 * processInstances))
-                .onEvent(any());
+                    .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(processInstances)).execute(any());
             verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
@@ -287,24 +290,24 @@ class MessageEventsIT {
     }
 
     @Test
-    public void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithBoundarySubprocessMessageCatchEvent() {
+    void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithBoundarySubprocessMessageCatchEvent() {
         // given
         int processInstances = 10;
 
         //when
         IntStream.rangeClosed(1, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(BOUNDARY_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(BOUNDARY_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .forEach(commandEndpoint::execute);
 
         // then
         await().untilAsserted(() -> {
             verify(bpmnMessageSentEventMessageProducer, times(3 * processInstances)).onEvent(any());
             verify(bpmnMessageWaitingEventMessageProducer, times(processInstances)).onEvent(any());
             verify(bpmnMessageReceivedEventMessageProducer, times(3 * processInstances))
-                .onEvent(any());
+                    .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(processInstances)).execute(any());
             verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
@@ -313,25 +316,25 @@ class MessageEventsIT {
     }
 
     @Test
-    public void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithStartEventSubprocessEvent() {
+    void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithStartEventSubprocessEvent() {
         // given
         int processInstances = 10;
 
         //when
         IntStream.rangeClosed(1, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(EVENT_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(EVENT_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .forEach(commandEndpoint::execute);
 
         // then
         await().untilAsserted(() -> {
             verify(bpmnMessageSentEventMessageProducer, times(4 * processInstances)).onEvent(any());
             verify(bpmnMessageWaitingEventMessageProducer, times(2 * processInstances))
-                .onEvent(any());
+                    .onEvent(any());
             verify(bpmnMessageReceivedEventMessageProducer, times(4 * processInstances))
-                .onEvent(any());
+                    .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(2 * processInstances)).execute(any());
             verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
@@ -340,26 +343,26 @@ class MessageEventsIT {
     }
 
     @Test
-    public void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithStartEventSubprocessNonInterruptingEvent() {
+    void shouldCompleteComplexBpmnMessageEventMultipleProcessesWithStartEventSubprocessNonInterruptingEvent() {
         // given
         int processInstances = 10;
 
         //when
         IntStream.rangeClosed(1, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(
-                    EVENT_SUBPROCESS_NON_INTERRUPTING_THROW_CATCH_MESSAGE_IT_PROCESS1)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(
+                                EVENT_SUBPROCESS_NON_INTERRUPTING_THROW_CATCH_MESSAGE_IT_PROCESS1)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .forEach(commandEndpoint::execute);
 
         // then
         await().untilAsserted(() -> {
             verify(bpmnMessageSentEventMessageProducer, times(4 * processInstances)).onEvent(any());
             verify(bpmnMessageWaitingEventMessageProducer, times(2 * processInstances))
-                .onEvent(any());
+                    .onEvent(any());
             verify(bpmnMessageReceivedEventMessageProducer, times(4 * processInstances))
-                .onEvent(any());
+                    .onEvent(any());
 
             verify(receiveMessageCmdExecutor, times(2 * processInstances)).execute(any());
             verify(startMessageCmdExecutor, times(2 * processInstances)).execute(any());
@@ -367,24 +370,24 @@ class MessageEventsIT {
     }
 
     @Test
-    public void shouldThrowCatchBpmnMessages() {
+    void shouldThrowCatchBpmnMessages() {
         // given
         int processInstances = 10;
 
         // when
         IntStream.rangeClosed(1, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .forEach(commandEndpoint::execute);
 
         IntStream.rangeClosed(1, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .forEach(commandEndpoint::execute);
 
         // then
         await().untilAsserted(() -> {
@@ -398,24 +401,24 @@ class MessageEventsIT {
     }
 
     @Test
-    public void shouldCatchThrowBpmnMessages() {
+    void shouldCatchThrowBpmnMessages() {
         // given
         int processInstances = 10;
 
         // when
         IntStream.rangeClosed(1, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .forEach(commandEndpoint::execute);
 
         IntStream.rangeClosed(1, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .forEach(commandEndpoint::execute);
 
         // then
         await().untilAsserted(() -> {
@@ -429,48 +432,48 @@ class MessageEventsIT {
     }
 
     @Test
-    public void shouldCancelWaitingMessageSubscription() {
+    void shouldCancelWaitingMessageSubscription() {
         // given
         int processInstances = 10;
         List<ProcessInstance> instances = new ArrayList<>();
 
         // when
         IntStream.range(0, processInstances)
-            .mapToObj(i -> ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-                .withBusinessKey(BUSINESS_KEY + i)
-                .build())
-            .<ProcessInstanceResult>map(commandEndpoint::execute)
-            .map(ProcessInstanceResult::getEntity)
-            .forEach(instances::add);
+                .mapToObj(i -> ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                        .withBusinessKey(BUSINESS_KEY + i)
+                        .build())
+                .<ProcessInstanceResult>map(commandEndpoint::execute)
+                .map(ProcessInstanceResult::getEntity)
+                .forEach(instances::add);
 
         // then
         assertThat(runtimeService.createProcessInstanceQuery()
-            .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-            .list()).hasSize(processInstances);
+                .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                .list()).hasSize(processInstances);
 
         verify(bpmnMessageWaitingEventMessageProducer,
-            times(processInstances)).onEvent(any());
+                times(processInstances)).onEvent(any());
 
         // when
         IntStream.range(0, processInstances)
-            .mapToObj(i -> instances.get(i))
-            .map(it -> new DeleteProcessPayload(it.getId(), "cancelled"))
-            .forEach(commandEndpoint::execute);
+                .mapToObj(i -> instances.get(i))
+                .map(it -> new DeleteProcessPayload(it.getId(), "cancelled"))
+                .forEach(commandEndpoint::execute);
 
         // then
         assertThat(runtimeService.createProcessInstanceQuery()
-            .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-            .list()).isEmpty();
+                .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                .list()).isEmpty();
 
         verify(messageSubscriptionCancelledEventMessageProducer,
-            times(processInstances)).onEvent(any());
+                times(processInstances)).onEvent(any());
 
         IntStream.range(0, processInstances)
-            .mapToObj(i -> BUSINESS_KEY + i)
-            .map("messages-app:BpmnMessage:"::concat)
-            .forEach(
-                groupId -> assertThat(messageGroupStore.getMessagesForGroup(groupId)).isEmpty());
+                .mapToObj(i -> BUSINESS_KEY + i)
+                .map("messages-app:BpmnMessage:"::concat)
+                .forEach(
+                        groupId -> assertThat(messageGroupStore.getMessagesForGroup(groupId)).isEmpty());
 
     }
 }

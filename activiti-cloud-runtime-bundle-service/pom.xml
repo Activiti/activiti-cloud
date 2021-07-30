@@ -8,13 +8,11 @@
     <version>7.1.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
-  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud Runtime Bundle Service :: Parent</name>
   <modules>
-
     <module>activiti-cloud-runtime-bundle-dependencies</module>
     <module>activiti-cloud-services-runtime-bundle</module>
     <module>activiti-cloud-starter-runtime-bundle</module>
