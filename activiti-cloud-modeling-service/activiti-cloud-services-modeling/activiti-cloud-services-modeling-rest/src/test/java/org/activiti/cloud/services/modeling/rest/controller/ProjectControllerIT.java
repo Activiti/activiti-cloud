@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
@@ -910,8 +911,34 @@ public class ProjectControllerIT {
         String projectName = "existing-project";
 
         mockMvc.perform(
-            post("/v1/projects/{projectId}/copy?name=" + projectName,
-                project.getId()))
-            .andExpect(status().isConflict());
+                post("/v1/projects/{projectId}/copy?name=" + projectName,
+                        project.getId()))
+                .andExpect(status().isConflict());
     }
+    
+    @Test
+    public void should_ValidateCorrectly_when_importingProjectWithUnusedConnector() throws Exception {
+
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                "unused-connector.zip",
+                "project/zip",
+                resourceAsByteArray("project/unused-connector.zip"));
+
+        MvcResult response = mockMvc.perform(multipart("/v1/projects/import")
+                .file(zipFile)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.entry.name",
+                        is("unused-connector")))
+                .andReturn();
+
+        String projectId = JsonPath.parse(response.getResponse().getContentAsString()).read("$.entry.id");
+
+        mockMvc.perform(
+                get("/v1/projects/{projectId}/validate",
+                        projectId))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
 }
