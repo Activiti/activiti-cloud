@@ -25,13 +25,6 @@ import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessE
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.BPMNError;
@@ -68,6 +61,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @ActiveProfiles(ConnectorAuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -78,7 +77,9 @@ public class ConnectorAuditProducerIT {
 
     private static final String ROUTING_KEY_HEADER = "routingKey";
     private static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
-    public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS)
+    private static final String[] EXECUTION_CONTEXT_HEADERS = {"rootProcessInstanceId", "rootProcessDefinitionId", "rootProcessDefinitionKey", "rootProcessDefinitionVersion", "deploymentId", "deploymentName", "deploymentVersion"};
+
+    public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS, EXECUTION_CONTEXT_HEADERS)
         .flatMap(Stream::of)
         .toArray(String[]::new);
 
@@ -270,6 +271,8 @@ public class ConnectorAuditProducerIT {
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
 
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+
                 List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = receivedEvents.stream()
                     .filter(event -> event.getEventType() == INTEGRATION_ERROR_RECEIVED &&
                         ((IntegrationContext) event.getEntity()).getClientId()
@@ -321,6 +324,8 @@ public class ConnectorAuditProducerIT {
         await()
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
+
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
                 List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
                     INTEGRATION_ERROR_RECEIVED);
@@ -380,6 +385,8 @@ public class ConnectorAuditProducerIT {
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
 
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+
                 List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
                     INTEGRATION_RESULT_RECEIVED);
                 assertThat(receivedIntegrationResultEvents)
@@ -427,6 +434,8 @@ public class ConnectorAuditProducerIT {
         await()
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
+
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
                 List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
                     INTEGRATION_ERROR_RECEIVED);
@@ -502,6 +511,8 @@ public class ConnectorAuditProducerIT {
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
 
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+
                 List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
                     INTEGRATION_ERROR_RECEIVED);
                 assertThat(receivedIntegrationResultEvents)
@@ -556,6 +567,8 @@ public class ConnectorAuditProducerIT {
         await()
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
+
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
                 List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
                     INTEGRATION_RESULT_RECEIVED);
@@ -621,6 +634,8 @@ public class ConnectorAuditProducerIT {
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
 
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+
                 List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
                     INTEGRATION_ERROR_RECEIVED);
                 assertThat(receivedIntegrationResultEvents)
@@ -654,6 +669,8 @@ public class ConnectorAuditProducerIT {
         await()
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
+
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
                 assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
                     RuntimeEvent::getProcessInstanceId)

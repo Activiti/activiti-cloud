@@ -15,11 +15,23 @@
  */
 package org.activiti.services.connectors.behavior;
 
+import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
+import static org.activiti.test.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
@@ -27,20 +39,12 @@ import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
-
-import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
-import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class MQServiceTaskBehaviorTest {
 
@@ -57,7 +61,7 @@ public class MQServiceTaskBehaviorTest {
     @Mock
     private IntegrationContextManager integrationContextManager;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RuntimeBundleProperties runtimeBundleProperties;
 
     @Mock
@@ -75,17 +79,24 @@ public class MQServiceTaskBehaviorTest {
     @Mock
     private DefaultServiceTaskBehavior defaultServiceTaskBehavior;
 
+    @Mock
+    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+
     @Captor
     private ArgumentCaptor<IntegrationRequestImpl> integrationRequestCaptor;
 
     @BeforeEach
     public void setUp() {
         initMocks(this);
+        when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
+
         behavior = spy(new MQServiceTaskBehavior(integrationContextManager,
                                                  eventPublisher,
                                                  integrationContextBuilder,
                                                  runtimeBundleInfoAppender,
-                                                 defaultServiceTaskBehavior));
+                                                 defaultServiceTaskBehavior,
+                                                 processEngineEventsAggregator,
+                                                 runtimeBundleProperties));
     }
 
     @Test
@@ -139,6 +150,8 @@ public class MQServiceTaskBehaviorTest {
                 .isEqualTo(integrationContext);
 
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequest);
+
+        verify(processEngineEventsAggregator).add(any(CloudIntegrationRequestedEvent.class));
     }
 
     @Test
