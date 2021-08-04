@@ -112,7 +112,6 @@ public class IntegrationRequestSenderTest {
         messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
 
         integrationRequestSender = new IntegrationRequestSender(resolver,
-                                                                runtimeBundleInfoAppender,
                                                                 messageBuilderFactory);
 
         when(resolver.resolveDestination(CONNECTOR_TYPE)).thenReturn(integrationProducer);

@@ -16,19 +16,20 @@
 
 package org.activiti.services.connectors.channel;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 class CompositeCommand implements Command<Void> {
 
-    static CompositeCommand of(Command<?>... commands) {
+    private final List<Command<?>> commands;
+
+    public static CompositeCommand of(Command<?>... commands) {
         return  new CompositeCommand(Arrays.asList(commands));
     }
-
-    private List<Command<?>> commands;
 
     private CompositeCommand(List<Command<?>> commands) {
         this.commands = commands;

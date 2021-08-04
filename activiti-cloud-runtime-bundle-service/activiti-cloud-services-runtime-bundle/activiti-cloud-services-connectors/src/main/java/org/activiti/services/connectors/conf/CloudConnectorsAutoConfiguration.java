@@ -84,13 +84,10 @@ public class CloudConnectorsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public IntegrationRequestSender integrationRequestSender(BinderAwareChannelResolver resolver,
-                                                             RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                              IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         return new IntegrationRequestSender(resolver,
-                                            runtimeBundleInfoAppender,
                                             messageBuilderFactory);
     }
-
 
     @Bean
     @ConditionalOnMissingBean
