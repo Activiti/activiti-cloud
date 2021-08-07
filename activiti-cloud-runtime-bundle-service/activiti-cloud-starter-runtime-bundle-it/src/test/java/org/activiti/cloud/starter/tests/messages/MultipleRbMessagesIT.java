@@ -13,22 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.tests.jobexecutor;
+package org.activiti.cloud.starter.tests.messages;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import org.activiti.cloud.services.job.executor.JobMessageHandler;
 import org.activiti.cloud.services.job.executor.JobMessageHandlerFactory;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
-import org.activiti.cloud.starter.tests.listener.CountDownLatchActvitiEventListener;
-import org.activiti.engine.ManagementService;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.h2.tools.Server;
 import org.junit.jupiter.api.AfterAll;
@@ -51,13 +42,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.sql.SQLException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @Testcontainers
-class MultipleRbJobExecutorIT {
+class MultipleRbMessagesIT {
 
-    private static final Logger logger = LoggerFactory.getLogger(MultipleRbJobExecutorIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(MultipleRbMessagesIT.class);
 
     private static final String ASYNC_TASK = "asyncTask";
 
@@ -140,51 +129,7 @@ class MultipleRbJobExecutorIT {
     @Test
     void shouldDistributeAsyncJobsBetweenMultipleRbReplicas() throws InterruptedException {
         //given
-        int jobCount = 100;
-        CountDownLatch jobsCompleted = new CountDownLatch(jobCount);
-
-        RuntimeService runtimeService = rbCtx1.getBean(RuntimeService.class);
-        RepositoryService repositoryService = rbCtx1.getBean(RepositoryService.class);
-        ManagementService managementService = rbCtx1.getBean(ManagementService.class);
-
-        JobMessageHandler jobMessageHandler1 = rbCtx1.getBean(JobMessageHandler.class);
-        JobMessageHandler jobMessageHandler2 = rbCtx2.getBean(JobMessageHandler.class);
-
-        rbCtx1.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
-                ActivitiEventType.JOB_EXECUTION_SUCCESS);
-
-        rbCtx2.getBean(RuntimeService.class).addEventListener(new CountDownLatchActvitiEventListener(jobsCompleted),
-                ActivitiEventType.JOB_EXECUTION_SUCCESS);
-
-        String processDefinitionId = repositoryService.createProcessDefinitionQuery()
-                .processDefinitionKey(ASYNC_TASK)
-                .singleResult()
-                .getId();
         //when
-        for (int i = 0; i < jobCount; i++) {
-            runtimeService.createProcessInstanceBuilder()
-                    .processDefinitionId(processDefinitionId)
-                    .start();
-        }
-
         //then
-        assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should distribute and complete all jobs between rb replicas")
-                .isTrue();
-
-        await("the async executions should complete and no more jobs should exist")
-                .untilAsserted(() -> {
-                    assertThat(runtimeService.createExecutionQuery()
-                            .processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
-
-                    assertThat(managementService.createJobQuery()
-                            .processDefinitionId(processDefinitionId)
-                            .count()).isEqualTo(0);
-                });
-        // rb1 message handler is invoked
-        verify(jobMessageHandler1, atLeastOnce()).handleMessage(any());
-
-        // rb2 message handler is invoked
-        verify(jobMessageHandler2, atLeastOnce()).handleMessage(any());
     }
-
 }
