@@ -48,8 +48,6 @@ class MultipleRbMessagesIT {
 
     private static final Logger logger = LoggerFactory.getLogger(MultipleRbMessagesIT.class);
 
-    private static final String ASYNC_TASK = "asyncTask";
-
     private static ConfigurableApplicationContext h2Ctx;
     private static ConfigurableApplicationContext rbCtx1;
     private static ConfigurableApplicationContext rbCtx2;
@@ -127,7 +125,8 @@ class MultipleRbMessagesIT {
     }
 
     @Test
-    void shouldDistributeAsyncJobsBetweenMultipleRbReplicas() throws InterruptedException {
+    void shouldHandleBpmnMessagesBetweenMulitpleRuntimeBundles() throws InterruptedException {
+        logger.info("shouldHandleBpmnMessagesBetweenMulitpleRuntimeBundles");
         //given
         //when
         //then
