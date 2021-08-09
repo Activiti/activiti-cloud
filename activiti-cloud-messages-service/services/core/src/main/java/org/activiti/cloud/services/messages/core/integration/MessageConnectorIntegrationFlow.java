@@ -17,10 +17,6 @@ package org.activiti.cloud.services.messages.core.integration;
 
 import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
 import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
-
-import java.util.List;
-import java.util.Objects;
-
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
@@ -37,6 +33,10 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.advice.HandleMessageAdvice;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+
+import java.util.List;
+import java.util.Objects;
 
 public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
@@ -83,13 +83,18 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
                                         .handle(this.aggregator(),
                                                 handlerSpec -> handlerSpec.id(AGGREGATOR)
                                                                           .advice(advices))
-                                        .channel(processor.output()),
+                                        .route(Message.class,
+                                               this::toOutput),
                             flowSpec -> flowSpec.transactional()
                                                 .id(MESSAGE_GATEWAY)
                                                 .requiresReply(false)
                                                 .async(true)
                                                 .replyTimeout(0L)
                                                 .advice(interceptor));
+    }
+
+    public MessageChannel toOutput(Message message) {
+        return processor.output();
     }
 
     public AbstractMessageProducingHandler aggregator() {
