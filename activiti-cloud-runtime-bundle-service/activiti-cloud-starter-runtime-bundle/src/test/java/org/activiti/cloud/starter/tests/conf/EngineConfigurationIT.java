@@ -74,7 +74,9 @@ public class EngineConfigurationIT {
     public void shouldHaveChannelBindingsSetForCommandEndpoint() {
         //when
         assertProperty("spring.cloud.stream.bindings.commandConsumer.destination").isEqualTo("commandConsumer_my-activiti-rb-app");
+        assertProperty("spring.cloud.stream.bindings.commandConsumer.group").isEqualTo("messageConnector");
         assertProperty("spring.cloud.stream.bindings.commandResults.destination").isEqualTo("commandResults_my-activiti-rb-app");
+
     }
 
     @Test
