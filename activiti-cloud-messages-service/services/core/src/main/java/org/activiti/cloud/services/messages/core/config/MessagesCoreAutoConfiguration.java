@@ -16,10 +16,6 @@
 package org.activiti.cloud.services.messages.core.config;
 
 import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
-
-import java.util.List;
-import java.util.Optional;
-
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
@@ -27,6 +23,7 @@ import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggr
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregatorFactoryBean;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
+import org.activiti.cloud.services.messages.core.integration.OutputMessageChannelResolver;
 import org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow;
 import org.activiti.cloud.services.messages.core.integration.MessageEventHeaders;
 import org.activiti.cloud.services.messages.core.processor.MessageGroupProcessorChain;
@@ -43,6 +40,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
+import org.springframework.cloud.stream.binding.BindingService;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -70,6 +70,9 @@ import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * A Processor app that performs aggregation.
@@ -106,12 +109,24 @@ public class MessagesCoreAutoConfiguration {
     public IntegrationFlow messageConnectorIntegrationFlow(MessageConnectorProcessor processor,
                                                            MessageConnectorAggregator aggregator,
                                                            IdempotentReceiverInterceptor interceptor,
-                                                           List<MessageConnectorHandlerAdvice> adviceChain) {
+                                                           List<MessageConnectorHandlerAdvice> adviceChain,
+                                                           OutputMessageChannelResolver channelResolver) {
         return new MessageConnectorIntegrationFlow(processor,
                                                    aggregator,
                                                    interceptor,
                                                    adviceChain,
-                                                   properties);
+                                                   properties,
+                                                   channelResolver);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OutputMessageChannelResolver messageChannelDestinationResolver(ApplicationContext applicationContext,
+                                                                          BindingService bindingService,
+                                                                          BinderAwareChannelResolver binderAwareChannelResolver) {
+        return new OutputMessageChannelResolver(applicationContext,
+                                                binderAwareChannelResolver,
+                                                bindingService);
     }
 
     @Bean

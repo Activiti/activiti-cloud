@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.messages.core.integration;
 
 import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.SERVICE_FULL_NAME;
 import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
@@ -37,6 +38,7 @@ import org.springframework.messaging.MessageChannel;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
@@ -53,17 +55,20 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     private final IdempotentReceiverInterceptor interceptor;
     private final HandleMessageAdvice[] advices;
     private final MessageAggregatorProperties properties;
+    private final OutputMessageChannelResolver channelResolver;
 
     public MessageConnectorIntegrationFlow(MessageConnectorProcessor processor,
                                            MessageConnectorAggregator aggregator,
                                            IdempotentReceiverInterceptor interceptor,
                                            List<? extends HandleMessageAdvice> advices,
-                                           MessageAggregatorProperties properties) {
+                                           MessageAggregatorProperties properties,
+                                           OutputMessageChannelResolver channelResolver) {
         this.processor = processor;
         this.aggregator = aggregator;
         this.interceptor = interceptor;
-        this.advices = advices.toArray(new HandleMessageAdvice[] {});
+        this.advices = advices.toArray(new HandleMessageAdvice[]{});
         this.properties = properties;
+        this.channelResolver = channelResolver;
     }
 
     @Override
@@ -94,7 +99,12 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     }
 
     public MessageChannel toOutput(Message message) {
-        return processor.output();
+        String serviceFullName = message.getHeaders()
+                                        .get(SERVICE_FULL_NAME,
+                                             String.class);
+        return Optional.ofNullable(serviceFullName)
+                       .map(channelResolver::resolve)
+                       .orElseGet(processor::output);
     }
 
     public AbstractMessageProducingHandler aggregator() {
