@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import org.activiti.cloud.services.job.executor.JobMessageHandler;
 import org.activiti.cloud.services.job.executor.JobMessageHandlerFactory;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
-import org.activiti.cloud.starter.tests.listener.CountDownLatchActvitiEventListener;
+import org.activiti.cloud.starter.tests.support.CountDownLatchActvitiEventListener;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;

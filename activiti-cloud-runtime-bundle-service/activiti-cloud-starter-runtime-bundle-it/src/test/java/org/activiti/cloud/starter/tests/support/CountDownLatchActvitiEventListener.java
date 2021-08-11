@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.tests.listener;
+package org.activiti.cloud.starter.tests.support;
 
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
