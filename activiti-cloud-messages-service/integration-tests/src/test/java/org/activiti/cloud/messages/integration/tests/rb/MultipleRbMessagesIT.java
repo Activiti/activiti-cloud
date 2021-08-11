@@ -60,9 +60,9 @@ class MultipleRbMessagesIT {
     private static final String INTERMEDIATE_THROW_MESSAGE_PROCESS = "IntermediateThrowMessageProcess";
     private static final String BUSINESS_KEY = "businessKey";
 
-    private static ConfigurableApplicationContext h2Ctx;
-    private static ConfigurableApplicationContext rbCtx1;
-    private static ConfigurableApplicationContext rbCtx2;
+    private static ConfigurableApplicationContext h2Context;
+    private static ConfigurableApplicationContext rb1Context;
+    private static ConfigurableApplicationContext rb2Context;
 
     @Container
     private static GenericContainer keycloakContainer =
@@ -129,32 +129,32 @@ class MultipleRbMessagesIT {
         System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
         System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
 
-        h2Ctx = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
-                                                                 .profiles("h2")
-                                                                 .run();
+        h2Context = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
+                                                                     .profiles("h2")
+                                                                     .run();
 
-        rbCtx1 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081",
-                                                                              "spring.application.name=rb1")
-                                                                  .run();
+        rb1Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081",
+                                                                                  "spring.application.name=rb1")
+                                                                      .run();
 
-        rbCtx2 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082",
-                                                                              "spring.application.name=rb2")
-                                                                  .run();
+        rb2Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082",
+                                                                                  "spring.application.name=rb2")
+                                                                      .run();
 
     }
 
     @AfterAll
     public static void tearDown() {
-        rbCtx1.close();
-        rbCtx2.close();
-        h2Ctx.close();
+        rb1Context.close();
+        rb2Context.close();
+        h2Context.close();
     }
 
     @Test
     void contextLoads() throws Exception {
-        assertThat(h2Ctx).isNotNull();
-        assertThat(rbCtx1).isNotNull();
-        assertThat(rbCtx2).isNotNull();
+        assertThat(h2Context).isNotNull();
+        assertThat(rb1Context).isNotNull();
+        assertThat(rb2Context).isNotNull();
     }
 
     @Test
@@ -171,14 +171,14 @@ class MultipleRbMessagesIT {
                                                                        .build();
 
         //when
-        executeCommand(rbCtx1, throwProcessPayload);
-        executeCommand(rbCtx2, throwProcessPayload);
-        executeCommand(rbCtx1, catchProcessPayload);
-        executeCommand(rbCtx2, catchProcessPayload);
+        executeCommand(rb1Context, throwProcessPayload);
+        executeCommand(rb2Context, throwProcessPayload);
+        executeCommand(rb1Context, catchProcessPayload);
+        executeCommand(rb2Context, catchProcessPayload);
 
         //then
-        assertThrowCatchBpmnMessages(rbCtx1);
-        assertThrowCatchBpmnMessages(rbCtx2);
+        assertThrowCatchBpmnMessages(rb1Context);
+        assertThrowCatchBpmnMessages(rb2Context);
     }
 
     void executeCommand(ConfigurableApplicationContext context,
