@@ -39,8 +39,6 @@ import org.h2.tools.Server;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -58,9 +56,6 @@ import java.sql.SQLException;
 
 @Testcontainers
 class MultipleRbMessagesIT {
-
-    private static final Logger logger = LoggerFactory.getLogger(MultipleRbMessagesIT.class);
-
     private static final String INTERMEDIATE_CATCH_MESSAGE_PROCESS = "IntermediateCatchMessageProcess";
     private static final String INTERMEDIATE_THROW_MESSAGE_PROCESS = "IntermediateThrowMessageProcess";
     private static final String BUSINESS_KEY = "businessKey";
