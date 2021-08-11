@@ -110,16 +110,14 @@ class MultipleRbJobExecutorIT {
         System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
 
         h2Ctx = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
-                .profiles("h2")
-                .run();
+                                                                 .profiles("h2")
+                                                                 .run();
 
-        rbCtx1 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081",
-                                                                              "spring.application.name=rb1")
-                .run();
+        rbCtx1 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081")
+                                                                  .run();
 
-        rbCtx2 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082",
-                                                                              "spring.application.name=rb2")
-                .run();
+        rbCtx2 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082")
+                                                                  .run();
 
     }
 
