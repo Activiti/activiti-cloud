@@ -16,7 +16,6 @@
 package org.activiti.services.subscription.config;
 
 import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior.DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME;
-
 import org.activiti.bpmn.model.Signal;
 import org.activiti.bpmn.model.SignalEventDefinition;
 import org.activiti.engine.RuntimeService;
@@ -35,9 +34,11 @@ import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 
 @Configuration
+@PropertySource("classpath:config/signal-events-channels.properties")
 @EnableBinding(ProcessEngineSignalChannels.class)
 @AutoConfigureBefore({ProcessRuntimeAutoConfiguration.class})
 public class ActivitiCloudSubscriptionsAutoConfiguration {

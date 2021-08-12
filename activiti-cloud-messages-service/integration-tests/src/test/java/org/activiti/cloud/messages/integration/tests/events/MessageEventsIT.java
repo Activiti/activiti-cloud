@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.messages.integration.tests;
+package org.activiti.cloud.messages.integration.tests.events;
 
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.model.ProcessInstance;

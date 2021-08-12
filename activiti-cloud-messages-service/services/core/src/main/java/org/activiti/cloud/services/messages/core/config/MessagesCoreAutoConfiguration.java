@@ -16,10 +16,6 @@
 package org.activiti.cloud.services.messages.core.config;
 
 import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
-
-import java.util.List;
-import java.util.Optional;
-
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
@@ -36,6 +32,9 @@ import org.activiti.cloud.services.messages.core.processor.StartMessagePayloadGr
 import org.activiti.cloud.services.messages.core.release.MessageGroupReleaseChain;
 import org.activiti.cloud.services.messages.core.release.MessageGroupReleaseStrategyChain;
 import org.activiti.cloud.services.messages.core.release.MessageSentReleaseHandler;
+import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageChannelResolver;
+import org.activiti.cloud.services.messages.core.router.CommandConsumerDestinationMapper;
+import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageRouter;
 import org.activiti.cloud.services.messages.core.support.ChainBuilder;
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
 import org.springframework.beans.factory.BeanFactory;
@@ -43,6 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
+import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -70,6 +71,9 @@ import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * A Processor app that performs aggregation.
@@ -106,12 +110,36 @@ public class MessagesCoreAutoConfiguration {
     public IntegrationFlow messageConnectorIntegrationFlow(MessageConnectorProcessor processor,
                                                            MessageConnectorAggregator aggregator,
                                                            IdempotentReceiverInterceptor interceptor,
-                                                           List<MessageConnectorHandlerAdvice> adviceChain) {
+                                                           List<MessageConnectorHandlerAdvice> adviceChain,
+                                                           CommandConsumerMessageRouter router) {
         return new MessageConnectorIntegrationFlow(processor,
                                                    aggregator,
                                                    interceptor,
                                                    adviceChain,
-                                                   properties);
+                                                   properties,
+                                                   router);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CommandConsumerDestinationMapper commandConsumerDestinationMapper() {
+        return new CommandConsumerDestinationMapper();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CommandConsumerMessageChannelResolver commandConsumerMessageChannelResolver(CommandConsumerDestinationMapper commandConsumerDestinationMapper,
+                                                                                       BindingService bindingService,
+                                                                                       BinderAwareChannelResolver binderAwareChannelResolver) {
+        return new CommandConsumerMessageChannelResolver(commandConsumerDestinationMapper,
+                                                         binderAwareChannelResolver,
+                                                         bindingService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CommandConsumerMessageRouter commandConsumerMessageRouter(CommandConsumerMessageChannelResolver destinationResolver) {
+        return new CommandConsumerMessageRouter(destinationResolver);
     }
 
     @Bean

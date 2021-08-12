@@ -16,15 +16,16 @@
 package org.activiti.cloud.services.messages.test.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
+import org.assertj.core.api.AbstractStringAssert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.integration.dsl.IntegrationFlow;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.application.name=my-activiti-rb-app")
 public class MessageCoreAutoConfigurationTest {
 
     @Autowired
@@ -32,6 +33,9 @@ public class MessageCoreAutoConfigurationTest {
 
     @Autowired
     private IntegrationFlow messageConnectorIntegrationFlow;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @SpringBootApplication
     static class Application {
@@ -42,5 +46,17 @@ public class MessageCoreAutoConfigurationTest {
     public void contextLoads() {
         assertThat(messageConnectorProcessor).isNotNull();
         assertThat(messageConnectorIntegrationFlow).isNotNull();
+
+        assertProperty("spring.cloud.stream.bindings.input.destination").isEqualTo("messageEvents_my-activiti-rb-app");
+        assertProperty("spring.cloud.stream.bindings.output.destination").isEqualTo("commandConsumer_my-activiti-rb-app");
+    }
+
+    private AbstractStringAssert<?> assertProperty(String name) {
+        return assertThat(getProperty(name));
+    }
+
+    private String getProperty(String name) {
+        return applicationContext.getEnvironment()
+                                 .getProperty(name);
     }
 }

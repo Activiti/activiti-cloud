@@ -15,14 +15,19 @@
  */
 package org.activiti.cloud.starter.tests.jobexecutor;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import org.activiti.cloud.services.job.executor.JobMessageHandler;
 import org.activiti.cloud.services.job.executor.JobMessageHandlerFactory;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
+import org.activiti.cloud.starter.tests.support.CountDownLatchActvitiEventListener;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
-import org.activiti.engine.delegate.event.ActivitiEvent;
-import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.h2.tools.Server;
@@ -48,13 +53,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 @Testcontainers
 class MultipleRbJobExecutorIT {
@@ -112,14 +110,14 @@ class MultipleRbJobExecutorIT {
         System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
 
         h2Ctx = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
-                .profiles("h2")
-                .run();
+                                                                 .profiles("h2")
+                                                                 .run();
 
         rbCtx1 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081")
-                .run();
+                                                                  .run();
 
         rbCtx2 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082")
-                .run();
+                                                                  .run();
 
     }
 
@@ -185,30 +183,6 @@ class MultipleRbJobExecutorIT {
 
         // rb2 message handler is invoked
         verify(jobMessageHandler2, atLeastOnce()).handleMessage(any());
-    }
-
-    abstract class AbstractActvitiEventListener implements ActivitiEventListener {
-
-        @Override
-        public boolean isFailOnException() {
-            return false;
-        }
-    }
-
-    class CountDownLatchActvitiEventListener extends AbstractActvitiEventListener {
-
-        private final CountDownLatch countDownLatch;
-
-        public CountDownLatchActvitiEventListener(CountDownLatch countDownLatch) {
-            this.countDownLatch = countDownLatch;
-        }
-
-        @Override
-        public void onEvent(ActivitiEvent arg0) {
-            logger.info("Received Activiti Event: {}", arg0);
-
-            countDownLatch.countDown();
-        }
     }
 
 }

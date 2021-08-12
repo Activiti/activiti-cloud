@@ -17,10 +17,6 @@ package org.activiti.cloud.services.messages.core.integration;
 
 import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
 import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
-
-import java.util.List;
-import java.util.Objects;
-
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
@@ -36,7 +32,11 @@ import org.springframework.integration.handler.AbstractMessageProducingHandler;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.advice.HandleMessageAdvice;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
+import org.springframework.integration.router.AbstractMessageRouter;
 import org.springframework.messaging.Message;
+
+import java.util.List;
+import java.util.Objects;
 
 public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
@@ -53,17 +53,20 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     private final IdempotentReceiverInterceptor interceptor;
     private final HandleMessageAdvice[] advices;
     private final MessageAggregatorProperties properties;
+    private final AbstractMessageRouter router;
 
     public MessageConnectorIntegrationFlow(MessageConnectorProcessor processor,
                                            MessageConnectorAggregator aggregator,
                                            IdempotentReceiverInterceptor interceptor,
                                            List<? extends HandleMessageAdvice> advices,
-                                           MessageAggregatorProperties properties) {
+                                           MessageAggregatorProperties properties,
+                                           AbstractMessageRouter router) {
         this.processor = processor;
         this.aggregator = aggregator;
         this.interceptor = interceptor;
-        this.advices = advices.toArray(new HandleMessageAdvice[] {});
+        this.advices = advices.toArray(new HandleMessageAdvice[]{});
         this.properties = properties;
+        this.router = router;
     }
 
     @Override
@@ -83,13 +86,17 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
                                         .handle(this.aggregator(),
                                                 handlerSpec -> handlerSpec.id(AGGREGATOR)
                                                                           .advice(advices))
-                                        .channel(processor.output()),
+                                        .route(this.output()),
                             flowSpec -> flowSpec.transactional()
                                                 .id(MESSAGE_GATEWAY)
                                                 .requiresReply(false)
                                                 .async(true)
                                                 .replyTimeout(0L)
                                                 .advice(interceptor));
+    }
+
+    public AbstractMessageRouter output() {
+        return router;
     }
 
     public AbstractMessageProducingHandler aggregator() {
