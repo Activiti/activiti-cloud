@@ -32,9 +32,9 @@ import org.activiti.cloud.services.messages.core.processor.StartMessagePayloadGr
 import org.activiti.cloud.services.messages.core.release.MessageGroupReleaseChain;
 import org.activiti.cloud.services.messages.core.release.MessageGroupReleaseStrategyChain;
 import org.activiti.cloud.services.messages.core.release.MessageSentReleaseHandler;
-import org.activiti.cloud.services.messages.core.router.BinderAwareOutputMessageChannelDestinationResolver;
-import org.activiti.cloud.services.messages.core.router.CommandConsumerOutputDestinationMapper;
-import org.activiti.cloud.services.messages.core.router.CommandConsumerOutputDestinationMessageRouter;
+import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageChannelResolver;
+import org.activiti.cloud.services.messages.core.router.CommandConsumerDestinationMapper;
+import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageRouter;
 import org.activiti.cloud.services.messages.core.support.ChainBuilder;
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
 import org.springframework.beans.factory.BeanFactory;
@@ -111,35 +111,35 @@ public class MessagesCoreAutoConfiguration {
                                                            MessageConnectorAggregator aggregator,
                                                            IdempotentReceiverInterceptor interceptor,
                                                            List<MessageConnectorHandlerAdvice> adviceChain,
-                                                           CommandConsumerOutputDestinationMessageRouter commandConsumerOutputDestinationMessageRouter) {
+                                                           CommandConsumerMessageRouter router) {
         return new MessageConnectorIntegrationFlow(processor,
                                                    aggregator,
                                                    interceptor,
                                                    adviceChain,
                                                    properties,
-                                                   commandConsumerOutputDestinationMessageRouter);
+                                                   router);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CommandConsumerOutputDestinationMapper commandConsumerOutputDestinationMapper() {
-        return new CommandConsumerOutputDestinationMapper();
+    public CommandConsumerDestinationMapper commandConsumerDestinationMapper() {
+        return new CommandConsumerDestinationMapper();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public BinderAwareOutputMessageChannelDestinationResolver messageChannelDestinationResolver(CommandConsumerOutputDestinationMapper commandConsumerOutputDestinationMapper,
-                                                                                                BindingService bindingService,
-                                                                                                BinderAwareChannelResolver binderAwareChannelResolver) {
-        return new BinderAwareOutputMessageChannelDestinationResolver(commandConsumerOutputDestinationMapper,
-                                                                      binderAwareChannelResolver,
-                                                                      bindingService);
+    public CommandConsumerMessageChannelResolver commandConsumerMessageChannelResolver(CommandConsumerDestinationMapper commandConsumerDestinationMapper,
+                                                                                       BindingService bindingService,
+                                                                                       BinderAwareChannelResolver binderAwareChannelResolver) {
+        return new CommandConsumerMessageChannelResolver(commandConsumerDestinationMapper,
+                                                         binderAwareChannelResolver,
+                                                         bindingService);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CommandConsumerOutputDestinationMessageRouter outputDestinationMessageRouter(BinderAwareOutputMessageChannelDestinationResolver destinationResolver) {
-        return new CommandConsumerOutputDestinationMessageRouter(destinationResolver);
+    public CommandConsumerMessageRouter commandConsumerMessageRouter(CommandConsumerMessageChannelResolver destinationResolver) {
+        return new CommandConsumerMessageRouter(destinationResolver);
     }
 
     @Bean

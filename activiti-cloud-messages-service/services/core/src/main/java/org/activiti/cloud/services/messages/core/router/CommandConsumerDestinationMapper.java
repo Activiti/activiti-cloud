@@ -18,7 +18,7 @@ package org.activiti.cloud.services.messages.core.router;
 
 import java.util.function.Function;
 
-public class CommandConsumerOutputDestinationMapper implements Function<String, String> {
+public class CommandConsumerDestinationMapper implements Function<String, String> {
 
     @Override
     public String apply(String serviceFullName) {

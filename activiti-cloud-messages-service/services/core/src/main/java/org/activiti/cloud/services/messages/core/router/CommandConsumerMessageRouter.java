@@ -27,11 +27,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
-public class CommandConsumerOutputDestinationMessageRouter extends AbstractMessageRouter {
+public class CommandConsumerMessageRouter extends AbstractMessageRouter {
 
     private final DestinationResolver<MessageChannel> destinationResolver;
 
-    public CommandConsumerOutputDestinationMessageRouter(DestinationResolver<MessageChannel> destinationResolver) {
+    public CommandConsumerMessageRouter(DestinationResolver<MessageChannel> destinationResolver) {
         this.destinationResolver = destinationResolver;
     }
 

@@ -27,15 +27,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class BinderAwareOutputMessageChannelDestinationResolver extends BeanFactoryMessageChannelDestinationResolver {
+public class CommandConsumerMessageChannelResolver extends BeanFactoryMessageChannelDestinationResolver {
 
     private final BinderAwareChannelResolver binderAwareChannelResolver;
     private final BindingService bindingService;
     private final Function<String, String> destinationMapper;
 
-    public BinderAwareOutputMessageChannelDestinationResolver(Function<String, String> destinationMapper,
-                                                              BinderAwareChannelResolver binderAwareChannelResolver,
-                                                              BindingService bindingService) {
+    public CommandConsumerMessageChannelResolver(Function<String, String> destinationMapper,
+                                                 BinderAwareChannelResolver binderAwareChannelResolver,
+                                                 BindingService bindingService) {
         this.destinationMapper = destinationMapper;
         this.binderAwareChannelResolver = binderAwareChannelResolver;
         this.bindingService = bindingService;
