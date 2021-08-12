@@ -14,41 +14,44 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.messages.core.integration;
+package org.activiti.cloud.services.messages.core.router;
 
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.core.BeanFactoryMessageChannelDestinationResolver;
+import org.springframework.messaging.core.DestinationResolutionException;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
-public class OutputMessageChannelResolver {
+public class BinderAwareOutputMessageChannelDestinationResolver extends BeanFactoryMessageChannelDestinationResolver {
 
     private final BinderAwareChannelResolver binderAwareChannelResolver;
     private final BindingService bindingService;
-    private final ApplicationContext applicationContext;
+    private final Function<String, String> destinationMapper;
 
-    public OutputMessageChannelResolver(ApplicationContext applicationContext,
-                                        BinderAwareChannelResolver binderAwareChannelResolver,
-                                        BindingService bindingService) {
-        this.applicationContext = applicationContext;
+    public BinderAwareOutputMessageChannelDestinationResolver(Function<String, String> destinationMapper,
+                                                              BinderAwareChannelResolver binderAwareChannelResolver,
+                                                              BindingService bindingService) {
+        this.destinationMapper = destinationMapper;
         this.binderAwareChannelResolver = binderAwareChannelResolver;
         this.bindingService = bindingService;
     }
 
-    public MessageChannel resolve(String serviceFullName) {
-        String destination = toDestination(serviceFullName);
+    @Override
+    public MessageChannel resolveDestination(String name) throws DestinationResolutionException {
+        String destination = destinationMapper.apply(name);
 
-        return getChannelBindingName(destination).filter(applicationContext::containsBean)
-                                                 .map(channelName -> applicationContext.getBean(channelName,
-                                                                                                MessageChannel.class))
-                                                 .orElseGet(() -> binderAwareChannelResolver.resolveDestination(destination));
+        Optional<String> channelName = getChannelName(destination);
+
+        return channelName.map(super::resolveDestination)
+                          .orElseGet(() -> binderAwareChannelResolver.resolveDestination(destination));
     }
 
-    protected Optional<String> getChannelBindingName(String destination) {
+    protected Optional<String> getChannelName(String destination) {
         BindingServiceProperties bindingProperties = bindingService.getBindingServiceProperties();
 
         return bindingProperties.getBindings()
@@ -61,9 +64,4 @@ public class OutputMessageChannelResolver {
                                 .findFirst();
     }
 
-    protected String toDestination(String serviceFullName) {
-        return new StringBuilder("commandConsumer").append("_")
-                                                   .append(serviceFullName)
-                                                   .toString();
-    }
 }

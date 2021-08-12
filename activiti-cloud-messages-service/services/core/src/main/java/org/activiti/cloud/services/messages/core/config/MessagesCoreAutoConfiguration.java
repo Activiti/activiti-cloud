@@ -23,7 +23,6 @@ import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggr
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregatorFactoryBean;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
-import org.activiti.cloud.services.messages.core.integration.OutputMessageChannelResolver;
 import org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow;
 import org.activiti.cloud.services.messages.core.integration.MessageEventHeaders;
 import org.activiti.cloud.services.messages.core.processor.MessageGroupProcessorChain;
@@ -33,6 +32,9 @@ import org.activiti.cloud.services.messages.core.processor.StartMessagePayloadGr
 import org.activiti.cloud.services.messages.core.release.MessageGroupReleaseChain;
 import org.activiti.cloud.services.messages.core.release.MessageGroupReleaseStrategyChain;
 import org.activiti.cloud.services.messages.core.release.MessageSentReleaseHandler;
+import org.activiti.cloud.services.messages.core.router.BinderAwareOutputMessageChannelDestinationResolver;
+import org.activiti.cloud.services.messages.core.router.CommandConsumerOutputDestinationMapper;
+import org.activiti.cloud.services.messages.core.router.CommandConsumerOutputDestinationMessageRouter;
 import org.activiti.cloud.services.messages.core.support.ChainBuilder;
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
 import org.springframework.beans.factory.BeanFactory;
@@ -42,7 +44,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -110,23 +111,35 @@ public class MessagesCoreAutoConfiguration {
                                                            MessageConnectorAggregator aggregator,
                                                            IdempotentReceiverInterceptor interceptor,
                                                            List<MessageConnectorHandlerAdvice> adviceChain,
-                                                           OutputMessageChannelResolver channelResolver) {
+                                                           CommandConsumerOutputDestinationMessageRouter commandConsumerOutputDestinationMessageRouter) {
         return new MessageConnectorIntegrationFlow(processor,
                                                    aggregator,
                                                    interceptor,
                                                    adviceChain,
                                                    properties,
-                                                   channelResolver);
+                                                   commandConsumerOutputDestinationMessageRouter);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public OutputMessageChannelResolver messageChannelDestinationResolver(ApplicationContext applicationContext,
-                                                                          BindingService bindingService,
-                                                                          BinderAwareChannelResolver binderAwareChannelResolver) {
-        return new OutputMessageChannelResolver(applicationContext,
-                                                binderAwareChannelResolver,
-                                                bindingService);
+    public CommandConsumerOutputDestinationMapper commandConsumerOutputDestinationMapper() {
+        return new CommandConsumerOutputDestinationMapper();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BinderAwareOutputMessageChannelDestinationResolver messageChannelDestinationResolver(CommandConsumerOutputDestinationMapper commandConsumerOutputDestinationMapper,
+                                                                                                BindingService bindingService,
+                                                                                                BinderAwareChannelResolver binderAwareChannelResolver) {
+        return new BinderAwareOutputMessageChannelDestinationResolver(commandConsumerOutputDestinationMapper,
+                                                                      binderAwareChannelResolver,
+                                                                      bindingService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CommandConsumerOutputDestinationMessageRouter outputDestinationMessageRouter(BinderAwareOutputMessageChannelDestinationResolver destinationResolver) {
+        return new CommandConsumerOutputDestinationMessageRouter(destinationResolver);
     }
 
     @Bean
