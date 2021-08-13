@@ -42,8 +42,13 @@ public class ModelValidationError {
         this.validatorSetName = validatorSetName;
     }
 
+    public ModelValidationError(String problem, String description, String validatorSetName, String referenceId) {
+        this(problem, description, validatorSetName);
+        this.referenceId = referenceId;
+    }
+
     public ModelValidationError(String problem, String description, String validatorSetName,
-        boolean isWarning) {
+            boolean isWarning) {
         this(problem, description, validatorSetName);
         this.isWarning = isWarning;
     }

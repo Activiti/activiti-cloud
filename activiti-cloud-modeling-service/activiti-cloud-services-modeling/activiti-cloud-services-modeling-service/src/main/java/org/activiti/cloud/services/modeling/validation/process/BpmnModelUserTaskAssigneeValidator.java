@@ -16,16 +16,14 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import static org.springframework.util.StringUtils.isEmpty;
-
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.StringUtils;
-
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Implementation of {@link BpmnModelValidator} for validating assignee attribute for user tasks
@@ -58,7 +56,7 @@ public class BpmnModelUserTaskAssigneeValidator implements BpmnModelValidator {
 
         return Optional.of(
                 new ModelValidationError(NO_ASSIGNEE_PROBLEM_TITLE, getNoAssigneeErrorDescription(userTask),
-                        USER_TASK_ASSIGNEE_VALIDATOR_NAME));
+                        USER_TASK_ASSIGNEE_VALIDATOR_NAME, userTask.getId()));
     }
 
     private String getNoAssigneeErrorDescription(UserTask userTask) {
