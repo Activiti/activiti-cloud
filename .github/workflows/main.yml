@@ -229,37 +229,128 @@ jobs:
         run: |
           kubectl delete ns $PREVIEW_NAME || true
 
-      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+      - name: Install release for ${{ matrix.messaging-broker }}
         run: |
+          ### Variables ###
           export SSO_PROTOCOL=https
           export GATEWAY_PROTOCOL=https
           export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
           export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
 
+          ### Main ###
+
+          echo "Installing release with make install"
           make install
 
-          attempt_counter=0
-          max_attempts=50
-          echo "Waiting for services to be up..."
-          until \
+      - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
+        if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' }}
+        run: |
+          ### Variables ###
+          export SSO_PROTOCOL=https
+          export GATEWAY_PROTOCOL=https
+          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export QUERY_CONSUMER_NUMBER=2
+
+          ### Functions ###
+
+          # It checks that the RESULT env var is equals to the first
+          # argument passed to the function
+          #
+          check_result_is () {
+            if [ "$RESULT" == "$1" ]; then
+              echo "correct"
+            else
+              echo "number expected is $1 but result is $RESULT"
+              exit 1
+            fi
+          }
+
+          # It counts the number of query consumer pods in the
+          # cluster and set it in RESULT env var
+          #
+          count_query_consumer_pods () {
+            export RESULT=$(kubectl -n $PREVIEW_NAME get pods -o \
+              'custom-columns=POD:metadata.name,READY-true:status.containerStatuses[*].ready' |\
+              grep -e 'activiti-cloud-query.*true' | wc -l | xargs);
+          }
+
+          # It counts the number of query partition of engineEvents topic
+          # created in Kafka and set it in RESULT env var
+          #
+          count_query_topic_partitions () {
+            export RESULT=$(kubectl exec -t -n $PREVIEW_NAME kafka-0 \
+              -c kafka "--" sh -c $'/opt/bitnami/kafka/bin/kafka-topics.sh \
+              --bootstrap-server=localhost:9092 --describe \
+              --topic engineEvents | grep PartitionCount |\
+              awk \'{ printf "%s",$6 }\'')
+          }
+
+          ### Main ###
+
+          echo "It checks the deployment has 1 query pod consumer"
+          count_query_consumer_pods
+          check_result_is 1
+
+          echo "It checks the deployment has 2 query topic patitions"
+          count_query_topic_partitions
+          check_result_is 2
+
+      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+        run: |
+          ### Variables ###
+          export SSO_PROTOCOL=https
+          export GATEWAY_PROTOCOL=https
+          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+
+          ### Functions ####
+
+          # It evaluates the function passed as a parameter
+          # if the result is different than 0 it waits
+          # for 5 seconds and re-evaluates it again.
+          #
+          wait_until_true () {
+            local attempt_counter=0
+            local max_attempts=50
+
+            until "$@"
+            do
+              if [ ${attempt_counter} -eq ${max_attempts} ]
+              then
+                echo "Max attempts reached"
+                break
+              fi
+
+              printf '.'
+              attempt_counter=$((attempt_counter+1))
+              sleep 5
+            done
+          }
+
+          # It makes an HTTP request to the health check of the
+          # modeling, query and runtime-bundles API returning 0
+          # in case their pods are ready and a value different
+          # than 0 otherwise.
+          #
+          check_services_up () {
             curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/modeling-service/actuator/health > /dev/null 2>&1 && \
             curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/rb/actuator/health > /dev/null 2>&1 && \
             curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/query/actuator/health > /dev/null 2>&1
-          do
-            if [ ${attempt_counter} -eq ${max_attempts} ]
-            then
-              echo "Max attempts reached"
-              break
-            fi
+          }
 
-            printf '.'
-            attempt_counter=$((attempt_counter+1))
-            sleep 5
-          done
+          ### Main ###
 
+          echo "Waiting for services to be up..."
+          wait_until_true check_services_up
+
+          # Showing the deployment result
           kubectl get all -n $PREVIEW_NAME
 
+          # Launching the tests
           make test/modeling-acceptance-tests
           make test/runtime-acceptance-tests
 
@@ -290,7 +381,6 @@ jobs:
                 echo "Delete Docker images"
                 make docker-delete-all
             fi
-
 
   promote:
     runs-on: ubuntu-20.04
