@@ -10,6 +10,9 @@
   <name>Activiti Cloud Notifications :: GraphQL Dependencies (Bill Of Materials)</name>
   <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
   <packaging>pom</packaging>
+  <properties>
+    <querydsl.version>5.0.0</querydsl.version>
+  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -61,6 +64,21 @@
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.querydsl</groupId>
+        <artifactId>querydsl-apt</artifactId>
+        <version>${querydsl.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.querydsl</groupId>
+        <artifactId>querydsl-core</artifactId>
+        <version>${querydsl.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.querydsl</groupId>
+        <artifactId>querydsl-jpa</artifactId>
+        <version>${querydsl.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
