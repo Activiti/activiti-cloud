@@ -10,9 +10,6 @@
   <artifactId>activiti-cloud-modeling-dependencies</artifactId>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Modeling Dependencies BOM (Bill Of Materials)</name>
-  <properties>
-    <guava.version>30.1.1-jre</guava.version>
-  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -106,11 +103,6 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-collections4</artifactId>
         <version>${commons-collections4.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

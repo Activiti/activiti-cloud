@@ -34,7 +34,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.process.Extensions;
@@ -204,10 +203,10 @@ public class MockFactory {
         extensions.setProcessVariables(processVariables);
         extensions.setVariablesMappings(
                 singletonMap(serviceTask,
-                             ImmutableMap.of(INPUTS,
-                                             inputsMappings,
-                                             OUTPUTS,
-                                             outputsMappings))
+                        Map.of(INPUTS,
+                                inputsMappings,
+                                OUTPUTS,
+                                outputsMappings))
         );
         return extensions;
     }
