@@ -203,6 +203,7 @@ public class ProjectServiceImpl implements ProjectService {
             modelService.copyModel(model, copiedProject);
         });
 
+        modelService.cleanModelIdList();
         return copiedProject;
     }
 

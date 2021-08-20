@@ -199,7 +199,15 @@ public class ModelServiceImpl implements ModelService{
 
     @Override
     public Model copyModel(Model modelToBeCopied, Project project) {
-        return modelRepository.copyModel(modelToBeCopied, project);
+        Model copiedModel = modelRepository.copyModel(modelToBeCopied, project);
+        modelIdentifiers.put(String.join("-",
+                        modelToBeCopied.getType().toLowerCase(),
+                        modelToBeCopied.getId()),
+                String.join("-",
+                        copiedModel.getType().toLowerCase(),
+                        copiedModel.getId()));
+        updateModelContent(copiedModel, getModelContentFile(copiedModel));
+        return copiedModel;
     }
 
     @Override
