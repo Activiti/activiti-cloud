@@ -16,15 +16,6 @@
 package org.activiti.cloud.services.messages.tests;
 
 
-import static java.util.Collections.singletonMap;
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_CORRELATION_KEY;
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_ID;
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_NAME;
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.SERVICE_FULL_NAME;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +35,7 @@ import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
@@ -67,12 +59,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
+
+import static java.util.Collections.singletonMap;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
 
 
 /**
@@ -83,6 +77,7 @@ import java.util.stream.IntStream;
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
                 "spring.application.name=rb",
+                "activiti.cloud.application.name=default-app",
                 "spring.cloud.stream.bindings.input.content-type=application/json",
                 "spring.cloud.stream.bindings.output.content-type=application/json"
         }
@@ -127,6 +122,12 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @Autowired
     protected AbstractMessageChannel output;
+
+    @Value("${activiti.cloud.application.name}")
+    protected String activitiCloudApplicationName;
+
+    @Value("${spring.application.name}")
+    protected String springApplicationName;
 
     @TestConfiguration
     static class TestConfigurationContext {
@@ -741,7 +742,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                              .setHeader(MESSAGE_EVENT_NAME, messageName)
                              .setHeader(MESSAGE_EVENT_CORRELATION_KEY, correlationKey)
                              .setHeader(MESSAGE_EVENT_ID, UUID.randomUUID())
-                             .setHeader(SERVICE_FULL_NAME, "rb");
+                             .setHeader(APP_NAME, activitiCloudApplicationName)
+                             .setHeader(SERVICE_FULL_NAME, springApplicationName);
 
     }
 
