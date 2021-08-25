@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
-import static org.activiti.test.Assertions.assertThat;
-
-import java.util.Collections;
-
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -28,12 +24,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
+import java.util.Collections;
+
+import static org.activiti.test.Assertions.assertThat;
+
 public class IntegrationErrorBuilderTest {
 
     private static final String PROC_INST_ID = "procInstId";
     private static final String PROC_DEF_ID = "procDefId";
     private static final String ACTIVITY_ELEMENT_ID = "activitiElementId";
-    private static final String RB_NAME = "appName";
+    private static final String RB_NAME = "rbName";
+    private static final String APP_NAME = "appName";
 
     private ConnectorProperties connectorProperties = new ConnectorProperties();
 
@@ -49,7 +50,8 @@ public class IntegrationErrorBuilderTest {
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
         IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
-        integrationRequestEvent.setAppName(RB_NAME);
+        integrationRequestEvent.setAppName(APP_NAME);
+        integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
         IntegrationError integrationError = IntegrationErrorBuilder.errorFor(integrationRequestEvent,
@@ -80,6 +82,7 @@ public class IntegrationErrorBuilderTest {
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
         IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        integrationRequestEvent.setAppName(APP_NAME);
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
@@ -91,6 +94,7 @@ public class IntegrationErrorBuilderTest {
         //then
         Assertions.assertThat(message.getHeaders())
                   .containsEntry(MessageHeaders.CONTENT_TYPE, "application/json")
-                  .containsEntry("targetService", RB_NAME);
+                  .containsEntry("targetService", RB_NAME)
+                  .containsEntry("targetAppName", APP_NAME);
     }
 }

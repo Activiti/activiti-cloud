@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
@@ -26,6 +22,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class IntegrationResultDestinationBuilderTest {
 
@@ -57,7 +57,7 @@ public class IntegrationResultDestinationBuilderTest {
         String result = subject.buildDestination(integrationRequest);
 
         // then
-        assertThat(result).isEqualTo("integrationResult.myApp");
+        assertThat(result).isEqualTo("integrationResult.myAppName");
 
     }
 
