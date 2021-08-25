@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.job.executor;
 
-import java.util.Date;
-
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.impl.asyncexecutor.DefaultJobManager;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
@@ -25,21 +23,23 @@ import org.activiti.engine.runtime.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+
 public class MessageBasedJobManager extends DefaultJobManager {
     private static final Logger logger = LoggerFactory.getLogger(MessageBasedJobManager.class);
-    
+
     private static final String DEFAULT_INPUT_CHANNEL_NAME = "asyncExecutorJobs";
-    
+
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final JobMessageProducer jobMessageProducer;
-    
+
     private String inputChannelName = DEFAULT_INPUT_CHANNEL_NAME;
 
     public MessageBasedJobManager(ProcessEngineConfigurationImpl processEngineConfiguration,
                                   RuntimeBundleProperties runtimeBundleProperties,
                                   JobMessageProducer jobMessageProducer) {
         super(processEngineConfiguration);
-        
+
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.jobMessageProducer = jobMessageProducer;
     }
@@ -67,15 +67,18 @@ public class MessageBasedJobManager extends DefaultJobManager {
 
         sendMessage(job);
     }
-    
+
     /**
-     * Scoped destination name by runtime bundle service name   
-     * 
+     * Scoped destination name by activiti cloud application name
+     *
      */
     public String getDestination() {
-        return runtimeBundleProperties.getServiceName() + "." + this.getInputChannelName();
+        return new StringBuilder().append(this.getInputChannelName())
+                                  .append("_")
+                                  .append(runtimeBundleProperties.getAppName())
+                                  .toString();
     }
-   
+
     public String getInputChannelName() {
         return inputChannelName;
     }
@@ -83,10 +86,10 @@ public class MessageBasedJobManager extends DefaultJobManager {
     public void setInputChannelName(String inputChannelName) {
         this.inputChannelName = inputChannelName;
     }
-    
+
     public void sendMessage(final Job job) {
         logger.debug("sendMessage for job: {}", job);
-        
+
         jobMessageProducer.sendMessage(getDestination(), job);
     }
 }
