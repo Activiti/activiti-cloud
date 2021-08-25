@@ -21,9 +21,9 @@ import java.util.function.Function;
 public class CommandConsumerDestinationMapper implements Function<String, String> {
 
     @Override
-    public String apply(String serviceFullName) {
+    public String apply(String appName) {
         return new StringBuilder("commandConsumer").append("_")
-                                                   .append(serviceFullName)
+                                                   .append(appName)
                                                    .toString();
     }
 }

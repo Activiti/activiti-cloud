@@ -15,13 +15,6 @@
  */
 package org.activiti.cloud.messages.integration.tests.rb;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
@@ -53,6 +46,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.sql.SQLException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @Testcontainers
 class MultipleRbMessagesIT {
@@ -134,11 +132,13 @@ class MultipleRbMessagesIT {
                                                                      .run();
 
         rb1Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081",
-                                                                                  "spring.application.name=rb1")
+                                                                                  "activiti.cloud.application.name=messages-app1",
+                                                                                  "spring.application.name=rb")
                                                                       .run();
 
         rb2Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082",
-                                                                                  "spring.application.name=rb2")
+                                                                                  "activiti.cloud.application.name=messages-app2",
+                                                                                  "spring.application.name=rb")
                                                                       .run();
 
     }
