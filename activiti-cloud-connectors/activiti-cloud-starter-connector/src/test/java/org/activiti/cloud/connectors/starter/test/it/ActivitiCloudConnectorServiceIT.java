@@ -15,13 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.test.it;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -33,6 +26,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.junit.rabbit.RabbitTestSupport;
 import org.springframework.messaging.Message;
@@ -41,6 +35,13 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
@@ -58,6 +59,9 @@ public class ActivitiCloudConnectorServiceIT {
 
     @Autowired
     private ConnectorsITStreamHandlers streamHandler;
+
+    @Value("${activiti.cloud.application.name}")
+    private String appName;
 
     private final static String PROCESS_INSTANCE_ID = "processInstanceId-" + UUID.randomUUID().toString();
     private final static String PROCESS_DEFINITION_ID = "myProcessDefinitionId";
@@ -87,7 +91,7 @@ public class ActivitiCloudConnectorServiceIT {
         integrationContext.setProcessDefinitionId(PROCESS_DEFINITION_ID);
         integrationContext.addInBoundVariables(variables);
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-        integrationRequest.setAppName("mock-rb");
+        integrationRequest.setAppName(appName);
         integrationRequest.setServiceFullName("mock-rb");
         integrationRequest.setServiceType("runtime-bundle");
         integrationRequest.setServiceVersion("1");
@@ -257,7 +261,7 @@ public class ActivitiCloudConnectorServiceIT {
         integrationContext.setProcessDefinitionId(PROCESS_DEFINITION_ID);
 
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-        integrationRequest.setAppName("mock-rb");
+        integrationRequest.setAppName(appName);
         integrationRequest.setServiceFullName("mock-rb");
         integrationRequest.setServiceType("runtime-bundle");
         integrationRequest.setServiceVersion("1");

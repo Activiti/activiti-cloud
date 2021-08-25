@@ -17,11 +17,6 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -35,6 +30,13 @@ import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.support.MessageBuilder;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -111,7 +113,7 @@ public class ServiceTaskConsumerHandler {
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult)
             .build();
         resolver
-            .resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName())
+            .resolveDestination("integrationResult_" + runtimeBundleProperties.getAppName())
             .send(message);
     }
 

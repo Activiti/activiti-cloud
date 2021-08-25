@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
-import java.util.Objects;
-
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
@@ -24,6 +22,8 @@ import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
+
+import java.util.Objects;
 
 public class IntegrationErrorBuilder {
 
@@ -74,7 +74,7 @@ public class IntegrationErrorBuilder {
 
         return MessageBuilder.withPayload(integrationError)
                              .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
-                             .setHeader("targetService",
-                                        integrationRequest.getServiceFullName());
+                             .setHeader("targetAppName", integrationRequest.getAppName())
+                             .setHeader("targetService", integrationRequest.getServiceFullName());
     }
 }
