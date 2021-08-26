@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.messages.test.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.assertj.core.api.AbstractStringAssert;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.integration.dsl.IntegrationFlow;
 
-@SpringBootTest(properties = "spring.application.name=my-activiti-rb-app")
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(properties = "activiti.cloud.application.name=my-activiti-rb-app")
 public class MessageCoreAutoConfigurationTest {
 
     @Autowired
