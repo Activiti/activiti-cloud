@@ -89,7 +89,7 @@ public class IntegrationResultBuilderTest {
                 .buildMessage();
 
         //then
-        assertThat(message.getHeaders()).containsEntry("targetService", RB_NAME)
-                                        .containsEntry("targetAppName", APP_NAME);
+        Assertions.assertThat(message.getHeaders()).containsEntry("targetService", RB_NAME)
+                                                   .containsEntry("targetAppName", APP_NAME);
     }
 }
