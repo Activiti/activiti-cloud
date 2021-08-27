@@ -19,9 +19,7 @@ package org.activiti.cloud.common.messaging;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.*;
 import java.util.Objects;
 
 @ConfigurationProperties(prefix = ActivitiCloudMessagingProperties.ACTIVITI_CLOUD_MESSAGING_PREFIX)
@@ -47,6 +45,10 @@ public class ActivitiCloudMessagingProperties {
     @Min(0)
     private Integer instanceIndex = 0;
 
+    @NotEmpty
+    @Size(min = 1, max = 1)
+    private String destinationSeparator;
+
     ActivitiCloudMessagingProperties() { }
 
     public Boolean isPartitioned() {
@@ -71,6 +73,14 @@ public class ActivitiCloudMessagingProperties {
 
     public void setInstanceIndex(Integer instanceIndex) {
         this.instanceIndex = instanceIndex;
+    }
+
+    public String getDestinationSeparator() {
+        return destinationSeparator;
+    }
+
+    public void setDestinationSeparator(String destinationSeparator) {
+        this.destinationSeparator = destinationSeparator;
     }
 
     @Override
