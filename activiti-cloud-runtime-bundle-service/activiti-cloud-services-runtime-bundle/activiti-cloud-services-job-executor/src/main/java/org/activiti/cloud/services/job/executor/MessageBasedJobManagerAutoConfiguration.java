@@ -86,14 +86,13 @@ public class MessageBasedJobManagerAutoConfiguration {
                                                                                  BindingService bindingService,
                                                                                  JobMessageInputChannelFactory jobMessageInputChannelFactory,
                                                                                  MessageBasedJobManagerFactory messageBasedJobManagerFactory,
-                                                                                 JobMessageHandlerFactory jobMessageHandlerFactory,
-                                                                                 RuntimeBundleProperties runtimeBundleProperties) {
+                                                                                 JobMessageHandlerFactory jobMessageHandlerFactory) {
+
         return new MessageBasedJobManagerConfigurator(beanFactory,
                                                       bindingService,
                                                       jobMessageInputChannelFactory,
                                                       messageBasedJobManagerFactory,
-                                                      jobMessageHandlerFactory,
-                                                      runtimeBundleProperties);
+                                                      jobMessageHandlerFactory);
     }
 
 }

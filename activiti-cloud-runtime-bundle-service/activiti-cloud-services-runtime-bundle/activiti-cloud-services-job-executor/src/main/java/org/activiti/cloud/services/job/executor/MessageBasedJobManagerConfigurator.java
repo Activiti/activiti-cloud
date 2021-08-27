@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.job.executor;
 
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.cfg.ProcessEngineConfigurator;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.slf4j.Logger;
@@ -38,7 +37,6 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
     private final MessageBasedJobManagerFactory messageBasedJobManagerFactory;
     private final JobMessageHandlerFactory jobMessageHandlerFactory;
     private final ConfigurableListableBeanFactory beanFactory;
-    private final RuntimeBundleProperties runtimeBundleProperties;
 
     private MessageBasedJobManager messageBasedJobManager;
     private MessageHandler jobMessageHandler;
@@ -51,14 +49,12 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
                                               BindingService bindingService,
                                               JobMessageInputChannelFactory inputChannelFactory,
                                               MessageBasedJobManagerFactory messageBasedJobManagerFactory,
-                                              JobMessageHandlerFactory jobMessageHandlerFactory,
-                                              RuntimeBundleProperties runtimeBundleProperties) {
+                                              JobMessageHandlerFactory jobMessageHandlerFactory) {
         this.bindingService = bindingService;
         this.inputChannelFactory = inputChannelFactory;
         this.messageBasedJobManagerFactory = messageBasedJobManagerFactory;
         this.jobMessageHandlerFactory = jobMessageHandlerFactory;
         this.beanFactory = beanFactory;
-        this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
     protected MessageHandler createJobMessageHandler(ProcessEngineConfigurationImpl configuration) {
