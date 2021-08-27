@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.services.messages.core.router;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.SERVICE_FULL_NAME;
 import org.springframework.integration.mapping.MessageMappingException;
 import org.springframework.integration.router.AbstractMessageRouter;
 import org.springframework.messaging.Message;
@@ -26,6 +25,8 @@ import org.springframework.messaging.core.DestinationResolver;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.APP_NAME;
 
 public class CommandConsumerMessageRouter extends AbstractMessageRouter {
 
@@ -37,11 +38,10 @@ public class CommandConsumerMessageRouter extends AbstractMessageRouter {
 
     @Override
     protected Collection<MessageChannel> determineTargetChannels(Message<?> message) {
-        String serviceFullName = message.getHeaders()
-                                        .get(SERVICE_FULL_NAME,
-                                             String.class);
+        String appName = message.getHeaders()
+                                .get(APP_NAME, String.class);
 
-        MessageChannel messageChannel = Optional.ofNullable(serviceFullName)
+        MessageChannel messageChannel = Optional.ofNullable(appName)
                                                 .map(destinationResolver::resolveDestination)
                                                 .orElseThrow(() -> new MessageMappingException(message,
                                                                       "Unable to determine target channel for message"));

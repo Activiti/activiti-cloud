@@ -15,32 +15,32 @@
  */
 package org.activiti.cloud.services.job.executor;
 
-import java.util.Date;
-
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.impl.asyncexecutor.DefaultJobManager;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.persistence.entity.JobEntity;
 import org.activiti.engine.runtime.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.stream.config.BindingProperties;
+
+import java.util.Date;
 
 public class MessageBasedJobManager extends DefaultJobManager {
     private static final Logger logger = LoggerFactory.getLogger(MessageBasedJobManager.class);
-    
+
     private static final String DEFAULT_INPUT_CHANNEL_NAME = "asyncExecutorJobs";
-    
-    private final RuntimeBundleProperties runtimeBundleProperties;
+
+    private final BindingProperties bindingProperties;
     private final JobMessageProducer jobMessageProducer;
-    
+
     private String inputChannelName = DEFAULT_INPUT_CHANNEL_NAME;
 
     public MessageBasedJobManager(ProcessEngineConfigurationImpl processEngineConfiguration,
-                                  RuntimeBundleProperties runtimeBundleProperties,
+                                  BindingProperties bindingProperties,
                                   JobMessageProducer jobMessageProducer) {
         super(processEngineConfiguration);
-        
-        this.runtimeBundleProperties = runtimeBundleProperties;
+
+        this.bindingProperties = bindingProperties;
         this.jobMessageProducer = jobMessageProducer;
     }
 
@@ -67,15 +67,15 @@ public class MessageBasedJobManager extends DefaultJobManager {
 
         sendMessage(job);
     }
-    
-    /**
-     * Scoped destination name by runtime bundle service name   
-     * 
-     */
-    public String getDestination() {
-        return runtimeBundleProperties.getServiceName() + "." + this.getInputChannelName();
+
+    public BindingProperties getBindingProperties() {
+        return bindingProperties;
     }
-   
+
+    public String getDestination() {
+        return bindingProperties.getDestination();
+    }
+
     public String getInputChannelName() {
         return inputChannelName;
     }
@@ -83,10 +83,10 @@ public class MessageBasedJobManager extends DefaultJobManager {
     public void setInputChannelName(String inputChannelName) {
         this.inputChannelName = inputChannelName;
     }
-    
+
     public void sendMessage(final Job job) {
         logger.debug("sendMessage for job: {}", job);
-        
+
         jobMessageProducer.sendMessage(getDestination(), job);
     }
 }

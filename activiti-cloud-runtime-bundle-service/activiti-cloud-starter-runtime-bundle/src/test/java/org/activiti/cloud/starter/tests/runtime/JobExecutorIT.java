@@ -15,28 +15,12 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.message.RuntimeBundleInfoMessageHeaders;
-import org.activiti.cloud.services.job.executor.JobMessageFailedEvent;
-import org.activiti.cloud.services.job.executor.JobMessageHandler;
-import org.activiti.cloud.services.job.executor.JobMessageHandlerFactory;
-import org.activiti.cloud.services.job.executor.JobMessageHeaders;
-import org.activiti.cloud.services.job.executor.JobMessageProducer;
-import org.activiti.cloud.services.job.executor.JobMessageSentEvent;
-import org.activiti.cloud.services.job.executor.MessageBasedJobManager;
+import org.activiti.cloud.services.job.executor.*;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.engine.ActivitiException;
-import org.activiti.engine.ManagementService;
-import org.activiti.engine.ProcessEngineConfiguration;
-import org.activiti.engine.ProcessEngines;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
+import org.activiti.engine.*;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.delegate.event.ActivitiEvent;
@@ -60,7 +44,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -77,23 +61,24 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "spring.activiti.asyncExecutorActivate=true",
-    "spring.activiti.cloud.rb.job-executor.message-job-consumer.max-attempts=4" // customized
+    "activiti.cloud.rb.job-executor.consumer.max-attempts=4" // customized
 })
 @DirtiesContext
 @ContextConfiguration(classes = {RuntimeITConfiguration.class,
@@ -121,7 +106,7 @@ public class JobExecutorIT {
     private RepositoryService repositoryService;
 
     @Autowired
-    private ConsumerProperties messageJobConsumerProperties;
+    private BindingProperties jobExecutorBindingProperties;
 
     @Autowired
     private MessageBasedJobManager messageBasedJobManager;
@@ -190,7 +175,7 @@ public class JobExecutorIT {
 
     @Test
     public void shouldConfigureConsumerProperties() {
-        assertThat(messageJobConsumerProperties.getMaxAttempts())
+        assertThat(jobExecutorBindingProperties.getConsumer().getMaxAttempts())
             .as("should configure consumer properties")
             .isEqualTo(4);
     }
@@ -208,7 +193,7 @@ public class JobExecutorIT {
 
         assertThat(messageBasedJobManager.getDestination())
             .as("should configure rb scoped destination")
-            .startsWith(runtimeBundleProperties.getServiceName());
+            .endsWith(runtimeBundleProperties.getAppName());
     }
 
     @Test

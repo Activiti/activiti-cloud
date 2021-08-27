@@ -15,30 +15,29 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
-import static org.activiti.test.Assertions.assertThat;
-
-import java.util.Collections;
-
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
+
+import java.util.Collections;
+
+import static org.activiti.test.Assertions.assertThat;
 
 public class IntegrationResultBuilderTest {
 
     private static final String PROC_INST_ID = "procInstId";
     private static final String PROC_DEF_ID = "procDefId";
     private static final String ACTIVITY_ELEMENT_ID = "activitiElementId";
-    private static final String RB_NAME = "appName";
+    private static final String RB_NAME = "rbName";
+    private static final String APP_NAME = "appName";
     private static final String VAR = "var";
     private static final String VALUE = "value";
 
-    @Autowired
-    private ConnectorProperties connectorProperties;
+    private ConnectorProperties connectorProperties = new ConnectorProperties();
 
     @Test
     public void shouldBuildIntegrationResultBasedOnInformationFromIntegrationRequest() throws Exception {
@@ -50,7 +49,8 @@ public class IntegrationResultBuilderTest {
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
         IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
-        integrationRequestEvent.setAppName(RB_NAME);
+        integrationRequestEvent.setAppName(APP_NAME);
+        integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
         IntegrationResult resultEvent = IntegrationResultBuilder
@@ -80,14 +80,16 @@ public class IntegrationResultBuilderTest {
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
         IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        integrationRequestEvent.setAppName(APP_NAME);
         integrationRequestEvent.setServiceFullName(RB_NAME);
+
         //when
         Message<IntegrationResult> message = IntegrationResultBuilder
                 .resultFor(integrationRequestEvent, connectorProperties)
                 .buildMessage();
 
         //then
-        Assertions.assertThat(message.getHeaders()).containsEntry("targetService",
-                                                                  RB_NAME);
+        Assertions.assertThat(message.getHeaders()).containsEntry("targetService", RB_NAME)
+                                                   .containsEntry("targetAppName", APP_NAME);
     }
 }

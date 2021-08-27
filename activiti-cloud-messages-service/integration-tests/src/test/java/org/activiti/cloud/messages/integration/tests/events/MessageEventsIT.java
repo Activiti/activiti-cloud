@@ -66,7 +66,8 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "spring.datasource.platform=postgresql",
-                "spring.application.name=messages-app",
+                "activiti.cloud.application.name=messages-app",
+                "spring.application.name=rb",
                 "spring.jmx.enabled=false",
         })
 @DirtiesContext

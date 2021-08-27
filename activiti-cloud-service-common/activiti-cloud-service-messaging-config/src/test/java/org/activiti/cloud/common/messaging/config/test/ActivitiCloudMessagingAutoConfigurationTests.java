@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.messages.core.router;
+package org.activiti.cloud.common.messaging.config.test;
 
-import java.util.function.Function;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.context.SpringBootTest;
 
-public class CommandConsumerDestinationMapper implements Function<String, String> {
+@SpringBootTest
+@SpringBootApplication
+public class ActivitiCloudMessagingAutoConfigurationTests {
 
-    private final String separator;
-
-    public CommandConsumerDestinationMapper(String separator) {
-        this.separator = separator;
-    }
-
-    @Override
-    public String apply(String appName) {
-        return new StringBuilder("commandConsumer").append(separator)
-                                                   .append(appName)
-                                                   .toString();
+    @Test
+    public void contextLoads() {
+        // noop
     }
 }

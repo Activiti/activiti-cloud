@@ -16,13 +16,6 @@
 
 package org.activiti.cloud.services.messages.core.router;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.SERVICE_FULL_NAME;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
-import java.util.Collection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,6 +26,14 @@ import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.DestinationResolver;
+
+import java.util.Collection;
+
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.APP_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 public class CommandConsumerMessageRouterTest {
@@ -46,13 +47,13 @@ public class CommandConsumerMessageRouterTest {
     @Test
     public void should_returnResultOfDestinationResolver_when_headerHasServiceFullName() {
         //given
-        final String serviceName = "myService";
+        final String appName = "myApp";
         final Message<String> message = MessageBuilder.withPayload("any")
-            .setHeader(SERVICE_FULL_NAME, serviceName)
+            .setHeader(APP_NAME, appName)
             .build();
 
         final MessageChannel messageChannel = mock(MessageChannel.class);
-        given(destinationResolver.resolveDestination(serviceName)).willReturn(
+        given(destinationResolver.resolveDestination(appName)).willReturn(
             messageChannel);
 
         //when
@@ -80,12 +81,12 @@ public class CommandConsumerMessageRouterTest {
     @Test
     public void should_throwException_when_destinationResolverDoesNotFindADestination() {
         //given
-        final String serviceName = "myService";
+        final String appName = "myApp";
         final Message<String> message = MessageBuilder.withPayload("any")
-            .setHeader(SERVICE_FULL_NAME, serviceName)
+            .setHeader(APP_NAME, appName)
             .build();
 
-        given(destinationResolver.resolveDestination(serviceName)).willReturn(null);
+        given(destinationResolver.resolveDestination(appName)).willReturn(null);
 
         //then
         assertThatExceptionOfType(MessageMappingException.class)

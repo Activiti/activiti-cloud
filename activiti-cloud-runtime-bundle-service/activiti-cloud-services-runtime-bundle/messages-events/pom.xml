@@ -19,6 +19,10 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-config</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-engine</artifactId>
       <scope>provided</scope>

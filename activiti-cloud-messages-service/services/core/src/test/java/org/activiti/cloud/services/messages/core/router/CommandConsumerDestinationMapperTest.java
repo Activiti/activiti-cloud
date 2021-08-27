@@ -16,13 +16,13 @@
 
 package org.activiti.cloud.services.messages.core.router;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CommandConsumerDestinationMapperTest {
 
-    private CommandConsumerDestinationMapper destinationMapper = new CommandConsumerDestinationMapper();
+    private CommandConsumerDestinationMapper destinationMapper = new CommandConsumerDestinationMapper(".");
 
     @Test
     public void should_appendServiceNameToCommandConsumerDestinationName() {
@@ -33,6 +33,6 @@ public class CommandConsumerDestinationMapperTest {
         final String destination = destinationMapper.apply(serviceFullName);
 
         //then
-        assertThat(destination).isEqualTo("commandConsumer_myService");
+        assertThat(destination).isEqualTo("commandConsumer.myService");
     }
 }

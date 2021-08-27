@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.conf;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
@@ -29,7 +28,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+                properties = {"activiti.cloud.messaging.destination-separator=."})
 @DirtiesContext
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class EngineConfigurationIT {
@@ -66,16 +68,16 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForMessageEvents() {
         //when
-        assertProperty("spring.cloud.stream.bindings.messageEvents.destination").isEqualTo("messageEvents_my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.messageEvents.producer.required-groups").isEqualTo("messageConnector");
+        assertProperty("spring.cloud.stream.bindings.messageEvents.destination").isEqualTo("messageEvents.activiti-app");
+        assertProperty("spring.cloud.stream.bindings.messageEvents.producer.required-groups").isEqualTo("messages");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForCommandEndpoint() {
         //when
-        assertProperty("spring.cloud.stream.bindings.commandConsumer.destination").isEqualTo("commandConsumer_my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.commandConsumer.group").isEqualTo("messageConnector");
-        assertProperty("spring.cloud.stream.bindings.commandResults.destination").isEqualTo("commandResults_my-activiti-rb-app");
+        assertProperty("spring.cloud.stream.bindings.commandConsumer.destination").isEqualTo("commandConsumer.activiti-app");
+        assertProperty("spring.cloud.stream.bindings.commandConsumer.group").isEqualTo("my-activiti-rb-app");
+        assertProperty("spring.cloud.stream.bindings.commandResults.destination").isEqualTo("commandResults.activiti-app");
 
     }
 
@@ -91,9 +93,9 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForCloudConnectors() {
         //when
-        assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.destination").isEqualTo("integrationResult_my-activiti-rb-app");
+        assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.destination").isEqualTo("integrationResult.activiti-app");
         assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.group").isEqualTo("my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.destination").isEqualTo("integrationError_my-activiti-rb-app");
+        assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.destination").isEqualTo("integrationError.activiti-app");
         assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.group").isEqualTo("my-activiti-rb-app");
     }
 
