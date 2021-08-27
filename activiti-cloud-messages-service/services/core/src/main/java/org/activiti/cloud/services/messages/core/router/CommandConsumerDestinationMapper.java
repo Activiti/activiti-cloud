@@ -20,9 +20,15 @@ import java.util.function.Function;
 
 public class CommandConsumerDestinationMapper implements Function<String, String> {
 
+    private final String separator;
+
+    public CommandConsumerDestinationMapper(String separator) {
+        this.separator = separator;
+    }
+
     @Override
     public String apply(String appName) {
-        return new StringBuilder("commandConsumer").append("_")
+        return new StringBuilder("commandConsumer").append(separator)
                                                    .append(appName)
                                                    .toString();
     }

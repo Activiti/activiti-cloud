@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
@@ -32,8 +32,8 @@ import org.activiti.cloud.services.messages.core.processor.StartMessagePayloadGr
 import org.activiti.cloud.services.messages.core.release.MessageGroupReleaseChain;
 import org.activiti.cloud.services.messages.core.release.MessageGroupReleaseStrategyChain;
 import org.activiti.cloud.services.messages.core.release.MessageSentReleaseHandler;
-import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageChannelResolver;
 import org.activiti.cloud.services.messages.core.router.CommandConsumerDestinationMapper;
+import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageChannelResolver;
 import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageRouter;
 import org.activiti.cloud.services.messages.core.support.ChainBuilder;
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
@@ -74,6 +74,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
 
 /**
  * A Processor app that performs aggregation.
@@ -122,8 +124,8 @@ public class MessagesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public CommandConsumerDestinationMapper commandConsumerDestinationMapper() {
-        return new CommandConsumerDestinationMapper();
+    public CommandConsumerDestinationMapper commandConsumerDestinationMapper(ActivitiCloudMessagingProperties properties) {
+        return new CommandConsumerDestinationMapper(properties.getDestinationSeparator());
     }
 
     @Bean

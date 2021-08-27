@@ -15,6 +15,10 @@
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-process-model-impl</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-config</artifactId>
+    </dependency>
     <!-- Third-party -->
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
