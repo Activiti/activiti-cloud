@@ -44,7 +44,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -78,7 +78,7 @@ import static org.mockito.Mockito.*;
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "spring.activiti.asyncExecutorActivate=true",
-    "spring.activiti.cloud.rb.job-executor.message-job-consumer.max-attempts=4" // customized
+    "activiti.cloud.rb.job-executor.consumer.max-attempts=4" // customized
 })
 @DirtiesContext
 @ContextConfiguration(classes = {RuntimeITConfiguration.class,
@@ -106,7 +106,7 @@ public class JobExecutorIT {
     private RepositoryService repositoryService;
 
     @Autowired
-    private ConsumerProperties messageJobConsumerProperties;
+    private BindingProperties jobExecutorBindingProperties;
 
     @Autowired
     private MessageBasedJobManager messageBasedJobManager;
@@ -175,7 +175,7 @@ public class JobExecutorIT {
 
     @Test
     public void shouldConfigureConsumerProperties() {
-        assertThat(messageJobConsumerProperties.getMaxAttempts())
+        assertThat(jobExecutorBindingProperties.getConsumer().getMaxAttempts())
             .as("should configure consumer properties")
             .isEqualTo(4);
     }

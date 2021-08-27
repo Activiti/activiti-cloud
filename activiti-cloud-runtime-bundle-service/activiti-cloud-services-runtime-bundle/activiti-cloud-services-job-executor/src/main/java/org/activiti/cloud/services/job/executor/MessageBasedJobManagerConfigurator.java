@@ -21,7 +21,6 @@ import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.context.SmartLifecycle;
@@ -34,11 +33,8 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
     private static final String MESSAGE_BASED_JOB_MANAGER = "messageBasedJobManager";
     public static final String JOB_MESSAGE_HANDLER = "jobMessageHandler";
 
-    private String contentType = "application/json";
-
     private final BindingService bindingService;
     private final JobMessageInputChannelFactory inputChannelFactory;
-    private final ConsumerProperties consumerProperties;
     private final MessageBasedJobManagerFactory messageBasedJobManagerFactory;
     private final JobMessageHandlerFactory jobMessageHandlerFactory;
     private final ConfigurableListableBeanFactory beanFactory;
@@ -56,11 +52,9 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
                                               JobMessageInputChannelFactory inputChannelFactory,
                                               MessageBasedJobManagerFactory messageBasedJobManagerFactory,
                                               JobMessageHandlerFactory jobMessageHandlerFactory,
-                                              ConsumerProperties consumerProperties,
                                               RuntimeBundleProperties runtimeBundleProperties) {
         this.bindingService = bindingService;
         this.inputChannelFactory = inputChannelFactory;
-        this.consumerProperties = consumerProperties;
         this.messageBasedJobManagerFactory = messageBasedJobManagerFactory;
         this.jobMessageHandlerFactory = jobMessageHandlerFactory;
         this.beanFactory = beanFactory;
@@ -103,15 +97,7 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
         this.configuration = configuration;
 
         String channelName = messageBasedJobManager.getInputChannelName();
-        String destination = messageBasedJobManager.getDestination();
-        String group = runtimeBundleProperties.getServiceFullName();
-
-        BindingProperties bindingProperties = new BindingProperties();
-        bindingProperties.setConsumer(consumerProperties);
-        bindingProperties.setContentType(contentType);
-        bindingProperties.setGroup(group);
-        // Let's use message job producer destination scope
-        bindingProperties.setDestination(destination);
+        BindingProperties bindingProperties = messageBasedJobManager.getBindingProperties();
 
         // Let's create input channel
         inputChannel = inputChannelFactory.createInputChannel(channelName, bindingProperties);
@@ -167,11 +153,6 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
     @Override
     public boolean isRunning() {
         return running;
-    }
-
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
     }
 
     @SuppressWarnings("unchecked")
