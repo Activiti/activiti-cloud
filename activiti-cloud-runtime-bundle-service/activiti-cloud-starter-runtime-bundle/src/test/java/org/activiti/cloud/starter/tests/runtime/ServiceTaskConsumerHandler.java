@@ -23,6 +23,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -64,6 +65,7 @@ public class ServiceTaskConsumerHandler {
     private final BinderAwareChannelResolver resolver;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ObjectMapper objectMapper;
+    private final String destinationSeparator;
 
     private final AtomicInteger currentMealIndex = new AtomicInteger(0);
     private List<String> meals = Arrays.asList("pizza", "pasta");
@@ -72,10 +74,12 @@ public class ServiceTaskConsumerHandler {
     @Autowired
     public ServiceTaskConsumerHandler(BinderAwareChannelResolver resolver,
         RuntimeBundleProperties runtimeBundleProperties,
-        ObjectMapper objectMapper) {
+        ObjectMapper objectMapper,
+        @Value("${activiti.cloud.messaging.destination-separator}") String destinationSeparator) {
         this.resolver = resolver;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.objectMapper = objectMapper;
+        this.destinationSeparator = destinationSeparator;
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
@@ -112,8 +116,12 @@ public class ServiceTaskConsumerHandler {
             integrationContext);
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult)
             .build();
+
+        String destination = new StringBuilder("integrationResult").append(destinationSeparator)
+                                                                   .append(runtimeBundleProperties.getAppName())
+                                                                   .toString();
         resolver
-            .resolveDestination("integrationResult_" + runtimeBundleProperties.getAppName())
+            .resolveDestination(destination)
             .send(message);
     }
 
