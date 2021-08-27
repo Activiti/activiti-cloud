@@ -30,7 +30,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+                properties = {"activiti.cloud.messaging.destination-separator=."})
 @DirtiesContext
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class EngineConfigurationIT {
@@ -67,16 +68,16 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForMessageEvents() {
         //when
-        assertProperty("spring.cloud.stream.bindings.messageEvents.destination").isEqualTo("messageEvents_activiti-app");
+        assertProperty("spring.cloud.stream.bindings.messageEvents.destination").isEqualTo("messageEvents.activiti-app");
         assertProperty("spring.cloud.stream.bindings.messageEvents.producer.required-groups").isEqualTo("messages");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForCommandEndpoint() {
         //when
-        assertProperty("spring.cloud.stream.bindings.commandConsumer.destination").isEqualTo("commandConsumer_activiti-app");
+        assertProperty("spring.cloud.stream.bindings.commandConsumer.destination").isEqualTo("commandConsumer.activiti-app");
         assertProperty("spring.cloud.stream.bindings.commandConsumer.group").isEqualTo("my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.commandResults.destination").isEqualTo("commandResults_activiti-app");
+        assertProperty("spring.cloud.stream.bindings.commandResults.destination").isEqualTo("commandResults.activiti-app");
 
     }
 
@@ -92,9 +93,9 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForCloudConnectors() {
         //when
-        assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.destination").isEqualTo("integrationResult_activiti-app");
+        assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.destination").isEqualTo("integrationResult.activiti-app");
         assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.group").isEqualTo("my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.destination").isEqualTo("integrationError_activiti-app");
+        assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.destination").isEqualTo("integrationError.activiti-app");
         assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.group").isEqualTo("my-activiti-rb-app");
     }
 
