@@ -29,7 +29,7 @@ public class IntegrationResultDestinationBuilderImpl implements IntegrationResul
 
     @Override
     public String buildDestination(IntegrationRequest event) {
-        String resultDestinationOverride = connectorProperties.getErrorDestinationOverride();
+        String resultDestinationOverride = connectorProperties.getResultDestinationOverride();
 
         String destination = ObjectUtils.isEmpty(resultDestinationOverride)
                 ? new StringBuilder("integrationResult").append(connectorProperties.getMqDestinationSeparator())
