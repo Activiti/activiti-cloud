@@ -20,11 +20,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "activiti.keycloak")
 public class ActivitiKeycloakProperties {
 
+    public static enum GrantType {
+        password, client_credentials
+    }
+
     private String adminClientApp;
 
     private String clientUser;
 
     private String clientPassword;
+
+    private String clientId;
+
+    private String clientSecret;
+
+    private GrantType grantType = GrantType.password;
 
     public String getAdminClientApp() {
         return adminClientApp;
@@ -49,4 +59,29 @@ public class ActivitiKeycloakProperties {
     public void setClientPassword(String clientPassword) {
         this.clientPassword = clientPassword;
     }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
+
+    public GrantType getGrantType() {
+        return grantType;
+    }
+
+    public void setGrantType(GrantType grantType) {
+        this.grantType = grantType;
+    }
+
 }
