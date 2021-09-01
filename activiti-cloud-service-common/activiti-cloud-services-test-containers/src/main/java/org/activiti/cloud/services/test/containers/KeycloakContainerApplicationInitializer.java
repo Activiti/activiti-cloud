@@ -15,16 +15,18 @@
  */
 package org.activiti.cloud.services.test.containers;
 
+import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 public class KeycloakContainerApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static GenericContainer keycloakContainer = new GenericContainer("activiti/activiti-keycloak:10.0.2")
-        .withExposedPorts(8180)
+    private static KeycloakContainer keycloakContainer = new KeycloakContainer()
+        .withAdminUsername("admin")
+        .withAdminPassword("admin")
+        .withRealmImportFile("activiti-realm.json")
         .waitingFor(Wait.defaultWaitStrategy())
         .withReuse(true);
 
@@ -36,8 +38,7 @@ public class KeycloakContainerApplicationInitializer implements ApplicationConte
         }
 
         TestPropertyValues.of(
-            "keycloak.auth-server-url=" + "http://" + keycloakContainer.getContainerIpAddress()
-                + ":" + keycloakContainer.getFirstMappedPort() + "/auth"
+            "keycloak.auth-server-url=" + keycloakContainer.getAuthServerUrl()
         ).applyTo(context.getEnvironment());
 
     }
