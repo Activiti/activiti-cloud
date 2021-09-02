@@ -36,7 +36,7 @@ public class KeycloakInstanceWrapperIT {
     public void shouldWireWrapper() {
         assertThat(keycloakInstanceWrapper).isNotNull();
         assertThat(keycloakInstanceWrapper.getRealm()).isNotNull();
-        assertThat(keycloakInstanceWrapper.getRealm().groups().groups()).hasSize(2);
-        assertThat(keycloakInstanceWrapper.getRealm().users().list()).hasSize(8);
+        assertThat(keycloakInstanceWrapper.getRealm().groups().groups()).isNotEmpty();
+        assertThat(keycloakInstanceWrapper.getRealm().users().list()).isNotEmpty();
     }
 }
