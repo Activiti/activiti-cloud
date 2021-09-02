@@ -16,49 +16,27 @@
 package org.activiti.cloud.services.identity.keycloak;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+@Validated
 @ConfigurationProperties(prefix = "activiti.keycloak")
 public class ActivitiKeycloakProperties {
 
     public static enum GrantType {
-        password, client_credentials
+        client_credentials
     }
 
-    private String adminClientApp;
-
-    private String clientUser;
-
-    private String clientPassword;
-
+    @NotEmpty
     private String clientId;
 
+    @NotEmpty
     private String clientSecret;
 
-    private GrantType grantType = GrantType.password;
-
-    public String getAdminClientApp() {
-        return adminClientApp;
-    }
-
-    public String getClientUser() {
-        return clientUser;
-    }
-
-    public String getClientPassword() {
-        return clientPassword;
-    }
-
-    public void setAdminClientApp(String adminClientApp) {
-        this.adminClientApp = adminClientApp;
-    }
-
-    public void setClientUser(String clientUser) {
-        this.clientUser = clientUser;
-    }
-
-    public void setClientPassword(String clientPassword) {
-        this.clientPassword = clientPassword;
-    }
+    @NotNull
+    private GrantType grantType = GrantType.client_credentials;
 
     public String getClientId() {
         return clientId;

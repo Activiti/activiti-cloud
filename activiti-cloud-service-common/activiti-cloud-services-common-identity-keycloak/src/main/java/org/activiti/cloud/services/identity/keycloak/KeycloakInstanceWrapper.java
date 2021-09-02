@@ -31,20 +31,12 @@ public class KeycloakInstanceWrapper {
 
     private Keycloak getKeycloakInstance() {
         KeycloakBuilder client = KeycloakBuilder.builder()
-                                                .realm(keycloakProperties.getRealm())
                                                 .serverUrl(keycloakProperties.getAuthServerUrl())
+                                                .realm(keycloakProperties.getRealm())
+                                                .clientId(activitiKeycloakProperties.getClientId())
+                                                .clientSecret(activitiKeycloakProperties.getClientSecret())
                                                 .grantType(activitiKeycloakProperties.getGrantType()
                                                                                      .name());
-
-        if (ActivitiKeycloakProperties.GrantType.password.equals(activitiKeycloakProperties.getGrantType())) {
-            client.clientId(activitiKeycloakProperties.getAdminClientApp())
-                  .username(activitiKeycloakProperties.getClientUser())
-                  .password(activitiKeycloakProperties.getClientPassword());
-        } else {
-            client.clientId(activitiKeycloakProperties.getClientId())
-                  .clientSecret(activitiKeycloakProperties.getClientSecret());
-        }
-
         return client.build();
     }
 

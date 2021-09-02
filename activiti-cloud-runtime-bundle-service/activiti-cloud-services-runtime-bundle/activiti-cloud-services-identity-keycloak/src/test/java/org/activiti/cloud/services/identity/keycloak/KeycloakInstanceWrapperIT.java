@@ -20,12 +20,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@TestPropertySource("classpath:application.properties")
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
-public abstract class KeycloakInstanceWrapperTestSupport {
+public class KeycloakInstanceWrapperIT {
 
     @Autowired
     private KeycloakInstanceWrapper keycloakInstanceWrapper;
