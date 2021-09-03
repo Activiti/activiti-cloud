@@ -37,9 +37,18 @@ public class KeycloakContainerApplicationInitializer implements ApplicationConte
             keycloakContainer.start();
         }
 
-        TestPropertyValues.of(
-            "keycloak.auth-server-url=" + keycloakContainer.getAuthServerUrl()
-        ).applyTo(context.getEnvironment());
+        TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
+    }
 
+    public static KeycloakContainer getContainer() {
+        return keycloakContainer;
+    }
+
+    public static String[] getContainerProperties() {
+        return new String[] {
+            "keycloak.auth-server-url=" + keycloakContainer.getAuthServerUrl(),
+            "activiti.keycloak.client-id=activiti-keycloak",
+            "activiti.keycloak.client-secret=545bc187-f10f-41f9-8d5f-cfca3dbada9c",
+            "activiti.keycloak.grant-type=client_credentials"};
     }
 }
