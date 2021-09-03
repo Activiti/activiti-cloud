@@ -19,9 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(classes = Application.class,
-                properties = {"activiti.keycloak.client-id=activiti-keycloak",
-                              "activiti.keycloak.client-secret=dummy"})
+@SpringBootTest(classes = Application.class)
 @DirtiesContext
 public class ApplicationTest {
 
