@@ -82,6 +82,9 @@ public class ProjectServiceImplTest {
     @Mock
     private Set<ProjectValidator> projectValidators;
 
+    @Mock
+    private Model modelOne;
+
     @BeforeEach
     public void setUp() {
         initMocks(this);
@@ -205,5 +208,21 @@ public class ProjectServiceImplTest {
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void should_returnProject_copyingProject() {
+        String copiedProjectName = "copied-project";
+        Project projectToCopy = new ProjectImpl("id", "copied-project");
+
+        when(projectRepository.copyProject(any(), any())).thenReturn(projectToCopy);
+        when(modelService.getAllModels(any())).thenReturn(asList(modelOne));
+
+        Project copiedProject = projectService.copyProject(null, copiedProjectName);
+
+        assertThat(copiedProject.getName()).isEqualTo(copiedProjectName);
+        verify(projectRepository, times(1)).copyProject(any(), any());
+        verify(modelService, times(1)).copyModel(any(), any());
+        verify(modelService, times(1)).cleanModelIdList();
     }
 }
