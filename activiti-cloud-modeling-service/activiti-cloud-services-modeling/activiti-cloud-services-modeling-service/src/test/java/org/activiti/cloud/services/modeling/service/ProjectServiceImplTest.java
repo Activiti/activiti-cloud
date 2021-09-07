@@ -215,14 +215,14 @@ public class ProjectServiceImplTest {
         String copiedProjectName = "copied-project";
         Project projectToCopy = new ProjectImpl("id", "copied-project");
 
-        when(projectRepository.copyProject(any(), any())).thenReturn(projectToCopy);
+        when(projectRepository.copyProject(projectToCopy, copiedProjectName)).thenReturn(projectToCopy);
         when(modelService.getAllModels(any())).thenReturn(asList(modelOne));
 
-        Project copiedProject = projectService.copyProject(null, copiedProjectName);
+        Project copiedProject = projectService.copyProject(projectToCopy, copiedProjectName);
 
         assertThat(copiedProject.getName()).isEqualTo(copiedProjectName);
-        verify(projectRepository, times(1)).copyProject(any(), any());
-        verify(modelService, times(1)).copyModel(any(), any());
+        verify(projectRepository, times(1)).copyProject(projectToCopy, copiedProjectName);
+        verify(modelService, times(1)).copyModel(modelOne, projectToCopy);
         verify(modelService, times(1)).cleanModelIdList();
     }
 }

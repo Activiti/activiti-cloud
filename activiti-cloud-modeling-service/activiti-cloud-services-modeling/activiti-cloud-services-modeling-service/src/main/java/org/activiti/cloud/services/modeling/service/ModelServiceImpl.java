@@ -96,6 +96,8 @@ public class ModelServiceImpl implements ModelService{
 
     private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
 
+    private static final String MODEL_IDENTIFIER_SEPARATOR = "-";
+
     @Autowired
     public ModelServiceImpl(ModelRepository modelRepository,
                             ModelTypeService modelTypeService,
@@ -200,10 +202,10 @@ public class ModelServiceImpl implements ModelService{
     @Override
     public Model copyModel(Model modelToBeCopied, Project project) {
         Model copiedModel = modelRepository.copyModel(modelToBeCopied, project);
-        modelIdentifiers.put(String.join("-",
+        modelIdentifiers.put(String.join(MODEL_IDENTIFIER_SEPARATOR,
                         modelToBeCopied.getType().toLowerCase(),
                         modelToBeCopied.getId()),
-                String.join("-",
+                String.join(MODEL_IDENTIFIER_SEPARATOR,
                         copiedModel.getType().toLowerCase(),
                         copiedModel.getId()));
         updateModelContent(copiedModel, getModelContentFile(copiedModel));
@@ -229,7 +231,7 @@ public class ModelServiceImpl implements ModelService{
         Model fullModel = findModelById(model.getId()).orElse(model);
         Model modelToFile = buildModel(fullModel.getType(),
                                        fullModel.getName());
-        modelToFile.setId(fullModel.getType().toLowerCase().concat("-").concat(model.getId()));
+        modelToFile.setId(fullModel.getType().toLowerCase().concat(MODEL_IDENTIFIER_SEPARATOR).concat(model.getId()));
         modelToFile.setExtensions(fullModel.getExtensions());
         modelToFile.setScope(null);
 
@@ -367,9 +369,9 @@ public class ModelServiceImpl implements ModelService{
                     model);
         if (convertedId != null) {
             modelIdentifiers.put(convertedId,
-                                 String.join("-",
-                                             model.getType().toLowerCase(),
-                                             model.getId()));
+                    String.join(MODEL_IDENTIFIER_SEPARATOR,
+                            model.getType().toLowerCase(),
+                            model.getId()));
         }
         return model;
     }
