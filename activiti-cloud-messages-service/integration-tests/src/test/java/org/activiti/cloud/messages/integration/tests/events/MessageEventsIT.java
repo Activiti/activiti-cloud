@@ -32,6 +32,7 @@ import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEvent
 import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
 import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionCancelledEventMessageProducer;
 import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.activiti.engine.RuntimeService;
@@ -72,7 +73,8 @@ import static org.mockito.Mockito.verify;
         })
 @DirtiesContext
 @Testcontainers
-@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class,
+                                      KeycloakContainerApplicationInitializer.class})
 class MessageEventsIT {
 
     @Container

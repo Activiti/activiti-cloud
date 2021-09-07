@@ -15,15 +15,18 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource("classpath:application.properties")
+@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakInstanceWrapperIT {
 
     @Autowired
@@ -33,5 +36,7 @@ public class KeycloakInstanceWrapperIT {
     public void shouldWireWrapper() {
         assertThat(keycloakInstanceWrapper).isNotNull();
         assertThat(keycloakInstanceWrapper.getRealm()).isNotNull();
+        assertThat(keycloakInstanceWrapper.getRealm().groups().groups()).isNotEmpty();
+        assertThat(keycloakInstanceWrapper.getRealm().users().list()).isNotEmpty();
     }
 }

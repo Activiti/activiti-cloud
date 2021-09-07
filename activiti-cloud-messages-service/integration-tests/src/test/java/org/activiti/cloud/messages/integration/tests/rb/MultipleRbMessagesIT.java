@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.messages.integration.tests.rb;
 
+import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
@@ -27,6 +28,8 @@ import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEvent
 import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
 import org.activiti.cloud.services.messages.events.support.BpmnMessageEventMessageBuilderFactory;
 import org.activiti.cloud.services.messages.events.support.MessageEventsDispatcher;
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.h2.tools.Server;
 import org.junit.jupiter.api.AfterAll;
@@ -35,13 +38,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -63,14 +65,10 @@ class MultipleRbMessagesIT {
     private static ConfigurableApplicationContext rb2Context;
 
     @Container
-    private static GenericContainer keycloakContainer =
-        new GenericContainer("activiti/activiti-keycloak")
-            .withExposedPorts(8180)
-            .waitingFor(Wait.defaultWaitStrategy());
+    private static KeycloakContainer keycloakContainer = KeycloakContainerApplicationInitializer.getContainer();
 
     @Container
-    private static RabbitMQContainer rabbitMQContainer =
-        new RabbitMQContainer("rabbitmq:3.8.9-management-alpine");
+    private static RabbitMQContainer rabbitMQContainer = RabbitMQContainerApplicationInitializer.getContainer();
 
     @Configuration
     @Profile("h2")
@@ -122,25 +120,25 @@ class MultipleRbMessagesIT {
 
     @BeforeAll
     public static void setUp() {
-        System.setProperty("keycloak.auth-server-url", "http://" + keycloakContainer.getContainerIpAddress() + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
+        TestPropertyValues.of(KeycloakContainerApplicationInitializer.getContainerProperties())
+                          .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
+                          .applyToSystemProperties(() -> {
+                                h2Context = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
+                                                                                             .profiles("h2")
+                                                                                             .run();
 
-        System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
-        System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
+                                rb1Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081",
+                                                                                                          "activiti.cloud.application.name=messages-app1",
+                                                                                                          "spring.application.name=rb")
+                                                                                              .run();
 
-        h2Context = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
-                                                                     .profiles("h2")
-                                                                     .run();
+                                rb2Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082",
+                                                                                                          "activiti.cloud.application.name=messages-app2",
+                                                                                                          "spring.application.name=rb")
+                                                                                              .run();
 
-        rb1Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081",
-                                                                                  "activiti.cloud.application.name=messages-app1",
-                                                                                  "spring.application.name=rb")
-                                                                      .run();
-
-        rb2Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082",
-                                                                                  "activiti.cloud.application.name=messages-app2",
-                                                                                  "spring.application.name=rb")
-                                                                      .run();
-
+                                return true;
+                            });
     }
 
     @AfterAll

@@ -33,10 +33,17 @@ public class RabbitMQContainerApplicationInitializer implements
             rabbitMQContainer.start();
         }
 
-        TestPropertyValues.of(
-                "spring.rabbitmq.host=" + rabbitMQContainer.getContainerIpAddress(),
-                "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort()
-        ).applyTo(context.getEnvironment());
+        TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
 
+    }
+
+    public static RabbitMQContainer getContainer() {
+        return rabbitMQContainer;
+    }
+
+    public static String[] getContainerProperties() {
+        return new String[] {
+            "spring.rabbitmq.host=" + rabbitMQContainer.getContainerIpAddress(),
+            "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort()};
     }
 }

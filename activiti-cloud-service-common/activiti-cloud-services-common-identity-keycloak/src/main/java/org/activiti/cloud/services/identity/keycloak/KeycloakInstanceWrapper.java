@@ -17,6 +17,7 @@ package org.activiti.cloud.services.identity.keycloak;
 
 
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,11 +30,14 @@ public class KeycloakInstanceWrapper {
     private KeycloakProperties keycloakProperties;
 
     private Keycloak getKeycloakInstance() {
-        return Keycloak.getInstance(keycloakProperties.getAuthServerUrl(),
-                                    keycloakProperties.getRealm(),
-                                    activitiKeycloakProperties.getClientUser(),
-                                    activitiKeycloakProperties.getClientPassword(),
-                                    activitiKeycloakProperties.getAdminClientApp());
+        KeycloakBuilder client = KeycloakBuilder.builder()
+                                                .serverUrl(keycloakProperties.getAuthServerUrl())
+                                                .realm(keycloakProperties.getRealm())
+                                                .clientId(activitiKeycloakProperties.getClientId())
+                                                .clientSecret(activitiKeycloakProperties.getClientSecret())
+                                                .grantType(activitiKeycloakProperties.getGrantType()
+                                                                                     .name());
+        return client.build();
     }
 
     public RealmResource getRealm() {
