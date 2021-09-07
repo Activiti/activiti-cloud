@@ -15,17 +15,27 @@
  */
 package org.activiti.cloud.runtime;
 
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = RuntimeBundleApplication.class)
 @DirtiesContext
+@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class RuntimeBundleApplicationIT {
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Test
     public void contextLoads() throws Exception {
-
+        assertThat(applicationContext).isNotNull();
     }
 
 }
