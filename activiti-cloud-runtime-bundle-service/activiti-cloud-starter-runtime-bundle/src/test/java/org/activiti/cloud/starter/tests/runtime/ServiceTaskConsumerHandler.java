@@ -118,7 +118,7 @@ public class ServiceTaskConsumerHandler {
             .build();
 
         String destination = new StringBuilder("integrationResult").append(destinationSeparator)
-                                                                   .append(runtimeBundleProperties.getAppName())
+                                                                   .append(runtimeBundleProperties.getServiceFullName())
                                                                    .toString();
         resolver
             .resolveDestination(destination)

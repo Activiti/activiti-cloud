@@ -93,9 +93,9 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForCloudConnectors() {
         //when
-        assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.destination").isEqualTo("integrationResult.activiti-app");
+        assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.destination").isEqualTo("integrationResult.my-activiti-rb-app");
         assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.group").isEqualTo("my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.destination").isEqualTo("integrationError.activiti-app");
+        assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.destination").isEqualTo("integrationError.my-activiti-rb-app");
         assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.group").isEqualTo("my-activiti-rb-app");
     }
 

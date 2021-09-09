@@ -47,7 +47,7 @@ public class IntegrationResultDestinationBuilderTest {
         // given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-        integrationRequest.setServiceFullName("myApp");
+        integrationRequest.setServiceFullName("myServiceName");
         integrationRequest.setAppName("myAppName");
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
@@ -57,7 +57,7 @@ public class IntegrationResultDestinationBuilderTest {
         String result = subject.buildDestination(integrationRequest);
 
         // then
-        assertThat(result).isEqualTo("integrationResult.myAppName");
+        assertThat(result).isEqualTo("integrationResult.myServiceName");
 
     }
 

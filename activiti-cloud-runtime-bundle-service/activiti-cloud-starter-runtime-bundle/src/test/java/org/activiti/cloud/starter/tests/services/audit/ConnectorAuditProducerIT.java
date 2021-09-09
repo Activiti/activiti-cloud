@@ -94,10 +94,10 @@ public class ConnectorAuditProducerIT {
     @Autowired
     private BinderAwareChannelResolver channelResolver;
 
-    @Value("integrationResult_${activiti.cloud.application.name}")
+    @Value("integrationResult_${spring.application.name}")
     private String integrationResultDestination;
 
-    @Value("integrationError_${activiti.cloud.application.name}")
+    @Value("integrationError_${spring.application.name}")
     private String integrationErrorDestination;
 
     @BeforeEach
