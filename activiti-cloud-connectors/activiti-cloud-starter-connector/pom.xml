@@ -37,10 +37,6 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-tracing</artifactId>
     </dependency>
     <dependency>
