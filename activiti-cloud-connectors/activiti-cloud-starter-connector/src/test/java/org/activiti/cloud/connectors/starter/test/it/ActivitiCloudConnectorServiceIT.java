@@ -63,6 +63,9 @@ public class ActivitiCloudConnectorServiceIT {
     @Value("${activiti.cloud.application.name}")
     private String appName;
 
+    @Value("${spring.application.name}")
+    private String serviceFullName;
+
     private final static String PROCESS_INSTANCE_ID = "processInstanceId-" + UUID.randomUUID().toString();
     private final static String PROCESS_DEFINITION_ID = "myProcessDefinitionId";
     private final static String INTEGRATION_ID = "integrationId-" + UUID.randomUUID().toString();
@@ -92,7 +95,7 @@ public class ActivitiCloudConnectorServiceIT {
         integrationContext.addInBoundVariables(variables);
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setAppName(appName);
-        integrationRequest.setServiceFullName("mock-rb");
+        integrationRequest.setServiceFullName(serviceFullName);
         integrationRequest.setServiceType("runtime-bundle");
         integrationRequest.setServiceVersion("1");
         integrationRequest.setAppVersion("1");
@@ -262,7 +265,7 @@ public class ActivitiCloudConnectorServiceIT {
 
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setAppName(appName);
-        integrationRequest.setServiceFullName("mock-rb");
+        integrationRequest.setServiceFullName(serviceFullName);
         integrationRequest.setServiceType("runtime-bundle");
         integrationRequest.setServiceVersion("1");
         integrationRequest.setAppVersion("1");

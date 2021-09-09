@@ -33,7 +33,7 @@ public class IntegrationResultDestinationBuilderImpl implements IntegrationResul
 
         String destination = ObjectUtils.isEmpty(resultDestinationOverride)
                 ? new StringBuilder("integrationResult").append(connectorProperties.getMqDestinationSeparator())
-                                                        .append(event.getAppName())
+                                                        .append(event.getServiceFullName())
                                                         .toString()
                 : resultDestinationOverride;
 

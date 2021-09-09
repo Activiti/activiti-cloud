@@ -33,7 +33,7 @@ public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorD
 
         String destination = ObjectUtils.isEmpty(errorDestinationOverride)
             ? new StringBuilder("integrationError").append(connectorProperties.getMqDestinationSeparator())
-                                                   .append(event.getAppName())
+                                                   .append(event.getServiceFullName())
                                                    .toString()
             : errorDestinationOverride;
 
