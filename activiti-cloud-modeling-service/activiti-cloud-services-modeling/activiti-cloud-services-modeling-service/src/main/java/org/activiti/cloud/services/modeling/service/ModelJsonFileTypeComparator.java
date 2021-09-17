@@ -20,7 +20,7 @@ import java.util.Comparator;
 
 public class ModelJsonFileTypeComparator implements Comparator<ProjectHolder.ModelJsonFile> {
 
-    @Override public int compare(final ProjectHolder.ModelJsonFile o1, final ProjectHolder.ModelJsonFile o2) {
+    @Override public int compare(ProjectHolder.ModelJsonFile o1, ProjectHolder.ModelJsonFile o2) {
         if (PRIORITIZED_MODEL_TYPES.contains(o2.getModelType().getName()) && !PRIORITIZED_MODEL_TYPES.contains(o1.getModelType().getName())) {
             return 1;
         } else if (PRIORITIZED_MODEL_TYPES.contains(o1.getModelType().getName()) && !PRIORITIZED_MODEL_TYPES.contains(

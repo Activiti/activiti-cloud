@@ -21,7 +21,7 @@ import org.activiti.cloud.modeling.api.Model;
 
 public class ModelTypeComparator implements Comparator<Model> {
 
-    @Override public int compare(final Model o1, final Model o2) {
+    @Override public int compare(Model o1, Model o2) {
         if (PRIORITIZED_MODEL_TYPES.contains(o2.getType()) && !PRIORITIZED_MODEL_TYPES.contains(o1.getType())) {
             return 1;
         } else if (PRIORITIZED_MODEL_TYPES.contains(o1.getType()) && !PRIORITIZED_MODEL_TYPES.contains(o2.getType())) {
