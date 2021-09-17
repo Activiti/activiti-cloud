@@ -19,6 +19,8 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -199,7 +201,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project copiedProject = projectRepository.copyProject(projectToCopy, newProjectName);
         List<Model> models = modelService.getAllModels(projectToCopy);
 
-        models.forEach(model -> {
+        models.stream().sorted(MODEL_TYPE_COMPARATOR).forEach(model -> {
             modelService.copyModel(model, copiedProject);
         });
 
@@ -455,7 +457,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() ->
                         new ImportProjectException("No valid project entry found to import"));
 
-        projectHolder.getModelJsonFiles().forEach(modelJsonFile -> {
+        projectHolder.getModelJsonFiles().stream().sorted(MODEL_JSON_FILE_TYPE_COMPARATOR).forEach(modelJsonFile -> {
             importJSONModelFiles(projectHolder, project, modelJsonFile);
         });
 
