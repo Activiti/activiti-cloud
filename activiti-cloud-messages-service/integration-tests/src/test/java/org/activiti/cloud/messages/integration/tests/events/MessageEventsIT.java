@@ -27,15 +27,12 @@ import org.activiti.api.process.model.results.ProcessInstanceResult;
 import org.activiti.cloud.services.core.commands.CommandEndpoint;
 import org.activiti.cloud.services.core.commands.ReceiveMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartMessageCmdExecutor;
-import org.activiti.cloud.services.messages.events.producer.BpmnMessageReceivedEventMessageProducer;
-import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEventMessageProducer;
-import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
-import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionCancelledEventMessageProducer;
-import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.*;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.activiti.engine.RuntimeService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -59,10 +56,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
@@ -133,6 +127,13 @@ class MessageEventsIT {
         System.setProperty("spring.datasource.url", postgresContainer.getJdbcUrl());
         System.setProperty("spring.datasource.username", postgresContainer.getUsername());
         System.setProperty("spring.datasource.password", postgresContainer.getPassword());
+    }
+
+    @AfterAll
+    public static void afterAll() {
+        System.clearProperty("spring.datasource.url");
+        System.clearProperty("spring.datasource.username");
+        System.clearProperty("spring.datasource.password");
     }
 
     @Test
