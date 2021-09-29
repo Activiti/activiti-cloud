@@ -54,11 +54,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -87,8 +86,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
@@ -674,9 +671,11 @@ public class ModelControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactlyInAnyOrder(tuple("expected type: Integer, found: String",
-                                       "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"));
+                                "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"),
+                        tuple("string [aloha] does not match pattern ^\\$\\{(.*)[\\}]$",
+                                "Value format in integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
     }
 
     @Test
@@ -703,9 +702,11 @@ public class ModelControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: Boolean, found: Integer",
-                                       "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is boolean"));
+                                "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is boolean"),
+                        tuple("expected type: String, found: Integer",
+                                "Value format in booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
     }
 
     @Test
@@ -732,9 +733,11 @@ public class ModelControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: JSONObject, found: Integer",
-                                       "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"));
+                                "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"),
+                        tuple("expected type: String, found: Integer",
+                                "Value format in objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
     }
 
     @Test
@@ -761,12 +764,16 @@ public class ModelControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(
                         tuple("expected type: String, found: Integer",
-                              "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is date"),
+                                "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is date"),
+                        tuple("expected type: String, found: Integer",
+                                "Value format in dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"),
                         tuple("string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
-                              "Invalid date - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68)")
+                                "Invalid date - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68)"),
+                        tuple("string [aloha] does not match pattern ^\\$\\{(.*)[\\}]$",
+                                "Value format in dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression")
                 );
     }
 
@@ -796,14 +803,22 @@ public class ModelControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
             .extracting(ModelValidationError::getProblem, ModelValidationError::getDescription)
             .containsExactlyInAnyOrder(
-                tuple("expected type: String, found: Integer",
-                        "Mismatch value type - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47k). Expected type is datetime"),
-                tuple("string [2019-12-06T00:60:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
-                    "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47g)"),
-                tuple("string [2019-12-06T00:00:60] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
-                    "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47f)"),
-                tuple("string [2019-12-06T24:00:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
-                    "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47e)")
+                    tuple("expected type: String, found: Integer",
+                            "Mismatch value type - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47k). Expected type is datetime"),
+                    tuple("string [2019-12-06T00:60:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                            "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47g)"),
+                    tuple("string [2019-12-06T00:00:60] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                            "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47f)"),
+                    tuple("string [2019-12-06T24:00:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                            "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47e)"),
+                    tuple("string [2019-12-06T00:60:00] does not match pattern ^\\$\\{(.*)[\\}]$",
+                            "Value format in case4(e0740a3a-fec4-4ee5-bece-61f39df2a47g) is not a valid expression"),
+                    tuple("string [2019-12-06T00:00:60] does not match pattern ^\\$\\{(.*)[\\}]$",
+                            "Value format in case4(e0740a3a-fec4-4ee5-bece-61f39df2a47f) is not a valid expression"),
+                    tuple("string [2019-12-06T24:00:00] does not match pattern ^\\$\\{(.*)[\\}]$",
+                            "Value format in case4(e0740a3a-fec4-4ee5-bece-61f39df2a47e) is not a valid expression"),
+                    tuple("expected type: String, found: Integer",
+                            "Value format in case4(e0740a3a-fec4-4ee5-bece-61f39df2a47k) is not a valid expression")
             );
     }
 
