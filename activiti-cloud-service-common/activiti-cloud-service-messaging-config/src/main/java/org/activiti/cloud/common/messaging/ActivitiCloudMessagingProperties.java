@@ -20,7 +20,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.*;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
 @ConfigurationProperties(prefix = ActivitiCloudMessagingProperties.ACTIVITI_CLOUD_MESSAGING_PREFIX)
 @Validated
@@ -51,6 +54,9 @@ public class ActivitiCloudMessagingProperties {
 
     private String destinationPrefix = "";
     
+
+    private Map<String, DestinationProperties> destinations = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
     ActivitiCloudMessagingProperties() { }
 
     public Boolean isPartitioned() {
@@ -87,20 +93,43 @@ public class ActivitiCloudMessagingProperties {
 
     public String getDestinationPrefix() {
         return destinationPrefix;
-        if (this == o) {
-            return true;
     }
 
     public void setDestinationPrefix(String destinationPrefix) {
         this.destinationPrefix = destinationPrefix;
     }
+
+    public Map<String, DestinationProperties> getDestinations() {
+        return destinations;
+    }
+
+    public void setDestinations(Map<String, DestinationProperties> destinations) {
+        this.destinations = destinations;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         ActivitiCloudMessagingProperties that = (ActivitiCloudMessagingProperties) o;
-        return broker == that.broker && Objects.equals(partitioned, that.partitioned) && Objects.equals(partitionCount, that.partitionCount) && Objects.equals(instanceIndex, that.instanceIndex);
+        return broker == that.broker
+            && Objects.equals(partitioned, that.partitioned)
+            && Objects.equals(partitionCount, that.partitionCount)
+            && Objects.equals(instanceIndex, that.instanceIndex)
+            && Objects.equals(destinationSeparator, that.destinationSeparator)
+            && Objects.equals(destinationPrefix, that.destinationPrefix)
+            && Objects.equals(destinations, that.destinations);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(broker, partitioned, partitionCount, instanceIndex);
+        return Objects.hash(broker,
+                            partitioned,
+                            partitionCount,
+                            instanceIndex,
+                            destinationSeparator,
+                            destinationPrefix,
+                            destinations);
     }
 
     @Override
@@ -112,7 +141,76 @@ public class ActivitiCloudMessagingProperties {
             ", instanceIndex=" + instanceIndex +
             ", destinationSeparator='" + destinationSeparator + '\'' +
             ", destinationPrefix='" + destinationPrefix + '\'' +
+            ", destinations=" + destinations +
             '}';
+    }
+
+    @Validated
+    public static class DestinationProperties {
+
+        private String[] bindings;
+
+        @NotEmpty
+        private String scope;
+
+        private String prefix;
+
+        private String separator;
+
+        private String template;
+
+        DestinationProperties() {}
+
+        public String[] getBindings() {
+            return bindings;
+        }
+
+        public void setBindings(String[] bindings) {
+            this.bindings = bindings;
+        }
+
+        public String getScope() {
+            return scope;
+        }
+
+        public void setScope(String scope) {
+            this.scope = scope;
+        }
+
+        public String getPrefix() {
+            return prefix;
+        }
+
+        public void setPrefix(String prefix) {
+            this.prefix = prefix;
+        }
+
+        public String getSeparator() {
+            return separator;
+        }
+
+        public void setSeparator(String separator) {
+            this.separator = separator;
+        }
+
+        public String getTemplate() {
+            return template;
+        }
+
+        public void setTemplate(String template) {
+            this.template = template;
+        }
+
+        @Override
+        public String toString() {
+            return "DestinationProperties{" +
+                "bindings=" + Arrays.toString(bindings) +
+                ", scope='" + scope + '\'' +
+                ", prefix='" + prefix + '\'' +
+                ", separator='" + separator + '\'' +
+                ", template='" + template + '\'' +
+                '}';
+        }
     }
 
 }
