@@ -47,8 +47,10 @@ public class ActivitiCloudMessagingProperties {
 
     @NotEmpty
     @Size(min = 1, max = 1)
-    private String destinationSeparator;
+    private String destinationSeparator = "_";
 
+    private String destinationPrefix = "";
+    
     ActivitiCloudMessagingProperties() { }
 
     public Boolean isPartitioned() {
@@ -83,14 +85,15 @@ public class ActivitiCloudMessagingProperties {
         this.destinationSeparator = destinationSeparator;
     }
 
-    @Override
-    public boolean equals(Object o) {
+    public String getDestinationPrefix() {
+        return destinationPrefix;
         if (this == o) {
             return true;
-        }
-        if (!(o instanceof ActivitiCloudMessagingProperties)) {
-            return false;
-        }
+    }
+
+    public void setDestinationPrefix(String destinationPrefix) {
+        this.destinationPrefix = destinationPrefix;
+    }
         ActivitiCloudMessagingProperties that = (ActivitiCloudMessagingProperties) o;
         return broker == that.broker && Objects.equals(partitioned, that.partitioned) && Objects.equals(partitionCount, that.partitionCount) && Objects.equals(instanceIndex, that.instanceIndex);
     }
@@ -107,6 +110,8 @@ public class ActivitiCloudMessagingProperties {
             ", partitioned=" + partitioned +
             ", partitionCount=" + partitionCount +
             ", instanceIndex=" + instanceIndex +
+            ", destinationSeparator='" + destinationSeparator + '\'' +
+            ", destinationPrefix='" + destinationPrefix + '\'' +
             '}';
     }
 
