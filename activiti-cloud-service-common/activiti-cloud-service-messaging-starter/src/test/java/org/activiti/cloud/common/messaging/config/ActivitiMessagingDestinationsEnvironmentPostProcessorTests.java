@@ -28,18 +28,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(properties = {
     "activiti.cloud.application.name=foo",
     "spring.application.name=bar",
-    "activiti.cloud.messaging.destination-prefix=baz",
+    "POD_NAMESPACE=baz",
+    "ENV_NAME=quix",
+
+    "activiti.cloud.messaging.destination-prefix=${ENV_NAME}.${POD_NAMESPACE}",
     "activiti.cloud.messaging.destination-separator=.",
     "activiti.cloud.messaging.destination-override-enabled=true",
+
     "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
     "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
+
     "activiti.cloud.messaging.destinations.engineEvents.bindings=auditProducer,auditConsumer,queryConsumer",
-    "activiti.cloud.messaging.destinations.engineEvents.scope=engineEvents",
-    "activiti.cloud.messaging.destinations.commandConsumer.scope=commandConsumer_${activiti.cloud.application.name}",
+    "activiti.cloud.messaging.destinations.engineEvents.scope=engine-events",
+
+    "activiti.cloud.messaging.destinations.commandConsumer.bindings=commandConsumer",
+    "activiti.cloud.messaging.destinations.commandConsumer.scope=command-consumer-${activiti.cloud.application.name}",
+
     "activiti.cloud.messaging.destinations.myCmResults.bindings=commandResults",
-    "activiti.cloud.messaging.destinations.myCmResults.scope=commandResults_${activiti.cloud.application.name}",
+    "activiti.cloud.messaging.destinations.myCmResults.scope=command-results.${activiti.cloud.application.name}",
     "activiti.cloud.messaging.destinations.myCmResults.prefix=bar",
-    "activiti.cloud.messaging.destinations.myCmResults.separator=-"})
+    "activiti.cloud.messaging.destinations.myCmResults.separator=_"})
 public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
 
     @Autowired
@@ -55,7 +63,7 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     public void testBindingServicePropertiesDefaults() {
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getDestination())
-            .isEqualTo("baz.commandConsumer_foo");
+            .isEqualTo("quix.baz.command-consumer-foo");
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getGroup())
             .isEqualTo("bar");
@@ -65,21 +73,21 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     public void testBindingServicePropertiesCustomValues() {
         assertThat(bindingServiceProperties.getBindingProperties("commandResults")
                                            .getDestination())
-            .isEqualTo("bar-commandResults_foo");
+            .isEqualTo("bar_command-results.foo");
     }
 
     @Test
     public void testBindingServicePropertiesWithMultipleBindings() {
         assertThat(bindingServiceProperties.getBindingProperties("auditProducer")
                                            .getDestination())
-            .isEqualTo("baz.engineEvents");
+            .isEqualTo("quix.baz.engine-events");
 
         assertThat(bindingServiceProperties.getBindingProperties("auditConsumer")
                                            .getDestination())
-            .isEqualTo("baz.engineEvents");
+            .isEqualTo("quix.baz.engine-events");
 
         assertThat(bindingServiceProperties.getBindingProperties("queryConsumer")
                                            .getDestination())
-            .isEqualTo("baz.engineEvents");
+            .isEqualTo("quix.baz.engine-events");
     }
 }
