@@ -53,7 +53,8 @@ public class ActivitiCloudMessagingProperties {
     private String destinationSeparator = "_";
 
     private String destinationPrefix = "";
-    
+
+    private boolean destinationOverrideEnabled = false;
 
     private Map<String, DestinationProperties> destinations = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -105,6 +106,14 @@ public class ActivitiCloudMessagingProperties {
 
     public void setDestinations(Map<String, DestinationProperties> destinations) {
         this.destinations = destinations;
+    }
+
+    public boolean isDestinationOverrideEnabled() {
+        return destinationOverrideEnabled;
+    }
+
+    public void setDestinationOverrideEnabled(boolean destinationOverrideEnabled) {
+        this.destinationOverrideEnabled = destinationOverrideEnabled;
     }
 
     @Override

@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     "spring.application.name=bar",
     "activiti.cloud.messaging.destination-prefix=baz",
     "activiti.cloud.messaging.destination-separator=.",
+    "activiti.cloud.messaging.destination-override-enabled=true",
     "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
     "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
     "activiti.cloud.messaging.destinations.engineEvents.bindings=auditProducer,auditConsumer,queryConsumer",

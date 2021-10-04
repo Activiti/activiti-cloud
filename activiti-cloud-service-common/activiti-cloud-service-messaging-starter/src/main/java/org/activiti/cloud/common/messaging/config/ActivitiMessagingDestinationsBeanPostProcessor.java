@@ -20,6 +20,7 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,10 @@ import java.util.stream.Stream;
 
 @Configuration
 @ConditionalOnClass(BindingServiceProperties.class)
+@ConditionalOnProperty(prefix = "activiti.cloud.messaging",
+                       name = "destination-override-enabled",
+                       havingValue = "true",
+                       matchIfMissing = false)
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor {
 
     private final ActivitiCloudMessagingProperties properties;
