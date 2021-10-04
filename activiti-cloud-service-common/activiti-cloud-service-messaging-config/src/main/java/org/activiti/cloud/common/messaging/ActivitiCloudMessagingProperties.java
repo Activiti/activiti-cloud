@@ -157,6 +157,7 @@ public class ActivitiCloudMessagingProperties {
     @Validated
     public static class DestinationProperties {
 
+        @NotEmpty
         private String[] bindings;
 
         @NotEmpty
