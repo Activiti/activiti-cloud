@@ -38,11 +38,12 @@ import java.util.stream.Stream;
                        matchIfMissing = false)
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor {
 
-    private final ActivitiCloudMessagingProperties properties;
+    private final ActivitiCloudMessagingProperties messagingProperties;
     private final ConfigurableEnvironment environment;
 
-    public ActivitiMessagingDestinationsBeanPostProcessor(ActivitiCloudMessagingProperties properties, ConfigurableEnvironment environment) {
-        this.properties = properties;
+    public ActivitiMessagingDestinationsBeanPostProcessor(ActivitiCloudMessagingProperties messagingProperties,
+                                                          ConfigurableEnvironment environment) {
+        this.messagingProperties = messagingProperties;
         this.environment = environment;
     }
 
@@ -50,18 +51,18 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
         if (BindingServiceProperties.class.isInstance(bean)) {
             BindingServiceProperties bindingServiceProperties = BindingServiceProperties.class.cast(bean);
 
-            properties.getDestinations()
-                      .entrySet()
-                      .forEach(entry -> {
+            messagingProperties.getDestinations()
+                               .entrySet()
+                               .forEach(entry -> {
                           ActivitiCloudMessagingProperties.DestinationProperties destinationProperties = entry.getValue();
                           String[] bindings = Optional.ofNullable(destinationProperties.getBindings())
                                                       .orElseGet(() -> new String[] {entry.getKey()});
                           String scope = Optional.ofNullable(destinationProperties.getScope())
                                                  .orElseGet(entry::getKey);
                           String prefix = Optional.ofNullable(destinationProperties.getPrefix())
-                                                  .orElseGet(properties::getDestinationPrefix);
+                                                  .orElseGet(messagingProperties::getDestinationPrefix);
                           String separator = Optional.ofNullable(destinationProperties.getSeparator())
-                                                     .orElseGet(properties::getDestinationSeparator);
+                                                     .orElseGet(messagingProperties::getDestinationSeparator);
 
                           Stream.of(bindings)
                               .forEach(binding -> {
