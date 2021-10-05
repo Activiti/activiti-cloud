@@ -57,7 +57,7 @@ public class SwaggerDocketBuilder {
     }
 
     private Docket baseDocket() {
-        Docket baseDocket = new Docket(DocumentationType.SWAGGER_2)
+        Docket baseDocket = new Docket(DocumentationType.OAS_30)
             .select()
             .apis(apiSelector::test)
             .paths(PathSelectors.any())

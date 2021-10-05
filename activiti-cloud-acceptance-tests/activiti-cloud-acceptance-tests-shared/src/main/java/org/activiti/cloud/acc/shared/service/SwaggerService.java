@@ -19,7 +19,7 @@ import feign.RequestLine;
 
 public interface SwaggerService {
 
-    @RequestLine("GET /v2/api-docs")
+    @RequestLine("GET /v3/api-docs")
     String getSwaggerSpecification();
 
 }
