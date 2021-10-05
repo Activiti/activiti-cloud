@@ -72,6 +72,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                           log.info("Found destination '{}' for bindings '{}' with prefix '{}' and scope '{}' using separator '{}'",
                                     entry.getKey(),
                                     bindings,
+                                    prefix,
                                     scope,
                                     separator);
 
