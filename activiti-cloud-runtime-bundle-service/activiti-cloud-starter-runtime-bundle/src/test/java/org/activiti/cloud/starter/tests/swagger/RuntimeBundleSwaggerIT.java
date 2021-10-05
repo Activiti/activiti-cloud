@@ -48,16 +48,16 @@ public class RuntimeBundleSwaggerIT {
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
-        mockMvc.perform(get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.paths").isNotEmpty())
-            .andExpect(jsonPath("$.definitions").isNotEmpty())
-            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContent"))))
+            .andExpect(jsonPath("$.components.schemas").isNotEmpty())
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
             .andExpect(
-                jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
-            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
-            .andExpect(jsonPath("$.definitions[\"SaveTaskPayload\"].properties")
+                jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
+            .andExpect(jsonPath("$.components.schemas[\"SaveTaskPayload\"].properties")
                 .value(hasKey("payloadType")))
             .andExpect(jsonPath("$.info.title")
                 .value("Activiti Cloud Starter :: Runtime Bundle ReST API"));
