@@ -17,6 +17,8 @@
 package org.activiti.cloud.common.messaging.config;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -37,6 +39,7 @@ import java.util.stream.Stream;
                        havingValue = "true",
                        matchIfMissing = false)
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor {
+    private static final Logger log = LoggerFactory.getLogger(ActivitiMessagingDestinationsBeanPostProcessor.class);
 
     private final ActivitiCloudMessagingProperties messagingProperties;
     private final ConfigurableEnvironment environment;
@@ -51,6 +54,8 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
         if (BindingServiceProperties.class.isInstance(bean)) {
             BindingServiceProperties bindingServiceProperties = BindingServiceProperties.class.cast(bean);
 
+            log.info("Post-processing bean {} with name {}", bean, beanName);
+
             messagingProperties.getDestinations()
                                .entrySet()
                                .forEach(entry -> {
@@ -64,6 +69,12 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                           String separator = Optional.ofNullable(destinationProperties.getSeparator())
                                                      .orElseGet(messagingProperties::getDestinationSeparator);
 
+                          log.info("Found destination '{}' for bindings '{}' with prefix '{}' and scope '{}' using separator '{}'",
+                                    entry.getKey(),
+                                    bindings,
+                                    scope,
+                                    separator);
+
                           Stream.of(bindings)
                               .forEach(binding -> {
                                   BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(binding);
@@ -72,6 +83,10 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                       String destination = buildDestination(scope,
                                                                             prefix,
                                                                             separator);
+
+                                      log.info("Overriding destination '{}' for binding name '{}'",
+                                                destination,
+                                                binding);
 
                                       bindingProperties.setDestination(destination);
                                   }
