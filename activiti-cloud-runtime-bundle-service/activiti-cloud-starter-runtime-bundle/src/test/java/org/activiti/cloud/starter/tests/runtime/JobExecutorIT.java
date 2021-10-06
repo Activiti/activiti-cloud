@@ -78,7 +78,7 @@ import static org.mockito.Mockito.*;
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "spring.activiti.asyncExecutorActivate=true",
-    "activiti.cloud.rb.job-executor.consumer.max-attempts=4" // customized
+    "spring.cloud.stream.bindings.async-executor-jobs.consumer.max-attempts=4" // customized
 })
 @DirtiesContext
 @ContextConfiguration(classes = {RuntimeITConfiguration.class,
