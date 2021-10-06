@@ -37,16 +37,18 @@ import static org.assertj.core.api.Assertions.assertThat;
     "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
 
     "activiti.cloud.messaging.destinations.engineEvents.bindings=auditProducer,auditConsumer,queryConsumer",
-    "activiti.cloud.messaging.destinations.engineEvents.scope=engine-events",
+    "activiti.cloud.messaging.destinations.engineEvents.name=engine-events",
 
     "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].bindings=camelConnectorConsumer",
-    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].scope=camel_connector.invoke",
+    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].name=camel_connector_invoke",
 
     "activiti.cloud.messaging.destinations.commandConsumer.bindings=commandConsumer",
-    "activiti.cloud.messaging.destinations.commandConsumer.scope=command-consumer-${activiti.cloud.application.name}",
+    "activiti.cloud.messaging.destinations.commandConsumer.name=command-consumer",
+    "activiti.cloud.messaging.destinations.commandConsumer.scope=${activiti.cloud.application.name}",
 
     "activiti.cloud.messaging.destinations.myCmResults.bindings=commandResults",
-    "activiti.cloud.messaging.destinations.myCmResults.scope=command-results.${activiti.cloud.application.name}",
+    "activiti.cloud.messaging.destinations.myCmResults.name=command-results",
+    "activiti.cloud.messaging.destinations.myCmResults.scope=${activiti.cloud.application.name}",
     "activiti.cloud.messaging.destinations.myCmResults.prefix=bar",
     "activiti.cloud.messaging.destinations.myCmResults.separator=_"})
 public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
@@ -58,7 +60,7 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     public void testBindingServicePropertiesDefaults() {
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getDestination())
-            .isEqualTo("quix.baz.command-consumer-foo");
+            .isEqualTo("quix.baz.command-consumer.foo");
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getGroup())
             .isEqualTo("bar");
@@ -68,7 +70,7 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     public void testBindingServicePropertiesCustomValues() {
         assertThat(bindingServiceProperties.getBindingProperties("commandResults")
                                            .getDestination())
-            .isEqualTo("bar_command-results.foo");
+            .isEqualTo("bar_command-results_foo");
     }
 
     @Test
@@ -90,10 +92,10 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     public void testBindingServicePropertiesWithConnectorDestinationOverride() {
         assertThat(bindingServiceProperties.getBindingProperties("camelConnectorConsumer")
                                            .getDestination())
-            .isEqualTo("quix.baz.camel_connector.invoke");
+            .isEqualTo("quix.baz.camel_connector_invoke");
 
         assertThat(bindingServiceProperties.getBindingProperties("camel-connector.INVOKE")
                                            .getDestination())
-            .isEqualTo("quix.baz.camel_connector.invoke");
+            .isEqualTo("quix.baz.camel_connector_invoke");
     }
 }

@@ -50,27 +50,31 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
         if (BindingServiceProperties.class.isInstance(bean)) {
             BindingServiceProperties bindingServiceProperties = BindingServiceProperties.class.cast(bean);
 
-            log.info("Post-processing bean {} with name {}", bean, beanName);
+            log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
 
             messagingProperties.getDestinations()
                                .entrySet()
                                .forEach(destinationEntry -> {
+
                           String destinationKey = destinationEntry.getKey();
                           ActivitiCloudMessagingProperties.DestinationProperties destinationProperties = destinationEntry.getValue();
 
                           String[] bindings = Optional.ofNullable(destinationProperties.getBindings())
                                                       .orElseGet(() -> new String[] {destinationEntry.getKey()});
-                          String scope = Optional.ofNullable(destinationProperties.getScope())
+                          String name = Optional.ofNullable(destinationProperties.getName())
                                                  .orElseGet(destinationEntry::getKey);
+                          String scope = destinationProperties.getScope();
+
                           String prefix = Optional.ofNullable(destinationProperties.getPrefix())
                                                   .orElseGet(messagingProperties::getDestinationPrefix);
                           String separator = Optional.ofNullable(destinationProperties.getSeparator())
                                                      .orElseGet(messagingProperties::getDestinationSeparator);
 
-                          log.info("Found destination key '{}' for bindings '{}' with prefix '{}' and scope '{}' using separator '{}'",
+                          log.info("Processing destination key '{}' for bindings '{}' with prefix '{}' and name '{}' of scope '{}' using separator '{}'",
                                    destinationKey,
                                    bindings,
                                    prefix,
+                                   name,
                                    scope,
                                    separator);
 
@@ -79,7 +83,8 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                   BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(binding);
 
                                   if (bindingProperties != null) {
-                                      String destination = buildDestination(scope,
+                                      String destination = buildDestination(name,
+                                                                            scope,
                                                                             prefix,
                                                                             separator);
 
@@ -96,9 +101,10 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
         return bean;
     }
 
-    private String buildDestination(String scope,
-                                    String prefix,
-                                    String separator) {
+    protected String buildDestination(String name,
+                                      String scope,
+                                      String prefix,
+                                      String separator) {
         StringBuilder value = new StringBuilder();
 
         if (StringUtils.hasText(prefix)) {
@@ -106,7 +112,12 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                  .append(separator);
         }
 
-        value.append(scope);
+        value.append(name);
+
+        if (StringUtils.hasText(scope)) {
+            value.append(separator)
+                 .append(scope);
+        }
 
         return value.toString();
     }

@@ -161,13 +161,13 @@ public class ActivitiCloudMessagingProperties {
         private String[] bindings;
 
         @NotEmpty
+        private String name;
+
         private String scope;
 
         private String prefix;
 
         private String separator;
-
-        private String template;
 
         DestinationProperties() {}
 
@@ -179,12 +179,12 @@ public class ActivitiCloudMessagingProperties {
             this.bindings = bindings;
         }
 
-        public String getScope() {
-            return scope;
+        public String getName() {
+            return name;
         }
 
-        public void setScope(String scope) {
-            this.scope = scope;
+        public void setName(String name) {
+            this.name = name;
         }
 
         public String getPrefix() {
@@ -203,22 +203,22 @@ public class ActivitiCloudMessagingProperties {
             this.separator = separator;
         }
 
-        public String getTemplate() {
-            return template;
+        public String getScope() {
+            return scope;
         }
 
-        public void setTemplate(String template) {
-            this.template = template;
+        public void setScope(String scope) {
+            this.scope = scope;
         }
 
         @Override
         public String toString() {
             return "DestinationProperties{" +
                 "bindings=" + Arrays.toString(bindings) +
+                ", name='" + name + '\'' +
                 ", scope='" + scope + '\'' +
                 ", prefix='" + prefix + '\'' +
                 ", separator='" + separator + '\'' +
-                ", template='" + template + '\'' +
                 '}';
         }
     }
