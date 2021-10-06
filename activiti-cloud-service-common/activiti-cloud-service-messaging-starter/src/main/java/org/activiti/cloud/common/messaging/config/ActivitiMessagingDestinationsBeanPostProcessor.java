@@ -58,25 +58,27 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
             messagingProperties.getDestinations()
                                .entrySet()
-                               .forEach(entry -> {
-                          ActivitiCloudMessagingProperties.DestinationProperties destinationProperties = entry.getValue();
+                               .forEach(destinationEntry -> {
+                          String destinationKey = destinationEntry.getKey();
+                          ActivitiCloudMessagingProperties.DestinationProperties destinationProperties = destinationEntry.getValue();
+
                           String[] bindings = Optional.ofNullable(destinationProperties.getBindings())
-                                                      .orElseGet(() -> new String[] {entry.getKey()});
+                                                      .orElseGet(() -> new String[] {destinationEntry.getKey()});
                           String scope = Optional.ofNullable(destinationProperties.getScope())
-                                                 .orElseGet(entry::getKey);
+                                                 .orElseGet(destinationEntry::getKey);
                           String prefix = Optional.ofNullable(destinationProperties.getPrefix())
                                                   .orElseGet(messagingProperties::getDestinationPrefix);
                           String separator = Optional.ofNullable(destinationProperties.getSeparator())
                                                      .orElseGet(messagingProperties::getDestinationSeparator);
 
-                          log.info("Found destination '{}' for bindings '{}' with prefix '{}' and scope '{}' using separator '{}'",
-                                    entry.getKey(),
-                                    bindings,
-                                    prefix,
-                                    scope,
-                                    separator);
+                          log.info("Found destination key '{}' for bindings '{}' with prefix '{}' and scope '{}' using separator '{}'",
+                                   destinationKey,
+                                   bindings,
+                                   prefix,
+                                   scope,
+                                   separator);
 
-                          Stream.of(bindings)
+                          Stream.concat(Stream.of(destinationKey), Stream.of(bindings))
                               .forEach(binding -> {
                                   BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(binding);
 
@@ -85,7 +87,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                                                             prefix,
                                                                             separator);
 
-                                      log.info("Overriding destination '{}' for binding name '{}'",
+                                      log.info("Overriding destination '{}' for binding '{}'",
                                                 destination,
                                                 binding);
 

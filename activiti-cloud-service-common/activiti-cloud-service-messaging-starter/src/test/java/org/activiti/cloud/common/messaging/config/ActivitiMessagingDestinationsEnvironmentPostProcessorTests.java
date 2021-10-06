@@ -41,6 +41,9 @@ import static org.assertj.core.api.Assertions.assertThat;
     "activiti.cloud.messaging.destinations.engineEvents.bindings=auditProducer,auditConsumer,queryConsumer",
     "activiti.cloud.messaging.destinations.engineEvents.scope=engine-events",
 
+    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].bindings=camelConnectorConsumer",
+    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].scope=camel_connector.invoke",
+
     "activiti.cloud.messaging.destinations.commandConsumer.bindings=commandConsumer",
     "activiti.cloud.messaging.destinations.commandConsumer.scope=command-consumer-${activiti.cloud.application.name}",
 
@@ -89,5 +92,16 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
         assertThat(bindingServiceProperties.getBindingProperties("queryConsumer")
                                            .getDestination())
             .isEqualTo("quix.baz.engine-events");
+    }
+
+    @Test
+    public void testBindingServicePropertiesWithConnectorDestinationOverride() {
+        assertThat(bindingServiceProperties.getBindingProperties("camelConnectorConsumer")
+                                           .getDestination())
+            .isEqualTo("quix.baz.camel_connector.invoke");
+            
+        assertThat(bindingServiceProperties.getBindingProperties("camel-connector.INVOKE")
+                                           .getDestination())
+            .isEqualTo("quix.baz.camel_connector.invoke");
     }
 }
