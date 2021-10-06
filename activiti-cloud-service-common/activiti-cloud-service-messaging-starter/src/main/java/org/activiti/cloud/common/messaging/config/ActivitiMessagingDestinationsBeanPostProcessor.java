@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.StringUtils;
 
 import java.util.Optional;
@@ -42,12 +41,9 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
     private static final Logger log = LoggerFactory.getLogger(ActivitiMessagingDestinationsBeanPostProcessor.class);
 
     private final ActivitiCloudMessagingProperties messagingProperties;
-    private final ConfigurableEnvironment environment;
 
-    public ActivitiMessagingDestinationsBeanPostProcessor(ActivitiCloudMessagingProperties messagingProperties,
-                                                          ConfigurableEnvironment environment) {
+    public ActivitiMessagingDestinationsBeanPostProcessor(ActivitiCloudMessagingProperties messagingProperties) {
         this.messagingProperties = messagingProperties;
-        this.environment = environment;
     }
 
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -98,10 +94,6 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
         }
 
         return bean;
-    }
-
-    private void applyDestination(ActivitiCloudMessagingProperties.DestinationProperties destinationProperties) {
-
     }
 
     private String buildDestination(String scope,

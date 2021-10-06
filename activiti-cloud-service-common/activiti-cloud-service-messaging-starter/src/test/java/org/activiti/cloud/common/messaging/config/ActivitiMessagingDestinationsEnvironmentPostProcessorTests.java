@@ -16,12 +16,10 @@
 
 package org.activiti.cloud.common.messaging.config;
 
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.core.env.Environment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,12 +50,6 @@ import static org.assertj.core.api.Assertions.assertThat;
     "activiti.cloud.messaging.destinations.myCmResults.prefix=bar",
     "activiti.cloud.messaging.destinations.myCmResults.separator=_"})
 public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
-
-    @Autowired
-    private ActivitiCloudMessagingProperties properties;
-
-    @Autowired
-    private Environment env;
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
@@ -99,7 +91,7 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
         assertThat(bindingServiceProperties.getBindingProperties("camelConnectorConsumer")
                                            .getDestination())
             .isEqualTo("quix.baz.camel_connector.invoke");
-            
+
         assertThat(bindingServiceProperties.getBindingProperties("camel-connector.INVOKE")
                                            .getDestination())
             .isEqualTo("quix.baz.camel_connector.invoke");
