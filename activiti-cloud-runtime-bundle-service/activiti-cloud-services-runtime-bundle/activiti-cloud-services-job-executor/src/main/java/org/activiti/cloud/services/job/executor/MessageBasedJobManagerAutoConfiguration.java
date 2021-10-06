@@ -16,11 +16,9 @@
 package org.activiti.cloud.services.job.executor;
 
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.binding.SubscribableChannelBindingTargetFactory;
@@ -35,13 +33,6 @@ import org.springframework.context.annotation.PropertySource;
 @ConditionalOnProperty(name = "spring.activiti.asyncExecutorActivate", havingValue = "true", matchIfMissing = true)
 @PropertySource("classpath:config/job-executor-channel.properties")
 public class MessageBasedJobManagerAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(name = "jobExecutorBindingProperties")
-    @ConfigurationProperties(prefix = "spring.cloud.stream.bindings.async-executor-jobs")
-    public BindingProperties jobExecutorBindingProperties() {
-        return new BindingProperties();
-    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -59,8 +50,10 @@ public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(@Qualifier("jobExecutorBindingProperties") BindingProperties bindingProperties,
+    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(BindingServiceProperties bindingServiceProperties,
                                                                        JobMessageProducer jobMessageProducer) {
+        BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties("asyncExecutorJobs");
+
         return new DefaultMessageBasedJobManagerFactory(bindingProperties, jobMessageProducer);
     }
 
