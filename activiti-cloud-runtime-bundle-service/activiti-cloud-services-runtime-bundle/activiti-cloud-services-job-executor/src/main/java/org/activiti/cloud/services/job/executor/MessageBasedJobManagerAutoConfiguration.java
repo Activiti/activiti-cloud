@@ -38,7 +38,7 @@ public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "jobExecutorBindingProperties")
-    @ConfigurationProperties(prefix = "activiti.cloud.rb.job-executor")
+    @ConfigurationProperties(prefix = "spring.cloud.stream.bindings.asyncExecutorJobs")
     public BindingProperties jobExecutorBindingProperties() {
         return new BindingProperties();
     }
