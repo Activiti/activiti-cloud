@@ -32,7 +32,7 @@ public class DefaultMessageBasedJobManagerFactory implements MessageBasedJobMana
 
     @Override
     public MessageBasedJobManager create(ProcessEngineConfigurationImpl processEngineConfiguration) {
-        BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(MessageBasedJobManagerChannels.INPUT);
+        BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(MessageBasedJobManagerChannelsConstants.INPUT);
 
         return new MessageBasedJobManager(processEngineConfiguration,
                                           bindingProperties,

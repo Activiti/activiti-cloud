@@ -31,8 +31,8 @@ public class MessageBasedJobManager extends DefaultJobManager {
     private final BindingProperties bindingProperties;
     private final JobMessageProducer jobMessageProducer;
 
-    private String inputChannelName = MessageBasedJobManagerChannels.INPUT;
-    private String outputChannelName = MessageBasedJobManagerChannels.OUTPUT;
+    private String inputChannelName = MessageBasedJobManagerChannelsConstants.INPUT;
+    private String outputChannelName = MessageBasedJobManagerChannelsConstants.OUTPUT;
 
     public MessageBasedJobManager(ProcessEngineConfigurationImpl processEngineConfiguration,
                                   BindingProperties bindingProperties,

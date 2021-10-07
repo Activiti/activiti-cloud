@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.job.executor;
 
-class MessageBasedJobManagerChannels {
+class MessageBasedJobManagerChannelsConstants {
     public static final String INPUT = "asyncExecutorJobsInput";
     public static final String OUTPUT = "asyncExecutorJobsOutput";
 }
