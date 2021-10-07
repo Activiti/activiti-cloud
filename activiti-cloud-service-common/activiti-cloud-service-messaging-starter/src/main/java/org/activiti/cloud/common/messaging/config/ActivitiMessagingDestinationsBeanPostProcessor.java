@@ -78,7 +78,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                    scope,
                                    separator);
 
-                          Stream.concat(Stream.of(destinationKey), Stream.of(bindings))
+                          Stream.of(bindings)
                               .forEach(binding -> {
                                   BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(binding);
 

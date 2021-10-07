@@ -160,7 +160,6 @@ public class ActivitiCloudMessagingProperties {
         @NotEmpty
         private String[] bindings;
 
-        @NotEmpty
         private String name;
 
         private String scope;

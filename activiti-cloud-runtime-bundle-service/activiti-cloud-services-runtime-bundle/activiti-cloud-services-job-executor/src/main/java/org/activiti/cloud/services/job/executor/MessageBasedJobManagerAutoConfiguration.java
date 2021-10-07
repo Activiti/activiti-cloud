@@ -22,7 +22,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.binding.SubscribableChannelBindingTargetFactory;
-import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -52,9 +51,7 @@ public class MessageBasedJobManagerAutoConfiguration {
     @ConditionalOnMissingBean
     public MessageBasedJobManagerFactory messageBasedJobManagerFactory(BindingServiceProperties bindingServiceProperties,
                                                                        JobMessageProducer jobMessageProducer) {
-        BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties("asyncExecutorJobs");
-
-        return new DefaultMessageBasedJobManagerFactory(bindingProperties, jobMessageProducer);
+        return new DefaultMessageBasedJobManagerFactory(bindingServiceProperties, jobMessageProducer);
     }
 
     @Bean

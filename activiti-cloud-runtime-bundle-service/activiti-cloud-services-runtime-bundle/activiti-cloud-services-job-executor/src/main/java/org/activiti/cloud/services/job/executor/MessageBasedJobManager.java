@@ -28,12 +28,11 @@ import java.util.Date;
 public class MessageBasedJobManager extends DefaultJobManager {
     private static final Logger logger = LoggerFactory.getLogger(MessageBasedJobManager.class);
 
-    private static final String DEFAULT_INPUT_CHANNEL_NAME = "asyncExecutorJobs";
-
     private final BindingProperties bindingProperties;
     private final JobMessageProducer jobMessageProducer;
 
-    private String inputChannelName = DEFAULT_INPUT_CHANNEL_NAME;
+    private String inputChannelName = MessageBasedJobManagerChannels.INPUT;
+    private String outputChannelName = MessageBasedJobManagerChannels.OUTPUT;
 
     public MessageBasedJobManager(ProcessEngineConfigurationImpl processEngineConfiguration,
                                   BindingProperties bindingProperties,
@@ -72,21 +71,17 @@ public class MessageBasedJobManager extends DefaultJobManager {
         return bindingProperties;
     }
 
-    public String getDestination() {
-        return bindingProperties.getDestination();
+    public String getOutputChannelName() {
+        return outputChannelName;
     }
 
     public String getInputChannelName() {
         return inputChannelName;
     }
 
-    public void setInputChannelName(String inputChannelName) {
-        this.inputChannelName = inputChannelName;
-    }
-
     public void sendMessage(final Job job) {
         logger.debug("sendMessage for job: {}", job);
 
-        jobMessageProducer.sendMessage(getDestination(), job);
+        jobMessageProducer.sendMessage(getOutputChannelName(), job);
     }
 }

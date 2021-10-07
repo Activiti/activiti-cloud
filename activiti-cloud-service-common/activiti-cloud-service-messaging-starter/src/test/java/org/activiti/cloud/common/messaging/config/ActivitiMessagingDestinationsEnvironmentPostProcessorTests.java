@@ -39,12 +39,15 @@ import static org.assertj.core.api.Assertions.assertThat;
     "activiti.cloud.messaging.destinations.engineEvents.bindings=auditProducer,auditConsumer,queryConsumer",
     "activiti.cloud.messaging.destinations.engineEvents.name=engine-events",
 
-    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].bindings=camelConnectorConsumer",
-    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].name=camel_connector_invoke",
+    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].bindings=camelConnectorConsumer,camel-connector.INVOKE",
+    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].name=${ACT_CAMEL_CONNECTOR_INVOKE_DEST:camel_connector_invoke}",
 
     "activiti.cloud.messaging.destinations.commandConsumer.bindings=commandConsumer",
     "activiti.cloud.messaging.destinations.commandConsumer.name=command-consumer",
     "activiti.cloud.messaging.destinations.commandConsumer.scope=${activiti.cloud.application.name}",
+
+    "activiti.cloud.messaging.destinations.asyncExecutorJobs.bindings=asyncExecutorJobsInput,asyncExecutorJobsOutput",
+    "activiti.cloud.messaging.destinations.asyncExecutorJobs.scope=${activiti.cloud.application.name}",
 
     "activiti.cloud.messaging.destinations.myCmResults.bindings=commandResults",
     "activiti.cloud.messaging.destinations.myCmResults.name=command-results",
@@ -97,5 +100,16 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
         assertThat(bindingServiceProperties.getBindingProperties("camel-connector.INVOKE")
                                            .getDestination())
             .isEqualTo("quix.baz.camel_connector_invoke");
+    }
+
+    @Test
+    public void testBindingServicePropertiesWithAsyncExecutorJobsOverride() {
+        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput")
+                                           .getDestination())
+            .isEqualTo("quix.baz.asyncExecutorJobs.foo");
+
+        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput")
+                                           .getDestination())
+            .isEqualTo("quix.baz.asyncExecutorJobs.foo");
     }
 }
