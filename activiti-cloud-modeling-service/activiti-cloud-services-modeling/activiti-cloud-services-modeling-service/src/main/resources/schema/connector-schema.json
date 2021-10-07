@@ -26,7 +26,8 @@
           },
           "required": {
             "type": "boolean"
-          }
+          },
+          "extendedProperties": {}
         },
         "required": [ "id", "name", "type" ]
       }
