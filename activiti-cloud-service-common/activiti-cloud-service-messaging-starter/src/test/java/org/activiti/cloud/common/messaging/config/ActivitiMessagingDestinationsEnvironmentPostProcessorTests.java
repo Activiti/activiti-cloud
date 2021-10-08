@@ -42,12 +42,15 @@ import static org.assertj.core.api.Assertions.assertThat;
     "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].bindings=camelConnectorConsumer,camel-connector.INVOKE",
     "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].name=${ACT_CAMEL_CONNECTOR_INVOKE_DEST:camel_connector_invoke}",
 
-    "activiti.cloud.messaging.destinations.commandConsumer.bindings=commandConsumer",
+    "activiti.cloud.messaging.destinations.commandConsumer.bindings=commandConsumer,messageConnectorOutput",
     "activiti.cloud.messaging.destinations.commandConsumer.name=command-consumer",
     "activiti.cloud.messaging.destinations.commandConsumer.scope=${activiti.cloud.application.name}",
 
     "activiti.cloud.messaging.destinations.asyncExecutorJobs.bindings=asyncExecutorJobsInput,asyncExecutorJobsOutput",
     "activiti.cloud.messaging.destinations.asyncExecutorJobs.scope=${activiti.cloud.application.name}",
+
+    "activiti.cloud.messaging.destinations.messageEvents.bindings=messageEventsOutput,messageConnectorInput",
+    "activiti.cloud.messaging.destinations.messageEvents.scope=${activiti.cloud.application.name}",
 
     "activiti.cloud.messaging.destinations.myCmResults.bindings=commandResults",
     "activiti.cloud.messaging.destinations.myCmResults.name=command-results",
@@ -62,6 +65,9 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     @Test
     public void testBindingServicePropertiesDefaults() {
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
+                                           .getDestination())
+            .isEqualTo("quix.baz.command-consumer.foo");
+        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorOutput")
                                            .getDestination())
             .isEqualTo("quix.baz.command-consumer.foo");
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
@@ -112,4 +118,16 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
                                            .getDestination())
             .isEqualTo("quix.baz.asyncExecutorJobs.foo");
     }
+
+    @Test
+    public void testBindingServicePropertiesWithMessageEventsOverrides() {
+        assertThat(bindingServiceProperties.getBindingProperties("messageEventsOutput")
+                                           .getDestination())
+            .isEqualTo("quix.baz.messageEvents.foo");
+
+        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorInput")
+                                           .getDestination())
+            .isEqualTo("quix.baz.messageEvents.foo");
+    }
+
 }

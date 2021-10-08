@@ -78,8 +78,8 @@ import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
         properties = {
                 "spring.application.name=rb",
                 "activiti.cloud.application.name=default-app",
-                "spring.cloud.stream.bindings.input.content-type=application/json",
-                "spring.cloud.stream.bindings.output.content-type=application/json"
+                "spring.cloud.stream.bindings.messageConnectorInput.content-type=application/json",
+                "spring.cloud.stream.bindings.messageConnectorOutput.content-type=application/json"
         }
 )
 @DirtiesContext
@@ -121,7 +121,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     protected MessageAggregatorProperties messageAggregatorProperties;
 
     @Autowired
-    protected AbstractMessageChannel output;
+    protected AbstractMessageChannel messageConnectorOutput;
 
     @Value("${activiti.cloud.application.name}")
     protected String activitiCloudApplicationName;
@@ -705,13 +705,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
                 };
 
-        output.addInterceptor(assertionInterceptor);
+        messageConnectorOutput.addInterceptor(assertionInterceptor);
 
         Throwable thrown = catchThrowable(() -> {
             send(messageSentEvent(messageName, null, "error"));
         });
 
-        output.removeInterceptor(assertionInterceptor);
+        messageConnectorOutput.removeInterceptor(assertionInterceptor);
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
         assertThat(thrown).isInstanceOf(MessageDeliveryException.class);

@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.messages.core.channels;
 
-public interface MessageConnectorProcessor extends MessageConnectorSource, MessageConnectorSink {
+import org.springframework.cloud.stream.annotation.Output;
+import org.springframework.messaging.MessageChannel;
+
+public interface MessageConnectorSource {
+
+    String OUTPUT = "messageConnectorOutput";
+
+    @Output(MessageConnectorSource.OUTPUT)
+    MessageChannel output();
 
 }
