@@ -68,8 +68,8 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForMessageEvents() {
         //when
-        assertProperty("spring.cloud.stream.bindings.messageEvents.destination").isEqualTo("messageEvents.activiti-app");
-        assertProperty("spring.cloud.stream.bindings.messageEvents.producer.required-groups").isEqualTo("messages");
+        assertProperty("spring.cloud.stream.bindings.messageEventsOutput.destination").isEqualTo("messageEvents.activiti-app");
+        assertProperty("spring.cloud.stream.bindings.messageEventsOutput.producer.required-groups").isEqualTo("messages");
     }
 
     @Test
