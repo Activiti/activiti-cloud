@@ -40,6 +40,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -86,9 +87,11 @@ public class CloudConnectorsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public IntegrationRequestSender integrationRequestSender(BinderAwareChannelResolver resolver,
-                                                             IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+                                                             IntegrationContextMessageBuilderFactory messageBuilderFactory,
+                                                             BindingServiceProperties bindingServiceProperties) {
         return new IntegrationRequestSender(resolver,
-                                            messageBuilderFactory);
+                                            messageBuilderFactory,
+                                            bindingServiceProperties);
     }
 
     @Bean

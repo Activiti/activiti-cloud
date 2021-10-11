@@ -16,8 +16,11 @@
 package org.activiti.services.connectors;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -27,15 +30,24 @@ public class IntegrationRequestSender {
 
     private final BinderAwareChannelResolver resolver;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
+    private final BindingServiceProperties bindingServiceProperties;
 
     public IntegrationRequestSender(BinderAwareChannelResolver resolver,
-                                    IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+                                    IntegrationContextMessageBuilderFactory messageBuilderFactory,
+                                    BindingServiceProperties bindingServiceProperties) {
         this.resolver = resolver;
         this.messageBuilderFactory = messageBuilderFactory;
+        this.bindingServiceProperties = bindingServiceProperties;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendIntegrationRequest(IntegrationRequest event) {
+        String resultDestination = bindingServiceProperties.getBindingDestination(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER);
+        IntegrationRequestImpl.class.cast(event).setResultDestination(resultDestination);
+
+        String errorDestination = bindingServiceProperties.getBindingDestination(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER);
+        IntegrationRequestImpl.class.cast(event).setErrorDestination(errorDestination);
+
         resolver.resolveDestination(event.getIntegrationContext()
                                          .getConnectorType()).send(buildIntegrationRequestMessage(event));
     }

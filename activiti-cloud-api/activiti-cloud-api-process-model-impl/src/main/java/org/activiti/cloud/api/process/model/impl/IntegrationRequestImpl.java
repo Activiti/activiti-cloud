@@ -23,6 +23,10 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
 
     private IntegrationContext integrationContext;
 
+    private String resultDestination;
+
+    private String errorDestination;
+
     public IntegrationRequestImpl() {
     }
 
@@ -34,5 +38,23 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
     @Override
     public IntegrationContext getIntegrationContext() {
         return integrationContext;
+    }
+
+    @Override
+    public String getResultDestination() {
+        return resultDestination;
+    }
+
+    @Override
+    public String getErrorDestination() {
+        return errorDestination;
+    }
+
+    public void setResultDestination(String resultDestination) {
+        this.resultDestination = resultDestination;
+    }
+
+    public void setErrorDestination(String errorDestination) {
+        this.errorDestination = errorDestination;
     }
 }
