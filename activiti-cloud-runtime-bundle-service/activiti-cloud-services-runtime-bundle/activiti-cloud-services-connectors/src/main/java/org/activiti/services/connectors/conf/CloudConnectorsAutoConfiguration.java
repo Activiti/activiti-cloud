@@ -16,10 +16,12 @@
 
 package org.activiti.services.connectors.conf;
 
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ManagementService;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
@@ -132,4 +134,27 @@ public class CloudConnectorsAutoConfiguration {
         taskBehavior.setVariablesCalculator(variablesMappingProvider);
         return taskBehavior;
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ConnectorImplementationsProvider connectorDestinationsProvider(RepositoryService repositoryService) {
+        return new RepositoryConnectorImplementationsProvider(repositoryService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DestinationMappingStrategy destinationMappingStrategy() {
+        return new NoopDestinationMappingStrategy();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ConnectorDestinationsBeanPostProcessor connectorDestinationsBeanPostProcessor(ConnectorImplementationsProvider destinationsProvider,
+                                                                                         ActivitiCloudMessagingProperties messagingProperties,
+                                                                                         DestinationMappingStrategy destinationMappingStrategy) {
+        return new ConnectorDestinationsBeanPostProcessor(destinationsProvider,
+                                                          messagingProperties,
+                                                          destinationMappingStrategy);
+    }
+
 }
