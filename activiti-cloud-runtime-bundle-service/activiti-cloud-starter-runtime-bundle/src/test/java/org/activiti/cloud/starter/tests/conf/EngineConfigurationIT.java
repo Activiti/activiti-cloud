@@ -28,10 +28,24 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.AbstractMap;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"activiti.cloud.messaging.destination-separator=."})
+                properties = {"ACT_MESSAGING_DEST_OVERRIDE_ENABLED=true",
+                              "ACT_MESSAGING_DEST_SEPARATOR=.",
+                              "ACT_MESSAGING_DEST_PREFIX=namespace",
+                              "ACT_RB_ENG_EVT_DEST=engine-events",
+                              "ACT_RB_SIG_EVT_DEST=signal-event",
+                              "ACT_RB_CMD_CONSUMER_DEST=command-consumer",
+                              "ACT_RB_ASYNC_JOB_EXEC_DEST=async-executor-jobs",
+                              "ACT_RB_MSG_EVT_DEST=message-events",
+                              "ACT_RB_CMD_RES_DEST=command-results",
+                              "ACT_INT_RES_CONSUMER=integration-result",
+                              "ACT_INT_ERR_CONSUMER:integration-error"})
 @DirtiesContext
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class EngineConfigurationIT {
@@ -41,6 +55,29 @@ public class EngineConfigurationIT {
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
+
+    @Test
+    public void shouldConfigureDefaultConnectorBindingProperties() {
+        //given
+
+        //when
+        Map<String, BindingProperties> bindings = bindingServiceProperties.getBindings();
+
+        //then
+        assertThat(bindings)
+            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
+                                                                                        entry.getValue()
+                                                                                             .getDestination()))
+            .contains(entry("mealsConnector", "namespace.mealsconnector"),
+                      entry("rest.GET", "namespace.rest.get"),
+                      entry("perfromBusinessTask", "namespace.perfrombusinesstask"),
+                      entry("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
+                      entry("payment", "namespace.payment"),
+                      entry("Constants Connector.constantsActionName", "namespace.constants-connector.constantsactionname"),
+                      entry("Variable Mapping Connector.variableMappingActionName", "namespace.variable-mapping-connector.variablemappingactionname"),
+                      entry("miCloudConnector", "namespace.micloudconnector"));
+    }
+
 
     @Test
     public void shouldUseCloudActivityBehaviorFactory() {
@@ -61,7 +98,7 @@ public class EngineConfigurationIT {
         //then
         assertThat(auditProducer.getDestination())
             .as("should have required groups set for audit producer")
-            .isEqualTo("engineEvents");
+            .isEqualTo("namespace.engine-events");
 
         assertThat(auditProducer.getProducer().getRequiredGroups())
             .as("should have required groups set for audit producer")
@@ -74,7 +111,7 @@ public class EngineConfigurationIT {
         BindingProperties messageEventsOutput = bindingServiceProperties.getBindingProperties("messageEventsOutput");
 
         //then
-        assertThat(messageEventsOutput.getDestination()).isEqualTo("messageEvents.activiti-app");
+        assertThat(messageEventsOutput.getDestination()).isEqualTo("namespace.message-events.activiti-app");
         assertThat(messageEventsOutput.getProducer().getRequiredGroups()).isEqualTo(new String[] {"messages"});
     }
 
@@ -85,9 +122,9 @@ public class EngineConfigurationIT {
         BindingProperties commandResults = bindingServiceProperties.getBindingProperties("commandResults");
 
         //then
-        assertThat(commandConsumer.getDestination()).isEqualTo("commandConsumer.activiti-app");
+        assertThat(commandConsumer.getDestination()).isEqualTo("namespace.command-consumer.activiti-app");
         assertThat(commandConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
-        assertThat(commandResults.getDestination()).isEqualTo("commandResults.activiti-app");
+        assertThat(commandResults.getDestination()).isEqualTo("namespace.command-results.activiti-app");
     }
 
     @Test
@@ -97,9 +134,9 @@ public class EngineConfigurationIT {
         BindingProperties signalConsumer = bindingServiceProperties.getBindingProperties("signalConsumer");
 
         //then
-        assertThat(signalProducer.getDestination()).isEqualTo("signalEvent");
+        assertThat(signalProducer.getDestination()).isEqualTo("namespace.signal-event");
         assertThat(signalProducer.getProducer().getRequiredGroups()).isEqualTo(new String[] {"my-activiti-rb-app"});
-        assertThat(signalConsumer.getDestination()).isEqualTo("signalEvent");
+        assertThat(signalConsumer.getDestination()).isEqualTo("namespace.signal-event");
         assertThat(signalConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }
 
@@ -110,9 +147,9 @@ public class EngineConfigurationIT {
         BindingProperties integrationErrorsConsumer = bindingServiceProperties.getBindingProperties("integrationErrorsConsumer");
 
         //then
-        assertThat(integrationResultsConsumer.getDestination()).isEqualTo("integrationResult.my-activiti-rb-app");
+        assertThat(integrationResultsConsumer.getDestination()).isEqualTo("namespace.integration-result.my-activiti-rb-app");
         assertThat(integrationResultsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
-        assertThat(integrationErrorsConsumer.getDestination()).isEqualTo("integrationError.my-activiti-rb-app");
+        assertThat(integrationErrorsConsumer.getDestination()).isEqualTo("namespace.integration-error.my-activiti-rb-app");
         assertThat(integrationErrorsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }
 
@@ -123,9 +160,9 @@ public class EngineConfigurationIT {
         BindingProperties asyncExecutorJobsOutput = bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput");
 
         //then
-        assertThat(asyncExecutorJobsInput.getDestination()).isEqualTo("asyncExecutorJobs.activiti-app");
+        assertThat(asyncExecutorJobsInput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
         assertThat(asyncExecutorJobsInput.getGroup()).isEqualTo("my-activiti-rb-app");
-        assertThat(asyncExecutorJobsOutput.getDestination()).isEqualTo("asyncExecutorJobs.activiti-app");
+        assertThat(asyncExecutorJobsOutput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
     }
 
 }
