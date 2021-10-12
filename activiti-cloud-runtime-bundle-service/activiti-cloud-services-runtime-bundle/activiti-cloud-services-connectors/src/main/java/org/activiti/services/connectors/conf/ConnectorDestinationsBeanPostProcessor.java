@@ -16,7 +16,6 @@
 
 package org.activiti.services.connectors.conf;
 
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -32,14 +31,11 @@ public class ConnectorDestinationsBeanPostProcessor implements BeanPostProcessor
     private static final Logger logger = LoggerFactory.getLogger(ConnectorImplementationsProvider.class);
 
     private final ConnectorImplementationsProvider destinationsProvider;
-    private final ActivitiCloudMessagingProperties messagingProperties;
     private final ConnectorDestinationMappingStrategy destinationMappingStrategy;
 
     public ConnectorDestinationsBeanPostProcessor(ConnectorImplementationsProvider destinationsProvider,
-                                                  ActivitiCloudMessagingProperties messagingProperties,
                                                   ConnectorDestinationMappingStrategy destinationMappingStrategy) {
         this.destinationsProvider = destinationsProvider;
-        this.messagingProperties = messagingProperties;
         this.destinationMappingStrategy = destinationMappingStrategy;
     }
 

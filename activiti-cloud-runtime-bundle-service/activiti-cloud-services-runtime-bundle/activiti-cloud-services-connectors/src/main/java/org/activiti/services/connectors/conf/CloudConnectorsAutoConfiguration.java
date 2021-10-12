@@ -16,7 +16,6 @@
 
 package org.activiti.services.connectors.conf;
 
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
@@ -153,10 +152,8 @@ public class CloudConnectorsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ConnectorDestinationsBeanPostProcessor connectorDestinationsBeanPostProcessor(ConnectorImplementationsProvider destinationsProvider,
-                                                                                         ActivitiCloudMessagingProperties messagingProperties,
                                                                                          ConnectorDestinationMappingStrategy destinationMappingStrategy) {
         return new ConnectorDestinationsBeanPostProcessor(destinationsProvider,
-                                                          messagingProperties,
                                                           destinationMappingStrategy);
     }
 
