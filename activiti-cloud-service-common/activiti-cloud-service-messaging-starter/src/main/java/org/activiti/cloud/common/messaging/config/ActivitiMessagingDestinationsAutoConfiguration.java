@@ -34,7 +34,13 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(ActivitiCloudMessagingProperties messagingProperties) {
-        return new ActivitiMessagingDestinationsBeanPostProcessor(messagingProperties);
+    public ActivitiMessagingDestinationTransformer activitiMessagingDestinationTransformer(ActivitiCloudMessagingProperties messagingProperties) {
+        return new ActivitiMessagingDestinationTransformer(messagingProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(ActivitiMessagingDestinationTransformer destinationTransformer) {
+        return new ActivitiMessagingDestinationsBeanPostProcessor(destinationTransformer);
     }
 }

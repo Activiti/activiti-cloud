@@ -20,7 +20,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.*;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -157,9 +156,6 @@ public class ActivitiCloudMessagingProperties {
     @Validated
     public static class DestinationProperties {
 
-        @NotEmpty
-        private String[] bindings;
-
         private String name;
 
         private String scope;
@@ -169,14 +165,6 @@ public class ActivitiCloudMessagingProperties {
         private String separator;
 
         DestinationProperties() {}
-
-        public String[] getBindings() {
-            return bindings;
-        }
-
-        public void setBindings(String[] bindings) {
-            this.bindings = bindings;
-        }
 
         public String getName() {
             return name;
@@ -213,7 +201,6 @@ public class ActivitiCloudMessagingProperties {
         @Override
         public String toString() {
             return "DestinationProperties{" +
-                "bindings=" + Arrays.toString(bindings) +
                 ", name='" + name + '\'' +
                 ", scope='" + scope + '\'' +
                 ", prefix='" + prefix + '\'' +

@@ -28,35 +28,41 @@ import static org.assertj.core.api.Assertions.assertThat;
     "spring.application.name=bar",
     "POD_NAMESPACE=baz",
     "ENV_NAME=quix",
+    "DEST_SEPARATOR=.",
 
-    "activiti.cloud.messaging.destination-separator=.",
-    "activiti.cloud.messaging.destination-prefix=${ENV_NAME}${activiti.cloud.messaging.destination-separator}${POD_NAMESPACE}",
+    "activiti.cloud.messaging.destination-separator=${DEST_SEPARATOR}",
+    "activiti.cloud.messaging.destination-prefix=${ENV_NAME}${DEST_SEPARATOR}${POD_NAMESPACE}",
     "activiti.cloud.messaging.destination-override-enabled=true",
 
-    "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer${activiti.cloud.messaging.destination-separator}${activiti.cloud.application.name}",
+    "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
     "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
-
-    "activiti.cloud.messaging.destinations.engineEvents.bindings=auditProducer,auditConsumer,queryConsumer",
-    "activiti.cloud.messaging.destinations.engineEvents.name=engine-events",
-
-    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].bindings=camelConnectorConsumer,camel-connector.INVOKE",
-    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].name=${ACT_CAMEL_CONNECTOR_INVOKE_DEST:camel_connector_invoke}",
-
-    "activiti.cloud.messaging.destinations.commandConsumer.bindings=commandConsumer,messageConnectorOutput",
-    "activiti.cloud.messaging.destinations.commandConsumer.name=command-consumer",
+    "spring.cloud.stream.bindings.messageConnectorOutput.destination=commandConsumer",
+    "spring.cloud.stream.bindings.messageConnectorOutput.group=${spring.application.name}",
     "activiti.cloud.messaging.destinations.commandConsumer.scope=${activiti.cloud.application.name}",
 
-    "activiti.cloud.messaging.destinations.asyncExecutorJobs.bindings=asyncExecutorJobsInput,asyncExecutorJobsOutput",
+    "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
+    "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
+    "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
+    "activiti.cloud.messaging.destinations.engineEvents.name=engine-events",
+
+    "spring.cloud.stream.bindings.[camel-connector.INVOKE].destination=camel-connector.INVOKE",
+    "spring.cloud.stream.bindings.camelConnectorConsumer.destination=camel-connector.INVOKE",
+    "activiti.cloud.messaging.destinations.[camel-connector.INVOKE].name=${ACT_CAMEL_CONNECTOR_INVOKE_DEST:camel_connector_invoke}",
+
+    "spring.cloud.stream.bindings.asyncExecutorJobsInput.destination=asyncExecutorJobs",
+    "spring.cloud.stream.bindings.asyncExecutorJobsOutput.destination=asyncExecutorJobs",
     "activiti.cloud.messaging.destinations.asyncExecutorJobs.scope=${activiti.cloud.application.name}",
 
-    "activiti.cloud.messaging.destinations.messageEvents.bindings=messageEventsOutput,messageConnectorInput",
+    "spring.cloud.stream.bindings.messageEventsOutput.destination=messageEvents",
+    "spring.cloud.stream.bindings.messageConnectorInput.destination=messageEvents",
+    "activiti.cloud.messaging.destinations.messageEvents.name=message-events",
     "activiti.cloud.messaging.destinations.messageEvents.scope=${activiti.cloud.application.name}",
 
-    "activiti.cloud.messaging.destinations.myCmResults.bindings=commandResults",
-    "activiti.cloud.messaging.destinations.myCmResults.name=command-results",
-    "activiti.cloud.messaging.destinations.myCmResults.scope=${activiti.cloud.application.name}",
-    "activiti.cloud.messaging.destinations.myCmResults.prefix=bar",
-    "activiti.cloud.messaging.destinations.myCmResults.separator=_"})
+    "spring.cloud.stream.bindings.commandResults.destination=commandResults",
+    "activiti.cloud.messaging.destinations.commandResults.name=command-results",
+    "activiti.cloud.messaging.destinations.commandResults.scope=${activiti.cloud.application.name}",
+    "activiti.cloud.messaging.destinations.commandResults.prefix=bar",
+    "activiti.cloud.messaging.destinations.commandResults.separator=_"})
 public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
 
     @Autowired
@@ -66,10 +72,10 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     public void testBindingServicePropertiesDefaults() {
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getDestination())
-            .isEqualTo("quix.baz.command-consumer.foo");
+            .isEqualTo("quix.baz.commandConsumer.foo");
         assertThat(bindingServiceProperties.getBindingProperties("messageConnectorOutput")
                                            .getDestination())
-            .isEqualTo("quix.baz.command-consumer.foo");
+            .isEqualTo("quix.baz.commandConsumer.foo");
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getGroup())
             .isEqualTo("bar");
@@ -123,11 +129,11 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     public void testBindingServicePropertiesWithMessageEventsOverrides() {
         assertThat(bindingServiceProperties.getBindingProperties("messageEventsOutput")
                                            .getDestination())
-            .isEqualTo("quix.baz.messageEvents.foo");
+            .isEqualTo("quix.baz.message-events.foo");
 
         assertThat(bindingServiceProperties.getBindingProperties("messageConnectorInput")
                                            .getDestination())
-            .isEqualTo("quix.baz.messageEvents.foo");
+            .isEqualTo("quix.baz.message-events.foo");
     }
 
 }
