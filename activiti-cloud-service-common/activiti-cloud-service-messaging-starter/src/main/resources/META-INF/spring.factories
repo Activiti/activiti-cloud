@@ -1,5 +1,5 @@
 org.springframework.boot.env.EnvironmentPostProcessor=\
   org.activiti.cloud.common.messaging.config.ActivitiMessagingEnvironmentPostProcessor
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsBeanPostProcessor
+    org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsAutoConfiguration
 

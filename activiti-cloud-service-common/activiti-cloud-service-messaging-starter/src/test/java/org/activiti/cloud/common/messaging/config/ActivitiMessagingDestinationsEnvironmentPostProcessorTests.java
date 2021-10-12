@@ -29,11 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
     "POD_NAMESPACE=baz",
     "ENV_NAME=quix",
 
-    "activiti.cloud.messaging.destination-prefix=${ENV_NAME}.${POD_NAMESPACE}",
     "activiti.cloud.messaging.destination-separator=.",
+    "activiti.cloud.messaging.destination-prefix=${ENV_NAME}${activiti.cloud.messaging.destination-separator}${POD_NAMESPACE}",
     "activiti.cloud.messaging.destination-override-enabled=true",
 
-    "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
+    "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer${activiti.cloud.messaging.destination-separator}${activiti.cloud.application.name}",
     "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
 
     "activiti.cloud.messaging.destinations.engineEvents.bindings=auditProducer,auditConsumer,queryConsumer",
