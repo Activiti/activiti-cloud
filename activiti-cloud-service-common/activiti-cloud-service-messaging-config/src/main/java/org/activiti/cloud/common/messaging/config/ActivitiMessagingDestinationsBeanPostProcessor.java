@@ -22,8 +22,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.core.Ordered;
 
-public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor {
+import java.util.Optional;
+
+public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
     private static final Logger log = LoggerFactory.getLogger(ActivitiMessagingDestinationsBeanPostProcessor.class);
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
@@ -43,8 +46,10 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                .forEach(bindingEntry -> {
                                    String bindingName = bindingEntry.getKey();
                                    BindingProperties bindingProperties = bindingEntry.getValue();
+                                   String source = Optional.ofNullable(bindingProperties.getDestination())
+                                                           .orElse(bindingName);
 
-                                   String destination = destinationTransformer.apply(bindingProperties.getDestination());
+                                   String destination = destinationTransformer.apply(source);
 
                                    bindingProperties.setDestination(destination);
 
@@ -56,5 +61,10 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
         }
 
         return bean;
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

@@ -27,9 +27,6 @@ import java.util.function.Function;
 public class ActivitiMessagingDestinationTransformer implements Function<String, String> {
     private static final Logger log = LoggerFactory.getLogger(ActivitiMessagingDestinationTransformer.class);
 
-    private static final String REPLACEMENT = "-";
-    private static final String ILLEGAL_CHARACTERS = "[\\t\\s*#:]";
-
     private final ActivitiCloudMessagingProperties messagingProperties;
 
     public ActivitiMessagingDestinationTransformer(ActivitiCloudMessagingProperties messagingProperties) {
@@ -53,10 +50,9 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
                                    .orElse(null);
 
         String name = Optional.ofNullable(destinationProperties)
-                              .map(it -> Optional.ofNullable(it.getName())
-                                                 .orElse(source))
-                              .orElseGet(() -> this.escapeIllegalCharacters(source)
-                                                   .toLowerCase());
+                              .map(it -> it.getName())
+                              .filter(StringUtils::hasText)
+                              .orElse(source);
 
         log.warn("Processing source destination '{}' with prefix '{}' and separator '{} to target name '{}' with scope '{}'",
                  source,
@@ -80,10 +76,6 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
         }
 
         return value.toString();
-    }
-
-    protected String escapeIllegalCharacters(String value) {
-        return value.replaceAll(ILLEGAL_CHARACTERS, REPLACEMENT);
     }
 
     public String getPrefix() {

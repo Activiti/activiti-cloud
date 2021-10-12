@@ -16,11 +16,14 @@ package org.activiti.cloud.starter.rb.configuration;
  * limitations under the License.
  */
 
-
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
 import org.activiti.services.connectors.conf.ConnectorDestinationMappingStrategy;
 
+import java.util.Optional;
+
 public class ActivitiConnectorDestinationMappingStrategy implements ConnectorDestinationMappingStrategy {
+    private static final String REPLACEMENT = "-";
+    private static final String ILLEGAL_CHARACTERS = "[\\t\\s*#:]";
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
 
@@ -30,6 +33,14 @@ public class ActivitiConnectorDestinationMappingStrategy implements ConnectorDes
 
     @Override
     public String apply(String implementation) {
-        return destinationTransformer.apply(implementation);
+        return Optional.ofNullable(destinationTransformer.apply(implementation))
+                       .map(this::escapeIllegalCharacters)
+                       .map(String::toLowerCase)
+                       .orElse(implementation);
     }
+
+    protected String escapeIllegalCharacters(String value) {
+        return value.replaceAll(ILLEGAL_CHARACTERS, REPLACEMENT);
+    }
+
 }

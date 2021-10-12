@@ -15,8 +15,10 @@
  */
 package org.activiti.cloud.services.job.executor;
 
+import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
@@ -26,11 +28,10 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @ConditionalOnProperty(name = "spring.activiti.asyncExecutorActivate", havingValue = "true", matchIfMissing = true)
-@PropertySource("classpath:config/job-executor-channel.properties")
+@AutoConfigureAfter(ActivitiMessagingDestinationsAutoConfiguration.class)
 public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
