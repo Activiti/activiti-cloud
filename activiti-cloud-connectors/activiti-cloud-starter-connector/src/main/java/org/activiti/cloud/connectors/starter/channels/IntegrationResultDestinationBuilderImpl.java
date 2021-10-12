@@ -20,6 +20,7 @@ import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class IntegrationResultDestinationBuilderImpl implements IntegrationResultDestinationBuilder {
 
@@ -34,7 +35,9 @@ public class IntegrationResultDestinationBuilderImpl implements IntegrationResul
         String resultDestinationOverride = connectorProperties.getResultDestinationOverride();
 
         String destination = ObjectUtils.isEmpty(resultDestinationOverride)
-                ? Optional.ofNullable(event.getResultDestination())
+                ? Optional.of(event)
+                          .map(IntegrationRequest::getResultDestination)
+                          .filter(Predicate.not(ObjectUtils::isEmpty))
                           .orElseGet(() -> getServiceDestination(event))
                 : resultDestinationOverride;
 

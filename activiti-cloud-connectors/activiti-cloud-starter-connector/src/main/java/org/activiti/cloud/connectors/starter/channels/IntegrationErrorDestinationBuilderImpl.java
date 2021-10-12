@@ -20,6 +20,7 @@ import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorDestinationBuilder {
 
@@ -34,7 +35,9 @@ public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorD
         String errorDestinationOverride = connectorProperties.getErrorDestinationOverride();
 
         String destination = ObjectUtils.isEmpty(errorDestinationOverride)
-            ? Optional.ofNullable(event.getErrorDestination())
+            ? Optional.of(event)
+                      .map(IntegrationRequest::getErrorDestination)
+                      .filter(Predicate.not(ObjectUtils::isEmpty))
                       .orElseGet(() -> this.getServiceDestination(event))
             : errorDestinationOverride;
 

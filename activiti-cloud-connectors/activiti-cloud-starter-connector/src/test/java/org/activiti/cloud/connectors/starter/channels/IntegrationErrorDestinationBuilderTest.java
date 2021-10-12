@@ -27,10 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class IntegrationResultDestinationBuilderTest {
+public class IntegrationErrorDestinationBuilderTest {
 
     @InjectMocks
-    private IntegrationResultDestinationBuilderImpl subject;
+    private IntegrationErrorDestinationBuilderImpl subject;
 
     @Mock
     private ConnectorProperties connectorProperties;
@@ -57,7 +57,7 @@ public class IntegrationResultDestinationBuilderTest {
         String result = subject.buildDestination(integrationRequest);
 
         // then
-        assertThat(result).isEqualTo("integrationResult.myServiceName");
+        assertThat(result).isEqualTo("integrationError.myServiceName");
 
     }
 
@@ -71,13 +71,13 @@ public class IntegrationResultDestinationBuilderTest {
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
-        integrationRequest.setResultDestination("integrationResult.myResultDestination");
+        integrationRequest.setErrorDestination("integrationError.myErrorDestination");
 
         // when
         String result = subject.buildDestination(integrationRequest);
 
         // then
-        assertThat(result).isEqualTo("integrationResult.myResultDestination");
+        assertThat(result).isEqualTo("integrationError.myErrorDestination");
     }
 
 }
