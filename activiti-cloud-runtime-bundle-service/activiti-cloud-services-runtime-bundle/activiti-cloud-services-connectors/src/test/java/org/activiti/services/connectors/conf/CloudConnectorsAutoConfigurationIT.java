@@ -35,8 +35,6 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
@@ -58,9 +56,6 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private IntegrationContextService integrationContextService;
-
-    @SpyBean
-    private BindingServiceProperties bindingServiceProperties;
 
     @MockBean
     private RuntimeBundleProperties runtimeBundleProperties;
