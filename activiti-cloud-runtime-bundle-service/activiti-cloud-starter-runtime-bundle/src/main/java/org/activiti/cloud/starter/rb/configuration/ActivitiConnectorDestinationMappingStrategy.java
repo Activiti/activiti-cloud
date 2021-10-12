@@ -1,3 +1,5 @@
+package org.activiti.cloud.starter.rb.configuration;
+
 /*
  * Copyright 2017-2020 Alfresco Software, Ltd.
  *
@@ -15,11 +17,19 @@
  */
 
 
-package org.activiti.services.connectors.conf;
+import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
+import org.activiti.services.connectors.conf.ConnectorDestinationMappingStrategy;
 
-public class NoopDestinationMappingStrategy implements DestinationMappingStrategy {
+public class ActivitiConnectorDestinationMappingStrategy implements ConnectorDestinationMappingStrategy {
+
+    private final ActivitiMessagingDestinationTransformer destinationTransformer;
+
+    public ActivitiConnectorDestinationMappingStrategy(ActivitiMessagingDestinationTransformer destinationTransformer) {
+        this.destinationTransformer = destinationTransformer;
+    }
+
     @Override
     public String apply(String implementation) {
-        return implementation;
+        return destinationTransformer.apply(implementation);
     }
 }

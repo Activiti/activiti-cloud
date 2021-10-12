@@ -33,11 +33,11 @@ public class ConnectorDestinationsBeanPostProcessor implements BeanPostProcessor
 
     private final ConnectorImplementationsProvider destinationsProvider;
     private final ActivitiCloudMessagingProperties messagingProperties;
-    private final DestinationMappingStrategy destinationMappingStrategy;
+    private final ConnectorDestinationMappingStrategy destinationMappingStrategy;
 
     public ConnectorDestinationsBeanPostProcessor(ConnectorImplementationsProvider destinationsProvider,
                                                   ActivitiCloudMessagingProperties messagingProperties,
-                                                  DestinationMappingStrategy destinationMappingStrategy) {
+                                                  ConnectorDestinationMappingStrategy destinationMappingStrategy) {
         this.destinationsProvider = destinationsProvider;
         this.messagingProperties = messagingProperties;
         this.destinationMappingStrategy = destinationMappingStrategy;

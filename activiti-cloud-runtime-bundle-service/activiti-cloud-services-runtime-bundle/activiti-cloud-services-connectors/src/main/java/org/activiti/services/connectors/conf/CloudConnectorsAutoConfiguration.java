@@ -146,15 +146,15 @@ public class CloudConnectorsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public DestinationMappingStrategy destinationMappingStrategy() {
-        return new NoopDestinationMappingStrategy();
+    public ConnectorDestinationMappingStrategy destinationMappingStrategy() {
+        return new ConnectorDestinationMappingStrategy() {};
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ConnectorDestinationsBeanPostProcessor connectorDestinationsBeanPostProcessor(ConnectorImplementationsProvider destinationsProvider,
                                                                                          ActivitiCloudMessagingProperties messagingProperties,
-                                                                                         DestinationMappingStrategy destinationMappingStrategy) {
+                                                                                         ConnectorDestinationMappingStrategy destinationMappingStrategy) {
         return new ConnectorDestinationsBeanPostProcessor(destinationsProvider,
                                                           messagingProperties,
                                                           destinationMappingStrategy);
