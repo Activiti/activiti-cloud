@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.common.messaging.config;
+package org.activiti.cloud.common.messaging.config.test;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +38,11 @@ import static org.assertj.core.api.Assertions.assertThat;
     "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
     "spring.cloud.stream.bindings.messageConnectorOutput.destination=commandConsumer",
     "spring.cloud.stream.bindings.messageConnectorOutput.group=${spring.application.name}",
-    "activiti.cloud.messaging.destinations.commandConsumer.scope=${activiti.cloud.application.name}",
 
     "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
     "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
     "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
+    // override destination name
     "activiti.cloud.messaging.destinations.engineEvents.name=engine-events",
 
     "spring.cloud.stream.bindings.[camel-connector.INVOKE].destination=camel-connector.INVOKE",
@@ -51,16 +51,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
     "spring.cloud.stream.bindings.asyncExecutorJobsInput.destination=asyncExecutorJobs",
     "spring.cloud.stream.bindings.asyncExecutorJobsOutput.destination=asyncExecutorJobs",
-    "activiti.cloud.messaging.destinations.asyncExecutorJobs.scope=${activiti.cloud.application.name}",
 
     "spring.cloud.stream.bindings.messageEventsOutput.destination=messageEvents",
     "spring.cloud.stream.bindings.messageConnectorInput.destination=messageEvents",
     "activiti.cloud.messaging.destinations.messageEvents.name=message-events",
-    "activiti.cloud.messaging.destinations.messageEvents.scope=${activiti.cloud.application.name}",
 
     "spring.cloud.stream.bindings.commandResults.destination=commandResults",
     "activiti.cloud.messaging.destinations.commandResults.name=command-results",
-    "activiti.cloud.messaging.destinations.commandResults.scope=${activiti.cloud.application.name}",
     "activiti.cloud.messaging.destinations.commandResults.prefix=bar",
     "activiti.cloud.messaging.destinations.commandResults.separator=_"})
 public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {

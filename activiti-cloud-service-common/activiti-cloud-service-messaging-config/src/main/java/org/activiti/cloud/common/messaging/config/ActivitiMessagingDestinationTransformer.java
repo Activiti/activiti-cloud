@@ -74,7 +74,7 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
 
         value.append(name);
 
-        if (scope != null) {
+        if (StringUtils.hasText(scope)) {
             value.append(separator)
                  .append(scope);
         }
