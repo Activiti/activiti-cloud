@@ -26,6 +26,7 @@ import org.activiti.api.process.model.events.MessageSubscriptionEvent.MessageSub
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
+import org.activiti.cloud.services.messages.core.channels.MessageConnectorSource;
 import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -122,6 +124,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @Autowired
     protected AbstractMessageChannel messageConnectorOutput;
+
+    @Autowired
+    private BindingServiceProperties bindingServiceProperties;
 
     @Value("${activiti.cloud.application.name}")
     protected String activitiCloudApplicationName;
@@ -743,8 +748,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                              .setHeader(MESSAGE_EVENT_CORRELATION_KEY, correlationKey)
                              .setHeader(MESSAGE_EVENT_ID, UUID.randomUUID())
                              .setHeader(APP_NAME, activitiCloudApplicationName)
+                             .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, bindingServiceProperties.getBindingDestination(MessageConnectorSource.OUTPUT))
                              .setHeader(SERVICE_FULL_NAME, springApplicationName);
-
     }
 
     protected Message<MessageEventPayload> startMessageDeployedEvent(String messageName) {

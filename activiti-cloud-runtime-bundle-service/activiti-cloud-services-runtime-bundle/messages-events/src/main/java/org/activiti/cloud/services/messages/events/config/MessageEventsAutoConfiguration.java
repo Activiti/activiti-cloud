@@ -28,6 +28,7 @@ import org.activiti.cloud.services.messages.events.support.MessageSubscriptionEv
 import org.activiti.cloud.services.messages.events.support.StartMessageDeployedEventMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -42,8 +43,12 @@ public class MessageEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageEventsDispatcher messageEventsDispatcher(MessageEventsSource messageEventsSource) {
-        return new MessageEventsDispatcher(messageEventsSource.messageEventsOutput());
+    public MessageEventsDispatcher messageEventsDispatcher(MessageEventsSource messageEventsSource,
+                                                           BindingServiceProperties bindingServiceProperties) {
+        String messageEventOutputDestination = bindingServiceProperties.getBindingDestination("commandConsumer");
+
+        return new MessageEventsDispatcher(messageEventsSource.messageEventsOutput(),
+                                           messageEventOutputDestination);
     }
 
     @Bean

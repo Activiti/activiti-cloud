@@ -15,24 +15,34 @@
  */
 package org.activiti.cloud.services.messages.events.support;
 
+import org.activiti.cloud.services.messages.events.MessageEventHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public class MessageEventsDispatcher {
-    
+
     private final MessageChannel messageEvents;
-    
-    public MessageEventsDispatcher(MessageChannel messageEvents) {
+    private final String messageEventOutputDestination;
+
+    public MessageEventsDispatcher(MessageChannel messageEvents,
+                                   String messageEventOutputDestination) {
         this.messageEvents = messageEvents;
+        this.messageEventOutputDestination = messageEventOutputDestination;
     }
-    
+
     public void dispatch(Message<?> message) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             throw new IllegalStateException("requires active transaction synchronization");
         }
 
-        TransactionSynchronizationManager.registerSynchronization(new MessageSenderTransactionSynchronization(message,
+        Message<?> dispatchMessage = MessageBuilder.fromMessage(message)
+                                                   .setHeader(MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION,
+                                                              messageEventOutputDestination)
+                                                   .build();
+
+        TransactionSynchronizationManager.registerSynchronization(new MessageSenderTransactionSynchronization(dispatchMessage,
                                                                                                               messageEvents));
     }
 

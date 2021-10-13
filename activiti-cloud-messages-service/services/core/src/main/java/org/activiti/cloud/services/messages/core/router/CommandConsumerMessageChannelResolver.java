@@ -16,18 +16,19 @@
 
 package org.activiti.cloud.services.messages.core.router;
 
+import org.activiti.cloud.services.messages.core.channels.MessageConnectorSource;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.core.BeanFactoryMessageChannelDestinationResolver;
 import org.springframework.messaging.core.DestinationResolutionException;
+import org.springframework.messaging.core.DestinationResolver;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class CommandConsumerMessageChannelResolver extends BeanFactoryMessageChannelDestinationResolver {
+public class CommandConsumerMessageChannelResolver implements DestinationResolver<MessageChannel> {
 
     private final BinderAwareChannelResolver binderAwareChannelResolver;
     private final BindingService bindingService;
@@ -42,13 +43,10 @@ public class CommandConsumerMessageChannelResolver extends BeanFactoryMessageCha
     }
 
     @Override
-    public MessageChannel resolveDestination(String name) throws DestinationResolutionException {
-        String destination = destinationMapper.apply(name);
+    public MessageChannel resolveDestination(String destination) throws DestinationResolutionException {
+        String channelName = getChannelName(destination).orElse(MessageConnectorSource.OUTPUT);
 
-        Optional<String> channelName = getChannelName(destination);
-
-        return channelName.map(super::resolveDestination)
-                          .orElseGet(() -> binderAwareChannelResolver.resolveDestination(destination));
+        return binderAwareChannelResolver.resolveDestination(channelName);
     }
 
     protected Optional<String> getChannelName(String destination) {

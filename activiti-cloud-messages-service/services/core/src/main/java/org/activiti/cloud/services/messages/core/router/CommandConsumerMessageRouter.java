@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.APP_NAME;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION;
 
 public class CommandConsumerMessageRouter extends AbstractMessageRouter {
 
@@ -38,13 +38,16 @@ public class CommandConsumerMessageRouter extends AbstractMessageRouter {
 
     @Override
     protected Collection<MessageChannel> determineTargetChannels(Message<?> message) {
-        String appName = message.getHeaders()
-                                .get(APP_NAME, String.class);
+        Optional<String> destination = getHeader(message, MESSAGE_EVENT_OUTPUT_DESTINATION);
 
-        MessageChannel messageChannel = Optional.ofNullable(appName)
-                                                .map(destinationResolver::resolveDestination)
-                                                .orElseThrow(() -> new MessageMappingException(message,
-                                                                      "Unable to determine target channel for message"));
+        MessageChannel messageChannel = destination.map(destinationResolver::resolveDestination)
+                                                   .orElseThrow(() -> new MessageMappingException(message,
+                                                                                                  "Unable to determine target channel for message"));
         return Arrays.asList(messageChannel);
+    }
+
+    private Optional<String> getHeader(Message<?> message, String key) {
+        return Optional.ofNullable(message.getHeaders()
+                                          .get(key, String.class));
     }
 }
