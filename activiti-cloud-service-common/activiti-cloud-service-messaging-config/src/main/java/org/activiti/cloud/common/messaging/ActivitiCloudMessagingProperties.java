@@ -55,6 +55,10 @@ public class ActivitiCloudMessagingProperties {
 
     private boolean destinationOverrideEnabled = false;
 
+    private String destinationIllegalCharsRegex = "[\\t\\s*#:]";
+
+    private String destinationIllegalCharsReplacement = "-";
+
     private Map<String, DestinationProperties> destinations = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     ActivitiCloudMessagingProperties() { }
@@ -115,6 +119,22 @@ public class ActivitiCloudMessagingProperties {
         this.destinationOverrideEnabled = destinationOverrideEnabled;
     }
 
+    public String getDestinationIllegalCharsRegex() {
+        return destinationIllegalCharsRegex;
+    }
+
+    public void setDestinationIllegalCharsRegex(String destinationIllegalCharsRegex) {
+        this.destinationIllegalCharsRegex = destinationIllegalCharsRegex;
+    }
+
+    public String getDestinationIllegalCharsReplacement() {
+        return destinationIllegalCharsReplacement;
+    }
+
+    public void setDestinationIllegalCharsReplacement(String destinationIllegalCharsReplacement) {
+        this.destinationIllegalCharsReplacement = destinationIllegalCharsReplacement;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -150,6 +170,8 @@ public class ActivitiCloudMessagingProperties {
             ", destinationSeparator='" + destinationSeparator + '\'' +
             ", destinationPrefix='" + destinationPrefix + '\'' +
             ", destinations=" + destinations +
+            ", destinationIllegalCharsReplacement=" + destinationIllegalCharsReplacement +
+            ", destinationIllegalCharsRegex=" + destinationIllegalCharsRegex +
             '}';
     }
 

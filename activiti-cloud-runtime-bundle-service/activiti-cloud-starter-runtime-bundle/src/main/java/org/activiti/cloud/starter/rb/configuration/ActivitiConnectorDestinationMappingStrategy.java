@@ -16,19 +16,21 @@ package org.activiti.cloud.starter.rb.configuration;
  * limitations under the License.
  */
 
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
 import org.activiti.services.connectors.conf.ConnectorDestinationMappingStrategy;
 
 import java.util.Optional;
 
 public class ActivitiConnectorDestinationMappingStrategy implements ConnectorDestinationMappingStrategy {
-    private static final String REPLACEMENT = "-";
-    private static final String ILLEGAL_CHARACTERS = "[\\t\\s*#:]";
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
+    private final ActivitiCloudMessagingProperties messagingProperties;
 
-    public ActivitiConnectorDestinationMappingStrategy(ActivitiMessagingDestinationTransformer destinationTransformer) {
+    public ActivitiConnectorDestinationMappingStrategy(ActivitiCloudMessagingProperties messagingProperties,
+                                                       ActivitiMessagingDestinationTransformer destinationTransformer) {
         this.destinationTransformer = destinationTransformer;
+        this.messagingProperties = messagingProperties;
     }
 
     @Override
@@ -40,7 +42,15 @@ public class ActivitiConnectorDestinationMappingStrategy implements ConnectorDes
     }
 
     protected String escapeIllegalCharacters(String value) {
-        return value.replaceAll(ILLEGAL_CHARACTERS, REPLACEMENT);
+        return value.replaceAll(getRegex(), getReplacement());
+    }
+
+    protected String getRegex() {
+        return messagingProperties.getDestinationIllegalCharsRegex();
+    }
+
+    protected String getReplacement() {
+        return messagingProperties.getDestinationIllegalCharsReplacement();
     }
 
 }

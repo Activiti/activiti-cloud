@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
 import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
@@ -53,7 +54,9 @@ public class ActivitiCloudEngineAutoConfiguration {
                            name = "destination-override-enabled",
                            havingValue = "true",
                            matchIfMissing = false)
-    public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(ActivitiMessagingDestinationTransformer destinationTransformer) {
-        return new ActivitiConnectorDestinationMappingStrategy(destinationTransformer);
+    public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(ActivitiCloudMessagingProperties messagingProperties,
+                                                                                                        ActivitiMessagingDestinationTransformer destinationTransformer) {
+        return new ActivitiConnectorDestinationMappingStrategy(messagingProperties,
+                                                               destinationTransformer);
     }
 }
