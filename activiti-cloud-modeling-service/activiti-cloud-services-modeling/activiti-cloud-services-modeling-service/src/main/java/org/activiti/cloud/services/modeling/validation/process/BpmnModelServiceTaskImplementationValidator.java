@@ -17,21 +17,19 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import static java.lang.String.format;
 import static org.springframework.util.StringUtils.isEmpty;
-
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContent;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 
 /**
  * Implementation of {@link BpmnModelValidator} vor validating service task implementation
@@ -62,6 +60,7 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
         availableImplementations.add("script.EXECUTE");
 
         availableImplementations.add("email-service.SEND");
+        availableImplementations.add("docgen-service.GENERATE");
 
         return getFlowElements(bpmnModel,
                         ServiceTask.class)

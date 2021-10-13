@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -906,4 +905,39 @@ public class ModelValidationControllerIT {
                               tuple("expected type: String, found: Null",
                                     "#/extensions/Process_test/templates/tasks/Task1/assignee/value: expected type: String, found: Null"));
     }
+    
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToEmailService() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/email-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                "process.xml",
+                CONTENT_TYPE_XML,
+                validContent);
+        Model processModel = createModel(validContent);
+
+        ResultActions resultActions = mockMvc
+                .perform(multipart("/v1/models/{model_id}/validate",
+                        processModel.getId())
+                        .file(file));
+
+        resultActions.andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToDocgenService() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/docgen-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                "process.xml",
+                CONTENT_TYPE_XML,
+                validContent);
+        Model processModel = createModel(validContent);
+
+        ResultActions resultActions = mockMvc
+                .perform(multipart("/v1/models/{model_id}/validate",
+                        processModel.getId())
+                        .file(file));
+
+        resultActions.andExpect(status().isNoContent());
+    }
+
 }
