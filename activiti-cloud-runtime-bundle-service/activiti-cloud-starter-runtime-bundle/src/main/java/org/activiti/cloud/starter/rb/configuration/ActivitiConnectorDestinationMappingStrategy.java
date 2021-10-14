@@ -36,21 +36,7 @@ public class ActivitiConnectorDestinationMappingStrategy implements ConnectorDes
     @Override
     public String apply(String implementation) {
         return Optional.ofNullable(destinationTransformer.apply(implementation))
-                       .map(this::escapeIllegalCharacters)
-                       .map(String::toLowerCase)
+                       .map(messagingProperties.overrideDestination())
                        .orElse(implementation);
     }
-
-    protected String escapeIllegalCharacters(String value) {
-        return value.replaceAll(getRegex(), getReplacement());
-    }
-
-    protected String getRegex() {
-        return messagingProperties.getDestinationIllegalCharsRegex();
-    }
-
-    protected String getReplacement() {
-        return messagingProperties.getDestinationIllegalCharsReplacement();
-    }
-
 }

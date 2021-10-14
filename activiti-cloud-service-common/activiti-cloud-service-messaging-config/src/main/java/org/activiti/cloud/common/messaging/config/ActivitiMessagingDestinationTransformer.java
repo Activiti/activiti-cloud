@@ -75,7 +75,11 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
                  .append(scope);
         }
 
-        return value.toString();
+        String target = value.toString();
+
+        return messagingProperties.isDestinationOverrideEnabled()
+                ? messagingProperties.overrideDestination().apply(target)
+                : target;
     }
 
     public String getPrefix() {

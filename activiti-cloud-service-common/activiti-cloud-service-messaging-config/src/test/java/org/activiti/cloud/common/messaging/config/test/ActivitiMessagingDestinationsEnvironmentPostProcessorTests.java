@@ -69,10 +69,10 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     public void testBindingServicePropertiesDefaults() {
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getDestination())
-            .isEqualTo("quix.baz.commandConsumer.foo");
+            .isEqualTo("quix.baz.commandconsumer.foo");
         assertThat(bindingServiceProperties.getBindingProperties("messageConnectorOutput")
                                            .getDestination())
-            .isEqualTo("quix.baz.commandConsumer.foo");
+            .isEqualTo("quix.baz.commandconsumer.foo");
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getGroup())
             .isEqualTo("bar");
@@ -115,11 +115,11 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorTests {
     public void testBindingServicePropertiesWithAsyncExecutorJobsOverride() {
         assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput")
                                            .getDestination())
-            .isEqualTo("quix.baz.asyncExecutorJobs.foo");
+            .isEqualTo("quix.baz.asyncexecutorjobs.foo");
 
         assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput")
                                            .getDestination())
-            .isEqualTo("quix.baz.asyncExecutorJobs.foo");
+            .isEqualTo("quix.baz.asyncexecutorjobs.foo");
     }
 
     @Test

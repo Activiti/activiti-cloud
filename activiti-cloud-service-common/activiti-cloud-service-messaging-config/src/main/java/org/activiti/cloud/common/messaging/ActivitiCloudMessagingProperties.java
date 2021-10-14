@@ -23,6 +23,7 @@ import javax.validation.constraints.*;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 @ConfigurationProperties(prefix = ActivitiCloudMessagingProperties.ACTIVITI_CLOUD_MESSAGING_PREFIX)
 @Validated
@@ -163,6 +164,15 @@ public class ActivitiCloudMessagingProperties {
 
     public void setDestinationIllegalCharsReplacement(String destinationIllegalCharsReplacement) {
         this.destinationIllegalCharsReplacement = destinationIllegalCharsReplacement;
+    }
+
+    public Function<String, String> overrideDestination() {
+        return escapeIllegalCharacters().andThen(String::toLowerCase);
+    }
+
+    public Function<String, String> escapeIllegalCharacters() {
+        return (value) -> value.replaceAll(destinationIllegalCharsRegex,
+                                           destinationIllegalCharsReplacement);
     }
 
     @Override
