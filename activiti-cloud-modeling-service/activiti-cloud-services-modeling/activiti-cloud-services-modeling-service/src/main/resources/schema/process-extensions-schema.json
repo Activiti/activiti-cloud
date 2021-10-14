@@ -115,12 +115,24 @@
           "then": {
             "properties": {
               "value": {
-                "type": "string",
-                "pattern": "^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
-                "message": {
-                  "pattern": "Invalid date - {{name}}({{id}})",
-                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is date"
-                }
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
+                    "message": {
+                      "pattern": "Invalid date - {{name}}({{id}})",
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is date"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
               }
             }
           }
@@ -136,12 +148,24 @@
           "then": {
             "properties": {
               "value": {
-                "type": "string",
-                "pattern": "^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
-                "message": {
-                  "pattern": "Invalid datetime - {{name}}({{id}})",
-                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is datetime"
-                }
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                    "message": {
+                      "pattern": "Invalid datetime - {{name}}({{id}})",
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is datetime"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
               }
             }
           }
@@ -177,10 +201,22 @@
           "then": {
             "properties": {
               "value": {
-                "type": "integer",
-                "message": {
-                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is integer"
-                }
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is integer"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
               }
             }
           }
@@ -196,10 +232,22 @@
           "then": {
             "properties": {
               "value": {
-                "type": "boolean",
-                "message": {
-                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is boolean"
-                }
+                "anyOf": [
+                  {
+                    "type": "boolean",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is boolean"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
               }
             }
           }
@@ -215,10 +263,22 @@
           "then": {
             "properties": {
               "value": {
-                "type": "object",
-                "message": {
-                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is json"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is json"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
               }
             }
           }
@@ -234,10 +294,22 @@
           "then": {
             "properties": {
               "value": {
-                "type": "object",
-                "message": {
-                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is file"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is file"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
               }
             }
           }
@@ -253,10 +325,22 @@
           "then": {
             "properties": {
               "value": {
-                "type": "object",
-                "message": {
-                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is folder"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is folder"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
               }
             }
           }
@@ -272,10 +356,22 @@
           "then": {
             "properties": {
               "value": {
-                "type": "array",
-                "message": {
-                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is array"
-                }
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is array"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
               }
             }
           }
