@@ -33,32 +33,62 @@ public class ActivitiCloudMessagingProperties {
         rabbitmq, kafka
     }
 
+    /**
+     * Configure messaging broker type. Default is rabbitmq
+     */
     @NotNull
     private MessagingBroker broker = MessagingBroker.rabbitmq;
 
+    /**
+     * Enable partitioned messaging configuration for engine events producer and consumers
+     */
     @NotNull
     private Boolean partitioned = false;
 
+    /**
+     * Set partition count for partitioned mode. Default is 1
+     */
     @NotNull
     @Positive
     private Integer partitionCount = 1;
 
+    /**
+     * Configure consumer instance index for partitioned messaging. Default is 0
+     */
     @NotNull
     @Min(0)
     private Integer instanceIndex = 0;
 
+    /**
+     * Set destination separator to use to build full destinations, i.e. prefix_destination. Default is _
+     */
     @NotEmpty
     @Size(min = 1, max = 1)
     private String destinationSeparator = "_";
 
+    /**
+     * Set destination prefix to use to build destinations, i.e. prefix_destination. Default is empty string.
+     */
     private String destinationPrefix = "";
 
+    /**
+     * Enable destination name override to apply conversion to all destination name for producers, consumers and connectors
+     */
     private boolean destinationOverrideEnabled = false;
 
+    /**
+     * Configure regex expression to use for replacement of illegal characters in the destination names. Default is [\t\s*#:]
+     */
     private String destinationIllegalCharsRegex = "[\\t\\s*#:]";
 
+    /**
+     * Configure replacement character for illegal characters in the destination names. Default is -
+     */
     private String destinationIllegalCharsReplacement = "-";
 
+    /**
+     * Configure destination properties to apply customization to producers and consumer channel bindings with matching destination key.
+     */
     private Map<String, DestinationProperties> destinations = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     ActivitiCloudMessagingProperties() { }
@@ -178,12 +208,24 @@ public class ActivitiCloudMessagingProperties {
     @Validated
     public static class DestinationProperties {
 
-        private String name;
+        /**
+         * Destination name to apply for matching channel binding destinations. If empty the key is used as name. Default is empty string.
+         */
+        private String name = "";
 
+        /**
+         * Destination scope to add to destination name, i.e. name.scope. Default is null
+         */
         private String scope;
 
+        /**
+         * Destination prefix to override common destination prefix. Default is null
+         */
         private String prefix;
 
+        /**
+         * Destination separator to override common destination separator. Default is null
+         */
         private String separator;
 
         DestinationProperties() {}
