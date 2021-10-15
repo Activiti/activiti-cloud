@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -542,9 +541,11 @@ public class ModelValidationControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: Integer, found: String",
-                                       "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"));
+                                "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"),
+                        tuple("string [aloha] does not match pattern ^\\$\\{(.*)[\\}]$",
+                                "Value format in integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
     }
 
     @Test
@@ -571,9 +572,11 @@ public class ModelValidationControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: Boolean, found: Integer",
-                                       "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is boolean"));
+                                "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is boolean"),
+                        tuple("expected type: String, found: Integer",
+                                "Value format in booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
     }
 
     @Test
@@ -600,9 +603,11 @@ public class ModelValidationControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: JSONObject, found: Integer",
-                                       "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"));
+                                "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"),
+                        tuple("expected type: String, found: Integer",
+                                "Value format in objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
     }
 
     @Test
@@ -629,12 +634,16 @@ public class ModelValidationControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(
                         tuple("expected type: String, found: Integer",
-                              "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is date"),
+                                "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is date"),
+                        tuple("expected type: String, found: Integer",
+                                "Value format in dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"),
                         tuple("string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
-                              "Invalid date - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68)"));
+                                "Invalid date - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68)"),
+                        tuple("string [aloha] does not match pattern ^\\$\\{(.*)[\\}]$",
+                                "Value format in dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
     }
 
     @Test
@@ -896,14 +905,102 @@ public class ModelValidationControllerIT {
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
 
-        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException)resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .hasSize(2)
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsOnly(tuple("something is not a valid enum value",
-                                    "#/extensions/Process_test/templates/tasks/Task2/assignee/type: something is not a valid enum value"),
-                              tuple("expected type: String, found: Null",
-                                    "#/extensions/Process_test/templates/tasks/Task1/assignee/value: expected type: String, found: Null"));
+                                "#/extensions/Process_test/templates/tasks/Task2/assignee/type: something is not a valid enum value"),
+                        tuple("expected type: String, found: Null",
+                                "#/extensions/Process_test/templates/tasks/Task1/assignee/value: expected type: String, found: Null"));
     }
+
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessExtensionsWithValidExpresionAsIntegerVariableType() throws Exception {
+        byte[] invalidContent = resourceAsByteArray("process-extensions/valid-extensions-with-variable-integer-as-expression.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                invalidContent);
+
+        ProjectEntity project = (ProjectEntity)projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                "process-model",
+                new Extensions()));
+
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate/extensions",
+                        processModel.getId())
+                        .file(file))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidExpresionAsIntegerVariableType() throws Exception {
+
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-extensions-with-incomplete-expression.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                invalidContent);
+
+        ProjectEntity project = (ProjectEntity)projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                "process-model",
+                new Extensions()));
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("/v1/models/{model_id}/validate/extensions",
+                        processModel.getId()).file(file));
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+                .isEqualTo("#/extensions/Process_test/properties/8b9ac008-8a76-4ebd-8221-04452add5f22: #: only 1 subschema matches out of 2");
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException)resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(2)
+                .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription)
+                .containsOnly(tuple("string [${error] does not match pattern ^\\$\\{(.*)[\\}]$",
+                                "Value format in var1(8b9ac008-8a76-4ebd-8221-04452add5f22) is not a valid expression"),
+                        tuple("expected type: Integer, found: String",
+                                "Mismatch value type - var1(8b9ac008-8a76-4ebd-8221-04452add5f22). Expected type is integer"));
+    }
+    
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToEmailService() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/email-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                "process.xml",
+                CONTENT_TYPE_XML,
+                validContent);
+        Model processModel = createModel(validContent);
+
+        ResultActions resultActions = mockMvc
+                .perform(multipart("/v1/models/{model_id}/validate",
+                        processModel.getId())
+                        .file(file));
+
+        resultActions.andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToDocgenService() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/docgen-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                "process.xml",
+                CONTENT_TYPE_XML,
+                validContent);
+        Model processModel = createModel(validContent);
+
+        ResultActions resultActions = mockMvc
+                .perform(multipart("/v1/models/{model_id}/validate",
+                        processModel.getId())
+                        .file(file));
+
+        resultActions.andExpect(status().isNoContent());
+    }
+
 }
