@@ -53,10 +53,9 @@ public class RuntimeBundleSwaggerIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").isNotEmpty())
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
-            .andExpect(
-                jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContentOf"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContentOf"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContentOf"))))
             .andExpect(jsonPath("$.components.schemas[\"SaveTaskPayload\"].properties")
                 .value(hasKey("payloadType")))
             .andExpect(jsonPath("$.info.title")
