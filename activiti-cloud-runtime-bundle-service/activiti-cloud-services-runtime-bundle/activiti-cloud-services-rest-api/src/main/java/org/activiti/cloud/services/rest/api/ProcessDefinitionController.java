@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.rest.api;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -41,18 +41,18 @@ public interface ProcessDefinitionController {
     @GetMapping(value = "/{id}/model",
             produces = "application/xml")
     @ResponseBody
-    @ApiOperation("getProcessModel")
+    @Operation(summary = "getProcessModel")
     String getProcessModel(@PathVariable(value = "id") String id);
 
     @GetMapping(value = "/{id}/model",
             produces = "application/json")
     @ResponseBody
-    @ApiOperation("getProcessModel")
+    @Operation(summary = "getProcessModel")
     String getBpmnModel(@PathVariable(value = "id") String id);
 
     @GetMapping(value = "/{id}/model",
             produces = "image/svg+xml")
     @ResponseBody
-    @ApiOperation("getProcessModel")
+    @Operation(summary = "getProcessModel")
     String getProcessDiagram(@PathVariable(value = "id") String id);
 }

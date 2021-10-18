@@ -19,7 +19,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -132,7 +132,7 @@ public class ProjectController implements ProjectRestApi {
 
     @Override
     public void validateProject(
-            @ApiParam(VALIDATE_PROJECT_ID_PARAM_DESCR)
+            @Parameter(description = VALIDATE_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId) throws IOException {
         Project project = findProjectById(projectId);
         projectService.validateProject(project);

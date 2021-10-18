@@ -17,8 +17,7 @@ package org.activiti.cloud.modeling.api.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
 
@@ -27,21 +26,21 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 /**
  * Implementation for {@link Project}
  */
-@ApiModel("Project")
+@Schema(name = "Project")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
 public class ProjectImpl extends AbstractAuditable<String> implements Project<String> {
 
-    @ApiModelProperty(value = "The unique identifier of the project", readOnly = true)
+    @Schema(description = "The unique identifier of the project", readOnly = true)
     private String id;
 
-    @ApiModelProperty(value = "The name of the project")
+    @Schema(description = "The name of the project")
     private String name;
 
-    @ApiModelProperty(value = "The description of the project")
+    @Schema(description = "The description of the project")
     private String description;
 
-    @ApiModelProperty(value = "The version of the project")
+    @Schema(description = "The version of the project")
     private String version;
 
     public ProjectImpl() {
