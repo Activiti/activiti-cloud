@@ -18,7 +18,6 @@ package org.activiti.services.connectors;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -28,14 +27,11 @@ public class IntegrationRequestSender {
 
     private final BinderAwareChannelResolver resolver;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
-    private final BindingServiceProperties bindingServiceProperties;
 
     public IntegrationRequestSender(BinderAwareChannelResolver resolver,
-                                    IntegrationContextMessageBuilderFactory messageBuilderFactory,
-                                    BindingServiceProperties bindingServiceProperties) {
+                                    IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         this.resolver = resolver;
         this.messageBuilderFactory = messageBuilderFactory;
-        this.bindingServiceProperties = bindingServiceProperties;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)

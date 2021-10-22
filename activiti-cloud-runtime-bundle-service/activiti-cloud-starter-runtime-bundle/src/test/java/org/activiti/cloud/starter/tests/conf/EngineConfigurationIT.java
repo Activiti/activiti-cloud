@@ -101,7 +101,7 @@ public class EngineConfigurationIT {
 
         assertThat(auditProducer.getProducer().getRequiredGroups())
             .as("should have required groups set for audit producer")
-            .containsExactly("query", "audit");;
+            .containsExactly("query", "audit");
     }
 
     @Test
