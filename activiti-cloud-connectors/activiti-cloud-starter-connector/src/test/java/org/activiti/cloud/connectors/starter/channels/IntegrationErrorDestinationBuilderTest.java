@@ -18,7 +18,6 @@ package org.activiti.cloud.connectors.starter.channels;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,10 +35,6 @@ public class IntegrationErrorDestinationBuilderTest {
 
     @Mock
     private ConnectorProperties connectorProperties;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-    }
 
     @Test
     public void shouldResolveDestination() {
