@@ -67,14 +67,14 @@ public class EngineConfigurationIT {
             .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
                                                                                         entry.getValue()
                                                                                              .getDestination()))
-            .contains(tuple("mealsConnector", "namespace.mealsconnector"),
-                      tuple("rest.GET", "namespace.rest.get"),
-                      tuple("perfromBusinessTask", "namespace.perfrombusinesstask"),
-                      tuple("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
-                      tuple("payment", "namespace.payment"),
-                      tuple("Constants Connector.constantsActionName", "namespace.constants-connector.constantsactionname"),
-                      tuple("Variable Mapping Connector.variableMappingActionName", "namespace.variable-mapping-connector.variablemappingactionname"),
-                      tuple("miCloudConnector", "namespace.micloudconnector"));
+            .contains(entry("mealsConnector", "namespace.mealsconnector"),
+                      entry("rest.GET", "namespace.rest.get"),
+                      entry("perfromBusinessTask", "namespace.perfrombusinesstask"),
+                      entry("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
+                      entry("payment", "namespace.payment"),
+                      entry("Constants Connector.constantsActionName", "namespace.constants-connector.constantsactionname"),
+                      entry("Variable Mapping Connector.variableMappingActionName", "namespace.variable-mapping-connector.variablemappingactionname"),
+                      entry("miCloudConnector", "namespace.micloudconnector"));
     }
 
 
