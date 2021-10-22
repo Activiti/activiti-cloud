@@ -39,7 +39,6 @@ public class IntegrationErrorDestinationBuilderTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
     }
 
     @Test
@@ -52,6 +51,8 @@ public class IntegrationErrorDestinationBuilderTest {
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
+
+        when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
 
         // when
         String result = subject.buildDestination(integrationRequest);
