@@ -38,7 +38,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
@@ -69,9 +68,6 @@ public class IntegrationRequestSenderTest {
 
     @Mock
     private BinderAwareChannelResolver resolver;
-
-    @Mock
-    private BindingServiceProperties bindingServiceProperties;
 
     @Mock
     private MessageChannel integrationProducer;
