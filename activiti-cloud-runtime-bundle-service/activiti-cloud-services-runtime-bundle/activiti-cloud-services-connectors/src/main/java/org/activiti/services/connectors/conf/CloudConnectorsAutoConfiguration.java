@@ -125,14 +125,16 @@ public class CloudConnectorsAutoConfiguration {
                                                        DefaultServiceTaskBehavior defaultServiceTaskBehavior,
                                                        ExtensionsVariablesMappingProvider variablesMappingProvider,
                                                        ProcessEngineEventsAggregator processEngineEventsAggregator,
-                                                       RuntimeBundleProperties runtimeBundleProperties) {
+                                                       RuntimeBundleProperties runtimeBundleProperties,
+                                                       BindingServiceProperties bindingServiceProperties) {
         MQServiceTaskBehavior taskBehavior = new MQServiceTaskBehavior(integrationContextManager,
                                                                        eventPublisher,
                                                                        integrationContextBuilder,
                                                                        runtimeBundleInfoAppender,
                                                                        defaultServiceTaskBehavior,
                                                                        processEngineEventsAggregator,
-                                                                       runtimeBundleProperties);
+                                                                       runtimeBundleProperties,
+                                                                       bindingServiceProperties);
         taskBehavior.setVariablesCalculator(variablesMappingProvider);
         return taskBehavior;
     }

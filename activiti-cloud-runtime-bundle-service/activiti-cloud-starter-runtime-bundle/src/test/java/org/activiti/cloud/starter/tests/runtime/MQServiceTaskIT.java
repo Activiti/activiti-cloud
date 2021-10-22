@@ -95,14 +95,14 @@ public class MQServiceTaskIT {
         List<String> destinations = connectorImplementationsProvider.getImplementations();
 
         //then
-        assertThat(destinations).containsOnly("mealsConnector",
-                                              "rest.GET",
-                                              "perfromBusinessTask",
-                                              "anyImplWithoutHandler",
-                                              "payment",
-                                              "Constants Connector.constantsActionName",
-                                              "Variable Mapping Connector.variableMappingActionName",
-                                              "miCloudConnector");
+        assertThat(destinations).contains("mealsConnector",
+                                          "rest.GET",
+                                          "perfromBusinessTask",
+                                          "anyImplWithoutHandler",
+                                          "payment",
+                                          "Constants Connector.constantsActionName",
+                                          "Variable Mapping Connector.variableMappingActionName",
+                                          "miCloudConnector");
     }
 
     @Test

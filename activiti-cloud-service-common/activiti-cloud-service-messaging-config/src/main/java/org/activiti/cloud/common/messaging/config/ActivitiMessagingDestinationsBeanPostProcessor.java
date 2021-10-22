@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.Ordered;
 
@@ -42,21 +41,18 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
             log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
 
             bindingServiceProperties.getBindings()
-                               .entrySet()
-                               .forEach(bindingEntry -> {
-                                   String bindingName = bindingEntry.getKey();
-                                   BindingProperties bindingProperties = bindingEntry.getValue();
-                                   String source = Optional.ofNullable(bindingProperties.getDestination())
-                                                           .orElse(bindingName);
+                                    .forEach((bindingName, bindingProperties) -> {
+                                        String source = Optional.ofNullable(bindingProperties.getDestination())
+                                                                .orElse(bindingName);
 
-                                   String destination = destinationTransformer.apply(source);
+                                        String destination = destinationTransformer.apply(source);
 
-                                   bindingProperties.setDestination(destination);
+                                        bindingProperties.setDestination(destination);
 
-                                   log.warn("Overriding destination '{}' for binding '{}'",
-                                            destination,
-                                            bindingName);
-                               });
+                                        log.warn("Configured destination '{}' for binding '{}'",
+                                                 destination,
+                                                 bindingName);
+                                    });
 
         }
 

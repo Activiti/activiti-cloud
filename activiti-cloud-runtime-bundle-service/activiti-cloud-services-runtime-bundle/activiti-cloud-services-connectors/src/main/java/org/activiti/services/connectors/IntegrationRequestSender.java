@@ -16,8 +16,6 @@
 package org.activiti.services.connectors;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -42,12 +40,6 @@ public class IntegrationRequestSender {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendIntegrationRequest(IntegrationRequest event) {
-        String resultDestination = bindingServiceProperties.getBindingDestination(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER);
-        IntegrationRequestImpl.class.cast(event).setResultDestination(resultDestination);
-
-        String errorDestination = bindingServiceProperties.getBindingDestination(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER);
-        IntegrationRequestImpl.class.cast(event).setErrorDestination(errorDestination);
-
         resolver.resolveDestination(event.getIntegrationContext()
                                          .getConnectorType()).send(buildIntegrationRequestMessage(event));
     }

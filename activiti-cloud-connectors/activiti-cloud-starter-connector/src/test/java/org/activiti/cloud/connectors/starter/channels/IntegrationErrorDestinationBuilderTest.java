@@ -20,13 +20,15 @@ import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationErrorDestinationBuilderTest {
 
     @InjectMocks
@@ -37,8 +39,6 @@ public class IntegrationErrorDestinationBuilderTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
-
         when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
     }
 

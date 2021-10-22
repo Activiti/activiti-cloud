@@ -44,7 +44,7 @@ public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorD
         return destination;
     }
 
-    protected String getServiceDestination(IntegrationRequest event) {
+    private String getServiceDestination(IntegrationRequest event) {
         return  new StringBuilder("integrationError").append(connectorProperties.getMqDestinationSeparator())
                                                      .append(event.getServiceFullName())
                                                      .toString();

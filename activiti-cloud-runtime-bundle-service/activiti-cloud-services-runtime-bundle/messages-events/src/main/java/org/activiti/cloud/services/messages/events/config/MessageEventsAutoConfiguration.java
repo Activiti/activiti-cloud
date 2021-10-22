@@ -45,10 +45,8 @@ public class MessageEventsAutoConfiguration {
     @ConditionalOnMissingBean
     public MessageEventsDispatcher messageEventsDispatcher(MessageEventsSource messageEventsSource,
                                                            BindingServiceProperties bindingServiceProperties) {
-        String messageEventOutputDestination = bindingServiceProperties.getBindingDestination("commandConsumer");
-
         return new MessageEventsDispatcher(messageEventsSource.messageEventsOutput(),
-                                           messageEventOutputDestination);
+                                           bindingServiceProperties);
     }
 
     @Bean

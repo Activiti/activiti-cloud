@@ -31,8 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.AbstractMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
                 properties = {"ACT_MESSAGING_DEST_OVERRIDE_ENABLED=true",
@@ -68,14 +67,14 @@ public class EngineConfigurationIT {
             .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
                                                                                         entry.getValue()
                                                                                              .getDestination()))
-            .contains(entry("mealsConnector", "namespace.mealsconnector"),
-                      entry("rest.GET", "namespace.rest.get"),
-                      entry("perfromBusinessTask", "namespace.perfrombusinesstask"),
-                      entry("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
-                      entry("payment", "namespace.payment"),
-                      entry("Constants Connector.constantsActionName", "namespace.constants-connector.constantsactionname"),
-                      entry("Variable Mapping Connector.variableMappingActionName", "namespace.variable-mapping-connector.variablemappingactionname"),
-                      entry("miCloudConnector", "namespace.micloudconnector"));
+            .contains(tuple("mealsConnector", "namespace.mealsconnector"),
+                      tuple("rest.GET", "namespace.rest.get"),
+                      tuple("perfromBusinessTask", "namespace.perfrombusinesstask"),
+                      tuple("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
+                      tuple("payment", "namespace.payment"),
+                      tuple("Constants Connector.constantsActionName", "namespace.constants-connector.constantsactionname"),
+                      tuple("Variable Mapping Connector.variableMappingActionName", "namespace.variable-mapping-connector.variablemappingactionname"),
+                      tuple("miCloudConnector", "namespace.micloudconnector"));
     }
 
 
@@ -102,7 +101,7 @@ public class EngineConfigurationIT {
 
         assertThat(auditProducer.getProducer().getRequiredGroups())
             .as("should have required groups set for audit producer")
-            .isEqualTo(new String[] {"query", "audit"});
+            .containsExactly("query", "audit");;
     }
 
     @Test
@@ -112,7 +111,7 @@ public class EngineConfigurationIT {
 
         //then
         assertThat(messageEventsOutput.getDestination()).isEqualTo("namespace.message-events.activiti-app");
-        assertThat(messageEventsOutput.getProducer().getRequiredGroups()).isEqualTo(new String[] {"messages"});
+        assertThat(messageEventsOutput.getProducer().getRequiredGroups()).containsExactly("messages");
     }
 
     @Test
@@ -135,7 +134,7 @@ public class EngineConfigurationIT {
 
         //then
         assertThat(signalProducer.getDestination()).isEqualTo("namespace.signal-event");
-        assertThat(signalProducer.getProducer().getRequiredGroups()).isEqualTo(new String[] {"my-activiti-rb-app"});
+        assertThat(signalProducer.getProducer().getRequiredGroups()).containsExactly("my-activiti-rb-app");
         assertThat(signalConsumer.getDestination()).isEqualTo("namespace.signal-event");
         assertThat(signalConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }

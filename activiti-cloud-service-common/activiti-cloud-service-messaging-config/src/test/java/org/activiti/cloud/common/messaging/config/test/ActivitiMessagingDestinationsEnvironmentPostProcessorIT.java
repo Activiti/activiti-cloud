@@ -26,8 +26,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(properties = {
     "activiti.cloud.application.name=foo",
     "spring.application.name=bar",
+    "POD_NAMESPACE=baz",
+    "ENV_NAME=quix",
+    "DEST_SEPARATOR=.",
 
-    "activiti.cloud.messaging.destination-override-enabled=false",
+    "activiti.cloud.messaging.destination-separator=${DEST_SEPARATOR}",
+    "activiti.cloud.messaging.destination-prefix=${ENV_NAME}${DEST_SEPARATOR}${POD_NAMESPACE}",
+    "activiti.cloud.messaging.destination-override-enabled=true",
 
     "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
     "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
@@ -37,6 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
     "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
     "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
     "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
+    // override destination name
+    "activiti.cloud.messaging.destinations.engineEvents.name=engine-events",
 
     "spring.cloud.stream.bindings.[camel-connector.INVOKE].destination=camel-connector.INVOKE",
     "spring.cloud.stream.bindings.camelConnectorConsumer.destination=camel-connector.INVOKE",
@@ -47,11 +54,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
     "spring.cloud.stream.bindings.messageEventsOutput.destination=messageEvents",
     "spring.cloud.stream.bindings.messageConnectorInput.destination=messageEvents",
+    "activiti.cloud.messaging.destinations.messageEvents.name=message-events",
 
     "spring.cloud.stream.bindings.commandResults.destination=commandResults",
+    "activiti.cloud.messaging.destinations.commandResults.name=command-results",
     "activiti.cloud.messaging.destinations.commandResults.prefix=bar",
     "activiti.cloud.messaging.destinations.commandResults.separator=_"})
-public class ActivitiMessagingDestinationsEnvironmentPostProcessorDisabledTests {
+public class ActivitiMessagingDestinationsEnvironmentPostProcessorIT {
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
@@ -60,10 +69,10 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorDisabledTests 
     public void testBindingServicePropertiesDefaults() {
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getDestination())
-            .isEqualTo("commandConsumer_foo");
+            .isEqualTo("quix.baz.commandconsumer.foo");
         assertThat(bindingServiceProperties.getBindingProperties("messageConnectorOutput")
                                            .getDestination())
-            .isEqualTo("commandConsumer_foo");
+            .isEqualTo("quix.baz.commandconsumer.foo");
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer")
                                            .getGroup())
             .isEqualTo("bar");
@@ -73,55 +82,55 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorDisabledTests 
     public void testBindingServicePropertiesCustomValues() {
         assertThat(bindingServiceProperties.getBindingProperties("commandResults")
                                            .getDestination())
-            .isEqualTo("bar_commandResults_foo");
+            .isEqualTo("bar_command-results_foo");
     }
 
     @Test
     public void testBindingServicePropertiesWithMultipleBindings() {
         assertThat(bindingServiceProperties.getBindingProperties("auditProducer")
                                            .getDestination())
-            .isEqualTo("engineEvents");
+            .isEqualTo("quix.baz.engine-events");
 
         assertThat(bindingServiceProperties.getBindingProperties("auditConsumer")
                                            .getDestination())
-            .isEqualTo("engineEvents");
+            .isEqualTo("quix.baz.engine-events");
 
         assertThat(bindingServiceProperties.getBindingProperties("queryConsumer")
                                            .getDestination())
-            .isEqualTo("engineEvents");
+            .isEqualTo("quix.baz.engine-events");
     }
 
     @Test
     public void testBindingServicePropertiesWithConnectorDestinationOverride() {
         assertThat(bindingServiceProperties.getBindingProperties("camelConnectorConsumer")
                                            .getDestination())
-            .isEqualTo("camel_connector_invoke");
+            .isEqualTo("quix.baz.camel_connector_invoke");
 
         assertThat(bindingServiceProperties.getBindingProperties("camel-connector.INVOKE")
                                            .getDestination())
-            .isEqualTo("camel_connector_invoke");
+            .isEqualTo("quix.baz.camel_connector_invoke");
     }
 
     @Test
     public void testBindingServicePropertiesWithAsyncExecutorJobsOverride() {
         assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput")
                                            .getDestination())
-            .isEqualTo("asyncExecutorJobs_foo");
+            .isEqualTo("quix.baz.asyncexecutorjobs.foo");
 
         assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput")
                                            .getDestination())
-            .isEqualTo("asyncExecutorJobs_foo");
+            .isEqualTo("quix.baz.asyncexecutorjobs.foo");
     }
 
     @Test
     public void testBindingServicePropertiesWithMessageEventsOverrides() {
         assertThat(bindingServiceProperties.getBindingProperties("messageEventsOutput")
                                            .getDestination())
-            .isEqualTo("messageEvents_foo");
+            .isEqualTo("quix.baz.message-events.foo");
 
         assertThat(bindingServiceProperties.getBindingProperties("messageConnectorInput")
                                            .getDestination())
-            .isEqualTo("messageEvents_foo");
+            .isEqualTo("quix.baz.message-events.foo");
     }
 
 }
