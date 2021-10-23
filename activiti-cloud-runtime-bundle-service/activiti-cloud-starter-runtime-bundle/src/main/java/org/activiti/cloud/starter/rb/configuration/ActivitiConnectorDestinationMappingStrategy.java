@@ -36,7 +36,7 @@ public class ActivitiConnectorDestinationMappingStrategy implements ConnectorDes
     @Override
     public String apply(String implementation) {
         return Optional.ofNullable(destinationTransformer.apply(implementation))
-                       .map(messagingProperties.overrideDestination())
+                       .map(messagingProperties.transformDestination())
                        .orElse(implementation);
     }
 }

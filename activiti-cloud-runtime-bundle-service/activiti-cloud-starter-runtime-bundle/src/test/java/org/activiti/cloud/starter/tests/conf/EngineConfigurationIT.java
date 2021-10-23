@@ -34,7 +34,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"ACT_MESSAGING_DEST_OVERRIDE_ENABLED=true",
+                properties = {"ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
                               "ACT_MESSAGING_DEST_SEPARATOR=.",
                               "ACT_MESSAGING_DEST_PREFIX=namespace",
                               "ACT_RB_ENG_EVT_DEST=engine-events",

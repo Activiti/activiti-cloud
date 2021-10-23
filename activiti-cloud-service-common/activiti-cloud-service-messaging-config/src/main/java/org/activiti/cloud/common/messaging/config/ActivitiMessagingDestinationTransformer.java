@@ -77,8 +77,8 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
 
         String target = value.toString();
 
-        return messagingProperties.isDestinationOverrideEnabled()
-                ? messagingProperties.overrideDestination().apply(target)
+        return messagingProperties.isDestinationTransformersEnabled()
+                ? messagingProperties.transformDestination().apply(target)
                 : target;
     }
 

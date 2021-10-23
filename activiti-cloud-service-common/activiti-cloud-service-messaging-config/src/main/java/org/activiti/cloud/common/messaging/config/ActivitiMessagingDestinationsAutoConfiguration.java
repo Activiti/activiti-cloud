@@ -37,4 +37,15 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
     public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(ActivitiMessagingDestinationTransformer destinationTransformer) {
         return new ActivitiMessagingDestinationsBeanPostProcessor(destinationTransformer);
     }
+
+    @Bean
+    public InputConverterFunction toLowerCase() {
+        return String::toLowerCase;
+    }
+
+    @Bean
+    public InputConverterFunction escapeIllegalChars(ActivitiCloudMessagingProperties messagingProperties) {
+        return (value) -> value.replaceAll(messagingProperties.getDestinationIllegalCharsRegex(),
+                                           messagingProperties.getDestinationIllegalCharsReplacement());
+    }
 }

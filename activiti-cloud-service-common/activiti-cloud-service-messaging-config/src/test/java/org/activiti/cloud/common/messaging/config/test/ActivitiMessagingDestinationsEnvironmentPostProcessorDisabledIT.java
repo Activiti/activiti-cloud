@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     "activiti.cloud.application.name=foo",
     "spring.application.name=bar",
 
-    "activiti.cloud.messaging.destination-override-enabled=false",
+    "activiti.cloud.messaging.destination-transformers-enabled=false",
 
     "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
     "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",

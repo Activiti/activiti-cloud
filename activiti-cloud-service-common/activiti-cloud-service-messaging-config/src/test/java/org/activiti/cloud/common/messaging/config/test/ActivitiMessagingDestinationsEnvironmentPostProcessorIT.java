@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
     "activiti.cloud.messaging.destination-separator=${DEST_SEPARATOR}",
     "activiti.cloud.messaging.destination-prefix=${ENV_NAME}${DEST_SEPARATOR}${POD_NAMESPACE}",
-    "activiti.cloud.messaging.destination-override-enabled=true",
+    "activiti.cloud.messaging.destination-transformers-enabled=true",
 
     "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
     "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",

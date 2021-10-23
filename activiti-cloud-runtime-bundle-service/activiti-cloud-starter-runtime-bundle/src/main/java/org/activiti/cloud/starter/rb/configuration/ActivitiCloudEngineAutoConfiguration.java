@@ -51,7 +51,7 @@ public class ActivitiCloudEngineAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "activiti.cloud.messaging",
-                           name = "destination-override-enabled",
+                           name = "destination-transformers-enabled",
                            havingValue = "true",
                            matchIfMissing = false)
     public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(ActivitiCloudMessagingProperties messagingProperties,

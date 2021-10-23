@@ -16,13 +16,13 @@
 
 package org.activiti.cloud.common.messaging;
 
+import org.activiti.cloud.common.messaging.config.InputConverterFunction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.*;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Function;
 
 @ConfigurationProperties(prefix = ActivitiCloudMessagingProperties.ACTIVITI_CLOUD_MESSAGING_PREFIX)
@@ -73,9 +73,14 @@ public class ActivitiCloudMessagingProperties {
     private String destinationPrefix = "";
 
     /**
-     * Enable destination name override to apply conversion to all destination name for producers, consumers and connectors
+     * Enable destination name transformers to apply conversion to all destination name for producers, consumers and connectors
      */
-    private boolean destinationOverrideEnabled = false;
+    private boolean destinationTransformersEnabled = false;
+
+    /**
+     * Configure list of transformer functions for destination
+     */
+    private List<String> destinationTransformers = new ArrayList<>();
 
     /**
      * Configure regex expression to use for replacement of illegal characters in the destination names. Default is [\t\s*#:]
@@ -91,6 +96,8 @@ public class ActivitiCloudMessagingProperties {
      * Configure destination properties to apply customization to producers and consumer channel bindings with matching destination key.
      */
     private Map<String, DestinationProperties> destinations = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+    private Map<String, InputConverterFunction> inputConverters;
 
     ActivitiCloudMessagingProperties() { }
 
@@ -142,12 +149,12 @@ public class ActivitiCloudMessagingProperties {
         this.destinations = destinations;
     }
 
-    public boolean isDestinationOverrideEnabled() {
-        return destinationOverrideEnabled;
+    public boolean isDestinationTransformersEnabled() {
+        return destinationTransformersEnabled;
     }
 
-    public void setDestinationOverrideEnabled(boolean destinationOverrideEnabled) {
-        this.destinationOverrideEnabled = destinationOverrideEnabled;
+    public void setDestinationTransformersEnabled(boolean destinationTransformersEnabled) {
+        this.destinationTransformersEnabled = destinationTransformersEnabled;
     }
 
     public String getDestinationIllegalCharsRegex() {
@@ -166,13 +173,31 @@ public class ActivitiCloudMessagingProperties {
         this.destinationIllegalCharsReplacement = destinationIllegalCharsReplacement;
     }
 
-    public Function<String, String> overrideDestination() {
-        return escapeIllegalCharacters().andThen(String::toLowerCase);
+    public Function<String, String> transformDestination() {
+        return (input) -> {
+            InputConverter<String> converter = new InputConverter<>(input);
+
+            for (String it: destinationTransformers) {
+                InputConverterFunction func = Optional.ofNullable(inputConverters.get(it))
+                                                      .orElseThrow();
+                converter = converter.convertBy(func);
+            }
+
+            return converter.pack();
+        };
     }
 
-    public Function<String, String> escapeIllegalCharacters() {
-        return (value) -> value.replaceAll(destinationIllegalCharsRegex,
-                                           destinationIllegalCharsReplacement);
+    @Autowired
+    public void configureInputConverters(Map<String, InputConverterFunction> inputConverters) {
+        this.inputConverters = new LinkedHashMap<>(inputConverters);
+    }
+
+    public List<String> getDestinationTransformers() {
+        return destinationTransformers;
+    }
+
+    public void setDestinationTransformers(List<String> destinationTransformers) {
+        this.destinationTransformers = destinationTransformers;
     }
 
     @Override
@@ -282,5 +307,23 @@ public class ActivitiCloudMessagingProperties {
                 '}';
         }
     }
+
+    static class InputConverter<T> {
+
+        private final T data;
+
+        public InputConverter(T data) {
+            this.data = data;
+        }
+
+        public <U> InputConverter<U> convertBy(Function<T, U> function) {
+            return new InputConverter<>(function.apply(data));
+        }
+
+        public T pack() {
+            return data;
+        }
+    }
+
 
 }
