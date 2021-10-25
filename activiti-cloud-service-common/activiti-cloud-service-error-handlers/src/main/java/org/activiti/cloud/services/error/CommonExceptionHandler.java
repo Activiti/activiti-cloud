@@ -42,7 +42,7 @@ public class CommonExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public EntityModel<ActivitiErrorMessage> handleAppException(IllegalStateException ex, HttpServletResponse response) {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        return new EntityModel<>(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+        return new EntityModel<>(new ActivitiErrorMessageImpl(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundException.class)
