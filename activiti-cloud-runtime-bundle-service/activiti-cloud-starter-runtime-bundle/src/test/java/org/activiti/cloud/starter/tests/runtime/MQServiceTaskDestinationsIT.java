@@ -25,11 +25,15 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {"ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
+                  "ACT_MESSAGING_DEST_TRANSFORMERS=toLowerCase,escapeIllegalChars",
+                  "ACT_MESSAGING_DEST_SEPARATOR=.",
+                  "ACT_MESSAGING_DEST_PREFIX=MQServiceTaskDestinationsIT"})
+public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
 
     @Test
-    public void shouldConfigureDefaultConnectorBindingProperties() {
+    public void shouldConfigureAndTransformConnectorBindingProperties() {
         //given
 
         //when
@@ -40,14 +44,14 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
             .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
                                                                                         entry.getValue()
                                                                                              .getDestination()))
-            .contains(entry("mealsConnector", "mealsConnector"),
-                      entry("rest.GET", "rest.GET"),
-                      entry("perfromBusinessTask", "perfromBusinessTask"),
-                      entry("anyImplWithoutHandler", "anyImplWithoutHandler"),
-                      entry("payment", "payment"),
-                      entry("Constants Connector.constantsActionName", "Constants Connector.constantsActionName"),
-                      entry("Variable Mapping Connector.variableMappingActionName", "Variable Mapping Connector.variableMappingActionName"),
-                      entry("miCloudConnector", "miCloudConnector"));
+            .contains(entry("mealsConnector", "mqservicetaskdestinationsit.mealsconnector"),
+                      entry("rest.GET", "mqservicetaskdestinationsit.rest.get"),
+                      entry("perfromBusinessTask", "mqservicetaskdestinationsit.perfrombusinesstask"),
+                      entry("anyImplWithoutHandler", "mqservicetaskdestinationsit.anyimplwithouthandler"),
+                      entry("payment", "mqservicetaskdestinationsit.payment"),
+                      entry("Constants Connector.constantsActionName", "mqservicetaskdestinationsit.constants-connector.constantsactionname"),
+                      entry("Variable Mapping Connector.variableMappingActionName", "mqservicetaskdestinationsit.variable-mapping-connector.variablemappingactionname"),
+                      entry("miCloudConnector", "mqservicetaskdestinationsit.micloudconnector"));
     }
 
 }
