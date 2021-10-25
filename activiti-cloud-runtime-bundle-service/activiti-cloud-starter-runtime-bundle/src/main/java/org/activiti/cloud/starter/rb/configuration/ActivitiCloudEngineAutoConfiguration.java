@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
 import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
@@ -23,7 +22,6 @@ import org.activiti.spring.boot.ProcessEngineAutoConfiguration;
 import org.activiti.spring.process.ProcessVariablesInitiator;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,13 +48,7 @@ public class ActivitiCloudEngineAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "activiti.cloud.messaging",
-                           name = "destination-transformers-enabled",
-                           havingValue = "true",
-                           matchIfMissing = false)
-    public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(ActivitiCloudMessagingProperties messagingProperties,
-                                                                                                        ActivitiMessagingDestinationTransformer destinationTransformer) {
-        return new ActivitiConnectorDestinationMappingStrategy(messagingProperties,
-                                                               destinationTransformer);
+    public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(ActivitiMessagingDestinationTransformer destinationTransformer) {
+        return new ActivitiConnectorDestinationMappingStrategy(destinationTransformer);
     }
 }
