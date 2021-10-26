@@ -22,11 +22,12 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.core.Ordered;
 
 import java.util.AbstractMap;
 import java.util.Map;
 
-public class ConnectorDestinationsBeanPostProcessor implements BeanPostProcessor {
+public class ConnectorDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectorImplementationsProvider.class);
 
@@ -78,4 +79,8 @@ public class ConnectorDestinationsBeanPostProcessor implements BeanPostProcessor
                          .getDestination());
     }
 
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
 }
