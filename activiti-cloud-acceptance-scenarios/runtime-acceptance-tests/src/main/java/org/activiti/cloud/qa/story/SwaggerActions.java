@@ -56,31 +56,31 @@ public class SwaggerActions {
     @Then("the user gets swagger specification following Alfresco MediaType")
     public void isFollowingAlfrescoMediaType(){
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.RUNTIME_BUNDLE))
-                .contains("ListResponseContent«CloudProcessDefinition»")
-                .contains("EntriesResponseContent«CloudProcessDefinition»")
-                .contains("EntryResponseContent«CloudProcessDefinition»")
+                .contains("ListResponseContentOfCloudProcessDefinition")
+                .contains("EntriesResponseContentOfCloudProcessDefinition")
+                .contains("EntryResponseContentOfCloudProcessDefinition")
                 .contains("payloadType")
-                .doesNotContain("PagedModel«")
-                .doesNotContain("Resources«Resource«")
-                .doesNotContain("Resource«");
+                .doesNotContain("PagedModelOf")
+                .doesNotContain("ResourcesOfResourceOf")
+                .doesNotContain("ResourceOf");
 
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.QUERY))
                 .contains("ListResponseContentOfCloudProcessDefinition")
                 .contains("EntriesResponseContentOfCloudProcessDefinition")
                 .contains("EntryResponseContentOfCloudProcessDefinition")
-                .doesNotContain("PagedModel«")
-                .doesNotContain("Resources«Resource«")
-                .doesNotContain("Resource«");
+                .doesNotContain("PagedModelOf")
+                .doesNotContain("ResourcesOfResourceOf")
+                .doesNotContain("ResourceOf");
 
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.AUDIT))
                 .contains("ListResponseContentOfCloudRuntimeEventOfobjectAndstring")
                 .contains("EntriesResponseContentOfCloudRuntimeEventOfobjectAndstring")
                 .contains("EntryResponseContentOfCloudRuntimeEventOfobjectAndstring")
                 .contains("CloudRuntimeEventModel")
-                .doesNotContain("PagedModel«")
-                .doesNotContain("Resources«Resource«")
-                .doesNotContain("Resource«")
-                .doesNotContain("Enum«");
+                .doesNotContain("PagedModelOf")
+                .doesNotContain("ResourcesOfResourceOf")
+                .doesNotContain("ResourceOf")
+                .doesNotContain("EnumOf");
     }
 
 }
