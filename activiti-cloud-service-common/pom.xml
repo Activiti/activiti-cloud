@@ -44,7 +44,7 @@
     <resteasy.version>4.7.1.Final</resteasy.version>
     <logstash.version>6.6</logstash.version>
     <springfox.version>3.0.0</springfox.version>
-    <swagger.version>1.5.20</swagger.version>
+    <swagger.version>2.1.11</swagger.version>
     <xstream.version>1.4.18</xstream.version>
     <json-unit.version>2.25.0</json-unit.version>
   </properties>
@@ -121,7 +121,7 @@
         <version>${springfox.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.swagger</groupId>
+        <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-annotations</artifactId>
         <version>${swagger.version}</version>
       </dependency>

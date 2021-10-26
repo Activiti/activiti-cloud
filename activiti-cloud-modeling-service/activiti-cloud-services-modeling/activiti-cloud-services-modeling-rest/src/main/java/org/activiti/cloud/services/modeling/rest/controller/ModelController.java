@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -222,9 +222,9 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public void validateModelExtensions(
-        @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
+        @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR)
         @PathVariable String modelId,
-        @ApiParam(VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
+        @Parameter(description = VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
         @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
         @RequestParam(value = PROJECT_ID_PARAM_NAME, required = false) String projectId) throws IOException {
 

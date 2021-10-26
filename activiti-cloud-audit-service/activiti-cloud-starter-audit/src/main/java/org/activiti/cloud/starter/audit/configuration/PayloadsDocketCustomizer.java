@@ -40,8 +40,7 @@ public class PayloadsDocketCustomizer implements DocketCustomizer {
                                                                      WildcardType.class,
                                                                      CloudRuntimeEventType.class);
         
-        return docket.forCodeGeneration(true)
-                     .alternateTypeRules(AlternateTypeRules.newRule(resourceTypeWithWildCard,
+        return docket.alternateTypeRules(AlternateTypeRules.newRule(resourceTypeWithWildCard,
                                                                     CloudRuntimeEventModel.class)
                                          );            
    }
