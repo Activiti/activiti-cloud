@@ -1,7 +1,7 @@
 pull_request_rules:
   - name: automatic merge with strict
     conditions:
-      - author=alfresco-build-user
+      - author=alfresco-build
       - status-success=build
       - status-success=test (rabbitmq, partitioned)
       - status-success=test (rabbitmq, non-partitioned)
