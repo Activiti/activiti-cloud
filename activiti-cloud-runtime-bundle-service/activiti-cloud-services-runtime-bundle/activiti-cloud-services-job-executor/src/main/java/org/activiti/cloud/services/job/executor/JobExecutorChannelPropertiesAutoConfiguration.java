@@ -13,17 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.activiti.cloud.services.job.executor;
 
-package org.activiti.cloud.common.messaging.config;
-
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@EnableConfigurationProperties(ActivitiCloudMessagingProperties.class)
-@PropertySource("classpath:config/activiti-cloud-messaging.properties")
-@PropertySource(value = "file:config/activiti-cloud-messaging.properties", ignoreResourceNotFound = true)
-public class ActivitiCloudMessagingAutoConfiguration {
+@PropertySource("classpath:config/job-executor-channel.properties")
+public class JobExecutorChannelPropertiesAutoConfiguration {
+
 }

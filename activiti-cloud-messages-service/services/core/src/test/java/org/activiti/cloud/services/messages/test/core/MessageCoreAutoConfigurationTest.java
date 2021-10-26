@@ -48,8 +48,8 @@ public class MessageCoreAutoConfigurationTest {
         assertThat(messageConnectorProcessor).isNotNull();
         assertThat(messageConnectorIntegrationFlow).isNotNull();
 
-        assertProperty("spring.cloud.stream.bindings.input.destination").isEqualTo("messageEvents_my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.output.destination").isEqualTo("commandConsumer_my-activiti-rb-app");
+        assertProperty("spring.cloud.stream.bindings.messageConnectorInput.destination").isEqualTo("messageEvents");
+        assertProperty("spring.cloud.stream.bindings.messageConnectorOutput.destination").isEqualTo("commandConsumer");
     }
 
     private AbstractStringAssert<?> assertProperty(String name) {

@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.messages.core.channels;
 
-public interface MessageConnectorProcessor extends MessageConnectorSource, MessageConnectorSink {
+package org.activiti.cloud.services.job.executor;
 
+class MessageBasedJobManagerChannelsConstants {
+    public static final String INPUT = "asyncExecutorJobsInput";
+    public static final String OUTPUT = "asyncExecutorJobsOutput";
 }

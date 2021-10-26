@@ -19,6 +19,9 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Optional;
+import java.util.function.Predicate;
+
 public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorDestinationBuilder {
 
     private final ConnectorProperties connectorProperties;
@@ -32,11 +35,18 @@ public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorD
         String errorDestinationOverride = connectorProperties.getErrorDestinationOverride();
 
         String destination = ObjectUtils.isEmpty(errorDestinationOverride)
-            ? new StringBuilder("integrationError").append(connectorProperties.getMqDestinationSeparator())
-                                                   .append(event.getServiceFullName())
-                                                   .toString()
+            ? Optional.of(event)
+                      .map(IntegrationRequest::getErrorDestination)
+                      .filter(Predicate.not(ObjectUtils::isEmpty))
+                      .orElseGet(() -> this.getServiceDestination(event))
             : errorDestinationOverride;
 
         return destination;
+    }
+
+    private String getServiceDestination(IntegrationRequest event) {
+        return  new StringBuilder("integrationError").append(connectorProperties.getMqDestinationSeparator())
+                                                     .append(event.getServiceFullName())
+                                                     .toString();
     }
 }

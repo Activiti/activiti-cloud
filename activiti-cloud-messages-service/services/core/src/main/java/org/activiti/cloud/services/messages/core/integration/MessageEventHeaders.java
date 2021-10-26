@@ -17,18 +17,18 @@ package org.activiti.cloud.services.messages.core.integration;
 
 public final class MessageEventHeaders {
 
-    public final static String APP_NAME = "appName"; 
+    public final static String APP_NAME = "appName";
     public final static String APP_VERSION = "appVersion";
     public final static String SERVICE_NAME = "serviceName";
     public final static String SERVICE_FULL_NAME = "serviceFullName";
     public final static String SERVICE_TYPE = "serviceType";
     public final static String SERVICE_VERSION = "serviceVersion";
-    
+
     public static final String MESSAGE_EVENT_ID = "messageEventId";
     public static final String MESSAGE_EVENT_CORRELATION_KEY = "messageEventCorrelationKey";
     public static final String MESSAGE_EVENT_BUSINESS_KEY = "messageEventBusinessKey";
     public static final String MESSAGE_EVENT_NAME = "messageEventName";
     public static final String MESSAGE_EVENT_TYPE = "messageEventType";
-    public static final String MESSAGE_PAYLOAD_TYPE = "messagePayloadType"; 
-
+    public static final String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
+    public static final String MESSAGE_EVENT_OUTPUT_DESTINATION = "messageEventOutputDestination";
 }

@@ -29,7 +29,7 @@ import org.springframework.messaging.core.DestinationResolver;
 
 import java.util.Collection;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.APP_NAME;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -47,13 +47,13 @@ public class CommandConsumerMessageRouterTest {
     @Test
     public void should_returnResultOfDestinationResolver_when_headerHasServiceFullName() {
         //given
-        final String appName = "myApp";
+        final String outputDestination = "messageConnectorOutput";
         final Message<String> message = MessageBuilder.withPayload("any")
-            .setHeader(APP_NAME, appName)
+            .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, outputDestination)
             .build();
 
         final MessageChannel messageChannel = mock(MessageChannel.class);
-        given(destinationResolver.resolveDestination(appName)).willReturn(
+        given(destinationResolver.resolveDestination(outputDestination)).willReturn(
             messageChannel);
 
         //when
@@ -81,12 +81,12 @@ public class CommandConsumerMessageRouterTest {
     @Test
     public void should_throwException_when_destinationResolverDoesNotFindADestination() {
         //given
-        final String appName = "myApp";
+        final String outputDestination = "messageConnectorOutput";
         final Message<String> message = MessageBuilder.withPayload("any")
-            .setHeader(APP_NAME, appName)
+            .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, outputDestination)
             .build();
 
-        given(destinationResolver.resolveDestination(appName)).willReturn(null);
+        given(destinationResolver.resolveDestination(outputDestination)).willReturn(null);
 
         //then
         assertThatExceptionOfType(MessageMappingException.class)
@@ -94,6 +94,5 @@ public class CommandConsumerMessageRouterTest {
             //when
             () -> messageRouter.determineTargetChannels(message))
         .withMessage("Unable to determine target channel for message");
-
     }
 }

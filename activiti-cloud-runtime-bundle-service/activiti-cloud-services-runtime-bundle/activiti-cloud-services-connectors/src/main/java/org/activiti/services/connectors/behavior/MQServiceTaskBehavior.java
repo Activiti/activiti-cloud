@@ -30,6 +30,8 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
+import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -45,6 +47,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
     private final DefaultServiceTaskBehavior defaultServiceTaskBehavior;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final RuntimeBundleProperties runtimeBundleProperties;
+    private final BindingServiceProperties bindingServiceProperties;
 
     public MQServiceTaskBehavior(IntegrationContextManager integrationContextManager,
                                  ApplicationEventPublisher eventPublisher,
@@ -52,7 +55,8 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
                                  RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                  DefaultServiceTaskBehavior defaultServiceTaskBehavior,
                                  ProcessEngineEventsAggregator processEngineEventsAggregator,
-                                 RuntimeBundleProperties runtimeBundleProperties) {
+                                 RuntimeBundleProperties runtimeBundleProperties,
+                                 BindingServiceProperties bindingServiceProperties) {
         this.integrationContextManager = integrationContextManager;
         this.eventPublisher = eventPublisher;
         this.integrationContextBuilder = integrationContextBuilder;
@@ -60,6 +64,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
         this.defaultServiceTaskBehavior = defaultServiceTaskBehavior;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.runtimeBundleProperties = runtimeBundleProperties;
+        this.bindingServiceProperties = bindingServiceProperties;
     }
 
     @Override
@@ -95,6 +100,12 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
      */
     private void publishSpringEvent(IntegrationContext integrationContext) {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+
+        String resultDestination = bindingServiceProperties.getBindingDestination(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER);
+        String errorDestination = bindingServiceProperties.getBindingDestination(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER);
+
+        integrationRequest.setErrorDestination(errorDestination);
+        integrationRequest.setResultDestination(resultDestination);
 
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);
 

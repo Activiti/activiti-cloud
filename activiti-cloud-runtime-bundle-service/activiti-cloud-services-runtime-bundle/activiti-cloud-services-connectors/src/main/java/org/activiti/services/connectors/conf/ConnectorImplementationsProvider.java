@@ -13,8 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.messages.core.channels;
 
-public interface MessageConnectorProcessor extends MessageConnectorSource, MessageConnectorSink {
+package org.activiti.services.connectors.conf;
+
+import java.util.List;
+
+public interface ConnectorImplementationsProvider {
+
+    List<String> getImplementations();
 
 }

@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.StartMessageDeploymentDefinition;
 import org.activiti.api.process.model.StartMessageSubscription;
@@ -34,43 +31,47 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.commands.ReceiveMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartMessageCmdExecutor;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.messages.events.producer.BpmnMessageReceivedEventMessageProducer;
-import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEventMessageProducer;
-import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
-import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionCancelledEventMessageProducer;
-import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
+import org.activiti.cloud.services.messages.events.MessageEventHeaders;
+import org.activiti.cloud.services.messages.events.producer.*;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.engine.RuntimeService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.integration.annotation.BridgeFrom;
+import org.springframework.integration.channel.QueueChannel;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
-import static org.assertj.core.api.Assertions.tuple;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,
+@ContextConfiguration(classes = {RuntimeITConfiguration.class, MessageEventsIT.TestConfigurationContext.class},
     initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class MessageEventsIT {
 
@@ -109,6 +110,28 @@ public class MessageEventsIT {
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
+
+    @Autowired
+    private QueueChannel messageEventsQueue;
+
+    @Autowired
+    private BindingServiceProperties bindingServiceProperties;
+
+    @TestConfiguration
+    static class TestConfigurationContext {
+
+        @Bean
+        @BridgeFrom("messageEventsOutput")
+        QueueChannel messageEventsQueue() {
+            return MessageChannels.queue()
+                                  .get();
+        }
+    }
+
+    @BeforeEach
+    public void setUp() {
+        messageEventsQueue.clear();
+    }
 
     @Test
     public void shouldProduceStartMessageDeployedEvents() {
@@ -153,6 +176,8 @@ public class MessageEventsIT {
 
         verify(receiveMessageCmdExecutor, never()).execute(any());
         verify(startMessageСmdExecutor, never()).execute(any());
+
+        assertOutputDestination();
     }
 
     @Test
@@ -199,6 +224,8 @@ public class MessageEventsIT {
 
         verify(receiveMessageCmdExecutor, times(1)).execute(any());
         verify(startMessageСmdExecutor, never()).execute(any());
+
+        assertOutputDestination();
     }
 
     @Test
@@ -224,6 +251,8 @@ public class MessageEventsIT {
 
         verify(startMessageСmdExecutor).execute(any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(any());
+
+        assertOutputDestination();
     }
 
     @Test
@@ -247,6 +276,8 @@ public class MessageEventsIT {
         });
 
         verify(bpmnMessageSentEventMessageProducer).onEvent(any());
+
+        assertOutputDestination();
     }
 
     @Test
@@ -291,6 +322,8 @@ public class MessageEventsIT {
 
         verify(receiveMessageCmdExecutor).execute(any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(any());
+
+        assertOutputDestination();
     }
 
     @Test
@@ -335,6 +368,8 @@ public class MessageEventsIT {
 
         verify(receiveMessageCmdExecutor).execute(any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(any());
+
+        assertOutputDestination();
     }
 
     @Test
@@ -379,6 +414,8 @@ public class MessageEventsIT {
 
         verify(receiveMessageCmdExecutor).execute(any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(any());
+
+        assertOutputDestination();
     }
 
     @Test
@@ -425,6 +462,8 @@ public class MessageEventsIT {
             .list()).hasSize(1);
 
         processInstanceRestTemplate.delete(response);
+
+        assertOutputDestination();
     }
 
     @Test
@@ -471,6 +510,8 @@ public class MessageEventsIT {
             .list()).hasSize(1);
 
         processInstanceRestTemplate.delete(response);
+
+        assertOutputDestination();
     }
 
     @Test
@@ -515,8 +556,9 @@ public class MessageEventsIT {
 
         verify(receiveMessageCmdExecutor).execute(any());
         verify(bpmnMessageReceivedEventMessageProducer).onEvent(any());
-    }
 
+        assertOutputDestination();
+    }
 
     @Test
     public void testBoundarySubprocessMessageEventNonInterrupting() {
@@ -563,6 +605,7 @@ public class MessageEventsIT {
 
         processInstanceRestTemplate.delete(response);
 
+        assertOutputDestination();
     }
 
     @Test
@@ -600,6 +643,8 @@ public class MessageEventsIT {
 
         verify(messageSubscriptionCancelledEventMessageProducer,
             times(processInstances)).onEvent(any());
+
+        assertOutputDestination();
     }
 
     @Test
@@ -662,6 +707,16 @@ public class MessageEventsIT {
 
         processInstanceRestTemplate.delete(catchMsgInstance);
 
+        assertOutputDestination();
+    }
+
+    private void assertOutputDestination() {
+        Message<?> message = messageEventsQueue.receive();
+
+        assertThat(message)
+            .extracting(Message::getHeaders)
+            .extracting(MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION)
+            .isEqualTo(bindingServiceProperties.getBindingDestination("commandConsumer"));
     }
 
 }

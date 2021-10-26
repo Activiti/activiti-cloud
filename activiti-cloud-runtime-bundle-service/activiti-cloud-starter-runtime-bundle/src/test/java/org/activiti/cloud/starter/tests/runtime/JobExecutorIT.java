@@ -45,6 +45,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -78,7 +79,7 @@ import static org.mockito.Mockito.*;
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "spring.activiti.asyncExecutorActivate=true",
-    "activiti.cloud.rb.job-executor.consumer.max-attempts=4" // customized
+    "spring.cloud.stream.bindings.asyncExecutorJobsInput.consumer.max-attempts=4" // customized
 })
 @DirtiesContext
 @ContextConfiguration(classes = {RuntimeITConfiguration.class,
@@ -106,7 +107,7 @@ public class JobExecutorIT {
     private RepositoryService repositoryService;
 
     @Autowired
-    private BindingProperties jobExecutorBindingProperties;
+    private BindingServiceProperties bindingServiceProperties;
 
     @Autowired
     private MessageBasedJobManager messageBasedJobManager;
@@ -175,7 +176,9 @@ public class JobExecutorIT {
 
     @Test
     public void shouldConfigureConsumerProperties() {
-        assertThat(jobExecutorBindingProperties.getConsumer().getMaxAttempts())
+        BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput");
+
+        assertThat(bindingProperties.getConsumer().getMaxAttempts())
             .as("should configure consumer properties")
             .isEqualTo(4);
     }
@@ -191,7 +194,7 @@ public class JobExecutorIT {
         assertThat(messageBasedJobManager).as("should register MessageBasedJobManager bean")
             .isInstanceOf(MessageBasedJobManager.class);
 
-        assertThat(messageBasedJobManager.getDestination())
+        assertThat(messageBasedJobManager.getBindingProperties().getDestination())
             .as("should configure rb scoped destination")
             .endsWith(runtimeBundleProperties.getAppName());
     }
@@ -230,7 +233,7 @@ public class JobExecutorIT {
             .isTrue();
         // message is sent
         verify(jobMessageProducer, times(jobCount))
-            .sendMessage(eq(messageBasedJobManager.getDestination()),
+            .sendMessage(eq(messageBasedJobManager.getOutputChannelName()),
                 any(Job.class));
         // message handler is invoked
         verify(jobMessageHandler, times(jobCount)).handleMessage(any(Message.class));
@@ -303,7 +306,7 @@ public class JobExecutorIT {
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish application event")
             .isTrue();
         // message is sent
-        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getDestination()),
+        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getOutputChannelName()),
             any(Job.class));
         // message handler is invoked
         verify(jobMessageHandler).handleMessage(any(Message.class));
@@ -347,7 +350,7 @@ public class JobExecutorIT {
 
         // message is sent
         verify(jobMessageProducer, times(retryCount))
-            .sendMessage(eq(messageBasedJobManager.getDestination()),
+            .sendMessage(eq(messageBasedJobManager.getOutputChannelName()),
                 any(Job.class));
         // message handler is invoked
         verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
@@ -391,7 +394,7 @@ public class JobExecutorIT {
 
         // timer job message is sent with 2 retries
         verify(jobMessageProducer, times(retryCount))
-            .sendMessage(eq(messageBasedJobManager.getDestination()),
+            .sendMessage(eq(messageBasedJobManager.getOutputChannelName()),
                 any(Job.class));
         // message handler is invoked
         verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
@@ -460,7 +463,7 @@ public class JobExecutorIT {
             .isTrue();
 
         // message is sent
-        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getDestination()),
+        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getOutputChannelName()),
             any(Job.class));
         // message handler is invoked
         verify(jobMessageHandler).handleMessage(any(Message.class));
@@ -521,7 +524,7 @@ public class JobExecutorIT {
         assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should complete job")
             .isTrue();
         // message is sent
-        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getDestination()),
+        verify(jobMessageProducer).sendMessage(eq(messageBasedJobManager.getOutputChannelName()),
             any(Job.class));
         // message handler is invoked
         verify(jobMessageHandler).handleMessage(any(Message.class));

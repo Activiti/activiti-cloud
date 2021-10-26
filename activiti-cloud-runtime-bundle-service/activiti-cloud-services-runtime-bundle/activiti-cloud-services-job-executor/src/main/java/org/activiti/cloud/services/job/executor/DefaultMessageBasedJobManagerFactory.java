@@ -16,23 +16,23 @@
 package org.activiti.cloud.services.job.executor;
 
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 
 public class DefaultMessageBasedJobManagerFactory implements MessageBasedJobManagerFactory {
 
-    private final BindingProperties bindingProperties;
+    private final BindingServiceProperties bindingServiceProperties;
     private final JobMessageProducer jobMessageProducer;
 
-    public DefaultMessageBasedJobManagerFactory(BindingProperties bindingProperties,
+    public DefaultMessageBasedJobManagerFactory(BindingServiceProperties bindingServiceProperties,
                                                 JobMessageProducer jobMessageProducer) {
-        this.bindingProperties = bindingProperties;
+        this.bindingServiceProperties = bindingServiceProperties;
         this.jobMessageProducer = jobMessageProducer;
     }
 
     @Override
     public MessageBasedJobManager create(ProcessEngineConfigurationImpl processEngineConfiguration) {
         return new MessageBasedJobManager(processEngineConfiguration,
-                                          bindingProperties,
+                                          bindingServiceProperties,
                                           jobMessageProducer);
     }
 }

@@ -22,4 +22,8 @@ public interface IntegrationRequest extends CloudRuntimeEntity {
 
     IntegrationContext getIntegrationContext();
 
+    String getResultDestination();
+
+    String getErrorDestination();
+
 }

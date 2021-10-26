@@ -28,6 +28,7 @@ import org.activiti.cloud.services.messages.events.support.MessageSubscriptionEv
 import org.activiti.cloud.services.messages.events.support.StartMessageDeployedEventMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -39,13 +40,15 @@ import org.springframework.context.annotation.PropertySource;
 })
 public class MessageEventsAutoConfiguration {
 
-    
+
     @Bean
     @ConditionalOnMissingBean
-    public MessageEventsDispatcher messageEventsDispatcher(MessageEventsSource messageEventsSource) {
-        return new MessageEventsDispatcher(messageEventsSource.messageEvents());
+    public MessageEventsDispatcher messageEventsDispatcher(MessageEventsSource messageEventsSource,
+                                                           BindingServiceProperties bindingServiceProperties) {
+        return new MessageEventsDispatcher(messageEventsSource.messageEventsOutput(),
+                                           bindingServiceProperties);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public BpmnMessageEventMessageBuilderFactory messageEventPayloadMessageBuilderFactory(RuntimeBundleProperties properties) {
@@ -57,13 +60,13 @@ public class MessageEventsAutoConfiguration {
     public StartMessageDeployedEventMessageBuilderFactory messageDeployedEventMessageBuilderFactory(RuntimeBundleProperties properties) {
         return new StartMessageDeployedEventMessageBuilderFactory(properties);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public MessageSubscriptionEventMessageBuilderFactory messageSubscriptionEventMessageBuilderFactory(RuntimeBundleProperties properties) {
         return new MessageSubscriptionEventMessageBuilderFactory(properties);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public BpmnMessageReceivedEventMessageProducer throwMessageReceivedEventListener(MessageEventsDispatcher messageEventsDispatcher,
@@ -87,7 +90,7 @@ public class MessageEventsAutoConfiguration {
         return new BpmnMessageSentEventMessageProducer(messageEventsDispatcher,
                                                        messageBuilderFactory);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public StartMessageDeployedEventMessageProducer MessageDeployedEventMessageProducer(MessageEventsDispatcher messageEventsDispatcher,
@@ -95,7 +98,7 @@ public class MessageEventsAutoConfiguration {
         return new StartMessageDeployedEventMessageProducer(messageEventsDispatcher,
                                                             messageBuilderFactory);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public MessageSubscriptionCancelledEventMessageProducer messageSubscriptionCancelledEventMessageProducer(MessageEventsDispatcher messageEventsDispatcher,

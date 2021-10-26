@@ -15,33 +15,24 @@
  */
 package org.activiti.cloud.services.job.executor;
 
+import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.binding.SubscribableChannelBindingTargetFactory;
-import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @ConditionalOnProperty(name = "spring.activiti.asyncExecutorActivate", havingValue = "true", matchIfMissing = true)
-@PropertySource("classpath:config/job-executor-channel.properties")
+@AutoConfigureAfter(ActivitiMessagingDestinationsAutoConfiguration.class)
 public class MessageBasedJobManagerAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(name = "jobExecutorBindingProperties")
-    @ConfigurationProperties(prefix = "activiti.cloud.rb.job-executor")
-    public BindingProperties jobExecutorBindingProperties() {
-        return new BindingProperties();
-    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -59,9 +50,9 @@ public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(@Qualifier("jobExecutorBindingProperties") BindingProperties bindingProperties,
+    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(BindingServiceProperties bindingServiceProperties,
                                                                        JobMessageProducer jobMessageProducer) {
-        return new DefaultMessageBasedJobManagerFactory(bindingProperties, jobMessageProducer);
+        return new DefaultMessageBasedJobManagerFactory(bindingServiceProperties, jobMessageProducer);
     }
 
     @Bean

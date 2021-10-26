@@ -20,6 +20,7 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ManagementService;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
@@ -38,6 +39,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -121,15 +123,38 @@ public class CloudConnectorsAutoConfiguration {
                                                        DefaultServiceTaskBehavior defaultServiceTaskBehavior,
                                                        ExtensionsVariablesMappingProvider variablesMappingProvider,
                                                        ProcessEngineEventsAggregator processEngineEventsAggregator,
-                                                       RuntimeBundleProperties runtimeBundleProperties) {
+                                                       RuntimeBundleProperties runtimeBundleProperties,
+                                                       BindingServiceProperties bindingServiceProperties) {
         MQServiceTaskBehavior taskBehavior = new MQServiceTaskBehavior(integrationContextManager,
                                                                        eventPublisher,
                                                                        integrationContextBuilder,
                                                                        runtimeBundleInfoAppender,
                                                                        defaultServiceTaskBehavior,
                                                                        processEngineEventsAggregator,
-                                                                       runtimeBundleProperties);
+                                                                       runtimeBundleProperties,
+                                                                       bindingServiceProperties);
         taskBehavior.setVariablesCalculator(variablesMappingProvider);
         return taskBehavior;
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ConnectorImplementationsProvider connectorDestinationsProvider(RepositoryService repositoryService) {
+        return new RepositoryConnectorImplementationsProvider(repositoryService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ConnectorDestinationMappingStrategy destinationMappingStrategy() {
+        return new ConnectorDestinationMappingStrategy() {};
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ConnectorDestinationsBeanPostProcessor connectorDestinationsBeanPostProcessor(ConnectorImplementationsProvider destinationsProvider,
+                                                                                         ConnectorDestinationMappingStrategy destinationMappingStrategy) {
+        return new ConnectorDestinationsBeanPostProcessor(destinationsProvider,
+                                                          destinationMappingStrategy);
+    }
+
 }

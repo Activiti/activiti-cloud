@@ -20,18 +20,31 @@ import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationI
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
-import org.assertj.core.api.AbstractStringAssert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.AbstractMap;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"activiti.cloud.messaging.destination-separator=."})
+                properties = {"ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
+                              "ACT_MESSAGING_DEST_SEPARATOR=.",
+                              "ACT_MESSAGING_DEST_PREFIX=namespace",
+                              "ACT_RB_ENG_EVT_DEST=engine-events",
+                              "ACT_RB_SIG_EVT_DEST=signal-event",
+                              "ACT_RB_CMD_CONSUMER_DEST=command-consumer",
+                              "ACT_RB_ASYNC_JOB_EXEC_DEST=async-executor-jobs",
+                              "ACT_RB_MSG_EVT_DEST=message-events",
+                              "ACT_RB_CMD_RES_DEST=command-results",
+                              "ACT_INT_RES_CONSUMER=integration-result",
+                              "ACT_INT_ERR_CONSUMER:integration-error"})
 @DirtiesContext
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class EngineConfigurationIT {
@@ -40,7 +53,30 @@ public class EngineConfigurationIT {
     private SpringProcessEngineConfiguration configuration;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private BindingServiceProperties bindingServiceProperties;
+
+    @Test
+    public void shouldConfigureDefaultConnectorBindingProperties() {
+        //given
+
+        //when
+        Map<String, BindingProperties> bindings = bindingServiceProperties.getBindings();
+
+        //then
+        assertThat(bindings)
+            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
+                                                                                        entry.getValue()
+                                                                                             .getDestination()))
+            .contains(entry("mealsConnector", "namespace.mealsconnector"),
+                      entry("rest.GET", "namespace.rest.get"),
+                      entry("perfromBusinessTask", "namespace.perfrombusinesstask"),
+                      entry("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
+                      entry("payment", "namespace.payment"),
+                      entry("Constants Connector.constantsActionName", "namespace.constants-connector.constantsactionname"),
+                      entry("Variable Mapping Connector.variableMappingActionName", "namespace.variable-mapping-connector.variablemappingactionname"),
+                      entry("miCloudConnector", "namespace.micloudconnector"));
+    }
+
 
     @Test
     public void shouldUseCloudActivityBehaviorFactory() {
@@ -56,55 +92,76 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveRequiredGroupsSetForAuditProducer() {
         //when
-        assertProperty("spring.cloud.stream.bindings.auditProducer.producer.required-groups")
-            .as("should have required groups set for audit producer")
-            .isEqualTo("query,audit");
+        BindingProperties auditProducer = bindingServiceProperties.getBindingProperties("auditProducer");
 
-        assertProperty("spring.cloud.stream.bindings.auditProducer.destination")
-            .as("should have destination set for audit producer")
-            .isEqualTo("engineEvents");
+        //then
+        assertThat(auditProducer.getDestination())
+            .as("should have required groups set for audit producer")
+            .isEqualTo("namespace.engine-events");
+
+        assertThat(auditProducer.getProducer().getRequiredGroups())
+            .as("should have required groups set for audit producer")
+            .containsExactly("query", "audit");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForMessageEvents() {
         //when
-        assertProperty("spring.cloud.stream.bindings.messageEvents.destination").isEqualTo("messageEvents.activiti-app");
-        assertProperty("spring.cloud.stream.bindings.messageEvents.producer.required-groups").isEqualTo("messages");
+        BindingProperties messageEventsOutput = bindingServiceProperties.getBindingProperties("messageEventsOutput");
+
+        //then
+        assertThat(messageEventsOutput.getDestination()).isEqualTo("namespace.message-events.activiti-app");
+        assertThat(messageEventsOutput.getProducer().getRequiredGroups()).containsExactly("messages");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForCommandEndpoint() {
         //when
-        assertProperty("spring.cloud.stream.bindings.commandConsumer.destination").isEqualTo("commandConsumer.activiti-app");
-        assertProperty("spring.cloud.stream.bindings.commandConsumer.group").isEqualTo("my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.commandResults.destination").isEqualTo("commandResults.activiti-app");
+        BindingProperties commandConsumer = bindingServiceProperties.getBindingProperties("commandConsumer");
+        BindingProperties commandResults = bindingServiceProperties.getBindingProperties("commandResults");
 
+        //then
+        assertThat(commandConsumer.getDestination()).isEqualTo("namespace.command-consumer.activiti-app");
+        assertThat(commandConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
+        assertThat(commandResults.getDestination()).isEqualTo("namespace.command-results.activiti-app");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForSignalEvents() {
         //when
-        assertProperty("spring.cloud.stream.bindings.signalProducer.destination").isEqualTo("signalEvent");
-        assertProperty("spring.cloud.stream.bindings.signalProducer.producer.required-groups").isEqualTo("my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.signalConsumer.destination").isEqualTo("signalEvent");
-        assertProperty("spring.cloud.stream.bindings.signalConsumer.group").isEqualTo("my-activiti-rb-app");
+        BindingProperties signalProducer = bindingServiceProperties.getBindingProperties("signalProducer");
+        BindingProperties signalConsumer = bindingServiceProperties.getBindingProperties("signalConsumer");
+
+        //then
+        assertThat(signalProducer.getDestination()).isEqualTo("namespace.signal-event");
+        assertThat(signalProducer.getProducer().getRequiredGroups()).containsExactly("my-activiti-rb-app");
+        assertThat(signalConsumer.getDestination()).isEqualTo("namespace.signal-event");
+        assertThat(signalConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForCloudConnectors() {
         //when
-        assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.destination").isEqualTo("integrationResult.my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.integrationResultsConsumer.group").isEqualTo("my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.destination").isEqualTo("integrationError.my-activiti-rb-app");
-        assertProperty("spring.cloud.stream.bindings.integrationErrorsConsumer.group").isEqualTo("my-activiti-rb-app");
+        BindingProperties integrationResultsConsumer = bindingServiceProperties.getBindingProperties("integrationResultsConsumer");
+        BindingProperties integrationErrorsConsumer = bindingServiceProperties.getBindingProperties("integrationErrorsConsumer");
+
+        //then
+        assertThat(integrationResultsConsumer.getDestination()).isEqualTo("namespace.integration-result.my-activiti-rb-app");
+        assertThat(integrationResultsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
+        assertThat(integrationErrorsConsumer.getDestination()).isEqualTo("namespace.integration-error.my-activiti-rb-app");
+        assertThat(integrationErrorsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }
 
-    private AbstractStringAssert<?> assertProperty(String name) {
-        return assertThat(getProperty(name));
+    @Test
+    public void shouldHaveChannelBindingsSetForAsyncJobExecutor() {
+        //when
+        BindingProperties asyncExecutorJobsInput = bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput");
+        BindingProperties asyncExecutorJobsOutput = bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput");
+
+        //then
+        assertThat(asyncExecutorJobsInput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
+        assertThat(asyncExecutorJobsInput.getGroup()).isEqualTo("my-activiti-rb-app");
+        assertThat(asyncExecutorJobsOutput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
     }
 
-    private String getProperty(String name) {
-        return applicationContext.getEnvironment()
-                                 .getProperty(name);
-    }
 }

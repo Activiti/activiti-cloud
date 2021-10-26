@@ -16,14 +16,7 @@
 
 package org.activiti.cloud.common.messaging.config;
 
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import java.util.function.Function;
 
-@Configuration
-@EnableConfigurationProperties(ActivitiCloudMessagingProperties.class)
-@PropertySource("classpath:config/activiti-cloud-messaging.properties")
-@PropertySource(value = "file:config/activiti-cloud-messaging.properties", ignoreResourceNotFound = true)
-public class ActivitiCloudMessagingAutoConfiguration {
+public interface InputConverterFunction extends Function<String, String> {
 }
