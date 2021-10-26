@@ -29,7 +29,14 @@ import static org.assertj.core.api.Assertions.entry;
     properties = {"ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
                   "ACT_MESSAGING_DEST_TRANSFORMERS=toLowerCase,escapeIllegalChars",
                   "ACT_MESSAGING_DEST_SEPARATOR=.",
-                  "ACT_MESSAGING_DEST_PREFIX=MQServiceTaskDestinationsIT"})
+                  "ACT_MESSAGING_DEST_PREFIX=MQServiceTaskDestinationsIT",
+                  // Connector implementation producer binding. Use [] brackets combined with escaping the whitespace using either \  or \u0020
+                  "spring.cloud.stream.bindings.[Constants\\ Connector.constantsActionName].destination=Constants Connector.constantsActionName",
+                  // Connector implementation consumer binding
+                  "spring.cloud.stream.bindings.constantsIntegrationEventsConsumer.destination=Constants Connector.constantsActionName",
+                  // Configure connector messaging destination with custom value
+                  "activiti.cloud.messaging.destinations.[Constants\\ Connector.constantsActionName].name=constants_connector.constants_action_name",
+    })
 public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
 
     @Test
@@ -49,9 +56,24 @@ public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
                       entry("perfromBusinessTask", "mqservicetaskdestinationsit.perfrombusinesstask"),
                       entry("anyImplWithoutHandler", "mqservicetaskdestinationsit.anyimplwithouthandler"),
                       entry("payment", "mqservicetaskdestinationsit.payment"),
-                      entry("Constants Connector.constantsActionName", "mqservicetaskdestinationsit.constants-connector.constantsactionname"),
                       entry("Variable Mapping Connector.variableMappingActionName", "mqservicetaskdestinationsit.variable-mapping-connector.variablemappingactionname"),
                       entry("miCloudConnector", "mqservicetaskdestinationsit.micloudconnector"));
+    }
+
+    @Test
+    public void shouldConfigureCustomConnectorBindingProperties() {
+        //given
+
+        //when
+        Map<String, BindingProperties> bindings = bindingServiceProperties.getBindings();
+
+        //then
+        assertThat(bindings)
+            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
+                                                                                        entry.getValue()
+                                                                                             .getDestination()))
+            .contains(entry("Constants Connector.constantsActionName", "mqservicetaskdestinationsit.constants_connector.constants_action_name"),
+                      entry("constantsIntegrationEventsConsumer", "mqservicetaskdestinationsit.constants_connector.constants_action_name"));
     }
 
 }
