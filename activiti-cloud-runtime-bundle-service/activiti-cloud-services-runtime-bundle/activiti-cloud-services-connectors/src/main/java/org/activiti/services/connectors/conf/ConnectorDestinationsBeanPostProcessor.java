@@ -73,7 +73,7 @@ public class ConnectorDestinationsBeanPostProcessor implements BeanPostProcessor
 
 
     protected void log(Map.Entry<String, BindingProperties> entry) {
-        logger.info("Configured Connector '{}' implementation to '{}' destination",
+        logger.warn("Configured Connector '{}' implementation to '{}' destination",
                     entry.getKey(),
                     entry.getValue()
                          .getDestination());
