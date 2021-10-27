@@ -18,14 +18,12 @@ package org.activiti.services.subscription.channel;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.engine.RuntimeService;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 
 public class BroadcastSignalEventHandler {
 
     private final RuntimeService runtimeService;
 
-    public BroadcastSignalEventHandler(BinderAwareChannelResolver resolver,
-                                      RuntimeService runtimeService) {
+    public BroadcastSignalEventHandler(RuntimeService runtimeService) {
         this.runtimeService = runtimeService;
     }
 
