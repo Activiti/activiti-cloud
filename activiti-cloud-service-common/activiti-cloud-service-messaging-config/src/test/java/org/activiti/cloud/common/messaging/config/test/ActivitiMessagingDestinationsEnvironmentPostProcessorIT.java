@@ -17,17 +17,12 @@
 package org.activiti.cloud.common.messaging.config.test;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.AfterAllCallback;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(ActivitiMessagingDestinationsEnvironmentPostProcessorIT.PropertyExtension.class)
 @SpringBootTest(properties = {
     "activiti.cloud.application.name=foo",
     "spring.application.name=bar",
@@ -47,7 +42,9 @@ import static org.assertj.core.api.Assertions.assertThat;
     "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
     "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
     "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
+
     // override destination name
+    "activiti.cloud.messaging.destinations.engineEvents.name=engine-events",
 
     "spring.cloud.stream.bindings.[camel-connector.INVOKE].destination=camel-connector.INVOKE",
     "spring.cloud.stream.bindings.camelConnectorConsumer.destination=camel-connector.INVOKE",
@@ -65,21 +62,6 @@ import static org.assertj.core.api.Assertions.assertThat;
     "activiti.cloud.messaging.destinations.commandResults.prefix=bar",
     "activiti.cloud.messaging.destinations.commandResults.separator=_"})
 public class ActivitiMessagingDestinationsEnvironmentPostProcessorIT {
-
-    // override destination name via case in-sensitive environment variable key map, i.e.
-    // activiti.cloud.messaging.destinations.engineEvents.name=engine-events
-    public static class PropertyExtension implements BeforeAllCallback, AfterAllCallback {
-
-        @Override
-        public void beforeAll(ExtensionContext context) {
-            System.setProperty("ACTIVITI_CLOUD_MESSAGING_DESTINATIONS_ENGINEEVENTS_NAME", "engine-events");
-        }
-
-        @Override
-        public void afterAll(ExtensionContext context) throws Exception {
-            System.clearProperty("ACTIVITI_CLOUD_MESSAGING_DESTINATIONS_ENGINEEVENTS_NAME");
-        }
-    }
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
