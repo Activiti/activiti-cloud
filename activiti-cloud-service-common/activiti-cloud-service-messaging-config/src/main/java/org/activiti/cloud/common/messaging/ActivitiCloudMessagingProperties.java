@@ -19,6 +19,7 @@ package org.activiti.cloud.common.messaging;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.*;
@@ -95,7 +96,7 @@ public class ActivitiCloudMessagingProperties {
     /**
      * Configure destination properties to apply customization to producers and consumer channel bindings with matching destination key.
      */
-    private Map<String, DestinationProperties> destinations = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, DestinationProperties> destinations = new LinkedCaseInsensitiveMap<>();
 
     private Map<String, InputConverterFunction> inputConverters;
 
