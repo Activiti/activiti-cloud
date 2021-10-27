@@ -50,7 +50,7 @@
         "type",
         "value"
       ]
-    },    
+    },
     "properties": {
       "type": "object",
       "patternProperties": {
@@ -198,10 +198,20 @@
           "then": {
             "properties": {
               "value": {
-                "type": "object",
-                "message": {
-                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is json"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is json"
+                    }
+                  },
+                  {
+                    "type": "array",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is json"
+                    }
+                  }
+                ]
               }
             }
           }

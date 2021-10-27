@@ -601,7 +601,7 @@ public class ModelValidationControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
-                .containsExactly(tuple("expected type: JSONObject, found: Integer",
+                .containsAnyOf(tuple("expected type: JSONObject, found: Integer",
                                        "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"));
     }
 
