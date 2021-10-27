@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
     "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
     "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
+
     // override destination name
     "activiti.cloud.messaging.destinations.engineEvents.name=engine-events",
 

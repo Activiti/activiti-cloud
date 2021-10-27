@@ -18,64 +18,64 @@ package org.activiti.services.connectors.conf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.core.Ordered;
 
-import java.util.AbstractMap;
 import java.util.Map;
 
-public class ConnectorDestinationsBeanPostProcessor implements BeanPostProcessor {
+public class ConnectorMessagingDestinationsConfigurer implements InitializingBean, Ordered {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectorImplementationsProvider.class);
 
     private final ConnectorImplementationsProvider destinationsProvider;
     private final ConnectorDestinationMappingStrategy destinationMappingStrategy;
+    private final BindingServiceProperties bindingServiceProperties;
 
-    public ConnectorDestinationsBeanPostProcessor(ConnectorImplementationsProvider destinationsProvider,
-                                                  ConnectorDestinationMappingStrategy destinationMappingStrategy) {
+    public ConnectorMessagingDestinationsConfigurer(ConnectorImplementationsProvider destinationsProvider,
+                                                    ConnectorDestinationMappingStrategy destinationMappingStrategy,
+                                                    BindingServiceProperties bindingServiceProperties) {
         this.destinationsProvider = destinationsProvider;
         this.destinationMappingStrategy = destinationMappingStrategy;
+        this.bindingServiceProperties = bindingServiceProperties;
     }
 
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (BindingServiceProperties.class.isInstance(bean)) {
-            BindingServiceProperties bindingServiceProperties = BindingServiceProperties.class.cast(bean);
-
-            destinationsProvider.getImplementations()
-                                .stream()
-                                .map(this::getDestination)
-                                .map(entry -> applyDestination(bindingServiceProperties, entry))
-                                .forEach(this::log);
-        }
-
-        return bean;
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        destinationsProvider.getImplementations()
+                            .stream()
+                            .map(this::resolveBindingDestination)
+                            .map(this::applyBindingDestination)
+                            .forEach(this::log);
     }
 
-    protected Map.Entry<String, String> getDestination(String implementation) {
+    protected Map.Entry<String, String> resolveBindingDestination(String implementation) {
         String destination = destinationMappingStrategy.apply(implementation);
 
-        return new AbstractMap.SimpleEntry<>(implementation,
-                                             destination);
+        return Map.entry(implementation,
+                         destination);
     }
 
-    protected Map.Entry<String, BindingProperties> applyDestination(BindingServiceProperties bindingServiceProperties,
-                                                                    Map.Entry<String, String> entry) {
+    protected Map.Entry<String, BindingProperties> applyBindingDestination(Map.Entry<String, String> entry) {
         BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(entry.getKey());
 
         bindingProperties.setDestination(entry.getValue());
 
-        return new AbstractMap.SimpleEntry<String, BindingProperties>(entry.getKey(),
-                                                                      bindingProperties);
+        return Map.entry(entry.getKey(),
+                         bindingProperties);
     }
 
 
     protected void log(Map.Entry<String, BindingProperties> entry) {
-        logger.info("Configured Connector '{}' implementation to '{}' destination",
+        logger.warn("Configured Connector '{}' implementation to '{}' destination",
                     entry.getKey(),
                     entry.getValue()
                          .getDestination());
     }
 
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
 }
