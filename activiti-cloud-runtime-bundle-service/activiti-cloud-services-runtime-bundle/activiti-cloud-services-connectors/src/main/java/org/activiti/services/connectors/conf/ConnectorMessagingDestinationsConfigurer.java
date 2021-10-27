@@ -18,8 +18,7 @@ package org.activiti.services.connectors.conf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.Ordered;
@@ -27,31 +26,29 @@ import org.springframework.core.Ordered;
 import java.util.AbstractMap;
 import java.util.Map;
 
-public class ConnectorDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
+public class ConnectorMessagingDestinationsConfigurer implements InitializingBean, Ordered {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectorImplementationsProvider.class);
 
     private final ConnectorImplementationsProvider destinationsProvider;
     private final ConnectorDestinationMappingStrategy destinationMappingStrategy;
+    private final BindingServiceProperties bindingServiceProperties;
 
-    public ConnectorDestinationsBeanPostProcessor(ConnectorImplementationsProvider destinationsProvider,
-                                                  ConnectorDestinationMappingStrategy destinationMappingStrategy) {
+    public ConnectorMessagingDestinationsConfigurer(ConnectorImplementationsProvider destinationsProvider,
+                                                    ConnectorDestinationMappingStrategy destinationMappingStrategy,
+                                                    BindingServiceProperties bindingServiceProperties) {
         this.destinationsProvider = destinationsProvider;
         this.destinationMappingStrategy = destinationMappingStrategy;
+        this.bindingServiceProperties = bindingServiceProperties;
     }
 
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (BindingServiceProperties.class.isInstance(bean)) {
-            BindingServiceProperties bindingServiceProperties = BindingServiceProperties.class.cast(bean);
-
-            destinationsProvider.getImplementations()
-                                .stream()
-                                .map(this::getDestination)
-                                .map(entry -> applyDestination(bindingServiceProperties, entry))
-                                .forEach(this::log);
-        }
-
-        return bean;
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        destinationsProvider.getImplementations()
+                            .stream()
+                            .map(this::getDestination)
+                            .map(entry -> applyDestination(bindingServiceProperties, entry))
+                            .forEach(this::log);
     }
 
     protected Map.Entry<String, String> getDestination(String implementation) {
@@ -81,6 +78,6 @@ public class ConnectorDestinationsBeanPostProcessor implements BeanPostProcessor
 
     @Override
     public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }
