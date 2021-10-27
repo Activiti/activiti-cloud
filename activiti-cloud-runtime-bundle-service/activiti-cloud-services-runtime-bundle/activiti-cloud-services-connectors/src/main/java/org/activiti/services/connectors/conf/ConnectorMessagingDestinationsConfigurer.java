@@ -23,7 +23,6 @@ import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.Ordered;
 
-import java.util.AbstractMap;
 import java.util.Map;
 
 public class ConnectorMessagingDestinationsConfigurer implements InitializingBean, Ordered {
@@ -46,26 +45,25 @@ public class ConnectorMessagingDestinationsConfigurer implements InitializingBea
     public void afterPropertiesSet() throws Exception {
         destinationsProvider.getImplementations()
                             .stream()
-                            .map(this::getDestination)
-                            .map(entry -> applyDestination(bindingServiceProperties, entry))
+                            .map(this::resolveBindingDestination)
+                            .map(this::applyBindingDestination)
                             .forEach(this::log);
     }
 
-    protected Map.Entry<String, String> getDestination(String implementation) {
+    protected Map.Entry<String, String> resolveBindingDestination(String implementation) {
         String destination = destinationMappingStrategy.apply(implementation);
 
-        return new AbstractMap.SimpleEntry<>(implementation,
-                                             destination);
+        return Map.entry(implementation,
+                         destination);
     }
 
-    protected Map.Entry<String, BindingProperties> applyDestination(BindingServiceProperties bindingServiceProperties,
-                                                                    Map.Entry<String, String> entry) {
+    protected Map.Entry<String, BindingProperties> applyBindingDestination(Map.Entry<String, String> entry) {
         BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(entry.getKey());
 
         bindingProperties.setDestination(entry.getValue());
 
-        return new AbstractMap.SimpleEntry<String, BindingProperties>(entry.getKey(),
-                                                                      bindingProperties);
+        return Map.entry(entry.getKey(),
+                         bindingProperties);
     }
 
 
@@ -78,6 +76,6 @@ public class ConnectorMessagingDestinationsConfigurer implements InitializingBea
 
     @Override
     public int getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
