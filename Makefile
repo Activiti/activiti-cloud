@@ -25,6 +25,7 @@ install: release
 	echo helm $(helm version --short)
 	test $(MESSAGING_BROKER) ||  exit 1
 	test $(MESSAGING_PARTITIONED) ||  exit 1
+	test $(MESSAGING_DESTINATIONS) ||  exit 1
 
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
 		helm dep up && \
@@ -36,6 +37,7 @@ install: release
 			--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
 			--values $(MESSAGING_BROKER)-values.yaml \
 			--values $(MESSAGING_PARTITIONED)-values.yaml \
+			--values $(MESSAGING_DESTINATIONS)-values.yaml \
 			--namespace ${PREVIEW_NAME} \
 			--create-namespace \
 			--atomic \

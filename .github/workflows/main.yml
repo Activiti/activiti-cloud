@@ -144,6 +144,11 @@ jobs:
       matrix:
         messaging-broker: [rabbitmq, kafka]
         messaging-partitioned: [partitioned, non-partitioned]
+        messaging-destinations: [default-destinations]
+        include:
+          - messaging-broker: kafka
+            messaging-partitioned: partitioned
+            messaging-destinations: override-destinations
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -205,13 +210,15 @@ jobs:
         env:
           MESSAGING_BROKER: ${{ matrix.messaging-broker }}
           MESSAGING_PARTITIONED: ${{ matrix.messaging-partitioned }}
+          MESSAGING_DESTINATIONS: ${{ matrix.messaging-destinations }}
           PREVIEW_NAME: ${{ needs.build.outputs.preview-name }}
           BRANCH_NAME: ${{ needs.build.outputs.branch-name }}
           VERSION: ${{ needs.build.outputs.version }}
         run: |
           echo "MESSAGING_BROKER=$MESSAGING_BROKER" >> $GITHUB_ENV
           echo "MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED" >> $GITHUB_ENV
-          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}" >> $GITHUB_ENV
+          echo "MESSAGING_DESTINATIONS=$MESSAGING_DESTINATIONS" >> $GITHUB_ENV
+          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}-${MESSAGING_DESTINATIONS:0:1}" >> $GITHUB_ENV
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo $VERSION > VERSION
@@ -220,6 +227,7 @@ jobs:
 
           echo MESSAGING_BROKER=$MESSAGING_BROKER
           echo MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED
+          echo MESSAGING_DESTINATIONS=$MESSAGING_DESTINATIONS
           echo PREVIEW_NAME=$PREVIEW_NAME
           echo BRANCH_NAME=$BRANCH_NAME
           echo VERSION=$VERSION
@@ -244,7 +252,7 @@ jobs:
           make install
 
       - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
-        if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' }}
+        if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         run: |
           ### Variables ###
           export SSO_PROTOCOL=https

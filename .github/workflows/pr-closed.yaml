@@ -18,6 +18,7 @@ jobs:
       matrix:
         messaging-broker: [rabbitmq, kafka]
         messaging-partitioned: [partitioned, non-partitioned]
+        messaging-destinations: [default-destinations, override-destinations]
     steps:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
@@ -37,9 +38,10 @@ jobs:
         env:
           MESSAGING_BROKER: ${{ matrix.messaging-broker }}
           MESSAGING_PARTITIONED: ${{ matrix.messaging-partitioned }}
+          MESSAGING_DESTINATIONS: ${{ matrix.messaging-destinations }}
         run: |
           test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
-          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}" >> $GITHUB_ENV
+          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}-${MESSAGING_DESTINATIONS:0:1}" >> $GITHUB_ENV
 
       - name: Delete preview for ${{ matrix.messaging-broker }}
         run: |

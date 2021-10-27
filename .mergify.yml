@@ -3,10 +3,11 @@ pull_request_rules:
     conditions:
       - author=alfresco-build
       - status-success=build
-      - status-success=test (rabbitmq, partitioned)
-      - status-success=test (rabbitmq, non-partitioned)
-      - status-success=test (kafka, partitioned)
-      - status-success=test (kafka, non-partitioned)
+      - status-success=test (rabbitmq, partitioned, default-destinations)
+      - status-success=test (rabbitmq, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, default-destinations)
+      - status-success=test (kafka, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, override-destinations)
       - status-success=promote
       - label!=do-not-merge
     actions:
@@ -19,10 +20,11 @@ pull_request_rules:
       - "#review-requested=0"
       - "#changes-requested-reviews-by=0"
       - status-success=build
-      - status-success=test (rabbitmq, partitioned)
-      - status-success=test (rabbitmq, non-partitioned)
-      - status-success=test (kafka, partitioned)
-      - status-success=test (kafka, non-partitioned)
+      - status-success=test (rabbitmq, partitioned, default-destinations)
+      - status-success=test (rabbitmq, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, default-destinations)
+      - status-success=test (kafka, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, override-destinations)
       - status-success=promote
       - status-success=license/cla
       - label!=do-not-merge
