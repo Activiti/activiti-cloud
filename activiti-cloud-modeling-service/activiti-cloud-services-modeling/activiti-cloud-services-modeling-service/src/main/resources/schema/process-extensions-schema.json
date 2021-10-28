@@ -271,6 +271,12 @@
                     }
                   },
                   {
+                    "type": "array",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is json"
+                    }
+                  },
+                  {
                     "type": "string",
                     "pattern": "^\\$\\{(.*)[\\}]$",
                     "message": {
