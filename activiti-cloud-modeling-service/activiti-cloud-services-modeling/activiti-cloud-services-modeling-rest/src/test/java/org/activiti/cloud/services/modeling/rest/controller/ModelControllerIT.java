@@ -736,6 +736,8 @@ public class ModelControllerIT {
                         ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: JSONObject, found: Integer",
                                 "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"),
+                        tuple("expected type: JSONArray, found: Integer",
+                                "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json")    ,
                         tuple("expected type: String, found: Integer",
                                 "Value format in objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
     }

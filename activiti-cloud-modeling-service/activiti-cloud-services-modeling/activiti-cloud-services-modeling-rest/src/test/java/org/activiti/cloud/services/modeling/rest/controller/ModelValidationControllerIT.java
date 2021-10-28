@@ -606,6 +606,8 @@ public class ModelValidationControllerIT {
                         ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: JSONObject, found: Integer",
                                 "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"),
+                        tuple("expected type: JSONArray, found: Integer",
+                                "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"),
                         tuple("expected type: String, found: Integer",
                                 "Value format in objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
     }
@@ -968,7 +970,7 @@ public class ModelValidationControllerIT {
                         tuple("expected type: Integer, found: String",
                                 "Mismatch value type - var1(8b9ac008-8a76-4ebd-8221-04452add5f22). Expected type is integer"));
     }
-    
+
     @Test
     public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToEmailService() throws Exception {
         byte[] validContent = resourceAsByteArray("process/email-service-task.bpmn20.xml");
