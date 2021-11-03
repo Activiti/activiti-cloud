@@ -41,7 +41,7 @@ install: release
 			--namespace ${PREVIEW_NAME} \
 			--create-namespace \
 			--atomic \
-			--timeout 6m
+			--timeout 8m
 
 delete:
 	helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME} || echo "try to remove helm chart"
