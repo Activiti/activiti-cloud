@@ -17,9 +17,9 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import static java.lang.String.format;
 import static org.springframework.util.StringUtils.isEmpty;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.bpmn.model.BpmnModel;
@@ -40,7 +40,6 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
     public static final String INVALID_SERVICE_IMPLEMENTATION_PROBLEM = "Invalid service implementation";
     public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "Invalid service implementation on service '%s'";
     public static final String SERVICE_USER_TASK_VALIDATOR_NAME = "BPMN service task validator";
-    private static final Pattern VALID_SERVICE_TASK_EVENT_REGEX = Pattern.compile("^([a-z]+)-service\\.([a-zA-Z-_]+)");
 
     private final ConnectorModelType connectorModelType;
 
@@ -59,7 +58,7 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
         //TODO: hardcoded decision table added -> fix this after implementation for decision table will change
         availableImplementations.add("dmn-connector.EXECUTE_TABLE");
         availableImplementations.add("script.EXECUTE");
-        
+
         return getFlowElements(bpmnModel,
                         ServiceTask.class)
                 .filter(serviceTask -> serviceTask.getImplementation() != null)
@@ -112,6 +111,7 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
     }
 
     private boolean isValidImplementation(String implementation, List<String> availableImplementations) {
-        return VALID_SERVICE_TASK_EVENT_REGEX.matcher(implementation).matches() || availableImplementations.contains(implementation);
+        return availableImplementations.contains(implementation) || Arrays.stream(ServiceTaskImplementationType.values())
+                .anyMatch(serviceImplementation -> implementation.startsWith(serviceImplementation.getPrefix()));
     }
 }
