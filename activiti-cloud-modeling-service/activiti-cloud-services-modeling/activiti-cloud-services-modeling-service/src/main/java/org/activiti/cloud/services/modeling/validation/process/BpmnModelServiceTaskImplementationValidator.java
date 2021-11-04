@@ -55,9 +55,6 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
                                                  ValidationContext validationContext) {
         List<String> availableImplementations = getAvailableImplementations(validationContext);
-        //TODO: hardcoded decision table added -> fix this after implementation for decision table will change
-        availableImplementations.add("dmn-connector.EXECUTE_TABLE");
-        availableImplementations.add("script.EXECUTE");
 
         return getFlowElements(bpmnModel,
                         ServiceTask.class)

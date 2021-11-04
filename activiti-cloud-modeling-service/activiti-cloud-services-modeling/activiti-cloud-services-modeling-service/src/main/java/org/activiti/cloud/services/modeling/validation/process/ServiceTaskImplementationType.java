@@ -19,7 +19,9 @@ public enum ServiceTaskImplementationType {
 
     EMAIL_SERVICE("email-service."),
     DOCGEN_SERVICE("docgen-service."),
-    CONTENT_SERVICE("content-service.");
+    CONTENT_SERVICE("content-service."),
+    SCRIPT_TASK("script."),
+    DMN_TASK("dmn-connector.");
 
     private String prefix;
 
