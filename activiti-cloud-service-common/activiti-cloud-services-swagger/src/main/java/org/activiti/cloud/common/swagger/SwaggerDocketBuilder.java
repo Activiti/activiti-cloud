@@ -39,6 +39,7 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
 import springfox.documentation.service.SecurityReference;
+import springfox.documentation.service.SecurityScheme;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -71,20 +72,27 @@ public class SwaggerDocketBuilder {
             baseDocket.apiInfo(apiInfo);
         }
      
-        baseDocket.forCodeGeneration(true);
-        baseDocket.securitySchemes(Arrays.asList(new ApiKey(AUTHORIZATION, AUTHORIZATION, "header")))
-                .securityContexts(Arrays.asList(
-                        SecurityContext.builder()
-                                .securityReferences(
-                                        Arrays.asList(SecurityReference.builder()
-                                                .reference(AUTHORIZATION)
-                                                .scopes(new AuthorizationScope[0])
-                                                .build()
-                                        )
-                                )
-                                .build())
-                );
+        baseDocket.forCodeGeneration(true)
+                .securitySchemes(securitySchema())
+                .securityContexts(securityContext());
         return applyCustomizations(baseDocket);
+    }
+
+    private List<SecurityScheme> securitySchema() {
+        return Arrays.asList(new ApiKey(AUTHORIZATION, AUTHORIZATION, "header"));
+    }
+
+    private List<SecurityContext> securityContext() {
+        return Arrays.asList(
+                SecurityContext.builder()
+                        .securityReferences(
+                                Arrays.asList(SecurityReference.builder()
+                                        .reference(AUTHORIZATION)
+                                        .scopes(new AuthorizationScope[0])
+                                        .build()
+                                )
+                        )
+                        .build());
     }
 
     private Docket applyCustomizations(Docket docket) {
