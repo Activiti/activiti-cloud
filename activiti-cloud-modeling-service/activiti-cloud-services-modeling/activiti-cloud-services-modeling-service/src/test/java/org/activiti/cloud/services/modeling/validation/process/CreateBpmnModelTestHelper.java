@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.validation.process;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.EndEvent;
 import org.activiti.bpmn.model.SequenceFlow;
+import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.bpmn.model.UserTask;
 
@@ -43,6 +44,30 @@ public class CreateBpmnModelTestHelper {
         sequenceFlow.setId("testSequenceId");
         process.addFlowElement(sequenceFlow);
         process.addFlowElement(new SequenceFlow("theTask", "theEnd"));
+        return model;
+    }
+
+    public static BpmnModel createOneServiceTaskTestProcess(String implementation) {
+        BpmnModel model = new BpmnModel();
+        org.activiti.bpmn.model.Process process = new org.activiti.bpmn.model.Process();
+        model.addProcess(process);
+        process.setId("oneTaskProcess");
+        process.setName("The one task process");
+        StartEvent startEvent = new StartEvent();
+        startEvent.setId("start");
+        process.addFlowElement(startEvent);
+        ServiceTask serviceTask = new ServiceTask();
+        serviceTask.setImplementation(implementation);
+        serviceTask.setName("The Service Task");
+        serviceTask.setId("theServiceTask");
+        process.addFlowElement(serviceTask);
+        EndEvent endEvent = new EndEvent();
+        endEvent.setId("theEnd");
+        process.addFlowElement(endEvent);
+        SequenceFlow sequenceFlow = new SequenceFlow("start", "theServiceTask");
+        sequenceFlow.setId("testSequenceId");
+        process.addFlowElement(sequenceFlow);
+        process.addFlowElement(new SequenceFlow("theServiceTask", "theEnd"));
         return model;
     }
 }

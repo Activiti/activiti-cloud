@@ -17,6 +17,7 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import static java.lang.String.format;
 import static org.springframework.util.StringUtils.isEmpty;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,16 +37,16 @@ import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
  */
 public class BpmnModelServiceTaskImplementationValidator implements BpmnModelValidator {
 
-    public final String INVALID_SERVICE_IMPLEMENTATION_PROBLEM = "Invalid service implementation";
-    public final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "Invalid service implementation on service '%s'";
-    public final String SERVICE_USER_TASK_VALIDATOR_NAME = "BPMN service task validator";
+    public static final String INVALID_SERVICE_IMPLEMENTATION_PROBLEM = "Invalid service implementation";
+    public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "Invalid service implementation on service '%s'";
+    public static final String SERVICE_USER_TASK_VALIDATOR_NAME = "BPMN service task validator";
 
     private final ConnectorModelType connectorModelType;
 
     private final ConnectorModelContentConverter connectorModelContentConverter;
 
     public BpmnModelServiceTaskImplementationValidator(ConnectorModelType connectorModelType,
-                                                       ConnectorModelContentConverter connectorModelContentConverter) {
+            ConnectorModelContentConverter connectorModelContentConverter) {
         this.connectorModelType = connectorModelType;
         this.connectorModelContentConverter = connectorModelContentConverter;
     }
@@ -54,13 +55,6 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
                                                  ValidationContext validationContext) {
         List<String> availableImplementations = getAvailableImplementations(validationContext);
-        //TODO: hardcoded decision table added -> fix this after implementation for decision table will change
-        availableImplementations.add("dmn-connector.EXECUTE_TABLE");
-
-        availableImplementations.add("script.EXECUTE");
-
-        availableImplementations.add("email-service.SEND");
-        availableImplementations.add("docgen-service.GENERATE");
 
         return getFlowElements(bpmnModel,
                         ServiceTask.class)
@@ -103,16 +97,18 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
     }
 
     private Optional<ModelValidationError> validateServiceTaskImplementation(ServiceTask serviceTask,
-                                                                             List<String> availableImplementations) {
-
-        return availableImplementations
-                .stream()
-                .filter(implementation -> implementation.equals(serviceTask.getImplementation()))
-                .findFirst()
-                .map(implementation -> Optional.<ModelValidationError>empty())
-                .orElseGet(() -> Optional.of(
-                    new ModelValidationError(INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
+            List<String> availableImplementations) {
+        if (isValidImplementation(serviceTask.getImplementation(), availableImplementations)) {
+            return Optional.<ModelValidationError>empty();
+        }
+        return Optional.of(
+                new ModelValidationError(INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
                         format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
-                            serviceTask.getId()), SERVICE_USER_TASK_VALIDATOR_NAME)));
+                                serviceTask.getId()), SERVICE_USER_TASK_VALIDATOR_NAME));
+    }
+
+    private boolean isValidImplementation(String implementation, List<String> availableImplementations) {
+        return availableImplementations.contains(implementation) || Arrays.stream(ServiceTaskImplementationType.values())
+                .anyMatch(serviceImplementation -> implementation.startsWith(serviceImplementation.getPrefix()));
     }
 }
