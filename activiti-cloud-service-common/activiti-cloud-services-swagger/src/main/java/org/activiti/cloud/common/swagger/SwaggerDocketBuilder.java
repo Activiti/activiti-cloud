@@ -36,11 +36,16 @@ import springfox.documentation.builders.AlternateTypePropertyBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.schema.WildcardType;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.ApiKey;
+import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 
 public class SwaggerDocketBuilder {
 
+    private static final String AUTHORIZATION = "Authorization" ;
     private final Predicate<RequestHandler> apiSelector;
     private final TypeResolver typeResolver;
     private final List<DocketCustomizer> docketCustomizers;
@@ -67,6 +72,18 @@ public class SwaggerDocketBuilder {
         }
      
         baseDocket.forCodeGeneration(true);
+        baseDocket.securitySchemes(Arrays.asList(new ApiKey(AUTHORIZATION, AUTHORIZATION, "header")))
+                .securityContexts(Arrays.asList(
+                        SecurityContext.builder()
+                                .securityReferences(
+                                        Arrays.asList(SecurityReference.builder()
+                                                .reference(AUTHORIZATION)
+                                                .scopes(new AuthorizationScope[0])
+                                                .build()
+                                        )
+                                )
+                                .build())
+                );
         return applyCustomizations(baseDocket);
     }
 
