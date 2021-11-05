@@ -225,7 +225,7 @@ public class ModelController implements ModelRestApi {
         @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR)
         @PathVariable String modelId,
         @Parameter(description = VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
-        @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+        @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
         @RequestParam(value = PROJECT_ID_PARAM_NAME, required = false) String projectId) throws IOException {
 
         if (StringUtils.isEmpty(projectId)) {

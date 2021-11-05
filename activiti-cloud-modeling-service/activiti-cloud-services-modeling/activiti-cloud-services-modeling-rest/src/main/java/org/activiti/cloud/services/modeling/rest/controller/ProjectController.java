@@ -34,6 +34,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -102,7 +103,7 @@ public class ProjectController implements ProjectRestApi {
 
     @Override
     public EntityModel<Project> importProject(
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
             @RequestParam(name = PROJECT_NAME_PARAM_NAME,
                           required = false) String name) throws IOException {
         return representationModelAssembler.toModel(projectService.importProject(file, name));
