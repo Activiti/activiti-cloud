@@ -15,12 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter;
 
-import static org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder.resultFor;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -28,6 +22,7 @@ import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChannels;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
+import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.configuration.EnableActivitiCloudConnector;
 import org.activiti.cloud.connectors.starter.model.IntegrationErrorBuilder;
@@ -41,9 +36,15 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder.resultFor;
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootApplication
 @EnableActivitiCloudConnector
-@EnableBinding(CloudConnectorConsumerChannels.class)
+@EnableBinding({CloudConnectorConsumerChannels.class, ProcessRuntimeChannels.class})
 public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
     private static final String CHANNEL_NAME = "notifications";
