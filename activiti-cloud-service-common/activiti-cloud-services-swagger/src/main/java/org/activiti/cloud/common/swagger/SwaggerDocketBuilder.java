@@ -36,8 +36,8 @@ import springfox.documentation.builders.AlternateTypePropertyBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.schema.WildcardType;
 import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.HttpAuthenticationScheme;
 import springfox.documentation.service.SecurityReference;
 import springfox.documentation.service.SecurityScheme;
 import springfox.documentation.spi.DocumentationType;
@@ -79,7 +79,12 @@ public class SwaggerDocketBuilder {
     }
 
     private List<SecurityScheme> securitySchema() {
-        return Arrays.asList(new ApiKey(AUTHORIZATION, AUTHORIZATION, "header"));
+            return List.of(
+                    HttpAuthenticationScheme
+                            .JWT_BEARER_BUILDER
+                            .name(AUTHORIZATION)
+                            .build()
+            );
     }
 
     private List<SecurityContext> securityContext() {
