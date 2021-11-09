@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -145,7 +146,7 @@ public interface ProjectRestApi {
     @ResponseStatus(CREATED)
     EntityModel<Project> importProject(
             @Parameter(description = IMPORT_PROJECT_FILE_PARAM_DESCR)
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
             @Parameter(description = PROJECT_NAME_OVERRIDE_DESCR)
             @RequestParam(
                     name = PROJECT_NAME_PARAM_NAME,
