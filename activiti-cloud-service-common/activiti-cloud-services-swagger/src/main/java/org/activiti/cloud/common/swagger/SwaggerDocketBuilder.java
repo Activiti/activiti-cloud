@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedModel;
@@ -37,7 +38,7 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.schema.WildcardType;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.AuthorizationScope;
-import springfox.documentation.service.HttpAuthenticationScheme;
+import springfox.documentation.service.OAuth2Scheme;
 import springfox.documentation.service.SecurityReference;
 import springfox.documentation.service.SecurityScheme;
 import springfox.documentation.spi.DocumentationType;
@@ -46,11 +47,15 @@ import springfox.documentation.spring.web.plugins.Docket;
 
 public class SwaggerDocketBuilder {
 
-    private static final String AUTHORIZATION = "Authorization" ;
     private final Predicate<RequestHandler> apiSelector;
     private final TypeResolver typeResolver;
     private final List<DocketCustomizer> docketCustomizers;
     private final ApiInfo apiInfo;
+    private static final String OAUTH_NAME = "oauth";
+    @Value("${keycloak.auth-server-url}")
+    private String AUTH_SERVER;
+    @Value("${keycloak.realm:activiti}")
+    private String REALM;
 
     public SwaggerDocketBuilder(Predicate<RequestHandler> apiSelector,
                                 TypeResolver typeResolver,
@@ -73,31 +78,31 @@ public class SwaggerDocketBuilder {
         }
      
         baseDocket.forCodeGeneration(true)
-                .securitySchemes(securitySchema())
-                .securityContexts(securityContext());
+                .securitySchemes(Arrays.asList(securitySchema()))
+                .securityContexts(Arrays.asList(securityContext()));
         return applyCustomizations(baseDocket);
     }
 
-    private List<SecurityScheme> securitySchema() {
-            return List.of(
-                    HttpAuthenticationScheme
-                            .JWT_BEARER_BUILDER
-                            .name(AUTHORIZATION)
-                            .build()
-            );
+    private SecurityScheme securitySchema() { 
+        return new OAuth2Scheme(
+                OAUTH_NAME, 
+                "implicit",
+                "Authorizing with SSO",
+                AUTH_SERVER + "/realms/" + REALM + "/protocol/openid-connect/auth", 
+                null, 
+                null, 
+                Arrays.asList(), 
+                Arrays.asList()
+        );
     }
-
-    private List<SecurityContext> securityContext() {
-        return Arrays.asList(
-                SecurityContext.builder()
-                        .securityReferences(
-                                Arrays.asList(SecurityReference.builder()
-                                        .reference(AUTHORIZATION)
-                                        .scopes(new AuthorizationScope[0])
-                                        .build()
-                                )
-                        )
-                        .build());
+    
+    private SecurityContext securityContext() { 
+        return SecurityContext.builder()
+                .securityReferences(Arrays.asList(
+                        new SecurityReference(
+                                OAUTH_NAME, 
+                                new AuthorizationScope[]{})))
+                .build();
     }
 
     private Docket applyCustomizations(Docket docket) {
