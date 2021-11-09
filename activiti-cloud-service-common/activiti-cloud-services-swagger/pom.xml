@@ -27,5 +27,9 @@
       <groupId>io.springfox</groupId>
       <artifactId>springfox-boot-starter</artifactId>
     </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
   </dependencies>
 </project>

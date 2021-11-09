@@ -15,43 +15,35 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import java.util.function.Predicate;
+import com.fasterxml.classmate.TypeResolver;
+import java.util.List;
+import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
+import org.activiti.cloud.common.swagger.DocketCustomizer;
+import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.RequestHandler;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
 public class RuntimeBundleSwaggerConfig {
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ApiInfo apiInfo(BuildProperties buildProperties) {
-        return new ApiInfoBuilder()
-            .title(String.format("%s ReST API", buildProperties.getName()))
-            .description(buildProperties.get("description"))
-            .version(buildProperties.getVersion())
-            .license(String.format("© %s-%s %s. All rights reserved",
-                buildProperties.get("inceptionYear"),
-                buildProperties.get("year"),
-                buildProperties.get("organization.name")))
-            .termsOfServiceUrl(buildProperties.get("organization.url"))
-            .build();
+    @Bean(name = "rbApiDocket")
+    @ConditionalOnMissingBean(name = "rbApiDocket")
+    public Docket rbApiDocket(BaseAPIInfoBuilder baseAPIInfoBuilder, TypeResolver typeResolver,
+       List<DocketCustomizer> docketCustomizers,
+        @Value("${activiti.cloud.swagger.rb-base-path:}") String rbSwaggerBasePath) {
+        return new SwaggerDocketBuilder("org.activiti.cloud.services.rest",
+            typeResolver, docketCustomizers)
+            .buildApiDocket("Runtime Bundle", rbSwaggerBasePath)
+            .apiInfo(baseAPIInfoBuilder.baseApiInfoBuilder("Runtime Bundle ReST API")
+                .build());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.rest");
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public PayloadsDocketCustomizer payloadsDocketCustomizer(){
+    public PayloadsDocketCustomizer payloadsDocketCustomizer() {
         return new PayloadsDocketCustomizer();
     }
 

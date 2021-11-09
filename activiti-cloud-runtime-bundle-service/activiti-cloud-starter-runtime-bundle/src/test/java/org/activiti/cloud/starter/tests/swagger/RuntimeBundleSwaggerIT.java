@@ -48,7 +48,7 @@ public class RuntimeBundleSwaggerIT {
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
-        mockMvc.perform(get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v3/api-docs?group=Runtime Bundle").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.paths").isNotEmpty())
@@ -59,7 +59,7 @@ public class RuntimeBundleSwaggerIT {
             .andExpect(jsonPath("$.components.schemas[\"SaveTaskPayload\"].properties")
                 .value(hasKey("payloadType")))
             .andExpect(jsonPath("$.info.title")
-                .value("Activiti Cloud Starter :: Runtime Bundle ReST API"));
+                .value("Runtime Bundle ReST API"));
     }
 
 }

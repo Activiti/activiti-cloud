@@ -21,6 +21,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.TypeResolver;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
@@ -35,12 +36,13 @@ import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.AlternateTypeBuilder;
 import springfox.documentation.builders.AlternateTypePropertyBuilder;
 import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.schema.WildcardType;
-import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.AuthorizationScope;
 import springfox.documentation.service.OAuth2Scheme;
 import springfox.documentation.service.SecurityReference;
 import springfox.documentation.service.SecurityScheme;
+import springfox.documentation.service.StringVendorExtension;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -50,57 +52,63 @@ public class SwaggerDocketBuilder {
     private final Predicate<RequestHandler> apiSelector;
     private final TypeResolver typeResolver;
     private final List<DocketCustomizer> docketCustomizers;
-    private final ApiInfo apiInfo;
     private static final String OAUTH_NAME = "oauth";
+    public static final String SERVICE_URL_PREFIX = "service-url-prefix";
+
     @Value("${keycloak.auth-server-url}")
     private String AUTH_SERVER;
+
     @Value("${keycloak.realm:activiti}")
     private String REALM;
 
     public SwaggerDocketBuilder(Predicate<RequestHandler> apiSelector,
-                                TypeResolver typeResolver,
-                                List<DocketCustomizer> docketCustomizers,
-                                ApiInfo apiInfo) {
+        TypeResolver typeResolver,
+        List<DocketCustomizer> docketCustomizers) {
         this.apiSelector = apiSelector;
         this.typeResolver = typeResolver;
         this.docketCustomizers = docketCustomizers;
-        this.apiInfo = apiInfo;
     }
 
-    private Docket baseDocket() {
+    public SwaggerDocketBuilder(String basePackage,
+        TypeResolver typeResolver,
+        List<DocketCustomizer> docketCustomizers) {
+        this(RequestHandlerSelectors.basePackage(basePackage), typeResolver, docketCustomizers);
+    }
+
+    private Docket baseDocket(String groupName, String serviceURLPrefix) {
         Docket baseDocket = new Docket(DocumentationType.OAS_30)
+            .groupName(groupName)
+            .extensions(
+                Collections.singletonList(new StringVendorExtension(SERVICE_URL_PREFIX, serviceURLPrefix)))
             .select()
             .apis(apiSelector::test)
             .paths(PathSelectors.any())
             .build();
-        if (apiInfo != null) {
-            baseDocket.apiInfo(apiInfo);
-        }
-     
+
         baseDocket.forCodeGeneration(true)
                 .securitySchemes(Arrays.asList(securitySchema()))
                 .securityContexts(Arrays.asList(securityContext()));
         return applyCustomizations(baseDocket);
     }
 
-    private SecurityScheme securitySchema() { 
+    private SecurityScheme securitySchema() {
         return new OAuth2Scheme(
-                OAUTH_NAME, 
+                OAUTH_NAME,
                 "implicit",
                 "Authorizing with SSO",
-                AUTH_SERVER + "/realms/" + REALM + "/protocol/openid-connect/auth", 
-                null, 
-                null, 
-                Arrays.asList(), 
+                AUTH_SERVER + "/realms/" + REALM + "/protocol/openid-connect/auth",
+                null,
+                null,
+                Arrays.asList(),
                 Arrays.asList()
         );
     }
-    
-    private SecurityContext securityContext() { 
+
+    private SecurityContext securityContext() {
         return SecurityContext.builder()
                 .securityReferences(Arrays.asList(
                         new SecurityReference(
-                                OAUTH_NAME, 
+                                OAUTH_NAME,
                                 new AuthorizationScope[]{})))
                 .build();
     }
@@ -115,10 +123,10 @@ public class SwaggerDocketBuilder {
         return customizedDocket;
     }
 
-    public Docket buildAlfrescoAPIDocket() {
+    public Docket buildApiDocket(String groupName, String serviceURLPrefix) {
         ResolvedType resourceTypeWithWildCard = typeResolver.resolve(EntityModel.class,
                                                                      WildcardType.class);
-        return baseDocket()
+        return baseDocket(groupName, serviceURLPrefix)
                 .alternateTypeRules(newRule(typeResolver.resolve(CollectionModel.class,
                                                                  resourceTypeWithWildCard),
                                             typeResolver.resolve(ListResponseContent.class,
