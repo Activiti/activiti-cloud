@@ -52,7 +52,7 @@ class RuntimeBundleSwaggerITSupport {
      */
     @Test
     void generateSwagger() throws Exception {
-        mockMvc.perform(get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v3/api-docs?group=Runtime Bundle").accept(MediaType.APPLICATION_JSON))
             .andDo((result) -> {
                 JsonNode jsonNodeTree = objectMapper
                     .readTree(result.getResponse().getContentAsByteArray());

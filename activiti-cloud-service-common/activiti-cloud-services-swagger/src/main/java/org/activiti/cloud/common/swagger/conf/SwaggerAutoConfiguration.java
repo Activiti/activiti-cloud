@@ -18,15 +18,17 @@ package org.activiti.cloud.common.swagger.conf;
 import com.fasterxml.classmate.TypeResolver;
 import java.util.List;
 import java.util.function.Predicate;
+import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
+import org.activiti.cloud.common.swagger.PathPrefixTransformationFilter;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.RequestHandler;
 import springfox.documentation.oas.annotations.EnableOpenApi;
-import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spring.web.plugins.Docket;
 
 /**
@@ -51,17 +53,16 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class SwaggerAutoConfiguration {
 
     @Bean
-    public SwaggerDocketBuilder swaggerDocketBuilder(Predicate<RequestHandler> apiSelector,
-        TypeResolver typeResolver,
-        @Autowired(required = false) List<DocketCustomizer> docketCustomizers,
-        @Autowired(required = false) ApiInfo apiInfo) {
-        return new SwaggerDocketBuilder(apiSelector, typeResolver, docketCustomizers, apiInfo);
+    @ConditionalOnMissingBean
+    public SwaggerDocketBuilder swaggerDocketBuilder(BuildProperties buildProperties, TypeResolver typeResolver,
+        List<DocketCustomizer> docketCustomizers) {
+        return new SwaggerDocketBuilder(new BaseAPIInfoBuilder(buildProperties), typeResolver, docketCustomizers);
     }
 
-    @Bean(name = "alfrescoAPIDocket")
-    @ConditionalOnMissingBean(name = "alfrescoAPIDocket")
-    public Docket alfrescoAPIDocket(SwaggerDocketBuilder swaggerDocketBuilder) {
-        return swaggerDocketBuilder.buildAlfrescoAPIDocket();
+    @Bean
+    @ConditionalOnMissingBean
+    public PathPrefixTransformationFilter pathPrefixTransformationFilter(@Value("${activiti.cloud.swagger.base-path:/}") String swaggerBasePath) {
+        return new PathPrefixTransformationFilter(swaggerBasePath);
     }
 
 }

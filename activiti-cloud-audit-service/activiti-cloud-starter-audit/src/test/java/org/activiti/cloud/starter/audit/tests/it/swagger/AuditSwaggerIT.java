@@ -25,6 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,16 +45,18 @@ public class AuditSwaggerIT {
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
-        mockMvc.perform(get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v3/api-docs?group=Audit").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.servers").isNotEmpty())
+            .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey("CloudRuntimeEventModel")))
-            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Audit :: Starter :: Audit ReST API"));
+            .andExpect(jsonPath("$.info.title").value("Audit Service ReST API"));
 
     }
 

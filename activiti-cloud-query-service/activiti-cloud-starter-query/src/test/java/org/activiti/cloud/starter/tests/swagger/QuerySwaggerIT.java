@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.tests.swagger;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.both;
@@ -51,15 +52,17 @@ public class QuerySwaggerIT {
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
         MvcResult result = mockMvc
-            .perform(get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v3/api-docs?group=Query").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.servers").isNotEmpty())
+            .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContentOf"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContentOf"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContentOf"))))
-            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Query :: Starter :: Query ReST API"))
+            .andExpect(jsonPath("$.info.title").value("Query Service ReST API"))
             .andExpect(content().string(
                         both(notNullValue(String.class))
                                 .and(not(containsString("ListResponseContent«")))
