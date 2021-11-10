@@ -28,7 +28,7 @@ public class SwaggerAuditSteps {
 
     @Step
     public String getSwaggerSpecification(){
-        return auditSwaggerService.getSwaggerSpecification();
+        return auditSwaggerService.getSwaggerSpecification("Audit");
     }
 
 }
