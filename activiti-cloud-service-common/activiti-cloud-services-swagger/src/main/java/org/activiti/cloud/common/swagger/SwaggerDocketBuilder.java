@@ -55,7 +55,7 @@ public class SwaggerDocketBuilder {
     private static final String OAUTH_NAME = "oauth";
     public static final String SERVICE_URL_PREFIX = "service-url-prefix";
 
-    @Value("${keycloak.auth-server-url}")
+    @Value("${keycloak.auth-server-url:}")
     private String authServer;
 
     @Value("${keycloak.realm:activiti}")
