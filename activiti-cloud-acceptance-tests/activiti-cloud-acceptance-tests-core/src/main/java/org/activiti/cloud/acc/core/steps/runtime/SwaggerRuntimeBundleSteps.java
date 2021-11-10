@@ -28,6 +28,6 @@ public class SwaggerRuntimeBundleSteps {
 
     @Step
     public String getSwaggerSpecification(){
-        return runtimeBundleSwaggerService.getSwaggerSpecification();
+        return runtimeBundleSwaggerService.getSwaggerSpecification("Runtime Bundle");
     }
 }
