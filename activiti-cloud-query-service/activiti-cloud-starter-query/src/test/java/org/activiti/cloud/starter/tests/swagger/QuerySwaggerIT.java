@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.tests.swagger;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.both;
@@ -54,6 +55,8 @@ public class QuerySwaggerIT {
             .perform(get("/v3/api-docs?group=Query").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.servers").isNotEmpty())
+            .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContentOf"))))

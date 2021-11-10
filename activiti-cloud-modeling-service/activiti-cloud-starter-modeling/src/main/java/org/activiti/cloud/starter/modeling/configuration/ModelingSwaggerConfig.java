@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.starter.modeling.configuration;
 
-import com.fasterxml.classmate.TypeResolver;
-import java.util.List;
-import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
-import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -31,14 +27,10 @@ public class ModelingSwaggerConfig {
 
     @Bean(name = "modelingApiDocket")
     @ConditionalOnMissingBean(name = "modelingApiDocket")
-    public Docket modelingApiDocket(BaseAPIInfoBuilder baseAPIInfoBuilder, TypeResolver typeResolver,
-        List<DocketCustomizer> docketCustomizers,
+    public Docket modelingApiDocket(SwaggerDocketBuilder swaggerDocketBuilder,
         @Value("${activiti.cloud.swagger.modeling-base-path:}") String swaggerBasePath) {
-        return new SwaggerDocketBuilder("org.activiti.cloud.services.modeling.rest",
-            typeResolver, docketCustomizers)
-            .buildApiDocket("Modeling", swaggerBasePath)
-            .apiInfo(baseAPIInfoBuilder.baseApiInfoBuilder("Modeling ReST API")
-                .build());
+        return swaggerDocketBuilder.buildApiDocket("Modeling ReST API", "Modeling", swaggerBasePath,
+            "org.activiti.cloud.services.modeling.rest");
     }
 
 }

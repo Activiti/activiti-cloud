@@ -15,9 +15,13 @@
  */
 package org.activiti.cloud.common.swagger.conf;
 
+import com.fasterxml.classmate.TypeResolver;
+import java.util.List;
 import java.util.function.Predicate;
 import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
+import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.PathPrefixTransformationFilter;
+import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
@@ -50,8 +54,9 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BaseAPIInfoBuilder baseAPIInfoBuilder(BuildProperties buildProperties) {
-        return new BaseAPIInfoBuilder(buildProperties);
+    public SwaggerDocketBuilder swaggerDocketBuilder(BuildProperties buildProperties, TypeResolver typeResolver,
+        List<DocketCustomizer> docketCustomizers) {
+        return new SwaggerDocketBuilder(new BaseAPIInfoBuilder(buildProperties), typeResolver, docketCustomizers);
     }
 
     @Bean
