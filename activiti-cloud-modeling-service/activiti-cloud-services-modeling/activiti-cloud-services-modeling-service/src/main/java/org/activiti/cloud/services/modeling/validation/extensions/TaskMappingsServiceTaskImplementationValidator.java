@@ -38,6 +38,7 @@ import org.activiti.cloud.modeling.api.process.VariableMappingType;
 import org.activiti.cloud.services.modeling.converter.ConnectorActionParameter;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
+import org.activiti.cloud.services.modeling.validation.process.ServiceTaskImplementationType;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -111,10 +112,8 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
 
     private boolean isConnector(Optional<String> implementationTask) {
         return implementationTask.isPresent()
-                && !implementationTask.get().equals("dmn-connector.EXECUTE_TABLE")
-                && !implementationTask.get().equals("script.EXECUTE")
-                && !implementationTask.get().equals("email-service.SEND")
-                && !implementationTask.get().equals("docgen-service.GENERATE");
+                && !Arrays.stream(ServiceTaskImplementationType.values())
+                .anyMatch(serviceImplementation -> implementationTask.get().startsWith(serviceImplementation.getPrefix()));
     }
 
     private Optional<ModelValidationError> validateTaskMappings(String processId,
