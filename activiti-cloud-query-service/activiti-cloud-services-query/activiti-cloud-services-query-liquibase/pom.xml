@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-query</artifactId>
-    <version>7.1.740</version>
+    <version>7.1.0-M16</version>
   </parent>
   <artifactId>activiti-cloud-services-query-liquibase</artifactId>
   
