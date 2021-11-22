@@ -17,32 +17,44 @@
         {
           "id": "input-variable-2",
           "name": "input-variable-name-2",
-          "type": "boolean",
+          "type": "string",
           "required": false,
           "description": "",
-          "extendedProperties": "string"
+          "model": {
+            "type": "string"
+          }
         },
         {
           "id": "input-variable-3",
           "name": "input-variable-name-3",
-          "type": "boolean",
+          "type": "json",
           "required": false,
           "description": "",
-          "extendedProperties": [
-            "a",
-            "b",
-            "c"
-          ]
+          "model": {
+            "enum": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
         },
         {
           "id": "input-variable-4",
           "name": "input-variable-name-4",
-          "type": "boolean",
+          "type": "json",
           "required": false,
           "description": "",
-          "extendedProperties": {
-            "a": "b",
-            "c": "d"
+          "model": {
+            "type": "object",
+            "properties": {
+              "a": {
+                "default": "b",
+                "readOnly": true
+              },
+              "c": {
+                "const": "b"
+              }
+            }
           }
         }
       ],

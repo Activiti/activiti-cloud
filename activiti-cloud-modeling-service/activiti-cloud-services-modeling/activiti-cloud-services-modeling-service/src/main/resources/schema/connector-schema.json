@@ -27,7 +27,7 @@
           "required": {
             "type": "boolean"
           },
-          "extendedProperties": {}
+          "model": {}
         },
         "required": [ "id", "name", "type" ]
       }
