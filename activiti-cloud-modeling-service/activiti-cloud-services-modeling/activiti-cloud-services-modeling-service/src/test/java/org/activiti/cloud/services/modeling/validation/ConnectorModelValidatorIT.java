@@ -43,7 +43,7 @@ public class ConnectorModelValidatorIT {
         ConnectorModelValidator connectorModelValidator = new ConnectorModelValidator(connectorSchemaLoader, connectorModelType);
 
         connectorModelValidator.validateModelContent(
-            resourceAsByteArray("connector/connector-with-extended-properties.json"), EMPTY_CONTEXT);
+            resourceAsByteArray("connector/connector-with-model.json"), EMPTY_CONTEXT);
     }
 
 }
