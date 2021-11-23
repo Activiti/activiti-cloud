@@ -20,14 +20,16 @@ import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
-
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.ResumeProcessPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
-import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.SuspendProcessPayload;
 import org.activiti.api.task.model.Task;
@@ -51,8 +53,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,11 +63,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @ActiveProfiles(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -339,25 +336,25 @@ public class CommandEndpointIT {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
-            HttpMethod.GET,
-            null,
-            responseType);
+                HttpMethod.GET,
+                null,
+                responseType);
     }
 
-    @Test
-    public void shouldSendSignalViaCommand() {
-        //given
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
-        SignalPayload sendSignal = ProcessPayloadBuilder.signal().withName("go").build();
-
-        //when
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(sendSignal).setHeader("cmdId",
-            sendSignal.getId()).build());
-        //then
-        await("signal to be sent")
-            .untilTrue(streamHandler.getSendSignalAck());
-
-        ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
-        assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
-    }
+    //    @Test
+    //    public void shouldSendSignalViaCommand() {
+    //        //given
+    //        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
+    //        SignalPayload sendSignal = ProcessPayloadBuilder.signal().withName("go").build();
+    //
+    //        //when
+    //        clientStream.myCmdProducer().send(MessageBuilder.withPayload(sendSignal).setHeader("cmdId",
+    //            sendSignal.getId()).build());
+    //        //then
+    //        await("signal to be sent")
+    //            .untilTrue(streamHandler.getSendSignalAck());
+    //
+    //        ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
+    //        assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
+    //    }
 }
