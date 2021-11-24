@@ -15,12 +15,12 @@
  */
 package org.activiti.cloud.services.core.conf;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
@@ -159,6 +159,12 @@ public class ServicesCoreAutoConfiguration {
     public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
         return new CommandEndpoint<T>(cmdExecutors);
     }
+
+    //    @Bean
+    //    @ConditionalOnMissingBean
+    //    public <T extends Payload, R> Function<T, R> commandConsumer(Set<CommandExecutor<T>> cmdExecutors) {
+    //        return (payload) -> (R)"";
+    //    }
 
     @Bean
     @ConditionalOnMissingBean

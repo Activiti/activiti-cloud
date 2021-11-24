@@ -31,14 +31,16 @@ import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.ReleaseTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.springframework.boot.test.context.TestComponent;
+import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
 
-@Profile(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
+@Profile(CommandEndPointITLegacyStreamHandler.COMMAND_ENDPOINT_IT_LEGACY)
 @TestComponent
-public class CommandEndPointITStreamHandler {
+@EnableBinding(MessageClientStream.class)
+public class CommandEndPointITLegacyStreamHandler {
 
-    public static final String COMMAND_ENDPOINT_IT = "CommandEndpointIT";
+    public static final String COMMAND_ENDPOINT_IT_LEGACY = "CommandEndpointITLegacy";
 
     private String processInstanceId;
 

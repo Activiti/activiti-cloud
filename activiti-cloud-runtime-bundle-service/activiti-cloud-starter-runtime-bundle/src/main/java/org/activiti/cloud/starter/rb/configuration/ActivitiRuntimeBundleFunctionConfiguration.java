@@ -15,12 +15,9 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.Message;
 
 @Configuration
 public class ActivitiRuntimeBundleFunctionConfiguration {
@@ -33,9 +30,9 @@ public class ActivitiRuntimeBundleFunctionConfiguration {
     //        return null;
     //    }
 
-    @Bean
-    public Consumer<Message<String>> onUpperCaseMessage() {
-        return (message) -> logger.info("Received upper case message: {}", message.getPayload());
-    }
+    //    @Bean
+    //    public Consumer<Message<String>> onUpperCaseMessage() {
+    //        return (message) -> logger.info("Received upper case message: {}", message.getPayload());
+    //    }
 
 }

@@ -19,5 +19,5 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 
 @EnableBinding(ProcessEngineChannels.class)
-public class ActivitiRuntimeBundleBindingConfiguration {
+public class ActivitiRuntimeBundleLegacyBindingConfiguration {
 }

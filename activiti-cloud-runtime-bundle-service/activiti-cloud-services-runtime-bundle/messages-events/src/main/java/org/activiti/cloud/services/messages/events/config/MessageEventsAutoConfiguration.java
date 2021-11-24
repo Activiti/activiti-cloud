@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.messages.events.config;
 
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.messages.events.channels.MessageEventsSource;
 import org.activiti.cloud.services.messages.events.producer.BpmnMessageReceivedEventMessageProducer;
 import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEventMessageProducer;
 import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
@@ -27,27 +26,13 @@ import org.activiti.cloud.services.messages.events.support.MessageEventsDispatch
 import org.activiti.cloud.services.messages.events.support.MessageSubscriptionEventMessageBuilderFactory;
 import org.activiti.cloud.services.messages.events.support.StartMessageDeployedEventMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource("classpath:config/messages-events-channels.properties")
-@EnableBinding({
-    MessageEventsSource.class
-})
 public class MessageEventsAutoConfiguration {
-
-
-    @Bean
-    @ConditionalOnMissingBean
-    public MessageEventsDispatcher messageEventsDispatcher(MessageEventsSource messageEventsSource,
-                                                           BindingServiceProperties bindingServiceProperties) {
-        return new MessageEventsDispatcher(messageEventsSource.messageEventsOutput(),
-                                           bindingServiceProperties);
-    }
 
     @Bean
     @ConditionalOnMissingBean

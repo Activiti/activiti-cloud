@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +33,6 @@ import org.activiti.api.runtime.event.impl.ProcessDeployedEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties.RuntimeBundleEventsProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -48,6 +46,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -60,7 +59,7 @@ public class CloudProcessDeployedProducerTest {
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Mock
-    private ProcessEngineChannels producer;
+    private StreamBridge streamBridge;
 
     @Spy
     private RuntimeBundleProperties properties = new RuntimeBundleProperties();
@@ -79,12 +78,12 @@ public class CloudProcessDeployedProducerTest {
 
     @BeforeEach
     public void setUp() {
-        when(producer.auditProducer()).thenReturn(auditProducer);
+        //        when(producer.auditProducer()).thenReturn(auditProducer);
         when(runtimeBundleMessageBuilderFactory.create()).thenReturn(messageBuilderAppenderChain);
         final RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
         eventsProperties.setChunkSize(2);
         properties.setEventsProperties(eventsProperties);
-        processDeployedProducer = new CloudProcessDeployedProducer(runtimeBundleInfoAppender, producer, runtimeBundleMessageBuilderFactory, properties);
+        processDeployedProducer = new CloudProcessDeployedProducer(runtimeBundleInfoAppender, streamBridge, runtimeBundleMessageBuilderFactory, properties);
     }
 
     @Test

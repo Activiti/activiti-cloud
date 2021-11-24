@@ -65,15 +65,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-@ActiveProfiles(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
+@ActiveProfiles(CommandEndPointITLegacyStreamHandler.COMMAND_ENDPOINT_IT_LEGACY)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("classpath:application-test.properties")
+@TestPropertySource("classpath:application-legacy-test.properties")
 @DirtiesContext
-@Import({ CommandEndPointITStreamHandler.class,
+@Import({ CommandEndPointITLegacyStreamHandler.class,
         ProcessInstanceRestTemplate.class,
         TaskRestTemplate.class })
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class })
-public class CommandEndpointIT {
+public class CommandEndpointLegacyIT {
 
     @Autowired
     private MessageClientStream clientStream;
@@ -88,7 +88,7 @@ public class CommandEndpointIT {
     private TaskRestTemplate taskRestTemplate;
 
     @Autowired
-    private CommandEndPointITStreamHandler streamHandler;
+    private CommandEndPointITLegacyStreamHandler streamHandler;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -112,7 +112,7 @@ public class CommandEndpointIT {
 
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
-                pd.getId());
+                    pd.getId());
         }
     }
 
@@ -121,10 +121,11 @@ public class CommandEndpointIT {
 
         Map<String, Object> vars = new HashMap<>();
         vars.put("hey",
-            "one");
+                "one");
 
         String simpleProcessDefinitionId = processDefinitionIds.get(SIMPLE_PROCESS);
-        StartProcessPayload startProcessInstanceCmd = ProcessPayloadBuilder.start().withProcessDefinitionId(simpleProcessDefinitionId).withVariables(vars).build();
+        StartProcessPayload startProcessInstanceCmd = ProcessPayloadBuilder.start().withProcessDefinitionId(simpleProcessDefinitionId).withVariables(vars)
+                .build();
 
         String processInstanceId = startProcessInstance(startProcessInstanceCmd);
 
@@ -132,7 +133,7 @@ public class CommandEndpointIT {
         suspendProcessInstance(suspendProcessInstanceCmd);
 
         resumeProcessInstance(simpleProcessDefinitionId,
-            processInstanceId);
+                processInstanceId);
 
         // Get Tasks
 
@@ -160,23 +161,24 @@ public class CommandEndpointIT {
         responseEntity = getTasks(processInstanceId);
         tasks = responseEntity.getBody().getContent();
         assertThat(tasks)
-            .filteredOn(t -> t.getId().equals(task.getId()))
-            .isEmpty();
+                .filteredOn(t -> t.getId().equals(task.getId()))
+                .isEmpty();
 
         Thread.sleep(1000);
         await().untilAsserted(() -> {
             // Checking that the process is finished
-            ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "?page={page}&size={size}",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {
-                },
-                "0",
-                "2");
+            ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = restTemplate.exchange(
+                    PROCESS_INSTANCES_RELATIVE_URL + "?page={page}&size={size}",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {
+                    },
+                    "0",
+                    "2");
 
             assertThat(processInstancesPage.getBody().getContent())
-                .filteredOn(processInstance -> processInstance.getId().equals(processInstanceId))
-                .isEmpty();
+                    .filteredOn(processInstance -> processInstance.getId().equals(processInstanceId))
+                    .isEmpty();
         });
 
         assertThat(streamHandler.getStartedProcessInstanceAck()).isTrue();
@@ -191,66 +193,67 @@ public class CommandEndpointIT {
         Map<String, Object> variables = new HashMap<>();
 
         CompleteTaskPayload completeTaskCmd = TaskPayloadBuilder.complete().withTaskId(task.getId()).withVariables(
-            variables).build();
+                variables).build();
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(completeTaskCmd).setHeader("cmdId",
-            completeTaskCmd.getId()).build());
+                completeTaskCmd.getId()).build());
         await("task to be completed").untilTrue(streamHandler.getCompletedTaskAck());
     }
 
     private void releaseTask(Task task) {
         ReleaseTaskPayload releaseTaskCmd = TaskPayloadBuilder.release().withTaskId(task.getId()).build();
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(releaseTaskCmd).setHeader("cmdId",
-            releaseTaskCmd.getId()).build());
+                releaseTaskCmd.getId()).build());
         await("task to be released").untilTrue(streamHandler.getReleasedTaskAck());
 
         assertThatTaskHasStatus(task.getId(),
-            CREATED);
+                CREATED);
     }
 
     private void setProcessVariables(String proInstanceId) {
         Map<String, Object> variables = Collections.singletonMap("procVar",
-            "v2");
-        SetProcessVariablesPayload setProcessVariables = ProcessPayloadBuilder.setVariables().withProcessInstanceId(proInstanceId).withVariables(variables).build();
+                "v2");
+        SetProcessVariablesPayload setProcessVariables = ProcessPayloadBuilder.setVariables().withProcessInstanceId(proInstanceId).withVariables(variables)
+                .build();
 
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(setProcessVariables).setHeader("cmdId",
-            setProcessVariables.getId()).build());
+                setProcessVariables.getId()).build());
 
         await("Variable to be set").untilTrue(streamHandler.getSetProcessVariablesAck());
 
         ResponseEntity<CollectionModel<CloudVariableInstance>> retrievedVars = processInstanceRestTemplate.getVariables(proInstanceId);
         assertThat(retrievedVars.getBody().getContent())
-            .extracting(VariableInstance::getName,
-                VariableInstance::getValue)
-            .contains(tuple("procVar",
-                "v2"));
+                .extracting(VariableInstance::getName,
+                        VariableInstance::getValue)
+                .contains(tuple("procVar",
+                        "v2"));
     }
 
     private void claimTask(Task task) {
         streamHandler.resetClaimedTaskAck();
         ClaimTaskPayload claimTaskPayload = TaskPayloadBuilder.claim().withTaskId(task.getId()).withAssignee("hruser").build();
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(claimTaskPayload).setHeader("cmdId",
-            claimTaskPayload.getId()).build());
+                claimTaskPayload.getId()).build());
 
         await("task to be claimed").untilTrue(streamHandler.getClaimedTaskAck());
 
         assertThatTaskHasStatus(task.getId(),
-            ASSIGNED
+                ASSIGNED
         );
     }
 
     private void assertThatTaskHasStatus(String taskId,
-        Task.TaskStatus status) {
+            Task.TaskStatus status) {
         ResponseEntity<CloudTask> responseEntity = getTask(taskId);
         Task retrievedTask = responseEntity.getBody();
         assertThat(retrievedTask.getStatus()).isEqualTo(status);
     }
 
     private void resumeProcessInstance(String processDefinitionId,
-        String processInstanceId) {
+            String processInstanceId) {
         //given
         ResumeProcessPayload resumeProcess = ProcessPayloadBuilder.resume(processInstanceId);
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(resumeProcess).setHeader("cmdId",
-            resumeProcess.getId()).build());
+                resumeProcess.getId()).build());
 
         await("process to be resumed").untilTrue(streamHandler.getResumedProcessInstanceAck());
 
@@ -288,7 +291,7 @@ public class CommandEndpointIT {
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(startProcessPayload).build());
 
         await("process to be started")
-            .untilTrue(streamHandler.getStartedProcessInstanceAck());
+                .untilTrue(streamHandler.getStartedProcessInstanceAck());
         String processInstanceId = streamHandler.getProcessInstanceId();
 
         //when
@@ -304,11 +307,11 @@ public class CommandEndpointIT {
 
     private ProcessInstance executeGetProcessInstanceRequest(String processInstanceId) {
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "{processInstanceId}",
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<CloudProcessInstance>() {
-            },
-            processInstanceId);
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<CloudProcessInstance>() {
+                },
+                processInstanceId);
 
         assertThat(processInstanceResponseEntity).isNotNull();
         assertThat(processInstanceResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -324,10 +327,10 @@ public class CommandEndpointIT {
 
     private ResponseEntity<CloudTask> getTask(String taskId) {
         ResponseEntity<CloudTask> responseEntity = restTemplate.exchange(TASKS_URL + taskId,
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<CloudTask>() {
-            });
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<CloudTask>() {
+                });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }

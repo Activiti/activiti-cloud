@@ -15,31 +15,25 @@
  */
 package org.activiti.services.subscription.config;
 
+import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior.DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME;
 import org.activiti.bpmn.model.Signal;
 import org.activiti.bpmn.model.SignalEventDefinition;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.behavior.IntermediateThrowSignalEventActivityBehavior;
 import org.activiti.runtime.api.conf.ProcessRuntimeAutoConfiguration;
-import org.activiti.runtime.api.signal.SignalPayloadEventListener;
-import org.activiti.services.subscription.SignalSender;
 import org.activiti.services.subscription.channel.BroadcastSignalEventHandler;
-import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
 import org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 
-import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior.DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME;
-
 @Configuration
 @PropertySource("classpath:config/signal-events-channels.properties")
-@EnableBinding(ProcessEngineSignalChannels.class)
 @AutoConfigureBefore({ProcessRuntimeAutoConfiguration.class})
 public class ActivitiCloudSubscriptionsAutoConfiguration {
 
@@ -48,13 +42,7 @@ public class ActivitiCloudSubscriptionsAutoConfiguration {
     public BroadcastSignalEventHandler broadcastSignalEventHandler(RuntimeService runtimeService) {
         return new BroadcastSignalEventHandler(runtimeService);
     }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public SignalPayloadEventListener signalSender(ProcessEngineSignalChannels processEngineSignalChannels) {
-        return new SignalSender(processEngineSignalChannels.signalProducer());
-    }
-
+    
     @Bean(DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME)
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @ConditionalOnMissingBean

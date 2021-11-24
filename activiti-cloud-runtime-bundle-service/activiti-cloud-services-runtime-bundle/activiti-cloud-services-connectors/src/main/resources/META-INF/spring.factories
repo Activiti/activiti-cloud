@@ -1,3 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     org.activiti.services.connectors.conf.CloudConnectorsAutoConfiguration,\
-    org.activiti.services.connectors.conf.CloudConnectorsMessagingAutoConfiguration
+    org.activiti.services.connectors.conf.CloudConnectorsMessagingAutoConfiguration,\
+    org.activiti.services.connectors.conf.CloudConnectorsLegacyBindingConfiguration

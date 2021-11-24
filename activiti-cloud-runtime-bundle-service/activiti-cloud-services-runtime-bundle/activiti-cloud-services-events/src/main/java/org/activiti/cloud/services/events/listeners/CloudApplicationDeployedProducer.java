@@ -18,28 +18,28 @@ package org.activiti.cloud.services.events.listeners;
 import org.activiti.api.runtime.event.impl.ApplicationDeployedEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployedEventImpl;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.event.EventListener;
 
 public class CloudApplicationDeployedProducer {
 
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private ProcessEngineChannels producer;
+    private StreamBridge streamBridge;
     private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
 
     public CloudApplicationDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                            ProcessEngineChannels producer,
-                                            RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
+            StreamBridge streamBridge,
+            RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-        this.producer = producer;
+        this.streamBridge = streamBridge;
         this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
     }
 
     @EventListener
     public void sendApplicationDeployedEvents(ApplicationDeployedEvents applicationDeployedEvents) {
-        producer.auditProducer().send(
+        streamBridge.send("engineEvents",
                 runtimeBundleMessageBuilderFactory.create()
                         .withPayload(
                                 applicationDeployedEvents.getApplicationDeployedEvents()
