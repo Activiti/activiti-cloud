@@ -16,10 +16,12 @@
 package org.activiti.services.connectors.conf;
 
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
 @EnableBinding(ProcessEngineIntegrationChannels.class)
 public class CloudConnectorsBinding {
 }

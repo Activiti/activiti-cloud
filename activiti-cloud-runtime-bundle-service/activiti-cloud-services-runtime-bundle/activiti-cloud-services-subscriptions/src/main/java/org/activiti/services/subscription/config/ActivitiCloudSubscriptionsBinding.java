@@ -16,10 +16,12 @@
 package org.activiti.services.subscription.config;
 
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
 @EnableBinding(ProcessEngineSignalChannels.class)
 public class ActivitiCloudSubscriptionsBinding {
 }

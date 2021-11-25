@@ -15,10 +15,12 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
 @EnableBinding(EngineEventsConsumerChannels.class)
 public class EngineEventsBinding {
 }

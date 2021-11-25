@@ -16,10 +16,12 @@
 package org.activiti.cloud.services.messages.core.config;
 
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
 @EnableBinding(MessageConnectorProcessor.class)
 public class MessagesCoreBinding {
 }
