@@ -16,10 +16,12 @@
 package org.activiti.cloud.starter.rb.configuration;
 
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
 @EnableBinding(ProcessEngineChannels.class)
 public class ActivitiRuntimeBundleBinding {
 }
