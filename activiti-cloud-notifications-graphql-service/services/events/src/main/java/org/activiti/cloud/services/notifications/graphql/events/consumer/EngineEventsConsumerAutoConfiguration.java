@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
+import java.util.Arrays;
+import java.util.List;
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
@@ -25,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -36,17 +37,12 @@ import org.springframework.messaging.Message;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Notification Gateway configuration that enables messaging channel bindings
  * and scans for MessagingGateway on interfaces to create GatewayProxyFactoryBeans.
  */
 @Configuration
-@EnableBinding(EngineEventsConsumerChannels.class)
 @EnableConfigurationProperties(EngineEventsConsumerProperties.class)
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.notifications.graphql.events.enabled", matchIfMissing = true)
 @PropertySources({
