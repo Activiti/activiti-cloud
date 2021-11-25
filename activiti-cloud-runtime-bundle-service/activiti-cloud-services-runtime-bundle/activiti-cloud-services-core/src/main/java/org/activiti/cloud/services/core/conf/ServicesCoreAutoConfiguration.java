@@ -159,13 +159,7 @@ public class ServicesCoreAutoConfiguration {
     public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
         return new CommandEndpoint<T>(cmdExecutors);
     }
-
-    //    @Bean
-    //    @ConditionalOnMissingBean
-    //    public <T extends Payload, R> Function<T, R> commandConsumer(Set<CommandExecutor<T>> cmdExecutors) {
-    //        return (payload) -> (R)"";
-    //    }
-
+    
     @Bean
     @ConditionalOnMissingBean
     public ProcessDefinitionSortApplier processDefinitionSortApplier() {

@@ -18,36 +18,36 @@ package org.activiti.cloud.services.messages.events.support;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.messages.events.MessageEventHeaders;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-public class MessageEventsDispatcher {
+public class MessageEventsBridgeDispatcher extends MessageEventsDispatcher {
 
-    private final MessageChannel messageEvents;
-    protected final BindingServiceProperties bindingServiceProperties;
-    
-    public MessageEventsDispatcher(MessageChannel messageEvents,
+    private final StreamBridge streamBridge;
+
+    public MessageEventsBridgeDispatcher(StreamBridge streamBridge,
             BindingServiceProperties bindingServiceProperties) {
-        this.messageEvents = messageEvents;
-        this.bindingServiceProperties = bindingServiceProperties;
+        super(null, bindingServiceProperties);
+        this.streamBridge = streamBridge;
     }
 
+    @Override
     public void dispatch(Message<?> message) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             throw new IllegalStateException("requires active transaction synchronization");
         }
 
-        String messageEventOutputDestination =  bindingServiceProperties.getBindingDestination(ProcessEngineChannels.COMMAND_CONSUMER);
+        String messageEventOutputDestination = bindingServiceProperties.getBindingDestination(ProcessEngineChannels.COMMAND_CONSUMER);
 
         Message<?> dispatchMessage = MessageBuilder.fromMessage(message)
-                                                   .setHeader(MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION,
-                                                              messageEventOutputDestination)
-                                                   .build();
+                .setHeader(MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION,
+                        messageEventOutputDestination)
+                .build();
 
-        TransactionSynchronizationManager.registerSynchronization(new MessageSenderTransactionSynchronization(dispatchMessage,
-                                                                                                              messageEvents));
+        TransactionSynchronizationManager.registerSynchronization(new MessageBridgeSenderTransactionSynchronization(dispatchMessage,
+                streamBridge));
     }
 
 }

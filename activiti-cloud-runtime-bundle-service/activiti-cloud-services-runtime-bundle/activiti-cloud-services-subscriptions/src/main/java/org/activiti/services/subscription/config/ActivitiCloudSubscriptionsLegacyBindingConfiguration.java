@@ -15,6 +15,9 @@
  */
 package org.activiti.services.subscription.config;
 
+import java.util.function.Consumer;
+import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.engine.RuntimeService;
 import org.activiti.runtime.api.signal.SignalPayloadEventListener;
 import org.activiti.services.subscription.SignalSender;
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
@@ -31,5 +34,18 @@ public class ActivitiCloudSubscriptionsLegacyBindingConfiguration {
     @ConditionalOnMissingBean
     public SignalPayloadEventListener signalSender(ProcessEngineSignalChannels processEngineSignalChannels) {
         return new SignalSender(processEngineSignalChannels.signalProducer());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public Consumer<SignalPayload> signalConsumer(RuntimeService runtimeService) {
+        return (signalPayload) -> {
+            if ((signalPayload.getVariables() == null) || (signalPayload.getVariables().isEmpty())) {
+                runtimeService.signalEventReceived(signalPayload.getName());
+            } else {
+                runtimeService.signalEventReceived(signalPayload.getName(),
+                        signalPayload.getVariables());
+            }
+        };
     }
 }
