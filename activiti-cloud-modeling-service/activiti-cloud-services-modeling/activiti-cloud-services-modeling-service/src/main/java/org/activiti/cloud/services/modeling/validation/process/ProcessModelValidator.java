@@ -45,15 +45,15 @@ public class ProcessModelValidator implements ModelContentValidator {
 
     private final ProcessModelType processModelType;
 
-    private final Set<BpmnCommonModelValidator> mpmnModelValidators;
+    private final Set<BpmnCommonModelValidator> bpmnCommonModelValidators;
 
     private final ProcessModelContentConverter processModelContentConverter;
 
     public ProcessModelValidator(ProcessModelType processModelType,
-                                 Set<BpmnCommonModelValidator> mpmnModelValidators,
+                                 Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
                                  ProcessModelContentConverter processModelContentConverter) {
         this.processModelType = processModelType;
-        this.mpmnModelValidators = mpmnModelValidators;
+        this.bpmnCommonModelValidators = bpmnCommonModelValidators;
         this.processModelContentConverter = processModelContentConverter;
     }
 
@@ -62,7 +62,7 @@ public class ProcessModelValidator implements ModelContentValidator {
                                      ValidationContext validationContext) {
         BpmnModel bpmnModel = processContentToBpmnModel(bytes);
         List<ModelValidationError> validationErrors =
-                mpmnModelValidators
+                bpmnCommonModelValidators
                         .stream()
                         .flatMap(mpmnModelValidator -> mpmnModelValidator.validate(bpmnModel,
                                                                                    validationContext))
