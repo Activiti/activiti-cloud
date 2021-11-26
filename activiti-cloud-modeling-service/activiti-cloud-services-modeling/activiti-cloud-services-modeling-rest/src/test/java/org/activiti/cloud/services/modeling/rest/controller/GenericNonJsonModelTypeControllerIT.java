@@ -128,9 +128,8 @@ public class GenericNonJsonModelTypeControllerIT {
                 .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))));
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.empty", "regex.mismatch")
-            .hasValidationErrorMessages("The model name cannot be empty",
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: ''");
+        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.empty")
+            .hasValidationErrorMessages("The model name cannot be empty");
     }
 
     @Test
@@ -144,13 +143,12 @@ public class GenericNonJsonModelTypeControllerIT {
                 .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))));
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("length.greater", "regex.mismatch")
-            .hasValidationErrorMessages("The model name length cannot be greater than 26: '123456789_123456789_1234567'",
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: '123456789_123456789_1234567'");
+        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("length.greater")
+            .hasValidationErrorMessages("The model name length cannot be greater than 26: '123456789_123456789_1234567'");
     }
 
     @Test
-    public void should_throwBadNameException_when_creatingGenericNonJsonModelWithNameWithUnderscore() throws Exception {
+    public void should_update_when_creatingGenericNonJsonModelWithNameWithUnderscore() throws Exception {
         String name = "name_with_underscore";
 
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
@@ -159,13 +157,11 @@ public class GenericNonJsonModelTypeControllerIT {
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))));
 
-        resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("regex.mismatch").hasValidationErrorMessages(
-            "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'name_with_underscore'");
+        resultActions.andExpect(status().isCreated());
     }
 
     @Test
-    public void should_throwBadNameException_when_creatingGenericNonJsonModelWithNameWithUppercase() throws Exception {
+    public void should_update_when_creatingGenericNonJsonModelWithNameWithUppercase() throws Exception {
         String name = "NameWithUppercase";
 
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
@@ -216,9 +212,8 @@ public class GenericNonJsonModelTypeControllerIT {
                 .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))));
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.empty", "regex.mismatch")
-            .hasValidationErrorMessages("The model name cannot be empty",
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: ''");
+        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.empty")
+            .hasValidationErrorMessages("The model name cannot be empty");
     }
 
     @Test
@@ -232,13 +227,13 @@ public class GenericNonJsonModelTypeControllerIT {
                 .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))));
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("regex.mismatch")
+        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: '123456789_123456789_1234567'");
+                "The model name length cannot be greater than 26: '123456789_123456789_1234567'");
     }
 
     @Test
-    public void should_throwBadNameException_when_updatingGenericNonJsonModelWithNameWithUnderscore() throws Exception {
+    public void should_update_when_updatingGenericNonJsonModelWithNameWithUnderscore() throws Exception {
         String name = "name_with_underscore";
 
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
@@ -247,14 +242,11 @@ public class GenericNonJsonModelTypeControllerIT {
             .perform(put("/v1/models/{modelId}", genericNonJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))));
 
-        resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("regex.mismatch")
-            .hasValidationErrorMessages(
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'name_with_underscore'");
+        resultActions.andExpect(status().isOk());
     }
 
     @Test
-    public void should_throwBadNameException_when_updatingGenericNonJsonModelWithNameWithUppercase() throws Exception {
+    public void should_update_when_updatingGenericNonJsonModelWithNameWithUppercase() throws Exception {
         String name = "NameWithUppercase";
 
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
@@ -263,9 +255,7 @@ public class GenericNonJsonModelTypeControllerIT {
             .perform(put("/v1/models/{modelId}", genericNonJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))));
 
-        resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("regex.mismatch").hasValidationErrorMessages(
-            "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'NameWithUppercase'");
+        resultActions.andExpect(status().isOk());
     }
 
     @Test
