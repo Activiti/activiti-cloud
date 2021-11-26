@@ -243,11 +243,11 @@ public class ModelValidationControllerIT {
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
-                .hasSize(2)
+                .hasSize(1)
                 .extracting(ModelValidationError::getDescription,
                             ModelValidationError::getValidatorSetName)
-                .contains(tuple("The process name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'RankMovie'",
-                                "DNS name validator"));
+                .contains(tuple("Invalid service implementation on service 'Task_1spvopd'",
+                                "BPMN service task validator"));
     }
 
     private Model createModel(byte[] processContent) {
