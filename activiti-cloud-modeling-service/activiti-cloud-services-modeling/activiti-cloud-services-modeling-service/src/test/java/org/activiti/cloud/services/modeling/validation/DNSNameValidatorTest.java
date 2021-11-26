@@ -27,7 +27,7 @@ class DNSNameValidatorTest {
     private DNSNameValidator dnsNameValidator;
 
     @BeforeEach
-    private void setup() {
+    public void setup() {
         dnsNameValidator = new DNSNameValidator() {};
     }
 

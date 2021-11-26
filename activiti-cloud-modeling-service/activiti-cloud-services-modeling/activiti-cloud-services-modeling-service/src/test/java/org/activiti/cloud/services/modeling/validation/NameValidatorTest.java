@@ -27,7 +27,7 @@ class NameValidatorTest {
     private NameValidator nameValidator;
 
     @BeforeEach
-    private void setup() {
+    public void setup() {
         nameValidator = new NameValidator() {};
     }
 
