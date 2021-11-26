@@ -28,9 +28,9 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 
 /**
- * Implementation of {@link BpmnModelValidator} for validating Sequence flow when empty source or target references are provided
+ * Implementation of {@link BpmnCommonModelValidator} for validating Sequence flow when empty source or target references are provided
  */
-public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
+public class BpmnModelSequenceFlowValidator implements BpmnCommonModelValidator {
 
     public static final String NO_SOURCE_REF_PROBLEM = "Sequence flow has no source reference";
     public static final String NO_SOURCE_REF_PROBLEM_DESCRIPTION = "Sequence flow [name: '%s', id: '%s'] has to have a source reference";

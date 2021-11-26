@@ -45,12 +45,12 @@ public class ProcessModelValidator implements ModelContentValidator {
 
     private final ProcessModelType processModelType;
 
-    private final Set<BpmnModelValidator> mpmnModelValidators;
+    private final Set<BpmnCommonModelValidator> mpmnModelValidators;
 
     private final ProcessModelContentConverter processModelContentConverter;
 
     public ProcessModelValidator(ProcessModelType processModelType,
-                                 Set<BpmnModelValidator> mpmnModelValidators,
+                                 Set<BpmnCommonModelValidator> mpmnModelValidators,
                                  ProcessModelContentConverter processModelContentConverter) {
         this.processModelType = processModelType;
         this.mpmnModelValidators = mpmnModelValidators;

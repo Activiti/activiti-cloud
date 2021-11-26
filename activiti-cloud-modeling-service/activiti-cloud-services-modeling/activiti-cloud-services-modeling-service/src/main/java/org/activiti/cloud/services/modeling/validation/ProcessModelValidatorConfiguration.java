@@ -38,7 +38,7 @@ import org.activiti.cloud.services.modeling.validation.process.BpmnModelNameVali
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelSequenceFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUserTaskAssigneeValidator;
-import org.activiti.cloud.services.modeling.validation.process.BpmnModelValidator;
+import org.activiti.cloud.services.modeling.validation.process.BpmnCommonModelValidator;
 import org.activiti.cloud.services.modeling.validation.process.EndEventIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.FlowNodeFlowsValidator;
 import org.activiti.cloud.services.modeling.validation.process.IntermediateFlowNodeIncomingOutgoingFlowValidator;
@@ -166,7 +166,7 @@ public class ProcessModelValidatorConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ProcessModelValidator processModelValidator(ProcessModelType processModelType,
-                                                       Set<BpmnModelValidator> mpmnModelValidators,
+                                                       Set<BpmnCommonModelValidator> mpmnModelValidators,
                                                        ProcessModelContentConverter processModelContentConverter) {
         return new ProcessModelValidator(processModelType,
                                          mpmnModelValidators,

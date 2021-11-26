@@ -28,9 +28,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Implementation of {@link BpmnModelValidator} for validating assignee attribute for user tasks
+ * Implementation of {@link BpmnCommonModelValidator} for validating assignee attribute for user tasks
  */
-public class BpmnModelUserTaskAssigneeValidator implements BpmnModelValidator {
+public class BpmnModelUserTaskAssigneeValidator implements BpmnCommonModelValidator {
 
     public final String NO_ASSIGNEE_PROBLEM_TITLE = "No assignee for user task";
     public final String NO_ASSIGNEE_DESCRIPTION = "One of the attributes 'assignee','candidateUsers' or"

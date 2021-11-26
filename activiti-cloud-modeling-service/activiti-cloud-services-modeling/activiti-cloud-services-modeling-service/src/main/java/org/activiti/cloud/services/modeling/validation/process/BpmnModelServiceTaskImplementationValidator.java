@@ -33,9 +33,9 @@ import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConve
 import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 
 /**
- * Implementation of {@link BpmnModelValidator} vor validating service task implementation
+ * Implementation of {@link BpmnCommonModelValidator} vor validating service task implementation
  */
-public class BpmnModelServiceTaskImplementationValidator implements BpmnModelValidator {
+public class BpmnModelServiceTaskImplementationValidator implements BpmnCommonModelValidator {
 
     public static final String INVALID_SERVICE_IMPLEMENTATION_PROBLEM = "Invalid service implementation";
     public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "Invalid service implementation on service '%s'";
