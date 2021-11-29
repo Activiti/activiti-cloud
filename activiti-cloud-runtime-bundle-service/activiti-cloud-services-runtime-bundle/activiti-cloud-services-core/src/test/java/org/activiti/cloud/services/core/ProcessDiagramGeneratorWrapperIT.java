@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.when;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.core.utils.TestProcessEngine;
 import org.activiti.cloud.services.core.utils.TestProcessEngineConfiguration;
@@ -23,14 +26,9 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.image.exception.ActivitiImageException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for ProcessDiagramGeneratorWrapper
@@ -40,12 +38,7 @@ import static org.mockito.Mockito.when;
 public class ProcessDiagramGeneratorWrapperIT {
 
     private static final String DEFAULT_DIAGRAM_FONT_NAME = "Arial";
-
-    @SpringBootApplication
-    static class Application {
-
-    }
-
+    
     @SpyBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
