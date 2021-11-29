@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -59,14 +60,15 @@ public class ProcessModelValidator implements ModelContentValidator {
 
     @Override
     public void validate(byte[] bytes,
-                                     ValidationContext validationContext) {
+        ValidationContext validationContext) {
+
         BpmnModel bpmnModel = processContentToBpmnModel(bytes);
-        List<ModelValidationError> validationErrors =
-                bpmnCommonModelValidators
-                        .stream()
-                        .flatMap(mpmnModelValidator -> mpmnModelValidator.validate(bpmnModel,
-                                                                                   validationContext))
-                        .collect(Collectors.toList());
+
+        List<ModelValidationError> validationErrors = bpmnCommonModelValidators
+            .stream()
+            .flatMap(bpmnCommonModelValidator -> bpmnCommonModelValidator.validate(bpmnModel,
+                validationContext))
+            .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
             String messageError = "Semantic process model validation errors encountered: " + validationErrors;
