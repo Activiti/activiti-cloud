@@ -9,9 +9,9 @@ import org.activiti.cloud.modeling.api.ValidationContext;
 
 public class BpmnModelValidator implements BpmnCommonModelValidator {
 
-    public final String ERROR_TYPE = "Invalid process category";
+    public final String ERROR_TYPE = "Missing process category";
 
-    public final String ERROR_DESCRIPTION = "The process category needs to be a string";
+    public final String ERROR_DESCRIPTION = "The process category needs to be set";
 
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
@@ -21,7 +21,7 @@ public class BpmnModelValidator implements BpmnCommonModelValidator {
 
     public Stream<ModelValidationError> validateTargetNamespace(BpmnModel bpmnModel) {
         List<ModelValidationError> aggregatedErrors = new ArrayList();
-        if(!(bpmnModel.getTargetNamespace() instanceof String)){
+        if(bpmnModel.getTargetNamespace() == null){
             aggregatedErrors.add(new ModelValidationError(ERROR_TYPE,
                 ERROR_DESCRIPTION));
         }
