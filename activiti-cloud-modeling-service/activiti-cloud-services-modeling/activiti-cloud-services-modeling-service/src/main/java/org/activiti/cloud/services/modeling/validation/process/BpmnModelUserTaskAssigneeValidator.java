@@ -56,9 +56,9 @@ public class BpmnModelUserTaskAssigneeValidator implements BpmnCommonModelValida
             return Optional.empty();
         }
 
-        return Optional.of(
-                new ModelValidationError(NO_ASSIGNEE_PROBLEM_TITLE, getNoAssigneeErrorDescription(userTask),
-                        USER_TASK_ASSIGNEE_VALIDATOR_NAME));
+        return Optional.of(new ModelValidationError(NO_ASSIGNEE_PROBLEM_TITLE,
+            getNoAssigneeErrorDescription(userTask),
+            USER_TASK_ASSIGNEE_VALIDATOR_NAME));
     }
 
     private String getNoAssigneeErrorDescription(UserTask userTask) {
