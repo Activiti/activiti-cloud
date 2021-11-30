@@ -76,7 +76,7 @@ class ServiceTaskIntegrationErrorConsumerConfigurationTest {
     private ManagementService managementService;
     
     @MockBean
-    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+    ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     @Mock
     private ExecutionQuery executionQuery;
