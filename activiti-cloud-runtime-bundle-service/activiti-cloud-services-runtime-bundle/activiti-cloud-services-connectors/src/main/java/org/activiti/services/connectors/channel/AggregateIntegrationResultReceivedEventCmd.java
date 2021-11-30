@@ -23,15 +23,15 @@ import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregato
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 
-class AggregateIntegrationResultReceivedEventCmd implements Command<Void> {
+public class AggregateIntegrationResultReceivedEventCmd implements Command<Void> {
 
     private final IntegrationContext integrationContext;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
 
-    AggregateIntegrationResultReceivedEventCmd(IntegrationContext integrationContext,
-        RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator) {
+    public AggregateIntegrationResultReceivedEventCmd(IntegrationContext integrationContext,
+            RuntimeBundleProperties runtimeBundleProperties,
+            ProcessEngineEventsAggregator processEngineEventsAggregator) {
         this.integrationContext = integrationContext;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.processEngineEventsAggregator = processEngineEventsAggregator;

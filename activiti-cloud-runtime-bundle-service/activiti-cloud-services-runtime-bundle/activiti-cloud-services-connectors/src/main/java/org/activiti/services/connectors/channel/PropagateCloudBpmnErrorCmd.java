@@ -23,12 +23,12 @@ import org.activiti.engine.impl.bpmn.helper.ErrorPropagation;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 
-class PropagateCloudBpmnErrorCmd implements Command<Void> {
+public class PropagateCloudBpmnErrorCmd implements Command<Void> {
 
     private final DelegateExecution execution;
     private final IntegrationError integrationError;
 
-    PropagateCloudBpmnErrorCmd(IntegrationError integrationError, DelegateExecution execution) {
+    public PropagateCloudBpmnErrorCmd(IntegrationError integrationError, DelegateExecution execution) {
         this.integrationError = integrationError;
         this.execution = execution;
     }
