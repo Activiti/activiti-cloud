@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Date;
-import java.util.Objects;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-
-import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
-import org.springframework.format.annotation.DateTimeFormat;
+import java.util.Date;
+import java.util.Objects;
 
 @MappedSuperclass
 public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
@@ -201,23 +200,7 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(activityName,
-                                               activityType,
-                                               businessKey,
-                                               cancelledDate,
-                                               completedDate,
-                                               elementId,
-                                               id,
-                                               processDefinitionId,
-                                               processDefinitionKey,
-                                               processDefinitionVersion,
-                                               processInstanceId,
-                                               executionId,
-                                               startedDate,
-                                               status);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override
@@ -225,65 +208,15 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        BaseBPMNActivityEntity other = (BaseBPMNActivityEntity) obj;
-        return Objects.equals(activityName, other.activityName) &&
-               Objects.equals(activityType, other.activityType) &&
-               Objects.equals(businessKey, other.businessKey) &&
-               Objects.equals(cancelledDate, other.cancelledDate) &&
-               Objects.equals(completedDate, other.completedDate) &&
-               Objects.equals(elementId, other.elementId) &&
-               Objects.equals(id, other.id) &&
-               Objects.equals(processDefinitionId, other.processDefinitionId) &&
-               Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
-               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
-               Objects.equals(processInstanceId, other.processInstanceId) &&
-               Objects.equals(executionId, other.executionId) &&
-               Objects.equals(startedDate, other.startedDate) &&
-               status == other.status;
+
+        BPMNActivityEntity other = (BPMNActivityEntity) obj;
+
+        return  Objects.equals(id, other.getId());
     }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("BPMNActivityEntity [id=")
-               .append(id)
-               .append(", elementId=")
-               .append(elementId)
-               .append(", activityName=")
-               .append(activityName)
-               .append(", activityType=")
-               .append(activityType)
-               .append(", processInstanceId=")
-               .append(processInstanceId)
-               .append(", executionId=")
-               .append(executionId)
-               .append(", processDefinitionId=")
-               .append(processDefinitionId)
-               .append(", status=")
-               .append(status)
-               .append(", startedDate=")
-               .append(startedDate)
-               .append(", completedDate=")
-               .append(completedDate)
-               .append(", cancelledDate=")
-               .append(cancelledDate)
-               .append(", processDefinitionKey=")
-               .append(processDefinitionKey)
-               .append(", processDefinitionVersion=")
-               .append(processDefinitionVersion)
-               .append(", businessKey=")
-               .append(businessKey)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
-
-        return builder.toString();
-    }
-
 }

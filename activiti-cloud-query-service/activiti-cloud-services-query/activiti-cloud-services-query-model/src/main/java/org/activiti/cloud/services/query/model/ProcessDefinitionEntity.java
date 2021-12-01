@@ -15,15 +15,10 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
-
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+
+import javax.persistence.*;
+import java.util.Objects;
 
 @Entity(name = "ProcessDefinition")
 @Table(name = "PROCESS_DEFINITION",
@@ -123,10 +118,7 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(id);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override

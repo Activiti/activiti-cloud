@@ -15,28 +15,17 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.persistence.ConstraintMode;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name="ProcessInstance")
 @Table(name = "PROCESS_INSTANCE",
@@ -400,67 +389,23 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(businessKey,
-                                               id,
-                                               initiator,
-                                               lastModified,
-                                               lastModifiedFrom,
-                                               lastModifiedTo,
-                                               name,
-                                               parentId,
-                                               processDefinitionId,
-                                               processDefinitionKey,
-                                               processDefinitionVersion,
-                                               processDefinitionName,
-                                               startDate,
-                                               startFrom,
-                                               startTo,
-                                               completedDate,
-                                               completedFrom,
-                                               completedTo,
-                                               suspendedDate,
-                                               suspendedFrom,
-                                               suspendedTo,
-                                               status);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
+
         ProcessInstanceEntity other = (ProcessInstanceEntity) obj;
-        return Objects.equals(businessKey, other.businessKey) &&
-                Objects.equals(id, other.id) &&
-                Objects.equals(initiator, other.initiator) &&
-                Objects.equals(lastModified, other.lastModified) &&
-                Objects.equals(lastModifiedFrom, other.lastModifiedFrom) &&
-                Objects.equals(lastModifiedTo, other.lastModifiedTo) &&
-                Objects.equals(name, other.name) &&
-                Objects.equals(parentId, other.parentId) &&
-                Objects.equals(processDefinitionId, other.processDefinitionId) &&
-                Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
-                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
-                Objects.equals(processDefinitionName, other.processDefinitionName) &&
-                Objects.equals(startDate, other.startDate) &&
-                Objects.equals(startFrom, other.startFrom) &&
-                Objects.equals(startTo, other.startTo) &&
-                Objects.equals(completedDate, other.completedDate) &&
-                Objects.equals(completedFrom, other.completedFrom) &&
-                Objects.equals(completedTo, other.completedTo) &&
-                Objects.equals(suspendedDate, other.suspendedDate) &&
-                Objects.equals(suspendedFrom, other.suspendedFrom) &&
-                Objects.equals(suspendedTo, other.suspendedTo) &&
-                status == other.status;
+
+        return Objects.equals(id, other.id);
     }
-
-
-
-
 }

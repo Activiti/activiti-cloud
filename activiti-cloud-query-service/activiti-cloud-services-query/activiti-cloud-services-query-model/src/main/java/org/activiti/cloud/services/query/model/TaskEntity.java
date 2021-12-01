@@ -15,27 +15,9 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.persistence.ConstraintMode;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.querydsl.core.annotations.PropertyType;
+import com.querydsl.core.annotations.QueryType;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
@@ -44,9 +26,9 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.querydsl.core.annotations.PropertyType;
-import com.querydsl.core.annotations.QueryType;
+import javax.persistence.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity(name = "Task")
 @Table(name = "TASK",
@@ -75,6 +57,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private Date claimedDate;
     private int priority;
     private String processDefinitionId;
+
+    @Column(nullable = true, insertable = true, updatable = false)
     private String processInstanceId;
     private Integer processDefinitionVersion;
     private String processDefinitionName;
@@ -557,10 +541,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(id);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override

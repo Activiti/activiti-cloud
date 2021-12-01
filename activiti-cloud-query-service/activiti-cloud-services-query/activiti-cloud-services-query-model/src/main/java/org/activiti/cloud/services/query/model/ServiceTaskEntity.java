@@ -15,15 +15,15 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import org.activiti.cloud.api.process.model.CloudServiceTask;
-import org.hibernate.annotations.Where;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Objects;
 
 @Entity(name="ServiceTask")
 @Table(name="BPMN_ACTIVITY")
@@ -44,7 +44,7 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return getClass().hashCode();
     }
 
     @Override
@@ -52,20 +52,14 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        return true;
-    }
+        ServiceTaskEntity other = (ServiceTaskEntity) obj;
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("ServiceTaskEntity [toString()=").append(super.toString()).append("]");
-        return builder.toString();
+        return Objects.equals(this.getId(), other.getId());
     }
-
 }

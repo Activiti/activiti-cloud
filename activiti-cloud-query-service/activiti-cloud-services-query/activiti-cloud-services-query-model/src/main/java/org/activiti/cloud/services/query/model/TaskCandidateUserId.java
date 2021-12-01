@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 public class TaskCandidateUserId implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     private String taskId;
     private String userId;
 
@@ -42,12 +42,7 @@ public class TaskCandidateUserId implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((taskId == null) ? 0 : taskId.hashCode());
-        result = prime * result + userId.hashCode();
-        return result;
+        return getClass().hashCode();
     }
 
     @Override

@@ -15,11 +15,12 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
-
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import java.util.Objects;
 
 @Entity(name="BPMNActivity")
 @Table(name="BPMN_ACTIVITY", indexes={
@@ -45,7 +46,7 @@ public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudB
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return getClass().hashCode();
     }
 
     @Override
@@ -53,20 +54,15 @@ public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudB
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        return true;
-    }
+        BPMNActivityEntity other = (BPMNActivityEntity) obj;
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("BPMNActivityEntity [toString()=").append(super.toString()).append("]");
-        return builder.toString();
+        return Objects.equals(this.getId(), other.getId());
     }
 
 }

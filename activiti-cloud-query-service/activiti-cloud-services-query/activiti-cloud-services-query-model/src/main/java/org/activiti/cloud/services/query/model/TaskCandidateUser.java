@@ -88,7 +88,7 @@ public class TaskCandidateUser {
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskId, userId);
+        return getClass().hashCode();
     }
 
     @Override

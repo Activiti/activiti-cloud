@@ -15,18 +15,11 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
-
-import javax.persistence.ConstraintMode;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity(name="TaskVariable")
 @Table(name = "TASK_VARIABLE",
@@ -39,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class TaskVariableEntity extends AbstractVariableEntity {
 
     private String taskId;
-    
+
     @JsonIgnore
     @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
@@ -90,7 +83,7 @@ public class TaskVariableEntity extends AbstractVariableEntity {
     public String getTaskId() {
         return taskId;
     }
-    
+
     public void setTaskId(String taskId) {
         this.taskId = taskId;
     }
@@ -102,10 +95,7 @@ public class TaskVariableEntity extends AbstractVariableEntity {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(taskId);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override
@@ -117,7 +107,7 @@ public class TaskVariableEntity extends AbstractVariableEntity {
         if (getClass() != obj.getClass())
             return false;
         TaskVariableEntity other = (TaskVariableEntity) obj;
-        return Objects.equals(taskId, other.taskId);
+        return Objects.equals(this.getId(), other.getId());
     }
-    
+
 }
