@@ -19,8 +19,6 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessDefinitionJpaJsonConverter;
 
-import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
@@ -50,29 +48,6 @@ public class ProcessDeployedAuditEventEntity extends AuditEventEntity {
 
     public void setProcessDefinition(ProcessDefinition processDefinition) {
         this.processDefinition = processDefinition;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(processDefinition);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ProcessDeployedAuditEventEntity other = (ProcessDeployedAuditEventEntity) obj;
-        return Objects.equals(processDefinition, other.processDefinition);
     }
 
     @Override

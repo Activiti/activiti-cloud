@@ -19,8 +19,6 @@ import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ActivityJpaJsonConverter;
 
-import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.MappedSuperclass;
@@ -47,29 +45,6 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
 
     public void setBpmnActivity(BPMNActivity bpmnActivity) {
         this.bpmnActivity = bpmnActivity;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(bpmnActivity);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        BPMNActivityAuditEventEntity other = (BPMNActivityAuditEventEntity) obj;
-        return Objects.equals(bpmnActivity, other.bpmnActivity);
     }
 
     @Override

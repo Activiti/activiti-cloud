@@ -25,31 +25,12 @@ import javax.persistence.Entity;
 public class MessageSentAuditEventEntity extends MessageAuditEventEntity {
 
     protected static final String MESSAGE_SENT_EVENT = "MessageSentEvent";
-    
+
     public MessageSentAuditEventEntity() {
     }
-    
+
     public MessageSentAuditEventEntity(CloudBPMNMessageSentEvent cloudEvent) {
         super(cloudEvent);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -57,5 +38,5 @@ public class MessageSentAuditEventEntity extends MessageAuditEventEntity {
         StringBuilder builder = new StringBuilder();
         builder.append("MessageSentAuditEventEntity []");
         return builder.toString();
-    }    
+    }
 }

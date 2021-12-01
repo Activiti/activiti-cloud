@@ -25,7 +25,7 @@ import javax.persistence.Entity;
 public class TimerRetriesDecrementedAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_RETRIES_DECREMENTED_EVENT = "TimerRetriesDecrementedEvent";
-    
+
     public TimerRetriesDecrementedAuditEventEntity() {
     }
 
@@ -38,24 +38,4 @@ public class TimerRetriesDecrementedAuditEventEntity extends TimerAuditEventEnti
         return super.hashCode();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("TimerRetriesDecrementedAuditEventEntity [toString()=").append(super.toString()).append("]");
-        return builder.toString();
-    }
 }

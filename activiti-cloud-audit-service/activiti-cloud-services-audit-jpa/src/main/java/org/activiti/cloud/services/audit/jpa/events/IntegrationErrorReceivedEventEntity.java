@@ -15,16 +15,14 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import java.util.List;
-import java.util.Objects;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
+import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-
-import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
-import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
+import java.util.List;
 
 @Entity(name = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
 @DiscriminatorValue(value = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
@@ -81,32 +79,6 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
 
     public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
         this.stackTraceElements = stackTraceElements;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(errorCode, errorClassName, errorMessage, stackTraceElements);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        IntegrationErrorReceivedEventEntity other = (IntegrationErrorReceivedEventEntity) obj;
-        return Objects.equals(errorCode, other.errorCode) &&
-               Objects.equals(errorClassName, other.errorClassName) &&
-               Objects.equals(errorMessage, other.errorMessage) &&
-               Objects.equals(stackTraceElements, other.stackTraceElements);
     }
 
     @Override

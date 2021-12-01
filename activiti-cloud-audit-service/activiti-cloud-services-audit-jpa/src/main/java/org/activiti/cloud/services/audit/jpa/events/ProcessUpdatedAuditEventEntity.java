@@ -34,25 +34,6 @@ public class ProcessUpdatedAuditEventEntity extends ProcessAuditEventEntity {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ProcessUpdatedAuditEventEntity [toString()=").append(super.toString()).append("]");

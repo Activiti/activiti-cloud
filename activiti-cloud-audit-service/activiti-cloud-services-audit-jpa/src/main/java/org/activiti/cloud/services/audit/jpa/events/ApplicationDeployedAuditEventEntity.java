@@ -19,8 +19,6 @@ import org.activiti.api.process.model.Deployment;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ApplicationJpaJsonConverter;
 
-import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
@@ -38,41 +36,18 @@ public class ApplicationDeployedAuditEventEntity extends AuditEventEntity {
 
     public ApplicationDeployedAuditEventEntity() {
     }
-    
+
     public ApplicationDeployedAuditEventEntity(CloudApplicationDeployedEvent cloudEvent) {
         super(cloudEvent);
         setDeployment(cloudEvent.getEntity());
     }
-    
+
     public Deployment getDeployment() {
         return deployment;
     }
 
     public void setDeployment(Deployment deployment) {
         this.deployment = deployment;
-    }
-    
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(deployment);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ApplicationDeployedAuditEventEntity other = (ApplicationDeployedAuditEventEntity) obj;
-        return Objects.equals(deployment, other.deployment);
     }
 
     @Override

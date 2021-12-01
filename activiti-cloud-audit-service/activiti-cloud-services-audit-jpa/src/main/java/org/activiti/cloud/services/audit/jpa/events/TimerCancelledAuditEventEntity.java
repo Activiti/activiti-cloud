@@ -25,31 +25,12 @@ import javax.persistence.Entity;
 public class TimerCancelledAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_CANCELLED_EVENT = "TimerCancelledEvent";
-    
+
     public TimerCancelledAuditEventEntity() {
     }
 
     public TimerCancelledAuditEventEntity(CloudBPMNTimerCancelledEvent cloudEvent) {
         super(cloudEvent);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
 
     @Override

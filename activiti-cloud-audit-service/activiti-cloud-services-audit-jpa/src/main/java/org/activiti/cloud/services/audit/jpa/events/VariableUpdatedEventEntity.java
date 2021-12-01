@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
@@ -46,25 +46,6 @@ public class VariableUpdatedEventEntity extends VariableAuditEventEntity {
 
     public void setPreviousValue(VariableValue<?> previousValue) {
         this.previousValue = previousValue;
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
 
     @Override

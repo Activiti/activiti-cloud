@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-
-import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 
 @Entity(name = IntegrationResultReceivedEventEntity.INTEGRATION_RESULT_RECEIVED_EVENT)
 @DiscriminatorValue(value = IntegrationResultReceivedEventEntity.INTEGRATION_RESULT_RECEIVED_EVENT)
@@ -30,25 +30,6 @@ public class IntegrationResultReceivedEventEntity extends IntegrationEventEntity
 
     public IntegrationResultReceivedEventEntity(CloudIntegrationResultReceivedEvent event) {
         super(event);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
 
     @Override
