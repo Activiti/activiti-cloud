@@ -32,7 +32,7 @@ import javax.persistence.InheritanceType;
 public abstract class AuditEventEntity {
 
     @Id
-    @GeneratedValue(generator = "audit_sequence")
+    @GeneratedValue(generator = "audit_sequence", strategy = GenerationType.SEQUENCE)
     private Long id;
     private String eventId;
     private Long timestamp;
