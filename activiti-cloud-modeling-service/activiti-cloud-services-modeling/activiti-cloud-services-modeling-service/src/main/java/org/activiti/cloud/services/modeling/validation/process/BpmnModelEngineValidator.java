@@ -24,9 +24,9 @@ import org.activiti.validation.ValidationError;
 import java.util.stream.Stream;
 
 /**
- * Implementation of {@link BpmnModelValidator} based on the default BPMN activiti engine validator
+ * Implementation of {@link BpmnCommonModelValidator} based on the default BPMN activiti engine validator
  */
-public class BpmnModelEngineValidator implements BpmnModelValidator {
+public class BpmnModelEngineValidator implements BpmnCommonModelValidator {
 
     private final ProcessValidator processValidator;
 

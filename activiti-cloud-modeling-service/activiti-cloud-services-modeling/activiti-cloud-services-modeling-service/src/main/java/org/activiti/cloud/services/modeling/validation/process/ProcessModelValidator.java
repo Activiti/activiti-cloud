@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -45,28 +46,29 @@ public class ProcessModelValidator implements ModelContentValidator {
 
     private final ProcessModelType processModelType;
 
-    private final Set<BpmnModelValidator> mpmnModelValidators;
+    private final Set<BpmnCommonModelValidator> bpmnCommonModelValidators;
 
     private final ProcessModelContentConverter processModelContentConverter;
 
     public ProcessModelValidator(ProcessModelType processModelType,
-                                 Set<BpmnModelValidator> mpmnModelValidators,
+                                 Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
                                  ProcessModelContentConverter processModelContentConverter) {
         this.processModelType = processModelType;
-        this.mpmnModelValidators = mpmnModelValidators;
+        this.bpmnCommonModelValidators = bpmnCommonModelValidators;
         this.processModelContentConverter = processModelContentConverter;
     }
 
     @Override
     public void validate(byte[] bytes,
-                                     ValidationContext validationContext) {
+        ValidationContext validationContext) {
+
         BpmnModel bpmnModel = processContentToBpmnModel(bytes);
-        List<ModelValidationError> validationErrors =
-                mpmnModelValidators
-                        .stream()
-                        .flatMap(mpmnModelValidator -> mpmnModelValidator.validate(bpmnModel,
-                                                                                   validationContext))
-                        .collect(Collectors.toList());
+
+        List<ModelValidationError> validationErrors = bpmnCommonModelValidators
+            .stream()
+            .flatMap(bpmnCommonModelValidator -> bpmnCommonModelValidator.validate(bpmnModel,
+                validationContext))
+            .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
             String messageError = "Semantic process model validation errors encountered: " + validationErrors;
