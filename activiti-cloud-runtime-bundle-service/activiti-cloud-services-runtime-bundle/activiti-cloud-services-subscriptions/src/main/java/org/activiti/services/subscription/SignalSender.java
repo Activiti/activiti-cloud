@@ -15,8 +15,10 @@
  */
 package org.activiti.services.subscription;
 
+import java.util.Objects;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.runtime.api.signal.SignalPayloadEventListener;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -30,14 +32,25 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class SignalSender implements SignalPayloadEventListener {
 
     private final MessageChannel messageChannel;
+    private final StreamBridge streamBridge;
 
     public SignalSender(MessageChannel messageChannel) {
         this.messageChannel = messageChannel;
+        this.streamBridge = null;
+    }
+
+    public SignalSender(StreamBridge streamBridge) {
+        this.messageChannel = null;
+        this.streamBridge = streamBridge;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendSignal(SignalPayload signalPayload) {
         Message<SignalPayload> message = MessageBuilder.withPayload(signalPayload).build();
-        messageChannel.send(message);
+        if (Objects.nonNull(messageChannel)) {
+            messageChannel.send(message);
+        } else {
+            streamBridge.send("", "a");
+        }
     }
 }
