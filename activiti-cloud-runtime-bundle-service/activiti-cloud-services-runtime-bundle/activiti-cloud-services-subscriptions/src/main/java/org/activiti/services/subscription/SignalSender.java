@@ -33,15 +33,18 @@ public class SignalSender implements SignalPayloadEventListener {
 
     private final MessageChannel messageChannel;
     private final StreamBridge streamBridge;
+    private final String signalProducerBindingName;
 
     public SignalSender(MessageChannel messageChannel) {
         this.messageChannel = messageChannel;
         this.streamBridge = null;
+        this.signalProducerBindingName = null;
     }
 
-    public SignalSender(StreamBridge streamBridge) {
+    public SignalSender(StreamBridge streamBridge, String signalProducerBindingName) {
         this.messageChannel = null;
         this.streamBridge = streamBridge;
+        this.signalProducerBindingName = signalProducerBindingName;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -50,7 +53,7 @@ public class SignalSender implements SignalPayloadEventListener {
         if (Objects.nonNull(messageChannel)) {
             messageChannel.send(message);
         } else {
-            streamBridge.send("", "a");
+            streamBridge.send(signalProducerBindingName, message);
         }
     }
 }

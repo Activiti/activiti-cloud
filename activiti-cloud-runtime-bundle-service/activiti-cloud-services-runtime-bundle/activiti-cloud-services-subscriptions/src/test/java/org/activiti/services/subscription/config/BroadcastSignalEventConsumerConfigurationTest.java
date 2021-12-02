@@ -15,9 +15,12 @@
  */
 package org.activiti.services.subscription.config;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
+import java.util.Map;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.engine.RuntimeService;
+import org.activiti.runtime.api.signal.SignalPayloadEventListener;
 import org.activiti.services.subscription.Application;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,9 @@ class BroadcastSignalEventConsumerConfigurationTest {
     @Autowired
     private OutputDestination outputDestination;
 
+    @Autowired
+    private SignalPayloadEventListener signalPayloadEventListener;
+
     @MockBean
     private RuntimeService runtimeService;
 
@@ -55,7 +61,21 @@ class BroadcastSignalEventConsumerConfigurationTest {
         //when
         inputDestination.send(message);
 
-        //Then
+        //then
         verify(runtimeService).signalEventReceived(signalName);
+    }
+
+    @Test
+    public void shouldHaveChannelBindingsSetForSignalProducer() {
+        //given
+        String signalName = "signal";
+
+        //when
+        signalPayloadEventListener.sendSignal(new SignalPayload(signalName,
+                Map.of("test-variable", "value")));
+
+        //then
+        Message<byte[]> received = outputDestination.receive(0l, "signalEvent");
+        assertNotNull(received);
     }
 }

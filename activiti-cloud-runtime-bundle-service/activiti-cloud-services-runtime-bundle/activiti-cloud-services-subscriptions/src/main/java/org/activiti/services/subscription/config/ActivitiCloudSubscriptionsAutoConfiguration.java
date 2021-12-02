@@ -26,6 +26,7 @@ import org.activiti.services.subscription.SignalSender;
 import org.activiti.services.subscription.channel.BroadcastSignalEventHandler;
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
 import org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -59,8 +60,9 @@ public class ActivitiCloudSubscriptionsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "enabled")
-    public SignalPayloadEventListener signalSenderBridge(StreamBridge streamBridge) {
-        return new SignalSender(streamBridge);
+    public SignalPayloadEventListener signalSenderBridge(StreamBridge streamBridge,
+            @Value("${activiti.stream.cloud.functional.binding.signalProducer.name:signalProducer-out-0}") String signalProducerBindingName) {
+        return new SignalSender(streamBridge, signalProducerBindingName);
     }
 
     @Bean(DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME)
