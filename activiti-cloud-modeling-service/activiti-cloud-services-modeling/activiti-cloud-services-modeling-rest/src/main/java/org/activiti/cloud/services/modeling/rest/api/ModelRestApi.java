@@ -253,7 +253,7 @@ public interface ModelRestApi {
             @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId,
             @Parameter(description = VALIDATE_MODEL_FILE_PARAM_DESCR)
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
             @Parameter(description = VALIDATE_PROJECT_ID_PARAM_DESCR, required = false)
             @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId,
             @Parameter(description = MODEL_USED_PARAM_DESCR, required = false)
@@ -269,12 +269,12 @@ public interface ModelRestApi {
             @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
             @Parameter(description = VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
             @Parameter(description = VALIDATE_PROJECT_ID_PARAM_DESCR, required = false)
             @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId) throws IOException;
 
     @Operation(
-            tags = MODELS, 
+            tags = MODELS,
             summary = "List all the models that are not coupled to a project",
             description = "Get the models that has GLOBAL as scope. " +
             "Minimal information for each model is returned."
@@ -289,7 +289,7 @@ public interface ModelRestApi {
         Pageable pageable);
 
     @Operation(
-            tags = MODELS, 
+            tags = MODELS,
             summary = "Add or update the relationship between an existing model, and the project",
             description = "Get the model associated with the project updated. " +
                 "Minimal information for the model is returned."
