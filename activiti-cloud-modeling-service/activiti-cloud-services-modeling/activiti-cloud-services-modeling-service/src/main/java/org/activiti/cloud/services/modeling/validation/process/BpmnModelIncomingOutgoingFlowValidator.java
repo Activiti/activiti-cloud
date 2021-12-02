@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Implementation of {@link BpmnModelValidator} for validating Incoming and Outgoing flows
+ * Implementation of {@link BpmnCommonModelValidator} for validating Incoming and Outgoing flows
  */
-public class BpmnModelIncomingOutgoingFlowValidator implements BpmnModelValidator{
+public class BpmnModelIncomingOutgoingFlowValidator implements BpmnCommonModelValidator {
 
     private final List<FlowNodeFlowsValidator> flowNodeFlowsValidators;
 
