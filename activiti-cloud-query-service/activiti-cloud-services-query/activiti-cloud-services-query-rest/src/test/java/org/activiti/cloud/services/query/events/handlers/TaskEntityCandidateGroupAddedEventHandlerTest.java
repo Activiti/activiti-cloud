@@ -15,24 +15,26 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.UUID;
-
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import javax.persistence.EntityManager;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -43,6 +45,9 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
 
     @Mock
     private TaskCandidateGroupRepository taskCandidateRepository;
+
+    @Mock
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -58,7 +63,7 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
 
         //then
         ArgumentCaptor<org.activiti.cloud.services.query.model.TaskCandidateGroup> captor = ArgumentCaptor.forClass(org.activiti.cloud.services.query.model.TaskCandidateGroup.class);
-        verify(taskCandidateRepository).save(captor.capture());
+        verify(entityManager).persist(captor.capture());
         assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
         assertThat(captor.getValue().getGroupId()).isEqualTo(event.getEntity().getGroupId());
     }
@@ -68,7 +73,7 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         //given
         CloudTaskCandidateGroupAddedEvent event = buildTaskCandidateGroupAddedEvent();
         Exception cause = new RuntimeException("Something went wrong");
-        given(taskCandidateRepository.save(any())).willThrow(cause);
+        doThrow(cause).when(entityManager).persist(any(TaskCandidateGroup.class));
 
         //when
         Throwable throwable = catchThrowable(() -> handler.handle(event));

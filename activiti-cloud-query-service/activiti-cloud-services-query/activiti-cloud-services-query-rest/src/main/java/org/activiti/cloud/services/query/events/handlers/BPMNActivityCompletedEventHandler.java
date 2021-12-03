@@ -15,19 +15,16 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-
-import javax.persistence.EntityManager;
-
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
+import javax.persistence.EntityManager;
+import java.util.Date;
+
 public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
     public BPMNActivityCompletedEventHandler(BPMNActivityRepository activitiyRepository,
@@ -45,6 +42,7 @@ public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHand
         bpmnActivityEntity.setCompletedDate(new Date(activityEvent.getTimestamp()));
         bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
 
+        entityManager.persist(bpmnActivityEntity);
     }
 
     @Override

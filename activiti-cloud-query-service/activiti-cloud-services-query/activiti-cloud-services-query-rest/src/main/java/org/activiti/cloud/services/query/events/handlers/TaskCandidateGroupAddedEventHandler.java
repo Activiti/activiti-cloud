@@ -18,16 +18,17 @@ package org.activiti.cloud.services.query.events.handlers;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 
+import javax.persistence.EntityManager;
+
 public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
 
-    private final TaskCandidateGroupRepository taskCandidateGroupRepository;
+    private final EntityManager entityManager;
 
-    public TaskCandidateGroupAddedEventHandler(TaskCandidateGroupRepository taskCandidateGroupRepository) {
-        this.taskCandidateGroupRepository = taskCandidateGroupRepository;
+    public TaskCandidateGroupAddedEventHandler(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -41,7 +42,7 @@ public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
 
         // Persist into database
         try {
-            taskCandidateGroupRepository.save(taskCandidateGroup);
+            entityManager.persist(taskCandidateGroup);
         } catch (Exception cause) {
             throw new QueryException("Error handling TaskCandidateGroupAddedEvent[" + event + "]",
                                      cause);

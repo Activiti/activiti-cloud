@@ -15,68 +15,17 @@
  */
 package org.activiti.cloud.conf;
 
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
-import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
-import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.events.handlers.ApplicationDeployedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.BPMNActivityCancelledEventHandler;
-import org.activiti.cloud.services.query.events.handlers.BPMNActivityCompletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.BPMNActivityStartedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.BPMNSequenceFlowTakenEventHandler;
-import org.activiti.cloud.services.query.events.handlers.IntegrationErrorReceivedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.IntegrationRequestedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.IntegrationResultReceivedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessCancelledEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessCompletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessCreatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessDeployedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessResumedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessStartedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessSuspendedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessUpdatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessVariableDeletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdateEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdater;
-import org.activiti.cloud.services.query.events.handlers.QueryEventHandler;
-import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
-import org.activiti.cloud.services.query.events.handlers.TaskActivatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskAssignedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCancelledEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCandidateGroupAddedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCandidateGroupRemovedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCandidateUserAddedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCandidateUserRemovedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCompletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCreatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskSuspendedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskUpdatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskVariableDeletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskVariableUpdatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskVariableUpdater;
-import org.activiti.cloud.services.query.events.handlers.VariableCreatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.VariableDeletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHandler;
+import org.activiti.cloud.services.query.app.repository.*;
+import org.activiti.cloud.services.query.events.handlers.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.persistence.EntityManager;
+import java.util.Set;
 
 @Configuration
 @EnableBinding(QueryConsumerChannels.class)
@@ -110,8 +59,8 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCreatedEventHandler processCreatedEventHandler(ProcessInstanceRepository processInstanceRepository) {
-        return new ProcessCreatedEventHandler(processInstanceRepository);
+    public ProcessCreatedEventHandler processCreatedEventHandler(EntityManager entityManager) {
+        return new ProcessCreatedEventHandler(entityManager);
     }
 
     @Bean
@@ -122,8 +71,8 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessStartedEventHandler processStartedEventHandler(ProcessInstanceRepository processInstanceRepository) {
-        return new ProcessStartedEventHandler(processInstanceRepository);
+    public ProcessStartedEventHandler processStartedEventHandler(EntityManager entityManager) {
+        return new ProcessStartedEventHandler(entityManager);
     }
 
     @Bean
@@ -158,8 +107,8 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateGroupAddedEventHandler taskCandidateGroupAddedEventHandler(TaskCandidateGroupRepository taskCandidateGroupRepository) {
-        return new TaskCandidateGroupAddedEventHandler(taskCandidateGroupRepository);
+    public TaskCandidateGroupAddedEventHandler taskCandidateGroupAddedEventHandler(EntityManager entityManager) {
+        return new TaskCandidateGroupAddedEventHandler(entityManager);
     }
 
     @Bean
@@ -190,10 +139,8 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCreatedEventHandler taskCreatedEventHandler(TaskRepository taskRepository,
-                                                           ProcessInstanceRepository processInstanceRepository) {
-        return new TaskCreatedEventHandler(taskRepository,
-                                            processInstanceRepository);
+    public TaskCreatedEventHandler taskCreatedEventHandler(EntityManager entityManager) {
+        return new TaskCreatedEventHandler(entityManager);
     }
 
     @Bean
@@ -210,12 +157,8 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableCreatedEventHandler variableCreatedEventHandler(VariableRepository variableRepository,
-                                                                   TaskVariableRepository taskVariableRepository,
-                                                                   EntityManager entityManager) {
-        return new VariableCreatedEventHandler(variableRepository,
-                                               taskVariableRepository,
-                                               entityManager);
+    public VariableCreatedEventHandler variableCreatedEventHandler(EntityManager entityManager) {
+        return new VariableCreatedEventHandler(entityManager);
     }
 
     @Bean

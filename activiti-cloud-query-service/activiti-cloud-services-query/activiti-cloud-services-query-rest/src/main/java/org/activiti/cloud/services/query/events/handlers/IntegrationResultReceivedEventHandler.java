@@ -15,11 +15,6 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-import java.util.Optional;
-
-import javax.persistence.EntityManager;
-
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
@@ -27,9 +22,11 @@ import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceive
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.Optional;
+
 public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
     public IntegrationResultReceivedEventHandler(IntegrationContextRepository integrationContextRepository,

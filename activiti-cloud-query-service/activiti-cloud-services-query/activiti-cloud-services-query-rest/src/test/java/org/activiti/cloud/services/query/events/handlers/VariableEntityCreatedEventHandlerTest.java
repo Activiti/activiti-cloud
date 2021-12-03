@@ -15,16 +15,6 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.util.UUID;
-
-import javax.persistence.EntityManager;
-
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
@@ -40,6 +30,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import javax.persistence.EntityManager;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class VariableEntityCreatedEventHandlerTest {
 
@@ -75,7 +71,7 @@ public class VariableEntityCreatedEventHandlerTest {
 
         //then
         ArgumentCaptor<ProcessVariableEntity> captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
-        verify(variableRepository).save(captor.capture());
+        verify(entityManager).persist(captor.capture());
 
         ProcessVariableEntity variableEntity = captor.getValue();
 
@@ -112,7 +108,7 @@ public class VariableEntityCreatedEventHandlerTest {
 
         //then
         ArgumentCaptor<TaskVariableEntity> captor = ArgumentCaptor.forClass(TaskVariableEntity.class);
-        verify(taskVariableRepository).save(captor.capture());
+        verify(entityManager).persist(captor.capture());
 
         TaskVariableEntity variableEntity = captor.getValue();
 

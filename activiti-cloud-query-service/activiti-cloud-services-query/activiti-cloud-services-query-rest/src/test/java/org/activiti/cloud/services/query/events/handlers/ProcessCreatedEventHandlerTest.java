@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -31,6 +29,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import javax.persistence.EntityManager;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -42,6 +43,9 @@ public class ProcessCreatedEventHandlerTest {
 
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
+
+    @Mock
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -57,7 +61,7 @@ public class ProcessCreatedEventHandlerTest {
         handler.handle(event);
 
         ArgumentCaptor<ProcessInstanceEntity> argumentCaptor = ArgumentCaptor.forClass(ProcessInstanceEntity.class);
-        verify(processInstanceRepository).save(argumentCaptor.capture());
+        verify(entityManager).persist(argumentCaptor.capture());
 
         ProcessInstanceEntity processInstanceEntity = argumentCaptor.getValue();
         Assertions.assertThat(processInstanceEntity)
