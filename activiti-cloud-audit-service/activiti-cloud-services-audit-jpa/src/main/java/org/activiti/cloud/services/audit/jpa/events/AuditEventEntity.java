@@ -234,7 +234,7 @@ public abstract class AuditEventEntity {
             return false;
         }
         AuditEventEntity other = (AuditEventEntity) obj;
-        return Objects.equals(id, other.id);
+        return this.id != null && Objects.equals(id, other.id);
     }
 
     @Override
