@@ -130,6 +130,6 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
         if (getClass() != obj.getClass())
             return false;
         ProcessDefinitionEntity other = (ProcessDefinitionEntity) obj;
-        return Objects.equals(id, other.id);
+        return id != null && Objects.equals(id, other.id);
     }
 }

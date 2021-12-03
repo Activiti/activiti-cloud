@@ -89,6 +89,8 @@ public class TaskCandidateGroup {
             return false;
         }
         TaskCandidateGroup other = (TaskCandidateGroup) obj;
-        return Objects.equals(groupId, other.groupId) && Objects.equals(taskId, other.taskId);
+        return this.groupId != null &&
+            this.taskId != null &&
+            Objects.equals(groupId, other.groupId) && Objects.equals(taskId, other.taskId);
     }
 }

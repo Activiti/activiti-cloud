@@ -88,7 +88,7 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
         }
         ProcessVariableEntity other = (ProcessVariableEntity) obj;
 
-        return Objects.equals(this.getId(), other.getId());
+        return this.getId() != null && Objects.equals(this.getId(), other.getId());
     }
 
 }

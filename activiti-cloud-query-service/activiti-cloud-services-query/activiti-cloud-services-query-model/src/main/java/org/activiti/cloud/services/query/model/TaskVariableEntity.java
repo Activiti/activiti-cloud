@@ -107,7 +107,7 @@ public class TaskVariableEntity extends AbstractVariableEntity {
         if (getClass() != obj.getClass())
             return false;
         TaskVariableEntity other = (TaskVariableEntity) obj;
-        return Objects.equals(this.getId(), other.getId());
+        return this.getId() != null && Objects.equals(this.getId(), other.getId());
     }
 
 }

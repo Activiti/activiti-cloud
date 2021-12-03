@@ -553,7 +553,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         if (getClass() != obj.getClass())
             return false;
         TaskEntity other = (TaskEntity) obj;
-        return Objects.equals(id, other.id);
+        return this.id != null && Objects.equals(id, other.id);
     }
 
 }

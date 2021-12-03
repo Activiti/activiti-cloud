@@ -217,6 +217,6 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
 
         BPMNActivityEntity other = (BPMNActivityEntity) obj;
 
-        return  Objects.equals(id, other.getId());
+        return id != null && Objects.equals(id, other.getId());
     }
 }

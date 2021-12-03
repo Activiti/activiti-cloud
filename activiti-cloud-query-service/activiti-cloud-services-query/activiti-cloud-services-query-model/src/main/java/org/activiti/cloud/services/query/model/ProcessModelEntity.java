@@ -75,6 +75,6 @@ public class ProcessModelEntity {
             return false;
         }
         ProcessModelEntity other = (ProcessModelEntity) obj;
-        return Objects.equals(id, other.id);
+        return id != null && Objects.equals(id, other.id);
     }
 }

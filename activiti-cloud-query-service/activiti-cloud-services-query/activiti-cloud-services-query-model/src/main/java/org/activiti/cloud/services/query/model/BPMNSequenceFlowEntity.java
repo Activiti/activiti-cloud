@@ -241,6 +241,6 @@ public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BP
         }
         BPMNSequenceFlowEntity other = (BPMNSequenceFlowEntity) obj;
 
-        return Objects.equals(this.getId(), other.getId());
+        return id != null && Objects.equals(this.getId(), other.getId());
     }
 }

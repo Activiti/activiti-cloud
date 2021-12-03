@@ -326,7 +326,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
         IntegrationContextEntity other = (IntegrationContextEntity) obj;
 
-        return Objects.equals(id, other.id);
+        return id != null && Objects.equals(id, other.id);
     }
 
     @Override

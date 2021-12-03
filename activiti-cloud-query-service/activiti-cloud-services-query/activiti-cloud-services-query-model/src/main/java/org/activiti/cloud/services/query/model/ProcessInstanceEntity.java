@@ -406,6 +406,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
         ProcessInstanceEntity other = (ProcessInstanceEntity) obj;
 
-        return Objects.equals(id, other.id);
+        return id != null && Objects.equals(id, other.id);
     }
 }

@@ -182,7 +182,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
             return false;
         }
         AbstractVariableEntity other = (AbstractVariableEntity) obj;
-        return Objects.equals(id, other.id);
+        return id != null && Objects.equals(id, other.id);
     }
 
  }

@@ -100,6 +100,8 @@ public class TaskCandidateUser {
         if (getClass() != obj.getClass())
             return false;
         TaskCandidateUser other = (TaskCandidateUser) obj;
-        return Objects.equals(taskId, other.taskId) && Objects.equals(userId, other.userId);
+        return this.userId != null &&
+            this.taskId != null &&
+            Objects.equals(taskId, other.taskId) && Objects.equals(userId, other.userId);
     }
 }

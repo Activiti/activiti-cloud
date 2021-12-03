@@ -60,6 +60,6 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
         }
         ServiceTaskEntity other = (ServiceTaskEntity) obj;
 
-        return Objects.equals(this.getId(), other.getId());
+        return this.getId() != null && Objects.equals(this.getId(), other.getId());
     }
 }

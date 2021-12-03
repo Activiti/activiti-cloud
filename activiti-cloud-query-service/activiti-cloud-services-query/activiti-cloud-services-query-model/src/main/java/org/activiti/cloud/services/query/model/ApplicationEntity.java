@@ -82,6 +82,6 @@ public class ApplicationEntity implements CloudApplication{
             return false;
         }
         ApplicationEntity other = (ApplicationEntity) obj;
-        return  Objects.equals(id, other.id);
+        return id != null &&  Objects.equals(id, other.id);
     }
 }
