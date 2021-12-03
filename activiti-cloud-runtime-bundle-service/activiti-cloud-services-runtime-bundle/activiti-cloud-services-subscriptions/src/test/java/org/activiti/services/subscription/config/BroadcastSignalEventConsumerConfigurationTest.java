@@ -69,13 +69,14 @@ class BroadcastSignalEventConsumerConfigurationTest {
     public void shouldHaveChannelBindingsSetForSignalProducer() {
         //given
         String signalName = "signal";
+        String destination = "signalEvent";
 
         //when
         signalPayloadEventListener.sendSignal(new SignalPayload(signalName,
                 Map.of("test-variable", "value")));
 
         //then
-        Message<byte[]> received = outputDestination.receive(0l, "signalEvent");
+        Message<byte[]> received = outputDestination.receive(0l, destination);
         assertNotNull(received);
     }
 }
