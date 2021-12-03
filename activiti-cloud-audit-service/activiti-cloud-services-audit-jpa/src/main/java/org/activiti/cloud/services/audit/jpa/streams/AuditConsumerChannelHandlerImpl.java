@@ -61,26 +61,21 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
         if (events != null) {
             AtomicInteger counter = new AtomicInteger(0);
             List<AuditEventEntity> entities = new ArrayList<>();
-            try {
-                for (CloudRuntimeEvent event : events) {
-                    EventToEntityConverter converter = eventConverters.getConverterByEventTypeName(event.getEventType()
-                                                                                                        .name());
-                    if (converter != null) {
-                        ((CloudRuntimeEventImpl) event).setMessageId((headers.get(MessageHeaders.ID)
-                                                                             .toString()));
-                        ((CloudRuntimeEventImpl) event).setSequenceNumber(counter.getAndIncrement());
-                        entities.add((AuditEventEntity) converter.convertToEntity(event));
-                    } else {
-                        LOGGER.warn(">>> Ignoring CloudRuntimeEvents type: " + event.getEventType()
-                                                                                    .name());
-                    }
+            for (CloudRuntimeEvent event : events) {
+                EventToEntityConverter converter = eventConverters.getConverterByEventTypeName(event.getEventType()
+                                                                                                    .name());
+                if (converter != null) {
+                    ((CloudRuntimeEventImpl) event).setMessageId((headers.get(MessageHeaders.ID)
+                                                                         .toString()));
+                    ((CloudRuntimeEventImpl) event).setSequenceNumber(counter.getAndIncrement());
+                    entities.add((AuditEventEntity) converter.convertToEntity(event));
+                } else {
+                    LOGGER.warn(">>> Ignoring CloudRuntimeEvents type: " + event.getEventType()
+                                                                                .name());
                 }
-
-                batchExecutor.saveInBatch(entities);
-            } finally {
-                entities.clear();
             }
 
+            batchExecutor.saveInBatch(entities);
         }
     }
 }
