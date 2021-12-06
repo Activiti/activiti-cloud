@@ -15,21 +15,20 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-import java.util.Optional;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import javax.persistence.EntityManager;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -45,7 +44,7 @@ public class ProcessCancelledEventHandlerTest {
     private ProcessCancelledEventHandler handler;
 
     @Mock
-    private ProcessInstanceRepository processInstanceRepository;
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -61,14 +60,14 @@ public class ProcessCancelledEventHandlerTest {
     public void testUpdateExistingProcessInstanceWhenCancelled() {
         //given
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(processInstanceRepository.findById("200")).willReturn(Optional.of(processInstanceEntity));
+        given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(processInstanceEntity);
 
         //when
         handler.handle(createProcessCancelledEvent("200"
         ));
 
         //then
-        verify(processInstanceRepository).save(processInstanceEntity);
+        verify(entityManager).persist(processInstanceEntity);
         verify(processInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.CANCELLED);
         verify(processInstanceEntity).setLastModified(any(Date.class));
     }
@@ -85,7 +84,7 @@ public class ProcessCancelledEventHandlerTest {
     @Test
     public void testThrowExceptionWhenProcessInstanceNotFound() {
         //given
-        given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
+        given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(null);
 
         //then
         //when

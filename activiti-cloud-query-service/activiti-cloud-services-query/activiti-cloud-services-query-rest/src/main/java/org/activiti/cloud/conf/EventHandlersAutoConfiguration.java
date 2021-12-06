@@ -47,14 +47,14 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCancelledEventHandler processCancelledEventHandler(ProcessInstanceRepository processInstanceRepository) {
-        return new ProcessCancelledEventHandler(processInstanceRepository);
+    public ProcessCancelledEventHandler processCancelledEventHandler(EntityManager entityManager) {
+        return new ProcessCancelledEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCompletedEventHandler processCompletedEventHandler(ProcessInstanceRepository processInstanceRepository) {
-        return new ProcessCompletedEventHandler(processInstanceRepository);
+    public ProcessCompletedEventHandler processCompletedEventHandler(EntityManager entityManager) {
+        return new ProcessCompletedEventHandler(entityManager);
     }
 
     @Bean
@@ -65,8 +65,8 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessResumedEventHandler processResumedEventHandler(ProcessInstanceRepository processInstanceRepository) {
-        return new ProcessResumedEventHandler(processInstanceRepository);
+    public ProcessResumedEventHandler processResumedEventHandler(EntityManager entityManager) {
+        return new ProcessResumedEventHandler(entityManager);
     }
 
     @Bean
@@ -77,14 +77,14 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessSuspendedEventHandler processSuspendedEventHandler(ProcessInstanceRepository processInstanceRepository) {
-        return new ProcessSuspendedEventHandler(processInstanceRepository);
+    public ProcessSuspendedEventHandler processSuspendedEventHandler(EntityManager entityManager) {
+        return new ProcessSuspendedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessUpdatedEventHandler processUpdatedEventHandler(ProcessInstanceRepository processInstanceRepository) {
-        return new ProcessUpdatedEventHandler(processInstanceRepository);
+    public ProcessUpdatedEventHandler processUpdatedEventHandler(EntityManager entityManager) {
+        return new ProcessUpdatedEventHandler(entityManager);
     }
 
     @Bean
