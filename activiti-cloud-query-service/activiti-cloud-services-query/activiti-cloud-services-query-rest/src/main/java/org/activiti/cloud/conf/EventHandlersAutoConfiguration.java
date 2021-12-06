@@ -89,20 +89,20 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskActivatedEventHandler taskActivatedEventHandler(TaskRepository taskRepository) {
-        return new TaskActivatedEventHandler(taskRepository);
+    public TaskActivatedEventHandler taskActivatedEventHandler(EntityManager entityManager) {
+        return new TaskActivatedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskAssignedEventHandler taskAssignedEventHandler(TaskRepository taskRepository) {
-        return new TaskAssignedEventHandler(taskRepository);
+    public TaskAssignedEventHandler taskAssignedEventHandler(EntityManager entityManager) {
+        return new TaskAssignedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCancelledEventHandler taskCancelledEventHandler(TaskRepository taskRepository) {
-        return new TaskCancelledEventHandler(taskRepository);
+    public TaskCancelledEventHandler taskCancelledEventHandler(EntityManager entityManager) {
+        return new TaskCancelledEventHandler(entityManager);
     }
 
     @Bean
@@ -133,8 +133,8 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCompletedEventHandler taskCompletedEventHandler(TaskRepository taskRepository) {
-        return new TaskCompletedEventHandler(taskRepository);
+    public TaskCompletedEventHandler taskCompletedEventHandler(EntityManager entityManager) {
+        return new TaskCompletedEventHandler(entityManager);
     }
 
     @Bean
@@ -145,14 +145,14 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskSuspendedEventHandler taskSuspendedEventHandler(TaskRepository taskRepository) {
-        return new TaskSuspendedEventHandler(taskRepository);
+    public TaskSuspendedEventHandler taskSuspendedEventHandler(EntityManager entityManager) {
+        return new TaskSuspendedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskUpdatedEventHandler taskUpdatedEventHandler(TaskRepository taskRepository) {
-        return new TaskUpdatedEventHandler(taskRepository);
+    public TaskUpdatedEventHandler taskUpdatedEventHandler(EntityManager entityManager) {
+        return new TaskUpdatedEventHandler(entityManager);
     }
 
     @Bean
