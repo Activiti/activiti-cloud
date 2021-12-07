@@ -19,8 +19,6 @@ import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
-import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
-import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 
 import javax.persistence.EntityManager;
@@ -29,12 +27,8 @@ import java.util.Optional;
 
 public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
-    public IntegrationResultReceivedEventHandler(IntegrationContextRepository integrationContextRepository,
-                                                 ServiceTaskRepository serviceTaskRepository,
-                                                 EntityManager entityManager) {
-        super(integrationContextRepository,
-              serviceTaskRepository,
-              entityManager);
+    public IntegrationResultReceivedEventHandler(EntityManager entityManager) {
+        super(entityManager);
     }
 
     @Override
@@ -47,6 +41,8 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
             entity.setResultDate(new Date(integrationEvent.getTimestamp()));
             entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
             entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
+
+            entityManager.persist(entity);
         });
     }
 

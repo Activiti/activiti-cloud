@@ -215,32 +215,20 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultReceivedEventHandler integrationResultReceivedEventHandler(IntegrationContextRepository integrationContextRepository,
-                                                                                       ServiceTaskRepository serviceTaskRepository,
-                                                                                       EntityManager entityManager) {
-        return new IntegrationResultReceivedEventHandler(integrationContextRepository,
-                                                         serviceTaskRepository,
-                                                         entityManager);
+    public IntegrationResultReceivedEventHandler integrationResultReceivedEventHandler(EntityManager entityManager) {
+        return new IntegrationResultReceivedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationRequestedEventHandler integrationRequestedEventHandler(IntegrationContextRepository integrationContextRepository,
-                                                                             ServiceTaskRepository serviceTaskRepository,
-                                                                             EntityManager entityManager) {
-        return new IntegrationRequestedEventHandler(integrationContextRepository,
-                                                    serviceTaskRepository,
-                                                    entityManager);
+    public IntegrationRequestedEventHandler integrationRequestedEventHandler(EntityManager entityManager) {
+        return new IntegrationRequestedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorReceivedEventHandler integrationErrorReceivedEventHandler(IntegrationContextRepository integrationContextRepository,
-                                                                                     ServiceTaskRepository serviceTaskRepository,
-                                                                                     EntityManager entityManager) {
-        return new IntegrationErrorReceivedEventHandler(integrationContextRepository,
-                                                        serviceTaskRepository,
-                                                        entityManager);
+    public IntegrationErrorReceivedEventHandler integrationErrorReceivedEventHandler(EntityManager entityManager) {
+        return new IntegrationErrorReceivedEventHandler(entityManager);
     }
 
 

@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -407,5 +408,16 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         return Optional.ofNullable(outBoundVariables)
                        .map(it -> (T) it.get(name))
                        .orElse(null);
+    }
+
+    public static class IdBuilder {
+        public static String from(IntegrationContext integrationContext) {
+            return new StringBuilder().append(integrationContext.getProcessInstanceId())
+                                      .append(":")
+                                      .append(integrationContext.getClientId())
+                                      .append(":")
+                                      .append(integrationContext.getExecutionId())
+                                      .toString();
+        }
     }
 }
