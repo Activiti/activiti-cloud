@@ -19,9 +19,7 @@ import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
-import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
-import org.activiti.cloud.services.query.model.QueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +31,9 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(BPMNSequenceFlowTakenEventHandler.class);
 
-    private final BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
     private final EntityManager entityManager;
 
-    public BPMNSequenceFlowTakenEventHandler(BPMNSequenceFlowRepository activitiyRepository,
-                                             EntityManager entityManager) {
-        this.bpmnSequenceFlowRepository = activitiyRepository;
+    public BPMNSequenceFlowTakenEventHandler(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
@@ -69,18 +64,7 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
         bpmnSequenceFlowEntity.setBusinessKey(event.getBusinessKey());
         bpmnSequenceFlowEntity.setEventId(event.getId());
 
-        persistIntoDatabase(event,
-                            bpmnSequenceFlowEntity);
-    }
-
-    private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                     BPMNSequenceFlowEntity entity) {
-        try {
-            entityManager.persist(entity);
-        } catch (Exception cause) {
-            throw new QueryException("Error handling CloudSequenceFlowTakenEvent[" + event + "]",
-                                     cause);
-        }
+        entityManager.persist(bpmnSequenceFlowEntity);
     }
 
     @Override

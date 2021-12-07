@@ -207,10 +207,8 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BPMNSequenceFlowTakenEventHandler bpmnSequenceFlowTakenEventHandler(BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
-                                                                               EntityManager entityManager) {
-        return new BPMNSequenceFlowTakenEventHandler(bpmnSequenceFlowRepository,
-                                                     entityManager);
+    public BPMNSequenceFlowTakenEventHandler bpmnSequenceFlowTakenEventHandler(EntityManager entityManager) {
+        return new BPMNSequenceFlowTakenEventHandler(entityManager);
     }
 
     @Bean
