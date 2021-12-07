@@ -44,8 +44,8 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
         String processInstanceId = startedEvent.getEntity().getId();
         LOGGER.debug("Handling start of process Instance " + processInstanceId);
 
-        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(entityManager.getReference(ProcessInstanceEntity.class,
-                                                                                                    processInstanceId));
+        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
+                                                                                            processInstanceId));
         ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(
                 () -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
 
