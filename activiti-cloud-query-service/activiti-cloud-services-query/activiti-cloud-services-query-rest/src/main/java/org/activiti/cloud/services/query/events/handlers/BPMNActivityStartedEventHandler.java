@@ -19,7 +19,6 @@ import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 
 import javax.persistence.EntityManager;
@@ -27,10 +26,8 @@ import java.util.Date;
 
 public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
-    public BPMNActivityStartedEventHandler(BPMNActivityRepository activitiyRepository,
-                                           EntityManager entityManager) {
-        super(activitiyRepository,
-              entityManager);
+    public BPMNActivityStartedEventHandler(EntityManager entityManager) {
+        super(entityManager);
     }
 
     @Override

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 
 import javax.persistence.Entity;
@@ -41,5 +42,16 @@ public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudB
               serviceVersion,
               appName,
               appVersion);
+    }
+
+    public static class IdBuilder {
+        public static String from(BPMNActivity bpmnActivity) {
+            return new StringBuilder().append(bpmnActivity.getProcessInstanceId())
+                                      .append(":")
+                                      .append(bpmnActivity.getElementId())
+                                      .append(":")
+                                      .append(bpmnActivity.getExecutionId())
+                                      .toString();
+        }
     }
 }

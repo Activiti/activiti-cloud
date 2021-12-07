@@ -18,19 +18,15 @@ package org.activiti.cloud.services.query.events.handlers;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 
 import javax.persistence.EntityManager;
 
 public abstract class BaseBPMNActivityEventHandler {
 
-    protected final BPMNActivityRepository bpmnActivitiyRepository;
     protected final EntityManager entityManager;
 
-    public BaseBPMNActivityEventHandler(BPMNActivityRepository activitiyRepository,
-                                        EntityManager entityManager) {
-        this.bpmnActivitiyRepository = activitiyRepository;
+    public BaseBPMNActivityEventHandler(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
@@ -39,7 +35,7 @@ public abstract class BaseBPMNActivityEventHandler {
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
-        String pkId = getBpmnActivityPk(bpmnActivity);
+        String pkId = BPMNActivityEntity.IdBuilder.from(bpmnActivity);
 
         BPMNActivityEntity bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class,
                                                                    pkId);
@@ -56,7 +52,7 @@ public abstract class BaseBPMNActivityEventHandler {
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
-        String pkId = getBpmnActivityPk(bpmnActivity);
+        String pkId = BPMNActivityEntity.IdBuilder.from(bpmnActivity);
 
         BPMNActivityEntity bpmnActivityEntity = new BPMNActivityEntity(event.getServiceName(),
                                                                        event.getServiceFullName(),
@@ -76,15 +72,6 @@ public abstract class BaseBPMNActivityEventHandler {
         bpmnActivityEntity.setBusinessKey(activityEvent.getBusinessKey());
 
         return bpmnActivityEntity;
-    }
-
-    protected String getBpmnActivityPk(BPMNActivity bpmnActivity) {
-        return new StringBuilder().append(bpmnActivity.getProcessInstanceId())
-                                  .append(":")
-                                  .append(bpmnActivity.getElementId())
-                                  .append(":")
-                                  .append(bpmnActivity.getExecutionId())
-                                  .toString();
     }
 
 }
