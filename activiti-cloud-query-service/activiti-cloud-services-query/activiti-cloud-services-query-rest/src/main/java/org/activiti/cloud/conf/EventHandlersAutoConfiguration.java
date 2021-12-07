@@ -258,8 +258,9 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ApplicationDeployedEventHandler applicationDeployedEventHandler(
-            ApplicationRepository applicationRepository) {
-        return new ApplicationDeployedEventHandler(applicationRepository);
+    public ApplicationDeployedEventHandler applicationDeployedEventHandler(EntityManager entityManager,
+                                                                           ApplicationRepository applicationRepository) {
+        return new ApplicationDeployedEventHandler(entityManager,
+                                                   applicationRepository);
     }
 }
