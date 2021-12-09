@@ -120,14 +120,10 @@ public interface ModelRestApi {
 
     String DELETE_RELATIONSHIP_MODEL_PROJECT_MODEL_ID_PARAM_DESCR = "The id of the model of the relationship to delete";
 
-
     @Operation(
             tags = MODELS,
             summary = "List models for an project",
-            description = "Get the models associated with an project. " +
-                    "Minimal information for each model is returned."
-            //response = AlfrescoModelPage.class
-    )
+            description = "Get the models associated with an project. Minimal information for each model is returned.")
     @GetMapping(path = "/projects/{projectId}/models")
     PagedModel<EntityModel<Model>> getModels(
             @Parameter(description = GET_MODELS_PROJECT_ID_PARAM_DESCR, required = true)
@@ -276,9 +272,7 @@ public interface ModelRestApi {
     @Operation(
             tags = MODELS,
             summary = "List all the models that are not coupled to a project",
-            description = "Get the models that has GLOBAL as scope. " +
-            "Minimal information for each model is returned."
-        //response = AlfrescoModelPage.class
+            description = "Get the models that has GLOBAL as scope. Minimal information for each model is returned."
     )
     @GetMapping(path = "/models")
     PagedModel<EntityModel<Model>> getGlobalModels(
@@ -291,8 +285,7 @@ public interface ModelRestApi {
     @Operation(
             tags = MODELS,
             summary = "Add or update the relationship between an existing model, and the project",
-            description = "Get the model associated with the project updated. " +
-                "Minimal information for the model is returned."
+            description = "Get the model associated with the project updated. Minimal information for the model is returned."
     )
     @PutMapping(path = "/projects/{projectId}/models/{modelId}")
     EntityModel<Model> putProjectModelRelationship(

@@ -107,32 +107,27 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
-    public EntityModel<Model> getModel(
-        @PathVariable String modelId) {
+    public EntityModel<Model> getModel(@PathVariable String modelId) {
         return representationModelAssembler.toModel(findModelById(modelId));
     }
 
     @Override
-    public EntityModel<Model> createModel(
-        @PathVariable String projectId,
+    public EntityModel<Model> createModel(@PathVariable String projectId,
         @Valid @RequestBody Model model) {
         Project project = projectController.findProjectById(projectId);
-        return representationModelAssembler.toModel(
-            modelService.createModel(project,
-                model));
+        return representationModelAssembler.toModel(modelService.createModel(project,
+            model));
     }
 
     @Override
-    public EntityModel<Model> updateModel(
-        @PathVariable String modelId,
+    public EntityModel<Model> updateModel(@PathVariable String modelId,
         @Valid @RequestBody Model model) {
         Model modelToUpdate = findModelById(modelId);
         model.setId(modelId);
         if (modelToUpdate.getProjects() != null) {
             modelToUpdate.getProjects().forEach(project -> model.addProject((Project) project));
         }
-        return representationModelAssembler.toModel(
-            modelService.updateModel(modelToUpdate,
+        return representationModelAssembler.toModel(modelService.updateModel(modelToUpdate,
                 model));
     }
 
@@ -140,7 +135,6 @@ public class ModelController implements ModelRestApi {
     public void updateModelContent(
         @PathVariable String modelId,
         @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
-
         modelService.updateModelContent(findModelById(modelId),
             multipartToFileContent(file));
     }

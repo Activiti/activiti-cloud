@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -112,6 +113,10 @@ public class ModelServiceImplTest {
 
     private ProcessModelType modelType;
 
+    private final String PROCESS_MODEL_TEST_CATEGORY = "test-category";
+
+    private final String PROCESS_MODEL_DEFAULT_CATEGORY = "default-category";
+
     @BeforeEach
     public void setUp() {
         initMocks(this);
@@ -126,6 +131,8 @@ public class ModelServiceImplTest {
         modelTwo.setName("name");
         modelTwo.setType(modelType.getName());
         modelTwo.setScope(ModelScope.PROJECT);
+        modelTwo.setCategory(PROCESS_MODEL_DEFAULT_CATEGORY);
+        modelTwo.setContent("mockContent".getBytes(StandardCharsets.UTF_8));
         modelTwo.addProject(projectOne);
     }
 
@@ -329,18 +336,52 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_allowModelsWithAndWithoutProject_when_creatingAModelWithProject() {
+    public void should_allowModelsWithAndWithoutProject_when_creatingAModelWithProject() throws Exception {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelTwo));
         when(modelRepository.createModel(modelTwo)).thenReturn(modelTwo);
         when(modelRepository.createModel(modelOne)).thenReturn(modelOne);
 
+        BpmnModel bpmnModel = new BpmnModel();
+        bpmnModel.setTargetNamespace(PROCESS_MODEL_TEST_CATEGORY);
+        when(processModelContentConverter.convertToBpmnModel(any())).thenReturn(bpmnModel);
+
         when(modelOne.getId()).thenReturn("modelOneId");
         when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        assertThat( modelService.createModel(projectOne, modelTwo)).isEqualTo(modelTwo);
-        assertThat( modelService.createModel(null, modelOne)).isEqualTo(modelOne);
+        assertThat(modelService.createModel(projectOne, modelTwo)).isEqualTo(modelTwo);
+        assertThat(modelService.createModel(null, modelOne)).isEqualTo(modelOne);
+    }
+
+    @Test
+    void should_setCategoryFromBpmnModel_whenCreatingModel() throws Exception {
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+        when(modelRepository.createModel(modelTwo)).thenReturn(modelTwo);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        bpmnModel.setTargetNamespace(PROCESS_MODEL_TEST_CATEGORY);
+        when(processModelContentConverter.convertToBpmnModel(any())).thenReturn(bpmnModel);
+
+        Model model = modelService.createModel(projectOne, modelTwo);
+
+        assertThat(model.getCategory()).isEqualTo(PROCESS_MODEL_TEST_CATEGORY);
+    }
+
+    @Test
+    void should_updateCategory_whenUpdatingModelContent() throws Exception {
+        FileContent fileContent = new FileContent(null, null,"mockContent".getBytes(StandardCharsets.UTF_8));
+        when(modelRepository.updateModelContent(modelTwo, fileContent)).thenReturn(modelTwo);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        bpmnModel.setTargetNamespace(PROCESS_MODEL_TEST_CATEGORY);
+        when(processModelContentConverter.convertToBpmnModel(any())).thenReturn(bpmnModel);
+
+        assertThat(modelTwo.getCategory()).isEqualTo(PROCESS_MODEL_DEFAULT_CATEGORY);
+
+        Model updatedModel = modelService.updateModelContent(modelTwo, fileContent);
+
+        assertThat(updatedModel.getCategory()).isEqualTo(PROCESS_MODEL_TEST_CATEGORY);
     }
 
     @Test
