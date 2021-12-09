@@ -915,7 +915,7 @@ public class ProjectControllerIT {
                         project.getId()))
                 .andExpect(status().isConflict());
     }
-
+    
     @Test
     public void should_ValidateCorrectly_when_importingProjectWithUnusedConnector() throws Exception {
 

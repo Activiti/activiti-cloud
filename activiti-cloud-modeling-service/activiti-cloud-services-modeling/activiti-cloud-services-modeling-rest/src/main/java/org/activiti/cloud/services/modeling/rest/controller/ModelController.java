@@ -19,13 +19,12 @@ import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileC
 import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.UPLOAD_FILE_PARAM_NAME;
-
-import io.swagger.v3.oas.annotations.Parameter;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
