@@ -54,9 +54,7 @@ public class BatchExecutor<T> {
                 if (i % batchSize == 0 && i > 0) {
                     logger.debug("Flushing the batch containing {0} entities ...", batchSize);
 
-                    tx.commit();
-                    tx.begin();
-
+                    entityManager.flush();
                     entityManager.clear();
                 }
 
