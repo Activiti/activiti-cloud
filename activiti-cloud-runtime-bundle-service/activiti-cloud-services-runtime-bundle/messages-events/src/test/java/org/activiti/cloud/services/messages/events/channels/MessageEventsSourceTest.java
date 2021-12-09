@@ -18,13 +18,23 @@ package org.activiti.cloud.services.messages.events.channels;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.payloads.MessageEventPayload;
+import org.activiti.cloud.services.messages.events.Application;
 import org.activiti.cloud.services.messages.events.support.MessageEventsDispatcher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        classes = { Application.class })
+@Import({ TestChannelBinderConfiguration.class })
+@ActiveProfiles("binding")
 class MessageEventsSourceTest {
 
     @Autowired
@@ -39,7 +49,13 @@ class MessageEventsSourceTest {
         String destination = "messageEvents";
 
         //when
-        messageEventsDispatcher.dispatch(createMessagePayload());
+        TransactionSynchronizationManager.initSynchronization();
+        try {
+            messageEventsDispatcher.dispatch(createMessagePayload());
+            TransactionSynchronizationManager.getSynchronizations().get(0).afterCommit();
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
 
         //then
         Message<byte[]> received = outputDestination.receive(0l, destination);

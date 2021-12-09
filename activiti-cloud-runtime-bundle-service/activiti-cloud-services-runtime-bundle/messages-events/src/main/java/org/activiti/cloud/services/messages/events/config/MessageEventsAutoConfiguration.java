@@ -53,7 +53,7 @@ public class MessageEventsAutoConfiguration {
     @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "enabled")
     public MessageEventsDispatcher messageEventsDispatcherBridge(BindingServiceProperties bindingServiceProperties,
             StreamBridge streamBridge,
-            @Value("${activiti.stream.cloud.functional.binding.messageEventsProducer.name:messageEvents-out-0}") String messageEventsProducerBindingName) {
+            @Value("${activiti.stream.cloud.functional.binding.messageEventsProducer.name:messageEventsProducer-out-0}") String messageEventsProducerBindingName) {
         return new MessageEventsDispatcher(bindingServiceProperties, streamBridge, messageEventsProducerBindingName);
     }
 
