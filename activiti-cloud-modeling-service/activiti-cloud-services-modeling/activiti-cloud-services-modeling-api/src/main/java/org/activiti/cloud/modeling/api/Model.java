@@ -67,6 +67,10 @@ public interface Model<A extends Project, U> extends Auditable<U> {
 
     void setScope(ModelScope scope);
 
+    String getCategory();
+
+    void setCategory(String category);
+
     boolean hasProjects();
 
     boolean hasMultipleProjects();
