@@ -26,8 +26,11 @@ import org.activiti.cloud.services.messages.events.support.BpmnMessageEventMessa
 import org.activiti.cloud.services.messages.events.support.MessageEventsDispatcher;
 import org.activiti.cloud.services.messages.events.support.MessageSubscriptionEventMessageBuilderFactory;
 import org.activiti.cloud.services.messages.events.support.StartMessageDeployedEventMessageBuilderFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -36,13 +39,22 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:config/messages-events-channels.properties")
 public class MessageEventsAutoConfiguration {
 
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
+    public MessageEventsDispatcher messageEventsDispatcher(MessageEventsSource messageEventsSource,
+            BindingServiceProperties bindingServiceProperties) {
+        return new MessageEventsDispatcher(messageEventsSource.messageEventsOutput(),
+                bindingServiceProperties);
+    }
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageEventsDispatcher messageEventsDispatcher(MessageEventsSource messageEventsSource,
-                                                           BindingServiceProperties bindingServiceProperties) {
-        return new MessageEventsDispatcher(messageEventsSource.messageEventsOutput(),
-                                           bindingServiceProperties);
+    @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "enabled")
+    public MessageEventsDispatcher messageEventsDispatcherBridge(BindingServiceProperties bindingServiceProperties,
+            StreamBridge streamBridge,
+            @Value("${activiti.stream.cloud.functional.binding.messageEventsProducer.name:messageEvents-out-0}") String messageEventsProducerBindingName) {
+        return new MessageEventsDispatcher(bindingServiceProperties, streamBridge, messageEventsProducerBindingName);
     }
 
     @Bean

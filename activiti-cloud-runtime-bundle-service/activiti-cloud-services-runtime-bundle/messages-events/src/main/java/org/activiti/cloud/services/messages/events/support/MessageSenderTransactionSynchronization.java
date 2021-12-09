@@ -15,8 +15,10 @@
  */
 package org.activiti.cloud.services.messages.events.support;
 
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.integration.MessageDispatchingException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -28,25 +30,41 @@ public class MessageSenderTransactionSynchronization implements TransactionSynch
 
     private final Message<?> message;
     private final MessageChannel messageChannel;
+    private final StreamBridge streamBridge;
+    private final String messageEventsProducerBindingName;
 
     public MessageSenderTransactionSynchronization(Message<?> message,
-                                                  MessageChannel messageChannel) {
+            MessageChannel messageChannel) {
         this.message = message;
         this.messageChannel = messageChannel;
+        this.streamBridge = null;
+        this.messageEventsProducerBindingName = null;
+    }
+
+    public MessageSenderTransactionSynchronization(Message<?> message, StreamBridge streamBridge, String messageEventsProducerBindingName) {
+        this.message = message;
+        this.streamBridge = streamBridge;
+        this.messageEventsProducerBindingName = messageEventsProducerBindingName;
+        this.messageChannel = null;
     }
 
     @Override
     public void afterCommit() {
         logger.debug("Sending bpmn message '{}' via message channel: {}", message, messageChannel);
-        
-        try { 
-            boolean sent = messageChannel.send(message);
-            
-            if(!sent) {
+
+        try {
+            boolean sent = false;
+            if (Objects.nonNull(messageChannel)) {
+                sent = messageChannel.send(message);
+            } else {
+                sent = streamBridge.send(messageEventsProducerBindingName, message);
+            }
+
+            if (!sent) {
                 throw new MessageDispatchingException(message);
             }
-            
-        } catch(Exception cause) {
+
+        } catch (Exception cause) {
             logger.error("Sending bpmn message {} failed due to error: {}", message, cause.getMessage());
         }
     }
