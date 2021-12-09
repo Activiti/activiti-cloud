@@ -43,7 +43,7 @@ public interface ModelService {
                           Pageable pageable);
 
     Model buildModel(String type,
-                     String name);
+        String name);
 
     Model createModel(Project project,
                       Model model);

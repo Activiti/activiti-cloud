@@ -63,6 +63,9 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     @Schema(description = "The template of the model", readOnly = true)
     private String template;
 
+    @Schema(description = "The category of the model")
+    private String category;
+
     @Schema(description = "The scope of the model. They can be shared between projects if it's scope is GLOBAL", readOnly = true)
     private ModelScope scope;
 
@@ -192,6 +195,16 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     @Override
     public void setScope(ModelScope scope) {
         this.scope = scope;
+    }
+
+    @Override
+    public String getCategory() {
+        return category;
+    }
+
+    @Override
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     @Override

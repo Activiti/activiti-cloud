@@ -10,6 +10,7 @@ create table model
     type                               varchar(255),
     latest_version_version             varchar(255),
     latest_version_versioned_entity_id varchar(255),
+    category                           varchar(255),
     scope                              int,
     primary key (id)
 );

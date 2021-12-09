@@ -26,6 +26,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtens
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.removeEnd;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -137,7 +138,7 @@ public class ModelServiceImpl implements ModelService{
 
     @Override
     public Model buildModel(String type,
-                            String name) {
+        String name) {
         try {
             Model model = (Model) modelRepository.getModelType().getConstructor().newInstance();
             model.setType(type);
@@ -150,19 +151,28 @@ public class ModelServiceImpl implements ModelService{
 
     @Override
     public Model createModel(Project project,
-                             Model model) {
+        Model model) {
+
         checkIfModelNameExistsInProject(project,model);
         checkModelScopeIntegrity(model);
         model.setId(null);
         ModelType modelType = findModelType(model);
+
         if(project != null) {
             model.addProject(project);
         }
+
         if (model.getExtensions() == null) {
             if (PROCESS.equals(modelType.getName()) || isJsonContentType(model.getContentType())) {
                 model.setExtensions(new HashMap<>());
             }
         }
+
+        if(PROCESS.equals(modelType.getName()) && model.getContent() != null) {
+            // We leverage targetNamespace of bpmn models as a category field
+            model.setCategory(safeGetBpmnModel(model.getContent()).getTargetNamespace());
+        }
+
         return modelRepository.createModel(model);
     }
 
@@ -278,37 +288,46 @@ public class ModelServiceImpl implements ModelService{
     }
 
     @Override
-    public Model updateModelContent(Model modelToBeUpdate,
-                                    FileContent fileContent) {
+    public Model updateModelContent(Model modelToBeUpdated,
+        FileContent fileContent) {
+
         FileContent fixedFileContent = modelIdentifiers.isEmpty()
-                ? fileContent
-                : overrideModelContentId(modelToBeUpdate,
-                                         fileContent);
+            ? fileContent
+            : overrideModelContentId(modelToBeUpdated,
+                fileContent);
 
-        modelToBeUpdate.setContentType(fixedFileContent.getContentType());
-        modelToBeUpdate.setContent(fixedFileContent.getFileContent());
+        modelToBeUpdated.setContentType(fixedFileContent.getContentType());
+        modelToBeUpdated.setContent(fixedFileContent.getFileContent());
 
-        try{
-          Optional.ofNullable(modelToBeUpdate.getType()).flatMap(modelContentService::findModelContentConverter)
-            .flatMap(validator -> validator.convertToModelContent(fixedFileContent.getFileContent()))
-            .ifPresent(modelContent -> modelToBeUpdate.setTemplate(modelContent.getTemplate()));
-        }catch(XMLException e){
-          throw new ImportModelException("Error importing model : "+e.getMessage());
+        if (modelToBeUpdated.getType().equals(PROCESS) &&
+            fixedFileContent.getFileContent() != null &&
+            isBpmnModelContent(fixedFileContent.getFileContent())) {
+            modelToBeUpdated.setCategory(safeGetBpmnModel(fixedFileContent.getFileContent()).getTargetNamespace());
         }
 
-        emptyIfNull(modelContentService.findContentUploadListeners(modelToBeUpdate.getType())).stream().forEach(listener -> listener.execute(modelToBeUpdate,
-                                                                                                                                             fixedFileContent));
+        try {
+            Optional.ofNullable(modelToBeUpdated.getType()).flatMap(modelContentService::findModelContentConverter)
+                .flatMap(validator -> validator.convertToModelContent(fixedFileContent.getFileContent()))
+                .ifPresent(modelContent -> modelToBeUpdated.setTemplate(modelContent.getTemplate()));
+        } catch (XMLException e) {
+            throw new ImportModelException("Error importing model : " + e.getMessage());
+        }
 
-        return modelRepository.updateModelContent(modelToBeUpdate,
+        emptyIfNull(modelContentService.findContentUploadListeners(modelToBeUpdated.getType()))
+            .stream()
+            .forEach(listener -> listener.execute(modelToBeUpdated, fixedFileContent));
+
+        return modelRepository.updateModelContent(modelToBeUpdated,
             fixedFileContent);
     }
 
     @Override
     public FileContent overrideModelContentId(Model model,
-                                              FileContent fileContent) {
-        return modelContentService.findModelContentConverter(model.getType()).map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent,
-            modelIdentifiers))
-                .orElse(fileContent);
+        FileContent fileContent) {
+        return modelContentService.findModelContentConverter(model.getType())
+            .map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent,
+                modelIdentifiers))
+            .orElse(fileContent);
     }
 
     @Override
@@ -364,9 +383,10 @@ public class ModelServiceImpl implements ModelService{
             convertedId = retrieveModelIdFromModelContent(model,
                                             fileContent);
         }
+
         model.setScope(ModelScope.PROJECT);
-        createModel(project,
-                    model);
+        createModel(project, model);
+
         if (convertedId != null) {
             modelIdentifiers.put(convertedId,
                     String.join(MODEL_IDENTIFIER_SEPARATOR,
@@ -392,19 +412,30 @@ public class ModelServiceImpl implements ModelService{
     public List<Process> getProcessesBy(Project project, ModelType type) {
         return getModels(project, type, Pageable.unpaged())
                 .stream()
-                .filter(model -> nonNull(model.getContent()))
+                .map(Model::getContent)
+                .filter(content -> nonNull(content))
                 .map(this::safeGetBpmnModel)
                 .map(BpmnModel::getProcesses)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
 
-    private BpmnModel safeGetBpmnModel(Model model) {
+    private BpmnModel safeGetBpmnModel(byte[] modelContent) {
         try {
-            return processModelContentConverter.convertToBpmnModel(model.getContent());
+            return processModelContentConverter.convertToBpmnModel(modelContent);
         } catch (IOException | XMLStreamException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean isBpmnModelContent (byte[] modelContent) {
+        boolean isBpmn = true;
+        try {
+            safeGetBpmnModel(modelContent);
+        } catch (RuntimeException e) {
+            isBpmn = false;
+        }
+        return isBpmn;
     }
 
     private String retrieveModelIdFromModelContent(Model model,
@@ -429,15 +460,13 @@ public class ModelServiceImpl implements ModelService{
 
     @Override
     public Model createModelFromContent(ModelType modelType,
-                                        FileContent fileContent) {
-        return contentFilenameToModelName(fileContent.getFilename(),
-                                          modelType).map(
-                                                         modelName -> buildModel(modelType.getName(),
-                                                                                 modelName))
-                                                  .orElseThrow(() -> new ImportModelException(MessageFormat
-                                                          .format("Unexpected extension was found for file to import model of type {0}: {1}",
-                                                                  modelType.getName(),
-                                                                  fileContent.getFilename())));
+        FileContent fileContent) {
+        return contentFilenameToModelName(fileContent.getFilename(), modelType)
+            .map(modelName -> buildModel(modelType.getName(), modelName))
+            .orElseThrow(() -> new ImportModelException(MessageFormat
+                .format("Unexpected extension was found for file to import model of type {0}: {1}",
+                    modelType.getName(),
+                    fileContent.getFilename())));
     }
 
     @Override

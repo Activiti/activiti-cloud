@@ -96,19 +96,16 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public ModelEntity createModel(ModelEntity model) {
-
         model.setId(null);
         versionGenerationHelper.generateNextVersion(model);
         return modelJpaRepository.save(model);
     }
 
     @Override
-    public ModelEntity updateModel(
-        ModelEntity modelToBeUpdated, ModelEntity newModel) {
-        Optional.ofNullable(newModel.getName())
-            .ifPresent(modelToBeUpdated::setName);
-        Optional.ofNullable(newModel.getExtensions())
-            .ifPresent(modelToBeUpdated::setExtensions);
+    public ModelEntity updateModel(ModelEntity modelToBeUpdated,
+        ModelEntity newModel) {
+        Optional.ofNullable(newModel.getName()).ifPresent(modelToBeUpdated::setName);
+        Optional.ofNullable(newModel.getExtensions()).ifPresent(modelToBeUpdated::setExtensions);
         versionGenerationHelper.generateNextVersion(modelToBeUpdated);
         return modelJpaRepository.save(modelToBeUpdated);
     }
@@ -125,10 +122,8 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     }
 
     @Override
-    public ModelEntity updateModelContent(
-        ModelEntity modelToBeUpdate,
+    public ModelEntity updateModelContent(ModelEntity modelToBeUpdate,
         FileContent fileContent) {
-
         return modelJpaRepository.save(modelToBeUpdate);
     }
 
