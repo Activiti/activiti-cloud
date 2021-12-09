@@ -49,4 +49,13 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
+
+  <changeSet id="process-category" author="aae-modeling">
+    <sqlFile dbms="postgresql"
+      encoding="utf8"
+      path="changelog/03.pg.update.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>
