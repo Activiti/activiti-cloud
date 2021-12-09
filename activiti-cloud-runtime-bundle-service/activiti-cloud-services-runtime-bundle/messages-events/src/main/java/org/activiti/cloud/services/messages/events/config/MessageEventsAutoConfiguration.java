@@ -27,7 +27,6 @@ import org.activiti.cloud.services.messages.events.support.MessageEventsDispatch
 import org.activiti.cloud.services.messages.events.support.MessageSubscriptionEventMessageBuilderFactory;
 import org.activiti.cloud.services.messages.events.support.StartMessageDeployedEventMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,9 +34,6 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource("classpath:config/messages-events-channels.properties")
-@EnableBinding({
-    MessageEventsSource.class
-})
 public class MessageEventsAutoConfiguration {
 
 
