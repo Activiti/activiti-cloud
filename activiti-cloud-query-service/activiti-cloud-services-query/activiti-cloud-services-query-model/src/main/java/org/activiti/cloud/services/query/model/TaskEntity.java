@@ -150,8 +150,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
             foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-
-    private Set<TaskVariableEntity> variables;
+    private Set<TaskVariableEntity> variables = new LinkedHashSet<>();
 
     public TaskEntity() {
     }

@@ -22,10 +22,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity(name="ProcessInstance")
 @Table(name = "PROCESS_INSTANCE",
@@ -106,25 +103,31 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
     	, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Set<TaskEntity> tasks;
+    private Set<TaskEntity> tasks = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
 		, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Set<ProcessVariableEntity> variables;
+    private Set<ProcessVariableEntity> variables = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
         , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Set<BPMNActivityEntity> activities;
+    private Set<BPMNActivityEntity> activities = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
         , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private List<BPMNSequenceFlowEntity> sequenceFlows;
+    private Set<ServiceTaskEntity> serviceTasks = new LinkedHashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch=FetchType.LAZY)
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
+        , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private List<BPMNSequenceFlowEntity> sequenceFlows = new LinkedList<>();
 
     private String parentId;
 
@@ -377,6 +380,13 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.activities = bpmnActivities;
     }
 
+    public Set<ServiceTaskEntity> getServiceTasks() {
+        return serviceTasks;
+    }
+
+    public void setServiceTasks(Set<ServiceTaskEntity> serviceTasks) {
+        this.serviceTasks = serviceTasks;
+    }
 
     public List<BPMNSequenceFlowEntity> getSequenceFlows() {
         return sequenceFlows;
