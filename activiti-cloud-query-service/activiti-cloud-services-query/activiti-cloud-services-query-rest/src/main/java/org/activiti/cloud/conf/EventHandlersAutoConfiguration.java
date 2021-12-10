@@ -160,33 +160,22 @@ public class EventHandlersAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public VariableCreatedEventHandler variableCreatedEventHandler(EntityManager entityManager) {
-        return new VariableCreatedEventHandler(entityManager);
+        return new VariableCreatedEventHandler(new TaskVariableCreatedEventHandler(entityManager),
+                                               new ProcessVariableCreatedEventHandler(entityManager));
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableDeletedEventHandler variableDeletedEventHandler(TaskRepository taskRepository,
-                                                                   ProcessInstanceRepository processInstanceRepository,
-                                                                   VariableRepository variableRepository,
-                                                                   EntityFinder entityFinder,
-                                                                   TaskVariableRepository taskVariableRepository) {
-        return new VariableDeletedEventHandler(new ProcessVariableDeletedEventHandler(processInstanceRepository,
-                                                                                      variableRepository,
-                                                                                      entityFinder),
-                                               new TaskVariableDeletedEventHandler(taskRepository,
-                                                                                   taskVariableRepository,
-                                                                                   entityFinder));
+    public VariableDeletedEventHandler variableDeletedEventHandler(EntityManager entityManager) {
+        return new VariableDeletedEventHandler(new ProcessVariableDeletedEventHandler(entityManager),
+                                               new TaskVariableDeletedEventHandler(entityManager));
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableUpdatedEventHandler variableUpdatedEventHandler(EntityFinder entityFinder,
-                                                                   VariableRepository variableRepository,
-                                                                   TaskVariableRepository taskVariableRepository) {
-        return new VariableUpdatedEventHandler(new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityFinder,
-                                                                                                                variableRepository)),
-                                               new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityFinder,
-                                                                                                           taskVariableRepository)));
+    public VariableUpdatedEventHandler variableUpdatedEventHandler(EntityManager entityManager) {
+        return new VariableUpdatedEventHandler(new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityManager)),
+                                               new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager)));
     }
 
     @Bean

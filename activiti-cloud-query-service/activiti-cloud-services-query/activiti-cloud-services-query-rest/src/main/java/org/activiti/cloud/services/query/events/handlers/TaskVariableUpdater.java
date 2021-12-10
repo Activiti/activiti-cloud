@@ -15,32 +15,43 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
+
+import javax.persistence.EntityManager;
+import java.util.Optional;
 
 public class TaskVariableUpdater {
 
-    private final EntityFinder entityFinder;
+    private final EntityManager entityManager;
 
-    private TaskVariableRepository variableRepository;
-
-    public TaskVariableUpdater(EntityFinder entityFinder,
-                           TaskVariableRepository variableRepository) {
-        this.entityFinder = entityFinder;
-        this.variableRepository = variableRepository;
+    public TaskVariableUpdater(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
-    public void update(TaskVariableEntity updatedVariableEntity, Predicate predicate, String notFoundMessage) {
-        TaskVariableEntity variableEntity = entityFinder.findOne(variableRepository,
-                                                             predicate,
-                                                             notFoundMessage);
-        variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
-        variableEntity.setType(updatedVariableEntity.getType());
-        variableEntity.setValue(updatedVariableEntity.getValue());
+    public void update(TaskVariableEntity updatedVariableEntity,
+                       String notFoundMessage) {
+        String taskId = updatedVariableEntity.getTaskId();
+        TaskEntity taskEntity = Optional.ofNullable(entityManager.find(TaskEntity.class,
+                                                                       taskId))
+                                        .orElseThrow(() -> new QueryException("Task instance id " + taskId + " not found!"));
 
-        variableRepository.save(variableEntity);
+        taskEntity.getVariables()
+                  .stream()
+                  .filter(v -> v.getName()
+                                .equals(updatedVariableEntity.getName()))
+                  .findFirst()
+                  .ifPresentOrElse(variableEntity -> {
+                      variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
+                      variableEntity.setType(updatedVariableEntity.getType());
+                      variableEntity.setValue(updatedVariableEntity.getValue());
+
+                      entityManager.merge(variableEntity);
+                  }, ()-> {
+                      throw new QueryException(notFoundMessage);
+                  });
+
     }
 
 }
