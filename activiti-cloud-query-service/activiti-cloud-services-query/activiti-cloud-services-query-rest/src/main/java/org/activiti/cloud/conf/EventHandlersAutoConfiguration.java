@@ -33,8 +33,10 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public QueryConsumerChannelHandler queryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext) {
-        return new QueryConsumerChannelHandler(eventHandlerContext);
+    public QueryConsumerChannelHandler queryConsumerChannelHandler(EntityManager entityManager,
+                                                                   QueryEventHandlerContext eventHandlerContext) {
+        return new QueryConsumerChannelHandler(entityManager,
+                                               eventHandlerContext);
     }
 
     @Bean
