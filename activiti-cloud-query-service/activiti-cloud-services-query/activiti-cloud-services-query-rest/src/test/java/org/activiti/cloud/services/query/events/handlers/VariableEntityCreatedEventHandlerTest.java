@@ -18,8 +18,6 @@ package org.activiti.cloud.services.query.events.handlers;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -42,11 +40,11 @@ public class VariableEntityCreatedEventHandlerTest {
     @InjectMocks
     private VariableCreatedEventHandler handler;
 
-    @Mock
-    private VariableRepository variableRepository;
+    @InjectMocks
+    private ProcessVariableCreatedEventHandler processVariableCreatedEventHandler;
 
-    @Mock
-    private TaskVariableRepository taskVariableRepository;
+    @InjectMocks
+    private TaskVariableCreatedEventHandler taskVariableCreatedEventHandler;
 
     @Mock
     private EntityManager entityManager;
@@ -61,13 +59,13 @@ public class VariableEntityCreatedEventHandlerTest {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
-        ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
-        when(entityManager.getReference(ProcessInstanceEntity.class,
-                                        event.getEntity().getProcessInstanceId()))
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        when(entityManager.find(ProcessInstanceEntity.class,
+                                event.getEntity().getProcessInstanceId()))
                 .thenReturn(processInstanceEntity);
 
         //when
-        handler.handle(event);
+        processVariableCreatedEventHandler.handle(event);
 
         //then
         ArgumentCaptor<ProcessVariableEntity> captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
@@ -93,18 +91,19 @@ public class VariableEntityCreatedEventHandlerTest {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariableWithTaskId());
 
-        ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
-        when(entityManager.getReference(ProcessInstanceEntity.class,
-                                        event.getEntity().getProcessInstanceId()))
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+
+        when(entityManager.find(ProcessInstanceEntity.class,
+                                event.getEntity().getProcessInstanceId()))
                 .thenReturn(processInstanceEntity);
 
         TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManager.getReference(TaskEntity.class,
-                                        event.getEntity().getTaskId()))
+        when(entityManager.find(TaskEntity.class,
+                                event.getEntity().getTaskId()))
                 .thenReturn(taskEntity);
 
         //when
-        handler.handle(event);
+        taskVariableCreatedEventHandler.handle(event);
 
         //then
         ArgumentCaptor<TaskVariableEntity> captor = ArgumentCaptor.forClass(TaskVariableEntity.class);

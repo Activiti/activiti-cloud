@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QueryException;
@@ -31,7 +30,7 @@ public class ProcessVariableUpdater {
         this.entityManager = entityManager;
     }
 
-    public void update(ProcessVariableEntity updatedVariableEntity, Predicate predicate, String notFoundMessage) {
+    public void update(ProcessVariableEntity updatedVariableEntity, String notFoundMessage) {
         String processInstanceId = updatedVariableEntity.getProcessInstanceId();
         ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
                                                                                              processInstanceId))
@@ -46,7 +45,7 @@ public class ProcessVariableUpdater {
                                                   variableEntity.setType(updatedVariableEntity.getType());
                                                   variableEntity.setValue(updatedVariableEntity.getValue());
 
-                                                  entityManager.merge(variableEntity);
+                                                  entityManager.persist(variableEntity);
                                               },
                                               () -> {
                                                   throw new QueryException(notFoundMessage);
