@@ -15,42 +15,14 @@
  */
 package org.activiti.cloud.starter.tests;
 
-import static org.activiti.cloud.services.query.model.IntegrationContextEntity.ERROR_MESSAGE_LENGTH;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.UUID;
-
-import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
-import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
-import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
-import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
-import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.*;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
-import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
-import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.api.process.model.impl.events.*;
+import org.activiti.cloud.services.query.app.repository.*;
 import org.activiti.cloud.services.query.model.StringUtils;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
@@ -71,6 +43,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.UUID;
+
+import static org.activiti.cloud.services.query.model.IntegrationContextEntity.ERROR_MESSAGE_LENGTH;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test-admin.properties")
@@ -367,7 +351,7 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    public void shouldGetServiceTaskIntegrationContextById() throws InterruptedException {
+    public void shouldGetServiceTaskIntegrationContextErrorById() throws InterruptedException {
         //given
         ProcessInstanceImpl process = startSimpleProcessInstance();
 
@@ -375,7 +359,9 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator.sendAll();
 
         //then
-        await().untilAsserted(() -> {
+        await()
+            .forever()
+            .untilAsserted(() -> {
             assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
@@ -471,8 +457,104 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getBody().getStackTraceElements()).isNotEmpty();
 
         });
+    }
+
+    @Test
+    public void shouldGetServiceTaskIntegrationContextResultById() throws InterruptedException {
+        //given
+        ProcessInstanceImpl process = startSimpleProcessInstance();
+
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        await()
+            .forever()
+            .untilAsserted(() -> {
+                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+            });
+
+        ResponseEntity<PagedModel<CloudServiceTask>> serviceTasksResponse = testRestTemplate.exchange("/admin/v1/service-tasks",
+                                                                                                      HttpMethod.GET,
+                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                      PAGED_TASKS_RESPONSE_TYPE);
+
+        assertThat(serviceTasksResponse.getBody().getContent()).isNotEmpty();
+
+        CloudBPMNActivity serviceTask = serviceTasksResponse.getBody()
+                                                            .getContent()
+                                                            .iterator()
+                                                            .next();
+
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setProcessInstanceId(process.getId());
+        integrationContext.setRootProcessInstanceId(rootProcessInstanceId);
+        integrationContext.setExecutionId(serviceTask.getExecutionId());
+        integrationContext.setClientId(serviceTask.getElementId());
+        integrationContext.setClientType(serviceTask.getActivityType());
+        integrationContext.setClientName(serviceTask.getActivityName());
+        integrationContext.setProcessDefinitionId(process.getProcessDefinitionId());
+        integrationContext.addInBoundVariable("key", "value");
+
+        eventsAggregator.addEvents(new CloudIntegrationRequestedEventImpl(integrationContext));
+
+        eventsAggregator.sendAll();
+
+        //when
+        await()
+            .forever()
+            .untilAsserted(() -> {
+
+                ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/{serviceTaskId}/integration-context",
+                                                                                                   HttpMethod.GET,
+                                                                                                   keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                   SINGLE_INT_CONTEXT_RESPONSE_TYPE,
+                                                                                                   serviceTask.getId());
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isNotNull();
+                assertThat(responseEntity.getBody())
+                    .extracting(
+                        CloudIntegrationContext::getClientId,
+                        CloudIntegrationContext::getClientType,
+                        CloudIntegrationContext::getRootProcessInstanceId,
+                        CloudIntegrationContext::getStatus)
+                    .containsExactly(
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_REQUESTED);
+            });
+
+        // and given
+        eventsAggregator.addEvents(new CloudIntegrationResultReceivedEventImpl(integrationContext));
+
+        eventsAggregator.sendAll();
+
+        await()
+            .forever()
+            .untilAsserted(() -> {
+
+                ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/{serviceTaskId}/integration-context",
+                                                                                                   HttpMethod.GET,
+                                                                                                   keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                   SINGLE_INT_CONTEXT_RESPONSE_TYPE,
+                                                                                                   serviceTask.getId());
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isNotNull();
+                assertThat(responseEntity.getBody()).extracting(CloudIntegrationContext::getClientId,
+                                                                CloudIntegrationContext::getClientType,
+                                                                CloudIntegrationContext::getStatus)
+                                                    .containsExactly(SERVICE_TASK_ELEMENT_ID,
+                                                                     SERVICE_TASK_TYPE,
+                                                                     IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+            });
 
     }
+
 
     @Test
     public void shouldNotGetProcessInstanceServiceTasks() throws InterruptedException {

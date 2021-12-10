@@ -35,7 +35,7 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
 
-        Optional<IntegrationContextEntity> result = findOrCreateIntegrationContextEntity(integrationEvent);
+        Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
 
         result.ifPresent(entity -> {
             entity.setResultDate(new Date(integrationEvent.getTimestamp()));

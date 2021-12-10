@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.events.handlers;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
-import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,46 +34,11 @@ public abstract class BaseIntegrationEventHandler {
         this.entityManager = entityManager;
     }
 
-    protected Optional<IntegrationContextEntity> findOrCreateIntegrationContextEntity(CloudIntegrationEvent event) {
-
+    protected Optional<IntegrationContextEntity> findIntegrationContextEntity(CloudIntegrationEvent event) {
         IntegrationContext integrationContext = event.getEntity();
-
         String pkId = IntegrationContextEntity.IdBuilder.from(integrationContext);
 
-        IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class,
-                                                             pkId);
-        // Let's create entity if does not exists
-        if(entity == null) {
-            ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class,
-                                                                     pkId);
-            if (serviceTaskEntity != null) {
-                logger.debug("Found BPMNActivityEntity: {}", serviceTaskEntity);
-
-                entity = new IntegrationContextEntity(event.getServiceName(),
-                                                      event.getServiceFullName(),
-                                                      event.getServiceVersion(),
-                                                      event.getAppName(),
-                                                      event.getAppVersion());
-                // Let use event id to persist integration context
-                entity.setId(serviceTaskEntity.getId());
-                entity.setClientId(integrationContext.getClientId());
-                entity.setClientName(integrationContext.getClientName());
-                entity.setClientType(integrationContext.getClientType());
-                entity.setConnectorType(integrationContext.getConnectorType());
-                entity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
-                entity.setProcessInstanceId(integrationContext.getProcessInstanceId());
-                entity.setRootProcessInstanceId(integrationContext.getRootProcessInstanceId());
-                entity.setExecutionId(integrationContext.getExecutionId());
-                entity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
-                entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
-                entity.setBusinessKey(integrationContext.getBusinessKey());
-                entity.setServiceTask(serviceTaskEntity);
-
-                entityManager.persist(entity);
-            } else {
-                logger.error("Cannot find BPMNActivityEntity for integrationContext: {}", integrationContext);
-            }
-        }
+        IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
 
         return Optional.ofNullable(entity);
     }
