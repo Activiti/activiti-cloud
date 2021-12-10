@@ -19,7 +19,7 @@ import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -34,7 +34,7 @@ public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandle
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityStartedEvent activityEvent = CloudBPMNActivityStartedEvent.class.cast(event);
 
-        BPMNActivityEntity bpmnActivityEntity = createBpmnActivityEntity(event);
+        BaseBPMNActivityEntity bpmnActivityEntity = createBpmnActivityEntity(event);
 
         // Activity can be cyclical, so we just update the status and started date anyways
         bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));

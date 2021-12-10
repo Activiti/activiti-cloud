@@ -19,6 +19,8 @@ import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 import javax.persistence.EntityManager;
 
@@ -30,14 +32,14 @@ public abstract class BaseBPMNActivityEventHandler {
         this.entityManager = entityManager;
     }
 
-    protected BPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
+    protected BaseBPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
         String pkId = BPMNActivityEntity.IdBuilder.from(bpmnActivity);
 
-        BPMNActivityEntity bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class,
+        BaseBPMNActivityEntity bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class,
                                                                    pkId);
         if (bpmnActivityEntity == null) {
             bpmnActivityEntity = createBpmnActivityEntity(event);
@@ -47,19 +49,29 @@ public abstract class BaseBPMNActivityEventHandler {
 
     }
 
-    public BPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
+    public <R> BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
         String pkId = BPMNActivityEntity.IdBuilder.from(bpmnActivity);
 
-        BPMNActivityEntity bpmnActivityEntity = new BPMNActivityEntity(event.getServiceName(),
-                                                                       event.getServiceFullName(),
-                                                                       event.getServiceVersion(),
-                                                                       event.getAppName(),
-                                                                       event.getAppVersion());
-        // Let use event id to persist activity id
+        BaseBPMNActivityEntity bpmnActivityEntity;
+
+        if ("serviceTask".equals(bpmnActivity.getActivityType())) {
+            bpmnActivityEntity = new ServiceTaskEntity(event.getServiceName(),
+                                                       event.getServiceFullName(),
+                                                       event.getServiceVersion(),
+                                                       event.getAppName(),
+                                                       event.getAppVersion());
+        } else {
+            bpmnActivityEntity = new BPMNActivityEntity(event.getServiceName(),
+                                                        event.getServiceFullName(),
+                                                        event.getServiceVersion(),
+                                                        event.getAppName(),
+                                                        event.getAppVersion());
+        }
+
         bpmnActivityEntity.setId(pkId);
         bpmnActivityEntity.setElementId(bpmnActivity.getElementId());
         bpmnActivityEntity.setActivityName(bpmnActivity.getActivityName());
@@ -73,5 +85,4 @@ public abstract class BaseBPMNActivityEventHandler {
 
         return bpmnActivityEntity;
     }
-
 }
