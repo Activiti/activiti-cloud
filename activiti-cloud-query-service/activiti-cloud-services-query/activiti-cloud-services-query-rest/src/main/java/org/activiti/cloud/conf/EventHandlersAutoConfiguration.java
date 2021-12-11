@@ -17,7 +17,7 @@ package org.activiti.cloud.conf;
 
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.activiti.cloud.services.query.app.QueryEntityGraphFetchingOptimizer;
+import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -35,15 +35,15 @@ public class EventHandlersAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public QueryConsumerChannelHandler queryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext,
-                                                                   QueryEntityGraphFetchingOptimizer fetchingOptimizer) {
+                                                                   QueryEventHandlerContextOptimizer fetchingOptimizer) {
         return new QueryConsumerChannelHandler(eventHandlerContext,
                                                fetchingOptimizer);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public QueryEntityGraphFetchingOptimizer queryEntityGraphFetchingOptimizer(EntityManager entityManager) {
-        return new QueryEntityGraphFetchingOptimizer(entityManager);
+    public QueryEventHandlerContextOptimizer queryEntityGraphFetchingOptimizer(EntityManager entityManager) {
+        return new QueryEventHandlerContextOptimizer(entityManager);
     }
 
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.app;
+package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -37,16 +37,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class QueryEntityGraphFetchingOptimizer {
-    private static Logger LOGGER = LoggerFactory.getLogger(QueryEntityGraphFetchingOptimizer.class);
+public class QueryEventHandlerContextOptimizer {
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContextOptimizer.class);
 
     private final EntityManager entityManager;
 
-    public QueryEntityGraphFetchingOptimizer(EntityManager entityManager) {
+    public QueryEventHandlerContextOptimizer(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    public void process(List<CloudRuntimeEvent<?, ?>> events) {
+    public void optimize(List<CloudRuntimeEvent<?, ?>> events) {
         resolveProcessInstanceId(events)
             .ifPresent(processInstanceId -> {
                 LOGGER.debug("Building entity fetch graph for root process instance: {}",

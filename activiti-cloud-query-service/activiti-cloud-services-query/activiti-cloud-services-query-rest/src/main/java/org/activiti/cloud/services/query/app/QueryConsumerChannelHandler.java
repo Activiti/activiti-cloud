@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.app;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
+import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -30,17 +31,17 @@ public class QueryConsumerChannelHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(QueryConsumerChannelHandler.class);
 
     private final QueryEventHandlerContext eventHandlerContext;
-    private final QueryEntityGraphFetchingOptimizer optimizer;
+    private final QueryEventHandlerContextOptimizer optimizer;
 
     public QueryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext,
-                                       QueryEntityGraphFetchingOptimizer optimizer) {
+                                       QueryEventHandlerContextOptimizer optimizer) {
         this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;
     }
 
     @StreamListener(QueryConsumerChannels.QUERY_CONSUMER)
     public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        optimizer.process(events);
+        optimizer.optimize(events);
 
         eventHandlerContext.handle(events.toArray(new CloudRuntimeEvent[]{}));
     }
