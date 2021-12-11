@@ -39,13 +39,12 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.TaskCandidateGroup;
-import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -193,22 +192,22 @@ public class TaskEntityControllerIT {
                 .node("entry.candidateGroups").isArray().ofLength(1).thatContains("testgroup");
     }
 
-    private Set<TaskCandidateGroup> buildCandidateGroups(TaskEntity taskEntity) {
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup();
+    private Set<TaskCandidateGroupEntity> buildCandidateGroups(TaskEntity taskEntity) {
+        TaskCandidateGroupEntity taskCandidateGroup = new TaskCandidateGroupEntity();
         taskCandidateGroup.setGroupId("testgroup");
         taskCandidateGroup.setTask(taskEntity);
         taskCandidateGroup.setTaskId(taskEntity.getId());
-        Set<TaskCandidateGroup> groups = new HashSet<>();
+        Set<TaskCandidateGroupEntity> groups = new HashSet<>();
         groups.add(taskCandidateGroup);
         return groups;
     }
 
-    private Set<TaskCandidateUser> buildCandidateUsers(TaskEntity taskEntity) {
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser();
+    private Set<TaskCandidateUserEntity> buildCandidateUsers(TaskEntity taskEntity) {
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity();
         taskCandidateUser.setUserId("testuser");
         taskCandidateUser.setTask(taskEntity);
         taskCandidateUser.setTaskId(taskEntity.getId());
-        Set<TaskCandidateUser> users = new HashSet<>();
+        Set<TaskCandidateUserEntity> users = new HashSet<>();
         users.add(taskCandidateUser);
         return users;
     }

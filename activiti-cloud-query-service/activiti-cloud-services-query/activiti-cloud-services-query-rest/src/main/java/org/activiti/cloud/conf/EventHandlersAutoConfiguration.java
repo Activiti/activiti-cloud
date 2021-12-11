@@ -17,7 +17,8 @@ package org.activiti.cloud.conf;
 
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.activiti.cloud.services.query.app.repository.*;
+import org.activiti.cloud.services.query.app.QueryEntityGraphFetchingOptimizer;
+import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -33,18 +34,23 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public QueryConsumerChannelHandler queryConsumerChannelHandler(EntityManager entityManager,
-                                                                   QueryEventHandlerContext eventHandlerContext) {
-        return new QueryConsumerChannelHandler(entityManager,
-                                               eventHandlerContext);
+    public QueryConsumerChannelHandler queryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext,
+                                                                   QueryEntityGraphFetchingOptimizer fetchingOptimizer) {
+        return new QueryConsumerChannelHandler(eventHandlerContext,
+                                               fetchingOptimizer);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDeployedEventHandler processDeployedEventHandler(ProcessDefinitionRepository processDefinitionRepository,
-                                                                   ProcessModelRepository processModelRepository) {
-        return new ProcessDeployedEventHandler(processDefinitionRepository,
-                                               processModelRepository);
+    public QueryEntityGraphFetchingOptimizer queryEntityGraphFetchingOptimizer(EntityManager entityManager) {
+        return new QueryEntityGraphFetchingOptimizer(entityManager);
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDeployedEventHandler processDeployedEventHandler(EntityManager entityManager) {
+        return new ProcessDeployedEventHandler(entityManager);
     }
 
     @Bean
@@ -115,22 +121,20 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateGroupRemovedEventHandler taskCandidateGroupRemovedEventHandler(TaskRepository taskRepository,
-                                                                                       TaskCandidateGroupRepository taskCandidateGroupRepository) {
-        return new TaskCandidateGroupRemovedEventHandler(taskRepository, taskCandidateGroupRepository);
+    public TaskCandidateGroupRemovedEventHandler taskCandidateGroupRemovedEventHandler(EntityManager entityManager) {
+        return new TaskCandidateGroupRemovedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateUserAddedEventHandler taskCandidateUserAddedEventHandler(TaskCandidateUserRepository taskCandidateUserRepository) {
-        return new TaskCandidateUserAddedEventHandler(taskCandidateUserRepository);
+    public TaskCandidateUserAddedEventHandler taskCandidateUserAddedEventHandler(EntityManager entityManager) {
+        return new TaskCandidateUserAddedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateUserRemovedEventHandler taskCandidateUserRemovedEventHandler(TaskRepository taskRepository,
-                                                                                     TaskCandidateUserRepository taskCandidateUserRepository) {
-        return new TaskCandidateUserRemovedEventHandler(taskRepository, taskCandidateUserRepository);
+    public TaskCandidateUserRemovedEventHandler taskCandidateUserRemovedEventHandler(EntityManager entityManager) {
+        return new TaskCandidateUserRemovedEventHandler(entityManager);
     }
 
     @Bean

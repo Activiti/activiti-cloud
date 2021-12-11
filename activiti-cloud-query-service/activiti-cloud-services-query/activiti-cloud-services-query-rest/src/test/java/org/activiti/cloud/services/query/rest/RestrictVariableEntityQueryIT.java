@@ -29,7 +29,7 @@ import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.security.ProcessVariableLookupRestrictionService;
@@ -107,8 +107,8 @@ public class RestrictVariableEntityQueryIT {
         variableEntity.setTask(taskEntity);
         taskVariableRepository.save(variableEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("1",
-                "testuser");
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("1",
+                                                                                "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");

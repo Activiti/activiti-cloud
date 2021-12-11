@@ -21,7 +21,7 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEven
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.cloud.services.query.model.TaskCandidateGroup;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -62,7 +62,7 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         handler.handle(event);
 
         //then
-        ArgumentCaptor<org.activiti.cloud.services.query.model.TaskCandidateGroup> captor = ArgumentCaptor.forClass(org.activiti.cloud.services.query.model.TaskCandidateGroup.class);
+        ArgumentCaptor<TaskCandidateGroupEntity> captor = ArgumentCaptor.forClass(TaskCandidateGroupEntity.class);
         verify(entityManager).persist(captor.capture());
         assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
         assertThat(captor.getValue().getGroupId()).isEqualTo(event.getEntity().getGroupId());
@@ -73,7 +73,7 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         //given
         CloudTaskCandidateGroupAddedEvent event = buildTaskCandidateGroupAddedEvent();
         Exception cause = new RuntimeException("Something went wrong");
-        doThrow(cause).when(entityManager).persist(any(TaskCandidateGroup.class));
+        doThrow(cause).when(entityManager).persist(any(TaskCandidateGroupEntity.class));
 
         //when
         Throwable throwable = catchThrowable(() -> handler.handle(event));

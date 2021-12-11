@@ -26,8 +26,8 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupReposi
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QTaskEntity;
-import org.activiti.cloud.services.query.model.TaskCandidateGroup;
-import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +78,7 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId(taskId);
         taskRepository.save(taskEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser(taskEntity.getId(), "testuser");
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity(taskEntity.getId(), "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
@@ -97,7 +97,7 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId("2");
         taskRepository.save(taskEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2", "testuser");
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("2", "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("fred");
@@ -116,7 +116,7 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setAssignee("someOneElse");
         taskRepository.save(taskEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2", "testuser");
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("2", "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
@@ -139,7 +139,7 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setOwner("testuser");
         taskRepository.save(taskEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2", "someOneElse");
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("2", "someOneElse");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
@@ -161,7 +161,7 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setAssignee("fred");
         taskRepository.save(taskEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2", "testuser");
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("2", "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("fred");
@@ -179,7 +179,7 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId("3");
         taskRepository.save(taskEntity);
 
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("3", "hr");
+        TaskCandidateGroupEntity taskCandidateGroup = new TaskCandidateGroupEntity("3", "hr");
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
@@ -198,7 +198,7 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId("4");
         taskRepository.save(taskEntity);
 
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("4", "finance");
+        TaskCandidateGroupEntity taskCandidateGroup = new TaskCandidateGroupEntity("4", "finance");
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
@@ -218,7 +218,7 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setAssignee("someOneElse");
         taskRepository.save(taskEntity);
 
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("3", "hr");
+        TaskCandidateGroupEntity taskCandidateGroup = new TaskCandidateGroupEntity("3", "hr");
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
@@ -314,7 +314,7 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId("3");
         taskRepository.save(taskEntity);
 
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("3", "hr");
+        TaskCandidateGroupEntity taskCandidateGroup = new TaskCandidateGroupEntity("3", "hr");
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");

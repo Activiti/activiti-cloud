@@ -137,14 +137,14 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
             foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     @Fetch(FetchMode.SUBSELECT)
-    private Set<TaskCandidateUser> taskCandidateUsers = new LinkedHashSet<>();
+    private Set<TaskCandidateUserEntity> taskCandidateUsers = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
             foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     @Fetch(FetchMode.SUBSELECT)
-    private Set<TaskCandidateGroup> taskCandidateGroups = new LinkedHashSet<>();
+    private Set<TaskCandidateGroupEntity> taskCandidateGroups = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
@@ -380,14 +380,14 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     /**
      * @return the taskCandidateUsers
      */
-    public Set<TaskCandidateUser> getTaskCandidateUsers() {
+    public Set<TaskCandidateUserEntity> getTaskCandidateUsers() {
         return this.taskCandidateUsers;
     }
 
     /**
      * @param taskCandidateUsers the taskCandidateUsers to set
      */
-    public void setTaskCandidateUsers(Set<TaskCandidateUser> taskCandidateUsers) {
+    public void setTaskCandidateUsers(Set<TaskCandidateUserEntity> taskCandidateUsers) {
         this.taskCandidateUsers = taskCandidateUsers;
     }
 
@@ -395,7 +395,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     public List<String> getCandidateUsers(){
         return this.taskCandidateUsers != null ? this.taskCandidateUsers
                        .stream()
-                       .map(TaskCandidateUser::getUserId)
+                       .map(TaskCandidateUserEntity::getUserId)
                        .collect(Collectors.toList()) : Collections.emptyList();
     }
 
@@ -403,21 +403,21 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     public List<String> getCandidateGroups(){
         return this.taskCandidateGroups != null ? this.taskCandidateGroups
                        .stream()
-                       .map(TaskCandidateGroup::getGroupId)
+                       .map(TaskCandidateGroupEntity::getGroupId)
                        .collect(Collectors.toList()): Collections.emptyList();
     }
 
     /**
      * @return the taskCandidateUsers
      */
-    public Set<TaskCandidateGroup> getTaskCandidateGroups() {
+    public Set<TaskCandidateGroupEntity> getTaskCandidateGroups() {
         return this.taskCandidateGroups;
     }
 
     /**
      * @param taskCandidateGroups the taskCandidateGroups to set
      */
-    public void setTaskCandidateGroups(Set<TaskCandidateGroup> taskCandidateGroups) {
+    public void setTaskCandidateGroups(Set<TaskCandidateGroupEntity> taskCandidateGroups) {
         this.taskCandidateGroups = taskCandidateGroups;
     }
 
