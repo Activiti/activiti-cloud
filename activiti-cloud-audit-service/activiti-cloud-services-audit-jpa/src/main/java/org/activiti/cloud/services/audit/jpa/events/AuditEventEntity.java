@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -23,6 +24,7 @@ import java.util.Objects;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "TYPE")
 @Entity(name = "AuditEvent")
+@Immutable
 public abstract class AuditEventEntity {
 
     @Id
