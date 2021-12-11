@@ -27,6 +27,7 @@ public abstract class AuditEventEntity {
 
     @Id
     @GeneratedValue(generator = "audit_sequence", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name="audit_sequence", sequenceName = "audit_sequence", allocationSize=50)
     private Long id;
     private String eventId;
     private Long timestamp;
