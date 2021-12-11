@@ -22,13 +22,14 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.repository.BatchExecutor;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("rawtypes")
+@Transactional(propagation = Propagation.REQUIRES_NEW)
 public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AuditConsumerChannelHandlerImpl.class);
@@ -44,14 +46,10 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
 
     private final APIEventToEntityConverters eventConverters;
 
-    private final BatchExecutor<AuditEventEntity> batchExecutor;
-
     public AuditConsumerChannelHandlerImpl(EventsRepository eventsRepository,
-                                           APIEventToEntityConverters eventConverters,
-                                           BatchExecutor<AuditEventEntity> batchExecutor) {
+                                           APIEventToEntityConverters eventConverters) {
         this.eventsRepository = eventsRepository;
         this.eventConverters = eventConverters;
-        this.batchExecutor = batchExecutor;
     }
 
     @SuppressWarnings("unchecked")
@@ -74,8 +72,8 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
                                                                                 .name());
                 }
             }
-
-            batchExecutor.saveInBatch(entities);
+            // TODO: test and implement flush for batch size
+            eventsRepository.saveAll(entities);
         }
     }
 }

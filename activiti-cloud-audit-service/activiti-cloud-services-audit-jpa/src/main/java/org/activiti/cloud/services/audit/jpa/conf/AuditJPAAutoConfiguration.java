@@ -19,13 +19,10 @@ import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverte
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
 import org.activiti.cloud.services.audit.jpa.converters.*;
-import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.repository.BatchExecutor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.persistence.EntityManagerFactory;
 import java.util.Set;
 
 @Configuration
@@ -295,9 +292,4 @@ public class AuditJPAAutoConfiguration {
         return new ApplicationDeployedEventConverter(eventContextInfoAppender);
     }
 
-    @ConditionalOnMissingBean
-    @Bean
-    public BatchExecutor<AuditEventEntity> batchExecutor(EntityManagerFactory entityManagerFactory) {
-        return new BatchExecutor<>(entityManagerFactory);
-    }
 }

@@ -22,7 +22,6 @@ import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverte
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.repository.BatchExecutor;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,9 +44,6 @@ public class AuditConsumerChannelHandlerImplTest {
 
     @Mock
     private EventsRepository eventsRepository;
-
-    @Mock
-    private BatchExecutor<AuditEventEntity> batchExecutor;
 
     @Mock
     private APIEventToEntityConverters converters;
@@ -76,7 +72,7 @@ public class AuditConsumerChannelHandlerImplTest {
         handler.receiveCloudRuntimeEvent(new HashMap<String,Object>(){{put("id", UUID.randomUUID());}}, events);
 
         //then
-        verify(batchExecutor).saveInBatch(argumentCaptor.capture());
+        verify(eventsRepository).saveAll(argumentCaptor.capture());
         assertThat(argumentCaptor.getValue()).containsOnly(entity);
 
     }
