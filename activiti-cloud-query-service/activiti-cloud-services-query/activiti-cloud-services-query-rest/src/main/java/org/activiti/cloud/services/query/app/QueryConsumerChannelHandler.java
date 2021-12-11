@@ -15,103 +15,34 @@
  */
 package org.activiti.cloud.services.query.app;
 
-import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
-import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
-import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
-import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
-import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
-import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.hibernate.jpa.QueryHints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class QueryConsumerChannelHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(QueryConsumerChannelHandler.class);
 
     private final QueryEventHandlerContext eventHandlerContext;
-    private final EntityManager entityManager;
+    private final QueryEntityGraphFetchingOptimizer optimizer;
 
-    public QueryConsumerChannelHandler(EntityManager entityManager,
-                                       QueryEventHandlerContext eventHandlerContext) {
-        this.entityManager = entityManager;
+    public QueryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext,
+                                       QueryEntityGraphFetchingOptimizer optimizer) {
+        this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;
     }
 
     @StreamListener(QueryConsumerChannels.QUERY_CONSUMER)
     public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        resolveProcessInstanceId(events)
-            .ifPresent(processInstanceId -> {
-                LOGGER.debug("Building entity fetch graph for root process instance: {}", processInstanceId);
-                EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
-
-                findRuntimeEvent(events, CloudVariableEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes("variables"));
-                findRuntimeEvent(events, CloudTaskRuntimeEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes("tasks"));
-                findRuntimeEvent(events, CloudBPMNActivityEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes("activities"));
-                findRuntimeEvent(events, CloudVariableEvent.class, VariableInstance::isTaskVariable)
-                    .ifPresent(e -> entityGraph.addSubgraph("tasks")
-                                               .addAttributeNodes("variables"));
-                findRuntimeEvent(events, CloudIntegrationEvent.class)
-                    .ifPresent(e -> entityGraph.addSubgraph("serviceTasks")
-                                               .addAttributeNodes("integrationContext"));
-
-                Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                       processInstanceId,
-                                                       Map.of(QueryHints.HINT_FETCHGRAPH, entityGraph)))
-                    .ifPresent(rootProcessInstance -> {
-                        LOGGER.debug("Fetched entity graph {} for process instance: {}",
-                                     entityGraph,
-                                     processInstanceId);
-                    });
-            });
+        optimizer.process(events);
 
         eventHandlerContext.handle(events.toArray(new CloudRuntimeEvent[]{}));
-    }
-
-    protected Optional<String> resolveProcessInstanceId(List<CloudRuntimeEvent<?, ?>> events) {
-        if (events.stream().anyMatch(CloudProcessCreatedEvent.class::isInstance)) {
-            return Optional.empty();
-        }
-
-        return events.stream()
-                     .map(CloudRuntimeEvent::getProcessInstanceId)
-                     .filter(Objects::nonNull)
-                     .findFirst();
-    }
-
-    protected Optional<CloudRuntimeEvent<?, ?>> findRuntimeEvent(List<CloudRuntimeEvent<?, ?>> events,
-                                                                 Class<? extends CloudRuntimeEvent<?,?>> runtimeEventClass) {
-        return events.stream()
-              .filter(runtimeEventClass::isInstance)
-              .findFirst();
-    }
-
-    protected <T> Optional<T> findRuntimeEvent(List<CloudRuntimeEvent<?, ?>> events,
-                                               Class<? extends CloudRuntimeEvent<T, ?>> runtimeEventClass,
-                                               Predicate<T> predicate) {
-        return events.stream()
-                     .filter(runtimeEventClass::isInstance)
-                     .map(runtimeEventClass::cast)
-                     .map(CloudRuntimeEvent::getEntity)
-                     .filter(predicate)
-                     .findFirst();
     }
 
 }
