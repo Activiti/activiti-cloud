@@ -37,20 +37,16 @@ public class QueryEventHandlerContext {
 
     public void handle(CloudRuntimeEvent<?, ?>... events) {
         if (events != null) {
-            try {
-                for (CloudRuntimeEvent<?, ?> event : events) {
-                    QueryEventHandler handler = handlers.get(event.getEventType()
-                                                                  .name());
-                    if (handler != null) {
-                        LOGGER.debug("Handling event: " + handler.getHandledEvent());
-                        handler.handle(event);
-                    } else {
-                        LOGGER.debug("No handler found for event: " + event.getEventType()
-                                                                           .name() + ". Ignoring event");
-                    }
+            for (CloudRuntimeEvent<?, ?> event : events) {
+                QueryEventHandler handler = handlers.get(event.getEventType()
+                                                              .name());
+                if (handler != null) {
+                    LOGGER.debug("Handling event: " + handler.getHandledEvent());
+                    handler.handle(event);
+                } else {
+                    LOGGER.debug("No handler found for event: " + event.getEventType()
+                                                                       .name() + ". Ignoring event");
                 }
-            } catch (Exception e) {
-                LOGGER.error("Query Exception", e);
             }
         }
     }
