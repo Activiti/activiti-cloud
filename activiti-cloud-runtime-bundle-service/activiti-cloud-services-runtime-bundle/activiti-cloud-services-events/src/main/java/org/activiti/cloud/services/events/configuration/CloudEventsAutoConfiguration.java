@@ -20,51 +20,14 @@ import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
 import org.activiti.cloud.services.events.converter.ToCloudVariableEventConverter;
-import org.activiti.cloud.services.events.listeners.CloudActivityCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudActivityCompletedProducer;
-import org.activiti.cloud.services.events.listeners.CloudActivityStartedProducer;
-import org.activiti.cloud.services.events.listeners.CloudApplicationDeployedProducer;
-import org.activiti.cloud.services.events.listeners.CloudErrorReceivedProducer;
-import org.activiti.cloud.services.events.listeners.CloudMessageReceivedProducer;
-import org.activiti.cloud.services.events.listeners.CloudMessageSentProducer;
-import org.activiti.cloud.services.events.listeners.CloudMessageSubscriptionCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudMessageWaitingProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessCompletedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessCreatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessResumedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessStartedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessSuspendedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessUpdatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudSequenceFlowTakenProducer;
-import org.activiti.cloud.services.events.listeners.CloudSignalReceivedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskActivatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskAssignedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCandidateGroupAddedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCandidateGroupRemovedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCandidateUserAddedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCandidateUserRemovedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCompletedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCreatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskSuspendedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskUpdatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerExecutedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerFailedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerFiredProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerRetriesDecrementedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerScheduledProducer;
-import org.activiti.cloud.services.events.listeners.CloudVariableCreatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudVariableDeletedProducer;
-import org.activiti.cloud.services.events.listeners.CloudVariableUpdatedProducer;
-import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.cloud.services.events.listeners.*;
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -109,12 +72,24 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
     public MessageProducerCommandContextCloseListener apiMessageProducerCommandContextCloseListener(ProcessEngineChannels processEngineChannels,
-                                                                                                    ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
-                                                                                                    RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+            ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
+            RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
         return new MessageProducerCommandContextCloseListener(processEngineChannels,
-                                                              executionContextMessageBuilderFactory,
-                                                              runtimeBundleInfoAppender);
+                executionContextMessageBuilderFactory,
+                runtimeBundleInfoAppender);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "enabled")
+    public MessageProducerCommandContextCloseListener apiMessageProducerCommandContextCloseListenerBridge(
+            ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
+            RuntimeBundleInfoAppender runtimeBundleInfoAppender, StreamBridge streamBridge,
+            @Value("${activiti.stream.cloud.functional.binding.auditProducer.name:auditProducer-out-0}") String auditProducerBindingName) {
+        return new MessageProducerCommandContextCloseListener(executionContextMessageBuilderFactory,
+                runtimeBundleInfoAppender, streamBridge, auditProducerBindingName);
     }
 
     @Bean
@@ -385,8 +360,9 @@ public class CloudEventsAutoConfiguration {
                                                   eventsAggregator);
     }
 
-    @ConditionalOnMissingBean
     @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
     public CloudProcessDeployedProducer cloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                                      ProcessEngineChannels processEngineChannels,
                                                                      RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
@@ -443,14 +419,24 @@ public class CloudEventsAutoConfiguration {
                                                              eventsAggregator);
     }
 
-    @ConditionalOnMissingBean
     @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
     public CloudApplicationDeployedProducer cloudApplicationDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                                             ProcessEngineChannels processEngineChannels,
-                                                                             RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
+            ProcessEngineChannels processEngineChannels,
+            RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
         return new CloudApplicationDeployedProducer(runtimeBundleInfoAppender,
                 processEngineChannels,
                 runtimeBundleMessageBuilderFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "enabled")
+    public CloudApplicationDeployedProducer cloudApplicationDeployedProducerBridge(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+            RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory, StreamBridge streamBridge,
+            @Value("${activiti.stream.cloud.functional.binding.auditProducer.name:auditProducer-out-0}") String auditProducerBindingName) {
+        return new CloudApplicationDeployedProducer(runtimeBundleInfoAppender, runtimeBundleMessageBuilderFactory, streamBridge, auditProducerBindingName);
     }
 
 }

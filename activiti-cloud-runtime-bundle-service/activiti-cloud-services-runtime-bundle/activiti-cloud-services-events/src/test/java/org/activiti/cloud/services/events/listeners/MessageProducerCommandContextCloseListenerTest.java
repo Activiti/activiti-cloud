@@ -24,9 +24,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.Collections;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -45,7 +43,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.messaging.Message;
@@ -72,7 +69,6 @@ public class MessageProducerCommandContextCloseListenerTest {
     private static final String MOCK_SUPER_EXECTUION_ID = "mockSuperExectuionId";
     private static final String MOCK_PROCESS_DEFINITION_NAME = "mockProcessDefinitionName";
 
-    @InjectMocks
     private MessageProducerCommandContextCloseListener closeListener;
 
     @Mock
@@ -113,6 +109,7 @@ public class MessageProducerCommandContextCloseListenerTest {
     @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
+        closeListener = new MessageProducerCommandContextCloseListener(producer, messageBuilderChainFactory, runtimeBundleInfoAppender);
         ProcessInstance processInstance = new ProcessInstanceImpl();
         event = new CloudProcessCreatedEventImpl(processInstance);
 

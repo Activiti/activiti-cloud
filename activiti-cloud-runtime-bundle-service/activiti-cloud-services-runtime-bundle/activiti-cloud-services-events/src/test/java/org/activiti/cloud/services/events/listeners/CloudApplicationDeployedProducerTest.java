@@ -15,6 +15,17 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationDeployedEvent;
 import org.activiti.api.runtime.event.impl.ApplicationDeployedEventImpl;
@@ -30,27 +41,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class CloudApplicationDeployedProducerTest {
 
-    @InjectMocks
     private CloudApplicationDeployedProducer cloudApplicationDeployedProducer;
 
     @Mock
@@ -74,6 +70,7 @@ public class CloudApplicationDeployedProducerTest {
     @BeforeEach
     public void setUp() {
         initMocks(this);
+        cloudApplicationDeployedProducer = new CloudApplicationDeployedProducer(runtimeBundleInfoAppender, producer, runtimeBundleMessageBuilderFactory);
         when(producer.auditProducer()).thenReturn(auditProducer);
         when(runtimeBundleMessageBuilderFactory.create()).thenReturn(messageBuilderAppenderChain);
     }

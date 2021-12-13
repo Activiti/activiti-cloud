@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.events.listeners;
 
 import java.util.List;
-
+import java.util.Objects;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -25,6 +25,7 @@ import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -38,20 +39,42 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    private final StreamBridge streamBridge;
+    private final String auditProducerBindingName;
 
     public MessageProducerCommandContextCloseListener(ProcessEngineChannels producer,
             MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory,
-            RuntimeBundleInfoAppender runtimeBundleInfoAppender ) {
+            RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
         Assert.notNull(producer,
-                       "producer must not be null");
+                "producer must not be null");
         Assert.notNull(messageBuilderChainFactory,
-                       "messageBuilderChainFactory must not be null");
+                "messageBuilderChainFactory must not be null");
         Assert.notNull(runtimeBundleInfoAppender,
                 "runtimeBundleInfoAppender must not be null");
 
         this.producer = producer;
         this.messageBuilderChainFactory = messageBuilderChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+        this.streamBridge = null;
+        this.auditProducerBindingName = null;
+    }
+
+    public MessageProducerCommandContextCloseListener(MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory,
+            RuntimeBundleInfoAppender runtimeBundleInfoAppender, StreamBridge streamBridge, String auditProducerBindingName) {
+        Assert.notNull(streamBridge,
+                "streamBridge must not be null");
+        Assert.notNull(auditProducerBindingName,
+                "auditProducerBindingName must not be null");
+        Assert.notNull(messageBuilderChainFactory,
+                "messageBuilderChainFactory must not be null");
+        Assert.notNull(runtimeBundleInfoAppender,
+                "runtimeBundleInfoAppender must not be null");
+
+        this.messageBuilderChainFactory = messageBuilderChainFactory;
+        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+        this.streamBridge = streamBridge;
+        this.auditProducerBindingName = auditProducerBindingName;
+        this.producer = null;
     }
 
     @Override
@@ -63,17 +86,22 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
             // Add runtime bundle context attributes to every event
             CloudRuntimeEvent<?, ?>[] payload = events.stream()
-                                                      .filter(CloudRuntimeEventImpl.class::isInstance)
-                                                      .map(CloudRuntimeEventImpl.class::cast)
-                                                      .map(runtimeBundleInfoAppender::appendRuntimeBundleInfoTo)
-                                                      .toArray(CloudRuntimeEvent<?, ?>[]::new);
+                    .filter(CloudRuntimeEventImpl.class::isInstance)
+                    .map(CloudRuntimeEventImpl.class::cast)
+                    .map(runtimeBundleInfoAppender::appendRuntimeBundleInfoTo)
+                    .toArray(CloudRuntimeEvent<?, ?>[]::new);
 
             // Inject message headers with null execution context as there may be events from several process instances
             Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderChainFactory.create(rootExecutionContext)
-                                                                                   .withPayload(payload)
-                                                                                   .build();
+                    .withPayload(payload)
+                    .build();
+
             // Send message to audit producer channel
-            producer.auditProducer().send(message);
+            if (Objects.nonNull(producer)) {
+                producer.auditProducer().send(message);
+            } else {
+                streamBridge.send(auditProducerBindingName, message);
+            }
         }
     }
 

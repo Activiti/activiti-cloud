@@ -123,5 +123,12 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-stream</artifactId>
+      <type>test-jar</type>
+      <classifier>test-binder</classifier>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
