@@ -16,11 +16,8 @@
 package org.activiti.cloud.conf;
 
 import java.util.Set;
-
 import javax.persistence.EntityManager;
-
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
-import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
@@ -35,55 +32,18 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateUserReposit
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.events.handlers.ApplicationDeployedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.BPMNActivityCancelledEventHandler;
-import org.activiti.cloud.services.query.events.handlers.BPMNActivityCompletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.BPMNActivityStartedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.BPMNSequenceFlowTakenEventHandler;
-import org.activiti.cloud.services.query.events.handlers.IntegrationErrorReceivedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.IntegrationRequestedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.IntegrationResultReceivedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessCancelledEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessCompletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessCreatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessDeployedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessResumedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessStartedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessSuspendedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessUpdatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessVariableDeletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdateEventHandler;
-import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdater;
-import org.activiti.cloud.services.query.events.handlers.QueryEventHandler;
-import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
-import org.activiti.cloud.services.query.events.handlers.TaskActivatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskAssignedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCancelledEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCandidateGroupAddedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCandidateGroupRemovedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCandidateUserAddedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCandidateUserRemovedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCompletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskCreatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskSuspendedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskUpdatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskVariableDeletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskVariableUpdatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.TaskVariableUpdater;
-import org.activiti.cloud.services.query.events.handlers.VariableCreatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.VariableDeletedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHandler;
+import org.activiti.cloud.services.query.events.handlers.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableBinding(QueryConsumerChannels.class)
 public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "activiti.stream.cloud.functional.binding", havingValue = "disabled", matchIfMissing = true)
     public QueryConsumerChannelHandler queryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext) {
         return new QueryConsumerChannelHandler(eventHandlerContext);
     }
