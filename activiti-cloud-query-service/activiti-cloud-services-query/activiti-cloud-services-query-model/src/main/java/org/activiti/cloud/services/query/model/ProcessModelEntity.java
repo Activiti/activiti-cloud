@@ -15,11 +15,16 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity(name = "ProcessModel")
 @Table(name = "PROCESS_MODEL")
+@DynamicInsert
+@DynamicUpdate
 public class ProcessModelEntity {
 
     @Id

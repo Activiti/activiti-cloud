@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.query.model;
 
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -26,6 +28,8 @@ import java.util.Objects;
                 @Index(name = "pd_name_idx", columnList = "name"),
                 @Index(name = "pd_key_idx", columnList = "processDefinitionKey")
         })
+@DynamicInsert
+@DynamicUpdate
 public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements CloudProcessDefinition {
 
     @Id

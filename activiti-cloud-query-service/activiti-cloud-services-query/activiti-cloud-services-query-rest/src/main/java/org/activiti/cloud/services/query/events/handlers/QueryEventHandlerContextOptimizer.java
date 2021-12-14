@@ -29,6 +29,7 @@ import org.hibernate.jpa.QueryHints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.AttributeNode;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import java.util.List;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class QueryEventHandlerContextOptimizer {
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContextOptimizer.class);
@@ -77,17 +79,22 @@ public class QueryEventHandlerContextOptimizer {
                                                .addAttributeNodes("taskCandidateGroups"));
                 findRuntimeEvent(events,
                                  CloudIntegrationEvent.class)
-                    .ifPresent(e -> entityGraph.addSubgraph("serviceTasks")
-                                               .addAttributeNodes("integrationContext"));
+                    .ifPresent(e -> {
+                        entityGraph.addAttributeNodes("serviceTasks");
+                        entityGraph.addSubgraph("serviceTasks")
+                                   .addAttributeNodes("integrationContext");
+                    });
 
                 Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
                                                        processInstanceId,
-                                                       Map.of(QueryHints.HINT_FETCHGRAPH,
+                                                       Map.of(QueryHints.HINT_LOADGRAPH,
                                                               entityGraph)))
                         .ifPresent(rootProcessInstance -> {
-                            LOGGER.debug("Fetched entity graph {} for process instance: {}",
-                                         entityGraph,
-                                         processInstanceId);
+                            if (LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("Fetched entity graph attributes {} for process instance: {}",
+                                             entityGraph.getAttributeNodes().stream().map(AttributeNode::getAttributeName).collect(Collectors.toList()),
+                                             processInstanceId);
+                            };
                         });
             });
 

@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -34,6 +36,8 @@ import java.util.*;
 				@Index(name="pi_processDefinitionKey_idx", columnList="processDefinitionKey", unique=false),
                 @Index(name="pi_processDefinitionName_idx", columnList="processDefinitionName", unique=false)
         })
+@DynamicInsert
+@DynamicUpdate
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
@@ -121,7 +125,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
         , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Set<ServiceTaskEntity> serviceTasks = new LinkedHashSet<>();
+    private List<ServiceTaskEntity> serviceTasks = new LinkedList<>();
 
     @JsonIgnore
     @OneToMany(fetch=FetchType.LAZY)
@@ -380,11 +384,11 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.activities = bpmnActivities;
     }
 
-    public Set<ServiceTaskEntity> getServiceTasks() {
+    public List<ServiceTaskEntity> getServiceTasks() {
         return serviceTasks;
     }
 
-    public void setServiceTasks(Set<ServiceTaskEntity> serviceTasks) {
+    public void setServiceTasks(List<ServiceTaskEntity> serviceTasks) {
         this.serviceTasks = serviceTasks;
     }
 

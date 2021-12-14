@@ -16,12 +16,14 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = ActivityCancelledAuditEventEntity.ACTIVITY_CANCELLED_EVENT)
 @DiscriminatorValue(value = ActivityCancelledAuditEventEntity.ACTIVITY_CANCELLED_EVENT)
+@DynamicInsert
 public class ActivityCancelledAuditEventEntity extends BPMNActivityAuditEventEntity {
 
     protected static final String ACTIVITY_CANCELLED_EVENT = "ActivityCancelledEvent";

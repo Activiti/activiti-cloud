@@ -16,12 +16,14 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = ProcessCancelledAuditEventEntity.PROCESS_CANCELLED_EVENT)
 @DiscriminatorValue(value = ProcessCancelledAuditEventEntity.PROCESS_CANCELLED_EVENT)
+@DynamicInsert
 public class ProcessCancelledAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_CANCELLED_EVENT = "ProcessCancelledEvent";

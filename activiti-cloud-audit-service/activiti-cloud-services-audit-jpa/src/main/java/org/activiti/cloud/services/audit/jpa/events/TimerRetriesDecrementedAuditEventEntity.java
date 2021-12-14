@@ -16,12 +16,14 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecrementedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = TimerRetriesDecrementedAuditEventEntity.TIMER_RETRIES_DECREMENTED_EVENT)
 @DiscriminatorValue(value = TimerRetriesDecrementedAuditEventEntity.TIMER_RETRIES_DECREMENTED_EVENT)
+@DynamicInsert
 public class TimerRetriesDecrementedAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_RETRIES_DECREMENTED_EVENT = "TimerRetriesDecrementedEvent";

@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -31,6 +33,8 @@ import java.util.*;
     @Index(name="integration_context_processInstance_idx", columnList="processInstanceId", unique=false),
     @Index(name="integration_context_processInstance_elementId_idx", columnList="processInstanceId,clientId,executionId", unique=true)
 })
+@DynamicInsert
+@DynamicUpdate
 public class IntegrationContextEntity extends ActivitiEntityMetadata implements CloudIntegrationContext {
 
     public static final int ERROR_MESSAGE_LENGTH = 255;
@@ -84,7 +88,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private IntegrationContextStatus status;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
     @MapsId
     @JoinColumn(name = "id")
     private ServiceTaskEntity serviceTask;

@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -37,6 +39,8 @@ import java.util.Objects;
 )
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@DynamicInsert
+@DynamicUpdate
 public class TaskCandidateUserEntity {
 
     @Id

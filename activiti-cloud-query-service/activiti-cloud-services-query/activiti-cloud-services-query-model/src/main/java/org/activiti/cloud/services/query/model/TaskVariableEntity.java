@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -29,6 +31,8 @@ import java.util.Objects;
                 @Index(name = "task_var_name_idx", columnList = "name", unique = false),
                 @Index(name = "task_var_executionId_idx", columnList = "executionId", unique = false)
 		})
+@DynamicInsert
+@DynamicUpdate
 public class TaskVariableEntity extends AbstractVariableEntity {
 
     private String taskId;

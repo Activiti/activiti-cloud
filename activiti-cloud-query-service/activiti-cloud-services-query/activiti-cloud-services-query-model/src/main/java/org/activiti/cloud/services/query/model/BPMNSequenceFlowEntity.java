@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import org.activiti.api.process.model.BPMNSequenceFlow;
+import org.hibernate.annotations.Immutable;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -29,6 +30,7 @@ import java.util.Objects;
     @Index(name="bpmn_sequence_flow_processInstance_elementId_idx", columnList="processInstanceId,elementId", unique=false),
     @Index(name="bpmn_sequence_flow_eventId_idx", columnList="eventId", unique=true)
 })
+@Immutable
 public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BPMNSequenceFlow {
 
     /** The unique identifier of this historic activity instance. */

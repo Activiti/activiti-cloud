@@ -17,6 +17,8 @@ package org.activiti.cloud.services.query.model;
 
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.Entity;
 import javax.persistence.Index;
@@ -28,6 +30,8 @@ import javax.persistence.Table;
     @Index(name="bpmn_activity_processInstance_idx", columnList="processInstanceId", unique=false),
     @Index(name="bpmn_activity_processInstance_elementId_idx", columnList="processInstanceId,elementId,executionId", unique=true)
 })
+@DynamicInsert
+@DynamicUpdate
 public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudBPMNActivity {
 
     public BPMNActivityEntity() { }

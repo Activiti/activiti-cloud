@@ -16,12 +16,14 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT)
 @DiscriminatorValue(value = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT)
+@DynamicInsert
 public class VariableCreatedEventEntity extends VariableAuditEventEntity {
 
     protected static final String VARIABLE_CREATED_EVENT = "VariableCreatedEvent";

@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.query.model;
 
 import org.activiti.cloud.api.process.model.CloudApplication;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -24,6 +26,8 @@ import java.util.Objects;
 
 @Entity(name = "Application")
 @Table(name = "APPLICATION")
+@DynamicInsert
+@DynamicUpdate
 public class ApplicationEntity implements CloudApplication{
     @Id
     private String id;

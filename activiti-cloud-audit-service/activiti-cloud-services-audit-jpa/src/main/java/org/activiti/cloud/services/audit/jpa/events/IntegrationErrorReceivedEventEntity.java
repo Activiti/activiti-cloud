@@ -17,6 +17,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @Entity(name = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
 @DiscriminatorValue(value = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
+@DynamicInsert
 public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity {
 
     private static final int ERROR_MESSAGE_LENGTH = 255;

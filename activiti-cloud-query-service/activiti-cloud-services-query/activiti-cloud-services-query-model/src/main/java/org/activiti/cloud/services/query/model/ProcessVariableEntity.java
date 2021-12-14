@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
@@ -28,6 +31,8 @@ import java.util.Objects;
                 @Index(name = "proc_var_name_idx", columnList = "name", unique = false),
                 @Index(name = "proc_var_executionId_idx", columnList = "executionId", unique = false)
         })
+@DynamicInsert
+@DynamicUpdate
 public class ProcessVariableEntity extends AbstractVariableEntity {
 
     public ProcessVariableEntity() {

@@ -16,12 +16,14 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = ProcessStartedAuditEventEntity.PROCESS_STARTED_EVENT)
 @DiscriminatorValue(value = ProcessStartedAuditEventEntity.PROCESS_STARTED_EVENT)
+@DynamicInsert
 public class ProcessStartedAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_STARTED_EVENT = "ProcessStartedEvent";

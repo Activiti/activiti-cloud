@@ -359,9 +359,7 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator.sendAll();
 
         //then
-        await()
-            .forever()
-            .untilAsserted(() -> {
+        await().untilAsserted(() -> {
             assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
             assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
         });
@@ -469,7 +467,6 @@ public class QueryAdminProcessServiceTasksIT {
 
         //then
         await()
-            .forever()
             .untilAsserted(() -> {
                 assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
                 assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
@@ -503,9 +500,7 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator.sendAll();
 
         //when
-        await()
-            .forever()
-            .untilAsserted(() -> {
+        await().untilAsserted(() -> {
 
                 ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/{serviceTaskId}/integration-context",
                                                                                                    HttpMethod.GET,
@@ -534,7 +529,6 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator.sendAll();
 
         await()
-            .forever()
             .untilAsserted(() -> {
 
                 ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange("/admin/v1/service-tasks/{serviceTaskId}/integration-context",

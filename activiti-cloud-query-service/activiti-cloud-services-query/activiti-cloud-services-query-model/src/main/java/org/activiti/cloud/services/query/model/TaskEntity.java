@@ -22,6 +22,8 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -37,6 +39,8 @@ import java.util.stream.Collectors;
                 @Index(name = "task_processInstance_idx", columnList = "processInstanceId", unique = false),
                 @Index(name = "task_processDefinitionName_idx", columnList = "processDefinitionName", unique = false)
         })
+@DynamicInsert
+@DynamicUpdate
 public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask {
 
     /**

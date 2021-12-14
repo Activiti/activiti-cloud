@@ -17,17 +17,18 @@ package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
+import javax.persistence.*;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity(name="ServiceTask")
 @Table(name="BPMN_ACTIVITY")
 @Where(clause = "activity_type='serviceTask'")
+@DynamicInsert
+@DynamicUpdate
 public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
 
     @JsonIgnore
