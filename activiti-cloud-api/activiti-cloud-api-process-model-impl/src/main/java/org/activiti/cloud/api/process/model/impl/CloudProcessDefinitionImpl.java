@@ -27,6 +27,7 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
     private String description;
     private int version;
     private String formKey;
+    private String category;
 
     public CloudProcessDefinitionImpl() {
     }
@@ -39,6 +40,7 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
         description = processDefinition.getDescription();
         version = processDefinition.getVersion();
         formKey = processDefinition.getFormKey();
+        category = processDefinition.getCategory();
     }
 
     @Override
@@ -93,5 +95,14 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
 
     public void setFormKey(String formKey) {
         this.formKey = formKey;
+    }
+
+    @Override
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

@@ -41,6 +41,7 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
     private String description;
     private int version;
     private String formKey;
+    private String category;
 
     public ProcessDefinitionEntity() {
     }
@@ -109,6 +110,15 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
 
     public void setFormKey(String formKey) {
         this.formKey = formKey;
+    }
+
+    @Override
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     @Override
