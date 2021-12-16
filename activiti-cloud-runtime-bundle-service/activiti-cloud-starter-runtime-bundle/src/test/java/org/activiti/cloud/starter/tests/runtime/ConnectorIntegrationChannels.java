@@ -25,6 +25,7 @@ public interface ConnectorIntegrationChannels {
     String VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER = "varMappingIntegrationEventsConsumer";
     String CONSTANTS_INTEGRATION_EVENTS_CONSUMER = "constantsIntegrationEventsConsumer";
     String MEALS_CONNECTOR_CONSUMER  = "mealsConnectorConsumer";
+    String VAR_MAPPING_LOOP_CONSUMER = "varMappingLoopConsumer";
 
     @Input(INTEGRATION_EVENTS_CONSUMER)
     SubscribableChannel integrationEventsConsumer();
@@ -40,5 +41,8 @@ public interface ConnectorIntegrationChannels {
 
     @Input(MEALS_CONNECTOR_CONSUMER)
     SubscribableChannel mealsConnectorConsumer();
+
+    @Input(VAR_MAPPING_LOOP_CONSUMER)
+    SubscribableChannel varMappingLoopConsumer();
 
 }

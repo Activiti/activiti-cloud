@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.assertj.core.api.Assertions.tuple;
 
 @TestComponent
@@ -253,4 +254,12 @@ public class ServiceTaskConsumerHandler {
 
         sendIntegrationResult(integrationRequest, integrationContext);
     }
+    @StreamListener(value = ConnectorIntegrationChannels.VAR_MAPPING_LOOP_CONSUMER)
+    public void varMappingLoopConnector(IntegrationRequest integrationRequest) {
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        integrationContext.addOutBoundVariables(integrationContext.getInBoundVariables());
+        integrationContext.addOutBoundVariable("output",integrationContext.getInBoundVariable("input"));
+        sendIntegrationResult(integrationRequest, integrationContext);
+    }
+
 }

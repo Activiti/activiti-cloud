@@ -15,18 +15,24 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import org.activiti.cloud.starter.tests.services.audit.AuditProducerIT;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingProperties;
 
 import java.util.AbstractMap;
 import java.util.Map;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
+@ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
+
+
 
     @Test
     public void shouldConfigureDefaultConnectorBindingProperties() {

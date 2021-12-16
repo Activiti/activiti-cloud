@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -26,6 +27,9 @@ import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationI
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.cloud.starter.tests.services.audit.AuditConsumerStreamHandler;
+import org.activiti.cloud.starter.tests.services.audit.AuditProducerIT;
+import org.activiti.cloud.starter.tests.services.audit.ServicesAuditITConfiguration;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -40,6 +44,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
@@ -50,11 +55,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+@ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,
+@ContextConfiguration(classes = {RuntimeITConfiguration.class, ServicesAuditITConfiguration.class},
     initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public abstract class AbstractMQServiceTaskIT {
+
+    @Autowired
+    private AuditConsumerStreamHandler streamHandler;
 
     @Autowired
     protected RuntimeService runtimeService;
@@ -342,4 +351,62 @@ public abstract class AbstractMQServiceTaskIT {
                         Map.of("meal", "pasta", "size", "medium"))));
         });
     }
+
+    @Test
+    public void should_supportVariableMappingAfterLoopingBack() {
+        //given
+        final CloudProcessInstance processInstance = processInstanceRestTemplate.startProcess(
+            "Process_N4qkN051N").getBody();
+
+        //when
+        Collection<CloudTask> tasks = processInstanceRestTemplate.getTasks(
+            processInstance.getId()).getBody().getContent();
+        assertThat(tasks).hasSize(1);
+        taskRestTemplate.complete(tasks.iterator().next(),
+            TaskPayloadBuilder.complete()
+                .withVariable("formInput", "provided-it1")
+                .build());
+
+        //then
+        await().untilAsserted(() ->
+                assertThat(processInstanceRestTemplate.getTasks(processInstance.getId()).getBody().getContent())
+                    .extracting(CloudTask::getName)
+                    .containsExactly("Enter values"));
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variables = processInstanceRestTemplate.getVariables(
+            processInstance.getId());
+        assertThat(variables.getBody())
+            .extracting(
+                CloudVariableInstance::getName,
+                CloudVariableInstance::getValue
+            ).containsExactly(
+                tuple("input", "provided-it1"),
+                tuple("processedValue", "provided-it1")
+            );
+
+        //when
+        tasks = processInstanceRestTemplate.getTasks(
+            processInstance.getId()).getBody().getContent();
+        taskRestTemplate.complete(tasks.iterator().next(),
+            TaskPayloadBuilder.complete()
+                .withVariable("formInput", "go")
+                .build());
+
+        await().untilAsserted(() ->
+            assertThat(processInstanceRestTemplate.getTasks(processInstance.getId()).getBody().getContent())
+                .extracting(CloudTask::getName)
+                .containsExactly("Wait")
+        );
+
+        variables = processInstanceRestTemplate.getVariables(processInstance.getId());
+        assertThat(variables.getBody())
+            .extracting(
+                CloudVariableInstance::getName,
+                CloudVariableInstance::getValue
+            ).containsExactly(
+                tuple("input", "go"),
+                tuple("processedValue", "go")
+            );
+
+    }
+
 }
