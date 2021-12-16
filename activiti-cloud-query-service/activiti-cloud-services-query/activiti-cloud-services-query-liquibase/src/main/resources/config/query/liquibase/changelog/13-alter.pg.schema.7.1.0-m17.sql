@@ -1,2 +1,2 @@
 alter table process_definition
-    add category varchar(255);
+    add column category varchar(255);
