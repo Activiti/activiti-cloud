@@ -139,6 +139,7 @@ public class AuditProducerIT {
 
     public static final String AUDIT_PRODUCER_IT = "AuditProducerIT";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
+    private static final String SIMPLE_PROCESS_CATEGORY = "test-category";
     private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
 
     @Value("${activiti.keycloak.test-user}")
@@ -191,11 +192,15 @@ public class AuditProducerIT {
             .extracting(event -> event.getEntity().getKey())
             .contains(SIMPLE_PROCESS);
 
-        CloudProcessDeployedEvent processDeployedEvent = processDeployedEvents.stream().filter(event -> SIMPLE_PROCESS.equals(event.getEntity().getKey()))
+        CloudProcessDeployedEvent processDeployedEvent = processDeployedEvents
+            .stream()
+            .filter(event -> SIMPLE_PROCESS.equals(event.getEntity().getKey()))
             .findFirst().orElse(null);
+
         assertThat(processDeployedEvent).isNotNull();
         assertThat(processDeployedEvent.getProcessModelContent())
             .isXmlEqualToContentOf(new File("src/test/resources/processes/SimpleProcess.bpmn20.xml"));
+        assertThat(processDeployedEvent.getEntity().getCategory()).isEqualTo(SIMPLE_PROCESS_CATEGORY);
     }
 
     @Test
