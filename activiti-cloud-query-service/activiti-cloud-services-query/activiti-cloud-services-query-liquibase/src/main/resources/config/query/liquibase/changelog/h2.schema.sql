@@ -61,6 +61,7 @@ create table process_definition
     form_key               varchar(255),
     process_definition_key varchar(255),
     name                   varchar(255),
+    category               varchar(255),
     version                integer      not null,
     primary key (id)
 );

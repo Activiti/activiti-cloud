@@ -55,6 +55,8 @@ import org.springframework.util.StreamUtils;
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class QueryProcessDefinitionIT {
 
+    public static final String TEST_CATEGORY = "Test category";
+
     @Autowired
     private KeycloakTokenProducer keycloakTokenProducer;
 
@@ -88,11 +90,13 @@ public class QueryProcessDefinitionIT {
         firstProcessDefinition.setId(UUID.randomUUID().toString());
         firstProcessDefinition.setKey("myFirstProcessKey");
         firstProcessDefinition.setName("My First Process");
+        firstProcessDefinition.setCategory(TEST_CATEGORY);
 
         ProcessDefinitionImpl secondProcessDefinition = new ProcessDefinitionImpl();
         secondProcessDefinition.setId(UUID.randomUUID().toString());
         secondProcessDefinition.setKey("mySecondProcess");
         secondProcessDefinition.setName("My second Process");
+        secondProcessDefinition.setCategory(TEST_CATEGORY);
         producer.send(new CloudProcessDeployedEventImpl(firstProcessDefinition),
                       new CloudProcessDeployedEventImpl(secondProcessDefinition));
 
@@ -104,13 +108,16 @@ public class QueryProcessDefinitionIT {
                 .isNotNull()
                 .extracting(ProcessDefinition::getId,
                             ProcessDefinition::getName,
-                            ProcessDefinition::getKey)
+                            ProcessDefinition::getKey,
+                            ProcessDefinition::getCategory)
                 .containsExactly(tuple(firstProcessDefinition.getId(),
                                        "My First Process",
-                                       "myFirstProcessKey"),
+                                       "myFirstProcessKey",
+                                        TEST_CATEGORY),
                                  tuple(secondProcessDefinition.getId(),
                                        "My second Process",
-                                       "mySecondProcess"));
+                                       "mySecondProcess",
+                                        TEST_CATEGORY));
     }
 
     @Test

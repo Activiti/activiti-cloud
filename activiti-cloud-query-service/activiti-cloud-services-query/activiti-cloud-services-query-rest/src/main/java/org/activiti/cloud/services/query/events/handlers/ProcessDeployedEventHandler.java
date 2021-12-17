@@ -55,6 +55,7 @@ public class ProcessDeployedEventHandler implements QueryEventHandler {
         processDefinition.setKey(eventProcessDefinition.getKey());
         processDefinition.setName(eventProcessDefinition.getName());
         processDefinition.setVersion(eventProcessDefinition.getVersion());
+        processDefinition.setCategory(eventProcessDefinition.getCategory());
         processDefinition.setServiceType(processDeployedEvent.getServiceType());
         processDefinitionRepository.save(processDefinition);
 
