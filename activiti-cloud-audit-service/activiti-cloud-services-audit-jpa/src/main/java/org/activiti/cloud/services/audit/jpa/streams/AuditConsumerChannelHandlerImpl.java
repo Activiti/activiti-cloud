@@ -72,7 +72,6 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
                                                                                 .name());
                 }
             }
-            // TODO: test and implement flush for batch size
             eventsRepository.saveAll(entities);
         }
     }
