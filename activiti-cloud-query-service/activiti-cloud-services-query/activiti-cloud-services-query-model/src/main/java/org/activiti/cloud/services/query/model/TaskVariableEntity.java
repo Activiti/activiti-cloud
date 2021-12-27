@@ -35,6 +35,11 @@ import java.util.Objects;
 @DynamicUpdate
 public class TaskVariableEntity extends AbstractVariableEntity {
 
+    @Id
+    @GeneratedValue(generator = "task_variable_sequence", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name="task_variable_sequence", sequenceName = "task_variable_sequence", allocationSize=50)
+    private Long id;
+
     private String taskId;
 
     @JsonIgnore
@@ -59,8 +64,7 @@ public class TaskVariableEntity extends AbstractVariableEntity {
                           Date createTime,
                           Date lastUpdatedTime,
                           String executionId) {
-        super(id,
-              type,
+        super(type,
               name,
               processInstanceId,
               serviceName,
@@ -72,7 +76,13 @@ public class TaskVariableEntity extends AbstractVariableEntity {
               lastUpdatedTime,
               executionId);
 
+        this.id = id;
         this.taskId = taskId;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
     }
 
     public TaskEntity getTask() {

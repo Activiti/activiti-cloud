@@ -26,11 +26,6 @@ import java.util.Objects;
 @MappedSuperclass
 public abstract class AbstractVariableEntity extends ActivitiEntityMetadata implements CloudVariableInstance {
 
-    @Id
-    @GeneratedValue(generator = "variable_sequence", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="variable_sequence", sequenceName = "variable_sequence", allocationSize=50)
-    private Long id;
-
     private String type;
 
     private String name;
@@ -60,8 +55,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     public AbstractVariableEntity() {
     }
 
-    public AbstractVariableEntity(Long id,
-                          String type,
+    public AbstractVariableEntity(String type,
                           String name,
                           String processInstanceId,
                           String serviceName,
@@ -77,7 +71,6 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
               serviceVersion,
               appName,
               appVersion);
-        this.id = id;
         this.type = type;
         this.name = name;
         this.processInstanceId = processInstanceId;
@@ -86,9 +79,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         this.executionId = executionId;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public abstract Long getId();
 
     @Override
     public String getType() {
@@ -183,7 +174,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
             return false;
         }
         AbstractVariableEntity other = (AbstractVariableEntity) obj;
-        return id != null && Objects.equals(id, other.id);
+        return getId() != null && Objects.equals(getId(), other.getId());
     }
 
  }

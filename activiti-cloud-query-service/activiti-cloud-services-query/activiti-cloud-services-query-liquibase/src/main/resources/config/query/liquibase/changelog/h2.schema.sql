@@ -1,4 +1,5 @@
-create sequence variable_sequence start with 1 increment by 50;
+create sequence process_variable_sequence start with 1 increment by 50;
+create sequence task_variable_sequence start with 1 increment by 50;
 
 create table bpmn_activity
 (

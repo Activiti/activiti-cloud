@@ -18,9 +18,7 @@ package org.activiti.cloud.services.query.model;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 
@@ -34,6 +32,12 @@ import java.util.Objects;
 @DynamicInsert
 @DynamicUpdate
 public class ProcessVariableEntity extends AbstractVariableEntity {
+
+    @Id
+    @GeneratedValue(generator = "process_variable_sequence", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name="process_variable_sequence", sequenceName = "process_variable_sequence", allocationSize=50)
+    private Long id;
+
 
     public ProcessVariableEntity() {
     }
@@ -50,8 +54,7 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
                           Date createTime,
                           Date lastUpdatedTime,
                           String executionId) {
-        super(id,
-              type,
+        super(type,
               name,
               processInstanceId,
               serviceName,
@@ -63,8 +66,14 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
               lastUpdatedTime,
               executionId);
 
+        this.id = id;
+
     }
 
+    @Override
+    public Long getId() {
+        return id;
+    }
     @Override
     public String getTaskId() {
         return null;
