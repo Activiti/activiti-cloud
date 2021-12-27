@@ -28,6 +28,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
 
     @Id
     @GeneratedValue(generator = "variable_sequence", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name="variable_sequence", sequenceName = "variable_sequence", allocationSize=50)
     private Long id;
 
     private String type;
