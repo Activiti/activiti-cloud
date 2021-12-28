@@ -18,7 +18,48 @@ package org.activiti.cloud.services.audit.jpa.conf;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
-import org.activiti.cloud.services.audit.jpa.converters.*;
+import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ApplicationDeployedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ErrorReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationErrorReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationRequestedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationResultReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.MessageReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.MessageSentEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.MessageSubscriptionCancelledEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.MessageWaitingEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCancelledEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCompletedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCreatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessDeployedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessResumedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessStartedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessSuspendedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessUpdatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.SequenceFlowTakenEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.SignalReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskAssignedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCancelledEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCandidateGroupAddedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCandidateGroupRemovedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCandidateUserAddedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCandidateUserRemovedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCompletedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCreatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskSuspendedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskUpdatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TimerCancelledEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TimerExecutedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TimerFailedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TimerFiredEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TimerRetriesDecrementedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TimerScheduledEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.VariableCreatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.VariableDeletedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConverter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +77,7 @@ public class AuditJPAAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public EventContextInfoAppender eventContextInfoAppender(){
+    public org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender eventContextInfoAppender(){
         return new EventContextInfoAppender();
     }
 
