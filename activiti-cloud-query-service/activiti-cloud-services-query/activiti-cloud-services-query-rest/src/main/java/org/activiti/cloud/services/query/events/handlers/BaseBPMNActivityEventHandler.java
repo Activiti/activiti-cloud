@@ -49,7 +49,7 @@ public abstract class BaseBPMNActivityEventHandler {
 
     }
 
-    public <R> BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
+    public BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
