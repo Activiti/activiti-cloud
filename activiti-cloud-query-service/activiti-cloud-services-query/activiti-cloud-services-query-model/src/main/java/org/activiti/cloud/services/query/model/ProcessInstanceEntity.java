@@ -218,6 +218,13 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.variables = variable;
     }
 
+    public Optional<ProcessVariableEntity> getVariable(String variableName) {
+        return getVariables().stream()
+                             .filter(v -> v.getName()
+                                           .equals(variableName))
+                             .findFirst();
+    }
+
     @Override
     public String getProcessDefinitionKey() {
         return processDefinitionKey;
