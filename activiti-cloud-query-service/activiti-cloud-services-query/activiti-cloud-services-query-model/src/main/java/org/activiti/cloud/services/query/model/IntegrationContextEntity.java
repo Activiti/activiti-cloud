@@ -414,7 +414,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
                        .orElse(null);
     }
 
-    public static class IdBuilder {
+    public static class IdBuilderHelper {
         public static String from(IntegrationContext integrationContext) {
             return new StringBuilder().append(integrationContext.getProcessInstanceId())
                                       .append(":")

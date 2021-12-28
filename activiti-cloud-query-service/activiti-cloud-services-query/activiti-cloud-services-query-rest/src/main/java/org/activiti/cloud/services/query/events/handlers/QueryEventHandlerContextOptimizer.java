@@ -94,7 +94,7 @@ public class QueryEventHandlerContextOptimizer {
                                 LOGGER.debug("Fetched entity graph attributes {} for process instance: {}",
                                              entityGraph.getAttributeNodes().stream().map(AttributeNode::getAttributeName).collect(Collectors.toList()),
                                              processInstanceId);
-                            };
+                            }
                         });
             });
 

@@ -48,7 +48,7 @@ public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudB
               appVersion);
     }
 
-    public static class IdBuilder {
+    public static class IdBuilderHelper {
         public static String from(BPMNActivity bpmnActivity) {
             return new StringBuilder().append(bpmnActivity.getProcessInstanceId())
                                       .append(":")

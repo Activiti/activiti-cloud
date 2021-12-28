@@ -77,7 +77,7 @@ public class AuditJPAAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender eventContextInfoAppender(){
+    public EventContextInfoAppender eventContextInfoAppender(){
         return new EventContextInfoAppender();
     }
 

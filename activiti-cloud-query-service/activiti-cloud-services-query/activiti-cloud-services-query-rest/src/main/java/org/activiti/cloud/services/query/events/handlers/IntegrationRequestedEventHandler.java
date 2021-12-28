@@ -40,7 +40,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationRequestedEvent integrationEvent = CloudIntegrationRequestedEvent.class.cast(event);
         IntegrationContext integrationContext = integrationEvent.getEntity();
-        String entityId = IntegrationContextEntity.IdBuilder.from(integrationContext);
+        String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
         IntegrationContextEntity entity = new IntegrationContextEntity(event.getServiceName(),
                                                                        event.getServiceFullName(),

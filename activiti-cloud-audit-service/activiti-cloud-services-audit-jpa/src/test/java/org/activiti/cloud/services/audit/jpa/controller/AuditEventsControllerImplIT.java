@@ -35,7 +35,15 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.audit.api.config.AuditAPIAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
-import org.activiti.cloud.services.audit.jpa.events.*;
+import org.activiti.cloud.services.audit.jpa.events.ActivityStartedAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageReceivedAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageSentAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageWaitingAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.TimerFiredAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.security.config.AuditJPASecurityAutoConfiguration;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
@@ -54,7 +62,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -87,9 +94,6 @@ public class AuditEventsControllerImplIT {
 
     @MockBean
     private SecurityManager securityManager;
-
-    @MockBean
-    private EntityManagerFactory entityManagerFactory;
 
     @MockBean
     private SecurityPoliciesProperties securityPoliciesProperties;

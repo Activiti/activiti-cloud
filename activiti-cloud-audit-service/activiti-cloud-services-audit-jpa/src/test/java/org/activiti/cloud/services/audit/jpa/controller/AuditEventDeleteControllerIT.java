@@ -39,7 +39,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,9 +73,6 @@ public class AuditEventDeleteControllerIT {
 
     @MockBean
     private UserGroupManager userGroupManager;
-
-    @MockBean
-    private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
     public void setUp() {

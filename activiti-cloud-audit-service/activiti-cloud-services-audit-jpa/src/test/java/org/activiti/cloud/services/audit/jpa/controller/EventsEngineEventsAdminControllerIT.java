@@ -42,7 +42,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,9 +74,6 @@ public class EventsEngineEventsAdminControllerIT {
 
     @MockBean
     private UserGroupManager userGroupManager;
-
-    @MockBean
-    private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
     public void setUp() throws Exception {
