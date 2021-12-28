@@ -47,7 +47,7 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
             }
 
         } catch (Exception cause) {
-            LOGGER.debug("Error handling VariableCreatedEvent[" + event + "]",
+            LOGGER.error("Error handling VariableCreatedEvent[" + event + "]",
                          cause);
         }
     }
