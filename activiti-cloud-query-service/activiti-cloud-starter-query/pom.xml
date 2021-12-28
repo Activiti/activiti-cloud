@@ -116,12 +116,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.gavlyukovskiy</groupId>
-      <artifactId>datasource-proxy-spring-boot-starter</artifactId>
-      <version>1.7.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>net.javacrumbs.json-unit</groupId>
       <artifactId>json-unit-assertj</artifactId>
     </dependency>
