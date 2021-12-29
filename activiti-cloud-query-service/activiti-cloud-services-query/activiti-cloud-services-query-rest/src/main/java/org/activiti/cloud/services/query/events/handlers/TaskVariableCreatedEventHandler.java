@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 
 public class TaskVariableCreatedEventHandler {
 
@@ -39,24 +40,26 @@ public class TaskVariableCreatedEventHandler {
         ProcessInstanceEntity processInstanceEntity = getProcessInstance(variableCreatedEvent);
         String taskId = variableCreatedEvent.getEntity().getTaskId();
         String variableName = variableCreatedEvent.getEntity().getName();
-        TaskEntity taskEntity = entityManager.getReference(TaskEntity.class, taskId);
 
-        if (entityManager.contains(taskEntity)) {
-            taskEntity.getVariable(variableName)
-                      .ifPresentOrElse(variableEntity -> {
-                          LOGGER.warn("Variable " + variableName + " already exists in the task " + taskId + "!");
-                      }, () -> {
-                          TaskVariableEntity taskVariableEntity = createTaskVariableEntity(variableCreatedEvent,
-                                                                                            taskEntity,
-                                                                                            processInstanceEntity);
-                          taskEntity.getVariables()
-                                    .add(taskVariableEntity);
-                      });
-        } else {
-            createTaskVariableEntity(variableCreatedEvent,
-                                     taskEntity,
-                                     processInstanceEntity);
-        }
+        Optional.ofNullable(entityManager.find(TaskEntity.class, taskId))
+                .ifPresentOrElse(taskEntity -> {
+                    taskEntity.getVariable(variableName)
+                              .ifPresentOrElse(variableEntity -> {
+                                  LOGGER.warn("Variable " + variableName + " already exists in the task " + taskId + "!");
+                              }, () -> {
+                                  TaskVariableEntity taskVariableEntity = createTaskVariableEntity(variableCreatedEvent,
+                                                                                                    taskEntity,
+                                                                                                    processInstanceEntity);
+                                  taskEntity.getVariables()
+                                            .add(taskVariableEntity);
+                              });
+                }, () -> {
+                    TaskEntity taskEntity = entityManager.getReference(TaskEntity.class, taskId);
+
+                    createTaskVariableEntity(variableCreatedEvent,
+                                             taskEntity,
+                                             processInstanceEntity);
+                });
     }
 
     private TaskVariableEntity createTaskVariableEntity(CloudVariableCreatedEvent variableCreatedEvent,

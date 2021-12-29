@@ -60,10 +60,8 @@ public class VariableEntityCreatedEventHandlerTest {
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManager.getReference(ProcessInstanceEntity.class,
-                                        event.getEntity().getProcessInstanceId())).thenReturn(processInstanceEntity);
-
-        when(entityManager.contains(processInstanceEntity)).thenReturn(true);
+        when(entityManager.find(ProcessInstanceEntity.class,
+                                event.getEntity().getProcessInstanceId())).thenReturn(processInstanceEntity);
 
         //when
         processVariableCreatedEventHandler.handle(event);
@@ -100,11 +98,8 @@ public class VariableEntityCreatedEventHandlerTest {
 
         TaskEntity taskEntity = mock(TaskEntity.class);
         when(entityManager.getReference(TaskEntity.class,
-                                event.getEntity().getTaskId()))
+                                        event.getEntity().getTaskId()))
                 .thenReturn(taskEntity);
-
-        when(entityManager.contains(taskEntity))
-            .thenReturn(false);
 
         //when
         taskVariableCreatedEventHandler.handle(event);

@@ -40,24 +40,18 @@ public class ProcessVariableCreatedEventHandler {
         String variableName = variableCreatedEvent.getEntity()
                                                   .getName();
 
-        ProcessInstanceEntity processInstanceEntity = entityManager.getReference(ProcessInstanceEntity.class,
-                                                                                 processInstanceId);
-
-        if (entityManager.contains(processInstanceEntity)) {
-            processInstanceEntity.getVariable(variableName)
-                                 .ifPresentOrElse(variableEntity -> {
-                                     LOGGER.warn("Variable " + variableName + " already exists in the process " + processInstanceId + "!");
-                                 },
-                                 () -> {
-                                     ProcessVariableEntity variableEntity = createProcessVariableEntity(variableCreatedEvent,
-                                                                                                        processInstanceEntity);
-                                     processInstanceEntity.getVariables()
-                                                          .add(variableEntity);
-                                 });
-        } else {
-            createProcessVariableEntity(variableCreatedEvent,
-                                        processInstanceEntity);
-        }
+        ProcessInstanceEntity processInstanceEntity = entityManager.find(ProcessInstanceEntity.class,
+                                                                         processInstanceId);
+        processInstanceEntity.getVariable(variableName)
+                             .ifPresentOrElse(variableEntity -> {
+                                 LOGGER.warn("Variable " + variableName + " already exists in the process " + processInstanceId + "!");
+                             },
+                             () -> {
+                                 ProcessVariableEntity variableEntity = createProcessVariableEntity(variableCreatedEvent,
+                                                                                                    processInstanceEntity);
+                                 processInstanceEntity.getVariables()
+                                                      .add(variableEntity);
+                             });
     }
 
     private ProcessVariableEntity createProcessVariableEntity(CloudVariableCreatedEvent variableCreatedEvent,
