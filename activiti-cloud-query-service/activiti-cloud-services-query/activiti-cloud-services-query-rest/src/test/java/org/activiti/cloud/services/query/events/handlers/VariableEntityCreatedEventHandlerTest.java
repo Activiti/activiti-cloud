@@ -29,6 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -100,6 +101,8 @@ public class VariableEntityCreatedEventHandlerTest {
         when(entityManager.getReference(TaskEntity.class,
                                         event.getEntity().getTaskId()))
                 .thenReturn(taskEntity);
+
+        when(entityManager.createEntityGraph(TaskEntity.class)).thenReturn(mock(EntityGraph.class));
 
         //when
         taskVariableCreatedEventHandler.handle(event);
