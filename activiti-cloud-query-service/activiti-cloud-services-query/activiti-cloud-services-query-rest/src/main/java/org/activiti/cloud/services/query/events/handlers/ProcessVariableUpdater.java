@@ -35,11 +35,7 @@ public class ProcessVariableUpdater {
         ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
                                                                                              processInstanceId))
                                                               .orElseThrow(() -> new QueryException("Process instance id " + processInstanceId + " not found!"));
-        processInstanceEntity.getVariables()
-                             .stream()
-                             .filter(v -> v.getName()
-                                           .equals(updatedVariableEntity.getName()))
-                             .findFirst()
+        processInstanceEntity.getVariable(updatedVariableEntity.getName())
                              .ifPresentOrElse(variableEntity -> {
                                                   variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
                                                   variableEntity.setType(updatedVariableEntity.getType());

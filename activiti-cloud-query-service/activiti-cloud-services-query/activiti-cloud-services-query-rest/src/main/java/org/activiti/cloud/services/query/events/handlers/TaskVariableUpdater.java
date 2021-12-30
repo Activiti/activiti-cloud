@@ -37,11 +37,7 @@ public class TaskVariableUpdater {
                                                                        taskId))
                                         .orElseThrow(() -> new QueryException("Task instance id " + taskId + " not found!"));
 
-        taskEntity.getVariables()
-                  .stream()
-                  .filter(v -> v.getName()
-                                .equals(updatedVariableEntity.getName()))
-                  .findFirst()
+        taskEntity.getVariable(updatedVariableEntity.getName())
                   .ifPresentOrElse(variableEntity -> {
                       variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
                       variableEntity.setType(updatedVariableEntity.getType());

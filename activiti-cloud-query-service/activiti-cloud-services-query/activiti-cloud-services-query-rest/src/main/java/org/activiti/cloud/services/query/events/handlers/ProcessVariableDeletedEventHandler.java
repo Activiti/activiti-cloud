@@ -17,13 +17,11 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import java.util.Optional;
-import java.util.Set;
 
 public class ProcessVariableDeletedEventHandler {
 
@@ -43,20 +41,20 @@ public class ProcessVariableDeletedEventHandler {
         // if a task was cancelled / completed do not handle this event
         if(findResult.isPresent() && !findResult.get().isInFinalState()) {
             try {
-                Set<ProcessVariableEntity> variables = findResult.get()
-                                                                 .getVariables();
-                variables.stream()
-                         .filter(v -> variableName.equals(v.getName()))
-                         .findFirst()
+                ProcessInstanceEntity processInstanceEntity = findResult.get();
+
+                processInstanceEntity.getVariable(variableName)
                          .ifPresentOrElse(variableEntity -> {
                              // Persist into database
-                             variables.remove(variableEntity);
+                             processInstanceEntity.getVariables()
+                                                  .remove(variableEntity);
+
                              entityManager.remove(variableEntity);
                          },() -> {
-                             LOGGER.debug("Unable to find variableEntity with name '" + variableName + "' for process instance '" + processInstanceId + "'");
+                             LOGGER.warn("Unable to find variableEntity with name '" + variableName + "' for process instance '" + processInstanceId + "'");
                          });
             } catch (Exception cause) {
-                LOGGER.debug("Error handling ProcessVariableDeletedEvent[" + event + "]",
+                LOGGER.error("Error handling ProcessVariableDeletedEvent[" + event + "]",
                              cause);
             }
         }

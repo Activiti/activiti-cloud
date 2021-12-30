@@ -17,13 +17,11 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import java.util.Optional;
-import java.util.Set;
 
 public class TaskVariableDeletedEventHandler {
 
@@ -44,14 +42,13 @@ public class TaskVariableDeletedEventHandler {
         // if a task was cancelled / completed do not handle this event
         if(findResult.isPresent() && !findResult.get().isInFinalState()) {
             try {
-                Set<TaskVariableEntity> variables = findResult.get()
-                                                                 .getVariables();
-                variables.stream()
-                         .filter(v -> variableName.equals(v.getName()))
-                         .findFirst()
+                TaskEntity taskEntity = findResult.get();
+
+                taskEntity.getVariable(variableName)
                          .ifPresentOrElse(variableEntity -> {
                              // Persist into database
-                             variables.remove(variableEntity);
+                             taskEntity.getVariables()
+                                       .remove(variableEntity);
                              entityManager.remove(variableEntity);
                          },() -> {
                              LOGGER.debug("Unable to find variableEntity with name '" + variableName + "' for task instance '" + taskId + "'");
