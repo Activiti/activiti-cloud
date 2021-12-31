@@ -21,3 +21,4 @@ Running on [GitHub Actions](https://github.com/features/actions), requires the f
 | NEXUS_PASSWORD | Internal Maven repository password |
 | BOT_GITHUB_USERNAME | GitHub username for other repositories |
 | BOT_GITHUB_TOKEN | GitHub token for other repositories |
+
