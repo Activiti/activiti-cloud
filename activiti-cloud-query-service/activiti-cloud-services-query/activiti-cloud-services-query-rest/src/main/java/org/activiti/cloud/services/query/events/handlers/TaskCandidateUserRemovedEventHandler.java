@@ -41,8 +41,8 @@ public class TaskCandidateUserRemovedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskCandidateUserRemovedEvent taskCandidateUserRemovedEvent = (CloudTaskCandidateUserRemovedEvent) event;
         TaskCandidateUser taskCandidateUser = taskCandidateUserRemovedEvent.getEntity();
-        Optional<TaskEntity> findResult = Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                                                 taskCandidateUser.getTaskId()));
+        Optional<TaskEntity> findResult = EntityManagerFinder.findTaskWithCandidateUsers(entityManager,
+                                                                                         taskCandidateUser.getTaskId());
         // if a task was cancelled / completed do not handle this event
         if(findResult.isPresent() && !findResult.get().isInFinalState()) {
             // Persist into database

@@ -36,8 +36,8 @@ public class ProcessVariableDeletedEventHandler {
     public void handle(CloudVariableDeletedEvent event) {
         String variableName = event.getEntity().getName();
         String processInstanceId = event.getEntity().getProcessInstanceId();
-        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                                                            processInstanceId));
+        Optional<ProcessInstanceEntity> findResult = EntityManagerFinder.findProcessInstanceWithVariables(entityManager,
+                                                                                                          processInstanceId);
         // if a task was cancelled / completed do not handle this event
         if(findResult.isPresent() && !findResult.get().isInFinalState()) {
             try {

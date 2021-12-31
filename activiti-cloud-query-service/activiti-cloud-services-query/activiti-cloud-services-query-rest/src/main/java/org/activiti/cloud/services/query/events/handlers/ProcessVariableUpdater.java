@@ -20,7 +20,6 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 
 import javax.persistence.EntityManager;
-import java.util.Optional;
 
 public class ProcessVariableUpdater {
 
@@ -32,9 +31,9 @@ public class ProcessVariableUpdater {
 
     public void update(ProcessVariableEntity updatedVariableEntity, String notFoundMessage) {
         String processInstanceId = updatedVariableEntity.getProcessInstanceId();
-        ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                                                             processInstanceId))
-                                                              .orElseThrow(() -> new QueryException("Process instance id " + processInstanceId + " not found!"));
+        ProcessInstanceEntity processInstanceEntity = EntityManagerFinder.findProcessInstanceWithVariables(entityManager,
+                                                                                                           processInstanceId)
+                                                                         .orElseThrow(() -> new QueryException("Process instance id " + processInstanceId + " not found!"));
         processInstanceEntity.getVariable(updatedVariableEntity.getName())
                              .ifPresentOrElse(variableEntity -> {
                                                   variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());

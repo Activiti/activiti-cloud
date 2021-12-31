@@ -26,11 +26,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessVariableEntityDeletedHandlerTest {
@@ -57,8 +64,10 @@ public class ProcessVariableEntityDeletedHandlerTest {
         variableEntity.setName("var");
         processInstanceEntity.getVariables().add(variableEntity);
 
-        given(entityManager.find(ProcessInstanceEntity.class,
-                                "procInstId")).willReturn(processInstanceEntity);
+        when(entityManager.createEntityGraph(ProcessInstanceEntity.class)).thenReturn(mock(EntityGraph.class));
+        given(entityManager.find(eq(ProcessInstanceEntity.class),
+                                 eq("procInstId"),
+                                 any(Map.class))).willReturn(processInstanceEntity);
 
         //when
         handler.handle(event);

@@ -32,6 +32,8 @@ import org.mockito.Mock;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -61,8 +63,10 @@ public class VariableEntityCreatedEventHandlerTest {
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManager.find(ProcessInstanceEntity.class,
-                                event.getEntity().getProcessInstanceId())).thenReturn(processInstanceEntity);
+        when(entityManager.createEntityGraph(ProcessInstanceEntity.class)).thenReturn(mock(EntityGraph.class));
+        when(entityManager.find(eq(ProcessInstanceEntity.class),
+                                eq(event.getEntity().getProcessInstanceId()),
+                                any(Map.class))).thenReturn(processInstanceEntity);
 
         //when
         processVariableCreatedEventHandler.handle(event);
@@ -93,15 +97,12 @@ public class VariableEntityCreatedEventHandlerTest {
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
 
-        when(entityManager.find(ProcessInstanceEntity.class,
-                                event.getEntity().getProcessInstanceId()))
+        when(entityManager.getReference(ProcessInstanceEntity.class,
+                                        event.getEntity().getProcessInstanceId()))
                 .thenReturn(processInstanceEntity);
 
         TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManager.getReference(TaskEntity.class,
-                                        event.getEntity().getTaskId()))
-                .thenReturn(taskEntity);
-
+        when(entityManager.find(eq(TaskEntity.class), eq("taskId"), any(Map.class))).thenReturn(taskEntity);
         when(entityManager.createEntityGraph(TaskEntity.class)).thenReturn(mock(EntityGraph.class));
 
         //when

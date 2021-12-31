@@ -15,14 +15,10 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
-import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
-import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupEvent;
-import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.hibernate.jpa.QueryHints;
@@ -64,26 +60,6 @@ public class QueryEventHandlerContextOptimizer {
                 findRuntimeEvent(events,
                                  CloudBPMNActivityEvent.class)
                     .ifPresent(e -> entityGraph.addAttributeNodes("activities"));
-                findRuntimeEvent(events,
-                                 CloudVariableEvent.class,
-                                 VariableInstance::isTaskVariable)
-                    .ifPresent(e -> entityGraph.addSubgraph("tasks")
-                                               .addAttributeNodes("variables"));
-                findRuntimeEvent(events,
-                                 CloudTaskCandidateUserEvent.class)
-                    .ifPresent(e -> entityGraph.addSubgraph("tasks")
-                                               .addAttributeNodes("taskCandidateUsers"));
-                findRuntimeEvent(events,
-                                 CloudTaskCandidateGroupEvent.class)
-                    .ifPresent(e -> entityGraph.addSubgraph("tasks")
-                                               .addAttributeNodes("taskCandidateGroups"));
-                findRuntimeEvent(events,
-                                 CloudIntegrationEvent.class)
-                    .ifPresent(e -> {
-                        entityGraph.addAttributeNodes("serviceTasks");
-                        entityGraph.addSubgraph("serviceTasks")
-                                   .addAttributeNodes("integrationContext");
-                    });
 
                 Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
                                                        processInstanceId,

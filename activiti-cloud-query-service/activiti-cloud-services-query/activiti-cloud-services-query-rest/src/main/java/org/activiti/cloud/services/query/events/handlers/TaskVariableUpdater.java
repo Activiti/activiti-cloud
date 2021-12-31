@@ -20,7 +20,6 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 
 import javax.persistence.EntityManager;
-import java.util.Optional;
 
 public class TaskVariableUpdater {
 
@@ -33,9 +32,8 @@ public class TaskVariableUpdater {
     public void update(TaskVariableEntity updatedVariableEntity,
                        String notFoundMessage) {
         String taskId = updatedVariableEntity.getTaskId();
-        TaskEntity taskEntity = Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                                       taskId))
-                                        .orElseThrow(() -> new QueryException("Task instance id " + taskId + " not found!"));
+        TaskEntity taskEntity = EntityManagerFinder.findTaskWithVariables(entityManager, taskId)
+                                                   .orElseThrow(() -> new QueryException("Task instance id " + taskId + " not found!"));
 
         taskEntity.getVariable(updatedVariableEntity.getName())
                   .ifPresentOrElse(variableEntity -> {
@@ -49,5 +47,4 @@ public class TaskVariableUpdater {
                   });
 
     }
-
 }
