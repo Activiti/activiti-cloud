@@ -46,6 +46,11 @@ public class EventHandlersAutoConfiguration {
         return new QueryEventHandlerContextOptimizer(entityManager);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public EntityManagerFinder entityManagerFinder() {
+        return new EntityManagerFinder();
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -121,8 +126,10 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateGroupRemovedEventHandler taskCandidateGroupRemovedEventHandler(EntityManager entityManager) {
-        return new TaskCandidateGroupRemovedEventHandler(entityManager);
+    public TaskCandidateGroupRemovedEventHandler taskCandidateGroupRemovedEventHandler(EntityManager entityManager,
+                                                                                       EntityManagerFinder entityManagerFinder) {
+        return new TaskCandidateGroupRemovedEventHandler(entityManager,
+                                                         entityManagerFinder);
     }
 
     @Bean
@@ -133,8 +140,10 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateUserRemovedEventHandler taskCandidateUserRemovedEventHandler(EntityManager entityManager) {
-        return new TaskCandidateUserRemovedEventHandler(entityManager);
+    public TaskCandidateUserRemovedEventHandler taskCandidateUserRemovedEventHandler(EntityManager entityManager,
+                                                                                     EntityManagerFinder entityManagerFinder) {
+        return new TaskCandidateUserRemovedEventHandler(entityManager,
+                                                        entityManagerFinder);
     }
 
     @Bean
@@ -163,23 +172,26 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableCreatedEventHandler variableCreatedEventHandler(EntityManager entityManager) {
-        return new VariableCreatedEventHandler(new TaskVariableCreatedEventHandler(entityManager),
-                                               new ProcessVariableCreatedEventHandler(entityManager));
+    public VariableCreatedEventHandler variableCreatedEventHandler(EntityManager entityManager,
+                                                                   EntityManagerFinder entityManagerFinder) {
+        return new VariableCreatedEventHandler(new TaskVariableCreatedEventHandler(entityManager, entityManagerFinder),
+                                               new ProcessVariableCreatedEventHandler(entityManager, entityManagerFinder));
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableDeletedEventHandler variableDeletedEventHandler(EntityManager entityManager) {
-        return new VariableDeletedEventHandler(new ProcessVariableDeletedEventHandler(entityManager),
-                                               new TaskVariableDeletedEventHandler(entityManager));
+    public VariableDeletedEventHandler variableDeletedEventHandler(EntityManager entityManager,
+                                                                   EntityManagerFinder entityManagerFinder) {
+        return new VariableDeletedEventHandler(new ProcessVariableDeletedEventHandler(entityManager, entityManagerFinder),
+                                               new TaskVariableDeletedEventHandler(entityManager, entityManagerFinder));
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableUpdatedEventHandler variableUpdatedEventHandler(EntityManager entityManager) {
-        return new VariableUpdatedEventHandler(new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityManager)),
-                                               new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager)));
+    public VariableUpdatedEventHandler variableUpdatedEventHandler(EntityManager entityManager,
+                                                                   EntityManagerFinder entityManagerFinder) {
+        return new VariableUpdatedEventHandler(new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityManager, entityManagerFinder)),
+                                               new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager, entityManagerFinder)));
     }
 
     @Bean

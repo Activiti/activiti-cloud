@@ -30,9 +30,12 @@ public class TaskVariableCreatedEventHandler {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TaskVariableCreatedEventHandler.class);
 
+    private final EntityManagerFinder entityManagerFinder;
     private final EntityManager entityManager;
 
-    public TaskVariableCreatedEventHandler(EntityManager entityManager) {
+    public TaskVariableCreatedEventHandler(EntityManager entityManager,
+                                           EntityManagerFinder entityManagerFinder) {
+        this.entityManagerFinder = entityManagerFinder;
         this.entityManager = entityManager;
     }
 
@@ -41,21 +44,21 @@ public class TaskVariableCreatedEventHandler {
         String taskId = variableCreatedEvent.getEntity().getTaskId();
         String variableName = variableCreatedEvent.getEntity().getName();
 
-        EntityManagerFinder.findTaskWithVariables(entityManager, taskId)
+        entityManagerFinder.findTaskWithVariables(entityManager, taskId)
                            .ifPresentOrElse(taskEntity -> {
-                            taskEntity.getVariable(variableName)
-                                      .ifPresentOrElse(variableEntity -> {
-                                          LOGGER.warn("Variable " + variableName + " already exists in the task " + taskId + "!");
-                                      }, () -> {
-                                          TaskVariableEntity taskVariableEntity = createTaskVariableEntity(variableCreatedEvent,
-                                                                                                           taskEntity,
-                                                                                                           processInstanceEntity);
-                                          taskEntity.getVariables()
-                                                    .add(taskVariableEntity);
-                                      });
-                        }, () -> {
-                            throw new QueryException("Task '" + taskId + "' not found!");
-                        });
+                                taskEntity.getVariable(variableName)
+                                    .ifPresentOrElse(variableEntity -> {
+                                        LOGGER.warn("Variable " + variableName + " already exists in the task " + taskId + "!");
+                                    }, () -> {
+                                        TaskVariableEntity taskVariableEntity = createTaskVariableEntity(variableCreatedEvent,
+                                                                                                         taskEntity,
+                                                                                                         processInstanceEntity);
+                                        taskEntity.getVariables()
+                                                  .add(taskVariableEntity);
+                                    });
+                           }, () -> {
+                                throw new QueryException("Task '" + taskId + "' not found!");
+                           });
     }
 
     private TaskVariableEntity createTaskVariableEntity(CloudVariableCreatedEvent variableCreatedEvent,

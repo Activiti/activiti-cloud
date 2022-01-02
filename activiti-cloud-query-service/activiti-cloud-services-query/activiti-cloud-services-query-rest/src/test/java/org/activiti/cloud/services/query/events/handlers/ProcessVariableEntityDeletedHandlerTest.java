@@ -30,6 +30,7 @@ import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,6 +49,9 @@ public class ProcessVariableEntityDeletedHandlerTest {
     @Mock
     private EntityManager entityManager;
 
+    @Mock
+    private EntityManagerFinder entityManagerFinder;
+
     @BeforeEach
     public void setUp() {
         initMocks(this);
@@ -64,10 +68,8 @@ public class ProcessVariableEntityDeletedHandlerTest {
         variableEntity.setName("var");
         processInstanceEntity.getVariables().add(variableEntity);
 
-        when(entityManager.createEntityGraph(ProcessInstanceEntity.class)).thenReturn(mock(EntityGraph.class));
-        given(entityManager.find(eq(ProcessInstanceEntity.class),
-                                 eq("procInstId"),
-                                 any(Map.class))).willReturn(processInstanceEntity);
+        given(entityManagerFinder.findProcessInstanceWithVariables(entityManager,"procInstId"))
+                                 .willReturn(Optional.of(processInstanceEntity));
 
         //when
         handler.handle(event);

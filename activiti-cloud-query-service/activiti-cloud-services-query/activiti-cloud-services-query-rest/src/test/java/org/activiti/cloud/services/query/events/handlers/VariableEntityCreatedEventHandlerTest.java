@@ -29,13 +29,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
-
-import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class VariableEntityCreatedEventHandlerTest {
@@ -52,6 +52,9 @@ public class VariableEntityCreatedEventHandlerTest {
     @Mock
     private EntityManager entityManager;
 
+    @Mock
+    private EntityManagerFinder entityManagerFinder;
+
     @BeforeEach
     public void setUp() {
         initMocks(this);
@@ -63,10 +66,9 @@ public class VariableEntityCreatedEventHandlerTest {
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManager.createEntityGraph(ProcessInstanceEntity.class)).thenReturn(mock(EntityGraph.class));
-        when(entityManager.find(eq(ProcessInstanceEntity.class),
-                                eq(event.getEntity().getProcessInstanceId()),
-                                any(Map.class))).thenReturn(processInstanceEntity);
+        when(entityManagerFinder.findProcessInstanceWithVariables(entityManager,
+                                                                  event.getEntity().getProcessInstanceId()))
+                                .thenReturn(Optional.of(processInstanceEntity));
 
         //when
         processVariableCreatedEventHandler.handle(event);
@@ -102,9 +104,8 @@ public class VariableEntityCreatedEventHandlerTest {
                 .thenReturn(processInstanceEntity);
 
         TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManager.find(eq(TaskEntity.class), eq("taskId"), any(Map.class))).thenReturn(taskEntity);
-        when(entityManager.createEntityGraph(TaskEntity.class)).thenReturn(mock(EntityGraph.class));
-
+        when(entityManagerFinder.findTaskWithVariables(entityManager,"taskId"))
+                                .thenReturn(Optional.of(taskEntity));
         //when
         taskVariableCreatedEventHandler.handle(event);
 

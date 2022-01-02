@@ -24,15 +24,18 @@ import javax.persistence.EntityManager;
 public class TaskVariableUpdater {
 
     private final EntityManager entityManager;
+    private final EntityManagerFinder entityManagerFinder;
 
-    public TaskVariableUpdater(EntityManager entityManager) {
+    public TaskVariableUpdater(EntityManager entityManager,
+                               EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
+        this.entityManagerFinder = entityManagerFinder;
     }
 
     public void update(TaskVariableEntity updatedVariableEntity,
                        String notFoundMessage) {
         String taskId = updatedVariableEntity.getTaskId();
-        TaskEntity taskEntity = EntityManagerFinder.findTaskWithVariables(entityManager, taskId)
+        TaskEntity taskEntity = entityManagerFinder.findTaskWithVariables(entityManager, taskId)
                                                    .orElseThrow(() -> new QueryException("Task instance id " + taskId + " not found!"));
 
         taskEntity.getVariable(updatedVariableEntity.getName())

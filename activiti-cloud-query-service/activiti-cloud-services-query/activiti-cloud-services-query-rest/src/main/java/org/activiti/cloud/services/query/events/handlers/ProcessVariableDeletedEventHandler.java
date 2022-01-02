@@ -28,15 +28,18 @@ public class ProcessVariableDeletedEventHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(ProcessVariableDeletedEventHandler.class);
 
     private final EntityManager entityManager;
+    private final EntityManagerFinder entityManagerFinder;
 
-    public ProcessVariableDeletedEventHandler(EntityManager entityManager) {
+    public ProcessVariableDeletedEventHandler(EntityManager entityManager,
+                                              EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
+        this.entityManagerFinder = entityManagerFinder;
     }
 
     public void handle(CloudVariableDeletedEvent event) {
         String variableName = event.getEntity().getName();
         String processInstanceId = event.getEntity().getProcessInstanceId();
-        Optional<ProcessInstanceEntity> findResult = EntityManagerFinder.findProcessInstanceWithVariables(entityManager,
+        Optional<ProcessInstanceEntity> findResult = entityManagerFinder.findProcessInstanceWithVariables(entityManager,
                                                                                                           processInstanceId);
         // if a task was cancelled / completed do not handle this event
         if(findResult.isPresent() && !findResult.get().isInFinalState()) {

@@ -25,15 +25,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
-
-import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -45,6 +40,9 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
     @Mock
     private EntityManager entityManager;
+
+    @Mock
+    private EntityManagerFinder entityManagerFinder;
 
     @BeforeEach
     public void setUp() {
@@ -65,8 +63,7 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
         taskEntity.setStatus(TaskStatus.CREATED);
         taskEntity.getVariables().add(variableEntity);
 
-        when(entityManager.find(eq(TaskEntity.class), eq("taskId"), any(Map.class))).thenReturn(taskEntity);
-        when(entityManager.createEntityGraph(TaskEntity.class)).thenReturn(mock(EntityGraph.class));
+        when(entityManagerFinder.findTaskWithVariables(entityManager,"taskId")).thenReturn(Optional.of(taskEntity));
 
         //when
         handler.handle(event);

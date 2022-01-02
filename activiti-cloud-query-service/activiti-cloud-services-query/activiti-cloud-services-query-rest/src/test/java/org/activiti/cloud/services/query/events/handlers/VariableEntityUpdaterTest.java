@@ -22,18 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import java.util.Date;
-import java.util.Map;
+import java.util.Optional;
 
 import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class VariableEntityUpdaterTest {
@@ -43,6 +38,9 @@ public class VariableEntityUpdaterTest {
 
     @Mock
     private EntityManager entityManager;
+
+    @Mock
+    private EntityManagerFinder entityManagerFinder;
 
     @BeforeEach
     public void setUp() {
@@ -58,11 +56,8 @@ public class VariableEntityUpdaterTest {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.getVariables().add(currentVariableEntity);
 
-        when(entityManager.createEntityGraph(ProcessInstanceEntity.class)).thenReturn(mock(EntityGraph.class));
-        given(entityManager.find(eq(ProcessInstanceEntity.class),
-                                 eq("procInstId"),
-                                 any(Map.class))).willReturn(processInstanceEntity);
-
+        given(entityManagerFinder.findProcessInstanceWithVariables(entityManager, "procInstId"))
+                                 .willReturn(Optional.of(processInstanceEntity));
         Date now = new Date();
         ProcessVariableEntity updatedVariableEntity = new ProcessVariableEntity();
         updatedVariableEntity.setName("var");

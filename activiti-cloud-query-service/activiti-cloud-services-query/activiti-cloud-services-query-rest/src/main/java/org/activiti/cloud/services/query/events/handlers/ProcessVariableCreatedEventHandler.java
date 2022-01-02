@@ -29,9 +29,12 @@ public class ProcessVariableCreatedEventHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(ProcessVariableCreatedEventHandler.class);
 
     private final EntityManager entityManager;
+    private final EntityManagerFinder entityManagerFinder;
 
-    public ProcessVariableCreatedEventHandler(EntityManager entityManager) {
+    public ProcessVariableCreatedEventHandler(EntityManager entityManager,
+                                              EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
+        this.entityManagerFinder = entityManagerFinder;
     }
 
     public void handle(CloudVariableCreatedEvent variableCreatedEvent) {
@@ -40,7 +43,7 @@ public class ProcessVariableCreatedEventHandler {
         String variableName = variableCreatedEvent.getEntity()
                                                   .getName();
 
-        EntityManagerFinder.findProcessInstanceWithVariables(entityManager,
+        entityManagerFinder.findProcessInstanceWithVariables(entityManager,
                                                              processInstanceId)
                            .ifPresent(processInstanceEntity -> {
                                processInstanceEntity.getVariable(variableName)

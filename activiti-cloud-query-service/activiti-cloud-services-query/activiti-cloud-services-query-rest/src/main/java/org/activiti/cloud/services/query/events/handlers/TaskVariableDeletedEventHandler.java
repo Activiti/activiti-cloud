@@ -28,16 +28,19 @@ public class TaskVariableDeletedEventHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(TaskVariableDeletedEventHandler.class);
 
     private final EntityManager entityManager;
+    private final EntityManagerFinder entityManagerFinder;
 
-    public TaskVariableDeletedEventHandler(EntityManager entityManager) {
+    public TaskVariableDeletedEventHandler(EntityManager entityManager,
+                                           EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
+        this.entityManagerFinder = entityManagerFinder;
     }
 
     public void handle(CloudVariableDeletedEvent event) {
         String variableName = event.getEntity().getName();
         String taskId = event.getEntity().getTaskId();
-        Optional<TaskEntity> findResult = EntityManagerFinder.findTaskWithVariables(entityManager, taskId);
-
+        Optional<TaskEntity> findResult = entityManagerFinder.findTaskWithVariables(entityManager,
+                                                                                    taskId);
         // if a task was cancelled / completed do not handle this event
         if(findResult.isPresent() && !findResult.get().isInFinalState()) {
             try {

@@ -24,15 +24,17 @@ import javax.persistence.EntityManager;
 public class ProcessVariableUpdater {
 
     private final EntityManager entityManager;
+    private final EntityManagerFinder entityManagerFinder;
 
-    public ProcessVariableUpdater(EntityManager entityManager) {
+    public ProcessVariableUpdater(EntityManager entityManager,
+                                  EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
+        this.entityManagerFinder = entityManagerFinder;
     }
 
     public void update(ProcessVariableEntity updatedVariableEntity, String notFoundMessage) {
         String processInstanceId = updatedVariableEntity.getProcessInstanceId();
-        ProcessInstanceEntity processInstanceEntity = EntityManagerFinder.findProcessInstanceWithVariables(entityManager,
-                                                                                                           processInstanceId)
+        ProcessInstanceEntity processInstanceEntity = entityManagerFinder.findProcessInstanceWithVariables(entityManager, processInstanceId)
                                                                          .orElseThrow(() -> new QueryException("Process instance id " + processInstanceId + " not found!"));
         processInstanceEntity.getVariable(updatedVariableEntity.getName())
                              .ifPresentOrElse(variableEntity -> {

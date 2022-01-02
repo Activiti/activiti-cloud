@@ -32,9 +32,12 @@ public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler 
 
     private static Logger LOGGER = LoggerFactory.getLogger(TaskCandidateGroupRemovedEventHandler.class);
     private final EntityManager entityManager;
+    private final EntityManagerFinder entityManagerFinder;
 
-    public TaskCandidateGroupRemovedEventHandler(EntityManager entityManager) {
+    public TaskCandidateGroupRemovedEventHandler(EntityManager entityManager,
+                                                 EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
+        this.entityManagerFinder = entityManagerFinder;
     }
 
     @Override
@@ -42,7 +45,7 @@ public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler 
 
         CloudTaskCandidateGroupRemovedEvent taskCandidateGroupRemovedEvent = (CloudTaskCandidateGroupRemovedEvent) event;
         TaskCandidateGroup taskCandidateGroup = taskCandidateGroupRemovedEvent.getEntity();
-        Optional<TaskEntity> findResult = EntityManagerFinder.findTaskWithCandidateGroups(entityManager,
+        Optional<TaskEntity> findResult = entityManagerFinder.findTaskWithCandidateGroups(entityManager,
                                                                                           taskCandidateGroup.getTaskId());
 
         // if a task was cancelled / completed do not handle this event
