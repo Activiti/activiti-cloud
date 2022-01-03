@@ -26,11 +26,15 @@ import java.util.Optional;
 
 public class EntityManagerFinder {
 
+    public static final String VARIABLES = "variables";
+    public static final String TASK_CANDIDATE_USERS = "taskCandidateUsers";
+    public static final String TASK_CANDIDATE_GROUPS = "taskCandidateGroups";
+
     public Optional<TaskEntity> findTaskWithVariables(EntityManager entityManager,
                                                       String taskId) {
         EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
 
-        entityGraph.addAttributeNodes("variables");
+        entityGraph.addAttributeNodes(VARIABLES);
 
         return Optional.ofNullable(entityManager.find(TaskEntity.class,
                                                       taskId,
@@ -41,7 +45,7 @@ public class EntityManagerFinder {
                                                            String taskId) {
         EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
 
-        entityGraph.addAttributeNodes("taskCandidateUsers");
+        entityGraph.addAttributeNodes(TASK_CANDIDATE_USERS);
 
         return Optional.ofNullable(entityManager.find(TaskEntity.class,
                                                       taskId,
@@ -52,7 +56,7 @@ public class EntityManagerFinder {
                                                             String taskId) {
         EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
 
-        entityGraph.addAttributeNodes("taskCandidateGroups");
+        entityGraph.addAttributeNodes(TASK_CANDIDATE_GROUPS);
 
         return Optional.ofNullable(entityManager.find(TaskEntity.class,
                                                       taskId,
@@ -63,7 +67,7 @@ public class EntityManagerFinder {
                                                                             String processInstanceId) {
         EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
 
-        entityGraph.addAttributeNodes("variables");
+        entityGraph.addAttributeNodes(VARIABLES);
 
         return Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
                                                       processInstanceId,

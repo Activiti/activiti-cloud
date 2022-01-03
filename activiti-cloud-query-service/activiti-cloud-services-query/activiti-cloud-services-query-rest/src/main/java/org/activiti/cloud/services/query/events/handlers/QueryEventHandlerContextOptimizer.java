@@ -63,6 +63,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class QueryEventHandlerContextOptimizer {
+    public static final String VARIABLES = "variables";
+    public static final String TASKS = "tasks";
+    public static final String ACTIVITIES = "activities";
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContextOptimizer.class);
 
     private Map<Class<? extends CloudRuntimeEvent>, Integer> order =
@@ -109,13 +112,13 @@ public class QueryEventHandlerContextOptimizer {
 
                 findRuntimeEvent(events,
                                  CloudVariableEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes("variables"));
+                    .ifPresent(e -> entityGraph.addAttributeNodes(VARIABLES));
                 findRuntimeEvent(events,
                                  CloudTaskRuntimeEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes("tasks"));
+                    .ifPresent(e -> entityGraph.addAttributeNodes(TASKS));
                 findRuntimeEvent(events,
                                  CloudBPMNActivityEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes("activities"));
+                    .ifPresent(e -> entityGraph.addAttributeNodes(ACTIVITIES));
 
                 Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
                                                        processInstanceId,
