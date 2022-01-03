@@ -23,21 +23,22 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.test.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import javax.persistence.EntityManager;
 import java.util.Optional;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class VariableEntityCreatedEventHandlerTest {
 
     @InjectMocks
@@ -55,19 +56,13 @@ public class VariableEntityCreatedEventHandlerTest {
     @Mock
     private EntityManagerFinder entityManagerFinder;
 
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
-
     @Test
     public void handleShouldCreateAndStoreProcessInstanceVariable() {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables(entityManager,
-                                                                  event.getEntity().getProcessInstanceId()))
+        when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId()))
                                 .thenReturn(Optional.of(processInstanceEntity));
 
         //when
@@ -104,7 +99,7 @@ public class VariableEntityCreatedEventHandlerTest {
                 .thenReturn(processInstanceEntity);
 
         TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManagerFinder.findTaskWithVariables(entityManager,"taskId"))
+        when(entityManagerFinder.findTaskWithVariables("taskId"))
                                 .thenReturn(Optional.of(taskEntity));
         //when
         taskVariableCreatedEventHandler.handle(event);

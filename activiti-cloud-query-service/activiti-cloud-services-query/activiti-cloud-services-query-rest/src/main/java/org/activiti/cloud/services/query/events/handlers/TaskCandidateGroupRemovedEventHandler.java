@@ -45,11 +45,10 @@ public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler 
 
         CloudTaskCandidateGroupRemovedEvent taskCandidateGroupRemovedEvent = (CloudTaskCandidateGroupRemovedEvent) event;
         TaskCandidateGroup taskCandidateGroup = taskCandidateGroupRemovedEvent.getEntity();
-        Optional<TaskEntity> findResult = entityManagerFinder.findTaskWithCandidateGroups(entityManager,
-                                                                                          taskCandidateGroup.getTaskId());
+        Optional<TaskEntity> findResult = entityManagerFinder.findTaskWithCandidateGroups(taskCandidateGroup.getTaskId());
 
         // if a task was cancelled / completed do not handle this event
-        if(findResult.isPresent() && !findResult.get().isInFinalState()) {
+        if (findResult.isPresent() && !findResult.get().isInFinalState()) {
             // Persist into database
             try {
                 TaskCandidateGroupId id = new TaskCandidateGroupId(taskCandidateGroup.getTaskId(),

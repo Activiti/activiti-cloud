@@ -16,36 +16,45 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Date;
+import java.util.Objects;
+import javax.persistence.ConstraintMode;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.*;
-import java.util.Date;
-import java.util.Objects;
-
-@Entity(name="TaskVariable")
+@Entity(name = "TaskVariable")
 @Table(name = "TASK_VARIABLE",
         indexes = {
                 @Index(name = "task_var_processInstanceId_idx", columnList = "processInstanceId", unique = false),
                 @Index(name = "task_var_taskId_idx", columnList = "taskId", unique = false),
                 @Index(name = "task_var_name_idx", columnList = "name", unique = false),
                 @Index(name = "task_var_executionId_idx", columnList = "executionId", unique = false)
-		})
+        })
 @DynamicInsert
 @DynamicUpdate
 public class TaskVariableEntity extends AbstractVariableEntity {
 
     @Id
     @GeneratedValue(generator = "task_variable_sequence", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="task_variable_sequence", sequenceName = "task_variable_sequence", allocationSize=50)
+    @SequenceGenerator(name = "task_variable_sequence", sequenceName = "task_variable_sequence", allocationSize = 50)
     private Long id;
 
     private String taskId;
 
     @JsonIgnore
-    @ManyToOne(optional = true, fetch=FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true,
+        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private TaskEntity task;
 
     public TaskVariableEntity() {

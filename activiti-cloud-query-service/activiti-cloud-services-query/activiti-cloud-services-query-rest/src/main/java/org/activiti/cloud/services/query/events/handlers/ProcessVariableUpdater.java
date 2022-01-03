@@ -34,7 +34,7 @@ public class ProcessVariableUpdater {
 
     public void update(ProcessVariableEntity updatedVariableEntity, String notFoundMessage) {
         String processInstanceId = updatedVariableEntity.getProcessInstanceId();
-        ProcessInstanceEntity processInstanceEntity = entityManagerFinder.findProcessInstanceWithVariables(entityManager, processInstanceId)
+        ProcessInstanceEntity processInstanceEntity = entityManagerFinder.findProcessInstanceWithVariables(processInstanceId)
                                                                          .orElseThrow(() -> new QueryException("Process instance id " + processInstanceId + " not found!"));
         processInstanceEntity.getVariable(updatedVariableEntity.getName())
                              .ifPresentOrElse(variableEntity -> {

@@ -39,10 +39,9 @@ public class TaskVariableDeletedEventHandler {
     public void handle(CloudVariableDeletedEvent event) {
         String variableName = event.getEntity().getName();
         String taskId = event.getEntity().getTaskId();
-        Optional<TaskEntity> findResult = entityManagerFinder.findTaskWithVariables(entityManager,
-                                                                                    taskId);
+        Optional<TaskEntity> findResult = entityManagerFinder.findTaskWithVariables(taskId);
         // if a task was cancelled / completed do not handle this event
-        if(findResult.isPresent() && !findResult.get().isInFinalState()) {
+        if (findResult.isPresent() && !findResult.get().isInFinalState()) {
             try {
                 TaskEntity taskEntity = findResult.get();
 

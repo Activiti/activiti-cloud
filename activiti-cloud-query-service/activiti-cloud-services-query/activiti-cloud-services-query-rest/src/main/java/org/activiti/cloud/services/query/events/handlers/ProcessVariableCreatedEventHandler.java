@@ -43,8 +43,7 @@ public class ProcessVariableCreatedEventHandler {
         String variableName = variableCreatedEvent.getEntity()
                                                   .getName();
 
-        entityManagerFinder.findProcessInstanceWithVariables(entityManager,
-                                                             processInstanceId)
+        entityManagerFinder.findProcessInstanceWithVariables(processInstanceId)
                            .ifPresent(processInstanceEntity -> {
                                processInstanceEntity.getVariable(variableName)
                                                     .ifPresentOrElse(variableEntity -> {

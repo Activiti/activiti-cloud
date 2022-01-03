@@ -35,7 +35,7 @@ public class TaskVariableUpdater {
     public void update(TaskVariableEntity updatedVariableEntity,
                        String notFoundMessage) {
         String taskId = updatedVariableEntity.getTaskId();
-        TaskEntity taskEntity = entityManagerFinder.findTaskWithVariables(entityManager, taskId)
+        TaskEntity taskEntity = entityManagerFinder.findTaskWithVariables(taskId)
                                                    .orElseThrow(() -> new QueryException("Task instance id " + taskId + " not found!"));
 
         taskEntity.getVariable(updatedVariableEntity.getName())
@@ -45,7 +45,7 @@ public class TaskVariableUpdater {
                       variableEntity.setValue(updatedVariableEntity.getValue());
 
                       entityManager.merge(variableEntity);
-                  }, ()-> {
+                  }, () -> {
                       throw new QueryException(notFoundMessage);
                   });
 

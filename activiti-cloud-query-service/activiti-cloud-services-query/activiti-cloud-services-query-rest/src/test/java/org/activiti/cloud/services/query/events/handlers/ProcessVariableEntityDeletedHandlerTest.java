@@ -15,32 +15,25 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-
-import java.util.Map;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
+@ExtendWith(MockitoExtension.class)
 public class ProcessVariableEntityDeletedHandlerTest {
 
     @InjectMocks
@@ -51,11 +44,6 @@ public class ProcessVariableEntityDeletedHandlerTest {
 
     @Mock
     private EntityManagerFinder entityManagerFinder;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleRemoveVariableFromProcessAnDeleteIt() {
@@ -68,7 +56,7 @@ public class ProcessVariableEntityDeletedHandlerTest {
         variableEntity.setName("var");
         processInstanceEntity.getVariables().add(variableEntity);
 
-        given(entityManagerFinder.findProcessInstanceWithVariables(entityManager,"procInstId"))
+        given(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
                                  .willReturn(Optional.of(processInstanceEntity));
 
         //when

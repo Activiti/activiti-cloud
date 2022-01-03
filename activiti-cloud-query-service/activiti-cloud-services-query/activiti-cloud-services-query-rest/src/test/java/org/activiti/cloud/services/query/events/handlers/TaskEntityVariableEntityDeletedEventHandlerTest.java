@@ -20,19 +20,20 @@ import org.activiti.api.task.model.Task.TaskStatus;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import javax.persistence.EntityManager;
 import java.util.Optional;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
     @InjectMocks
@@ -43,11 +44,6 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
     @Mock
     private EntityManagerFinder entityManagerFinder;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldDeleteIt() {
@@ -63,7 +59,7 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
         taskEntity.setStatus(TaskStatus.CREATED);
         taskEntity.getVariables().add(variableEntity);
 
-        when(entityManagerFinder.findTaskWithVariables(entityManager,"taskId")).thenReturn(Optional.of(taskEntity));
+        when(entityManagerFinder.findTaskWithVariables("taskId")).thenReturn(Optional.of(taskEntity));
 
         //when
         handler.handle(event);

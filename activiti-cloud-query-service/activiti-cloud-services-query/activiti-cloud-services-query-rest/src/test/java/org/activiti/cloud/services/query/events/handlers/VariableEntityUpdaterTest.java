@@ -17,20 +17,21 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class VariableEntityUpdaterTest {
 
     @InjectMocks
@@ -42,11 +43,6 @@ public class VariableEntityUpdaterTest {
     @Mock
     private EntityManagerFinder entityManagerFinder;
 
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
-
     @Test
     public void updateShouldUpdateVariableRetrievedByPredicate() {
         //given
@@ -56,7 +52,7 @@ public class VariableEntityUpdaterTest {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.getVariables().add(currentVariableEntity);
 
-        given(entityManagerFinder.findProcessInstanceWithVariables(entityManager, "procInstId"))
+        given(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
                                  .willReturn(Optional.of(processInstanceEntity));
         Date now = new Date();
         ProcessVariableEntity updatedVariableEntity = new ProcessVariableEntity();

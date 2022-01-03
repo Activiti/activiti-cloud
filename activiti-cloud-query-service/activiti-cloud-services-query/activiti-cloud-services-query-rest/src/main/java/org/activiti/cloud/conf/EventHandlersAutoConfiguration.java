@@ -48,8 +48,8 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EntityManagerFinder entityManagerFinder() {
-        return new EntityManagerFinder();
+    public EntityManagerFinder entityManagerFinder(EntityManager entityManager) {
+        return new EntityManagerFinder(entityManager);
     }
 
     @Bean
@@ -235,7 +235,6 @@ public class EventHandlersAutoConfiguration {
     public IntegrationErrorReceivedEventHandler integrationErrorReceivedEventHandler(EntityManager entityManager) {
         return new IntegrationErrorReceivedEventHandler(entityManager);
     }
-
 
     @Bean
     @ConditionalOnMissingBean

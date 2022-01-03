@@ -26,12 +26,16 @@ import java.util.Optional;
 
 public class EntityManagerFinder {
 
-    public static final String VARIABLES = "variables";
-    public static final String TASK_CANDIDATE_USERS = "taskCandidateUsers";
-    public static final String TASK_CANDIDATE_GROUPS = "taskCandidateGroups";
+    private static final String VARIABLES = "variables";
+    private static final String TASK_CANDIDATE_USERS = "taskCandidateUsers";
+    private static final String TASK_CANDIDATE_GROUPS = "taskCandidateGroups";
+    private final EntityManager entityManager;
 
-    public Optional<TaskEntity> findTaskWithVariables(EntityManager entityManager,
-                                                      String taskId) {
+    public EntityManagerFinder(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public Optional<TaskEntity> findTaskWithVariables(String taskId) {
         EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
 
         entityGraph.addAttributeNodes(VARIABLES);
@@ -41,8 +45,7 @@ public class EntityManagerFinder {
                                                       Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
     }
 
-    public Optional<TaskEntity> findTaskWithCandidateUsers(EntityManager entityManager,
-                                                           String taskId) {
+    public Optional<TaskEntity> findTaskWithCandidateUsers(String taskId) {
         EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
 
         entityGraph.addAttributeNodes(TASK_CANDIDATE_USERS);
@@ -52,8 +55,7 @@ public class EntityManagerFinder {
                                                       Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
     }
 
-    public Optional<TaskEntity> findTaskWithCandidateGroups(EntityManager entityManager,
-                                                            String taskId) {
+    public Optional<TaskEntity> findTaskWithCandidateGroups(String taskId) {
         EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
 
         entityGraph.addAttributeNodes(TASK_CANDIDATE_GROUPS);
@@ -63,8 +65,7 @@ public class EntityManagerFinder {
                                                       Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
     }
 
-    public Optional<ProcessInstanceEntity> findProcessInstanceWithVariables(EntityManager entityManager,
-                                                                            String processInstanceId) {
+    public Optional<ProcessInstanceEntity> findProcessInstanceWithVariables(String processInstanceId) {
         EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
 
         entityGraph.addAttributeNodes(VARIABLES);

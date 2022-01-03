@@ -28,7 +28,7 @@ import java.util.Date;
 
 public class TaskVariableCreatedEventHandler {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(TaskVariableCreatedEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskVariableCreatedEventHandler.class);
 
     private final EntityManagerFinder entityManagerFinder;
     private final EntityManager entityManager;
@@ -44,7 +44,7 @@ public class TaskVariableCreatedEventHandler {
         String taskId = variableCreatedEvent.getEntity().getTaskId();
         String variableName = variableCreatedEvent.getEntity().getName();
 
-        entityManagerFinder.findTaskWithVariables(entityManager, taskId)
+        entityManagerFinder.findTaskWithVariables(taskId)
                            .ifPresentOrElse(taskEntity -> {
                                 taskEntity.getVariable(variableName)
                                     .ifPresentOrElse(variableEntity -> {
@@ -88,7 +88,7 @@ public class TaskVariableCreatedEventHandler {
 
 
     private ProcessInstanceEntity getProcessInstance(CloudVariableCreatedEvent variableCreatedEvent) {
-        if(variableCreatedEvent.getEntity().getProcessInstanceId() == null){
+        if (variableCreatedEvent.getEntity().getProcessInstanceId() == null) {
             return null;
         } else {
             return entityManager.getReference(ProcessInstanceEntity.class,
