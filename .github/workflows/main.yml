@@ -302,9 +302,9 @@ jobs:
           count_query_consumer_pods
           check_result_is 1
 
-          echo "It checks the deployment has 2 query topic patitions"
+          echo "It checks the deployment has 4 query topic patitions"
           count_query_topic_partitions
-          check_result_is 2
+          check_result_is 4
 
       - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
         run: |
