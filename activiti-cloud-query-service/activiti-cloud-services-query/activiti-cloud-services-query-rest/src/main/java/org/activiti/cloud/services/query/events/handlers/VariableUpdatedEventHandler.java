@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
@@ -25,10 +23,12 @@ import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+
 public class VariableUpdatedEventHandler implements QueryEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VariableUpdatedEventHandler.class);
-    
+
     private ProcessVariableUpdateEventHandler processVariableUpdateEventHandler;
 
     private TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler;
@@ -42,7 +42,7 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudVariableUpdatedEvent variableUpdatedEvent = (CloudVariableUpdatedEvent) event;
-        
+
         try {
             if (variableUpdatedEvent.getEntity().isTaskVariable()) {
                 TaskVariableEntity variableEntity = new TaskVariableEntity(null,

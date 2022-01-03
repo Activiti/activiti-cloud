@@ -15,11 +15,14 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
-
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 
 @Entity(name="BPMNActivity")
 @Table(name="BPMN_ACTIVITY", indexes={
@@ -27,6 +30,8 @@ import org.activiti.cloud.api.process.model.CloudBPMNActivity;
     @Index(name="bpmn_activity_processInstance_idx", columnList="processInstanceId", unique=false),
     @Index(name="bpmn_activity_processInstance_elementId_idx", columnList="processInstanceId,elementId,executionId", unique=true)
 })
+@DynamicInsert
+@DynamicUpdate
 public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudBPMNActivity {
 
     public BPMNActivityEntity() { }
@@ -43,30 +48,14 @@ public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudB
               appVersion);
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
+    public static class IdBuilderHelper {
+        public static String from(BPMNActivity bpmnActivity) {
+            return new StringBuilder().append(bpmnActivity.getProcessInstanceId())
+                                      .append(":")
+                                      .append(bpmnActivity.getElementId())
+                                      .append(":")
+                                      .append(bpmnActivity.getExecutionId())
+                                      .toString();
         }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("BPMNActivityEntity [toString()=").append(super.toString()).append("]");
-        return builder.toString();
-    }
-
 }

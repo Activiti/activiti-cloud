@@ -15,14 +15,6 @@
  */
 package org.activiti.cloud.starter.tests;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task;
@@ -30,6 +22,7 @@ import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
@@ -56,6 +49,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.UUID;
+
+import static org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder.buildTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -108,8 +110,10 @@ public class QueryTaskEntityVariablesIT {
 
         ProcessInstance runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance("Process with variables");
 
-        task = taskEventContainedBuilder.aCreatedTask("Created task",
-            runningProcessInstance);
+        task = buildTask("Created task",
+                         Task.TaskStatus.CREATED,
+                         runningProcessInstance);
+
         standAloneTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("StandAlone task");
 
     }
@@ -128,6 +132,8 @@ public class QueryTaskEntityVariablesIT {
             "v1",
             "string")
             .onTask(task);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
 
         variableEventContainedBuilder.anUpdatedVariable("varUpdated",
             "v2-up",
@@ -175,6 +181,8 @@ public class QueryTaskEntityVariablesIT {
             bigDecimalValue)
             .onTask(task);
 
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
+
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
@@ -209,6 +217,8 @@ public class QueryTaskEntityVariablesIT {
             "v2",
             "string")
             .onTask(task);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
 
         eventsAggregator.sendAll();
 
@@ -288,6 +298,7 @@ public class QueryTaskEntityVariablesIT {
         var.setTaskId(task.getId());
 
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
 
         eventsAggregator.sendAll();
 
@@ -342,6 +353,7 @@ public class QueryTaskEntityVariablesIT {
         VariableInstanceImpl<String> var = buildVariable("varCreated", "string", "value");
         var.setTaskId(task.getId());
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
 
         eventsAggregator.sendAll();
 
@@ -398,6 +410,7 @@ public class QueryTaskEntityVariablesIT {
         var.setTaskId(task.getId());
 
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
 
         eventsAggregator.sendAll();
 

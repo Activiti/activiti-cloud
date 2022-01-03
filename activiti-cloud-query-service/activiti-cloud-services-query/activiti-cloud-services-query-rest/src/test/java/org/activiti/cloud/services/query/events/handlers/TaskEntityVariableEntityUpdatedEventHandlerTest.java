@@ -56,7 +56,7 @@ public class TaskEntityVariableEntityUpdatedEventHandlerTest {
         handler.handle(updatedVariableEntity);
 
         //then
-        verify(variableUpdater).update(eq(updatedVariableEntity), any(Predicate.class), anyString());
+        verify(variableUpdater).update(eq(updatedVariableEntity), anyString());
     }
 
 }

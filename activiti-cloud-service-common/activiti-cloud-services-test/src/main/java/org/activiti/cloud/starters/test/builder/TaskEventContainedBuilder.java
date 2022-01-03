@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.starters.test.builder;
 
-import java.util.Date;
-import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
@@ -30,6 +28,9 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
+
+import java.util.Date;
+import java.util.UUID;
 
 public class TaskEventContainedBuilder {
 
@@ -212,7 +213,7 @@ public class TaskEventContainedBuilder {
         return task;
     }
 
-    private static TaskImpl buildTask(String taskName,
+    public static TaskImpl buildTask(String taskName,
                                       Task.TaskStatus status,
                                       ProcessInstance processInstance) {
         TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),

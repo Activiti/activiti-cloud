@@ -18,16 +18,17 @@ package org.activiti.cloud.services.query.events.handlers;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
+
+import javax.persistence.EntityManager;
 
 public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
 
-    private final TaskCandidateUserRepository taskCandidateUserRepository;
+    private final EntityManager entityManager;
 
-    public TaskCandidateUserAddedEventHandler(TaskCandidateUserRepository taskCandidateUserRepository) {
-        this.taskCandidateUserRepository = taskCandidateUserRepository;
+    public TaskCandidateUserAddedEventHandler(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -36,8 +37,9 @@ public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
         org.activiti.api.task.model.TaskCandidateUser taskCandidateUser = taskCandidateUserAddedEvent.getEntity();
 
         try {
-            taskCandidateUserRepository.save(new TaskCandidateUser(taskCandidateUser.getTaskId(),
-                                                                   taskCandidateUser.getUserId()));
+            TaskCandidateUserEntity entity = new TaskCandidateUserEntity(taskCandidateUser.getTaskId(),
+                                                                         taskCandidateUser.getUserId());
+            entityManager.persist(entity);
         } catch (Exception cause) {
             throw new QueryException("Error handling TaskCandidateUserAddedEvent[" + event + "]",
                                      cause);

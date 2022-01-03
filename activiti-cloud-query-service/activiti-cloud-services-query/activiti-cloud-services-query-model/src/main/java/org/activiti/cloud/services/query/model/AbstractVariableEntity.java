@@ -15,30 +15,16 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Date;
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.ConstraintMode;
-import javax.persistence.Convert;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.*;
+import java.util.Date;
+import java.util.Objects;
+
 @MappedSuperclass
 public abstract class AbstractVariableEntity extends ActivitiEntityMetadata implements CloudVariableInstance {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     private String type;
 
@@ -69,8 +55,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     public AbstractVariableEntity() {
     }
 
-    public AbstractVariableEntity(Long id,
-                          String type,
+    public AbstractVariableEntity(String type,
                           String name,
                           String processInstanceId,
                           String serviceName,
@@ -86,7 +71,6 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
               serviceVersion,
               appName,
               appVersion);
-        this.id = id;
         this.type = type;
         this.name = name;
         this.processInstanceId = processInstanceId;
@@ -95,9 +79,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         this.executionId = executionId;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public abstract Long getId();
 
     @Override
     public String getType() {
@@ -177,22 +159,22 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(id);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         AbstractVariableEntity other = (AbstractVariableEntity) obj;
-        return Objects.equals(id, other.id);
+        return getId() != null && Objects.equals(getId(), other.getId());
     }
 
  }

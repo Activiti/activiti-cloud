@@ -15,63 +15,64 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-
-import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.Optional;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 public class VariableEntityUpdaterTest {
 
     @InjectMocks
     private ProcessVariableUpdater updater;
 
     @Mock
-    private EntityFinder entityFinder;
+    private EntityManager entityManager;
 
     @Mock
-    private VariableRepository variableRepository;
-
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
+    private EntityManagerFinder entityManagerFinder;
 
     @Test
     public void updateShouldUpdateVariableRetrievedByPredicate() {
         //given
         ProcessVariableEntity currentVariableEntity = new ProcessVariableEntity();
+        currentVariableEntity.setName("var");
 
-        Predicate predicate = mock(Predicate.class);
-        given(entityFinder.findOne(variableRepository, predicate, "error")).willReturn(currentVariableEntity);
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.getVariables().add(currentVariableEntity);
 
+        given(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
+                                 .willReturn(Optional.of(processInstanceEntity));
         Date now = new Date();
         ProcessVariableEntity updatedVariableEntity = new ProcessVariableEntity();
+        updatedVariableEntity.setName("var");
         updatedVariableEntity.setType("string");
         updatedVariableEntity.setValue("content");
         updatedVariableEntity.setLastUpdatedTime(now);
+        updatedVariableEntity.setProcessInstanceId("procInstId");
 
         //when
         updater.update(updatedVariableEntity,
-                       predicate, "error");
+                       "error");
 
         //then
         assertThat(currentVariableEntity)
                 .hasType("string")
                 .hasValue("content")
                 .hasLastUpdatedTime(now);
-        verify(variableRepository).save(currentVariableEntity);
+
+        verify(entityManager).persist(currentVariableEntity);
     }
 
 }

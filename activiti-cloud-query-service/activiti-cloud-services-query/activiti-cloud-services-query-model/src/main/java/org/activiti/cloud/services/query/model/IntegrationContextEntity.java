@@ -18,29 +18,14 @@ package org.activiti.cloud.services.query.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.persistence.*;
+import java.util.*;
 
 @Entity(name="IntegrationContext")
 @Table(name="INTEGRATION_CONTEXT", indexes={
@@ -48,6 +33,8 @@ import org.springframework.format.annotation.DateTimeFormat;
     @Index(name="integration_context_processInstance_idx", columnList="processInstanceId", unique=false),
     @Index(name="integration_context_processInstance_elementId_idx", columnList="processInstanceId,clientId,executionId", unique=true)
 })
+@DynamicInsert
+@DynamicUpdate
 public class IntegrationContextEntity extends ActivitiEntityMetadata implements CloudIntegrationContext {
 
     public static final int ERROR_MESSAGE_LENGTH = 255;
@@ -101,7 +88,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private IntegrationContextStatus status;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
     @MapsId
     @JoinColumn(name = "id")
     private ServiceTaskEntity serviceTask;
@@ -327,31 +314,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(businessKey,
-                                               clientId,
-                                               clientName,
-                                               clientType,
-                                               connectorType,
-                                               errorClassName,
-                                               errorDate,
-                                               errorMessage,
-                                               id,
-                                               inBoundVariables,
-                                               outBoundVariables,
-                                               parentProcessInstanceId,
-                                               processDefinitionId,
-                                               processDefinitionKey,
-                                               processDefinitionVersion,
-                                               rootProcessInstanceId,
-                                               processInstanceId,
-                                               executionId,
-                                               requestDate,
-                                               resultDate,
-                                               stackTraceElements,
-                                               status);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override
@@ -359,103 +322,17 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
+
         IntegrationContextEntity other = (IntegrationContextEntity) obj;
-        return Objects.equals(businessKey, other.businessKey) &&
-               Objects.equals(clientId, other.clientId) &&
-               Objects.equals(clientName, other.clientName) &&
-               Objects.equals(clientType, other.clientType) &&
-               Objects.equals(connectorType, other.connectorType) &&
-               Objects.equals(errorClassName, other.errorClassName) &&
-               Objects.equals(errorDate,other.errorDate) &&
-               Objects.equals(errorMessage, other.errorMessage) &&
-               Objects.equals(id, other.id) &&
-               Objects.equals(inBoundVariables, other.inBoundVariables) &&
-               Objects.equals(outBoundVariables, other.outBoundVariables) &&
-               Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) &&
-               Objects.equals(processDefinitionId, other.processDefinitionId) &&
-               Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
-               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
-               Objects.equals(processInstanceId, other.processInstanceId) &&
-               Objects.equals(rootProcessInstanceId, other.rootProcessInstanceId) &&
-               Objects.equals(executionId, other.executionId) &&
-               Objects.equals(requestDate, other.requestDate) &&
-               Objects.equals(resultDate, other.resultDate) &&
-               Objects.equals(stackTraceElements, other.stackTraceElements) &&
-               status == other.status;
-    }
 
-    @Override
-    public String toString() {
-        final int maxLen = 10;
-        StringBuilder builder = new StringBuilder();
-        builder.append("IntegrationContextEntity [id=")
-               .append(id)
-               .append(", inboundVariables=")
-               .append(inBoundVariables != null ? toString(inBoundVariables.entrySet(), maxLen) : null)
-               .append(", outBoundVariables=")
-               .append(outBoundVariables != null ? toString(outBoundVariables.entrySet(), maxLen) : null)
-               .append(", rootProcessInstanceId=")
-               .append(rootProcessInstanceId)
-               .append(", processInstanceId=")
-               .append(processInstanceId)
-               .append(", executionId=")
-               .append(executionId)
-               .append(", parentProcessInstanceId=")
-               .append(parentProcessInstanceId)
-               .append(", processDefinitionId=")
-               .append(processDefinitionId)
-               .append(", processDefinitionKey=")
-               .append(processDefinitionKey)
-               .append(", processDefinitionVersion=")
-               .append(processDefinitionVersion)
-               .append(", businessKey=")
-               .append(businessKey)
-               .append(", clientId=")
-               .append(clientId)
-               .append(", clientName=")
-               .append(clientName)
-               .append(", clientType=")
-               .append(clientType)
-               .append(", connectorType=")
-               .append(connectorType)
-               .append(", requestDate=")
-               .append(requestDate)
-               .append(", resultDate=")
-               .append(resultDate)
-               .append(", errorDate=")
-               .append(errorDate)
-               .append(", errorMessage=")
-               .append(errorMessage)
-               .append(", errorClassName=")
-               .append(errorClassName)
-               .append(", stackTraceElements=")
-               .append(stackTraceElements != null ? toString(stackTraceElements, maxLen) : null)
-               .append(", status=")
-               .append(status)
-               .append("]");
-        return builder.toString();
+        return id != null && Objects.equals(id, other.id);
     }
-
-    private String toString(Collection<?> collection, int maxLen) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("[");
-        int i = 0;
-        for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {
-            if (i > 0) {
-                builder.append(", ");
-            }
-            builder.append(iterator.next());
-        }
-        builder.append("]");
-        return builder.toString();
-    }
-
 
     @Override
     public IntegrationContextStatus getStatus() {
@@ -535,5 +412,16 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         return Optional.ofNullable(outBoundVariables)
                        .map(it -> (T) it.get(name))
                        .orElse(null);
+    }
+
+    public static class IdBuilderHelper {
+        public static String from(IntegrationContext integrationContext) {
+            return new StringBuilder().append(integrationContext.getProcessInstanceId())
+                                      .append(":")
+                                      .append(integrationContext.getClientId())
+                                      .append(":")
+                                      .append(integrationContext.getExecutionId())
+                                      .toString();
+        }
     }
 }

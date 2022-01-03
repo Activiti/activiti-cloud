@@ -15,20 +15,21 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Stream;
 
 public class QueryEventHandlerContext {
 
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContext.class);
 
-    private Map<String, QueryEventHandler> handlers;
+    private final Map<String, QueryEventHandler> handlers;
 
     public QueryEventHandlerContext(Set<QueryEventHandler> handlers) {
         this.handlers = handlers.stream().collect(Collectors.toMap(QueryEventHandler::getHandledEvent,
@@ -37,15 +38,18 @@ public class QueryEventHandlerContext {
 
     public void handle(CloudRuntimeEvent<?, ?>... events) {
         if (events != null) {
-            for (CloudRuntimeEvent<?, ?> event : events) {
-                QueryEventHandler handler = handlers.get(event.getEventType().name());
-                if (handler != null) {
-                    LOGGER.debug("Handling event: " + handler.getHandledEvent());
-                    handler.handle(event);
-                } else {
-                    LOGGER.info("No handler found for event: " + event.getEventType().name() + ". Ignoring event");
-                }
-            }
+            Stream.of(events)
+                  .forEach(event -> {
+                      QueryEventHandler handler = handlers.get(event.getEventType()
+                                                                    .name());
+                      if (handler != null) {
+                          LOGGER.debug("Handling event: " + handler.getHandledEvent());
+                          handler.handle(event);
+                      } else {
+                          LOGGER.debug("No handler found for event: " + event.getEventType()
+                                                                             .name() + ". Ignoring event");
+                      }
+                  });
         }
     }
 

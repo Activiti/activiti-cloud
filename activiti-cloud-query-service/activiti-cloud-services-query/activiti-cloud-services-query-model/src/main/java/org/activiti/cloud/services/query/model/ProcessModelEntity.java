@@ -15,18 +15,16 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Objects;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Objects;
 
 @Entity(name = "ProcessModel")
 @Table(name = "PROCESS_MODEL")
+@DynamicInsert
+@DynamicUpdate
 public class ProcessModelEntity {
 
     @Id
@@ -72,13 +70,16 @@ public class ProcessModelEntity {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ProcessModelEntity other = (ProcessModelEntity) obj;
-        return Objects.equals(id, other.id);
+        return id != null && Objects.equals(id, other.id);
     }
 }

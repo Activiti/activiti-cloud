@@ -68,10 +68,19 @@
       <not>
         <indexExists indexName="audit_event_event_id_idx"/>
       </not>
-    </preConditions>  
+    </preConditions>
     <sqlFile dbms="oracle"
              encoding="utf8"
              path="changelog/05-alter.oracle.schema.m11.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-audit" id="alter9-oracle-schema-m17" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/09-alter.oracle.schema.m17.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
@@ -151,7 +160,7 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
-  
+
   <changeSet author="activiti-audit" id="alter8-schema-m11" dbms="postgresql">
     <sqlFile dbms="postgresql"
              encoding="utf8"
@@ -161,4 +170,12 @@
              stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-audit" id="alter9-schema-m17" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/09-alter.pg.schema.m17.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>

@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -37,7 +39,9 @@ import java.util.Objects;
 )
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TaskCandidateUser {
+@DynamicInsert
+@DynamicUpdate
+public class TaskCandidateUserEntity {
 
     @Id
     private String taskId;
@@ -52,13 +56,13 @@ public class TaskCandidateUser {
     private TaskEntity task;
 
     @JsonCreator
-    public TaskCandidateUser(@JsonProperty("taskId") String taskid,
-                             @JsonProperty("userId") String userId) {
+    public TaskCandidateUserEntity(@JsonProperty("taskId") String taskid,
+                                   @JsonProperty("userId") String userId) {
         this.taskId = taskid;
         this.userId = userId;
     }
 
-    public TaskCandidateUser() {
+    public TaskCandidateUserEntity() {
 
     }
 
@@ -88,7 +92,7 @@ public class TaskCandidateUser {
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskId, userId);
+        return getClass().hashCode();
     }
 
     @Override
@@ -99,7 +103,9 @@ public class TaskCandidateUser {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        TaskCandidateUser other = (TaskCandidateUser) obj;
-        return Objects.equals(taskId, other.taskId) && Objects.equals(userId, other.userId);
+        TaskCandidateUserEntity other = (TaskCandidateUserEntity) obj;
+        return this.userId != null &&
+            this.taskId != null &&
+            Objects.equals(taskId, other.taskId) && Objects.equals(userId, other.userId);
     }
 }

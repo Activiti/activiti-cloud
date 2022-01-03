@@ -15,24 +15,24 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.EntityManager;
+import java.util.Date;
+
 public class ProcessCreatedEventHandler implements QueryEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessCreatedEventHandler.class);
-    private ProcessInstanceRepository processInstanceRepository;
+    private EntityManager entityManager;
 
-    public ProcessCreatedEventHandler(ProcessInstanceRepository processInstanceRepository) {
-        this.processInstanceRepository = processInstanceRepository;
+    public ProcessCreatedEventHandler(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -57,12 +57,12 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
         createdProcessInstanceEntity.setInitiator(createdEvent.getEntity().getInitiator());
         createdProcessInstanceEntity.setBusinessKey(createdEvent.getEntity().getBusinessKey());
         createdProcessInstanceEntity.setStartDate(createdEvent.getEntity().getStartDate());
-        
+
         createdProcessInstanceEntity.setParentId(createdEvent.getEntity().getParentId());
         createdProcessInstanceEntity.setProcessDefinitionVersion(createdEvent.getEntity().getProcessDefinitionVersion());
         createdProcessInstanceEntity.setProcessDefinitionName(createdEvent.getEntity().getProcessDefinitionName());
-        
-        processInstanceRepository.save(createdProcessInstanceEntity);
+
+        entityManager.persist(createdProcessInstanceEntity);
     }
 
     @Override

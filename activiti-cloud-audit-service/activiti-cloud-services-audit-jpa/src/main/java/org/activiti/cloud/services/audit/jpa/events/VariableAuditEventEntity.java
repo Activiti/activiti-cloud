@@ -19,8 +19,6 @@ import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 
-import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.MappedSuperclass;
@@ -80,32 +78,6 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
             this.taskId = variableInstance.getTaskId();
             setEntityId(variableInstance.getName());
         }
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(taskId, variableInstance, variableName, variableType);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        VariableAuditEventEntity other = (VariableAuditEventEntity) obj;
-        return Objects.equals(taskId, other.taskId) 
-                && Objects.equals(variableInstance, other.variableInstance) 
-                && Objects.equals(variableName, other.variableName) 
-                && Objects.equals(variableType, other.variableType);
     }
 
     @Override

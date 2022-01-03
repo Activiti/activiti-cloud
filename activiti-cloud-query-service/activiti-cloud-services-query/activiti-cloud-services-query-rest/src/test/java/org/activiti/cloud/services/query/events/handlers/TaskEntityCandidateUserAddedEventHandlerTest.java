@@ -15,18 +15,18 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.UUID;
-
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
-import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import javax.persistence.EntityManager;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -38,7 +38,7 @@ public class TaskEntityCandidateUserAddedEventHandlerTest {
     private TaskCandidateUserAddedEventHandler handler;
 
     @Mock
-    private TaskCandidateUserRepository taskCandidateRepository;
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -56,8 +56,8 @@ public class TaskEntityCandidateUserAddedEventHandlerTest {
         handler.handle(event);
 
         //then
-        ArgumentCaptor<TaskCandidateUser> captor = ArgumentCaptor.forClass(TaskCandidateUser.class);
-        verify(taskCandidateRepository).save(captor.capture());
+        ArgumentCaptor<TaskCandidateUserEntity> captor = ArgumentCaptor.forClass(TaskCandidateUserEntity.class);
+        verify(entityManager).persist(captor.capture());
         assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
         assertThat(captor.getValue().getUserId()).isEqualTo(event.getEntity().getUserId());
     }

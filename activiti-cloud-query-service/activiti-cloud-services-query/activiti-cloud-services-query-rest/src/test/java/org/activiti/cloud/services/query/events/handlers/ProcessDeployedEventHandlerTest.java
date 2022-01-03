@@ -15,13 +15,9 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.UUID;
-
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
-import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.assertj.core.api.Assertions;
@@ -31,8 +27,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import javax.persistence.EntityManager;
+import java.util.UUID;
+
 import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessDeployedEventHandlerTest {
@@ -41,10 +40,7 @@ public class ProcessDeployedEventHandlerTest {
     private ProcessDeployedEventHandler handler;
 
     @Mock
-    private ProcessDefinitionRepository processDefinitionRepository;
-
-    @Mock
-    private ProcessModelRepository processModelRepository;
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -75,10 +71,11 @@ public class ProcessDeployedEventHandlerTest {
         handler.handle(processDeployedEvent);
 
         //then
-        ArgumentCaptor<ProcessDefinitionEntity> processDefinitionCaptor = ArgumentCaptor.forClass(ProcessDefinitionEntity.class);
+        ArgumentCaptor<Object> argumentsCaptor = ArgumentCaptor.forClass(Object.class);
 
-        verify(processDefinitionRepository).save(processDefinitionCaptor.capture());
-        ProcessDefinitionEntity storedProcess = processDefinitionCaptor.getValue();
+        verify(entityManager, times(2)).merge(argumentsCaptor.capture());
+
+        ProcessDefinitionEntity storedProcess = (ProcessDefinitionEntity) argumentsCaptor.getAllValues().get(0);
         assertThat(storedProcess)
                 .hasId(eventProcess.getId())
                 .hasKey(eventProcess.getKey())
@@ -93,10 +90,8 @@ public class ProcessDeployedEventHandlerTest {
                 .hasServiceType(processDeployedEvent.getServiceType())
                 .hasServiceVersion(processDeployedEvent.getServiceVersion());
 
-        ArgumentCaptor<ProcessModelEntity> processModelCaptor = ArgumentCaptor.forClass(ProcessModelEntity.class);
-        verify(processModelRepository).save(processModelCaptor.capture());
-        assertThat(processModelCaptor.getValue())
-                .hasProcessModelContent("<model/>");
+        ProcessModelEntity processModel = (ProcessModelEntity) argumentsCaptor.getAllValues().get(1);
+        assertThat(processModel).hasProcessModelContent("<model/>");
     }
 
     @Test
