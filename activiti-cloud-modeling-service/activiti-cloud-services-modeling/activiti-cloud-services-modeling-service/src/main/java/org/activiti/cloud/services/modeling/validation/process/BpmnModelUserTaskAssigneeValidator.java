@@ -32,17 +32,22 @@ import java.util.stream.Stream;
  */
 public class BpmnModelUserTaskAssigneeValidator implements BpmnCommonModelValidator {
 
-    public final String NO_ASSIGNEE_PROBLEM_TITLE = "No assignee for user task";
-    public final String NO_ASSIGNEE_DESCRIPTION = "One of the attributes 'assignee','candidateUsers' or"
+    private static final String NO_ASSIGNEE_PROBLEM_TITLE = "No assignee for user task";
+    private static final String NO_ASSIGNEE_DESCRIPTION = "One of the attributes 'assignee','candidateUsers' or"
             + " 'candidateGroups' are mandatory on user task with id: '%s' %s";
-    public final String NO_ASSIGNEE_DESCRIPTION_NAME = "and name: '%s'";
-    public final String USER_TASK_ASSIGNEE_VALIDATOR_NAME = "BPMN user task assignee validator";
+    private static final String NO_ASSIGNEE_DESCRIPTION_NAME = "and name: '%s'";
+    private static final String USER_TASK_ASSIGNEE_VALIDATOR_NAME = "BPMN user task assignee validator";
+
+    private final FlowElementsExtractor flowElementsExtractor;
+
+    public BpmnModelUserTaskAssigneeValidator(FlowElementsExtractor flowElementsExtractor) {
+        this.flowElementsExtractor = flowElementsExtractor;
+    }
 
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
                                                  ValidationContext validationContext) {
-        return getFlowElements(bpmnModel,
-                        UserTask.class)
+        return flowElementsExtractor.extractFlowElements(bpmnModel, UserTask.class).stream()
                 .map(this::validateTaskAssignedUser)
                 .filter(Optional::isPresent)
                 .map(Optional::get);

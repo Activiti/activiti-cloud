@@ -473,6 +473,30 @@ public class ProjectControllerIT {
     }
 
     @Test
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeOnTaskInSubProcess() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
+        modelService.importSingleModel(project,
+                                 processModelType,
+                                 processFileContent("process-model",
+                                                    resourceAsByteArray("process/no-assignee-subprocess.bpmn20.xml")));
+
+        MvcResult response = mockMvc.perform(
+                get("/v1/projects/{projectId}/validate",
+                    project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription,
+                            ModelValidationError::getValidatorSetName)
+                .containsExactly(tuple("No assignee for user task",
+                                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
+                                            + "with id: 'Task_06l44lk' and name: 'My task'",
+                                    "BPMN user task assignee validator"));
+    }
+
+    @Test
     public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeAndTaskNoNameShouldReturnErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
         modelService.importSingleModel(project,
@@ -915,7 +939,7 @@ public class ProjectControllerIT {
                         project.getId()))
                 .andExpect(status().isConflict());
     }
-    
+
     @Test
     public void should_ValidateCorrectly_when_importingProjectWithUnusedConnector() throws Exception {
 
