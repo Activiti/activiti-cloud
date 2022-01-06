@@ -30,19 +30,20 @@ import java.util.stream.Stream;
 public class BpmnModelIncomingOutgoingFlowValidator implements BpmnCommonModelValidator {
 
     private final List<FlowNodeFlowsValidator> flowNodeFlowsValidators;
+    private final FlowElementsExtractor flowElementsExtractor;
 
-    public BpmnModelIncomingOutgoingFlowValidator(List<FlowNodeFlowsValidator> flowNodeFlowsValidators) {
+    public BpmnModelIncomingOutgoingFlowValidator(
+        List<FlowNodeFlowsValidator> flowNodeFlowsValidators,
+        FlowElementsExtractor flowElementsExtractor) {
         this.flowNodeFlowsValidators = flowNodeFlowsValidators;
+        this.flowElementsExtractor = flowElementsExtractor;
     }
 
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
         List<ModelValidationError> errors = new ArrayList<>();
-        getFlowElements(bpmnModel,
-            FlowNode.class).forEach(flowNode -> {
-            errors.addAll(validateFlowNode(flowNode));
-        });
-
+        flowElementsExtractor.extractFlowElements(bpmnModel, FlowNode.class)
+            .forEach(flowNode -> errors.addAll(validateFlowNode(flowNode)));
         return errors.stream();
     }
 
@@ -51,7 +52,7 @@ public class BpmnModelIncomingOutgoingFlowValidator implements BpmnCommonModelVa
         List<ModelValidationError> errors = new ArrayList<>();
 
         for (FlowNodeFlowsValidator validator: flowNodeFlowsValidators) {
-            if (validator.canValidate(flowNode)){
+            if (validator.canValidate(flowNode)) {
                 errors.addAll(validator.validate(flowNode));
             }
         }
