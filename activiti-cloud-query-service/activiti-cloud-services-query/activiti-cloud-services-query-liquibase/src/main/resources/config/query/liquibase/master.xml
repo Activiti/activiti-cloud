@@ -261,6 +261,26 @@
   </changeSet>
 
   <changeSet author="activiti-query"
+             id="alter11-oracle-schema-m17" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/11-alter.oracle.schema.7.1.0-m17.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="alter12-oracle-schema-m17" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/12-alter.oracle.schema.7.1.0-m17.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
     id="alter13-schema-m17" dbms="postgresql">
     <sqlFile dbms="postgresql"
       encoding="utf8"
