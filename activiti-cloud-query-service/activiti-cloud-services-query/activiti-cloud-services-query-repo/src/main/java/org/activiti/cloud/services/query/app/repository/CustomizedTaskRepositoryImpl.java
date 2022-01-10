@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPQLQuery;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -24,9 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.util.Assert;
-
-import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.JPQLQuery;
 
 public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport implements CustomizedTaskRepository {
 
@@ -48,7 +48,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
         QTaskVariableEntity variableEntity = QTaskVariableEntity.taskVariableEntity;
 
         Predicate condition = variableEntity.name.eq(name)
-                .and(variableEntity.value.eq(value));
+                .and(Expressions.booleanTemplate("{0} like {1}", variableEntity.value, value));
 
         JPQLQuery<TaskEntity> from = from(taskEntity).innerJoin(taskEntity.variables, variableEntity).on(condition)
                                                      .where(predicate);
