@@ -34,7 +34,7 @@ public class CommonExceptionHandlerQuery {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public EntityModel<ActivitiErrorMessage> handleAppException(ActivitiForbiddenException ex, HttpServletResponse response) {
         response.setContentType("application/json");
-        return new EntityModel<>(new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
+        return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 }
 

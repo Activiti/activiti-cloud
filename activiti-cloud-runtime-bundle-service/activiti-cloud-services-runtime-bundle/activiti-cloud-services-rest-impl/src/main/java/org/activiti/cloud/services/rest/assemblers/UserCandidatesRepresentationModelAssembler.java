@@ -33,6 +33,6 @@ public class UserCandidatesRepresentationModelAssembler implements Representatio
 
     @Override
     public EntityModel<CandidateUser> toModel(CandidateUser candidateUser) {
-        return new EntityModel<>(candidateUser);
+        return EntityModel.of(candidateUser);
     }
 }

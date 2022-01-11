@@ -33,6 +33,6 @@ public class GroupCandidatesRepresentationModelAssembler implements Representati
 
     @Override
     public EntityModel<CandidateGroup> toModel(CandidateGroup groupCandidates) {
-        return new EntityModel<>(groupCandidates);
+        return EntityModel.of(groupCandidates);
     }
 }
