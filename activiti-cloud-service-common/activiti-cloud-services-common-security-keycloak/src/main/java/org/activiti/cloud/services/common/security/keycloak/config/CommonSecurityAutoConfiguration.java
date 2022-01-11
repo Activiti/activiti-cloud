@@ -30,7 +30,6 @@ package org.activiti.cloud.services.common.security.keycloak.config;/*
  */
 
 
-import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
@@ -53,7 +52,7 @@ import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.keycloak.adapters.springsecurity.management.HttpSessionManager;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -69,6 +68,8 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
+import java.util.List;
+
 @Configuration
 @KeycloakConfiguration
 @ConditionalOnWebApplication
@@ -77,15 +78,16 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @DependsOn({"keycloakConfigResolver"})
 public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigurerAdapter {
 
-
     /**
      * Registers the KeycloakAuthenticationProvider with the authentication manager.
      */
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth,
-        KeycloakAuthenticationProvider keycloakAuthenticationProvider) throws Exception {
-        keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
-        auth.authenticationProvider(keycloakAuthenticationProvider);
+    @Bean
+    public InitializingBean configureGlobalAuthenticationManager(AuthenticationManagerBuilder auth,
+                                            KeycloakAuthenticationProvider keycloakAuthenticationProvider) {
+        return () -> {
+            keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
+            auth.authenticationProvider(keycloakAuthenticationProvider);
+        };
     }
 
     @Bean
