@@ -27,9 +27,9 @@ create table model_version
     creation_date       timestamp,
     last_modified_by    varchar(255),
     last_modified_date  timestamp,
-    content             blob,
+    content             text,
     content_type        varchar(255),
-    extensions          clob,
+    extensions          text,
     versioned_entity_id varchar(255) not null,
     primary key (version, versioned_entity_id)
 );

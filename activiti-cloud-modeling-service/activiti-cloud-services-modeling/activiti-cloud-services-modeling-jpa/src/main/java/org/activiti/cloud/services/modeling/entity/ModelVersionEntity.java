@@ -15,24 +15,22 @@
  */
 package org.activiti.cloud.services.modeling.entity;
 
-import java.util.Map;
-import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
+import org.activiti.cloud.services.modeling.jpa.version.VersionEntity;
+import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.Transient;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.cloud.modeling.api.process.Extensions;
-import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
-import org.activiti.cloud.services.modeling.jpa.version.VersionEntity;
-import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
@@ -55,12 +53,10 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
 
     private String contentType;
 
-    @Lob
-    @Column
+    @Column(columnDefinition = "TEXT")
     private byte[] content;
 
-    @Lob
-    @Column
+    @Column(columnDefinition = "TEXT")
     @Convert(converter = ExtensionsJsonConverter.class)
     private Map<String,Object> extensions;
 
