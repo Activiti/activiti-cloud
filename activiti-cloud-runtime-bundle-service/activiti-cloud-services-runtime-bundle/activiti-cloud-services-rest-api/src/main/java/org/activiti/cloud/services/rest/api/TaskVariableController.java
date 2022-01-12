@@ -20,28 +20,23 @@ import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 
-@RequestMapping(value = "/v1/tasks/{taskId}/variables",
-    produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public interface TaskVariableController {
 
-    @GetMapping(headers = "Content-type=application/json")
+    @GetMapping(path = "/v1/tasks/{taskId}/variables", headers = "Content-type=application/json")
     CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable(value = "taskId") String taskId);
 
-    @PostMapping(headers = "Content-type=application/json")
+    @PostMapping(path = "/v1/tasks/{taskId}/variables", headers = "Content-type=application/json")
     ResponseEntity<Void> createVariable(@PathVariable(value = "taskId") String taskId,
         @RequestBody CreateTaskVariablePayload createTaskVariablePayload);
 
-    @PutMapping(value = "/{variableName}",
+    @PutMapping(value = "/v1/tasks/{taskId}/variables/{variableName}",
         headers = "Content-type=application/json")
     ResponseEntity<Void> updateVariable(@PathVariable(value = "taskId") String taskId,
         @PathVariable(value = "variableName") String variableName,

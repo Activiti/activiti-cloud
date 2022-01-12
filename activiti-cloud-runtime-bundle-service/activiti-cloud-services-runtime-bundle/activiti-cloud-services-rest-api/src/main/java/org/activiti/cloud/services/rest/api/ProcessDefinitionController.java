@@ -19,38 +19,33 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@RequestMapping(value = "/v1/process-definitions",
-        produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public interface ProcessDefinitionController {
 
-    @GetMapping()
+    @GetMapping("/v1/process-definitions")
     PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable);
 
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/v1/process-definitions/{id}")
     EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/{id}/model",
+    @GetMapping(value = "/v1/process-definitions/{id}/model",
             produces = "application/xml")
     @ResponseBody
     @Operation(summary = "getProcessModel")
     String getProcessModel(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/{id}/model",
+    @GetMapping(value = "/v1/process-definitions/{id}/model",
             produces = "application/json")
     @ResponseBody
     @Operation(summary = "getProcessModel")
     String getBpmnModel(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/{id}/model",
+    @GetMapping(value = "/v1/process-definitions/{id}/model",
             produces = "image/svg+xml")
     @ResponseBody
     @Operation(summary = "getProcessModel")
