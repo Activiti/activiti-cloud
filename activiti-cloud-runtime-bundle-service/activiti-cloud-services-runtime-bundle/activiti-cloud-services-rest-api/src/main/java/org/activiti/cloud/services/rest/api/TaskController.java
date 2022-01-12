@@ -58,7 +58,7 @@ public interface TaskController {
     @DeleteMapping(value = "/v1/tasks/{taskId}")
     EntityModel<CloudTask> deleteTask(@PathVariable(value = "taskId") String taskId);
 
-    @PostMapping(headers = "Content-type=application/json")
+    @PostMapping(path = "/v1/tasks", headers = "Content-type=application/json")
     EntityModel<CloudTask> createNewTask(@RequestBody CreateTaskPayload createTaskPayload);
 
     @PutMapping(value = "/v1/tasks/{taskId}",
