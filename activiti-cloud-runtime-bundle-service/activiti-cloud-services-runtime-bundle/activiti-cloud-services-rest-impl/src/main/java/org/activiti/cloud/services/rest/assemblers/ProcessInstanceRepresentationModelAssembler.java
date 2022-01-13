@@ -56,7 +56,7 @@ public class ProcessInstanceRepresentationModelAssembler implements Representati
         Link processInstancesRel = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstances(null))
                 .withRel("processInstances");
         Link selfLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(cloudProcessInstance.getId())).withSelfRel();
-        Link variablesLink = linkTo(methodOn(ProcessInstanceVariableControllerImpl.class).getVariables(cloudProcessInstance.getId())).withRel("variables");
+        Link variablesLink = linkTo(methodOn(ProcessInstanceVariableControllerImpl.class).getProcessInstanceVariables(cloudProcessInstance.getId())).withRel("variables");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
         return new EntityModel<>(cloudProcessInstance,
                               selfLink,

@@ -236,7 +236,7 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) {
-        return processInstanceTasksApiClient.getTasks(processInstanceId, DEFAULT_PAGEABLE)
+        return processInstanceTasksApiClient.getProcessInstanceTasks(processInstanceId, DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)

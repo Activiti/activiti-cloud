@@ -63,7 +63,7 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     }
 
     @Override
-    public CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId) {
+    public CollectionModel<EntityModel<CloudVariableInstance>> getProcessInstanceVariables(@PathVariable String processInstanceId) {
         return resourcesAssembler.toCollectionModel(processRuntime.variables(ProcessPayloadBuilder.variables()
                                                                                .withProcessInstanceId(processInstanceId)
                                                                                .build()),
@@ -71,7 +71,7 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     }
 
     @Override
-    public ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
+    public ResponseEntity<Void> setProcessInstanceVariables(@PathVariable String processInstanceId,
                                              @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
 
         if (setProcessVariablesPayload != null) {

@@ -19,14 +19,17 @@ import com.fasterxml.classmate.TypeResolver;
 import java.util.List;
 import java.util.function.Predicate;
 import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
+import org.activiti.cloud.common.swagger.CustomOperationNameGenerator;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.PathPrefixTransformationFilter;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
+import org.activiti.cloud.common.swagger.SwaggerOperationIdCleanBuilderPlugin;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import springfox.documentation.RequestHandler;
 import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -57,6 +60,18 @@ public class SwaggerAutoConfiguration {
     public SwaggerDocketBuilder swaggerDocketBuilder(BuildProperties buildProperties, TypeResolver typeResolver,
         List<DocketCustomizer> docketCustomizers) {
         return new SwaggerDocketBuilder(new BaseAPIInfoBuilder(buildProperties), typeResolver, docketCustomizers);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SwaggerOperationIdCleanBuilderPlugin swaggerIncludeMissingNicknameIntoUniqueIdReader() {
+        return new SwaggerOperationIdCleanBuilderPlugin();
+    }
+
+    @Bean
+    @Primary
+    public CustomOperationNameGenerator customOperationNameGenerator() {
+        return new CustomOperationNameGenerator();
     }
 
     @Bean
