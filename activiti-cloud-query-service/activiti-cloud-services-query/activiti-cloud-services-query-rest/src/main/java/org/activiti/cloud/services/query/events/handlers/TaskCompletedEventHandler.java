@@ -15,30 +15,31 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-import java.util.Optional;
-
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.Optional;
+
 public class TaskCompletedEventHandler implements QueryEventHandler {
 
-    private final TaskRepository taskRepository;
+    private final EntityManager entityManager;
 
-    public TaskCompletedEventHandler(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+    public TaskCompletedEventHandler(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskCompletedEvent taskCompletedEvent = (CloudTaskCompletedEvent) event;
         Task eventTask = taskCompletedEvent.getEntity();
-        Optional<TaskEntity> findResult = taskRepository.findById(eventTask.getId());
+        Optional<TaskEntity> findResult = Optional.ofNullable(entityManager.find(TaskEntity.class,
+                                                                                 eventTask.getId()));
         TaskEntity queryTaskEntity = findResult.orElseThrow(
                 () -> new QueryException("Unable to find task with id: " + eventTask.getId())
         );
@@ -52,7 +53,7 @@ public class TaskCompletedEventHandler implements QueryEventHandler {
             queryTaskEntity.setDuration(queryTaskEntity.getCompletedDate().getTime() - queryTaskEntity.getCreatedDate().getTime());
         }
 
-        taskRepository.save(queryTaskEntity);
+        entityManager.persist(queryTaskEntity);
     }
 
     @Override

@@ -41,15 +41,19 @@ public class VariableValue<T> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null ) {
             return false;
         }
+        if (getClass() != o.getClass()) {
+            return false;
+        }
+
         VariableValue<?> that = (VariableValue<?>) o;
-        return Objects.equals(value, that.value);
+        return value != null && Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return getClass().hashCode();
     }
 }

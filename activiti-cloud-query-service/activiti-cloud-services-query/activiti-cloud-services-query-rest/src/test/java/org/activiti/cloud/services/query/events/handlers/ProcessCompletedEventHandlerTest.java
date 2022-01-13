@@ -15,22 +15,21 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -46,7 +45,7 @@ public class ProcessCompletedEventHandlerTest {
     private ProcessCompletedEventHandler handler;
 
     @Mock
-    private ProcessInstanceRepository processInstanceRepository;
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -59,13 +58,13 @@ public class ProcessCompletedEventHandlerTest {
         CloudProcessCompletedEvent event = createProcessCompletedEvent();
 
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
+        given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId())).willReturn(currentProcessInstanceEntity);
 
         //when
         handler.handle(event);
 
         //then
-        verify(processInstanceRepository).save(currentProcessInstanceEntity);
+        verify(entityManager).persist(currentProcessInstanceEntity);
         verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
         verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     }
@@ -80,7 +79,7 @@ public class ProcessCompletedEventHandlerTest {
     public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
         //given
         CloudProcessCompletedEvent event = createProcessCompletedEvent();
-        given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
+        given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(null);
 
         //then
         //when

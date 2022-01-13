@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.TaskCandidateGroup;
-import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
@@ -98,7 +98,7 @@ public class TaskAdminController {
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         return taskEntity.getTaskCandidateUsers() != null ?
-                                      taskEntity.getTaskCandidateUsers().stream().map(TaskCandidateUser::getUserId).collect(Collectors.toList()) :
+                                      taskEntity.getTaskCandidateUsers().stream().map(TaskCandidateUserEntity::getUserId).collect(Collectors.toList()) :
                                       null;
     }
 
@@ -109,7 +109,7 @@ public class TaskAdminController {
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         return taskEntity.getTaskCandidateGroups() != null ?
-                                       taskEntity.getTaskCandidateGroups().stream().map(TaskCandidateGroup::getGroupId).collect(Collectors.toList()) :
+                                       taskEntity.getTaskCandidateGroups().stream().map(TaskCandidateGroupEntity::getGroupId).collect(Collectors.toList()) :
                                        null;
     }
 

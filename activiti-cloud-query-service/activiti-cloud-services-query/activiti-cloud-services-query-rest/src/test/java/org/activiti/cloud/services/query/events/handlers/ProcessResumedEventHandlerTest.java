@@ -15,22 +15,21 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -46,7 +45,7 @@ public class ProcessResumedEventHandlerTest {
     private ProcessResumedEventHandler handler;
 
     @Mock
-    private ProcessInstanceRepository processInstanceRepository;
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -61,13 +60,13 @@ public class ProcessResumedEventHandlerTest {
         CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.of(currentProcessInstanceEntity));
+        given(entityManager.find(ProcessInstanceEntity.class, eventProcessInstance.getId())).willReturn(currentProcessInstanceEntity);
 
         //when
         handler.handle(event);
 
         //then
-        verify(processInstanceRepository).save(currentProcessInstanceEntity);
+        verify(entityManager).persist(currentProcessInstanceEntity);
         verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
         verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     }
@@ -79,7 +78,7 @@ public class ProcessResumedEventHandlerTest {
         eventProcessInstance.setId(UUID.randomUUID().toString());
         CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
-        given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.empty());
+        given(entityManager.find(ProcessInstanceEntity.class, eventProcessInstance.getId())).willReturn(null);
 
         //then
         //when

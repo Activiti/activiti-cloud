@@ -15,19 +15,11 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
+import javax.persistence.*;
 import java.util.Objects;
-
-import javax.persistence.ConstraintMode;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 @Entity(name="TaskCandidateGroup")
 @Table(name="TASK_CANDIDATE_GROUP", indexes= {
@@ -36,7 +28,9 @@ import javax.persistence.Table;
 	}
 )
 @IdClass(TaskCandidateGroupId.class)
-public class TaskCandidateGroup {
+@DynamicInsert
+@DynamicUpdate
+public class TaskCandidateGroupEntity {
 
     @Id
     private String taskId;
@@ -49,12 +43,12 @@ public class TaskCandidateGroup {
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private TaskEntity task;
 
-    public TaskCandidateGroup() {
+    public TaskCandidateGroupEntity() {
 
     }
 
-    public TaskCandidateGroup(String taskid,
-                              String groupId) {
+    public TaskCandidateGroupEntity(String taskid,
+                                    String groupId) {
         this.taskId = taskid;
         this.groupId = groupId;
     }
@@ -85,18 +79,23 @@ public class TaskCandidateGroup {
 
     @Override
     public int hashCode() {
-        return Objects.hash(groupId, taskId);
+        return getClass().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        TaskCandidateGroup other = (TaskCandidateGroup) obj;
-        return Objects.equals(groupId, other.groupId) && Objects.equals(taskId, other.taskId);
+        }
+        TaskCandidateGroupEntity other = (TaskCandidateGroupEntity) obj;
+        return this.groupId != null &&
+            this.taskId != null &&
+            Objects.equals(groupId, other.groupId) && Objects.equals(taskId, other.taskId);
     }
 }

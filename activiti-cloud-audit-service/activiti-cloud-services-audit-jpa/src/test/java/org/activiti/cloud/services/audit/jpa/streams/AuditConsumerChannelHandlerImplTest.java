@@ -21,19 +21,20 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.util.HashMap;
 import java.util.UUID;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class AuditConsumerChannelHandlerImplTest {
@@ -47,6 +48,9 @@ public class AuditConsumerChannelHandlerImplTest {
     @Mock
     private APIEventToEntityConverters converters;
 
+    @Captor
+    private ArgumentCaptor<Iterable<AuditEventEntity>> argumentCaptor;
+
     @BeforeEach
     public void setUp() {
         initMocks(this);
@@ -59,7 +63,7 @@ public class AuditConsumerChannelHandlerImplTest {
         when(cloudRuntimeEvent.getEventType()).thenReturn(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED);
         EventToEntityConverter converter = mock(EventToEntityConverter.class);
         when(converters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())).thenReturn(converter);
-        AuditEventEntity entity = mock(AuditEventEntity.class);
+        ProcessCreatedAuditEventEntity entity = mock(ProcessCreatedAuditEventEntity.class);
         when(converter.convertToEntity(cloudRuntimeEvent)).thenReturn(entity);
 
         CloudRuntimeEvent[] events = {cloudRuntimeEvent};
@@ -68,7 +72,9 @@ public class AuditConsumerChannelHandlerImplTest {
         handler.receiveCloudRuntimeEvent(new HashMap<String,Object>(){{put("id", UUID.randomUUID());}}, events);
 
         //then
-        verify(eventsRepository).save(entity);
+        verify(eventsRepository).saveAll(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue()).containsOnly(entity);
+
     }
 
     @Test

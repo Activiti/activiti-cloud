@@ -30,6 +30,8 @@ public interface ApplicationRepository extends
         QuerydslPredicateExecutor<ApplicationEntity>,
         QuerydslBinderCustomizer<QApplicationEntity> {
 
+    boolean existsByNameAndVersion(String name, String version);
+
     @Override
     default void customize(QuerydslBindings bindings,
             QApplicationEntity root) {

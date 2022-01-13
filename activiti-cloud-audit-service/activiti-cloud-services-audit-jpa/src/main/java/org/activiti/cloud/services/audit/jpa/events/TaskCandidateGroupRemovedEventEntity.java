@@ -19,8 +19,7 @@ import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateGroupJpaJsonConverter;
-
-import java.util.Objects;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -29,6 +28,7 @@ import javax.persistence.Entity;
 
 @Entity(name = TaskCandidateGroupRemovedEventEntity.TASK_CANDIDATE_GROUP_REMOVED_EVENT)
 @DiscriminatorValue(value = TaskCandidateGroupRemovedEventEntity.TASK_CANDIDATE_GROUP_REMOVED_EVENT)
+@DynamicInsert
 public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
 
     protected static final String TASK_CANDIDATE_GROUP_REMOVED_EVENT = "TaskCandidateGroupRemovedEvent";
@@ -36,7 +36,7 @@ public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
     @Convert(converter = TaskCandidateGroupJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private TaskCandidateGroupImpl candidateGroup;
-    
+
     public TaskCandidateGroupRemovedEventEntity() {
     }
 
@@ -44,36 +44,13 @@ public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
         super(cloudEvent);
         setCandidateGroup(cloudEvent.getEntity());
     }
-    
+
     public TaskCandidateGroup getCandidateGroup() {
         return candidateGroup;
     }
 
     public void setCandidateGroup(TaskCandidateGroup candidateGroup) {
         this.candidateGroup = new TaskCandidateGroupImpl(candidateGroup.getGroupId(),candidateGroup.getTaskId());
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(candidateGroup);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        TaskCandidateGroupRemovedEventEntity other = (TaskCandidateGroupRemovedEventEntity) obj;
-        return Objects.equals(candidateGroup, other.candidateGroup);
     }
 
     @Override

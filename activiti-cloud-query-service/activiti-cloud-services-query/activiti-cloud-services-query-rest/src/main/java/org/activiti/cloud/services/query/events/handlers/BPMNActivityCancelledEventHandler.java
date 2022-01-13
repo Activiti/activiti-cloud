@@ -15,36 +15,31 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-
-import javax.persistence.EntityManager;
-
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 
-@Transactional
+import javax.persistence.EntityManager;
+import java.util.Date;
+
 public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
-    public BPMNActivityCancelledEventHandler(BPMNActivityRepository activitiyRepository,
-                                             EntityManager entityManager) {
-        super(activitiyRepository,
-              entityManager);
-
+    public BPMNActivityCancelledEventHandler(EntityManager entityManager) {
+        super(entityManager);
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityCancelledEvent activityEvent = CloudBPMNActivityCancelledEvent.class.cast(event);
 
-        BPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntity(event);
+        BaseBPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntity(event);
 
         bpmnActivityEntity.setCancelledDate(new Date(activityEvent.getTimestamp()));
         bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.CANCELLED);
+
+        entityManager.persist(bpmnActivityEntity);
     }
 
     @Override

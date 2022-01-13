@@ -44,11 +44,14 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnCommonMo
     private final ConnectorModelType connectorModelType;
 
     private final ConnectorModelContentConverter connectorModelContentConverter;
+    private final FlowElementsExtractor flowElementsExtractor;
 
     public BpmnModelServiceTaskImplementationValidator(ConnectorModelType connectorModelType,
-            ConnectorModelContentConverter connectorModelContentConverter) {
+        ConnectorModelContentConverter connectorModelContentConverter,
+        FlowElementsExtractor flowElementsExtractor) {
         this.connectorModelType = connectorModelType;
         this.connectorModelContentConverter = connectorModelContentConverter;
+        this.flowElementsExtractor = flowElementsExtractor;
     }
 
     @Override
@@ -56,11 +59,9 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnCommonMo
                                                  ValidationContext validationContext) {
         List<String> availableImplementations = getAvailableImplementations(validationContext);
 
-        return getFlowElements(bpmnModel,
-                        ServiceTask.class)
+        return flowElementsExtractor.extractFlowElements(bpmnModel, ServiceTask.class).stream()
                 .filter(serviceTask -> serviceTask.getImplementation() != null)
-                .map(serviceTask -> validateServiceTaskImplementation(serviceTask,
-                                                                      availableImplementations))
+                .map(serviceTask -> validateServiceTaskImplementation(serviceTask, availableImplementations))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
     }

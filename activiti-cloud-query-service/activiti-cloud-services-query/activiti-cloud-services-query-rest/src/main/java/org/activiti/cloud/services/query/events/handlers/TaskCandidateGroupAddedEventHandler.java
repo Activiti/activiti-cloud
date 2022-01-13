@@ -15,33 +15,34 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.cloud.services.query.model.TaskCandidateGroup;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+
+import javax.persistence.EntityManager;
 
 public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
 
-    private final TaskCandidateGroupRepository taskCandidateGroupRepository;
+    private final EntityManager entityManager;
 
-    public TaskCandidateGroupAddedEventHandler(TaskCandidateGroupRepository taskCandidateGroupRepository) {
-        this.taskCandidateGroupRepository = taskCandidateGroupRepository;
+    public TaskCandidateGroupAddedEventHandler(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
 
         CloudTaskCandidateGroupAddedEvent taskCandidateGroupAddedEvent = (CloudTaskCandidateGroupAddedEvent) event;
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup(taskCandidateGroupAddedEvent.getEntity().getTaskId(),
-                                                                       taskCandidateGroupAddedEvent.getEntity().getGroupId());
-
+        TaskCandidateGroup taskCandidateGroup = taskCandidateGroupAddedEvent.getEntity();
+        TaskCandidateGroupEntity taskCandidateGroupEntity = new TaskCandidateGroupEntity(taskCandidateGroup.getTaskId(),
+                                                                                         taskCandidateGroup.getGroupId());
         // not going to look up task as candidate can be created before task
-
         // Persist into database
         try {
-            taskCandidateGroupRepository.save(taskCandidateGroup);
+            entityManager.persist(taskCandidateGroupEntity);
         } catch (Exception cause) {
             throw new QueryException("Error handling TaskCandidateGroupAddedEvent[" + event + "]",
                                      cause);

@@ -16,40 +16,23 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageWaitingEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = MessageWaitingAuditEventEntity.MESSAGE_WAITING_EVENT)
 @DiscriminatorValue(value = MessageWaitingAuditEventEntity.MESSAGE_WAITING_EVENT)
+@DynamicInsert
 public class MessageWaitingAuditEventEntity extends MessageAuditEventEntity {
 
     protected static final String MESSAGE_WAITING_EVENT = "MessageWaitingEvent";
-    
+
     public MessageWaitingAuditEventEntity() {
     }
-    
+
     public MessageWaitingAuditEventEntity(CloudBPMNMessageWaitingEvent cloudEvent) {
         super(cloudEvent);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -57,5 +40,5 @@ public class MessageWaitingAuditEventEntity extends MessageAuditEventEntity {
         StringBuilder builder = new StringBuilder();
         builder.append("MessageWaitingAuditEventEntity [toString()=").append(super.toString()).append("]");
         return builder.toString();
-    }    
+    }
 }

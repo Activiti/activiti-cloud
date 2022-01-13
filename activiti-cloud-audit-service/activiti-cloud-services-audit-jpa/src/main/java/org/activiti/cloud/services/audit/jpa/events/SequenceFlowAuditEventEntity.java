@@ -18,8 +18,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SequenceFlowJpaJsonConverter;
-
-import java.util.Objects;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -28,6 +27,7 @@ import javax.persistence.Entity;
 
 @Entity(name = SequenceFlowAuditEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
 @DiscriminatorValue(value = SequenceFlowAuditEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
+@DynamicInsert
 public class SequenceFlowAuditEventEntity extends AuditEventEntity {
 
     protected static final String SEQUENCE_FLOW_TAKEN_EVENT = "SequenceFlowTakenEvent";
@@ -50,29 +50,6 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
 
     public void setSequenceFlow(BPMNSequenceFlow sequenceFlow) {
         this.sequenceFlow = sequenceFlow;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(sequenceFlow);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        SequenceFlowAuditEventEntity other = (SequenceFlowAuditEventEntity) obj;
-        return Objects.equals(sequenceFlow, other.sequenceFlow);
     }
 
     @Override

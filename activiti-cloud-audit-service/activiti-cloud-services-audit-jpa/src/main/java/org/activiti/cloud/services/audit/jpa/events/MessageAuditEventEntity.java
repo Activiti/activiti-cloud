@@ -19,8 +19,6 @@ import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.MessageJpaJsonConverter;
 
-import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.MappedSuperclass;
@@ -51,29 +49,6 @@ public abstract class MessageAuditEventEntity extends AuditEventEntity {
 
     public void setMessage(BPMNMessage message) {
         this.message = message;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(message);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        MessageAuditEventEntity other = (MessageAuditEventEntity) obj;
-        return Objects.equals(message, other.message);
     }
 
     @Override

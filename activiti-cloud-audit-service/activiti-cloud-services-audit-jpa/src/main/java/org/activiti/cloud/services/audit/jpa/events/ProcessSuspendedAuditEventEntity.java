@@ -16,12 +16,14 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = ProcessSuspendedAuditEventEntity.PROCESS_SUSPENDED_EVENT)
 @DiscriminatorValue(value = ProcessSuspendedAuditEventEntity.PROCESS_SUSPENDED_EVENT)
+@DynamicInsert
 public class ProcessSuspendedAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_SUSPENDED_EVENT = "ProcessSuspendedEvent";
@@ -31,25 +33,6 @@ public class ProcessSuspendedAuditEventEntity extends ProcessAuditEventEntity {
 
     public ProcessSuspendedAuditEventEntity(CloudProcessSuspendedEvent cloudEvent) {
         super(cloudEvent);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
 
     @Override

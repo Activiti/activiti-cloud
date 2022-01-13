@@ -15,14 +15,19 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Objects;
+import org.activiti.cloud.api.process.model.CloudApplication;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.activiti.cloud.api.process.model.CloudApplication;
+import java.util.Objects;
 
 @Entity(name = "Application")
 @Table(name = "APPLICATION")
+@DynamicInsert
+@DynamicUpdate
 public class ApplicationEntity implements CloudApplication{
     @Id
     private String id;
@@ -39,7 +44,7 @@ public class ApplicationEntity implements CloudApplication{
         this.name = name;
         this.version = version;
     }
-    
+
     public String getId() {
         return id;
     }
@@ -63,26 +68,24 @@ public class ApplicationEntity implements CloudApplication{
     public void setName(String name) {
         this.name = name;
     }
-    
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(id);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ApplicationEntity other = (ApplicationEntity) obj;
-        return  Objects.equals(id, other.id) &&
-                Objects.equals(version, other.version) && 
-                Objects.equals(name, other.name) ;
+        return id != null &&  Objects.equals(id, other.id);
     }
 }

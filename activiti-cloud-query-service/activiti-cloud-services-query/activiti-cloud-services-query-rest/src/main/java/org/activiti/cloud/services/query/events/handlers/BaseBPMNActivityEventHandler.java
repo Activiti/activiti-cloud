@@ -15,56 +15,74 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import javax.persistence.EntityManager;
-
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
-public abstract class BaseBPMNActivityEventHandler  {
+import javax.persistence.EntityManager;
 
-    protected final BPMNActivityRepository bpmnActivitiyRepository;
+public abstract class BaseBPMNActivityEventHandler {
+
     protected final EntityManager entityManager;
 
-    public BaseBPMNActivityEventHandler(BPMNActivityRepository activitiyRepository,
-                                        EntityManager entityManager) {
-        this.bpmnActivitiyRepository = activitiyRepository;
+    public BaseBPMNActivityEventHandler(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    protected BPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
+    protected BaseBPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
-        BPMNActivityEntity bpmnActivityEntity = bpmnActivitiyRepository.findByProcessInstanceIdAndElementIdAndExecutionId(bpmnActivity.getProcessInstanceId(),
-                                                                                                                          bpmnActivity.getElementId(),
-                                                                                                                          bpmnActivity.getExecutionId());
-        if(bpmnActivityEntity == null) {
+        String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
+
+        BaseBPMNActivityEntity bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class,
+                                                                   pkId);
+        if (bpmnActivityEntity == null) {
+            bpmnActivityEntity = createBpmnActivityEntity(event);
+        }
+
+        return bpmnActivityEntity;
+
+    }
+
+    public BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
+        CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
+
+        BPMNActivity bpmnActivity = activityEvent.getEntity();
+
+        String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
+
+        BaseBPMNActivityEntity bpmnActivityEntity;
+
+        if ("serviceTask".equals(bpmnActivity.getActivityType())) {
+            bpmnActivityEntity = new ServiceTaskEntity(event.getServiceName(),
+                                                       event.getServiceFullName(),
+                                                       event.getServiceVersion(),
+                                                       event.getAppName(),
+                                                       event.getAppVersion());
+        } else {
             bpmnActivityEntity = new BPMNActivityEntity(event.getServiceName(),
                                                         event.getServiceFullName(),
                                                         event.getServiceVersion(),
                                                         event.getAppName(),
                                                         event.getAppVersion());
-
-            // Let use event id to persist activity id
-            bpmnActivityEntity.setId(event.getId());
-            bpmnActivityEntity.setElementId(bpmnActivity.getElementId());
-            bpmnActivityEntity.setActivityName(bpmnActivity.getActivityName());
-            bpmnActivityEntity.setActivityType(bpmnActivity.getActivityType());
-            bpmnActivityEntity.setProcessDefinitionId(bpmnActivity.getProcessDefinitionId());
-            bpmnActivityEntity.setProcessInstanceId(bpmnActivity.getProcessInstanceId());
-            bpmnActivityEntity.setExecutionId(bpmnActivity.getExecutionId());
-            bpmnActivityEntity.setProcessDefinitionKey(activityEvent.getProcessDefinitionKey());
-            bpmnActivityEntity.setProcessDefinitionVersion(activityEvent.getProcessDefinitionVersion());
-            bpmnActivityEntity.setBusinessKey(activityEvent.getBusinessKey());
-
-            entityManager.persist(bpmnActivityEntity);
         }
 
-        return bpmnActivityEntity;
+        bpmnActivityEntity.setId(pkId);
+        bpmnActivityEntity.setElementId(bpmnActivity.getElementId());
+        bpmnActivityEntity.setActivityName(bpmnActivity.getActivityName());
+        bpmnActivityEntity.setActivityType(bpmnActivity.getActivityType());
+        bpmnActivityEntity.setProcessDefinitionId(bpmnActivity.getProcessDefinitionId());
+        bpmnActivityEntity.setProcessInstanceId(bpmnActivity.getProcessInstanceId());
+        bpmnActivityEntity.setExecutionId(bpmnActivity.getExecutionId());
+        bpmnActivityEntity.setProcessDefinitionKey(activityEvent.getProcessDefinitionKey());
+        bpmnActivityEntity.setProcessDefinitionVersion(activityEvent.getProcessDefinitionVersion());
+        bpmnActivityEntity.setBusinessKey(activityEvent.getBusinessKey());
 
+        return bpmnActivityEntity;
     }
 }

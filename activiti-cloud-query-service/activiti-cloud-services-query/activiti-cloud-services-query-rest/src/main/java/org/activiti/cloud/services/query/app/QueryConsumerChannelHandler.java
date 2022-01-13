@@ -17,21 +17,29 @@ package org.activiti.cloud.services.query.app;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
+import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional(propagation = Propagation.REQUIRES_NEW)
 public class QueryConsumerChannelHandler {
 
-    private QueryEventHandlerContext eventHandlerContext;
+    private final QueryEventHandlerContext eventHandlerContext;
+    private final QueryEventHandlerContextOptimizer optimizer;
 
-    public QueryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext) {
+    public QueryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext,
+                                       QueryEventHandlerContextOptimizer optimizer) {
+        this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;
     }
 
     @StreamListener(QueryConsumerChannels.QUERY_CONSUMER)
     public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        eventHandlerContext.handle(events.toArray(new CloudRuntimeEvent[]{}));
+        eventHandlerContext.handle(optimizer.optimize(events)
+                                            .toArray(new CloudRuntimeEvent[]{}));
     }
 
 }

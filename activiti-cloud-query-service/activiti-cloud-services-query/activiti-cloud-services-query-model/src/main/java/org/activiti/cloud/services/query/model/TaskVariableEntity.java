@@ -15,35 +15,46 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.Objects;
-
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-@Entity(name="TaskVariable")
+@Entity(name = "TaskVariable")
 @Table(name = "TASK_VARIABLE",
         indexes = {
                 @Index(name = "task_var_processInstanceId_idx", columnList = "processInstanceId", unique = false),
                 @Index(name = "task_var_taskId_idx", columnList = "taskId", unique = false),
                 @Index(name = "task_var_name_idx", columnList = "name", unique = false),
                 @Index(name = "task_var_executionId_idx", columnList = "executionId", unique = false)
-		})
+        })
+@DynamicInsert
+@DynamicUpdate
 public class TaskVariableEntity extends AbstractVariableEntity {
 
+    @Id
+    @GeneratedValue(generator = "task_variable_sequence", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "task_variable_sequence", sequenceName = "task_variable_sequence", allocationSize = 50)
+    private Long id;
+
     private String taskId;
-    
+
     @JsonIgnore
-    @ManyToOne(optional = true, fetch=FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true,
+        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private TaskEntity task;
 
     public TaskVariableEntity() {
@@ -62,8 +73,7 @@ public class TaskVariableEntity extends AbstractVariableEntity {
                           Date createTime,
                           Date lastUpdatedTime,
                           String executionId) {
-        super(id,
-              type,
+        super(type,
               name,
               processInstanceId,
               serviceName,
@@ -75,7 +85,13 @@ public class TaskVariableEntity extends AbstractVariableEntity {
               lastUpdatedTime,
               executionId);
 
+        this.id = id;
         this.taskId = taskId;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
     }
 
     public TaskEntity getTask() {
@@ -90,7 +106,7 @@ public class TaskVariableEntity extends AbstractVariableEntity {
     public String getTaskId() {
         return taskId;
     }
-    
+
     public void setTaskId(String taskId) {
         this.taskId = taskId;
     }
@@ -102,10 +118,7 @@ public class TaskVariableEntity extends AbstractVariableEntity {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(taskId);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override
@@ -117,7 +130,7 @@ public class TaskVariableEntity extends AbstractVariableEntity {
         if (getClass() != obj.getClass())
             return false;
         TaskVariableEntity other = (TaskVariableEntity) obj;
-        return Objects.equals(taskId, other.taskId);
+        return this.getId() != null && Objects.equals(this.getId(), other.getId());
     }
-    
+
 }
