@@ -8,7 +8,6 @@ public class CustomOperationNameGenerator implements OperationNameGenerator {
 
     @Override
     public String startingWith(String operationId) {
-        operationId = operationId.replaceAll(DEFAULT_SPRINGFOX_PATTERN_REGEX, "");
-        return operationId;
+        return operationId.replaceAll(DEFAULT_SPRINGFOX_PATTERN_REGEX, "");
     }
 }
