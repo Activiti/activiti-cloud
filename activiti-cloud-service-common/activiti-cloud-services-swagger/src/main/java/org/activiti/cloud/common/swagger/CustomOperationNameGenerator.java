@@ -4,7 +4,7 @@ import springfox.documentation.OperationNameGenerator;
 
 public class CustomOperationNameGenerator implements OperationNameGenerator {
 
-    private final static String DEFAULT_SPRINGFOX_PATTERN_REGEX = "Using(GET|POST|PUT|DELETE)(_[0-9])?";
+    private static final String DEFAULT_SPRINGFOX_PATTERN_REGEX = "Using(GET|POST|PUT|DELETE)(_[0-9])?";
 
     @Override
     public String startingWith(String operationId) {
