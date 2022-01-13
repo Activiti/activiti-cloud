@@ -30,6 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface ProcessInstanceTasksController {
 
     @GetMapping(value = "/tasks")
-    PagedModel<EntityModel<CloudTask>> getProcessInstanceTasks(@PathVariable(value = "processInstanceId") String processInstanceId,
+    PagedModel<EntityModel<CloudTask>> getTasks(@PathVariable(value = "processInstanceId") String processInstanceId,
         Pageable pageable);
 }

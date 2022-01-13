@@ -38,7 +38,7 @@ public class ProcessInstanceVariableRepresentationModelAssembler implements Repr
     @Override
     public EntityModel<CloudVariableInstance> toModel(VariableInstance variableInstance) {
         CloudVariableInstance cloudVariableInstance = converter.from(variableInstance);
-        Link processVariables = linkTo(methodOn(ProcessInstanceVariableControllerImpl.class).getProcessInstanceVariables(cloudVariableInstance.getProcessInstanceId())).withRel("processVariables");
+        Link processVariables = linkTo(methodOn(ProcessInstanceVariableControllerImpl.class).getVariables(cloudVariableInstance.getProcessInstanceId())).withRel("processVariables");
         Link processInstance = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(cloudVariableInstance.getProcessInstanceId())).withRel("processInstance");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
         return new EntityModel<>(cloudVariableInstance,

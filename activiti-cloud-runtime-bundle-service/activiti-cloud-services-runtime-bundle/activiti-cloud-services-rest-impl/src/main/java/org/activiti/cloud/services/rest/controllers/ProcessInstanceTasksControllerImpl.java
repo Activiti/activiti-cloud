@@ -54,7 +54,7 @@ public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksC
     }
 
     @Override
-    public PagedModel<EntityModel<CloudTask>> getProcessInstanceTasks(@PathVariable String processInstanceId,
+    public PagedModel<EntityModel<CloudTask>> getTasks(@PathVariable String processInstanceId,
                                                         Pageable pageable) {
         Page<Task> page = taskRuntime.tasks(pageConverter.toAPIPageable(pageable),
                                             TaskPayloadBuilder.tasks()

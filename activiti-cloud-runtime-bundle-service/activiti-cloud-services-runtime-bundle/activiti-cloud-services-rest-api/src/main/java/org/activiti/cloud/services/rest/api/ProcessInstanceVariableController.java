@@ -31,10 +31,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface ProcessInstanceVariableController {
 
     @RequestMapping(method = RequestMethod.GET)
-    CollectionModel<EntityModel<CloudVariableInstance>> getProcessInstanceVariables(@PathVariable String processInstanceId);
+    CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId);
 
     @RequestMapping(method = RequestMethod.POST)
-    ResponseEntity<Void> setProcessInstanceVariables(@PathVariable String processInstanceId,
+    ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
                                       @RequestBody SetProcessVariablesPayload setProcessVariablesPayload);
 
 }
