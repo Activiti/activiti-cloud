@@ -43,7 +43,7 @@ public class HomeControllerImpl implements HomeController {
     @Override
     public EntityModel<HomeResource> getHomeInfo() {
 
-        return new EntityModel<>(new HomeResource(),
+        return EntityModel.of(new HomeResource(),
                               linkTo(ProcessDefinitionControllerImpl.class).withRel("process-definitions"),
                               linkTo(ProcessInstanceControllerImpl.class).withRel("process-instances"),
                               linkTo(TaskControllerImpl.class).withRel("tasks"));

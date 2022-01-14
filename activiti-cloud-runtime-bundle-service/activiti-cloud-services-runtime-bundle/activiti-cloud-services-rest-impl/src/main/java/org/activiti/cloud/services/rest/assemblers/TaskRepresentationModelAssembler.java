@@ -30,17 +30,17 @@
 
 package org.activiti.cloud.services.rest.assemblers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskControllerImpl;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -74,7 +74,7 @@ public class TaskRepresentationModelAssembler implements RepresentationModelAsse
             links.add(linkTo(methodOn(TaskControllerImpl.class).getTaskById(cloudTask.getParentTaskId())).withRel("parent"));
         }
         links.add(linkTo(HomeControllerImpl.class).withRel("home"));
-        return new EntityModel<>(cloudTask,
+        return EntityModel.of(cloudTask,
                               links);
     }
 

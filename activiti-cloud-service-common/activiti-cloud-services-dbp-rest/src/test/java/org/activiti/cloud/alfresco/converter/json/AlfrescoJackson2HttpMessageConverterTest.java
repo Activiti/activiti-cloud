@@ -16,9 +16,6 @@
 package org.activiti.cloud.alfresco.converter.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.lang.reflect.Type;
-import java.util.List;
-
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,11 +25,14 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -129,7 +129,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
                                                                     eq(outputMessage));
 
         //when
-        httpMessageConverter.writeInternal(new EntityModel<>("content"),
+        httpMessageConverter.writeInternal(EntityModel.of("content"),
                                            type,
                                            outputMessage);
 

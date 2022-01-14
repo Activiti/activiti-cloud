@@ -26,6 +26,6 @@ public class ModelTypeRepresentationModelAssembler implements RepresentationMode
 
     @Override
     public EntityModel<ModelType> toModel(ModelType modelType) {
-        return new EntityModel<>(modelType);
+        return EntityModel.of(modelType);
     }
 }
