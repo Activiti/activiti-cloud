@@ -67,7 +67,7 @@ public class TaskDeleteController {
 
         taskRepository.deleteAll(iterable);
 
-        return new CollectionModel<>(result);
+        return CollectionModel.of(result);
     }
 
 }

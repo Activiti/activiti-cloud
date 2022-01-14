@@ -24,7 +24,7 @@ public class TaskVariableRepresentationModelAssembler implements RepresentationM
 
     @Override
     public EntityModel<CloudVariableInstance> toModel(TaskVariableEntity entity) {
-       return new EntityModel<>(entity);
+       return EntityModel.of(entity);
     }
 
 }

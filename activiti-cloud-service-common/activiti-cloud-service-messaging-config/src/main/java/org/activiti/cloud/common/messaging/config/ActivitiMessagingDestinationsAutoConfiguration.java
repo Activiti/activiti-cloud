@@ -24,6 +24,7 @@ import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
@@ -47,7 +48,7 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
     }
 
     @Bean
-    public InputConverterFunction escapeIllegalChars(ActivitiCloudMessagingProperties messagingProperties) {
+    public InputConverterFunction escapeIllegalChars(@Lazy ActivitiCloudMessagingProperties messagingProperties) {
         return (value) -> value.replaceAll(messagingProperties.getDestinationIllegalCharsRegex(),
                                            messagingProperties.getDestinationIllegalCharsReplacement());
     }

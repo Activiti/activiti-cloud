@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.alfresco.converter.json;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
@@ -25,9 +22,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -49,7 +49,7 @@ public class PagedModelConverterTest {
     @Test
     public void toAlfrescoContentListWrapperShouldConvertFromPagedModelToAlfrescoContentListWrapper() {
         //given
-        List<EntityModel<String>> elements = Collections.singletonList(new EntityModel<>("any"));
+        List<EntityModel<String>> elements = Collections.singletonList(EntityModel.of("any"));
         PagedModel.PageMetadata basePageMetaData = new PagedModel.PageMetadata(10,
                                                                                1,
                                                                                100);
@@ -58,8 +58,8 @@ public class PagedModelConverterTest {
         given(pageMetadataConverter.toAlfrescoPageMetadata(basePageMetaData, elements.size())).willReturn(alfrescoPageMetadata);
 
         //when
-        ListResponseContent<String> alfrescoPageContentListWrapper = pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(new PagedModel<>(elements,
-                                                                                                                                                      basePageMetaData));
+        ListResponseContent<String> alfrescoPageContentListWrapper = pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(PagedModel.of(elements,
+                                                                                                                                                           basePageMetaData));
 
         //then
         assertThat(alfrescoPageContentListWrapper).isNotNull();
@@ -73,10 +73,10 @@ public class PagedModelConverterTest {
     @Test
     public void toAlfrescoContentListWrapperShouldConvertFromCollectionModelToAlfrescoContentListWrapper() {
         //given
-        List<EntityModel<String>> elements = Collections.singletonList(new EntityModel<>("any"));
+        List<EntityModel<String>> elements = Collections.singletonList(EntityModel.of("any"));
 
         //when
-        ListResponseContent<String> alfrescoPageContentListWrapper = pagedCollectionModelConverter.resourcesToListResponseContent(new CollectionModel<>(elements));
+        ListResponseContent<String> alfrescoPageContentListWrapper = pagedCollectionModelConverter.resourcesToListResponseContent(CollectionModel.of(elements));
 
         //then
         assertThat(alfrescoPageContentListWrapper).isNotNull();

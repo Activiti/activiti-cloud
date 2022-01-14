@@ -25,6 +25,6 @@ public class ApplicationRepresentationModelAssembler implements
 
     @Override
     public EntityModel<CloudApplication> toModel(ApplicationEntity entity) {
-        return new EntityModel<>(entity);
+        return EntityModel.of(entity);
     }
 }

@@ -19,6 +19,7 @@ package org.activiti.cloud.common.messaging;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.validation.annotation.Validated;
 
@@ -189,7 +190,7 @@ public class ActivitiCloudMessagingProperties {
     }
 
     @Autowired
-    public void configureInputConverters(Map<String, InputConverterFunction> inputConverters) {
+    public void configureInputConverters(@Lazy Map<String, InputConverterFunction> inputConverters) {
         this.inputConverters = new LinkedHashMap<>(inputConverters);
     }
 

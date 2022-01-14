@@ -24,6 +24,6 @@ public class ProcessDefinitionRepresentationModelAssembler implements Representa
 
     @Override
     public EntityModel<CloudProcessDefinition> toModel(ProcessDefinitionEntity processDefinitionEntity) {
-        return new EntityModel<>(processDefinitionEntity);
+        return EntityModel.of(processDefinitionEntity);
     }
 }

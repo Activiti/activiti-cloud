@@ -74,7 +74,7 @@ public class AuditEventsDeleteController {
 
         eventsRepository.deleteAll(iterable);
 
-        return new CollectionModel<>(result);
+        return CollectionModel.of(result);
     }
 
 

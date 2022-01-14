@@ -30,8 +30,8 @@ public class EventRepresentationModelAssembler implements RepresentationModelAss
     @Override
     public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> toModel(CloudRuntimeEvent<?, CloudRuntimeEventType> event) {
         Link selfRel = linkTo(methodOn(AuditEventsControllerImpl.class).findById(event.getId())).withSelfRel();
-        return new EntityModel<>(event,
-                                 selfRel);
+        return EntityModel.of(event,
+                              selfRel);
     }
 
 }

@@ -24,7 +24,7 @@ public class ProcessInstanceVariableRepresentationModelAssembler implements Repr
 
     @Override
     public EntityModel<CloudVariableInstance> toModel(ProcessVariableEntity entity) {
-       return new EntityModel<>(entity);
+       return EntityModel.of(entity);
     }
 
 }
