@@ -15,8 +15,19 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -42,13 +53,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.*;
-
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
@@ -221,6 +225,60 @@ public abstract class AbstractMQServiceTaskIT {
         assertThat(tasks.getBody().getContent())
             .extracting(CloudTask::getName)
             .containsExactly("My user task");
+    }
+
+    @Test
+    public void should_supportVariableMappingAfterLoopingBack() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
+            ProcessPayloadBuilder.start()
+                .withProcessDefinitionKey("Process_N4qkN051N")
+                .build());
+
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        assertThat(tasks.getBody().getContent())
+            .extracting(CloudTask::getName)
+            .containsExactly("Enter values");
+
+        //when the task completes with a variable value causing a loop back
+        taskRestTemplate.complete(tasks.getBody().iterator().next(), TaskPayloadBuilder.complete()
+            .withVariable("formInput", "provided-it1").build());
+
+        //then process loops back to the first task
+        waitForTaskOnProcessInstance(processInstanceResponseEntity, "Enter values");
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variables = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+        assertThat(variables.getBody())
+            .extracting(
+                VariableInstance::getName,
+                VariableInstance::getValue
+            ).containsExactly(
+                tuple("providedValue", "provided-it1")
+            );
+
+        //when the task completes with a variable value not causing a loop back
+        tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        taskRestTemplate.complete(tasks.getBody().iterator().next(), TaskPayloadBuilder.complete()
+            .withVariable("formInput", "go").build());
+
+        //then the process reaches the next task
+        waitForTaskOnProcessInstance(processInstanceResponseEntity, "Wait");
+        variables = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+        assertThat(variables.getBody())
+            .extracting(
+                VariableInstance::getName,
+                VariableInstance::getValue
+            ).containsExactly(
+                tuple("providedValue", "go")
+            );
+
+    }
+
+    private void waitForTaskOnProcessInstance(ResponseEntity<CloudProcessInstance> processInstanceResponseEntity,
+        String name) {
+        await().untilAsserted(() -> assertThat(processInstanceRestTemplate.getTasks(
+            processInstanceResponseEntity).getBody().getContent())
+            .extracting(CloudTask::getName)
+            .containsExactly(name));
     }
 
     @Test
