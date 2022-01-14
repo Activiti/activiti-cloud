@@ -17,7 +17,7 @@ package org.activiti.cloud.common.swagger.conf;
 
 import com.fasterxml.classmate.TypeResolver;
 import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
-import org.activiti.cloud.common.swagger.CustomOperationNameGenerator;
+import org.activiti.cloud.common.swagger.SwaggerOperationIdTrimmer;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.PathPrefixTransformationFilter;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
@@ -73,8 +73,8 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @Primary
-    public CustomOperationNameGenerator customOperationNameGenerator() {
-        return new CustomOperationNameGenerator();
+    public SwaggerOperationIdTrimmer customOperationNameGenerator() {
+        return new SwaggerOperationIdTrimmer();
     }
 
     @Bean
