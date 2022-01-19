@@ -56,6 +56,14 @@
               }
             }
           }
+        },
+        {
+          "id": "input-variable-5",
+          "name": "input-variable-name-5",
+          "type": "string",
+          "required": false,
+          "description": "description",
+          "additionalProperty": "allowed"
         }
       ],
       "outputs": [
