@@ -347,12 +347,29 @@ public class ProcessInstanceTasks {
     }
 
     @Then("the status of the process is changed to completed")
-    public void verifyProcessStatus() throws Exception {
+    public void verifyProcessStatusCompleted() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
         processQuerySteps.checkProcessInstanceStatus(processId,
                 ProcessInstance.ProcessInstanceStatus.COMPLETED);
         auditSteps.checkProcessInstanceEvent(processId, ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED, AUDIT_STEP_TIMEOUT);
     }
+
+    @Then("the status of the process is changed to suspended")
+    public void verifyProcessStatusSuspended() throws Exception {
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+        processQuerySteps.checkProcessInstanceStatus(processId,
+                                                     ProcessInstance.ProcessInstanceStatus.SUSPENDED);
+        auditSteps.checkProcessInstanceEvent(processId, ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED, AUDIT_STEP_TIMEOUT);
+    }
+
+    @Then("the status of the process is changed to running")
+    public void verifyProcessStatusResumed() throws Exception {
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+        processQuerySteps.checkProcessInstanceStatus(processId,
+                                                     ProcessInstance.ProcessInstanceStatus.RUNNING);
+        auditSteps.checkProcessInstanceEvent(processId, ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED, AUDIT_STEP_TIMEOUT);
+    }
+
 
     @Then("a variable was created with name $variableName")
     @When("a variable was created with name $variableName")

@@ -15,11 +15,13 @@ When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VAR
 And the user deletes the process
 Then the process instance is deleted
 
-Scenario: resume a cancelled process instance
+Scenario: resume a suspended process instance
 Given the user is authenticated as testuser
 When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE
 And the user suspends the process instance
-Then the user is able to resume the process instance
+Then the status of the process is changed to suspended
+And the user is able to resume the process instance
+And the status of the process is changed to running
 
 Scenario: try activate a cancelled process instance
 Given the user is authenticated as testuser
