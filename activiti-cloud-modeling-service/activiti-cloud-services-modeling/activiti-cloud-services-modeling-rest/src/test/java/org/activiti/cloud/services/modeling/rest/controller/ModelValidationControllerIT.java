@@ -580,7 +580,7 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidObjectVariableContent() throws Exception {
+    public void should_returnSuccessful_when_validatingProcessExtensionsWithNonObjectVariableContent() throws Exception {
 
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-object-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
@@ -595,21 +595,7 @@ public class ModelValidationControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate/extensions",
                                    processModel.getId()).file(file));
-        resultActions.andExpect(status().isBadRequest());
-
-        final Exception resolvedException = resultActions.andReturn().getResolvedException();
-        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
-
-        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
-        assertThat(semanticModelValidationException.getValidationErrors())
-                .extracting(ModelValidationError::getProblem,
-                        ModelValidationError::getDescription)
-                .containsExactly(tuple("expected type: JSONObject, found: Integer",
-                                "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"),
-                        tuple("expected type: JSONArray, found: Integer",
-                                "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"),
-                        tuple("expected type: String, found: Integer",
-                                "Value format in objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"));
+        resultActions.andExpect(status().is2xxSuccessful());
     }
 
     @Test
