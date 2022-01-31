@@ -39,11 +39,8 @@ class AggregateIntegrationResultReceivedEventCmd implements Command<Void> {
 
     @Override
     public Void execute(CommandContext commandContext) {
-        if (runtimeBundleProperties.getEventsProperties()
-            .isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationResultReceivedEventImpl integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(
-                integrationContext);
-
+        if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
+            CloudIntegrationResultReceivedEventImpl integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(integrationContext);
             processEngineEventsAggregator.add(integrationResultReceived);
         }
 

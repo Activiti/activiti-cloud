@@ -23,7 +23,7 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
-import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
+import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -41,17 +41,20 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
+    private final VariablesPropagator variablesPropagator;
 
     public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator) {
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        VariablesPropagator variablesPropagator) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
+        this.variablesPropagator = variablesPropagator;
     }
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
@@ -94,9 +97,8 @@ public class ServiceTaskIntegrationResultEventHandler {
     private void triggerIntegrationContextExecution(IntegrationContext integrationContext) {
         managementService.executeCommand(
             CompositeCommand.of(
-                new SetExecutionVariablesCmd(integrationContext.getExecutionId(),
-                    integrationContext.getOutBoundVariables(), true),
-                new TriggerCmd(integrationContext.getExecutionId(), null),
+                new TriggerCmd(integrationContext.getExecutionId(), integrationContext.getOutBoundVariables(),
+                    variablesPropagator),
                 new AggregateIntegrationResultReceivedEventCmd(integrationContext,
                     runtimeBundleProperties, processEngineEventsAggregator)
             ));

@@ -253,4 +253,11 @@ public class ServiceTaskConsumerHandler {
 
         sendIntegrationResult(integrationRequest, integrationContext);
     }
+
+    @StreamListener(value = ConnectorIntegrationChannels.VALUE_PROCESSOR_CONSUMER)
+    public void valueProcessorConnector(IntegrationRequest integrationRequest) {
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        integrationContext.addOutBoundVariable("providedValue", integrationContext.getInBoundVariable("input"));
+        sendIntegrationResult(integrationRequest, integrationContext);
+    }
 }
