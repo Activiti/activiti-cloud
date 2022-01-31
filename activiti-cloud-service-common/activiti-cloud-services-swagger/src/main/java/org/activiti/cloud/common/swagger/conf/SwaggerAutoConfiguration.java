@@ -17,6 +17,7 @@ package org.activiti.cloud.common.swagger.conf;
 
 import com.fasterxml.classmate.TypeResolver;
 import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
+import org.activiti.cloud.common.swagger.SwaggerOperationIdTrimmer;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.PathPrefixTransformationFilter;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
@@ -27,6 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
@@ -67,6 +69,12 @@ public class SwaggerAutoConfiguration {
     public SwaggerDocketBuilder swaggerDocketBuilder(BuildProperties buildProperties, TypeResolver typeResolver,
         List<DocketCustomizer> docketCustomizers) {
         return new SwaggerDocketBuilder(new BaseAPIInfoBuilder(buildProperties), typeResolver, docketCustomizers);
+    }
+
+    @Bean
+    @Primary
+    public SwaggerOperationIdTrimmer customOperationNameGenerator() {
+        return new SwaggerOperationIdTrimmer();
     }
 
     @Bean
