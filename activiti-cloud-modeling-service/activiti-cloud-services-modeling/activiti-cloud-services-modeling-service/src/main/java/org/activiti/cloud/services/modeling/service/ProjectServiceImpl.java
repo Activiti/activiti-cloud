@@ -157,8 +157,12 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Override
     public void deleteProject(Project project) {
-        modelService.getAllModels(project).stream().filter(model -> ModelScope.PROJECT.equals(model.getScope())).forEach(modelService::deleteModel);
+        deleteAllModelsInProject(project);
         projectRepository.deleteProject(project);
+    }
+
+    private void deleteAllModelsInProject(Project project) {
+        modelService.getAllModels(project).stream().filter(model -> ModelScope.PROJECT.equals(model.getScope())).forEach(modelService::deleteModel);
     }
 
     /**
@@ -457,6 +461,11 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() ->
                         new ImportProjectException("No valid project entry found to import"));
 
+        importModelsInProjectHolderToProject(projectHolder, project);
+        return project;
+    }
+
+    private void importModelsInProjectHolderToProject(ProjectHolder projectHolder, Project project) {
         projectHolder.getModelJsonFiles().stream().sorted(MODEL_JSON_FILE_TYPE_COMPARATOR).forEach(modelJsonFile -> {
             importJSONModelFiles(projectHolder, project, modelJsonFile);
         });
@@ -468,7 +477,6 @@ public class ProjectServiceImpl implements ProjectService {
         createdProcesses.keySet().forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
 
         modelService.cleanModelIdList();
-        return project;
     }
 
     private ProjectHolder getProjectHolderFromZipStream(ZipStream stream, String name) throws IOException {
@@ -478,5 +486,20 @@ public class ProjectServiceImpl implements ProjectService {
                 .ifPresent(fileContent -> convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
 
         return projectHolder;
+    }
+
+    @Override
+    public Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException {
+        ProjectHolder projectHolder = getProjectHolderFromZipStream(ZipStream.of(inputStream), project.getName());
+
+        if(projectHolder.getProjectMetadata().isEmpty()) {
+            throw new ImportProjectException("No valid project entry found to import");
+        }
+
+        deleteAllModelsInProject(project);
+
+        importModelsInProjectHolderToProject(projectHolder, project);
+
+        return project;
     }
 }

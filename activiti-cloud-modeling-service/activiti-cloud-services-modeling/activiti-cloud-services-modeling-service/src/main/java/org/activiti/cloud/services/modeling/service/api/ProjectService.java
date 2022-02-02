@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.service.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
-
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
@@ -55,4 +54,6 @@ public interface ProjectService {
     Project importProject(final InputStream file, String name) throws IOException;
 
     void validateProject(Project project);
+
+    Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException;
 }
