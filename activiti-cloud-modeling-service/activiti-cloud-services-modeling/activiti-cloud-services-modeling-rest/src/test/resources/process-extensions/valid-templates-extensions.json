@@ -5,8 +5,8 @@
       "templates": {
         "tasks": {
           "Task1": {
-            "from": "no-reply@activiti.org",
             "assignee": {
+              "from": "no-reply@activiti.org",
               "subject": "Task1 assignee subject",
               "type": "file",
               "value": "file://c/project/email.html"
@@ -22,6 +22,7 @@
               "value": "file1"
             },
             "candidate": {
+              "from": "no-reply@activiti.org",
               "subject": "Task2 assignee subject",
               "type": "variable",
               "value": "candidateTemplate"
@@ -29,13 +30,14 @@
           }
         },
         "default": {
-          "from": "no-reply@activiti.org",
           "assignee": {
+            "from": "no-reply@activiti.org",
             "subject": "Default assignee subject",
             "type": "file",
             "value": "classpath:email.html"
           },
           "candidate": {
+            "from": "no-reply@activiti.org",
             "subject": "Default candidate subject",
             "type": "variable",
             "value": "candidateTemplate"
