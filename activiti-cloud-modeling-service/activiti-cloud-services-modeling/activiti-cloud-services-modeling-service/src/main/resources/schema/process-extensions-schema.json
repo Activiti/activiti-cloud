@@ -44,6 +44,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "from": {
+          "type": "string"
+        },
         "assignee" : {"$ref" :  "#/definitions/template"},
         "candidate" : {"$ref" :  "#/definitions/template"}
       }
@@ -52,6 +55,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "subject": {
+          "type": "string"
+        },
         "type": {
           "type": "string",
           "enum": [
