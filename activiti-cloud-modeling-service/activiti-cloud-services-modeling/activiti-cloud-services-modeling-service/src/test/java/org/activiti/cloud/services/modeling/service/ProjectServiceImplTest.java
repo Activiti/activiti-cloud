@@ -262,7 +262,7 @@ public class ProjectServiceImplTest {
 
         projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
 
-        verify(modelService, times(1)).deleteModel(projectModel);
+        verify(modelService).deleteModel(projectModel);
         verify(modelService, never()).deleteModel(globalModel);
     }
 
