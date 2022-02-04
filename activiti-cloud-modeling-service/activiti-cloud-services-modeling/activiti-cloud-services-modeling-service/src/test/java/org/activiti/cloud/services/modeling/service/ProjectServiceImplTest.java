@@ -225,4 +225,62 @@ public class ProjectServiceImplTest {
         verify(modelService, times(1)).copyModel(modelOne, projectToCopy);
         verify(modelService, times(1)).cleanModelIdList();
     }
+
+    @Test
+    public void should_throwImportProjectException_replacingProjectContentWithInvalidProject() {
+        Optional<InputStream> file = resourceAsStream("project/project-xy-invalid.zip");
+
+        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
+        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
+
+        Exception exception = assertThrows(ImportProjectException.class, () -> {
+            projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
+        });
+        String expectedMessage = "No valid project entry found to import";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void should_deleteProjectScopedModelsOnly_when_replacingProjectContent() throws IOException {
+        Model globalModel = new ModelImpl();
+        globalModel.setScope(ModelScope.GLOBAL);
+        globalModel.setId("global-model");
+
+        Model projectModel = new ModelImpl();
+        projectModel.setScope(ModelScope.PROJECT);
+        projectModel.setId("project-model");
+        when(modelService.getAllModels(project)).thenReturn(List.of(globalModel, projectModel));
+        doNothing().when(modelService).deleteModel(any());
+
+        Optional<InputStream> file = resourceAsStream("project/project-xy.zip");
+        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
+        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
+        projectValidators.add(new ProjectNameValidator());
+        when(projectRepository.createProject(any())).thenReturn(project);
+
+        projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
+
+        verify(modelService).deleteModel(projectModel);
+        verify(modelService, never()).deleteModel(globalModel);
+    }
+
+    @Test
+    public void should_importModelsInZipFile_when_replacingProjectContent() throws IOException {
+        Optional<InputStream> file = resourceAsStream("project/project-xy.zip");
+
+        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
+        ProcessModelType processModelType = new ProcessModelType();
+        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(processModelType));
+        projectValidators.add(new ProjectNameValidator());
+        when(projectRepository.createProject(any())).thenReturn(project);
+        when(modelService.contentFilenameToModelName("process-x.bpmn20.xml", processModelType)).thenReturn(Optional.of("process-x"));
+        when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType)).thenReturn(Optional.of("process-y"));
+        when(modelService.importModel(eq(project),eq(processModelType),any())).thenReturn(new ModelImpl());
+
+        projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
+
+        verify(modelService, times(2)).importModel(eq(project), eq(processModelType), any());
+    }
 }
