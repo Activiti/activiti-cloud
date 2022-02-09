@@ -392,6 +392,28 @@ limitations under the License.]]>
             </mapping>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>third-party-licenses</id>
+              <goals>
+                <goal>add-third-party</goal>
+              </goals>
+              <phase>generate-resources</phase>
+              <configuration>
+                <failOnMissing>true</failOnMissing>
+                <excludedScopes>provided,test</excludedScopes>
+                <excludedGroups>^(org\.alfresco|com\.alfresco|org\.activiti|org\.gytheio).*</excludedGroups>
+                <failIfWarning>true</failIfWarning>
+                <includedLicenses>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/includedLicenses.txt</includedLicenses>
+                <licenseMergesUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/licenseMerges.txt</licenseMergesUrl>
+                <overrideUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/override-THIRD-PARTY.properties</overrideUrl>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -464,6 +486,10 @@ limitations under the License.]]>
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
