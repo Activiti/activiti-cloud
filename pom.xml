@@ -178,6 +178,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
+    <third-party-license-maven-plugin.version>2.0.1.alfresco-1</third-party-license-maven-plugin.version>
     <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
@@ -209,6 +210,13 @@
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>alfresco-internal-plugin</id>
+      <name>Alfresco Internal Repository</name>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+    </pluginRepository>
+  </pluginRepositories>
   <build>
     <pluginManagement>
       <plugins>
@@ -216,6 +224,11 @@
           <groupId>com.mycila</groupId>
           <artifactId>license-maven-plugin</artifactId>
           <version>${license-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>${third-party-license-maven-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
