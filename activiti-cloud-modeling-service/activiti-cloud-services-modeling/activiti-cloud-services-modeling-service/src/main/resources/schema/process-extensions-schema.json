@@ -52,6 +52,12 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "from": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
         "type": {
           "type": "string",
           "enum": [
