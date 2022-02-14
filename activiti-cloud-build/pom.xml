@@ -224,6 +224,13 @@
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>alfresco-internal-plugin</id>
+      <name>Alfresco Internal Repository</name>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+    </pluginRepository>
+  </pluginRepositories>
   <build>
     <pluginManagement>
       <plugins>
