@@ -400,6 +400,7 @@ limitations under the License.]]>
             </mapping>
           </configuration>
         </plugin>
+<!--        
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>license-maven-plugin</artifactId>
@@ -423,6 +424,7 @@ limitations under the License.]]>
             </execution>
           </executions>
         </plugin>
+-->        
       </plugins>
     </pluginManagement>
     <plugins>
@@ -496,10 +498,12 @@ limitations under the License.]]>
           </execution>
         </executions>
       </plugin>
+<!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
       </plugin>
+-->
     </plugins>
   </build>
   <profiles>
