@@ -15,28 +15,19 @@
  */
 package org.activiti.cloud.services.modeling.rest.api;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.modeling.api.Project;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.PROJECTS;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
@@ -84,11 +75,15 @@ public interface ProjectRestApi {
 
     String PROJECT_NAME_COPY_DESCR = "The name of the project that will replace the original name of the project";
 
+    String PROJECT_FILTERS_PARAM_DESCR = "The filter name to filter the returned projects";
+
     String UPLOAD_FILE_PARAM_NAME = "file";
 
     String EXPORT_AS_ATTACHMENT_PARAM_NAME = "attachment";
 
     String PROJECT_NAME_PARAM_NAME = "name";
+
+    String PROJECT_FILTERS_PARAM_NAME = "filters";
 
     @Operation(
             tags = PROJECTS,
@@ -97,10 +92,10 @@ public interface ProjectRestApi {
                     "Minimal information for each project is returned.")
     @GetMapping(path = "/projects")
     PagedModel<EntityModel<Project>> getProjects(Pageable pageable,
-                                                  @Parameter(description = PROJECT_NAME_PARAM_DESCR)
-                                                  @RequestParam(
-                                                          name = PROJECT_NAME_PARAM_NAME,
-                                                          required = false) String name);
+                                                 @Parameter(description = PROJECT_NAME_PARAM_DESCR)
+                                                 @RequestParam(name = PROJECT_NAME_PARAM_NAME, required = false) String name,
+                                                 @Parameter(description = PROJECT_FILTERS_PARAM_DESCR)
+                                                 @RequestParam(name = PROJECT_FILTERS_PARAM_NAME, required = false) List<String> filters);
 
     @Operation(
             tags = PROJECTS,
