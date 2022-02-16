@@ -70,8 +70,7 @@ jobs:
 
       - name: Update VERSION file
         if: ${{ github.event_name == 'push' }}
-        run: |
-          echo ${{steps.next-release.outputs.next-prerelease}} > VERSION
+        run: echo ${{steps.next-release.outputs.next-prerelease}} > VERSION
 
       - name: Set preview version
         if: ${{ contains(github.head_ref, 'preview') }}
@@ -105,8 +104,8 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: |
           git commit -am "Release $VERSION" --allow-empty
-          git tag -fa v$VERSION -m "Release version $VERSION"
-          git push -f -q origin v$VERSION
+          git tag -fa $VERSION -m "Release version $VERSION"
+          git push -f -q origin $VERSION
 
       - name: Deploy with Maven
         if: ${{ github.event_name == 'push' || contains(github.head_ref, 'preview') }}
