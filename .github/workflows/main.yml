@@ -91,7 +91,7 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: |
           git fetch --tags -q
-          echo $(jx-release-version -next-version increment) > VERSION
+          echo $(jx-release-version -previous-version=from-tag:7.1 -next-version increment) > VERSION
 
       - name: Set BRANCH_NAME env variable
         id: set-branch-name
