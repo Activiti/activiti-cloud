@@ -110,8 +110,8 @@ deploy:
 tag:
 	git add -u
 	git commit -m "Release $(RELEASE_VERSION)" --allow-empty
-	git tag -fa v$(RELEASE_VERSION) -m "Release version $(RELEASE_VERSION)"
-	git push -f -q origin v$(RELEASE_VERSION)
+	git tag -fa $(RELEASE_VERSION) -m "Release version $(RELEASE_VERSION)"
+	git push -f -q origin $(RELEASE_VERSION)
 
 test/%:
 	$(eval MODULE=$(word 2, $(subst /, ,$@)))
@@ -119,4 +119,4 @@ test/%:
 	cd activiti-cloud-acceptance-scenarios && \
 		mvn ${MAVEN_CLI_OPTS} -pl $(MODULE) -Droot.log.level=off verify
 
-promote: version deploy tag updatebot/push-version create-pr
+promote: version tag deploy updatebot/push-version create-pr

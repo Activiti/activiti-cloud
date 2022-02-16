@@ -83,15 +83,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Set up jx-release-version
+      - uses: actions/setup-python@v2
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-jx-release-version@v1.1.5
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-pysemver@v1.2.0
+        if: ${{ github.event_name == 'push' }}
+      - id: next-release
+        if: ${{ github.event_name == 'push' }}
+        name: Calculate next internal release
+        uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v1.2.0
 
-      - name: Bump version with jx-release-version
+      - name: Update VERSION file
         if: ${{ github.event_name == 'push' }}
-        run: |
-          git fetch --tags -q
-          echo $(jx-release-version -previous-version=from-tag:7.1 -next-version increment) > VERSION
+        run: echo ${{steps.next-release.outputs.next-prerelease}} > VERSION
+
 
       - name: Set BRANCH_NAME env variable
         id: set-branch-name
@@ -196,10 +200,10 @@ jobs:
           version: v3.5.2
 
       - name: Set up yq
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-yq@v1.1.5
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-yq@v1.2.0
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.1.5
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.2.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -435,7 +439,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up yq
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-yq@v1.1.5
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-yq@v1.2.0
 
       - name: Configure git user
         if: ${{ github.event_name == 'push' }}
@@ -447,11 +451,11 @@ jobs:
 
       - name: Set up updatebot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.1.5
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.2.0
 
       - name: Set up helm-docs
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.1.5
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.2.0
 
       - name: Promote Release
         if: ${{ github.event_name == 'push' }}
