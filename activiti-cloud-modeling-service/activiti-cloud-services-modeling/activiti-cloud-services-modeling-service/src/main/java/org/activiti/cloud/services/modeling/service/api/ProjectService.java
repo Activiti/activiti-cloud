@@ -62,4 +62,8 @@ public interface ProjectService {
     default Page<Project> getProjects(Pageable pageable, String name, List<String> filters) {
         return getProjects(pageable, name);
     }
+
+    default Optional<Project> findProjectRepresentationById(String projectId){
+        return findProjectById(projectId);
+    }
 }
