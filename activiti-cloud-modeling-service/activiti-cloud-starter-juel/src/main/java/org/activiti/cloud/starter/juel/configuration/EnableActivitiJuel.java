@@ -23,12 +23,14 @@ import java.lang.annotation.Target;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @EnableAutoConfiguration
 @Inherited
 @EnableDiscoveryClient
+@EnableWebSecurity
 @ImportAutoConfiguration(ActivitiJuelAutoConfiguration.class)
 public @interface EnableActivitiJuel {
 
