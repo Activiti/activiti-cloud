@@ -49,10 +49,6 @@ public class JuelSwaggerIT {
             .andExpect(jsonPath("$.servers").isNotEmpty())
             .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
             .andExpect(jsonPath("$.paths", hasKey("/v1/juel")))
-            .andExpect(jsonPath("$.components.schemas").isNotEmpty())
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
             .andExpect(jsonPath("$.info.title").value("Juel ReST API"));
     }
 }

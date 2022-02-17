@@ -29,7 +29,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableAutoConfiguration
 @Inherited
 @EnableDiscoveryClient
-@ImportAutoConfiguration(JuelSwaggerConfig.class)
+@ImportAutoConfiguration(ActivitiJuelAutoConfiguration.class)
 public @interface EnableActivitiJuel {
 
 }
