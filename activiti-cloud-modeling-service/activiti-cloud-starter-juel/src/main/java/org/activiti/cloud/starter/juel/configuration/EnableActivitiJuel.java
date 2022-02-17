@@ -15,17 +15,21 @@
  */
 package org.activiti.cloud.starter.juel.configuration;
 
-import org.activiti.cloud.starter.juel.service.JuelExpressionResolverService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-@Configuration
-@Import({JuelRestConfiguration.class, JuelSwaggerConfig.class})
-public class ActivitiJuelAutoConfiguration {
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@EnableAutoConfiguration
+@Inherited
+@EnableDiscoveryClient
+@ImportAutoConfiguration(JuelSwaggerConfig.class)
+public @interface EnableActivitiJuel {
 
-    @Bean
-    public JuelExpressionResolverService juelExpressionResolverService() {
-        return new JuelExpressionResolverService();
-    }
 }
