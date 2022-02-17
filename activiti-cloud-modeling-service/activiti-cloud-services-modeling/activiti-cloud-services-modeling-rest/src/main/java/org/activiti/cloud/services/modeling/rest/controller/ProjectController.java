@@ -73,7 +73,7 @@ public class ProjectController implements ProjectRestApi {
     @Override
     public EntityModel<Project> getProject(
             @PathVariable String projectId) {
-§§        return representationModelAssembler.toModel(findProjectRepresentationById(projectId));
+        return representationModelAssembler.toModel(findProjectRepresentationById(projectId));
     }
 
     @Override
