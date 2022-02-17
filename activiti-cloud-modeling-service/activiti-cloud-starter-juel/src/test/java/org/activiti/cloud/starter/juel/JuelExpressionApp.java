@@ -15,10 +15,12 @@
  */
 package org.activiti.cloud.starter.juel;
 
+import org.activiti.cloud.starter.juel.configuration.EnableActivitiJuel;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@EnableActivitiJuel
 public class JuelExpressionApp {
 
     public static void main(String[] args) {
