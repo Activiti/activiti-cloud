@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.modeling.rest.assembler.ProjectRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
@@ -41,8 +40,6 @@ class ProjectControllerTest {
     private ProjectService projectService;
     @Spy
     private ProjectRepresentationModelAssembler representationModelAssembler = new ProjectRepresentationModelAssembler();
-    @Mock
-    private AlfrescoPagedModelAssembler<Project> pagedCollectionModelAssembler;
 
     @InjectMocks
     private ProjectController projectController;
@@ -54,6 +51,7 @@ class ProjectControllerTest {
         EntityModel<Project> foundProject = projectController.getProject("projectId");
         verify(projectService, times(1)).findProjectRepresentationById("projectId");
         assertThat(foundProject.getContent()).isEqualTo(projectMock);
+        assertThat(representationModelAssembler).isNotNull();
     }
 
     @Test
