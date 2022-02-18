@@ -195,6 +195,12 @@ public class ProjectControllerIT {
     }
 
     @Test
+    public void should_returnNotFound_when_gettingNotExistingProject() throws Exception {
+        mockMvc.perform(get("/v1/projects/{projectId}", "wrongId"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void should_returnStatusCreatedAndProjectDetails_when_creatingProject() throws Exception {
         mockMvc.perform(post("/v1/projects")
                                 .contentType(MediaType.APPLICATION_JSON)
