@@ -13,22 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak.config;/*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+package org.activiti.cloud.services.common.security.keycloak.config;
 
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
@@ -36,6 +21,8 @@ import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
+import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalGroupsProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
@@ -53,6 +40,7 @@ import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticatio
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.keycloak.adapters.springsecurity.management.HttpSessionManager;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -73,12 +61,20 @@ import java.util.List;
 
 @Configuration
 @KeycloakConfiguration
+@EnableAuthorizationConfiguration
 @ConditionalOnWebApplication
 @Import({KeycloakSpringBootConfigResolver.class})
 @ConditionalOnMissingBean(value = {KeycloakConfigResolver.class, SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
 @DependsOn({"keycloakConfigResolver"})
 @PropertySource("classpath:keycloak-configuration.properties")
 public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigurerAdapter {
+
+    private final AuthorizationConfigurer authorizationConfigurer;
+
+    @Autowired
+    public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer) {
+        this.authorizationConfigurer = authorizationConfigurer;
+    }
 
     /**
      * Registers the KeycloakAuthenticationProvider with the authentication manager.
@@ -196,6 +192,7 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
+        authorizationConfigurer.configure(http);
         http.authorizeRequests()
                 .anyRequest().permitAll().and().csrf().disable().httpBasic().disable();
     }
