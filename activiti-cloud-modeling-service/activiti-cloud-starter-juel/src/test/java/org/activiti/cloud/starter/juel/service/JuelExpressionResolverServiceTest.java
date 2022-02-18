@@ -30,7 +30,7 @@ public class JuelExpressionResolverServiceTest {
     private static final String RESULT_TEST = "10 + 20";
 
     @Autowired
-    org.activiti.cloud.starter.juel.service.JuelExpressionResolverService juelExpressionResolverService;
+    JuelExpressionResolverService juelExpressionResolverService;
 
     @Test
     public void should_outputIsCorrect_when_resolveExpression() {
