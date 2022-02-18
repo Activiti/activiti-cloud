@@ -283,4 +283,12 @@ public class ProjectServiceImplTest {
 
         verify(modelService, times(2)).importModel(eq(project), eq(processModelType), any());
     }
+
+    @Test
+    void should_findProjectRepresentationById() {
+        ProjectImpl givenProject = new ProjectImpl("projectId", "name");
+        when(projectRepository.findProjectById("projectId")).thenReturn(Optional.of(givenProject));
+        Optional<Project> foundProjectOptional = projectService.findProjectRepresentationById("projectId");
+        assertThat(foundProjectOptional.get()).isEqualTo(givenProject);
+    }
 }
