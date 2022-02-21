@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.stereotype.Component;
 
 /**
@@ -49,11 +48,10 @@ public class AuthorizationConfigurer {
     }
 
     public void configure(HttpSecurity http) throws Exception {
-        ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry = http.authorizeRequests();
         for (SecurityConstraint securityConstraint : authorizationProperties.getSecurityConstraints()) {
             String[] patterns = getPatterns(securityConstraint);
             String[] roles = securityConstraint.getAuthRoles();
-            registry.antMatchers(patterns).hasAnyRole(roles);
+            http.authorizeRequests().antMatchers(patterns).hasAnyRole(roles);
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Setting access to patterns {} for roles {}", patterns, roles);
             }
@@ -64,6 +62,7 @@ public class AuthorizationConfigurer {
         return Stream.of(securityConstraint.getSecurityCollections())
             .map(SecurityCollection::getPatterns)
             .flatMap(Stream::of)
+            .map(pattern -> pattern.endsWith("/*") ? pattern + "*" : pattern)
             .toArray(String[]::new);
     }
 
