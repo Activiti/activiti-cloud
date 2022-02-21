@@ -172,11 +172,15 @@ public class QueryRestWebMvcAutoConfiguration  {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskControllerHelper taskControllerHelper(TaskRepository taskRepository,
-        AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
-        TaskRepresentationModelAssembler taskRepresentationModelAssembler) {
-        return new TaskControllerHelper(taskRepository, pagedCollectionModelAssembler,
-            new QueryDslPredicateAggregator(), taskRepresentationModelAssembler);
+    public TaskControllerHelper taskControllerHelper(TaskRepository taskRepository, 
+                                                     AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler, 
+                                                     TaskRepresentationModelAssembler taskRepresentationModelAssembler,
+                                                     TaskLookupRestrictionService taskLookupRestrictionService) {
+        return new TaskControllerHelper(taskRepository, 
+                                        pagedCollectionModelAssembler, 
+                                        new QueryDslPredicateAggregator(), 
+                                        taskRepresentationModelAssembler, 
+                                        taskLookupRestrictionService);
     }
 
     @Bean

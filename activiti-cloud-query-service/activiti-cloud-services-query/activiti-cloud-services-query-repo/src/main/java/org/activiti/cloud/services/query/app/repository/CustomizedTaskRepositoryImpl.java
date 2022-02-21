@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.app.repository;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -59,5 +60,47 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
 
         return PageableExecutionUtils.getPage(tasks.fetch(), pageable, countQuery::fetchCount);
    }
+    
+   @Override
+    public Iterable<TaskEntity> findAllOverProcessInstance(Predicate predicate) {
+
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+
+        JPQLQuery<TaskEntity> from = buildLeftJoin(taskEntity, predicate);
+        JPQLQuery<TaskEntity> tasks = from.select(taskEntity);
+
+        return tasks.fetch();
+    }
+
+    @Override
+    public Page<TaskEntity> findAllOverProcessInstance(Predicate predicate, Pageable pageable) {
+        
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+        
+        JPQLQuery<TaskEntity> from = buildLeftJoin(taskEntity, predicate);
+        final JPQLQuery<?> countQuery = from.select(taskEntity.count());
+        JPQLQuery<TaskEntity> tasks = from.select(taskEntity);
+
+        return PageableExecutionUtils.getPage(tasks.fetch(), pageable, countQuery::fetchCount);
+        
+    }
+
+    @Override
+    public boolean existsOverProcessInstance(Predicate predicate) {
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+        JPQLQuery<TaskEntity> from = buildLeftJoin(taskEntity, predicate);
+        JPQLQuery<?> countQuery = from.select(taskEntity.count());
+        return countQuery.fetchCount() > 0;
+    }
+    
+    private JPQLQuery<TaskEntity> buildLeftJoin(QTaskEntity taskEntity, Predicate predicate) {
+        Assert.notNull(predicate, "Predicate must not be null!");
+
+        QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
+        Predicate condition = processInstanceEntity.id.eq(taskEntity.processInstanceId);
+        
+        return from(taskEntity).leftJoin(processInstanceEntity).on(condition)
+                .where(predicate);
+    }
 
 }
