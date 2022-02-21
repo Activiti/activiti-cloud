@@ -1643,9 +1643,9 @@ public class QueryTasksIT {
     @Test
     public void should_notGetTasks_by_ProcessInstance_userIsNotInvolved() {
         keycloakTokenProducer.setKeycloakTestUser(HRUSER);
-        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
-                                                                      "fakeUser", 
-                                                                      runningProcessInstance);
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                         "fakeUser", 
+                                                         runningProcessInstance);
 
         await().untilAsserted(() -> {
 
