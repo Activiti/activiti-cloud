@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.juel.service;
 
 import java.util.Map;
+import org.activiti.cloud.starter.juel.exception.JuelRuntimeException;
 import org.activiti.core.el.JuelExpressionResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +31,12 @@ public class JuelExpressionResolverService {
 
     public Map<String, Object> resolveExpression(final Map<String, Object> inputVariables) {
         LOGGER.debug("Calling Juel Expression Resolver with parameters {}", inputVariables);
-        final String expression = (String) inputVariables.get(EXPRESSION);
-        final Map<String, Object> conditionVariables = (Map<String, Object>) inputVariables.get(VARIABLES);
-        return Map.of(RESULT, new JuelExpressionResolver().resolveExpression(expression, conditionVariables, Object.class));
+        try {
+            final String expression = (String) inputVariables.get(EXPRESSION);
+            final Map<String, Object> conditionVariables = (Map<String, Object>) inputVariables.get(VARIABLES);
+            return Map.of(RESULT, new JuelExpressionResolver().resolveExpression(expression, conditionVariables, Object.class));
+        } catch (Exception e) {
+            throw new JuelRuntimeException(e.getMessage(), e);
+        }
     }
 }
