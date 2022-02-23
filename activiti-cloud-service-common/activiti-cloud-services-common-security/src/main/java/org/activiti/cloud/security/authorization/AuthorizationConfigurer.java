@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.security.authorization;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
@@ -48,14 +50,43 @@ public class AuthorizationConfigurer {
     }
 
     public void configure(HttpSecurity http) throws Exception {
-        for (SecurityConstraint securityConstraint : authorizationProperties.getSecurityConstraints()) {
+        List<SecurityConstraint> orderedSecurityConstraints = getOrderedList(authorizationProperties.getSecurityConstraints());
+        for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
             String[] patterns = getPatterns(securityConstraint);
             String[] roles = securityConstraint.getAuthRoles();
-            http.authorizeRequests().antMatchers(patterns).hasAnyRole(roles);
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Setting access to patterns {} for roles {}", patterns, roles);
-            }
+            configureAuthorization(http, patterns, roles);
         }
+        http.anonymous();
+    }
+
+    private void configureAuthorization(HttpSecurity http, String[] patterns, String[] roles) throws Exception {
+        boolean rolesNotEmpty = isNotEmpty(roles);
+        if(rolesNotEmpty){
+            http.authorizeRequests().antMatchers(patterns).hasAnyRole(roles);
+        } else {
+            http.authorizeRequests().antMatchers(patterns).permitAll();
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Setting access to patterns {} for roles {}", patterns, rolesNotEmpty ? roles : "anonymous");
+        }
+    }
+
+    /**
+     * If a security constraint hasn't any roles it means that it can accessible from anyone.
+     * It must be the first one in order to avoid being overridden by other rules.
+     * @param securityConstraints
+     * @return
+     */
+    private List<SecurityConstraint> getOrderedList(List<SecurityConstraint> securityConstraints) {
+        List<SecurityConstraint> result = new ArrayList<>();
+        securityConstraints.forEach(securityConstraint -> {
+            if(isNotEmpty(securityConstraint.getAuthRoles())) {
+                result.add(securityConstraint);
+            } else {
+                result.add(0, securityConstraint);
+            }
+        });
+        return result;
     }
 
     private String[] getPatterns(SecurityConstraint securityConstraint) {
@@ -64,6 +95,10 @@ public class AuthorizationConfigurer {
             .flatMap(Stream::of)
             .map(pattern -> pattern.endsWith("/*") ? pattern + "*" : pattern)
             .toArray(String[]::new);
+    }
+
+    private boolean isNotEmpty(String[] array) {
+        return array != null && array.length > 0;
     }
 
 }

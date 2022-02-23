@@ -45,7 +45,7 @@ class AuthorizationConfigurerTest {
     private AuthorizedUrl authorizedUrl;
 
     @Test
-    public void configureTest() throws Exception {
+    public void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
         authorizationProperties.setSecurityConstraints(asList(
             createSecurityConstraint(new String[]{"ROLE_1", "ROLE_2"}, new String[]{"/a", "/b"}),
@@ -61,6 +61,29 @@ class AuthorizationConfigurerTest {
 
         inOrder.verify(authorizeRequests).antMatchers(eq("/a"), eq("/b"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"), eq("ROLE_2"));
+
+        inOrder.verify(authorizeRequests).antMatchers(eq("/c"));
+        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
+    }
+
+    @Test
+    public void should_configureAuth_when_aURLiSPublic() throws Exception {
+        AuthorizationProperties authorizationProperties = new AuthorizationProperties();
+        authorizationProperties.setSecurityConstraints(asList(
+            createSecurityConstraint(new String[]{"ROLE_3"}, new String[]{"/c"}),
+            createSecurityConstraint(new String[]{}, new String[]{"/d"})));
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties);
+
+        when(http.authorizeRequests()).thenReturn(authorizeRequests);
+        when(authorizeRequests.antMatchers(any(String.class))).thenReturn(authorizedUrl);
+
+        authorizationConfigurer.configure(http);
+
+        InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
+
+        //URLs with permitAll must be defined first in order to avoid being overridden
+        inOrder.verify(authorizeRequests).antMatchers(eq("/d"));
+        inOrder.verify(authorizedUrl).permitAll();
 
         inOrder.verify(authorizeRequests).antMatchers(eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
