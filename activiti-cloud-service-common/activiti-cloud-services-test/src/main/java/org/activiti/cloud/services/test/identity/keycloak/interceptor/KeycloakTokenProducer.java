@@ -27,7 +27,6 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.stereotype.Component;
 
 public class KeycloakTokenProducer implements ClientHttpRequestInterceptor {
 
@@ -52,35 +51,45 @@ public class KeycloakTokenProducer implements ClientHttpRequestInterceptor {
     public ClientHttpResponse intercept(HttpRequest httpRequest,
                                         byte[] bytes,
                                         ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
-        httpRequest.getHeaders().set(AUTHORIZATION_HEADER,
-                                     getTokenString());
-        return clientHttpRequestExecution.execute(httpRequest,
-                                                  bytes);
+        return clientHttpRequestExecution.execute(httpRequest, bytes);
     }
 
-    private AccessTokenResponse getAccessTokenResponse() {
+    private AccessTokenResponse getAccessTokenResponse(String user, String password) {
         return Keycloak.getInstance(keycloakProperties.getAuthServerUrl(),
                                     keycloakProperties.getRealm(),
-                                    keycloakTestUser,
-                                    keycloakTestPassword,
+                                    user,
+                                    password,
                                     resource).tokenManager().getAccessToken();
     }
 
-    public String getTokenString() {
-        AccessTokenResponse token = getAccessTokenResponse();
+    public String getTokenString(String user, String password) {
+        AccessTokenResponse token = getAccessTokenResponse(user, password);
         return "Bearer " + token.getToken();
     }
 
     public HttpEntity entityWithAuthorizationHeader() {
-        HttpHeaders headers = authorizationHeaders();
+        return this.entityWithAuthorizationHeader(keycloakTestUser, keycloakTestPassword);
+    }
+
+    public HttpEntity entityWithAuthorizationHeader(String user, String password) {
+        HttpHeaders headers = authorizationHeaders(user, password);
         return new HttpEntity<>("parameters",
                                 headers);
     }
 
+    public HttpEntity entityWithoutAuthentication() {
+        HttpHeaders headers = new HttpHeaders();
+        return new HttpEntity<>("parameters", headers);
+    }
+
     public HttpHeaders authorizationHeaders() {
+        return this.authorizationHeaders(keycloakTestUser, keycloakTestPassword);
+    }
+
+    public HttpHeaders authorizationHeaders(String user, String password) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER,
-                    getTokenString());
+                    getTokenString(user, password));
         return headers;
     }
 
@@ -91,4 +100,5 @@ public class KeycloakTokenProducer implements ClientHttpRequestInterceptor {
     public String getKeycloakTestUser() {
         return keycloakTestUser;
     }
+
 }
