@@ -79,7 +79,7 @@ public class ProcessInstanceIT {
     @Autowired
     private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
 
-    @Value("${activiti.keycloak.test-user}")
+    @Value("${activiti.identity.test-user}")
     protected String keycloakTestUser;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();

@@ -79,7 +79,7 @@ public class ConnectorAuditProducerIT {
 
     public static final String AUDIT_PRODUCER_IT = "AuditProducerIT";
 
-    @Value("${activiti.keycloak.test-user}")
+    @Value("${activiti.identity.test-user}")
     protected String keycloakTestUser;
 
     @Autowired

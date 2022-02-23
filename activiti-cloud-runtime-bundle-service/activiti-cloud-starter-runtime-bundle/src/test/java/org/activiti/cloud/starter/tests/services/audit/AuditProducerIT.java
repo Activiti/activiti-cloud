@@ -142,7 +142,7 @@ public class AuditProducerIT {
     private static final String SIMPLE_PROCESS_CATEGORY = "test-category";
     private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
 
-    @Value("${activiti.keycloak.test-user}")
+    @Value("${activiti.identity.test-user}")
     protected String keycloakTestUser;
 
     @Autowired
