@@ -45,7 +45,7 @@ import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.MessageRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -92,7 +92,7 @@ public class ProcessVariablesIT {
     private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
 
     @Autowired
-    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
@@ -123,7 +123,7 @@ public class ProcessVariablesIT {
 
     @BeforeEach
     public void setUp() {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
 
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -213,7 +213,7 @@ public class ProcessVariablesIT {
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
             variables);
 
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
 
         ResponseEntity<Void> variablesResponse = processInstanceRestTemplate.adminRemoveVariables(startResponse.getBody().getId(), variablesNames);
 
@@ -269,7 +269,7 @@ public class ProcessVariablesIT {
     @Test
     public void adminShouldUpdateProcessVariables() {
         //given
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",
@@ -328,7 +328,7 @@ public class ProcessVariablesIT {
             variables);
 
         //testuser doesn't have permission according to access-control.properties
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
 
         await().untilAsserted(() -> {
 
@@ -351,7 +351,7 @@ public class ProcessVariablesIT {
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
             variables);
 
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
 
         //should see at /{processInstanceId}/variables
         await().untilAsserted(() -> {
@@ -378,14 +378,14 @@ public class ProcessVariablesIT {
     @Test
     public void shouldProperHandleProcessVariablesForAdmin() throws Exception {
         //given
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
         checkProcessVariables(true);
     }
 
     @Test
     public void shouldProperHandleProcessVariables() throws Exception {
         //given
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
         checkProcessVariables(false);
     }
 
@@ -538,13 +538,13 @@ public class ProcessVariablesIT {
 
     @Test
     public void shouldStartProcessWihDateVariables() throws Exception {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
         checkStartProcessWihDateVariables(false);
     }
 
     @Test
     public void shouldStartProcessWihDateVariablesFromAdmin() throws Exception {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
         checkStartProcessWihDateVariables(true);
     }
 
@@ -612,13 +612,13 @@ public class ProcessVariablesIT {
 
     @Test
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariables() throws Exception {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
         checkBADREQUESTStartProcessWihWrongDateVariables(false);
     }
 
     @Test
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariablesForAdmin() throws Exception {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
         checkBADREQUESTStartProcessWihWrongDateVariables(true);
     }
 
@@ -675,7 +675,7 @@ public class ProcessVariablesIT {
     @WithMockKeycloakUser(username = "hruser", roles = "ACTIVITI_USER")
     public void testAdminStartProcessVariablesPayloadConverter() {
         // given
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
 
         StartProcessPayload startProcessPayload = testStartProcessPayload();
 
@@ -696,7 +696,7 @@ public class ProcessVariablesIT {
     @WithMockKeycloakUser(username = "hruser", roles = "ACTIVITI_USER")
     public void testStartMessageVariablesPayloadConverter() {
         // given
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
 
         StartMessagePayload startMessagePayload = testStartMessagePayload();
 
@@ -717,7 +717,7 @@ public class ProcessVariablesIT {
     @WithMockKeycloakUser(username = "hruser", roles = "ACTIVITI_USER")
     public void testAdminStartMessageVariablesPayloadConverter() {
         // given
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
 
         StartMessagePayload startMessagePayload = testStartMessagePayload();
 

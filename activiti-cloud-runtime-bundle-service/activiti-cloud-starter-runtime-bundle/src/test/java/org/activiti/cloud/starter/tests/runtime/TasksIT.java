@@ -42,7 +42,7 @@ import org.activiti.cloud.api.process.model.impl.CandidateUser;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
@@ -79,7 +79,7 @@ public class TasksIT {
     private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
 
     @Autowired
-    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private VariablesUtil variablesUtil;
@@ -88,7 +88,7 @@ public class TasksIT {
 
     @BeforeEach
     public void setUp() {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
 
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -181,7 +181,7 @@ public class TasksIT {
         Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         CloudTask task = tasks.iterator().next();
 
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
 
         UpdateTaskPayload updateTask = TaskPayloadBuilder.update().withTaskId(task.getId())
             .withName("Updated name")
@@ -193,14 +193,14 @@ public class TasksIT {
 
         //then
         //once admin/v1/tasks/{taskId} is available there will be no need to switch users
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
         ResponseEntity<CloudTask> taskResponseEntity = taskRestTemplate.getTask(task.getId());
 
         assertThat(taskResponseEntity.getBody().getName()).isEqualTo("Updated name");
         assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("Updated description");
 
         //Check UpdateTaskPayload without taskId
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         updateTask = TaskPayloadBuilder.update()
             .withName("New Updated name")
             .withDescription("New Updated description")
@@ -210,7 +210,7 @@ public class TasksIT {
         taskRestTemplate.adminUpdateTask(task.getId(), updateTask);
 
         //then
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
         taskResponseEntity = taskRestTemplate.getTask(task.getId());
 
         assertThat(taskResponseEntity.getBody().getName()).isEqualTo("New Updated name");
@@ -225,7 +225,7 @@ public class TasksIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //SIMPLE_PROCESS not visible to testuser according to access-control.properties
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
 
         //when
         ResponseEntity<PagedModel<CloudTask>> responseEntity = taskRestTemplate.getTasks();
@@ -257,7 +257,7 @@ public class TasksIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
 
         //when
         ResponseEntity<PagedModel<CloudTask>> responseEntity = taskRestTemplate.adminGetTasks();
@@ -336,7 +336,7 @@ public class TasksIT {
         //given
         CloudTask standaloneTask = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("parent task").withDescription("This is my parent task").build());
         //when
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         ResponseEntity<CloudTask> delete = taskRestTemplate.adminDelete(standaloneTask);
 
         //then
@@ -364,7 +364,7 @@ public class TasksIT {
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //when
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminGetTask(task.getId());
 
         //then
@@ -384,7 +384,7 @@ public class TasksIT {
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody().getAssignee()).isEqualTo(keycloakSecurityContextClientRequestInterceptor.getKeycloakTestUser());
+        assertThat(responseEntity.getBody().getAssignee()).isEqualTo(identityTokenProducer.getTestUser());
     }
 
     @Test
@@ -425,7 +425,7 @@ public class TasksIT {
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //when
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminComplete(task);
 
         //then
@@ -456,7 +456,7 @@ public class TasksIT {
         String taskId = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next().getId();
 
         //when
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminGetTask(taskId);
         assertThat(responseEntity).isNotNull();
 
@@ -465,7 +465,7 @@ public class TasksIT {
         assertThat(task.getAssignee()).isNull();
 
         //when
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         AssignTaskPayload assignTaskPayload = TaskPayloadBuilder
             .assign()
             .withTaskId(task.getId())
@@ -526,7 +526,7 @@ public class TasksIT {
         taskRestTemplate.release(task);
 
         //Claim task by another user
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
         ResponseEntity<CloudTask> responseTask = taskRestTemplate.claim(task);
 
         //then
@@ -748,7 +748,7 @@ public class TasksIT {
                 .withCandidateUsers(Arrays.asList("hruser", "testuser"))
                 .build());
         taskRestTemplate.claim(standaloneTask);
-        
+
         //when
         AssignTaskPayload assignTaskPayload = TaskPayloadBuilder
                 .assign()

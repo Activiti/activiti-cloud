@@ -22,7 +22,7 @@ import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -53,12 +53,12 @@ public class QueryApplicationEntityIT {
     private static final String APPS_URL = "/v1/applications";
     private static final String ADMIN_APPS_URL = "/admin/v1/applications";
 
-    private static final ParameterizedTypeReference<PagedModel<ApplicationEntity>> PAGED_APPLICATION_RESPONSE_TYPE = 
+    private static final ParameterizedTypeReference<PagedModel<ApplicationEntity>> PAGED_APPLICATION_RESPONSE_TYPE =
             new ParameterizedTypeReference<PagedModel<ApplicationEntity>>() {
     };
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -68,9 +68,9 @@ public class QueryApplicationEntityIT {
 
     @Autowired
     private MyProducer producer;
-    
+
     @AfterEach
-    public void tearDown() { 
+    public void tearDown() {
         applicationRepository.deleteAll();
     }
 
@@ -81,10 +81,10 @@ public class QueryApplicationEntityIT {
 
     @Test
     public void shouldGetDeployedApplicationsWhenUserIsAdmin() {
-        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
         getDeployedApplication(ADMIN_APPS_URL);
     }
-    
+
     private void getDeployedApplication(String url) {
         CloudApplicationDeployedEvent applicationDeployed1 = buildCloudApplicationDeployedEvent("deployment1",
                 "appName", 1);
@@ -101,7 +101,7 @@ public class QueryApplicationEntityIT {
         await().untilAsserted(() -> {
             ResponseEntity<PagedModel<ApplicationEntity>> responseEntity = testRestTemplate.exchange(url,
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_APPLICATION_RESPONSE_TYPE);
 
             //then
@@ -132,12 +132,12 @@ public class QueryApplicationEntityIT {
         CloudApplicationDeployedEvent applicationDeployedDuplicated = buildCloudApplicationDeployedEvent("deployment3",
                 "appName_test", 1);
         producer.send(applicationDeployed1, applicationDeployed2, applicationDeployedDuplicated);
-        
+
         await().untilAsserted(() -> {
-            ResponseEntity<PagedModel<ApplicationEntity>> responseEntity = 
-                    testRestTemplate.exchange(APPS_URL + "?name=" + appToFilter, 
+            ResponseEntity<PagedModel<ApplicationEntity>> responseEntity =
+                    testRestTemplate.exchange(APPS_URL + "?name=" + appToFilter,
                             HttpMethod.GET,
-                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                            identityTokenProducer.entityWithAuthorizationHeader(),
                             PAGED_APPLICATION_RESPONSE_TYPE);
 
             //then
@@ -150,7 +150,7 @@ public class QueryApplicationEntityIT {
                     .containsOnly(appToFilter);
         });
     }
-    
+
     private CloudApplicationDeployedEvent buildCloudApplicationDeployedEvent(String id,
                                                                              String name, int version){
         DeploymentImpl deployment = new DeploymentImpl();

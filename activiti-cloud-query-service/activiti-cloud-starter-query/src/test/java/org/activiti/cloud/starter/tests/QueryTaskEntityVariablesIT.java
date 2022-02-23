@@ -29,7 +29,7 @@ import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
@@ -72,7 +72,7 @@ public class QueryTaskEntityVariablesIT {
     };
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -227,7 +227,7 @@ public class QueryTaskEntityVariablesIT {
             //when
             ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
                 HttpMethod.GET,
-                keycloakTokenProducer.entityWithAuthorizationHeader(),
+                identityTokenProducer.entityWithAuthorizationHeader(),
                 PAGED_VARIABLE_RESPONSE_TYPE,
                 task.getId(),
                 "var2");
@@ -252,7 +252,7 @@ public class QueryTaskEntityVariablesIT {
         //when
         ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_VARIABLES_URL,
             HttpMethod.GET,
-            keycloakTokenProducer.entityWithAuthorizationHeader(),
+            identityTokenProducer.entityWithAuthorizationHeader(),
             PAGED_VARIABLE_RESPONSE_TYPE,
             task.getId());
         //then
@@ -477,7 +477,7 @@ public class QueryTaskEntityVariablesIT {
     public ResponseEntity<PagedModel<TaskVariableEntity>> getTaskVariables(String taskId) {
         return testRestTemplate.exchange(VARIABLES_URL,
             HttpMethod.GET,
-            keycloakTokenProducer.entityWithAuthorizationHeader(),
+            identityTokenProducer.entityWithAuthorizationHeader(),
             PAGED_VARIABLE_RESPONSE_TYPE,
             taskId);
     }

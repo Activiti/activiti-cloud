@@ -23,9 +23,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.interceptor.IdentityTokenInterceptor;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.activiti.cloud.services.test.identity.keycloak.KeycloakTokenProducer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -49,13 +53,20 @@ public class TestConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public KeycloakTokenProducer keycloakTokenProducer(KeycloakProperties keycloakProperties) {
+    public IdentityTokenProducer keycloakTokenProducer(KeycloakProperties keycloakProperties) {
         return new KeycloakTokenProducer(keycloakProperties);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public RestTemplateBuilder restTemplateBuilder(KeycloakTokenProducer keycloakTokenProducer) {
+    @ConditionalOnProperty(value = "identity.test.token-interceptor.enabled", havingValue = "true", matchIfMissing = true)
+    public IdentityTokenInterceptor identityTokenInterceptor(IdentityTokenProducer keycloakTokenProducer) {
+        return new IdentityTokenInterceptor(keycloakTokenProducer);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RestTemplateBuilder restTemplateBuilder(@Autowired(required = false) IdentityTokenInterceptor identityTokenInterceptor) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                          false);
@@ -72,11 +83,16 @@ public class TestConfiguration {
         jackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON));
         jackson2HttpMessageConverter.setObjectMapper(mapper);
 
-        return new RestTemplateBuilder().additionalMessageConverters(
-                jackson2HttpMessageConverter,
-                new StringHttpMessageConverter(StandardCharsets.UTF_8),
-                new ByteArrayHttpMessageConverter())
-            .additionalInterceptors(keycloakTokenProducer);
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder().additionalMessageConverters(
+            jackson2HttpMessageConverter,
+            new StringHttpMessageConverter(StandardCharsets.UTF_8),
+            new ByteArrayHttpMessageConverter());
+        if (identityTokenInterceptor != null) {
+            return restTemplateBuilder
+                .additionalInterceptors(identityTokenInterceptor);
+        } else {
+            return restTemplateBuilder;
+        }
     }
 
 }

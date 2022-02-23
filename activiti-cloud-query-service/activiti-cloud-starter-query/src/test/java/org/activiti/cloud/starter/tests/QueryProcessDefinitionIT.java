@@ -27,7 +27,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.test.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +58,7 @@ public class QueryProcessDefinitionIT {
     public static final String TEST_CATEGORY = "Test category";
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private ProcessDefinitionRestTemplate restTemplate;
@@ -74,7 +74,7 @@ public class QueryProcessDefinitionIT {
 
     @BeforeEach
     public void setUp() {
-        keycloakTokenProducer.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
     }
 
     @AfterEach

@@ -35,7 +35,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
@@ -68,7 +68,7 @@ public class ProcessInstanceIT {
     private static final String PARENT_PROCESS = "ParentProcess";
 
     @Autowired
-    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private ProcessDiagramGenerator processDiagramGenerator;
@@ -90,7 +90,7 @@ public class ProcessInstanceIT {
     @BeforeEach
     public void setUp() {
         keycloakTestUser = "hruser";
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
+        identityTokenProducer.setTestUser(keycloakTestUser);
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -219,7 +219,7 @@ public class ProcessInstanceIT {
     @Test
     public void shouldNotStartProcessWithoutPermission() {
         //testuser does not have access to SIMPLE_PROCESS according to access-control.properties
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
 
         assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
             processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
@@ -228,7 +228,7 @@ public class ProcessInstanceIT {
     @Test
     public void shouldStartProcessIfAdmin() {
         //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
 
         StartProcessPayload startProcess = ProcessPayloadBuilder.start()
             .withProcessDefinitionKey(SIMPLE_PROCESS)
@@ -331,7 +331,7 @@ public class ProcessInstanceIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
 
         //when
         ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
@@ -380,7 +380,7 @@ public class ProcessInstanceIT {
 
         //when
         //testadmin should see process instances at admin endpoint
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         responseEntity = processInstanceRestTemplate.adminSuspend(startProcessEntity);
 
         //then
@@ -411,7 +411,7 @@ public class ProcessInstanceIT {
 
         //First suspend process and check that everything is OK
         //testadmin should see process instances at admin endpoint
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         ResponseEntity<Void> responseEntity = processInstanceRestTemplate.adminSuspend(startProcessEntity);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
@@ -420,7 +420,7 @@ public class ProcessInstanceIT {
 
         //when
         //change user
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
+        identityTokenProducer.setTestUser(keycloakTestUser);
         responseEntity = processInstanceRestTemplate.adminResume(startProcessEntity);
 
         //then
@@ -429,7 +429,7 @@ public class ProcessInstanceIT {
 
         //when
         //testadmin should see process instances at admin endpoint
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         responseEntity = processInstanceRestTemplate.adminResume(startProcessEntity);
 
         //then
@@ -487,7 +487,7 @@ public class ProcessInstanceIT {
         String newBusinessKey = startProcessEntity.getBody().getBusinessKey() != null ? startProcessEntity.getBody().getBusinessKey() + " UPDATED" : " UPDATED";
         String newName = startProcessEntity.getBody().getName() != null ? startProcessEntity.getBody().getName() + " UPDATED" : " UPDATED";
 
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
 
         ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminUpdate(startProcessEntity,
             newBusinessKey,
@@ -556,7 +556,7 @@ public class ProcessInstanceIT {
         assertThat(processEntity.getBody().getProcessDefinitionId()).contains("SimpleProcess:");
 
         //when
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminDelete(processEntity);
 
         //then

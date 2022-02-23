@@ -25,7 +25,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
@@ -68,7 +68,7 @@ public class TaskVariablesIT {
     private TaskRestTemplate taskRestTemplate;
 
     @Autowired
-    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private VariablesUtil variablesUtil;
@@ -79,7 +79,7 @@ public class TaskVariablesIT {
 
     @BeforeEach
     public void setUp() {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
 
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -162,7 +162,7 @@ public class TaskVariablesIT {
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
 
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
         taskRestTemplate.adminCreateVariable(taskId, "var2", "test2");
 
         //when
@@ -245,7 +245,7 @@ public class TaskVariablesIT {
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
 
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        identityTokenProducer.setTestUser("testadmin");
 
         taskRestTemplate.adminCreateVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
         taskRestTemplate.adminCreateVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
