@@ -101,8 +101,8 @@ public class TaskController {
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         //do restricted query and check if still able to see it
-        boolean userCanSeeTask = taskControllerHelper.userCanSeeTask(QTaskEntity.taskEntity.id.eq(taskId));
-        if (!userCanSeeTask) {
+        boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
+        if (!canUserViewTask) {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
@@ -116,8 +116,8 @@ public class TaskController {
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         //do restricted query and check if still able to see it
-        boolean userCanSeeTask = taskControllerHelper.userCanSeeTask(QTaskEntity.taskEntity.id.eq(taskId));
-        if (!userCanSeeTask) {
+        boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
+        if (!canUserViewTask) {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
@@ -133,8 +133,8 @@ public class TaskController {
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         //do restricted query and check if still able to see it
-        boolean userCanSeeTask = taskControllerHelper.userCanSeeTask(QTaskEntity.taskEntity.id.eq(taskId));
-        if (!userCanSeeTask) {
+        boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
+        if (!canUserViewTask) {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }

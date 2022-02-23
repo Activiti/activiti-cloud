@@ -90,7 +90,7 @@ public class ProcessInstanceEntityTasksControllerIT {
         TaskEntity taskEntity = buildDefaultTask();
         Predicate restrictionPredicate = mock(Predicate.class);
         given(taskLookupRestrictionService.restrictTaskQuery(any())).willReturn(restrictionPredicate);
-        given(taskRepository.findAllOverProcessInstance(any(),
+        given(taskRepository.findInProcessInstanceScope(any(),
                                      any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(taskEntity),
                                            new AlfrescoPageRequest(11, 10, PageRequest.of(0,

@@ -154,7 +154,7 @@ public class TaskEntityControllerIT {
 
         Predicate restrictionPredicate = mock(Predicate.class);
         given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
-        given(taskRepository.existsOverProcessInstance(restrictionPredicate)).willReturn(true);
+        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
 
         //when
         this.mockMvc.perform(get("/v1/tasks/{taskId}",
@@ -177,7 +177,7 @@ public class TaskEntityControllerIT {
 
         Predicate restrictionPredicate = mock(Predicate.class);
         given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
-        given(taskRepository.existsOverProcessInstance(restrictionPredicate)).willReturn(true);
+        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
 
         //when
         MvcResult mvcResult = this.mockMvc.perform(get("/v1/tasks/{taskId}",

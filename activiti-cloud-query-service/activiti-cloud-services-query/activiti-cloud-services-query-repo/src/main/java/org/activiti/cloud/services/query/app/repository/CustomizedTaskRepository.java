@@ -29,10 +29,10 @@ public interface CustomizedTaskRepository {
                                                 Predicate predicate,
                                                 Pageable pageable);
 
-    Iterable<TaskEntity> findAllOverProcessInstance(Predicate predicate);
+    Iterable<TaskEntity> findInProcessInstanceScope(Predicate predicate);
     
-    Page<TaskEntity> findAllOverProcessInstance(Predicate predicate, 
+    Page<TaskEntity> findInProcessInstanceScope(Predicate predicate, 
                                                 Pageable pageable);
 
-    boolean existsOverProcessInstance(Predicate predicate);
+    boolean existsInProcessInstanceScope(Predicate predicate);
 }

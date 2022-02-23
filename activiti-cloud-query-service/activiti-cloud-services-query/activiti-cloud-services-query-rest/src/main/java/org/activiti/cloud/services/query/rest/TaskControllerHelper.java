@@ -75,16 +75,16 @@ public class TaskControllerHelper {
                                                                      Pageable pageable) {
 
         Predicate conditions = taskLookupRestrictionService.restrictToInvolvedUsersQuery(predicate);
-        Page<TaskEntity> page = taskRepository.findAllOverProcessInstance(conditions, pageable);
+        Page<TaskEntity> page = taskRepository.findInProcessInstanceScope(conditions, pageable);
         
         return pagedCollectionModelAssembler.toModel(pageable, 
                                                      page, 
                                                      taskRepresentationModelAssembler);
     }
 
-    public boolean userCanSeeTask(Predicate predicate) {
+    public boolean canUserViewTask(Predicate predicate) {
         Predicate conditions = taskLookupRestrictionService.restrictToInvolvedUsersQuery(predicate);
-        return taskRepository.existsOverProcessInstance(conditions);
+        return taskRepository.existsInProcessInstanceScope(conditions);
     }
 
 }

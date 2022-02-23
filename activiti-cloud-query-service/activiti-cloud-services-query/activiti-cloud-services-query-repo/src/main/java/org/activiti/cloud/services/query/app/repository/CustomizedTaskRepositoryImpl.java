@@ -62,7 +62,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
    }
     
    @Override
-    public Iterable<TaskEntity> findAllOverProcessInstance(Predicate predicate) {
+    public Iterable<TaskEntity> findInProcessInstanceScope(Predicate predicate) {
 
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
 
@@ -73,7 +73,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
     }
 
     @Override
-    public Page<TaskEntity> findAllOverProcessInstance(Predicate predicate, Pageable pageable) {
+    public Page<TaskEntity> findInProcessInstanceScope(Predicate predicate, Pageable pageable) {
         
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
         
@@ -86,7 +86,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
     }
 
     @Override
-    public boolean existsOverProcessInstance(Predicate predicate) {
+    public boolean existsInProcessInstanceScope(Predicate predicate) {
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
         JPQLQuery<TaskEntity> from = buildLeftJoin(taskEntity, predicate);
         JPQLQuery<?> countQuery = from.select(taskEntity.count());

@@ -131,7 +131,8 @@ public class QueryTasksIT {
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
         taskEventContainedBuilder = new TaskEventContainedBuilder(eventsAggregator);
         variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
-        runningProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstance1", TESTUSER);
+        runningProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator",
+                                                                                             TESTUSER);
         keycloakTokenProducer.setKeycloakTestUser(TESTUSER);
     }
 
