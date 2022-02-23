@@ -81,7 +81,7 @@ public abstract class AbstractMQServiceTaskIT {
     @Autowired
     protected BindingServiceProperties bindingServiceProperties;
 
-    @Value("${activiti.keycloak.test-user:hruser}")
+    @Value("${activiti.identity.test-user:hruser}")
     protected String keycloakTestUser;
 
     @BeforeEach
