@@ -29,6 +29,11 @@ public class JuelExpressionResolverService {
     private static final String EXPRESSION = "expression";
     private static final String VARIABLES = "variables";
 
+    /**
+     * Resolves the given expression with the provided variables.
+     * @param inputVariables the input variables: expression and variables.
+     * @return the resolved expression.
+     */
     public Map<String, Object> resolveExpression(final Map<String, Object> inputVariables) {
         LOGGER.debug("Calling Juel Expression Resolver with parameters {}", inputVariables);
         try {

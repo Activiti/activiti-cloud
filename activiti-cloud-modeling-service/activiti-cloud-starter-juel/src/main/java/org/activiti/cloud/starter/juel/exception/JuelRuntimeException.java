@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.starter.juel.exception;
 
+/**
+ * Generic Juel Runtime Exception
+ */
 public class JuelRuntimeException extends RuntimeException {
     public JuelRuntimeException() {
         super();
