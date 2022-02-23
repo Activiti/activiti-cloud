@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
@@ -73,7 +74,9 @@ public class TestConfiguration {
 
         return new RestTemplateBuilder().additionalMessageConverters(
                 jackson2HttpMessageConverter,
-                new StringHttpMessageConverter(StandardCharsets.UTF_8)).additionalInterceptors(keycloakTokenProducer);
+                new StringHttpMessageConverter(StandardCharsets.UTF_8),
+                new ByteArrayHttpMessageConverter())
+            .additionalInterceptors(keycloakTokenProducer);
     }
 
 }
