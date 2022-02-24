@@ -16,6 +16,7 @@
 package org.activiti.cloud.security.authorization;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
@@ -74,12 +75,15 @@ public class AuthorizationConfigurer {
     /**
      * If a security constraint hasn't any roles it means that it can accessible from anyone.
      * It must be the first one in order to avoid being overridden by other rules.
+     * The order is reversed because in order to mimic the security-constraint behaviour.
      * @param securityConstraints
      * @return
      */
     private List<SecurityConstraint> getOrderedList(List<SecurityConstraint> securityConstraints) {
+        List<SecurityConstraint> reversed = new ArrayList<>(securityConstraints);
+        Collections.reverse(reversed);
         List<SecurityConstraint> result = new ArrayList<>();
-        securityConstraints.forEach(securityConstraint -> {
+        reversed.forEach(securityConstraint -> {
             if(isNotEmpty(securityConstraint.getAuthRoles())) {
                 result.add(securityConstraint);
             } else {

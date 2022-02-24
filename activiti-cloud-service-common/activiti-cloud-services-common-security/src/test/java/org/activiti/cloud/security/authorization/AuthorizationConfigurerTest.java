@@ -59,11 +59,11 @@ class AuthorizationConfigurerTest {
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
-        inOrder.verify(authorizeRequests).antMatchers(eq("/a"), eq("/b"));
-        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"), eq("ROLE_2"));
-
         inOrder.verify(authorizeRequests).antMatchers(eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
+
+        inOrder.verify(authorizeRequests).antMatchers(eq("/a"), eq("/b"));
+        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"), eq("ROLE_2"));
     }
 
     @Test
