@@ -19,11 +19,13 @@ import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
 
+import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -32,6 +34,7 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.Test;
@@ -78,12 +81,16 @@ public class ProcessInstanceEntityTasksControllerIT {
     @MockBean
     private SecurityPoliciesProperties securityPoliciesProperties;
 
+    @MockBean
+    private TaskLookupRestrictionService taskLookupRestrictionService;
+
     @Test
     public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
-
-        given(taskRepository.findAll(any(),
+        Predicate restrictionPredicate = mock(Predicate.class);
+        given(taskLookupRestrictionService.restrictTaskQuery(any())).willReturn(restrictionPredicate);
+        given(taskRepository.findInProcessInstanceScope(any(),
                                      any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(taskEntity),
                                            new AlfrescoPageRequest(11, 10, PageRequest.of(0,

@@ -15,11 +15,15 @@
  */
 package org.activiti.cloud.services.security;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+
+import com.querydsl.jpa.JPAExpressions;
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
@@ -35,6 +39,9 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
 
     @Value("${activiti.cloud.security.task.restrictions.enabled:true}")
     private boolean restrictionsEnabled;
+
+    @Value("${activiti.cloud.security.task.restrictions.involved.user.enabled:true}")
+    private boolean restrictionsInvolvedUserEnabled;
 
     public TaskLookupRestrictionService(SecurityManager securityManager) {
         this.securityManager = securityManager;
@@ -57,6 +64,28 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
         Predicate extendedPredicate = addAndConditionToPredicate(predicate,task.isNotNull());
 
         return restrictTaskQuery(extendedPredicate, task);
+    }
+
+    public Predicate restrictToInvolvedUsersQuery(Predicate predicate){
+
+        if (!restrictionsInvolvedUserEnabled){
+            return restrictTaskQuery(predicate);
+        }
+
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+        QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
+        String userId = securityManager.getAuthenticatedUserId();
+
+        Predicate defaultRestrictions = restrictTaskQuery(new BooleanBuilder());
+
+        BooleanExpression userIsInvolved = processInstanceEntity.initiator.eq(userId) //is Initiator
+                .or(taskEntity.processInstanceId.in( //user is Involved in one of the tasks of the Process 
+                        JPAExpressions.select(taskEntity.processInstanceId)
+                                .from(taskEntity)
+                                .where(defaultRestrictions)))
+                .or(defaultRestrictions); //apply default conditions 
+
+        return addAndConditionToPredicate(predicate,userIsInvolved);
     }
 
     private Predicate restrictTaskQuery(Predicate predicate, QTaskEntity task){
@@ -115,5 +144,13 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
 
     public boolean isRestrictionsEnabled() {
         return restrictionsEnabled;
+    }
+    
+    public boolean isRestrictionsInvolvedUserEnabled() {
+        return restrictionsInvolvedUserEnabled;
+    }
+
+    public void setRestrictionsInvolvedUserEnabled(boolean restrictionsInvolvedUserEnabled) {
+        this.restrictionsInvolvedUserEnabled = restrictionsInvolvedUserEnabled;
     }
 }
