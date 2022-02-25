@@ -16,6 +16,7 @@
 package org.activiti.cloud.security.authorization;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -55,13 +56,13 @@ public class AuthorizationProperties {
         public void setSecurityCollections(SecurityCollection[] securityCollections) {
             this.securityCollections = securityCollections;
         }
-
     }
 
     @ConfigurationProperties
     public static class SecurityCollection {
 
         private String[] patterns = new String[]{};
+        private String[] omittedMethods = new String[]{};
 
         public String[] getPatterns() {
             return patterns;
@@ -71,6 +72,21 @@ public class AuthorizationProperties {
             this.patterns = patterns;
         }
 
+        public String[] getOmittedMethods() {
+            return omittedMethods;
+        }
+
+        public void setOmittedMethods(String[] omittedMethods) {
+            this.omittedMethods = omittedMethods;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                "patterns=" + Arrays.toString(patterns) +
+                ", omittedMethods=" + Arrays.toString(omittedMethods) +
+                '}';
+        }
     }
 
 }

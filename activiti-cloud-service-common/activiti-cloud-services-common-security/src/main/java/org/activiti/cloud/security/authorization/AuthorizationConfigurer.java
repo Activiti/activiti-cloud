@@ -15,28 +15,31 @@
  */
 package org.activiti.cloud.security.authorization;
 
+import static java.util.function.Predicate.not;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.stereotype.Component;
 
 /**
  * This class aims to define authorizations on a REST API using a configuration like below:
- *
- * authorizations.security-constraints[0].authRoles[0]=ACTIVITI_USER
- * authorizations.security-constraints[0].securityCollections[0].patterns[0]=/v1/*
- * authorizations.security-constraints[1].authRoles[0]=ACTIVITI_ADMIN
+ * <p>
+ * authorizations.security-constraints[0].authRoles[0]=ACTIVITI_USER authorizations.security-constraints[0].securityCollections[0].patterns[0]=/v1/* authorizations.security-constraints[1].authRoles[0]=ACTIVITI_ADMIN
  * authorizations.security-constraints[1].securityCollections[0].patterns[0]=/admin/*
- *
+ * <p>
  * This configuration schema is similar to the security constraint configurations used by other systems like Keycloak.
- *
  */
 @Component
 public class AuthorizationConfigurer {
@@ -53,29 +56,47 @@ public class AuthorizationConfigurer {
     public void configure(HttpSecurity http) throws Exception {
         List<SecurityConstraint> orderedSecurityConstraints = getOrderedList(authorizationProperties.getSecurityConstraints());
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
-            String[] patterns = getPatterns(securityConstraint);
             String[] roles = securityConstraint.getAuthRoles();
-            configureAuthorization(http, patterns, roles);
+            configureAuthorization(http, roles, securityConstraint.getSecurityCollections());
         }
         http.anonymous();
     }
 
-    private void configureAuthorization(HttpSecurity http, String[] patterns, String[] roles) throws Exception {
+    private void configureAuthorization(HttpSecurity http, String[] roles, SecurityCollection[] securityCollection) throws Exception {
         boolean rolesNotEmpty = isNotEmpty(roles);
-        if(rolesNotEmpty){
-            http.authorizeRequests().antMatchers(patterns).hasAnyRole(roles);
+        Consumer<ExpressionUrlAuthorizationConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
+        if (rolesNotEmpty) {
+            authorizedUrlConsumer = a -> a.hasAnyRole(roles);
         } else {
-            http.authorizeRequests().antMatchers(patterns).permitAll();
+            authorizedUrlConsumer = a -> a.permitAll();
         }
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Setting access to patterns {} for roles {}", patterns, rolesNotEmpty ? roles : "anonymous");
+        buildAntMatchers(http, securityCollection, authorizedUrlConsumer);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Setting access {} to {}", securityCollection, rolesNotEmpty ? roles : "anonymous");
+        }
+    }
+
+    private void buildAntMatchers(HttpSecurity http,
+                                  SecurityCollection[] securityCollections,
+                                  Consumer<ExpressionUrlAuthorizationConfigurer<HttpSecurity>.AuthorizedUrl> f) throws Exception {
+        for (SecurityCollection securityCollection : securityCollections) {
+            String[] patterns = getPatterns(securityCollection.getPatterns());
+            if(isNotEmpty(securityCollection.getOmittedMethods())){
+                List<HttpMethod> methods = getAllowedMethods(securityCollection.getOmittedMethods());
+                for (HttpMethod method : methods) {
+                    f.accept(http.authorizeRequests().antMatchers(method, patterns));
+                }
+            } else {
+                f.accept(http.authorizeRequests().antMatchers(patterns));
+            }
         }
     }
 
     /**
-     * If a security constraint hasn't any roles it means that it can accessible from anyone.
-     * It must be the first one in order to avoid being overridden by other rules.
-     * The order is reversed because in order to mimic the security-constraint behaviour.
+     * If a security constraint hasn't any roles it means that it can accessible from anyone. It must be the first one
+     * in order to avoid being overridden by other rules. The order is reversed because in order
+     * to mimic the security-constraint behaviour.
+     *
      * @param securityConstraints
      * @return
      */
@@ -84,7 +105,7 @@ public class AuthorizationConfigurer {
         Collections.reverse(reversed);
         List<SecurityConstraint> result = new ArrayList<>();
         reversed.forEach(securityConstraint -> {
-            if(isNotEmpty(securityConstraint.getAuthRoles())) {
+            if (isNotEmpty(securityConstraint.getAuthRoles())) {
                 result.add(securityConstraint);
             } else {
                 result.add(0, securityConstraint);
@@ -93,12 +114,15 @@ public class AuthorizationConfigurer {
         return result;
     }
 
-    private String[] getPatterns(SecurityConstraint securityConstraint) {
-        return Stream.of(securityConstraint.getSecurityCollections())
-            .map(SecurityCollection::getPatterns)
-            .flatMap(Stream::of)
+    private String[] getPatterns(String[] patterns) {
+        return Stream.of(patterns)
             .map(pattern -> pattern.endsWith("/*") ? pattern + "*" : pattern)
             .toArray(String[]::new);
+    }
+
+    private List<HttpMethod> getAllowedMethods(String[] omittedMethods) {
+        List<HttpMethod> httpMethods = Stream.of(omittedMethods).map(HttpMethod::resolve).collect(Collectors.toList());
+        return Stream.of(HttpMethod.values()).filter(not(httpMethods::contains)).collect(Collectors.toList());
     }
 
     private boolean isNotEmpty(String[] array) {

@@ -16,10 +16,15 @@
 package org.activiti.cloud.security.authorization;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.HEAD;
+import static org.springframework.http.HttpMethod.OPTIONS;
+import static org.springframework.http.HttpMethod.PATCH;
+import static org.springframework.http.HttpMethod.TRACE;
 
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
@@ -28,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer.AuthorizedUrl;
@@ -89,11 +95,42 @@ class AuthorizationConfigurerTest {
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
     }
 
+    @Test
+    public void should_configureAuth_when_everythingIsAuthenticatedMethods() throws Exception {
+        AuthorizationProperties authorizationProperties = new AuthorizationProperties();
+        authorizationProperties.setSecurityConstraints(asList(
+            createSecurityConstraint(new String[]{"ROLE_1"}, new String[]{"/c"}, new String[]{"POST", "DELETE", "PUT"})));
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties);
+
+        when(http.authorizeRequests()).thenReturn(authorizeRequests);
+        when(authorizeRequests.antMatchers(any(HttpMethod.class), any(String.class))).thenReturn(authorizedUrl);
+
+        authorizationConfigurer.configure(http);
+
+        InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
+
+        inOrder.verify(authorizeRequests).antMatchers(eq(GET), eq("/c"));
+        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
+        inOrder.verify(authorizeRequests).antMatchers(eq(HEAD), eq("/c"));
+        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
+        inOrder.verify(authorizeRequests).antMatchers(eq(PATCH), eq("/c"));
+        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
+        inOrder.verify(authorizeRequests).antMatchers(eq(OPTIONS), eq("/c"));
+        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
+        inOrder.verify(authorizeRequests).antMatchers(eq(TRACE), eq("/c"));
+        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
+    }
+
     private SecurityConstraint createSecurityConstraint(String[] roles, String[] patterns) {
+        return createSecurityConstraint(roles, patterns, new String[]{});
+    }
+
+    private SecurityConstraint createSecurityConstraint(String[] roles, String[] patterns, String[] omittedMethods) {
         SecurityConstraint securityConstraint = new SecurityConstraint();
         securityConstraint.setAuthRoles(roles);
         SecurityCollection securityCollection = new SecurityCollection();
         securityCollection.setPatterns(patterns);
+        securityCollection.setOmittedMethods(omittedMethods);
         securityConstraint.setSecurityCollections(new SecurityCollection[]{securityCollection});
         return securityConstraint;
     }
