@@ -5,5 +5,3 @@ github:
         - name: alfresco-process
           branch: develop
           useSinglePullRequest: true
-        - name: alfresco-process-application-oracle-kafka
-          useSinglePullRequest: true
