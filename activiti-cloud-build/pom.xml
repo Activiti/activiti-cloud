@@ -185,7 +185,7 @@
     <docker-maven-plugin.version>0.33.0</docker-maven-plugin.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
     <git-commit-id-plugin.version>3.0.1</git-commit-id-plugin.version>
-    <jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
     <third-party-license-maven-plugin.version>2.0.1.alfresco-1</third-party-license-maven-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
