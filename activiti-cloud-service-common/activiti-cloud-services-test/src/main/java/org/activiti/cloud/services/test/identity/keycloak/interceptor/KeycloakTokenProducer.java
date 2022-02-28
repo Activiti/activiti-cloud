@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.test.identity.keycloak.interceptor;
 
 import java.io.IOException;
-
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessTokenResponse;
@@ -49,21 +48,26 @@ public class KeycloakTokenProducer implements ClientHttpRequestInterceptor {
     }
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest httpRequest,
-                                        byte[] bytes,
-                                        ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
-        httpRequest.getHeaders().set(AUTHORIZATION_HEADER,
-                                     getTokenString());
-        return clientHttpRequestExecution.execute(httpRequest,
-                                                  bytes);
+    public ClientHttpResponse intercept(
+        HttpRequest httpRequest,
+        byte[] bytes,
+        ClientHttpRequestExecution clientHttpRequestExecution
+    ) throws IOException {
+        httpRequest.getHeaders().set(AUTHORIZATION_HEADER, getTokenString());
+        return clientHttpRequestExecution.execute(httpRequest, bytes);
     }
 
     private AccessTokenResponse getAccessTokenResponse() {
-        return Keycloak.getInstance(keycloakProperties.getAuthServerUrl(),
-                                    keycloakProperties.getRealm(),
-                                    keycloakTestUser,
-                                    keycloakTestPassword,
-                                    resource).tokenManager().getAccessToken();
+        return Keycloak
+            .getInstance(
+                keycloakProperties.getAuthServerUrl(),
+                keycloakProperties.getRealm(),
+                keycloakTestUser,
+                keycloakTestPassword,
+                resource
+            )
+            .tokenManager()
+            .getAccessToken();
     }
 
     public String getTokenString() {
@@ -73,14 +77,12 @@ public class KeycloakTokenProducer implements ClientHttpRequestInterceptor {
 
     public HttpEntity entityWithAuthorizationHeader() {
         HttpHeaders headers = authorizationHeaders();
-        return new HttpEntity<>("parameters",
-                                headers);
+        return new HttpEntity<>("parameters", headers);
     }
 
     public HttpHeaders authorizationHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add(AUTHORIZATION_HEADER,
-                    getTokenString());
+        headers.add(AUTHORIZATION_HEADER, getTokenString());
         return headers;
     }
 

@@ -15,55 +15,78 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
+import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.function.Predicate;
-
-import graphql.schema.DataFetchingEnvironment;
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
 
-public class EngineEventsDestinationsPredicateFactory implements EngineEventsPredicateFactory {
+public class EngineEventsDestinationsPredicateFactory
+    implements EngineEventsPredicateFactory {
 
-    private static Logger logger = LoggerFactory.getLogger(EngineEventsDestinationsPredicateFactory.class);
+    private static Logger logger = LoggerFactory.getLogger(
+        EngineEventsDestinationsPredicateFactory.class
+    );
 
     private final RoutingKeyResolver routingKeyResolver;
 
     private DataFetcherDestinationResolver destinationResolver = new AntPathDestinationResolver();
     private AntPathMatcher pathMatcher = new AntPathMatcher(".");
-    
-    public EngineEventsDestinationsPredicateFactory(RoutingKeyResolver routingKeyResolver) {
+
+    public EngineEventsDestinationsPredicateFactory(
+        RoutingKeyResolver routingKeyResolver
+    ) {
         this.routingKeyResolver = routingKeyResolver;
-    }    
+    }
 
     // filter events that do not match subscription arguments
     @Override
-    public Predicate<? super EngineEvent> getPredicate(DataFetchingEnvironment environment) {
-        List<String> destinations = destinationResolver.resolveDestinations(environment);
-        
-        logger.info("Resolved destinations {} for environment: {}", destinations, environment);
-        
-        return (engineEvent) -> {
-            String routingKey = routingKeyResolver.resolveRoutingKey(engineEvent);
-            
-            logger.debug("Resolved routing key {} for {}", routingKey, engineEvent);
-            
-            return destinations.stream()
-                               .anyMatch(pattern -> pathMatcher.match(pattern, routingKey));
+    public Predicate<? super EngineEvent> getPredicate(
+        DataFetchingEnvironment environment
+    ) {
+        List<String> destinations = destinationResolver.resolveDestinations(
+            environment
+        );
+
+        logger.info(
+            "Resolved destinations {} for environment: {}",
+            destinations,
+            environment
+        );
+
+        return engineEvent -> {
+            String routingKey = routingKeyResolver.resolveRoutingKey(
+                engineEvent
+            );
+
+            logger.debug(
+                "Resolved routing key {} for {}",
+                routingKey,
+                engineEvent
+            );
+
+            return destinations
+                .stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, routingKey));
         };
     }
 
-    public EngineEventsDestinationsPredicateFactory destinationResolver(DataFetcherDestinationResolver destinationResolver) {
+    public EngineEventsDestinationsPredicateFactory destinationResolver(
+        DataFetcherDestinationResolver destinationResolver
+    ) {
         this.destinationResolver = destinationResolver;
 
         return this;
     }
-    
-    public EngineEventsDestinationsPredicateFactory pathMatcher(AntPathMatcher pathMatcher) {
+
+    public EngineEventsDestinationsPredicateFactory pathMatcher(
+        AntPathMatcher pathMatcher
+    ) {
         this.pathMatcher = pathMatcher;
-        
+
         return this;
     }
 }

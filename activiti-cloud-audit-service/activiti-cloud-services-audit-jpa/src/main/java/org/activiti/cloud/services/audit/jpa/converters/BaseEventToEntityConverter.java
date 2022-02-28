@@ -20,21 +20,27 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 
-public abstract class BaseEventToEntityConverter implements EventToEntityConverter<AuditEventEntity> {
+public abstract class BaseEventToEntityConverter
+    implements EventToEntityConverter<AuditEventEntity> {
 
     private EventContextInfoAppender eventContextInfoAppender;
 
-    protected BaseEventToEntityConverter(EventContextInfoAppender eventContextInfoAppender) {
+    protected BaseEventToEntityConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         this.eventContextInfoAppender = eventContextInfoAppender;
     }
 
     @Override
-    public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
+    public AuditEventEntity convertToEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
         return createEventEntity(cloudRuntimeEvent);
     }
 
-    protected abstract AuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent);
-    
+    protected abstract AuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    );
 
     @Override
     public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
@@ -47,9 +53,13 @@ public abstract class BaseEventToEntityConverter implements EventToEntityConvert
         apiEvent.setServiceVersion(auditEventEntity.getServiceVersion());
         apiEvent.setMessageId(auditEventEntity.getMessageId());
         apiEvent.setSequenceNumber(auditEventEntity.getSequenceNumber());
-        return eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity);
+        return eventContextInfoAppender.addProcessContextInfoToApiEvent(
+            apiEvent,
+            auditEventEntity
+        );
     }
 
-    protected abstract CloudRuntimeEventImpl<?,?> createAPIEvent(AuditEventEntity auditEventEntity);
-
+    protected abstract CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    );
 }

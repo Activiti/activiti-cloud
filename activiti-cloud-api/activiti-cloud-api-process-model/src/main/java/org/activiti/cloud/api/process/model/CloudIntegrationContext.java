@@ -17,14 +17,15 @@ package org.activiti.cloud.api.process.model;
 
 import java.util.Date;
 import java.util.List;
-
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
-public interface CloudIntegrationContext extends IntegrationContext, CloudRuntimeEntity {
-
+public interface CloudIntegrationContext
+    extends IntegrationContext, CloudRuntimeEntity {
     public enum IntegrationContextStatus {
-        INTEGRATION_REQUESTED, INTEGRATION_RESULT_RECEIVED, INTEGRATION_ERROR_RECEIVED
+        INTEGRATION_REQUESTED,
+        INTEGRATION_RESULT_RECEIVED,
+        INTEGRATION_ERROR_RECEIVED,
     }
 
     IntegrationContextStatus getStatus();
@@ -42,5 +43,4 @@ public interface CloudIntegrationContext extends IntegrationContext, CloudRuntim
     String getErrorClassName();
 
     List<StackTraceElement> getStackTraceElements();
-
 }

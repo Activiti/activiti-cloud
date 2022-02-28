@@ -25,12 +25,16 @@ public class ProcessVariableLookupRestrictionService {
 
     private final ProcessVariableRestrictionService restrictionService;
 
-    public ProcessVariableLookupRestrictionService(ProcessVariableRestrictionService restrictionService) {
+    public ProcessVariableLookupRestrictionService(
+        ProcessVariableRestrictionService restrictionService
+    ) {
         this.restrictionService = restrictionService;
     }
 
-    public Predicate restrictProcessInstanceVariableQuery(Predicate predicate){
-        return restrictionService.restrictProcessInstanceVariableQuery(predicate, SecurityPolicyAccess.READ);
+    public Predicate restrictProcessInstanceVariableQuery(Predicate predicate) {
+        return restrictionService.restrictProcessInstanceVariableQuery(
+            predicate,
+            SecurityPolicyAccess.READ
+        );
     }
-
 }

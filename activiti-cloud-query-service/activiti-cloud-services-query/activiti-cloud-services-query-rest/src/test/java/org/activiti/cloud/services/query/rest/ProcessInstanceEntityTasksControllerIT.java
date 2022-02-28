@@ -23,9 +23,8 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collections;
-
 import com.querydsl.core.types.Predicate;
+import java.util.Collections;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -55,11 +54,13 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(ProcessInstanceTasksController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({
-    QueryRestWebMvcAutoConfiguration.class,
-    CommonModelAutoConfiguration.class,
-    AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    {
+        QueryRestWebMvcAutoConfiguration.class,
+        CommonModelAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @WithMockUser
 public class ProcessInstanceEntityTasksControllerIT {
 
@@ -85,31 +86,50 @@ public class ProcessInstanceEntityTasksControllerIT {
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @Test
-    public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         Predicate restrictionPredicate = mock(Predicate.class);
-        given(taskLookupRestrictionService.restrictTaskQuery(any())).willReturn(restrictionPredicate);
-        given(taskRepository.findInProcessInstanceScope(any(),
-                                     any(Pageable.class)))
-                .willReturn(new PageImpl<>(Collections.singletonList(taskEntity),
-                                           new AlfrescoPageRequest(11, 10, PageRequest.of(0,
-                                                          10)),
-                                           12));
+        given(taskLookupRestrictionService.restrictTaskQuery(any()))
+            .willReturn(restrictionPredicate);
+        given(
+            taskRepository.findInProcessInstanceScope(
+                any(),
+                any(Pageable.class)
+            )
+        )
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(taskEntity),
+                    new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)),
+                    12
+                )
+            );
 
         //when
-        MvcResult result = mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
-                                               taskEntity.getProcessInstanceId())
-                                                      .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc
+            .perform(
+                get(
+                    "/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
+                    taskEntity.getProcessInstanceId()
+                )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+            .node("list.pagination.skipCount")
+            .isEqualTo(11)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(12);
     }
 }

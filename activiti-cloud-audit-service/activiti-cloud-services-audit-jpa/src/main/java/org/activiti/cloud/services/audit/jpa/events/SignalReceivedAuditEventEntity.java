@@ -15,33 +15,35 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 @Entity(name = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
-@DiscriminatorValue(value = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
+@DiscriminatorValue(
+    value = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT
+)
 @DynamicInsert
 public class SignalReceivedAuditEventEntity extends AuditEventEntity {
 
     protected static final String SIGNAL_RECEIVED_EVENT = "SignalReceivedEvent";
 
     @Convert(converter = SignalJpaJsonConverter.class)
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private BPMNSignal signal;
 
-    public SignalReceivedAuditEventEntity() {
-    }
+    public SignalReceivedAuditEventEntity() {}
 
-    public SignalReceivedAuditEventEntity(CloudBPMNSignalReceivedEvent cloudEvent) {
+    public SignalReceivedAuditEventEntity(
+        CloudBPMNSignalReceivedEvent cloudEvent
+    ) {
         super(cloudEvent);
-        setSignal(cloudEvent.getEntity()) ;
+        setSignal(cloudEvent.getEntity());
     }
 
     public BPMNSignal getSignal() {
@@ -55,11 +57,12 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("SignalReceivedAuditEventEntity [signal=")
-               .append(signal)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("SignalReceivedAuditEventEntity [signal=")
+            .append(signal)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

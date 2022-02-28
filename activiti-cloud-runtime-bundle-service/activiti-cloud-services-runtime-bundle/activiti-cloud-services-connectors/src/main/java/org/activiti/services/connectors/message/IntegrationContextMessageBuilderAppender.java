@@ -20,12 +20,18 @@ import org.activiti.cloud.services.events.message.MessageBuilderAppender;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-public class IntegrationContextMessageBuilderAppender implements MessageBuilderAppender {
+public class IntegrationContextMessageBuilderAppender
+    implements MessageBuilderAppender {
 
     private final IntegrationContext integrationContext;
 
-    public IntegrationContextMessageBuilderAppender(IntegrationContext integrationContext) {
-        Assert.notNull(integrationContext, "integrationContext must not be null");
+    public IntegrationContextMessageBuilderAppender(
+        IntegrationContext integrationContext
+    ) {
+        Assert.notNull(
+            integrationContext,
+            "integrationContext must not be null"
+        );
 
         this.integrationContext = integrationContext;
     }
@@ -33,17 +39,49 @@ public class IntegrationContextMessageBuilderAppender implements MessageBuilderA
     @Override
     public <T> MessageBuilder<T> apply(MessageBuilder<T> request) {
         return request
-                .setHeader(IntegrationContextMessageHeaders.CONNECTOR_TYPE, integrationContext.getConnectorType())
-                .setHeader(IntegrationContextMessageHeaders.BUSINESS_KEY, integrationContext.getBusinessKey())
-                .setHeader(IntegrationContextMessageHeaders.INTEGRATION_CONTEXT_ID, integrationContext.getId())
-                .setHeader(IntegrationContextMessageHeaders.ROOT_PROCESS_INSTANCE_ID, integrationContext.getRootProcessInstanceId())
-                .setHeader(IntegrationContextMessageHeaders.PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
-                .setHeader(IntegrationContextMessageHeaders.EXECUTION_ID, integrationContext.getExecutionId())
-                .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
-                .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
-                .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
-                .setHeader(IntegrationContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId())
-                .setHeader(IntegrationContextMessageHeaders.APP_VERSION, integrationContext.getAppVersion());
+            .setHeader(
+                IntegrationContextMessageHeaders.CONNECTOR_TYPE,
+                integrationContext.getConnectorType()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.BUSINESS_KEY,
+                integrationContext.getBusinessKey()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.INTEGRATION_CONTEXT_ID,
+                integrationContext.getId()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.ROOT_PROCESS_INSTANCE_ID,
+                integrationContext.getRootProcessInstanceId()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.PROCESS_INSTANCE_ID,
+                integrationContext.getProcessInstanceId()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.EXECUTION_ID,
+                integrationContext.getExecutionId()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.PROCESS_DEFINITION_ID,
+                integrationContext.getProcessDefinitionId()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.PROCESS_DEFINITION_KEY,
+                integrationContext.getProcessDefinitionKey()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.PROCESS_DEFINITION_VERSION,
+                integrationContext.getProcessDefinitionVersion()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID,
+                integrationContext.getParentProcessInstanceId()
+            )
+            .setHeader(
+                IntegrationContextMessageHeaders.APP_VERSION,
+                integrationContext.getAppVersion()
+            );
     }
-
 }

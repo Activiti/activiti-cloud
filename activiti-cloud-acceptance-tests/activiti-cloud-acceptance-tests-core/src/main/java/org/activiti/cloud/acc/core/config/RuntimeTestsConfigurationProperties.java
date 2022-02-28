@@ -72,5 +72,4 @@ public class RuntimeTestsConfigurationProperties {
     public String getRuntimeBundleServiceName() {
         return runtimeBundleServiceName;
     }
-
 }

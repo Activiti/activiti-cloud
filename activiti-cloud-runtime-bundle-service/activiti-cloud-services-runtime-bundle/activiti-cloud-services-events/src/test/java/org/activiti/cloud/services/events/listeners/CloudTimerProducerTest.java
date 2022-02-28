@@ -40,6 +40,7 @@ public class CloudTimerProducerTest {
 
     @Mock
     private ToCloudProcessRuntimeEventConverter eventConverter;
+
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
 
@@ -51,7 +52,9 @@ public class CloudTimerProducerTest {
     @Test
     public void onEventShouldConvertEventToCloudEventAndAddToAggregator() {
         //given
-        BPMNTimerFiredEventImpl eventFired = new BPMNTimerFiredEventImpl(new BPMNTimerImpl());
+        BPMNTimerFiredEventImpl eventFired = new BPMNTimerFiredEventImpl(
+            new BPMNTimerImpl()
+        );
         CloudBPMNTimerFiredEventImpl cloudEventFired = new CloudBPMNTimerFiredEventImpl();
         given(eventConverter.from(eventFired)).willReturn(cloudEventFired);
         //when
@@ -60,15 +63,17 @@ public class CloudTimerProducerTest {
         //then
         verify(eventsAggregator).add(cloudEventFired);
 
-        BPMNTimerScheduledEventImpl eventScheduled = new BPMNTimerScheduledEventImpl(new BPMNTimerImpl());
+        BPMNTimerScheduledEventImpl eventScheduled = new BPMNTimerScheduledEventImpl(
+            new BPMNTimerImpl()
+        );
         CloudBPMNTimerScheduledEventImpl cloudEventScheduled = new CloudBPMNTimerScheduledEventImpl();
-        given(eventConverter.from(eventScheduled)).willReturn(cloudEventScheduled);
+        given(eventConverter.from(eventScheduled))
+            .willReturn(cloudEventScheduled);
 
         //when
         cloudTimerScheduledProducer.onEvent(eventScheduled);
 
         //then
         verify(eventsAggregator).add(cloudEventScheduled);
-
     }
 }

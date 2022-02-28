@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.job.executor;
 
+import java.util.Date;
 import org.activiti.engine.impl.asyncexecutor.DefaultJobManager;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.persistence.entity.JobEntity;
@@ -24,22 +25,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 
-import java.util.Date;
-
 public class MessageBasedJobManager extends DefaultJobManager {
-    private static final Logger logger = LoggerFactory.getLogger(MessageBasedJobManager.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(
+        MessageBasedJobManager.class
+    );
 
     private final BindingServiceProperties bindingServiceProperties;
     private final JobMessageProducer jobMessageProducer;
 
-    private String inputChannelName = MessageBasedJobManagerChannelsConstants.INPUT;
-    private String outputChannelName = MessageBasedJobManagerChannelsConstants.OUTPUT;
+    private String inputChannelName =
+        MessageBasedJobManagerChannelsConstants.INPUT;
+    private String outputChannelName =
+        MessageBasedJobManagerChannelsConstants.OUTPUT;
 
-    public MessageBasedJobManager(ProcessEngineConfigurationImpl processEngineConfiguration,
-                                  BindingServiceProperties bindingServiceProperties,
-                                  JobMessageProducer jobMessageProducer) {
+    public MessageBasedJobManager(
+        ProcessEngineConfigurationImpl processEngineConfiguration,
+        BindingServiceProperties bindingServiceProperties,
+        JobMessageProducer jobMessageProducer
+    ) {
         super(processEngineConfiguration);
-
         this.bindingServiceProperties = bindingServiceProperties;
         this.jobMessageProducer = jobMessageProducer;
     }
@@ -59,17 +64,26 @@ public class MessageBasedJobManager extends DefaultJobManager {
             JobEntity jobEntity = (JobEntity) job;
 
             // When unacquiring, we up the lock time again., so that it isn't cleared by the reset expired thread.
-            jobEntity.setLockExpirationTime(new Date(processEngineConfiguration.getClock()
-                                                                               .getCurrentTime()
-                                                                               .getTime() + processEngineConfiguration.getAsyncExecutor()
-                                                                                                                      .getAsyncJobLockTimeInMillis()));
+            jobEntity.setLockExpirationTime(
+                new Date(
+                    processEngineConfiguration
+                        .getClock()
+                        .getCurrentTime()
+                        .getTime() +
+                    processEngineConfiguration
+                        .getAsyncExecutor()
+                        .getAsyncJobLockTimeInMillis()
+                )
+            );
         }
 
         sendMessage(job);
     }
 
     public BindingProperties getBindingProperties() {
-        return bindingServiceProperties.getBindingProperties(MessageBasedJobManagerChannelsConstants.INPUT);
+        return bindingServiceProperties.getBindingProperties(
+            MessageBasedJobManagerChannelsConstants.INPUT
+        );
     }
 
     public String getOutputChannelName() {

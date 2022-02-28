@@ -25,26 +25,36 @@ import org.activiti.cloud.services.audit.jpa.events.VariableDeletedEventEntity;
 
 public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
 
-    public VariableDeletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public VariableDeletedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return VariableEvent.VariableEvents.VARIABLE_DELETED.name();
     }
 
     @Override
-    protected VariableDeletedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new VariableDeletedEventEntity((CloudVariableDeletedEvent) cloudRuntimeEvent);       
+    protected VariableDeletedEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new VariableDeletedEventEntity(
+            (CloudVariableDeletedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         VariableDeletedEventEntity variableDeletedEventEntity = (VariableDeletedEventEntity) auditEventEntity;
 
-        return new CloudVariableDeletedEventImpl(variableDeletedEventEntity.getEventId(),
-                                                 variableDeletedEventEntity.getTimestamp(),
-                                                 variableDeletedEventEntity.getVariableInstance());
+        return new CloudVariableDeletedEventImpl(
+            variableDeletedEventEntity.getEventId(),
+            variableDeletedEventEntity.getTimestamp(),
+            variableDeletedEventEntity.getVariableInstance()
+        );
     }
 }

@@ -19,19 +19,28 @@ import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 
-public class CloudVariableUpdatedEventImpl<T> extends CloudVariableEventImpl implements CloudVariableUpdatedEvent {
+public class CloudVariableUpdatedEventImpl<T>
+    extends CloudVariableEventImpl
+    implements CloudVariableUpdatedEvent {
 
     private T previousValue;
 
-    public CloudVariableUpdatedEventImpl() {
-    }
+    public CloudVariableUpdatedEventImpl() {}
 
-    public CloudVariableUpdatedEventImpl(VariableInstance entity, T previousValue) {
+    public CloudVariableUpdatedEventImpl(
+        VariableInstance entity,
+        T previousValue
+    ) {
         super(entity);
         this.previousValue = previousValue;
     }
 
-    public CloudVariableUpdatedEventImpl(String id, Long timestamp, VariableInstance entity, T previousValue) {
+    public CloudVariableUpdatedEventImpl(
+        String id,
+        Long timestamp,
+        VariableInstance entity,
+        T previousValue
+    ) {
         super(id, timestamp, entity);
         this.previousValue = previousValue;
     }

@@ -19,18 +19,23 @@ import org.activiti.api.model.shared.EmptyResult;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 
-public class RemoveProcessVariablesCmdExecutor extends AbstractCommandExecutor<RemoveProcessVariablesPayload> {
+public class RemoveProcessVariablesCmdExecutor
+    extends AbstractCommandExecutor<RemoveProcessVariablesPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;
 
-    public RemoveProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public RemoveProcessVariablesCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         this.processAdminRuntime = processAdminRuntime;
     }
 
     @Override
-    public EmptyResult execute(RemoveProcessVariablesPayload removeProcessVariablesPayload) {
+    public EmptyResult execute(
+        RemoveProcessVariablesPayload removeProcessVariablesPayload
+    ) {
         processAdminRuntime.removeVariables(removeProcessVariablesPayload);
-        
+
         return new EmptyResult(removeProcessVariablesPayload);
     }
 }

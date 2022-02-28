@@ -19,13 +19,16 @@ import org.activiti.api.task.runtime.events.TaskUpdatedEvent;
 import org.activiti.api.task.runtime.events.listener.TaskEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
 
-public class CloudTaskUpdatedProducer implements TaskEventListener<TaskUpdatedEvent> {
+public class CloudTaskUpdatedProducer
+    implements TaskEventListener<TaskUpdatedEvent> {
 
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTaskUpdatedProducer(ToCloudTaskRuntimeEventConverter converter,
-                                    ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTaskUpdatedProducer(
+        ToCloudTaskRuntimeEventConverter converter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }
@@ -34,5 +37,4 @@ public class CloudTaskUpdatedProducer implements TaskEventListener<TaskUpdatedEv
     public void onEvent(TaskUpdatedEvent event) {
         eventsAggregator.add(converter.from(event));
     }
-
 }

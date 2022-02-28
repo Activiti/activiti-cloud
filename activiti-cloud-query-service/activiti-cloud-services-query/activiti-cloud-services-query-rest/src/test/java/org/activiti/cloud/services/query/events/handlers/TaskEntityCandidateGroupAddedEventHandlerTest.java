@@ -15,6 +15,15 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
@@ -27,16 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityCandidateGroupAddedEventHandlerTest {
 
@@ -62,10 +61,14 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         handler.handle(event);
 
         //then
-        ArgumentCaptor<TaskCandidateGroupEntity> captor = ArgumentCaptor.forClass(TaskCandidateGroupEntity.class);
+        ArgumentCaptor<TaskCandidateGroupEntity> captor = ArgumentCaptor.forClass(
+            TaskCandidateGroupEntity.class
+        );
         verify(entityManager).persist(captor.capture());
-        assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
-        assertThat(captor.getValue().getGroupId()).isEqualTo(event.getEntity().getGroupId());
+        assertThat(captor.getValue().getTaskId())
+            .isEqualTo(event.getEntity().getTaskId());
+        assertThat(captor.getValue().getGroupId())
+            .isEqualTo(event.getEntity().getGroupId());
     }
 
     @Test
@@ -73,21 +76,29 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         //given
         CloudTaskCandidateGroupAddedEvent event = buildTaskCandidateGroupAddedEvent();
         Exception cause = new RuntimeException("Something went wrong");
-        doThrow(cause).when(entityManager).persist(any(TaskCandidateGroupEntity.class));
+        doThrow(cause)
+            .when(entityManager)
+            .persist(any(TaskCandidateGroupEntity.class));
 
         //when
         Throwable throwable = catchThrowable(() -> handler.handle(event));
 
         //then
         assertThat(throwable)
-                .isInstanceOf(QueryException.class)
-                .hasCause(cause)
-                .hasMessageContaining("Error handling TaskCandidateGroupAddedEvent[");
+            .isInstanceOf(QueryException.class)
+            .hasCause(cause)
+            .hasMessageContaining(
+                "Error handling TaskCandidateGroupAddedEvent["
+            );
     }
 
     private CloudTaskCandidateGroupAddedEvent buildTaskCandidateGroupAddedEvent() {
-        return new CloudTaskCandidateGroupAddedEventImpl(new TaskCandidateGroupImpl(UUID.randomUUID().toString(),
-                                                                                    UUID.randomUUID().toString()));
+        return new CloudTaskCandidateGroupAddedEventImpl(
+            new TaskCandidateGroupImpl(
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString()
+            )
+        );
     }
 
     @Test
@@ -96,6 +107,9 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         String event = handler.getHandledEvent();
 
         //then
-        assertThat(event).isEqualTo(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name());
+        assertThat(event)
+            .isEqualTo(
+                TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name()
+            );
     }
 }

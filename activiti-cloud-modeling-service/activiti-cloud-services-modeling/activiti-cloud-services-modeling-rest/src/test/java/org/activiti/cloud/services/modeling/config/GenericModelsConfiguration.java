@@ -17,6 +17,7 @@ package org.activiti.cloud.services.modeling.config;
 
 import static org.springframework.http.MediaType.ALL_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.JsonModelType;
 import org.activiti.cloud.modeling.api.Model;
@@ -36,10 +37,11 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class GenericModelsConfiguration {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(GenericModelsConfiguration.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(
+        GenericModelsConfiguration.class
+    );
 
     JsonModelType genericJsonModelType = new JsonModelType() {
-
         @Override
         public String getName() {
             return "GENERIC_JSON_MODEL";
@@ -52,7 +54,6 @@ public class GenericModelsConfiguration {
     };
 
     ModelType genericNonJsonModelType = new ModelType() {
-
         @Override
         public String getName() {
             return "GENERIC_NON_JSON_MODEL";
@@ -75,18 +76,21 @@ public class GenericModelsConfiguration {
     };
 
     ModelContentValidator genericJsonContentValidator = new ModelContentValidator() {
-
         @Override
-        public void validate(byte[] modelFile,
-                             ValidationContext validationContext) {
+        public void validate(
+            byte[] modelFile,
+            ValidationContext validationContext
+        ) {
             LOGGER.info("validate generic json content");
         }
 
         @Override
-        public void validate(Model model,
-                             byte[] modelContent,
-                             ValidationContext validationContext,
-                             boolean validateUsage) {
+        public void validate(
+            Model model,
+            byte[] modelContent,
+            ValidationContext validationContext,
+            boolean validateUsage
+        ) {
             LOGGER.info("usage of json");
         }
 
@@ -102,10 +106,11 @@ public class GenericModelsConfiguration {
     };
 
     private ModelExtensionsValidator genericJsonExtensionsValidator = new ModelExtensionsValidator() {
-
         @Override
-        public void validate(byte[] modelFile,
-                             ValidationContext validationContext) {
+        public void validate(
+            byte[] modelFile,
+            ValidationContext validationContext
+        ) {
             LOGGER.info("validate generic json extensions");
         }
 
@@ -116,10 +121,11 @@ public class GenericModelsConfiguration {
     };
 
     ModelContentValidator genericNonJsonContentValidator = new ModelContentValidator() {
-
         @Override
-        public void validate(byte[] modelFile,
-                             ValidationContext validationContext) {
+        public void validate(
+            byte[] modelFile,
+            ValidationContext validationContext
+        ) {
             LOGGER.info("validate generic non json content");
         }
 
@@ -135,10 +141,11 @@ public class GenericModelsConfiguration {
     };
 
     private ModelExtensionsValidator genericNonJsonExtensionsValidator = new ModelExtensionsValidator() {
-
         @Override
-        public void validate(byte[] modelFile,
-                             ValidationContext validationContext) {
+        public void validate(
+            byte[] modelFile,
+            ValidationContext validationContext
+        ) {
             LOGGER.info("validate generic non json extensions");
         }
 
@@ -149,21 +156,18 @@ public class GenericModelsConfiguration {
     };
 
     private ContentUpdateListener genericJsonContentUpdateListener = new ContentUpdateListener() {
-
         @Override
         public ModelType getHandledModelType() {
             return genericJsonModelType;
         }
 
         @Override
-        public void execute(Model model,
-                            FileContent fileContent) {
+        public void execute(Model model, FileContent fileContent) {
             LOGGER.info("generic json content update listener");
         }
     };
 
     private ModelUpdateListener genericJsonModelUpdateListener = new ModelUpdateListener() {
-
         @Override
         public ModelType getHandledModelType() {
             return genericJsonModelType;
@@ -176,21 +180,18 @@ public class GenericModelsConfiguration {
     };
 
     private ContentUpdateListener genericNonJsonContentUpdateListener = new ContentUpdateListener() {
-
         @Override
         public ModelType getHandledModelType() {
             return genericNonJsonModelType;
         }
 
         @Override
-        public void execute(Model model,
-                            FileContent fileContent) {
+        public void execute(Model model, FileContent fileContent) {
             LOGGER.info("generic non json content update listener");
         }
     };
 
     private ModelUpdateListener genericNonJsonModelUpdateListener = new ModelUpdateListener() {
-
         @Override
         public ModelType getHandledModelType() {
             return genericNonJsonModelType;

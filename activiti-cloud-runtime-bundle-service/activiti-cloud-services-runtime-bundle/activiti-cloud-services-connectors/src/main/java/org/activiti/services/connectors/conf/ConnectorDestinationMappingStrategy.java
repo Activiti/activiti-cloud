@@ -18,8 +18,8 @@ package org.activiti.services.connectors.conf;
 
 import java.util.function.Function;
 
-public interface ConnectorDestinationMappingStrategy extends Function<String, String> {
-
+public interface ConnectorDestinationMappingStrategy
+    extends Function<String, String> {
     @Override
     default String apply(String implementation) {
         return implementation;

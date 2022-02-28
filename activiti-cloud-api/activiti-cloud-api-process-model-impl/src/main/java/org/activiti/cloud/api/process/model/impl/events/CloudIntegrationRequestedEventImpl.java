@@ -20,15 +20,17 @@ import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 
-public class CloudIntegrationRequestedEventImpl extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents>
-        implements CloudIntegrationRequestedEvent {
+public class CloudIntegrationRequestedEventImpl
+    extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents>
+    implements CloudIntegrationRequestedEvent {
 
     private static final long serialVersionUID = 1L;
 
-    public CloudIntegrationRequestedEventImpl() {
-    }
+    public CloudIntegrationRequestedEventImpl() {}
 
-    public CloudIntegrationRequestedEventImpl(IntegrationContext integrationContext) {
+    public CloudIntegrationRequestedEventImpl(
+        IntegrationContext integrationContext
+    ) {
         super(integrationContext);
         if (getEntity() != null) {
             setEntityId(getEntity().getId());
@@ -36,7 +38,9 @@ public class CloudIntegrationRequestedEventImpl extends CloudRuntimeEventImpl<In
 
         setProcessInstanceId(integrationContext.getProcessInstanceId());
         setProcessDefinitionId(integrationContext.getProcessDefinitionId());
-        setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
+        setProcessDefinitionVersion(
+            integrationContext.getProcessDefinitionVersion()
+        );
         setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
         setBusinessKey(integrationContext.getBusinessKey());
     }

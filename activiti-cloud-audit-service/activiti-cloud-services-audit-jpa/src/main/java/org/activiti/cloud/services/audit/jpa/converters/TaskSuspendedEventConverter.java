@@ -25,26 +25,36 @@ import org.activiti.cloud.services.audit.jpa.events.TaskSuspendedEventEntity;
 
 public class TaskSuspendedEventConverter extends BaseEventToEntityConverter {
 
-    public TaskSuspendedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TaskSuspendedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name();
     }
 
     @Override
-    protected TaskSuspendedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new TaskSuspendedEventEntity((CloudTaskSuspendedEvent) cloudRuntimeEvent);
+    protected TaskSuspendedEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new TaskSuspendedEventEntity(
+            (CloudTaskSuspendedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         TaskSuspendedEventEntity taskSuspendedEventEntity = (TaskSuspendedEventEntity) auditEventEntity;
 
-        return new CloudTaskSuspendedEventImpl(taskSuspendedEventEntity.getEventId(),
-                                               taskSuspendedEventEntity.getTimestamp(),
-                                               taskSuspendedEventEntity.getTask());
+        return new CloudTaskSuspendedEventImpl(
+            taskSuspendedEventEntity.getEventId(),
+            taskSuspendedEventEntity.getTimestamp(),
+            taskSuspendedEventEntity.getTask()
+        );
     }
 }

@@ -19,13 +19,16 @@ import org.activiti.api.process.model.events.BPMNTimerExecutedEvent;
 import org.activiti.api.process.runtime.events.listener.BPMNElementEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 
-public class CloudTimerExecutedProducer implements BPMNElementEventListener<BPMNTimerExecutedEvent> {
+public class CloudTimerExecutedProducer
+    implements BPMNElementEventListener<BPMNTimerExecutedEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTimerExecutedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                      ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTimerExecutedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

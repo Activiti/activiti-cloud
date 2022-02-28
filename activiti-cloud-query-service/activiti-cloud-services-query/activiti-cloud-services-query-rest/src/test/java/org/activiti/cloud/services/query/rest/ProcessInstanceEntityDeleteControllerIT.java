@@ -58,11 +58,13 @@ import org.springframework.test.web.servlet.MockMvc;
 @TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @TestPropertySource("classpath:application-test.properties")
 @WebMvcTest(ProcessInstanceDeleteController.class)
-@Import({
+@Import(
+    {
         QueryRestWebMvcAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser("admin")
@@ -107,29 +109,39 @@ public class ProcessInstanceEntityDeleteControllerIT {
     }
 
     @Test
-    public void deleteProcessInstancesShouldReturnAllProcessInstancesAndDeleteThem() throws Exception{
-
+    public void deleteProcessInstancesShouldReturnAllProcessInstancesAndDeleteThem()
+        throws Exception {
         //given
-        List<ProcessInstanceEntity> processInstanceEntities = Collections.singletonList(buildDefaultProcessInstance());
+        List<ProcessInstanceEntity> processInstanceEntities = Collections.singletonList(
+            buildDefaultProcessInstance()
+        );
         given(processInstanceRepository.findAll(any(Predicate.class)))
-                .willReturn(processInstanceEntities);
+            .willReturn(processInstanceEntities);
 
         //when
-        mockMvc.perform(delete("/admin/v1/process-instances")
-                .with(csrf())
-                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                delete("/admin/v1/process-instances")
+                    .with(csrf())
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk());
 
         verify(processInstanceRepository).deleteAll(processInstanceEntities);
-
     }
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,
-                UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(),
-                ProcessInstance.ProcessInstanceStatus.RUNNING,
-                new Date());
+        return new ProcessInstanceEntity(
+            "My-app",
+            "My-app",
+            "1",
+            null,
+            null,
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(),
+            ProcessInstance.ProcessInstanceStatus.RUNNING,
+            new Date()
+        );
     }
 }

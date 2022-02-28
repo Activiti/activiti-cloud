@@ -35,6 +35,7 @@ class ModelPayloadValidatorTest {
 
     @Mock
     private Errors errors;
+
     @Mock
     private Model model;
 
@@ -58,29 +59,47 @@ class ModelPayloadValidatorTest {
 
         modelPayloadValidator.validatePayload(model, this.errors);
 
-        verify(errors).rejectValue("name", "field.required", "The model name is required");
+        verify(errors)
+            .rejectValue(
+                "name",
+                "field.required",
+                "The model name is required"
+            );
     }
 
     @Test
     public void should_returnFieldEmptyError_when_itIsAnEmptyString() {
         when(model.getName()).thenReturn("");
         modelPayloadValidator.validatePayload(model, this.errors);
-        verify(errors).rejectValue("name", "field.empty", "The model name cannot be empty");
+        verify(errors)
+            .rejectValue(
+                "name",
+                "field.empty",
+                "The model name cannot be empty"
+            );
     }
 
     @Test
     public void should_returnFieldEmptyError_when_itContainsOnlyBlankSpaces() {
         when(model.getName()).thenReturn("   ");
         modelPayloadValidator.validatePayload(model, this.errors);
-        verify(errors).rejectValue("name", "field.empty", "The model name cannot be empty");
+        verify(errors)
+            .rejectValue(
+                "name",
+                "field.empty",
+                "The model name cannot be empty"
+            );
     }
 
     @Test
     public void should_returnLengthGreaterError_when_textIsTooLong() {
         when(model.getName()).thenReturn("Abc 123 def 456 ghi 789 jkl");
         modelPayloadValidator.validatePayload(model, this.errors);
-        verify(errors).rejectValue("name", "length.greater", "The model name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'");
+        verify(errors)
+            .rejectValue(
+                "name",
+                "length.greater",
+                "The model name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'"
+            );
     }
-
-
 }

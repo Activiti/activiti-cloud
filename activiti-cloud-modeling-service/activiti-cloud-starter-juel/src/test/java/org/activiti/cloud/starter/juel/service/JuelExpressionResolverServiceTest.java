@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.juel.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.activiti.cloud.starter.juel.exception.JuelRuntimeException;
@@ -39,8 +40,15 @@ public class JuelExpressionResolverServiceTest {
     public void should_outputIsCorrect_when_resolveExpression() {
         final String expression = "${var1} + ${var2}";
         final Map<String, Object> variables = Map.of("var1", 10, "var2", 20);
-        final Map<String, Object> input = Map.of(EXPRESSION, expression, VARIABLES, variables);
-        final Map<String, Object> result = juelExpressionResolverService.resolveExpression(input);
+        final Map<String, Object> input = Map.of(
+            EXPRESSION,
+            expression,
+            VARIABLES,
+            variables
+        );
+        final Map<String, Object> result = juelExpressionResolverService.resolveExpression(
+            input
+        );
         assertThat(result.get(RESULT)).isNotNull();
         assertThat(result.get(RESULT)).isEqualTo(RESULT_TEST);
     }
@@ -49,8 +57,15 @@ public class JuelExpressionResolverServiceTest {
     public void should_throwsJuelRuntimeException_when_resolveInvalidExpression() {
         final String expression = "${var1} + ${var2}";
         final Map<String, Object> variables = new HashMap<>();
-        final Map<String, Object> input = Map.of(EXPRESSION, expression, VARIABLES, variables);
-        Throwable thrown = catchThrowable(() -> juelExpressionResolverService.resolveExpression(input));
+        final Map<String, Object> input = Map.of(
+            EXPRESSION,
+            expression,
+            VARIABLES,
+            variables
+        );
+        Throwable thrown = catchThrowable(() ->
+            juelExpressionResolverService.resolveExpression(input)
+        );
         assertThat(thrown).isInstanceOf(JuelRuntimeException.class);
     }
 }

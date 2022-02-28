@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.api.process.model.impl.conf;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
@@ -81,121 +89,243 @@ import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeploye
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.jsontype.NamedType;
-import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-
 @Configuration
 public class CloudProcessModelAutoConfiguration {
 
     //this bean will be automatically injected inside boot's ObjectMapper
     @Bean
     public Module customizeCloudProcessModelObjectMapper() {
-        SimpleModule module = new SimpleModule("mapProcessRuntimeEvents",
-                                               Version.unknownVersion());
-        module.registerSubtypes(new NamedType(CloudBPMNActivityStartedEventImpl.class,
-                                              BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNActivityCompletedEventImpl.class,
-                                              BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNActivityCancelledEventImpl.class,
-                                              BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNSignalReceivedEventImpl.class,
-                                              BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name()));
-        module.registerSubtypes(new NamedType(CloudProcessDeployedEventImpl.class,
-                                              ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name()));
-        module.registerSubtypes(new NamedType(CloudStartMessageDeployedEventImpl.class,
-                                              MessageDefinitionEvent.MessageDefinitionEvents.START_MESSAGE_DEPLOYED.name()));
-        module.registerSubtypes(new NamedType(CloudProcessStartedEventImpl.class,
-                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name()));
-        module.registerSubtypes(new NamedType(CloudProcessCreatedEventImpl.class,
-                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()));
-        module.registerSubtypes(new NamedType(CloudProcessUpdatedEventImpl.class,
-                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name()));
-        module.registerSubtypes(new NamedType(CloudProcessCompletedEventImpl.class,
-                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name()));
-        module.registerSubtypes(new NamedType(CloudProcessSuspendedEventImpl.class,
-                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name()));
-        module.registerSubtypes(new NamedType(CloudProcessResumedEventImpl.class,
-                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name()));
-        module.registerSubtypes(new NamedType(CloudProcessCancelledEventImpl.class,
-                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name()));
-        module.registerSubtypes(new NamedType(CloudSequenceFlowTakenEventImpl.class,
-                                              SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name()));
+        SimpleModule module = new SimpleModule(
+            "mapProcessRuntimeEvents",
+            Version.unknownVersion()
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNActivityStartedEventImpl.class,
+                BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNActivityCompletedEventImpl.class,
+                BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNActivityCancelledEventImpl.class,
+                BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNSignalReceivedEventImpl.class,
+                BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudProcessDeployedEventImpl.class,
+                ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudStartMessageDeployedEventImpl.class,
+                MessageDefinitionEvent.MessageDefinitionEvents.START_MESSAGE_DEPLOYED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudProcessStartedEventImpl.class,
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudProcessCreatedEventImpl.class,
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudProcessUpdatedEventImpl.class,
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudProcessCompletedEventImpl.class,
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudProcessSuspendedEventImpl.class,
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudProcessResumedEventImpl.class,
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudProcessCancelledEventImpl.class,
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudSequenceFlowTakenEventImpl.class,
+                SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name()
+            )
+        );
 
-        module.registerSubtypes(new NamedType(CloudIntegrationRequestedEventImpl.class,
-                                              IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED.name()));
-        module.registerSubtypes(new NamedType(CloudIntegrationResultReceivedEventImpl.class,
-                                              IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name()));
-        module.registerSubtypes(new NamedType(CloudIntegrationErrorReceivedEventImpl.class,
-                                              IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()));
+        module.registerSubtypes(
+            new NamedType(
+                CloudIntegrationRequestedEventImpl.class,
+                IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudIntegrationResultReceivedEventImpl.class,
+                IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudIntegrationErrorReceivedEventImpl.class,
+                IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()
+            )
+        );
 
-        module.registerSubtypes(new NamedType(CloudBPMNTimerFiredEventImpl.class,
-                                              BPMNTimerEvent.TimerEvents.TIMER_FIRED.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNTimerScheduledEventImpl.class,
-                                              BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNTimerExecutedEventImpl.class,
-                                              BPMNTimerEvent.TimerEvents.TIMER_EXECUTED.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNTimerFailedEventImpl.class,
-                                              BPMNTimerEvent.TimerEvents.TIMER_FAILED.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNTimerRetriesDecrementedEventImpl.class,
-                                              BPMNTimerEvent.TimerEvents.TIMER_RETRIES_DECREMENTED.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNTimerCancelledEventImpl.class,
-                                              BPMNTimerEvent.TimerEvents.TIMER_CANCELLED.name()));
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNTimerFiredEventImpl.class,
+                BPMNTimerEvent.TimerEvents.TIMER_FIRED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNTimerScheduledEventImpl.class,
+                BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNTimerExecutedEventImpl.class,
+                BPMNTimerEvent.TimerEvents.TIMER_EXECUTED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNTimerFailedEventImpl.class,
+                BPMNTimerEvent.TimerEvents.TIMER_FAILED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNTimerRetriesDecrementedEventImpl.class,
+                BPMNTimerEvent.TimerEvents.TIMER_RETRIES_DECREMENTED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNTimerCancelledEventImpl.class,
+                BPMNTimerEvent.TimerEvents.TIMER_CANCELLED.name()
+            )
+        );
 
-        module.registerSubtypes(new NamedType(CloudBPMNMessageReceivedEventImpl.class,
-                                              BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNMessageSentEventImpl.class,
-                                              BPMNMessageEvent.MessageEvents.MESSAGE_SENT.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNMessageWaitingEventImpl.class,
-                                              BPMNMessageEvent.MessageEvents.MESSAGE_WAITING.name()));
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNMessageReceivedEventImpl.class,
+                BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNMessageSentEventImpl.class,
+                BPMNMessageEvent.MessageEvents.MESSAGE_SENT.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNMessageWaitingEventImpl.class,
+                BPMNMessageEvent.MessageEvents.MESSAGE_WAITING.name()
+            )
+        );
 
-        module.registerSubtypes(new NamedType(CloudBPMNErrorReceivedEventImpl.class,
-                                              BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name()));
+        module.registerSubtypes(
+            new NamedType(
+                CloudBPMNErrorReceivedEventImpl.class,
+                BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name()
+            )
+        );
 
-        module.registerSubtypes(new NamedType(CloudMessageSubscriptionCancelledEventImpl.class,
-                                              MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name()));
-        module.registerSubtypes(new NamedType(CloudApplicationDeployedEventImpl.class,
-                                              ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name()));
+        module.registerSubtypes(
+            new NamedType(
+                CloudMessageSubscriptionCancelledEventImpl.class,
+                MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudApplicationDeployedEventImpl.class,
+                ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name()
+            )
+        );
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
             //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
             //once version 2.9.6 is related we can remove this @override method
             @Override
-            public JavaType resolveAbstractType(DeserializationConfig config,
-                                                BeanDescription typeDesc) {
-                return findTypeMapping(config,
-                                       typeDesc.getType());
+            public JavaType resolveAbstractType(
+                DeserializationConfig config,
+                BeanDescription typeDesc
+            ) {
+                return findTypeMapping(config, typeDesc.getType());
             }
         };
 
-        resolver.addMapping(IntegrationRequest.class, IntegrationRequestImpl.class);
-        resolver.addMapping(IntegrationResult.class, IntegrationResultImpl.class);
+        resolver.addMapping(
+            IntegrationRequest.class,
+            IntegrationRequestImpl.class
+        );
+        resolver.addMapping(
+            IntegrationResult.class,
+            IntegrationResultImpl.class
+        );
         resolver.addMapping(IntegrationError.class, IntegrationErrorImpl.class);
 
-        resolver.addMapping(CloudProcessDefinition.class,
-                            CloudProcessDefinitionImpl.class);
-        resolver.addMapping(CloudStartMessageDeploymentDefinition.class,
-                            CloudStartMessageDeploymentDefinitionImpl.class);
-        resolver.addMapping(CloudProcessInstance.class,
-                            CloudProcessInstanceImpl.class);
-        resolver.addMapping(CloudBPMNActivity.class,
-                            CloudBPMNActivityImpl.class);
-        resolver.addMapping(CloudIntegrationContext.class,
-                            CloudIntegrationContextImpl.class);
-        resolver.addMapping(CloudServiceTask.class,
-                            CloudServiceTaskImpl.class);
-        resolver.addMapping(Deployment.class,
-                            DeploymentImpl.class);
-        resolver.addMapping(CloudApplication.class,
-                            CloudApplicationImpl.class);
+        resolver.addMapping(
+            CloudProcessDefinition.class,
+            CloudProcessDefinitionImpl.class
+        );
+        resolver.addMapping(
+            CloudStartMessageDeploymentDefinition.class,
+            CloudStartMessageDeploymentDefinitionImpl.class
+        );
+        resolver.addMapping(
+            CloudProcessInstance.class,
+            CloudProcessInstanceImpl.class
+        );
+        resolver.addMapping(
+            CloudBPMNActivity.class,
+            CloudBPMNActivityImpl.class
+        );
+        resolver.addMapping(
+            CloudIntegrationContext.class,
+            CloudIntegrationContextImpl.class
+        );
+        resolver.addMapping(CloudServiceTask.class, CloudServiceTaskImpl.class);
+        resolver.addMapping(Deployment.class, DeploymentImpl.class);
+        resolver.addMapping(CloudApplication.class, CloudApplicationImpl.class);
 
         module.setAbstractTypes(resolver);
 
         return module;
     }
-
 }

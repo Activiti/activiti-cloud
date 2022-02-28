@@ -42,7 +42,9 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ConditionalOnWebApplication
 @AutoConfigureAfter(ServicesRestWebMvcAutoConfiguration.class)
-@Import({HomeControllerImpl.class,
+@Import(
+    {
+        HomeControllerImpl.class,
         ConnectorDefinitionControllerImpl.class,
         ProcessDefinitionAdminControllerImpl.class,
         ProcessDefinitionControllerImpl.class,
@@ -60,7 +62,7 @@ import org.springframework.context.annotation.Import;
         CandidateUserControllerImpl.class,
         CandidateUserAdminControllerImpl.class,
         CandidateGroupControllerImpl.class,
-        CandidateGroupAdminControllerImpl.class})
-public class ServicesRestControllersAutoConfiguration {
-
-}
+        CandidateGroupAdminControllerImpl.class,
+    }
+)
+public class ServicesRestControllersAutoConfiguration {}

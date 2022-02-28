@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.config.BindingProperties;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 import java.util.AbstractMap;
 import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.config.BindingProperties;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
@@ -37,17 +36,27 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
 
         //then
         assertThat(bindings)
-            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
-                                                                                        entry.getValue()
-                                                                                             .getDestination()))
-            .contains(entry("mealsConnector", "mealsConnector"),
-                      entry("rest.GET", "rest.GET"),
-                      entry("perfromBusinessTask", "perfromBusinessTask"),
-                      entry("anyImplWithoutHandler", "anyImplWithoutHandler"),
-                      entry("payment", "payment"),
-                      entry("Constants Connector.constantsActionName", "Constants Connector.constantsActionName"),
-                      entry("Variable Mapping Connector.variableMappingActionName", "Variable Mapping Connector.variableMappingActionName"),
-                      entry("miCloudConnector", "miCloudConnector"));
+            .extractingFromEntries(entry ->
+                new AbstractMap.SimpleEntry<String, String>(
+                    entry.getKey(),
+                    entry.getValue().getDestination()
+                )
+            )
+            .contains(
+                entry("mealsConnector", "mealsConnector"),
+                entry("rest.GET", "rest.GET"),
+                entry("perfromBusinessTask", "perfromBusinessTask"),
+                entry("anyImplWithoutHandler", "anyImplWithoutHandler"),
+                entry("payment", "payment"),
+                entry(
+                    "Constants Connector.constantsActionName",
+                    "Constants Connector.constantsActionName"
+                ),
+                entry(
+                    "Variable Mapping Connector.variableMappingActionName",
+                    "Variable Mapping Connector.variableMappingActionName"
+                ),
+                entry("miCloudConnector", "miCloudConnector")
+            );
     }
-
 }

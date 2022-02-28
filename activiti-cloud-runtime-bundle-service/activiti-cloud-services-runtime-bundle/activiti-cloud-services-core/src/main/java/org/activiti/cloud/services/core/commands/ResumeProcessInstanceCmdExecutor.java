@@ -20,18 +20,25 @@ import org.activiti.api.process.model.payloads.ResumeProcessPayload;
 import org.activiti.api.process.model.results.ProcessInstanceResult;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 
-public class ResumeProcessInstanceCmdExecutor extends AbstractCommandExecutor<ResumeProcessPayload> {
+public class ResumeProcessInstanceCmdExecutor
+    extends AbstractCommandExecutor<ResumeProcessPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;
 
-    public ResumeProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public ResumeProcessInstanceCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         this.processAdminRuntime = processAdminRuntime;
     }
 
     @Override
-    public ProcessInstanceResult execute(ResumeProcessPayload resumeProcessPayload) {
-        ProcessInstance processInstance = processAdminRuntime.resume(resumeProcessPayload);
-        
+    public ProcessInstanceResult execute(
+        ResumeProcessPayload resumeProcessPayload
+    ) {
+        ProcessInstance processInstance = processAdminRuntime.resume(
+            resumeProcessPayload
+        );
+
         return new ProcessInstanceResult(resumeProcessPayload, processInstance);
     }
 }

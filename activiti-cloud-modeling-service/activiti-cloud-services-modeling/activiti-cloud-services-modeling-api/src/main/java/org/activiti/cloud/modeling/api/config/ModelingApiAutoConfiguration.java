@@ -32,6 +32,4 @@ public class ModelingApiAutoConfiguration {
     public ProcessModelType processModelType() {
         return new ProcessModelType();
     }
-
-
 }

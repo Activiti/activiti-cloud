@@ -28,9 +28,7 @@ public class SyntacticModelValidationException extends ModelingException {
         super(cause);
     }
 
-    public SyntacticModelValidationException(String message,
-                                             Throwable cause) {
-        super(message,
-              cause);
+    public SyntacticModelValidationException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

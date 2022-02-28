@@ -17,7 +17,6 @@ package org.activiti.cloud.services.rest.controllers;
 
 import java.util.Date;
 import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 
@@ -31,7 +30,9 @@ public class ProcessInstanceSamples {
         processInstance.setInitiator("user");
         processInstance.setStartDate(new Date());
         processInstance.setBusinessKey("my business key");
-        processInstance.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        processInstance.setStatus(
+            ProcessInstance.ProcessInstanceStatus.RUNNING
+        );
         processInstance.setProcessDefinitionKey("my-proc-def");
 
         return processInstance;

@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.activiti.api.model.shared.EmptyResult;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -31,40 +30,46 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class CommandEndpoint<T extends Payload> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandEndpoint.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        CommandEndpoint.class
+    );
     private Map<String, CommandExecutor<T>> commandExecutors;
-    
+
     public CommandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
-        this.commandExecutors = cmdExecutors.stream()
-                                            .collect(Collectors.toMap(CommandExecutor::getHandledType,
-                                                                      Function.identity()));
+        this.commandExecutors =
+            cmdExecutors
+                .stream()
+                .collect(
+                    Collectors.toMap(
+                        CommandExecutor::getHandledType,
+                        Function.identity()
+                    )
+                );
     }
 
     @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
     @SendTo(ProcessEngineChannels.COMMAND_RESULTS)
     public <R> R execute(T payload) {
-        
-        SecurityContextHolder.getContext()
-                             .setAuthentication(new CommandEndpointAdminAuthentication());
+        SecurityContextHolder
+            .getContext()
+            .setAuthentication(new CommandEndpointAdminAuthentication());
         try {
             return (R) processCommand(payload);
-            
         } finally {
             SecurityContextHolder.clearContext();
         }
-
     }
 
     private Object processCommand(T payload) {
-
-        CommandExecutor<T> cmdExecutor = commandExecutors.get(payload.getClass().getName());
+        CommandExecutor<T> cmdExecutor = commandExecutors.get(
+            payload.getClass().getName()
+        );
         if (cmdExecutor != null) {
             return cmdExecutor.execute(payload);
-            
         } else {
             LOGGER.warn(">>> No Command Found for type: " + payload.getClass());
         }
-        
+
         return new EmptyResult();
     }
 }

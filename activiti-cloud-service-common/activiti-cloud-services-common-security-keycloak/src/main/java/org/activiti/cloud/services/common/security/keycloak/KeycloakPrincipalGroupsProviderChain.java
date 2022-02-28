@@ -15,32 +15,37 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
-import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
-import org.springframework.lang.NonNull;
-
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
+import org.springframework.lang.NonNull;
 
-public class KeycloakPrincipalGroupsProviderChain implements PrincipalGroupsProvider {
-    
+public class KeycloakPrincipalGroupsProviderChain
+    implements PrincipalGroupsProvider {
+
     private final List<PrincipalGroupsProvider> providers;
-    
-    public KeycloakPrincipalGroupsProviderChain(@NonNull List<PrincipalGroupsProvider> providers) {
+
+    public KeycloakPrincipalGroupsProviderChain(
+        @NonNull List<PrincipalGroupsProvider> providers
+    ) {
         this.providers = Collections.unmodifiableList(providers);
     }
 
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
-        return providers.stream()
-                        .map(provider -> provider.getGroups(principal))
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElseThrow(this::securityException);
+        return providers
+            .stream()
+            .map(provider -> provider.getGroups(principal))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElseThrow(this::securityException);
     }
 
     protected SecurityException securityException() {
-        return new SecurityException("Invalid principal security access token groups");
+        return new SecurityException(
+            "Invalid principal security access token groups"
+        );
     }
 }

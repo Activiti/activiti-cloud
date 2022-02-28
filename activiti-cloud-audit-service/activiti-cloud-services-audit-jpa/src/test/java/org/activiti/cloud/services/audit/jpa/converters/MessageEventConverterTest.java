@@ -35,9 +35,15 @@ import org.junit.jupiter.api.Test;
 
 public class MessageEventConverterTest {
 
-    private MessageSentEventConverter messageSentEventComverter = new MessageSentEventConverter(new EventContextInfoAppender());
-    private MessageWaitingEventConverter messageWaitingEventConverter = new MessageWaitingEventConverter(new EventContextInfoAppender());
-    private MessageReceivedEventConverter messageReceivedEventConverter = new MessageReceivedEventConverter(new EventContextInfoAppender());
+    private MessageSentEventConverter messageSentEventComverter = new MessageSentEventConverter(
+        new EventContextInfoAppender()
+    );
+    private MessageWaitingEventConverter messageWaitingEventConverter = new MessageWaitingEventConverter(
+        new EventContextInfoAppender()
+    );
+    private MessageReceivedEventConverter messageReceivedEventConverter = new MessageReceivedEventConverter(
+        new EventContextInfoAppender()
+    );
 
     @Test
     public void checkConvertToEntityMessageSentEvent() {
@@ -45,7 +51,9 @@ public class MessageEventConverterTest {
         CloudBPMNMessageSentEventImpl event = createMessageSentEvent();
 
         //when
-        MessageSentAuditEventEntity auditEventEntity = (MessageSentAuditEventEntity) messageSentEventComverter.convertToEntity(event);
+        MessageSentAuditEventEntity auditEventEntity = (MessageSentAuditEventEntity) messageSentEventComverter.convertToEntity(
+            event
+        );
 
         //then
         assertThatIsEqualTo(auditEventEntity, event);
@@ -57,7 +65,9 @@ public class MessageEventConverterTest {
         CloudBPMNMessageWaitingEventImpl event = createMessageWaitingEvent();
 
         //when
-        MessageWaitingAuditEventEntity auditEventEntity = (MessageWaitingAuditEventEntity) messageWaitingEventConverter.convertToEntity(event);
+        MessageWaitingAuditEventEntity auditEventEntity = (MessageWaitingAuditEventEntity) messageWaitingEventConverter.convertToEntity(
+            event
+        );
 
         //then
         assertThatIsEqualTo(auditEventEntity, event);
@@ -69,7 +79,9 @@ public class MessageEventConverterTest {
         CloudBPMNMessageReceivedEventImpl event = createMessageReceivedEvent();
 
         //when
-        MessageAuditEventEntity auditEventEntity = (MessageReceivedAuditEventEntity) messageReceivedEventConverter.convertToEntity(event);
+        MessageAuditEventEntity auditEventEntity = (MessageReceivedAuditEventEntity) messageReceivedEventConverter.convertToEntity(
+            event
+        );
 
         //then
         assertThatIsEqualTo(auditEventEntity, event);
@@ -78,10 +90,14 @@ public class MessageEventConverterTest {
     @Test
     public void checkConvertToAPIMessageSentEvent() {
         //given
-        MessageSentAuditEventEntity auditEventEntity = (MessageSentAuditEventEntity) messageSentEventComverter.convertToEntity(createMessageSentEvent());
+        MessageSentAuditEventEntity auditEventEntity = (MessageSentAuditEventEntity) messageSentEventComverter.convertToEntity(
+            createMessageSentEvent()
+        );
 
         //when
-        CloudBPMNMessageSentEventImpl cloudEvent = (CloudBPMNMessageSentEventImpl) messageSentEventComverter.convertToAPI(auditEventEntity);
+        CloudBPMNMessageSentEventImpl cloudEvent = (CloudBPMNMessageSentEventImpl) messageSentEventComverter.convertToAPI(
+            auditEventEntity
+        );
 
         assertThatIsEqualTo(auditEventEntity, cloudEvent);
     }
@@ -89,10 +105,14 @@ public class MessageEventConverterTest {
     @Test
     public void checkConvertToAPIMessageWaitingEvent() {
         //given
-        MessageWaitingAuditEventEntity auditEventEntity = (MessageWaitingAuditEventEntity) messageWaitingEventConverter.convertToEntity(createMessageWaitingEvent());
+        MessageWaitingAuditEventEntity auditEventEntity = (MessageWaitingAuditEventEntity) messageWaitingEventConverter.convertToEntity(
+            createMessageWaitingEvent()
+        );
 
         //when
-        CloudBPMNMessageWaitingEventImpl cloudEvent = (CloudBPMNMessageWaitingEventImpl) messageWaitingEventConverter.convertToAPI(auditEventEntity);
+        CloudBPMNMessageWaitingEventImpl cloudEvent = (CloudBPMNMessageWaitingEventImpl) messageWaitingEventConverter.convertToAPI(
+            auditEventEntity
+        );
 
         assertThatIsEqualTo(auditEventEntity, cloudEvent);
     }
@@ -100,10 +120,14 @@ public class MessageEventConverterTest {
     @Test
     public void checkConvertToAPIMessageReceivedEvent() {
         //given
-        MessageReceivedAuditEventEntity auditEventEntity = (MessageReceivedAuditEventEntity) messageReceivedEventConverter.convertToEntity(createMessageReceivedEvent());
+        MessageReceivedAuditEventEntity auditEventEntity = (MessageReceivedAuditEventEntity) messageReceivedEventConverter.convertToEntity(
+            createMessageReceivedEvent()
+        );
 
         //when
-        CloudBPMNMessageReceivedEventImpl cloudEvent = (CloudBPMNMessageReceivedEventImpl) messageReceivedEventConverter.convertToAPI(auditEventEntity);
+        CloudBPMNMessageReceivedEventImpl cloudEvent = (CloudBPMNMessageReceivedEventImpl) messageReceivedEventConverter.convertToAPI(
+            auditEventEntity
+        );
 
         assertThatIsEqualTo(auditEventEntity, cloudEvent);
     }
@@ -114,11 +138,13 @@ public class MessageEventConverterTest {
 
         BPMNMessageImpl message = createBPMNMessage(processInstance);
 
-        CloudBPMNMessageSentEventImpl event = new CloudBPMNMessageSentEventImpl("eventId",
-                                                                                System.currentTimeMillis(),
-                                                                                message,
-                                                                                message.getProcessDefinitionId(),
-                                                                                message.getProcessInstanceId());
+        CloudBPMNMessageSentEventImpl event = new CloudBPMNMessageSentEventImpl(
+            "eventId",
+            System.currentTimeMillis(),
+            message,
+            message.getProcessDefinitionId(),
+            message.getProcessInstanceId()
+        );
         appendEventInfo(event, processInstance);
 
         return event;
@@ -131,11 +157,13 @@ public class MessageEventConverterTest {
 
         BPMNMessageImpl message = createBPMNMessage(processInstance);
 
-        CloudBPMNMessageWaitingEventImpl event = new CloudBPMNMessageWaitingEventImpl("eventId",
-                                                                                      System.currentTimeMillis(),
-                                                                                      message,
-                                                                                      message.getProcessDefinitionId(),
-                                                                                      message.getProcessInstanceId());
+        CloudBPMNMessageWaitingEventImpl event = new CloudBPMNMessageWaitingEventImpl(
+            "eventId",
+            System.currentTimeMillis(),
+            message,
+            message.getProcessDefinitionId(),
+            message.getProcessInstanceId()
+        );
         appendEventInfo(event, processInstance);
 
         return event;
@@ -148,11 +176,13 @@ public class MessageEventConverterTest {
 
         BPMNMessageImpl message = createBPMNMessage(processInstance);
 
-        CloudBPMNMessageReceivedEventImpl event = new CloudBPMNMessageReceivedEventImpl("eventId",
-                                                                                        System.currentTimeMillis(),
-                                                                                        message,
-                                                                                        message.getProcessDefinitionId(),
-                                                                                        message.getProcessInstanceId());
+        CloudBPMNMessageReceivedEventImpl event = new CloudBPMNMessageReceivedEventImpl(
+            "eventId",
+            System.currentTimeMillis(),
+            message,
+            message.getProcessDefinitionId(),
+            message.getProcessInstanceId()
+        );
         appendEventInfo(event, processInstance);
 
         return event;
@@ -169,49 +199,68 @@ public class MessageEventConverterTest {
         return processInstance;
     }
 
-    private BPMNMessageImpl createBPMNMessage(ProcessInstanceImpl processInstance) {
+    private BPMNMessageImpl createBPMNMessage(
+        ProcessInstanceImpl processInstance
+    ) {
         BPMNMessageImpl message = new BPMNMessageImpl("entityId");
-        message.setProcessDefinitionId(processInstance.getProcessDefinitionId());
+        message.setProcessDefinitionId(
+            processInstance.getProcessDefinitionId()
+        );
         message.setProcessInstanceId(processInstance.getId());
         message.setMessagePayload(createMessagePayload());
         return message;
     }
 
     private MessageEventPayload createMessagePayload() {
-        MessageEventPayload messagePayload = MessagePayloadBuilder.event("messageName")
-                                                                  .withBusinessKey("businessId")
-                                                                  .withCorrelationKey("correlationId")
-                                                                  .withVariable("name", "value")
-                                                                  .build();
+        MessageEventPayload messagePayload = MessagePayloadBuilder
+            .event("messageName")
+            .withBusinessKey("businessId")
+            .withCorrelationKey("correlationId")
+            .withVariable("name", "value")
+            .build();
 
         return messagePayload;
     }
 
-    private void appendEventInfo(CloudBPMNMessageEventImpl event, ProcessInstance processInstance) {
+    private void appendEventInfo(
+        CloudBPMNMessageEventImpl event,
+        ProcessInstance processInstance
+    ) {
         event.setEntityId("entityId");
         event.setProcessInstanceId(processInstance.getId());
         event.setProcessDefinitionId(processInstance.getProcessDefinitionId());
-        event.setProcessDefinitionKey(processInstance.getProcessDefinitionKey());
+        event.setProcessDefinitionKey(
+            processInstance.getProcessDefinitionKey()
+        );
         event.setBusinessKey(processInstance.getBusinessKey());
         event.setParentProcessInstanceId(processInstance.getParentId());
         event.setMessageId("message-id");
         event.setSequenceNumber(0);
-
     }
 
-    private void assertThatIsEqualTo(MessageAuditEventEntity auditEventEntity, CloudBPMNMessageEvent event) {
+    private void assertThatIsEqualTo(
+        MessageAuditEventEntity auditEventEntity,
+        CloudBPMNMessageEvent event
+    ) {
         assertThat(event).isNotNull();
         assertThat(auditEventEntity).isNotNull();
-        assertThat(auditEventEntity.getEntityId()).isEqualTo(event.getEntityId());
-        assertThat(auditEventEntity.getProcessInstanceId()).isEqualTo(event.getProcessInstanceId());
-        assertThat(auditEventEntity.getProcessDefinitionId()).isEqualTo(event.getProcessDefinitionId());
-        assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(event.getProcessDefinitionKey());
-        assertThat(auditEventEntity.getBusinessKey()).isEqualTo(event.getBusinessKey());
-        assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(event.getParentProcessInstanceId());
-        assertThat(auditEventEntity.getMessage().getProcessInstanceId()).isEqualTo(event.getEntity()
-                                                                                        .getProcessInstanceId());
-        assertThat(auditEventEntity.getMessage().getProcessDefinitionId()).isEqualTo(event.getEntity()
-                                                                                          .getProcessDefinitionId());
-        assertThat(auditEventEntity.getMessage().getMessagePayload()).isEqualTo(event.getEntity().getMessagePayload());
+        assertThat(auditEventEntity.getEntityId())
+            .isEqualTo(event.getEntityId());
+        assertThat(auditEventEntity.getProcessInstanceId())
+            .isEqualTo(event.getProcessInstanceId());
+        assertThat(auditEventEntity.getProcessDefinitionId())
+            .isEqualTo(event.getProcessDefinitionId());
+        assertThat(auditEventEntity.getProcessDefinitionKey())
+            .isEqualTo(event.getProcessDefinitionKey());
+        assertThat(auditEventEntity.getBusinessKey())
+            .isEqualTo(event.getBusinessKey());
+        assertThat(auditEventEntity.getParentProcessInstanceId())
+            .isEqualTo(event.getParentProcessInstanceId());
+        assertThat(auditEventEntity.getMessage().getProcessInstanceId())
+            .isEqualTo(event.getEntity().getProcessInstanceId());
+        assertThat(auditEventEntity.getMessage().getProcessDefinitionId())
+            .isEqualTo(event.getEntity().getProcessDefinitionId());
+        assertThat(auditEventEntity.getMessage().getMessagePayload())
+            .isEqualTo(event.getEntity().getMessagePayload());
     }
 }

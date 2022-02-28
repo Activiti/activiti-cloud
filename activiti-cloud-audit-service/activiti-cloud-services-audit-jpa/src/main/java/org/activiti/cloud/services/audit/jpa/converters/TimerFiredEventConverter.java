@@ -25,7 +25,9 @@ import org.activiti.cloud.services.audit.jpa.events.TimerFiredAuditEventEntity;
 
 public class TimerFiredEventConverter extends BaseEventToEntityConverter {
 
-    public TimerFiredEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TimerFiredEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -35,18 +37,26 @@ public class TimerFiredEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected TimerFiredAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new TimerFiredAuditEventEntity((CloudBPMNTimerFiredEvent) cloudRuntimeEvent);
+    protected TimerFiredAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new TimerFiredAuditEventEntity(
+            (CloudBPMNTimerFiredEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         TimerFiredAuditEventEntity timerEventEntity = (TimerFiredAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNTimerFiredEventImpl(timerEventEntity.getEventId(),
-                                                timerEventEntity.getTimestamp(),
-                                                timerEventEntity.getTimer(),
-                                                timerEventEntity.getProcessDefinitionId(),
-                                                timerEventEntity.getProcessInstanceId());
+        return new CloudBPMNTimerFiredEventImpl(
+            timerEventEntity.getEventId(),
+            timerEventEntity.getTimestamp(),
+            timerEventEntity.getTimer(),
+            timerEventEntity.getProcessDefinitionId(),
+            timerEventEntity.getProcessInstanceId()
+        );
     }
 }

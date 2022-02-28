@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.hateoas.IanaLinkRelations.SELF;
+
 import java.util.Optional;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -23,13 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.springframework.hateoas.IanaLinkRelations.SELF;
+import org.springframework.hateoas.Link;
 
 public class ProcessDefinitionRepresentationModelAssemblerTest {
 
@@ -48,11 +48,16 @@ public class ProcessDefinitionRepresentationModelAssemblerTest {
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId("my-identifier");
-        given(converter.from(processDefinition)).willReturn(new CloudProcessDefinitionImpl(processDefinition));
+        given(converter.from(processDefinition))
+            .willReturn(new CloudProcessDefinitionImpl(processDefinition));
 
-        EntityModel<CloudProcessDefinition> processDefinitionResource = representationModelAssembler.toModel(processDefinition);
+        EntityModel<CloudProcessDefinition> processDefinitionResource = representationModelAssembler.toModel(
+            processDefinition
+        );
 
-        Optional<Link> selfResourceLink = processDefinitionResource.getLink(SELF);
+        Optional<Link> selfResourceLink = processDefinitionResource.getLink(
+            SELF
+        );
 
         assertThat(selfResourceLink).isPresent();
         assertThat(selfResourceLink.get().getHref()).contains("my-identifier");

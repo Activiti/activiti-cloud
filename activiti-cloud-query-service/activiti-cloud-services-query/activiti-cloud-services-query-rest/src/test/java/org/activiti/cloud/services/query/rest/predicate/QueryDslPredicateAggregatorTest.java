@@ -32,22 +32,31 @@ public class QueryDslPredicateAggregatorTest {
     public void should_addPredicatesFromAllFiltersToInitialPredicate() {
         //given
         Predicate initialPredicate = mock(Predicate.class);
-        QueryDslPredicateFilter firstFilter = mock(QueryDslPredicateFilter.class);
+        QueryDslPredicateFilter firstFilter = mock(
+            QueryDslPredicateFilter.class
+        );
 
         Predicate initialPredicatePlusFirstFilter = mock(Predicate.class);
-        given(firstFilter.extend(initialPredicate)).willReturn(initialPredicatePlusFirstFilter);
+        given(firstFilter.extend(initialPredicate))
+            .willReturn(initialPredicatePlusFirstFilter);
 
-        QueryDslPredicateFilter secondFilter = mock(QueryDslPredicateFilter.class);
-        Predicate initialPredicatePlusFirstAndSecondFilters = mock(Predicate.class);
+        QueryDslPredicateFilter secondFilter = mock(
+            QueryDslPredicateFilter.class
+        );
+        Predicate initialPredicatePlusFirstAndSecondFilters = mock(
+            Predicate.class
+        );
         given(secondFilter.extend(initialPredicatePlusFirstFilter))
             .willReturn(initialPredicatePlusFirstAndSecondFilters);
 
         //when
-        Predicate finalPredicate = predicateAggregator
-            .applyFilters(initialPredicate, Arrays.asList(firstFilter, secondFilter));
+        Predicate finalPredicate = predicateAggregator.applyFilters(
+            initialPredicate,
+            Arrays.asList(firstFilter, secondFilter)
+        );
 
         //then
-        assertThat(finalPredicate).isEqualTo(initialPredicatePlusFirstAndSecondFilters);
+        assertThat(finalPredicate)
+            .isEqualTo(initialPredicatePlusFirstAndSecondFilters);
     }
-
 }

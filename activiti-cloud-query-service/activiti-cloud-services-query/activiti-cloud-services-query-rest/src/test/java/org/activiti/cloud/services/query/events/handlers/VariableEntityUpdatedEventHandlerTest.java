@@ -22,8 +22,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
-import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.test.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,52 +50,61 @@ public class VariableEntityUpdatedEventHandlerTest {
     @Test
     public void handleShouldUseProcessVariableUpdateHandlerWhenNoTaskId() {
         //given
-        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(buildVariable(), "v0");
+        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(
+            buildVariable(),
+            "v0"
+        );
         event.setServiceName("runtime-bundle-a");
 
         //when
         handler.handle(event);
 
         //then
-        ArgumentCaptor<ProcessVariableEntity> captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
+        ArgumentCaptor<ProcessVariableEntity> captor = ArgumentCaptor.forClass(
+            ProcessVariableEntity.class
+        );
         verify(processVariableUpdateEventHandler).handle(captor.capture());
 
         ProcessVariableEntity variableEntity = captor.getValue();
-        Assertions.assertThat(variableEntity)
-                .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
-                .hasName("var")
-                .hasServiceName("runtime-bundle-a")
-                .hasValue("v1")
-                .hasType("string");
+        Assertions
+            .assertThat(variableEntity)
+            .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
+            .hasName("var")
+            .hasServiceName("runtime-bundle-a")
+            .hasValue("v1")
+            .hasType("string");
     }
 
     private static VariableInstanceImpl<String> buildVariable() {
-        return new VariableInstanceImpl<>("var",
-                                          "string",
-                                          "v1",
-                                          "10", null);
+        return new VariableInstanceImpl<>("var", "string", "v1", "10", null);
     }
 
     @Test
     public void handleShouldUseTaskVariableUpdateHandlerWhenTaskIdIsSet() {
         //given
-        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(buildVariableWithTaskId(), "v0");
+        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(
+            buildVariableWithTaskId(),
+            "v0"
+        );
         event.setServiceName("runtime-bundle-a");
 
         //when
         handler.handle(event);
 
         //then
-        ArgumentCaptor<TaskVariableEntity> captor = ArgumentCaptor.forClass(TaskVariableEntity.class);
+        ArgumentCaptor<TaskVariableEntity> captor = ArgumentCaptor.forClass(
+            TaskVariableEntity.class
+        );
         verify(taskVariableUpdatedEventHandler).handle(captor.capture());
 
         TaskVariableEntity variableEntity = captor.getValue();
-        Assertions.assertThat(variableEntity)
-                .hasTaskId("20")
-                .hasName("var")
-                .hasValue("v1")
-                .hasServiceName("runtime-bundle-a")
-                .hasType("string");
+        Assertions
+            .assertThat(variableEntity)
+            .hasTaskId("20")
+            .hasName("var")
+            .hasValue("v1")
+            .hasServiceName("runtime-bundle-a")
+            .hasType("string");
     }
 
     private static VariableInstanceImpl<String> buildVariableWithTaskId() {
@@ -108,6 +117,7 @@ public class VariableEntityUpdatedEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(VariableEvent.VariableEvents.VARIABLE_UPDATED.name());
+        assertThat(handledEvent)
+            .isEqualTo(VariableEvent.VariableEvents.VARIABLE_UPDATED.name());
     }
 }

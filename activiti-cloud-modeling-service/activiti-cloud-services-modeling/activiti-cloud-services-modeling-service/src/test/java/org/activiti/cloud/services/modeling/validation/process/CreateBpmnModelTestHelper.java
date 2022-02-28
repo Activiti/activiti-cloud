@@ -47,7 +47,9 @@ public class CreateBpmnModelTestHelper {
         return model;
     }
 
-    public static BpmnModel createOneServiceTaskTestProcess(String implementation) {
+    public static BpmnModel createOneServiceTaskTestProcess(
+        String implementation
+    ) {
         BpmnModel model = new BpmnModel();
         org.activiti.bpmn.model.Process process = new org.activiti.bpmn.model.Process();
         model.addProcess(process);

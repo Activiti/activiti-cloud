@@ -15,22 +15,20 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
+import java.security.Principal;
+import java.util.Optional;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.springframework.lang.NonNull;
 
-import java.security.Principal;
-import java.util.Optional;
-
 public interface KeycloakAccessTokenProvider {
-
     default Optional<AccessToken> accessToken(@NonNull Principal principal) {
-        return Optional.of(principal)
-                       .filter(KeycloakPrincipal.class::isInstance)
-                       .map(KeycloakPrincipal.class::cast)
-                       .map(KeycloakPrincipal::getKeycloakSecurityContext)
-                       .map(KeycloakSecurityContext::getToken);
+        return Optional
+            .of(principal)
+            .filter(KeycloakPrincipal.class::isInstance)
+            .map(KeycloakPrincipal.class::cast)
+            .map(KeycloakPrincipal::getKeycloakSecurityContext)
+            .map(KeycloakSecurityContext::getToken);
     }
-
 }

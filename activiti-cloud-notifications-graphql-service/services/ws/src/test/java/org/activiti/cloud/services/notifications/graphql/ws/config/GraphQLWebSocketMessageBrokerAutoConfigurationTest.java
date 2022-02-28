@@ -41,13 +41,10 @@ public class GraphQLWebSocketMessageBrokerAutoConfigurationTest {
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
-    static class GraphQLWebSocketMessageBrokerAutoConfigurationTestApplication {
-
-    }
+    static class GraphQLWebSocketMessageBrokerAutoConfigurationTestApplication {}
 
     @Test
     public void testContextLoads() {
         // success
     }
-
 }

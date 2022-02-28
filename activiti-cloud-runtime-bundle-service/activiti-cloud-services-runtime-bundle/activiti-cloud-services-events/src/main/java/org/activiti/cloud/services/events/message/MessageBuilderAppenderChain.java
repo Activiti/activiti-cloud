@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
@@ -35,38 +34,45 @@ public class MessageBuilderAppenderChain {
 
     // Noop routing key resolver that resolves routing key for message payload type header
     private RoutingKeyResolver<Map<String, Object>> routingKeyResolver = new DefaultRoutingKeyResolver();
-    
+
     public MessageBuilderAppenderChain() {
         // Silence is golden
     }
-    
+
     public <P> MessageBuilder<P> withPayload(P payload) {
         Assert.notNull(payload, "payload must not be null");
 
         // So we can access headers later
         MessageHeaderAccessor accessor = new MessageHeaderAccessor();
         accessor.setLeaveMutable(true);
-        
-        MessageBuilder<P> messageBuilder = MessageBuilder.withPayload(payload)
-                                                         .setHeaders(accessor);
-        // Let's resolve payload class name 
-        messageBuilder.setHeader(MESSAGE_PAYLOAD_TYPE, payload.getClass().getName());
-        
+
+        MessageBuilder<P> messageBuilder = MessageBuilder
+            .withPayload(payload)
+            .setHeaders(accessor);
+        // Let's resolve payload class name
+        messageBuilder.setHeader(
+            MESSAGE_PAYLOAD_TYPE,
+            payload.getClass().getName()
+        );
+
         for (MessageBuilderAppender appender : appenders) {
             appender.apply(messageBuilder);
         }
 
         // Let's resolve and set routingKey in the message headers if present
         resolveRoutingKey(accessor.getMessageHeaders())
-                .ifPresent(routingKey -> accessor.setHeader(ROUTING_KEY, routingKey));
+            .ifPresent(routingKey -> accessor.setHeader(ROUTING_KEY, routingKey)
+            );
 
         return messageBuilder;
     }
-    
-    protected Optional<String> resolveRoutingKey(MessageHeaders messageHeaders) {
+
+    protected Optional<String> resolveRoutingKey(
+        MessageHeaders messageHeaders
+    ) {
         return Optional.ofNullable(routingKeyResolver.resolve(messageHeaders));
     }
-    
+
     public MessageBuilderAppenderChain chain(MessageBuilderAppender filter) {
         Assert.notNull(filter, "filter must not be null");
 
@@ -75,16 +81,22 @@ public class MessageBuilderAppenderChain {
         return this;
     }
 
-    public MessageBuilderAppenderChain routingKeyResolver(RoutingKeyResolver<Map<String, Object>> routingKeyResolver) {
-        Assert.notNull(routingKeyResolver, "routingKeyResolver must not be null");
+    public MessageBuilderAppenderChain routingKeyResolver(
+        RoutingKeyResolver<Map<String, Object>> routingKeyResolver
+    ) {
+        Assert.notNull(
+            routingKeyResolver,
+            "routingKeyResolver must not be null"
+        );
 
         this.routingKeyResolver = routingKeyResolver;
 
         return this;
     }
-    
-    // Default implementation 
-    static class DefaultRoutingKeyResolver extends AbstractMessageHeadersRoutingKeyResolver {
+
+    // Default implementation
+    static class DefaultRoutingKeyResolver
+        extends AbstractMessageHeadersRoutingKeyResolver {
 
         private static final String EVENT_MESSAGE = "eventMessage";
 
@@ -97,8 +109,5 @@ public class MessageBuilderAppenderChain {
         public String getPrefix() {
             return EVENT_MESSAGE;
         }
-        
     }
-   
-    
 }

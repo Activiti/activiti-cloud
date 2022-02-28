@@ -17,14 +17,13 @@
 package org.activiti.cloud.common.liquibase;
 
 import javax.sql.DataSource;
-
+import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 
-import liquibase.integration.spring.SpringLiquibase;
-
-public abstract class SpringLiquibaseConfigurationSupport implements ResourceLoaderAware {
+public abstract class SpringLiquibaseConfigurationSupport
+    implements ResourceLoaderAware {
 
     private ResourceLoader resourceLoader;
 
@@ -33,7 +32,10 @@ public abstract class SpringLiquibaseConfigurationSupport implements ResourceLoa
         this.resourceLoader = resourceLoader;
     }
 
-    protected SpringLiquibase buildSpringLiquibase(DataSource dataSource, LiquibaseProperties properties) {
+    protected SpringLiquibase buildSpringLiquibase(
+        DataSource dataSource,
+        LiquibaseProperties properties
+    ) {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setResourceLoader(resourceLoader);
@@ -46,8 +48,12 @@ public abstract class SpringLiquibaseConfigurationSupport implements ResourceLoa
         liquibase.setLabels(properties.getLabels());
         liquibase.setChangeLogParameters(properties.getParameters());
         liquibase.setRollbackFile(properties.getRollbackFile());
-        liquibase.setDatabaseChangeLogTable(properties.getDatabaseChangeLogTable());
-        liquibase.setDatabaseChangeLogLockTable(properties.getDatabaseChangeLogLockTable());
+        liquibase.setDatabaseChangeLogTable(
+            properties.getDatabaseChangeLogTable()
+        );
+        liquibase.setDatabaseChangeLogLockTable(
+            properties.getDatabaseChangeLogLockTable()
+        );
         liquibase.setTestRollbackOnUpdate(properties.isTestRollbackOnUpdate());
         return liquibase;
     }

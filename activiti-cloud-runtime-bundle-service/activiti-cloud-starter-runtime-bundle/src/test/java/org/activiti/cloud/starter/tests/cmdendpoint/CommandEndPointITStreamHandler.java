@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.tests.cmdendpoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.activiti.api.model.shared.Result;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
@@ -35,8 +36,6 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @Profile(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @TestComponent
 @EnableBinding(MessageClientStream.class)
@@ -47,7 +46,9 @@ public class CommandEndPointITStreamHandler {
     private String processInstanceId;
 
     private AtomicBoolean startedProcessInstanceAck = new AtomicBoolean(false);
-    private AtomicBoolean suspendedProcessInstanceAck = new AtomicBoolean(false);
+    private AtomicBoolean suspendedProcessInstanceAck = new AtomicBoolean(
+        false
+    );
     private AtomicBoolean resumedProcessInstanceAck = new AtomicBoolean(false);
     private AtomicBoolean claimedTaskAck = new AtomicBoolean(false);
     private AtomicBoolean releasedTaskAck = new AtomicBoolean(false);
@@ -59,11 +60,14 @@ public class CommandEndPointITStreamHandler {
     private AtomicBoolean updateTaskVariableAck = new AtomicBoolean(false);
 
     @StreamListener(MessageClientStream.MY_CMD_RESULTS)
-    public <T extends Result> void consumeStartProcessInstanceResults(Result result) {
+    public <T extends Result> void consumeStartProcessInstanceResults(
+        Result result
+    ) {
         if (result.getPayload() instanceof StartProcessPayload) {
             assertThat(result.getEntity()).isNotNull();
             assertThat(result.getEntity()).isInstanceOf(ProcessInstance.class);
-            assertThat(((ProcessInstance) result.getEntity()).getId()).isNotEmpty();
+            assertThat(((ProcessInstance) result.getEntity()).getId())
+                .isNotEmpty();
             processInstanceId = ((ProcessInstance) result.getEntity()).getId();
             startedProcessInstanceAck.set(true);
         } else if (result.getPayload() instanceof SuspendProcessPayload) {
@@ -84,7 +88,9 @@ public class CommandEndPointITStreamHandler {
             updateTaskVariableAck.set(true);
         } else if (result.getPayload() instanceof SetProcessVariablesPayload) {
             setProcessVariablesAck.set(true);
-        } else if (result.getPayload() instanceof RemoveProcessVariablesPayload) {
+        } else if (
+            result.getPayload() instanceof RemoveProcessVariablesPayload
+        ) {
             removeProcessVariablesAck.set(true);
         }
     }
@@ -128,7 +134,7 @@ public class CommandEndPointITStreamHandler {
     public AtomicBoolean getCreateTaskVariableAck() {
         return createTaskVariableAck;
     }
-    
+
     public AtomicBoolean getUpdateTaskVariableAck() {
         return updateTaskVariableAck;
     }

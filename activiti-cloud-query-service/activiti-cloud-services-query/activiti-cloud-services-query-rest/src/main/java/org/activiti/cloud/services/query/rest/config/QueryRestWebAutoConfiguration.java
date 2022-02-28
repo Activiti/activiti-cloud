@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.query.rest.config;
 
+import java.util.List;
 import org.activiti.cloud.services.query.rest.VariableSearchArgumentResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -23,19 +24,21 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.List;
-
 @Configuration
 public class QueryRestWebAutoConfiguration implements WebMvcConfigurer {
 
     private ConversionService conversionService;
 
-    public QueryRestWebAutoConfiguration(@Lazy ConversionService mvcConversionService) {
+    public QueryRestWebAutoConfiguration(
+        @Lazy ConversionService mvcConversionService
+    ) {
         this.conversionService = mvcConversionService;
     }
 
     @Override
-    public void addArgumentResolvers(@Lazy List<HandlerMethodArgumentResolver> resolvers) {
+    public void addArgumentResolvers(
+        @Lazy List<HandlerMethodArgumentResolver> resolvers
+    ) {
         resolvers.add(new VariableSearchArgumentResolver(conversionService));
     }
 }

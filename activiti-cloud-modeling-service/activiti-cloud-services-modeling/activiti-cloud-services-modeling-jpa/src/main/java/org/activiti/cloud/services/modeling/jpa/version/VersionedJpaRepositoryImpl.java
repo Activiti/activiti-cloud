@@ -23,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Implementation for {@link VersionedJpaRepository}
  */
-public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Serializable, V extends VersionEntity>
+public class VersionedJpaRepositoryImpl<
+    T extends VersionedEntity, K extends Serializable, V extends VersionEntity
+>
     extends SimpleJpaRepository<T, K>
     implements VersionedJpaRepository<T, K, V> {
 
@@ -36,14 +38,14 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
      * @param versionClass   the class of the version entity.
      * @param entityManager  must not be {@literal null}.
      */
-    public VersionedJpaRepositoryImpl(final Class<T> versionedClass,
+    public VersionedJpaRepositoryImpl(
+        final Class<T> versionedClass,
         final Class<V> versionClass,
-        final EntityManager entityManager) {
-        super(versionedClass,
-            entityManager);
-
-        this.versionGenerationHelper = new VersionGenerationHelper<T, V>(versionedClass,
-            versionClass);
+        final EntityManager entityManager
+    ) {
+        super(versionedClass, entityManager);
+        this.versionGenerationHelper =
+            new VersionGenerationHelper<T, V>(versionedClass, versionClass);
     }
 
     /**
@@ -57,11 +59,8 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
     @Override
     @Transactional
     public <S extends T> S save(S versionedEntity) {
-
         this.versionGenerationHelper.generateNextVersion(versionedEntity);
 
         return super.save(versionedEntity);
     }
-
-
 }

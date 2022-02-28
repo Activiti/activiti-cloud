@@ -21,7 +21,6 @@ import org.activiti.cloud.services.auditable.Auditable;
  * Interface for projects
  */
 public interface Project<U> extends Auditable<U> {
-
     String getId();
 
     void setId(String id);

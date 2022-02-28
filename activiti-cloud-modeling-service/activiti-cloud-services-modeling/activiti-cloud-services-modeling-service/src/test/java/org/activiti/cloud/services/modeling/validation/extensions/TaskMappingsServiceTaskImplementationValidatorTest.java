@@ -19,6 +19,7 @@ import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.when;
+
 import java.util.List;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
@@ -39,10 +40,13 @@ class TaskMappingsServiceTaskImplementationValidatorTest {
 
     @Mock
     private ValidationContext validationContext;
+
     @Mock
     private ConnectorModelType connectorModelType;
+
     @Mock
     private ConnectorModelContentConverter connectorModelContentConverter;
+
     @Mock
     private MappingModel mappingModel;
 
@@ -53,7 +57,11 @@ class TaskMappingsServiceTaskImplementationValidatorTest {
 
     @BeforeEach
     void setUp() {
-        validator = new TaskMappingsServiceTaskImplementationValidator(connectorModelType, connectorModelContentConverter);
+        validator =
+            new TaskMappingsServiceTaskImplementationValidator(
+                connectorModelType,
+                connectorModelContentConverter
+            );
     }
 
     @Test
@@ -63,7 +71,16 @@ class TaskMappingsServiceTaskImplementationValidatorTest {
 
         when(mappingModel.getFlowNode()).thenReturn(serviceTask);
 
-        assertThat(validator.validateTaskMappings(List.of(mappingModel), null, validationContext).count()).isEqualTo(0);
+        assertThat(
+            validator
+                .validateTaskMappings(
+                    List.of(mappingModel),
+                    null,
+                    validationContext
+                )
+                .count()
+        )
+            .isEqualTo(0);
     }
 
     @Test
@@ -71,21 +88,45 @@ class TaskMappingsServiceTaskImplementationValidatorTest {
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setId(ID_TEXT);
         serviceTask.setImplementation(CUSTOM_ACTION);
-        ServiceTaskActionType actionType = ServiceTaskActionType.fromValue(INPUTS_TEXT);
+        ServiceTaskActionType actionType = ServiceTaskActionType.fromValue(
+            INPUTS_TEXT
+        );
 
         when(mappingModel.getProcessId()).thenReturn(PROCESS_ID);
         when(mappingModel.getFlowNode()).thenReturn(serviceTask);
         when(mappingModel.getAction()).thenReturn(actionType);
 
-        assertThat(validator.validateTaskMappings(List.of(mappingModel), null, validationContext))
-                .extracting(ModelValidationError::getProblem,
-                        ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName,
-                        ModelValidationError::getReferenceId)
-                .contains(
-                        tuple(format(TaskMappingsServiceTaskImplementationValidator.UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_PROBLEM, INPUTS_TEXT, ID_TEXT,
-                                        CUSTOM_ACTION),
-                                format(TaskMappingsServiceTaskImplementationValidator.UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_DESCRIPTION, PROCESS_ID,
-                                        INPUTS_TEXT, ID_TEXT, CUSTOM_ACTION), null, null));
+        assertThat(
+            validator.validateTaskMappings(
+                List.of(mappingModel),
+                null,
+                validationContext
+            )
+        )
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName,
+                ModelValidationError::getReferenceId
+            )
+            .contains(
+                tuple(
+                    format(
+                        TaskMappingsServiceTaskImplementationValidator.UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_PROBLEM,
+                        INPUTS_TEXT,
+                        ID_TEXT,
+                        CUSTOM_ACTION
+                    ),
+                    format(
+                        TaskMappingsServiceTaskImplementationValidator.UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_DESCRIPTION,
+                        PROCESS_ID,
+                        INPUTS_TEXT,
+                        ID_TEXT,
+                        CUSTOM_ACTION
+                    ),
+                    null,
+                    null
+                )
+            );
     }
 }

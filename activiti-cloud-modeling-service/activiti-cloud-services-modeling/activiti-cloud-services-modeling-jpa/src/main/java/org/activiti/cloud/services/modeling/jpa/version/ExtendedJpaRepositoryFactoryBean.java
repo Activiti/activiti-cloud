@@ -17,7 +17,6 @@ package org.activiti.cloud.services.modeling.jpa.version;
 
 import java.io.Serializable;
 import javax.persistence.EntityManager;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
@@ -32,14 +31,21 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
  * @param <K> the entity id type
  * @param <V> the entity version type
  */
-public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, K extends Serializable, V extends VersionEntity>
-        extends JpaRepositoryFactoryBean<R, T, K> {
+public class ExtendedJpaRepositoryFactoryBean<
+    R extends JpaRepository<T, K>,
+    T,
+    K extends Serializable,
+    V extends VersionEntity
+>
+    extends JpaRepositoryFactoryBean<R, T, K> {
 
     /**
      * Creates a new {@link JpaRepositoryFactoryBean} for the given repository interface.
      * @param repositoryInterface must not be {@literal null}.
      */
-    public ExtendedJpaRepositoryFactoryBean(Class<? extends R> repositoryInterface) {
+    public ExtendedJpaRepositoryFactoryBean(
+        Class<? extends R> repositoryInterface
+    ) {
         super(repositoryInterface);
     }
 
@@ -49,7 +55,9 @@ public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, 
      * @return the repository factory
      */
     @Override
-    protected RepositoryFactorySupport createRepositoryFactory(EntityManager entityManager) {
+    protected RepositoryFactorySupport createRepositoryFactory(
+        EntityManager entityManager
+    ) {
         return new ExtendedJpaRepositoryFactory(entityManager);
     }
 
@@ -59,8 +67,12 @@ public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, 
      * @param <ID> the entity id type
      * @param <V> the entity version type
      */
-    private static class ExtendedJpaRepositoryFactory<T extends VersionedEntity, ID extends Serializable, V extends VersionEntity>
-            extends JpaRepositoryFactory {
+    private static class ExtendedJpaRepositoryFactory<
+        T extends VersionedEntity,
+        ID extends Serializable,
+        V extends VersionEntity
+    >
+        extends JpaRepositoryFactory {
 
         public ExtendedJpaRepositoryFactory(EntityManager em) {
             super(em);
@@ -72,15 +84,20 @@ public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, 
          * @return the repository implementation
          */
         @Override
-        protected JpaRepositoryImplementation getTargetRepository(final RepositoryInformation information,
-                                                                  final EntityManager entityManager) {
-            if (isVersionedJpaRepository(information.getRepositoryInterface())) {
-                return getTargetVersionedJpaRepository(information.getRepositoryInterface(),
-                                                       entityManager);
+        protected JpaRepositoryImplementation getTargetRepository(
+            final RepositoryInformation information,
+            final EntityManager entityManager
+        ) {
+            if (
+                isVersionedJpaRepository(information.getRepositoryInterface())
+            ) {
+                return getTargetVersionedJpaRepository(
+                    information.getRepositoryInterface(),
+                    entityManager
+                );
             }
 
-            return super.getTargetRepository(information,
-                                             entityManager);
+            return super.getTargetRepository(information, entityManager);
         }
 
         /**
@@ -88,8 +105,12 @@ public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, 
          * @param repositoryInterface the repository interface
          * @return true if the given repository interface is a version one
          */
-        protected boolean isVersionedJpaRepository(Class<?> repositoryInterface) {
-            return VersionedJpaRepository.class.isAssignableFrom(repositoryInterface);
+        protected boolean isVersionedJpaRepository(
+            Class<?> repositoryInterface
+        ) {
+            return VersionedJpaRepository.class.isAssignableFrom(
+                    repositoryInterface
+                );
         }
 
         /**
@@ -98,15 +119,21 @@ public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, 
          * @param entityManager the entity manager
          * @return the repository implementation
          */
-        protected VersionedJpaRepositoryImpl getTargetVersionedJpaRepository(Class<?> repositoryInterface,
-                                                                             EntityManager entityManager) {
-            VersionedRepositoryMetadata metadata = new VersionedRepositoryMetadata(repositoryInterface);
+        protected VersionedJpaRepositoryImpl getTargetVersionedJpaRepository(
+            Class<?> repositoryInterface,
+            EntityManager entityManager
+        ) {
+            VersionedRepositoryMetadata metadata = new VersionedRepositoryMetadata(
+                repositoryInterface
+            );
 
             Class<T> versionedEntityType = (Class<T>) metadata.getDomainType();
             Class<V> versionEntityType = (Class<V>) metadata.getVersionEntityType();
-            return new VersionedJpaRepositoryImpl<T, ID, V>(versionedEntityType,
-                                                            versionEntityType,
-                                                            entityManager);
+            return new VersionedJpaRepositoryImpl<T, ID, V>(
+                versionedEntityType,
+                versionEntityType,
+                entityManager
+            );
         }
     }
 }

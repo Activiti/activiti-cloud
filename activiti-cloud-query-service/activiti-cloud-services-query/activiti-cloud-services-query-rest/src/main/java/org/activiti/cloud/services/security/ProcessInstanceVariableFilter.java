@@ -19,19 +19,26 @@ import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 
-public class ProcessInstanceVariableFilter implements ProcessDefinitionKeyBasedFilter {
+public class ProcessInstanceVariableFilter
+    implements ProcessDefinitionKeyBasedFilter {
 
     @Override
     public ProcessDefinitionRestrictionProperties getRestrictionProperties() {
-        QProcessInstanceEntity processInstance = QProcessVariableEntity.processVariableEntity.processInstance;
-        return new ProcessDefinitionRestrictionProperties(processInstance.serviceName,
-                                                          processInstance.serviceFullName,
-                                                          processInstance.processDefinitionKey);
+        QProcessInstanceEntity processInstance =
+            QProcessVariableEntity.processVariableEntity.processInstance;
+        return new ProcessDefinitionRestrictionProperties(
+            processInstance.serviceName,
+            processInstance.serviceFullName,
+            processInstance.processDefinitionKey
+        );
     }
 
     @Override
     public Predicate buildImpossiblePredicate() {
-        QProcessInstanceEntity qProcessInstanceEntity = QProcessVariableEntity.processVariableEntity.processInstance;
-        return qProcessInstanceEntity.id.eq("1").and(qProcessInstanceEntity.id.eq("2"));
+        QProcessInstanceEntity qProcessInstanceEntity =
+            QProcessVariableEntity.processVariableEntity.processInstance;
+        return qProcessInstanceEntity.id
+            .eq("1")
+            .and(qProcessInstanceEntity.id.eq("2"));
     }
 }

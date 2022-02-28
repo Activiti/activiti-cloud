@@ -15,9 +15,17 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import java.util.ArrayList;
 import java.util.List;
-
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,15 +35,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessEngineEventsAggregatorTest {
 
@@ -50,15 +49,16 @@ public class ProcessEngineEventsAggregatorTest {
     private CommandContext commandContext;
 
     @Captor
-    private ArgumentCaptor<List<CloudRuntimeEvent<?,?>>> eventsCaptor;
+    private ArgumentCaptor<List<CloudRuntimeEvent<?, ?>>> eventsCaptor;
 
     @Mock
-    private CloudRuntimeEvent<?,?> event;
+    private CloudRuntimeEvent<?, ?> event;
 
     @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
-        when(eventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
+        when(eventsAggregator.getCurrentCommandContext())
+            .thenReturn(commandContext);
     }
 
     @Test
@@ -67,7 +67,8 @@ public class ProcessEngineEventsAggregatorTest {
         Class<MessageProducerCommandContextCloseListener> listenerClass = eventsAggregator.getCloseListenerClass();
 
         //then
-        assertThat(listenerClass).isEqualTo(MessageProducerCommandContextCloseListener.class);
+        assertThat(listenerClass)
+            .isEqualTo(MessageProducerCommandContextCloseListener.class);
     }
 
     @Test
@@ -85,40 +86,70 @@ public class ProcessEngineEventsAggregatorTest {
         String attributeKey = eventsAggregator.getAttributeKey();
 
         //then
-        assertThat(attributeKey).isEqualTo(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS);
+        assertThat(attributeKey)
+            .isEqualTo(
+                MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS
+            );
     }
 
     @Test
     public void addShouldAddTheEventEventToTheEventAttributeListWhenTheAttributeAlreadyExists() {
         //given
-        ArrayList<CloudRuntimeEvent<?,?>> currentEvents = new ArrayList<>();
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)).willReturn(currentEvents);
+        ArrayList<CloudRuntimeEvent<?, ?>> currentEvents = new ArrayList<>();
+        given(
+            commandContext.getGenericAttribute(
+                MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS
+            )
+        )
+            .willReturn(currentEvents);
 
         //when
         eventsAggregator.add(event);
 
         //then
         assertThat(currentEvents).containsExactly(event);
-        verify(commandContext, never()).addAttribute(eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS), any());
+        verify(commandContext, never())
+            .addAttribute(
+                eq(
+                    MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS
+                ),
+                any()
+            );
     }
 
     @Test
     public void addShouldCreateAnewListAndRegisterItAsAttributeWhenTheAttributeDoesNotExist() {
         //given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)).willReturn(null);
+        given(
+            commandContext.getGenericAttribute(
+                MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS
+            )
+        )
+            .willReturn(null);
 
         //when
         eventsAggregator.add(event);
 
         //then
-        verify(commandContext).addAttribute(eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS), eventsCaptor.capture());
+        verify(commandContext)
+            .addAttribute(
+                eq(
+                    MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS
+                ),
+                eventsCaptor.capture()
+            );
         assertThat(eventsCaptor.getValue()).containsExactly(event);
     }
 
     @Test
     public void addShouldRegisterCloseListenerWhenItIsMissing() {
         //given
-        given(commandContext.hasCloseListener(MessageProducerCommandContextCloseListener.class)).willReturn(false);
+        given(
+            commandContext.hasCloseListener(
+                MessageProducerCommandContextCloseListener.class
+            )
+        )
+            .willReturn(false);
 
         //when
         eventsAggregator.add(event);
@@ -130,7 +161,12 @@ public class ProcessEngineEventsAggregatorTest {
     @Test
     public void addShouldNotRegisterCloseListenerWhenItIsAlreadyRegistered() {
         //given
-        given(commandContext.hasCloseListener(MessageProducerCommandContextCloseListener.class)).willReturn(true);
+        given(
+            commandContext.hasCloseListener(
+                MessageProducerCommandContextCloseListener.class
+            )
+        )
+            .willReturn(true);
 
         //when
         eventsAggregator.add(event);
@@ -138,5 +174,4 @@ public class ProcessEngineEventsAggregatorTest {
         //then
         verify(commandContext, never()).addCloseListener(closeListener);
     }
-
 }

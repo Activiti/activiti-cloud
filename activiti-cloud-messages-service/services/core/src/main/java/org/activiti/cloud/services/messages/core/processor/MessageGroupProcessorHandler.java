@@ -18,6 +18,5 @@ package org.activiti.cloud.services.messages.core.processor;
 import org.activiti.cloud.services.messages.core.support.Handler;
 import org.springframework.integration.store.MessageGroup;
 
-public interface MessageGroupProcessorHandler extends Handler<MessageGroup, Object>{
-
-}
+public interface MessageGroupProcessorHandler
+    extends Handler<MessageGroup, Object> {}

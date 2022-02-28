@@ -15,21 +15,21 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 @Entity(name = ProcessResumedAuditEventEntity.PROCESS_RESUMED_EVENT)
-@DiscriminatorValue(value = ProcessResumedAuditEventEntity.PROCESS_RESUMED_EVENT)
+@DiscriminatorValue(
+    value = ProcessResumedAuditEventEntity.PROCESS_RESUMED_EVENT
+)
 @DynamicInsert
 public class ProcessResumedAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_RESUMED_EVENT = "ProcessResumedEvent";
 
-    public ProcessResumedAuditEventEntity() {
-    }
+    public ProcessResumedAuditEventEntity() {}
 
     public ProcessResumedAuditEventEntity(CloudProcessResumedEvent cloudEvent) {
         super(cloudEvent);
@@ -38,7 +38,10 @@ public class ProcessResumedAuditEventEntity extends ProcessAuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ProcessResumedAuditEventEntity [toString()=").append(super.toString()).append("]");
+        builder
+            .append("ProcessResumedAuditEventEntity [toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

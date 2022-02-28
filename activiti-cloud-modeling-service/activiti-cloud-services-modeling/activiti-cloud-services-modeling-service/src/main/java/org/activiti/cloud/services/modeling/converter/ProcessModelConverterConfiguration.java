@@ -34,16 +34,24 @@ public class ProcessModelConverterConfiguration {
     }
 
     @Bean
-    public ConnectorModelContentConverter connectorModelContentConverter(ConnectorModelType connectorModelType,
-                                                                         JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter) {
-        return new ConnectorModelContentConverter(connectorModelType,
-                                                  connectorModelContentJsonConverter);
+    public ConnectorModelContentConverter connectorModelContentConverter(
+        ConnectorModelType connectorModelType,
+        JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter
+    ) {
+        return new ConnectorModelContentConverter(
+            connectorModelType,
+            connectorModelContentJsonConverter
+        );
     }
 
     @Bean
-    public ProcessModelContentConverter processModelContentConverter(ProcessModelType processModelType,
-                                                                     BpmnXMLConverter bpmnConverter) {
-        return new ProcessModelContentConverter(processModelType,
-                                                bpmnConverter);
+    public ProcessModelContentConverter processModelContentConverter(
+        ProcessModelType processModelType,
+        BpmnXMLConverter bpmnConverter
+    ) {
+        return new ProcessModelContentConverter(
+            processModelType,
+            bpmnConverter
+        );
     }
 }

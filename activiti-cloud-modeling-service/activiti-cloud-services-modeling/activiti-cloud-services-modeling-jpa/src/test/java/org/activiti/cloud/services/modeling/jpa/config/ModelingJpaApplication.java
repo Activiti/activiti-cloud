@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ModelingJpaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ModelingJpaApplication.class,
-                              args);
+        SpringApplication.run(ModelingJpaApplication.class, args);
     }
 }

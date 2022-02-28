@@ -15,18 +15,19 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import java.util.Optional;
-
 public abstract class BaseIntegrationEventHandler {
 
-    private final static Logger logger = LoggerFactory.getLogger(BaseIntegrationEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        BaseIntegrationEventHandler.class
+    );
 
     protected final EntityManager entityManager;
 
@@ -34,13 +35,19 @@ public abstract class BaseIntegrationEventHandler {
         this.entityManager = entityManager;
     }
 
-    protected Optional<IntegrationContextEntity> findIntegrationContextEntity(CloudIntegrationEvent event) {
+    protected Optional<IntegrationContextEntity> findIntegrationContextEntity(
+        CloudIntegrationEvent event
+    ) {
         IntegrationContext integrationContext = event.getEntity();
-        String pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
+        String pkId = IntegrationContextEntity.IdBuilderHelper.from(
+            integrationContext
+        );
 
-        IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
+        IntegrationContextEntity entity = entityManager.find(
+            IntegrationContextEntity.class,
+            pkId
+        );
 
         return Optional.ofNullable(entity);
     }
-
 }

@@ -20,7 +20,8 @@ import org.activiti.api.task.model.payloads.ReleaseTaskPayload;
 import org.activiti.api.task.model.results.TaskResult;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 
-public class ReleaseTaskCmdExecutor extends AbstractCommandExecutor<ReleaseTaskPayload> {
+public class ReleaseTaskCmdExecutor
+    extends AbstractCommandExecutor<ReleaseTaskPayload> {
 
     private TaskAdminRuntime taskAdminRuntime;
 

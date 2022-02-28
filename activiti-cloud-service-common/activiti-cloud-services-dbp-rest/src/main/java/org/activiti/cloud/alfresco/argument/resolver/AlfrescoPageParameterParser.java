@@ -25,8 +25,13 @@ public class AlfrescoPageParameterParser {
         this.defaultPageSize = defaultPageSize;
     }
 
-    public AlfrescoQueryParameters parseParameters(NativeWebRequest webRequest) {
-        return new AlfrescoQueryParameters(parseSkipCount(webRequest), parseMaxItems(webRequest));
+    public AlfrescoQueryParameters parseParameters(
+        NativeWebRequest webRequest
+    ) {
+        return new AlfrescoQueryParameters(
+            parseSkipCount(webRequest),
+            parseMaxItems(webRequest)
+        );
     }
 
     protected MaxItemsParameter parseMaxItems(NativeWebRequest webRequest) {
@@ -50,5 +55,4 @@ public class AlfrescoPageParameterParser {
         }
         return new SkipCountParameter(isSet, skipCount);
     }
-
 }

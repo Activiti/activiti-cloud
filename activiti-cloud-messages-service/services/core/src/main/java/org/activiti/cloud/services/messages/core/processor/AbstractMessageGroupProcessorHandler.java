@@ -17,19 +17,19 @@ package org.activiti.cloud.services.messages.core.processor;
 
 import org.springframework.integration.store.MessageGroup;
 
-public abstract class AbstractMessageGroupProcessorHandler implements MessageGroupProcessorHandler {
+public abstract class AbstractMessageGroupProcessorHandler
+    implements MessageGroupProcessorHandler {
 
     @Override
     public Object handle(MessageGroup group) {
-        
         if (canProcess(group)) {
             return process(group);
         }
-        
+
         return null;
     }
 
     protected abstract Object process(MessageGroup group);
 
-    protected abstract boolean canProcess(MessageGroup group);    
+    protected abstract boolean canProcess(MessageGroup group);
 }

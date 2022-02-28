@@ -25,7 +25,9 @@ import org.activiti.cloud.services.audit.jpa.events.TimerScheduledAuditEventEnti
 
 public class TimerScheduledEventConverter extends BaseEventToEntityConverter {
 
-    public TimerScheduledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TimerScheduledEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -35,18 +37,26 @@ public class TimerScheduledEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected TimerScheduledAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new TimerScheduledAuditEventEntity((CloudBPMNTimerScheduledEvent) cloudRuntimeEvent);
+    protected TimerScheduledAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new TimerScheduledAuditEventEntity(
+            (CloudBPMNTimerScheduledEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         TimerScheduledAuditEventEntity timerEventEntity = (TimerScheduledAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNTimerScheduledEventImpl(timerEventEntity.getEventId(),
-                                                    timerEventEntity.getTimestamp(),
-                                                    timerEventEntity.getTimer(),
-                                                    timerEventEntity.getProcessDefinitionId(),
-                                                    timerEventEntity.getProcessInstanceId());
+        return new CloudBPMNTimerScheduledEventImpl(
+            timerEventEntity.getEventId(),
+            timerEventEntity.getTimestamp(),
+            timerEventEntity.getTimer(),
+            timerEventEntity.getProcessDefinitionId(),
+            timerEventEntity.getProcessInstanceId()
+        );
     }
 }

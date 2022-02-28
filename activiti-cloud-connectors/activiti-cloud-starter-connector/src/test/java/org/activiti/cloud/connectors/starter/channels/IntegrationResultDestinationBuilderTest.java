@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
@@ -22,10 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class IntegrationResultDestinationBuilderTest {
 
@@ -46,7 +46,9 @@ public class IntegrationResultDestinationBuilderTest {
     public void shouldResolveDestination() {
         // given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(
+            integrationContext
+        );
         integrationRequest.setServiceFullName("myServiceName");
         integrationRequest.setAppName("myAppName");
         integrationRequest.setAppVersion("1.0");
@@ -58,20 +60,23 @@ public class IntegrationResultDestinationBuilderTest {
 
         // then
         assertThat(result).isEqualTo("integrationResult.myServiceName");
-
     }
 
     @Test
     public void shouldResolveIntegrationEventDestination() {
         // given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(
+            integrationContext
+        );
         integrationRequest.setServiceFullName("myServiceName");
         integrationRequest.setAppName("myAppName");
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
-        integrationRequest.setResultDestination("integrationResult.myResultDestination");
+        integrationRequest.setResultDestination(
+            "integrationResult.myResultDestination"
+        );
 
         // when
         String result = subject.buildDestination(integrationRequest);
@@ -79,5 +84,4 @@ public class IntegrationResultDestinationBuilderTest {
         // then
         assertThat(result).isEqualTo("integrationResult.myResultDestination");
     }
-
 }

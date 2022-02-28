@@ -23,5 +23,4 @@ public interface CloudConnectorConsumerChannels {
 
     @Input(INTEGRATION_EVENT_CONSUMER)
     SubscribableChannel integrationEventConsumer();
-
 }

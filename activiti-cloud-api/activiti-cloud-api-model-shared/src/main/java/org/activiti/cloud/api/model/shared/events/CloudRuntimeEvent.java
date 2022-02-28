@@ -18,8 +18,8 @@ package org.activiti.cloud.api.model.shared.events;
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
-public interface CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> extends CloudRuntimeEntity, RuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
-
+public interface CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE extends Enum<?>>
+    extends CloudRuntimeEntity, RuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
     /**
      * Sequence index of the event if it is part of an aggregate within the message if part of the same transaction.
      */
@@ -34,5 +34,4 @@ public interface CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> exte
      * ID of the entity included in the message.
      */
     String getEntityId();
-
 }

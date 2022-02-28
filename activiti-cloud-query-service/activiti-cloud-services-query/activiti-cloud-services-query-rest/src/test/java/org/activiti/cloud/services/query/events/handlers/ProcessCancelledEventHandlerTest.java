@@ -15,6 +15,16 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Date;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -26,17 +36,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessCancelledEventHandlerTest {
 
@@ -59,20 +58,25 @@ public class ProcessCancelledEventHandlerTest {
     @Test
     public void testUpdateExistingProcessInstanceWhenCancelled() {
         //given
-        ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(processInstanceEntity);
+        ProcessInstanceEntity processInstanceEntity = mock(
+            ProcessInstanceEntity.class
+        );
+        given(entityManager.find(ProcessInstanceEntity.class, "200"))
+            .willReturn(processInstanceEntity);
 
         //when
-        handler.handle(createProcessCancelledEvent("200"
-        ));
+        handler.handle(createProcessCancelledEvent("200"));
 
         //then
         verify(entityManager).persist(processInstanceEntity);
-        verify(processInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.CANCELLED);
+        verify(processInstanceEntity)
+            .setStatus(ProcessInstance.ProcessInstanceStatus.CANCELLED);
         verify(processInstanceEntity).setLastModified(any(Date.class));
     }
 
-    private CloudRuntimeEvent<?, ?> createProcessCancelledEvent(String processInstanceId) {
+    private CloudRuntimeEvent<?, ?> createProcessCancelledEvent(
+        String processInstanceId
+    ) {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId(processInstanceId);
         return new CloudProcessCancelledEventImpl(processInstance);
@@ -84,13 +88,17 @@ public class ProcessCancelledEventHandlerTest {
     @Test
     public void testThrowExceptionWhenProcessInstanceNotFound() {
         //given
-        given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(null);
+        given(entityManager.find(ProcessInstanceEntity.class, "200"))
+            .willReturn(null);
 
         //then
         //when
         assertThatExceptionOfType(QueryException.class)
-            .isThrownBy(() -> handler.handle(createProcessCancelledEvent("200")))
-            .withMessageContaining("Unable to find process instance with the given id: ");
+            .isThrownBy(() -> handler.handle(createProcessCancelledEvent("200"))
+            )
+            .withMessageContaining(
+                "Unable to find process instance with the given id: "
+            );
     }
 
     /**
@@ -102,6 +110,9 @@ public class ProcessCancelledEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name());
+        assertThat(handledEvent)
+            .isEqualTo(
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name()
+            );
     }
 }

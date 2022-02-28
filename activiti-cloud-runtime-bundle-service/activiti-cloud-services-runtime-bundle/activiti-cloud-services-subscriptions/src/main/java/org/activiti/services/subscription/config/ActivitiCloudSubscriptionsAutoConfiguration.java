@@ -15,6 +15,8 @@
  */
 package org.activiti.services.subscription.config;
 
+import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior.DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME;
+
 import org.activiti.bpmn.model.Signal;
 import org.activiti.bpmn.model.SignalEventDefinition;
 import org.activiti.engine.RuntimeService;
@@ -35,35 +37,40 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 
-import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior.DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME;
-
 @Configuration
 @PropertySource("classpath:config/signal-events-channels.properties")
 @EnableBinding(ProcessEngineSignalChannels.class)
-@AutoConfigureBefore({ProcessRuntimeAutoConfiguration.class})
+@AutoConfigureBefore({ ProcessRuntimeAutoConfiguration.class })
 public class ActivitiCloudSubscriptionsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BroadcastSignalEventHandler broadcastSignalEventHandler(RuntimeService runtimeService) {
+    public BroadcastSignalEventHandler broadcastSignalEventHandler(
+        RuntimeService runtimeService
+    ) {
         return new BroadcastSignalEventHandler(runtimeService);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SignalPayloadEventListener signalSender(ProcessEngineSignalChannels processEngineSignalChannels) {
+    public SignalPayloadEventListener signalSender(
+        ProcessEngineSignalChannels processEngineSignalChannels
+    ) {
         return new SignalSender(processEngineSignalChannels.signalProducer());
     }
 
     @Bean(DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME)
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @ConditionalOnMissingBean
-    public IntermediateThrowSignalEventActivityBehavior broadcastSignalEventActivityBehavior(ApplicationEventPublisher eventPublisher,
-                                                                                             SignalEventDefinition signalEventDefinition,
-                                                                                             Signal signal) {
-        return new BroadcastSignalEventActivityBehavior(eventPublisher,
-                                                        signalEventDefinition,
-                                                        signal);
+    public IntermediateThrowSignalEventActivityBehavior broadcastSignalEventActivityBehavior(
+        ApplicationEventPublisher eventPublisher,
+        SignalEventDefinition signalEventDefinition,
+        Signal signal
+    ) {
+        return new BroadcastSignalEventActivityBehavior(
+            eventPublisher,
+            signalEventDefinition,
+            signal
+        );
     }
-
 }

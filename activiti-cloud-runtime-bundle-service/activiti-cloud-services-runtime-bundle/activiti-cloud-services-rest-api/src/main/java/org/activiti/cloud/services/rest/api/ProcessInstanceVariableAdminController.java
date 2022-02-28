@@ -26,25 +26,29 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@RequestMapping(value = "/admin/v1/process-instances/{processInstanceId}/variables",
-        produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(
+    value = "/admin/v1/process-instances/{processInstanceId}/variables",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public interface ProcessInstanceVariableAdminController {
-
     /**
      * @param processInstanceId          id of process instance
      * @param setProcessVariablesPayload process variables payload
      * @return list of error messages, empty list if no error message
      */
     @PutMapping
-    ResponseEntity<Void> updateVariables(@PathVariable String processInstanceId,
-                                         @RequestBody SetProcessVariablesPayload setProcessVariablesPayload);
-    
+    ResponseEntity<Void> updateVariables(
+        @PathVariable String processInstanceId,
+        @RequestBody SetProcessVariablesPayload setProcessVariablesPayload
+    );
+
     /**
      * @param processInstanceId          id of process instance
      * @param removeProcessVariablesPayload process variables payload
      */
     @DeleteMapping
-    ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
-                                         @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload);
-
+    ResponseEntity<Void> removeVariables(
+        @PathVariable String processInstanceId,
+        @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload
+    );
 }

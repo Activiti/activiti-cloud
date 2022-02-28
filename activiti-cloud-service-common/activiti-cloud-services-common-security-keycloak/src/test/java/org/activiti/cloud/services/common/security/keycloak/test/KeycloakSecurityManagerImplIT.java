@@ -18,6 +18,7 @@ package org.activiti.cloud.services.common.security.keycloak.test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.util.List;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
 import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
@@ -28,8 +29,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-import java.util.List;
-
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class KeycloakSecurityManagerImplIT {
 
@@ -38,13 +37,12 @@ public class KeycloakSecurityManagerImplIT {
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    static class Application {
-
-    }
+    static class Application {}
 
     @Test
     public void contextLoads() {
-        assertThat(securityManager).isInstanceOf(KeycloakSecurityManagerImpl.class);
+        assertThat(securityManager)
+            .isInstanceOf(KeycloakSecurityManagerImpl.class);
     }
 
     @Test
@@ -60,7 +58,7 @@ public class KeycloakSecurityManagerImplIT {
     }
 
     @Test
-    @WithMockKeycloakUser(groups = {"hr", "admins"})
+    @WithMockKeycloakUser(groups = { "hr", "admins" })
     public void testGetAuthenticatedUserGroups() {
         // given
 
@@ -68,12 +66,11 @@ public class KeycloakSecurityManagerImplIT {
         List<String> result = securityManager.getAuthenticatedUserGroups();
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("hr", "admins");
+        assertThat(result).isNotEmpty().containsExactly("hr", "admins");
     }
 
     @Test
-    @WithMockKeycloakUser(roles = {"ACTIVITI_USER"})
+    @WithMockKeycloakUser(roles = { "ACTIVITI_USER" })
     public void testGetAuthenticatedUserRoles() {
         // given
 
@@ -81,8 +78,7 @@ public class KeycloakSecurityManagerImplIT {
         List<String> result = securityManager.getAuthenticatedUserRoles();
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("ACTIVITI_USER");
+        assertThat(result).isNotEmpty().containsExactly("ACTIVITI_USER");
     }
 
     @Test
@@ -90,7 +86,9 @@ public class KeycloakSecurityManagerImplIT {
         // given
 
         // when
-        Throwable thrown = catchThrowable(() -> { securityManager.getAuthenticatedUserId(); });
+        Throwable thrown = catchThrowable(() -> {
+            securityManager.getAuthenticatedUserId();
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
@@ -101,7 +99,9 @@ public class KeycloakSecurityManagerImplIT {
         // given
 
         // when
-        Throwable thrown = catchThrowable(() -> { securityManager.getAuthenticatedUserGroups(); });
+        Throwable thrown = catchThrowable(() -> {
+            securityManager.getAuthenticatedUserGroups();
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
@@ -112,12 +112,11 @@ public class KeycloakSecurityManagerImplIT {
         // given
 
         // when
-        Throwable thrown = catchThrowable(() -> { securityManager.getAuthenticatedUserRoles(); });
+        Throwable thrown = catchThrowable(() -> {
+            securityManager.getAuthenticatedUserRoles();
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
-
     }
-
-
 }

@@ -24,7 +24,9 @@ public class IntegrationRequestErrorChannelListener {
 
     private final IntegrationErrorHandler integrationErrorHandler;
 
-    public IntegrationRequestErrorChannelListener(IntegrationErrorHandler integrationErrorSender) {
+    public IntegrationRequestErrorChannelListener(
+        IntegrationErrorHandler integrationErrorSender
+    ) {
         this.integrationErrorHandler = integrationErrorSender;
     }
 

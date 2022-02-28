@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.services.query.model.ActivitiEntityMetadata;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
@@ -26,8 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class QueryLinkRelationProviderTest {
 
     private QueryLinkRelationProvider relProvider = new QueryLinkRelationProvider();
@@ -35,7 +35,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getItemResourceRelForShouldReturnProcessDefinitionWhenIsProcessDefinitionEntity() {
         //when
-        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(ProcessDefinitionEntity.class);
+        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(
+            ProcessDefinitionEntity.class
+        );
 
         //then
         assertThat(itemResourceRel.value()).isEqualTo("processDefinition");
@@ -44,7 +46,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getItemResourceRelForShouldReturnProcessInstanceWhenIsProcessInstanceEntity() {
         //when
-        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(ProcessInstanceEntity.class);
+        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(
+            ProcessInstanceEntity.class
+        );
 
         //then
         assertThat(itemResourceRel.value()).isEqualTo("processInstance");
@@ -53,7 +57,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getItemResourceRelForShouldReturnTaskWhenIsTaskEntity() {
         //when
-        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(TaskEntity.class);
+        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(
+            TaskEntity.class
+        );
 
         //then
         assertThat(itemResourceRel.value()).isEqualTo("task");
@@ -62,7 +68,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getItemResourceRelForShouldReturnVariableWhenIsProcessVariableEntity() {
         //when
-        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(ProcessVariableEntity.class);
+        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(
+            ProcessVariableEntity.class
+        );
 
         //then
         assertThat(itemResourceRel.value()).isEqualTo("variable");
@@ -71,7 +79,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getItemResourceRelForShouldReturnVariableWhenIsTaskVariableEntity() {
         //when
-        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(TaskVariableEntity.class);
+        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(
+            TaskVariableEntity.class
+        );
 
         //then
         assertThat(itemResourceRel.value()).isEqualTo("variable");
@@ -80,7 +90,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getItemResourceRelForShouldReturnApplicationWhenIsApplicationEntity() {
         //when
-        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(ApplicationEntity.class);
+        LinkRelation itemResourceRel = relProvider.getItemResourceRelFor(
+            ApplicationEntity.class
+        );
 
         //then
         assertThat(itemResourceRel.value()).isEqualTo("application");
@@ -89,16 +101,21 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getCollectionResourceRelForShouldReturnProcessDefinitionsWhenIsProcessDefinitionEntity() {
         //when
-        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(ProcessDefinitionEntity.class);
+        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(
+            ProcessDefinitionEntity.class
+        );
 
         //then
-        assertThat(collectionResourceRel.value()).isEqualTo("processDefinitions");
+        assertThat(collectionResourceRel.value())
+            .isEqualTo("processDefinitions");
     }
 
     @Test
     public void getCollectionResourceRelForShouldReturnProcessInstancesWhenIsProcessInstanceEntity() {
         //when
-        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(ProcessInstanceEntity.class);
+        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(
+            ProcessInstanceEntity.class
+        );
 
         //then
         assertThat(collectionResourceRel.value()).isEqualTo("processInstances");
@@ -107,7 +124,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getCollectionResourceRelForShouldReturnTasksWhenIsTaskEntity() {
         //when
-        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(TaskEntity.class);
+        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(
+            TaskEntity.class
+        );
 
         //then
         assertThat(collectionResourceRel.value()).isEqualTo("tasks");
@@ -116,7 +135,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getCollectionResourceRelForShouldReturnVariablesWhenIsProcessVariableEntity() {
         //when
-        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(ProcessVariableEntity.class);
+        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(
+            ProcessVariableEntity.class
+        );
 
         //then
         assertThat(collectionResourceRel.value()).isEqualTo("variables");
@@ -125,7 +146,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getCollectionResourceRelForShouldReturnVariablesWhenIsTaskVariableEntity() {
         //when
-        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(TaskVariableEntity.class);
+        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(
+            TaskVariableEntity.class
+        );
 
         //then
         assertThat(collectionResourceRel.value()).isEqualTo("variables");
@@ -134,7 +157,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void getCollectionResourceRelForShouldReturnApplicationsWhenIsApplicationEntity() {
         //when
-        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(ApplicationEntity.class);
+        LinkRelation collectionResourceRel = relProvider.getCollectionResourceRelFor(
+            ApplicationEntity.class
+        );
 
         //then
         assertThat(collectionResourceRel.value()).isEqualTo("applications");
@@ -143,7 +168,11 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldSupportProcessDefinitionEntity() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ProcessDefinitionEntity.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(
+                ProcessDefinitionEntity.class
+            )
+        );
 
         //then
         assertThat(supports).isTrue();
@@ -152,7 +181,11 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldSupportProcessInstanceEntity() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ProcessInstanceEntity.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(
+                ProcessInstanceEntity.class
+            )
+        );
 
         //then
         assertThat(supports).isTrue();
@@ -161,7 +194,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldSupportTaskEntity() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(TaskEntity.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(TaskEntity.class)
+        );
 
         //then
         assertThat(supports).isTrue();
@@ -170,7 +205,11 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldSupportProcessVariableEntity() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ProcessVariableEntity.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(
+                ProcessVariableEntity.class
+            )
+        );
 
         //then
         assertThat(supports).isTrue();
@@ -179,7 +218,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldSupportTaskVariableEntity() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(TaskVariableEntity.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(TaskVariableEntity.class)
+        );
 
         //then
         assertThat(supports).isTrue();
@@ -188,7 +229,11 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldNotSupportUncoveredClasses() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ActivitiEntityMetadata.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(
+                ActivitiEntityMetadata.class
+            )
+        );
 
         //then
         assertThat(supports).isFalse();
@@ -197,10 +242,11 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldSupportApplicationEntity() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ApplicationEntity.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(ApplicationEntity.class)
+        );
 
         //then
         assertThat(supports).isTrue();
     }
-    
 }

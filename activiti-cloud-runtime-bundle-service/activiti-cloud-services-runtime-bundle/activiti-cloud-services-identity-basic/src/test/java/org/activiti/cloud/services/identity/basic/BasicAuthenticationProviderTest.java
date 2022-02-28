@@ -15,9 +15,11 @@
  */
 package org.activiti.cloud.services.identity.basic;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -29,9 +31,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class BasicAuthenticationProviderTest {
 
@@ -50,42 +49,50 @@ public class BasicAuthenticationProviderTest {
     public void testAuthenticate() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("testrole"));
-        User user = new User("test",
-                             "pass",
-                             authorities);
+        User user = new User("test", "pass", authorities);
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken("test",
-                                                                                                     "pass",
-                                                                                                     authorities);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            "test",
+            "pass",
+            authorities
+        );
 
-        when(userDetailsService.loadUserByUsername("test"))
-                .thenReturn(user);
+        when(userDetailsService.loadUserByUsername("test")).thenReturn(user);
 
-        assertThat(basicAuthenticationProvider.authenticate(authentication)).isNotNull();
+        assertThat(basicAuthenticationProvider.authenticate(authentication))
+            .isNotNull();
     }
 
     @Test
     public void testAuthenticationFailure() {
-
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("testrole"));
-        User user = new User("test",
-                             "pass",
-                             authorities);
+        User user = new User("test", "pass", authorities);
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken("differentuser",
-                                                                                                     "differentpass",
-                                                                                                     authorities);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            "differentuser",
+            "differentpass",
+            authorities
+        );
 
         when(userDetailsService.loadUserByUsername("differentuser"))
-                .thenReturn(user);
+            .thenReturn(user);
 
-        assertThatExceptionOfType(BadCredentialsException.class).isThrownBy(() -> basicAuthenticationProvider.authenticate(authentication));
+        assertThatExceptionOfType(BadCredentialsException.class)
+            .isThrownBy(() ->
+                basicAuthenticationProvider.authenticate(authentication)
+            );
     }
 
     @Test
     public void testSupports() {
-        assertThat(basicAuthenticationProvider.supports(UsernamePasswordAuthenticationToken.class)).isTrue();
-        assertThat(basicAuthenticationProvider.supports(Integer.class)).isFalse();
+        assertThat(
+            basicAuthenticationProvider.supports(
+                UsernamePasswordAuthenticationToken.class
+            )
+        )
+            .isTrue();
+        assertThat(basicAuthenticationProvider.supports(Integer.class))
+            .isFalse();
     }
 }

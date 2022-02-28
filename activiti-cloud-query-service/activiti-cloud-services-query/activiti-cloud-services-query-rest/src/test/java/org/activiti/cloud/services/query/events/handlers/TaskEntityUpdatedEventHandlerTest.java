@@ -15,6 +15,18 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -26,19 +38,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityUpdatedEventHandlerTest {
 
@@ -58,14 +57,16 @@ public class TaskEntityUpdatedEventHandlerTest {
         //given
         CloudTaskUpdatedEvent event = buildTaskUpdateEvent();
         String taskId = event.getEntity().getId();
-        TaskEntity eventTaskEntity = aTask().withId(taskId)
-                .withName("name")
-                .withDescription("description")
-                .withPriority(10)
-                .withFormKey("formKey")
-                .build();
+        TaskEntity eventTaskEntity = aTask()
+            .withId(taskId)
+            .withName("name")
+            .withDescription("description")
+            .withPriority(10)
+            .withFormKey("formKey")
+            .build();
 
-        given(entityManager.find(TaskEntity.class, taskId)).willReturn(eventTaskEntity);
+        given(entityManager.find(TaskEntity.class, taskId))
+            .willReturn(eventTaskEntity);
 
         //when
         handler.handle(event);
@@ -73,11 +74,13 @@ public class TaskEntityUpdatedEventHandlerTest {
         //then
         verify(entityManager).persist(eventTaskEntity);
         verify(eventTaskEntity).setName(event.getEntity().getName());
-        verify(eventTaskEntity).setDescription(event.getEntity().getDescription());
+        verify(eventTaskEntity)
+            .setDescription(event.getEntity().getDescription());
         verify(eventTaskEntity).setPriority(event.getEntity().getPriority());
         verify(eventTaskEntity).setDueDate(event.getEntity().getDueDate());
         verify(eventTaskEntity).setFormKey(event.getEntity().getFormKey());
-        verify(eventTaskEntity).setParentTaskId(event.getEntity().getParentTaskId());
+        verify(eventTaskEntity)
+            .setParentTaskId(event.getEntity().getParentTaskId());
         verify(eventTaskEntity).setLastModified(any(Date.class));
         verify(eventTaskEntity).setStatus(event.getEntity().getStatus());
 
@@ -85,9 +88,11 @@ public class TaskEntityUpdatedEventHandlerTest {
     }
 
     private CloudTaskUpdatedEventImpl buildTaskUpdateEvent() {
-        final TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
-                                           "my task",
-                                           Task.TaskStatus.ASSIGNED);
+        final TaskImpl task = new TaskImpl(
+            UUID.randomUUID().toString(),
+            "my task",
+            Task.TaskStatus.ASSIGNED
+        );
         task.setAssignee("user");
         task.setDescription("task description");
         task.setPriority(75);
@@ -115,6 +120,7 @@ public class TaskEntityUpdatedEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name());
+        assertThat(handledEvent)
+            .isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name());
     }
 }

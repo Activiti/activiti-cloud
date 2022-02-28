@@ -19,7 +19,8 @@ package org.activiti.services.connectors.channel;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
 
-class CommandContextCloseListenerAdapter implements CommandContextCloseListener {
+class CommandContextCloseListenerAdapter
+    implements CommandContextCloseListener {
 
     @Override
     public void closing(CommandContext commandContext) {

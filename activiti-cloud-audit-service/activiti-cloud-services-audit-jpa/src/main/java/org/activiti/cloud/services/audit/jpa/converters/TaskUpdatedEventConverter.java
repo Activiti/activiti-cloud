@@ -25,26 +25,36 @@ import org.activiti.cloud.services.audit.jpa.events.TaskUpdatedEventEntity;
 
 public class TaskUpdatedEventConverter extends BaseEventToEntityConverter {
 
-    public TaskUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TaskUpdatedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name();
     }
 
     @Override
-    public TaskUpdatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {            
-        return new TaskUpdatedEventEntity((CloudTaskUpdatedEvent) cloudRuntimeEvent);
+    public TaskUpdatedEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new TaskUpdatedEventEntity(
+            (CloudTaskUpdatedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         TaskUpdatedEventEntity taskUpdatedEventEntity = (TaskUpdatedEventEntity) auditEventEntity;
 
-        return new CloudTaskUpdatedEventImpl(taskUpdatedEventEntity.getEventId(),
-                                             taskUpdatedEventEntity.getTimestamp(),
-                                             taskUpdatedEventEntity.getTask());
+        return new CloudTaskUpdatedEventImpl(
+            taskUpdatedEventEntity.getEventId(),
+            taskUpdatedEventEntity.getTimestamp(),
+            taskUpdatedEventEntity.getTask()
+        );
     }
 }

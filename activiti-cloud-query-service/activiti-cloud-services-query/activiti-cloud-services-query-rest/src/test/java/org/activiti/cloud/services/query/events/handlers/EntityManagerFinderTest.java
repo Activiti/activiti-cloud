@@ -16,6 +16,16 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Map;
+import java.util.Optional;
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.junit.jupiter.api.Test;
@@ -23,17 +33,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EntityManagerFinderTest {
@@ -47,11 +46,17 @@ class EntityManagerFinderTest {
     @Test
     void findTaskWithVariables() {
         //given
-        when(entityManager.createEntityGraph(TaskEntity.class)).thenReturn(mock(EntityGraph.class));
+        when(entityManager.createEntityGraph(TaskEntity.class))
+            .thenReturn(mock(EntityGraph.class));
         final TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManager.find(eq(TaskEntity.class),
-                                eq("taskId"),
-                                any(Map.class))).thenReturn(taskEntity);
+        when(
+            entityManager.find(
+                eq(TaskEntity.class),
+                eq("taskId"),
+                any(Map.class)
+            )
+        )
+            .thenReturn(taskEntity);
 
         //when
         Optional<TaskEntity> result = subject.findTaskWithVariables("taskId");
@@ -63,14 +68,22 @@ class EntityManagerFinderTest {
     @Test
     void findTaskWithCandidateUsers() {
         //given
-        when(entityManager.createEntityGraph(TaskEntity.class)).thenReturn(mock(EntityGraph.class));
+        when(entityManager.createEntityGraph(TaskEntity.class))
+            .thenReturn(mock(EntityGraph.class));
         final TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManager.find(eq(TaskEntity.class),
-                                eq("taskId"),
-                                any(Map.class))).thenReturn(taskEntity);
+        when(
+            entityManager.find(
+                eq(TaskEntity.class),
+                eq("taskId"),
+                any(Map.class)
+            )
+        )
+            .thenReturn(taskEntity);
 
         //when
-        Optional<TaskEntity> result = subject.findTaskWithCandidateUsers("taskId");
+        Optional<TaskEntity> result = subject.findTaskWithCandidateUsers(
+            "taskId"
+        );
 
         //then
         assertThat(result).isNotEmpty().hasValue(taskEntity);
@@ -79,14 +92,22 @@ class EntityManagerFinderTest {
     @Test
     void findTaskWithCandidateGroups() {
         //given
-        when(entityManager.createEntityGraph(TaskEntity.class)).thenReturn(mock(EntityGraph.class));
+        when(entityManager.createEntityGraph(TaskEntity.class))
+            .thenReturn(mock(EntityGraph.class));
         final TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManager.find(eq(TaskEntity.class),
-                                eq("taskId"),
-                                any(Map.class))).thenReturn(taskEntity);
+        when(
+            entityManager.find(
+                eq(TaskEntity.class),
+                eq("taskId"),
+                any(Map.class)
+            )
+        )
+            .thenReturn(taskEntity);
 
         //when
-        Optional<TaskEntity> result = subject.findTaskWithCandidateGroups("taskId");
+        Optional<TaskEntity> result = subject.findTaskWithCandidateGroups(
+            "taskId"
+        );
 
         //then
         assertThat(result).isNotEmpty().hasValue(taskEntity);
@@ -95,14 +116,24 @@ class EntityManagerFinderTest {
     @Test
     void findProcessInstanceWithVariables() {
         //given
-        when(entityManager.createEntityGraph(ProcessInstanceEntity.class)).thenReturn(mock(EntityGraph.class));
-        final ProcessInstanceEntity processInstance = mock(ProcessInstanceEntity.class);
-        when(entityManager.find(eq(ProcessInstanceEntity.class),
-                                eq("procId"),
-                                any(Map.class))).thenReturn(processInstance);
+        when(entityManager.createEntityGraph(ProcessInstanceEntity.class))
+            .thenReturn(mock(EntityGraph.class));
+        final ProcessInstanceEntity processInstance = mock(
+            ProcessInstanceEntity.class
+        );
+        when(
+            entityManager.find(
+                eq(ProcessInstanceEntity.class),
+                eq("procId"),
+                any(Map.class)
+            )
+        )
+            .thenReturn(processInstance);
 
         //when
-        Optional<ProcessInstanceEntity> result = subject.findProcessInstanceWithVariables("procId");
+        Optional<ProcessInstanceEntity> result = subject.findProcessInstanceWithVariables(
+            "procId"
+        );
 
         //then
         assertThat(result).isNotEmpty().hasValue(processInstance);

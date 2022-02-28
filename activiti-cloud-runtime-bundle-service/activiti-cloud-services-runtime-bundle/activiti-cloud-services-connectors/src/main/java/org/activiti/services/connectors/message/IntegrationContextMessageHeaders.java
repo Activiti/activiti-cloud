@@ -20,16 +20,19 @@ package org.activiti.services.connectors.message;
  *
  */
 class IntegrationContextMessageHeaders {
+
     public static final String CONNECTOR_TYPE = "connectorType";
     public static final String BUSINESS_KEY = "businessKey";
     public static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
-    public static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
+    public static final String ROOT_PROCESS_INSTANCE_ID =
+        "rootProcessInstanceId";
     public static final String PROCESS_INSTANCE_ID = "processInstanceId";
-    public static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
+    public static final String PARENT_PROCESS_INSTANCE_ID =
+        "parentProcessInstanceId";
     public static final String PROCESS_DEFINITION_ID = "processDefinitionId";
     public static final String PROCESS_DEFINITION_KEY = "processDefinitionKey";
     public static final String EXECUTION_ID = "executionId";
-    public static final String PROCESS_DEFINITION_VERSION = "processDefinitionVersion";
+    public static final String PROCESS_DEFINITION_VERSION =
+        "processDefinitionVersion";
     public static final String APP_VERSION = "appVersion";
-
 }

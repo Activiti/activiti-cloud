@@ -22,22 +22,25 @@ import org.springframework.validation.Errors;
 /**
  * Abstract model payload validator. It contains the basic validation functionality.
  */
-public class ModelPayloadValidator extends GenericPayloadValidator<Model> implements NameValidator {
+public class ModelPayloadValidator
+    extends GenericPayloadValidator<Model>
+    implements NameValidator {
 
     public ModelPayloadValidator(boolean validateRequiredFields) {
-        super(Model.class,
-              validateRequiredFields);
+        super(Model.class, validateRequiredFields);
     }
 
     @Override
-    public void validatePayload(Model model,
-                                Errors errors) {
+    public void validatePayload(Model model, Errors errors) {
         if (validateRequiredFields || model.getName() != null) {
-            validateName(model.getName(),
-                            "model")
-                    .forEach(error -> errors.rejectValue("name",
-                                                         error.getErrorCode(),
-                                                         error.getDescription()));
+            validateName(model.getName(), "model")
+                .forEach(error ->
+                    errors.rejectValue(
+                        "name",
+                        error.getErrorCode(),
+                        error.getDescription()
+                    )
+                );
         }
     }
 }

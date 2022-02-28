@@ -25,9 +25,11 @@ public class ProcessDefinitionRestrictionProperties {
 
     private StringPath processDefinitionKeyPath;
 
-    public ProcessDefinitionRestrictionProperties(StringPath serviceNamePath,
-                                                  StringPath fullServiceNamePath,
-                                                  StringPath processDefinitionKeyPath) {
+    public ProcessDefinitionRestrictionProperties(
+        StringPath serviceNamePath,
+        StringPath fullServiceNamePath,
+        StringPath processDefinitionKeyPath
+    ) {
         this.serviceNamePath = serviceNamePath;
         this.fullServiceNamePath = fullServiceNamePath;
         this.processDefinitionKeyPath = processDefinitionKeyPath;

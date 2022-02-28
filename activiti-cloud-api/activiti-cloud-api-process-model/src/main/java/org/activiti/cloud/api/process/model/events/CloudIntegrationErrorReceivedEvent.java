@@ -17,8 +17,8 @@ package org.activiti.cloud.api.process.model.events;
 
 import java.util.List;
 
-public interface CloudIntegrationErrorReceivedEvent extends CloudIntegrationEvent {
-
+public interface CloudIntegrationErrorReceivedEvent
+    extends CloudIntegrationEvent {
     String getErrorCode();
 
     String getErrorMessage();
@@ -26,5 +26,4 @@ public interface CloudIntegrationErrorReceivedEvent extends CloudIntegrationEven
     String getErrorClassName();
 
     List<StackTraceElement> getStackTraceElements();
-
 }

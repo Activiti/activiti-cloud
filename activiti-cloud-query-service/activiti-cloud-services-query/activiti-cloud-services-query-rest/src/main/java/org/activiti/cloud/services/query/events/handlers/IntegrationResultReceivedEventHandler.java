@@ -15,17 +15,18 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
-
-public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
+public class IntegrationResultReceivedEventHandler
+    extends BaseIntegrationEventHandler
+    implements QueryEventHandler {
 
     public IntegrationResultReceivedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -33,14 +34,21 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
+        CloudIntegrationResultReceivedEvent integrationEvent =
+            CloudIntegrationResultReceivedEvent.class.cast(event);
 
-        Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
+        Optional<IntegrationContextEntity> result = findIntegrationContextEntity(
+            integrationEvent
+        );
 
         result.ifPresent(entity -> {
             entity.setResultDate(new Date(integrationEvent.getTimestamp()));
-            entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
-            entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
+            entity.setStatus(
+                IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+            );
+            entity.setOutBoundVariables(
+                integrationEvent.getEntity().getOutBoundVariables()
+            );
 
             entityManager.persist(entity);
         });

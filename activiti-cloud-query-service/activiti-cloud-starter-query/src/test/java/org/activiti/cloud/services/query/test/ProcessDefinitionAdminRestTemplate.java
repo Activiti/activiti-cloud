@@ -20,12 +20,14 @@ import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
 @TestComponent
-public class ProcessDefinitionAdminRestTemplate extends BaseProcessDefinitionRestTemplate {
+public class ProcessDefinitionAdminRestTemplate
+    extends BaseProcessDefinitionRestTemplate {
 
-    protected ProcessDefinitionAdminRestTemplate(TestRestTemplate testRestTemplate,
-                                                 KeycloakTokenProducer keycloakTokenProducer) {
-        super(testRestTemplate,
-              keycloakTokenProducer);
+    protected ProcessDefinitionAdminRestTemplate(
+        TestRestTemplate testRestTemplate,
+        KeycloakTokenProducer keycloakTokenProducer
+    ) {
+        super(testRestTemplate, keycloakTokenProducer);
     }
 
     @Override

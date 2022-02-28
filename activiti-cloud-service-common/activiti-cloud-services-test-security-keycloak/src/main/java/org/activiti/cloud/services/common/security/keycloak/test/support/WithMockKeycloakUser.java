@@ -21,7 +21,6 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.test.context.support.TestExecutionEvent;
@@ -37,19 +36,18 @@ import org.springframework.test.context.TestContext;
 @Documented
 @WithSecurityContext(factory = WithMockKeycloakUserSecurityContextFactory.class)
 public @interface WithMockKeycloakUser {
-
     String username() default "testuser";
-    
+
     String[] roles() default {};
 
     String[] groups() default {};
-    
+
     boolean isActive() default true;
 
     boolean isInteractive() default false;
-    
+
     String rolePrefix() default "ROLE_";
-    
+
     /**
      * Determines when the {@link SecurityContext} is setup. The default is before
      * {@link TestExecutionEvent#TEST_METHOD} which occurs during
@@ -58,5 +56,5 @@ public @interface WithMockKeycloakUser {
      * @since 5.1
      */
     @AliasFor(annotation = WithSecurityContext.class)
-    TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_METHOD;    
+    TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_METHOD;
 }

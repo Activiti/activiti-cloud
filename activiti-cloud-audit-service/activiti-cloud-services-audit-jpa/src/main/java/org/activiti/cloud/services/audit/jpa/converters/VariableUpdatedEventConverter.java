@@ -26,7 +26,9 @@ import org.activiti.cloud.services.audit.jpa.events.VariableUpdatedEventEntity;
 
 public class VariableUpdatedEventConverter extends BaseEventToEntityConverter {
 
-    public VariableUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public VariableUpdatedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -36,19 +38,32 @@ public class VariableUpdatedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected VariableUpdatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new VariableUpdatedEventEntity((CloudVariableUpdatedEvent) cloudRuntimeEvent);
+    protected VariableUpdatedEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new VariableUpdatedEventEntity(
+            (CloudVariableUpdatedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         VariableUpdatedEventEntity variableUpdatedEventEntity = (VariableUpdatedEventEntity) auditEventEntity;
 
         String eventId = variableUpdatedEventEntity.getEventId();
         Long timestamp = variableUpdatedEventEntity.getTimestamp();
         VariableInstance variableInstance = variableUpdatedEventEntity.getVariableInstance();
-        Object previousValue = variableUpdatedEventEntity.getPreviousValue() != null ?
-            variableUpdatedEventEntity.getPreviousValue().getValue() : null;
-        return new CloudVariableUpdatedEventImpl<>(eventId, timestamp, variableInstance, previousValue);
+        Object previousValue = variableUpdatedEventEntity.getPreviousValue() !=
+            null
+            ? variableUpdatedEventEntity.getPreviousValue().getValue()
+            : null;
+        return new CloudVariableUpdatedEventImpl<>(
+            eventId,
+            timestamp,
+            variableInstance,
+            previousValue
+        );
     }
 }

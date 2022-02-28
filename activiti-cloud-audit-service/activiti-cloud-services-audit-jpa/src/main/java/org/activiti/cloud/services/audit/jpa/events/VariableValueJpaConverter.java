@@ -21,9 +21,10 @@ import java.io.IOException;
 import javax.persistence.AttributeConverter;
 import org.activiti.cloud.services.audit.api.AuditException;
 
-public class VariableValueJpaConverter implements AttributeConverter<VariableValue<?>, String> {
+public class VariableValueJpaConverter
+    implements AttributeConverter<VariableValue<?>, String> {
 
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public String convertToDatabaseColumn(VariableValue<?> entity) {
@@ -35,10 +36,18 @@ public class VariableValueJpaConverter implements AttributeConverter<VariableVal
     }
 
     @Override
-    public VariableValue<?> convertToEntityAttribute(String entityTextRepresentation) {
+    public VariableValue<?> convertToEntityAttribute(
+        String entityTextRepresentation
+    ) {
         try {
-            if (entityTextRepresentation != null && entityTextRepresentation.length() > 0) {
-                return objectMapper.readValue(entityTextRepresentation, VariableValue.class);
+            if (
+                entityTextRepresentation != null &&
+                entityTextRepresentation.length() > 0
+            ) {
+                return objectMapper.readValue(
+                    entityTextRepresentation,
+                    VariableValue.class
+                );
             } else {
                 return null;
             }

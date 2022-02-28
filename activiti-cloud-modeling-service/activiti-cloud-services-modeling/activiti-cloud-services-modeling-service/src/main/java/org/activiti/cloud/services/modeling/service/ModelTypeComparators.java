@@ -21,11 +21,14 @@ import org.activiti.cloud.modeling.api.Model;
 
 public abstract class ModelTypeComparators {
 
-    protected static final List<String> PRIORITIZED_MODEL_TYPES = List.of("FORM", "SCRIPT", "DECISION");
+    protected static final List<String> PRIORITIZED_MODEL_TYPES = List.of(
+        "FORM",
+        "SCRIPT",
+        "DECISION"
+    );
 
     public static final Comparator<ProjectHolder.ModelJsonFile> MODEL_JSON_FILE_TYPE_COMPARATOR = new ModelJsonFileTypeComparator();
     public static final Comparator<Model> MODEL_TYPE_COMPARATOR = new ModelTypeComparator();
 
-    private ModelTypeComparators() {
-    }
+    private ModelTypeComparators() {}
 }

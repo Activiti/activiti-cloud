@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-
 import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
@@ -24,9 +23,12 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequeste
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationRequestSentEventEntity;
 
-public class IntegrationRequestedEventConverter extends BaseEventToEntityConverter {
+public class IntegrationRequestedEventConverter
+    extends BaseEventToEntityConverter {
 
-    public IntegrationRequestedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public IntegrationRequestedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -36,14 +38,22 @@ public class IntegrationRequestedEventConverter extends BaseEventToEntityConvert
     }
 
     @Override
-    protected IntegrationRequestSentEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new IntegrationRequestSentEventEntity(CloudIntegrationRequestedEvent.class.cast(cloudRuntimeEvent));
+    protected IntegrationRequestSentEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new IntegrationRequestSentEventEntity(
+            CloudIntegrationRequestedEvent.class.cast(cloudRuntimeEvent)
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         IntegrationRequestSentEventEntity entity = (IntegrationRequestSentEventEntity) auditEventEntity;
 
-        return new CloudIntegrationRequestedEventImpl(entity.getIntegrationContext());
+        return new CloudIntegrationRequestedEventImpl(
+            entity.getIntegrationContext()
+        );
     }
 }

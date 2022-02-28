@@ -47,7 +47,6 @@ public class MessageAggregatorProperties {
      */
     private String headerChannelsTimeToLiveExpression = null;
 
-
     public Expression getGroupTimeout() {
         return this.groupTimeout;
     }
@@ -72,14 +71,14 @@ public class MessageAggregatorProperties {
         this.inputHeadersToRemove = headersToRemove;
     }
 
-
     public String getHeaderChannelsTimeToLiveExpression() {
         return headerChannelsTimeToLiveExpression;
     }
 
-
-    public void setHeaderChannelsTimeToLiveExpression(String headerChannelsTimeToLiveExpression) {
-        this.headerChannelsTimeToLiveExpression = headerChannelsTimeToLiveExpression;
+    public void setHeaderChannelsTimeToLiveExpression(
+        String headerChannelsTimeToLiveExpression
+    ) {
+        this.headerChannelsTimeToLiveExpression =
+            headerChannelsTimeToLiveExpression;
     }
-
 }

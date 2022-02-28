@@ -27,32 +27,40 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstanceVariableAdminController {
+public class ProcessInstanceVariableAdminControllerImpl
+    implements ProcessInstanceVariableAdminController {
+
     private final ProcessAdminRuntime processAdminRuntime;
 
     @Autowired
-    public ProcessInstanceVariableAdminControllerImpl(ProcessAdminRuntime processAdminRuntime) {
+    public ProcessInstanceVariableAdminControllerImpl(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         this.processAdminRuntime = processAdminRuntime;
     }
 
     @Override
-    public ResponseEntity<Void> updateVariables(@PathVariable String processInstanceId,
-                                                @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
-        
+    public ResponseEntity<Void> updateVariables(
+        @PathVariable String processInstanceId,
+        @RequestBody SetProcessVariablesPayload setProcessVariablesPayload
+    ) {
         if (setProcessVariablesPayload != null) {
             setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
         }
-        
+
         processAdminRuntime.setVariables(setProcessVariablesPayload);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
-                                                @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload) {
-        if (removeProcessVariablesPayload!=null) {
-            removeProcessVariablesPayload.setProcessInstanceId(processInstanceId);
-
+    public ResponseEntity<Void> removeVariables(
+        @PathVariable String processInstanceId,
+        @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload
+    ) {
+        if (removeProcessVariablesPayload != null) {
+            removeProcessVariablesPayload.setProcessInstanceId(
+                processInstanceId
+            );
         }
         processAdminRuntime.removeVariables(removeProcessVariablesPayload);
 

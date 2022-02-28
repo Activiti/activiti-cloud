@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TaskAssignedEventEntity.TASK_ASSIGNED_EVENT)
 @DiscriminatorValue(value = TaskAssignedEventEntity.TASK_ASSIGNED_EVENT)
@@ -28,8 +27,7 @@ public class TaskAssignedEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_ASSIGNED_EVENT = "TaskAssignedEvent";
 
-    public TaskAssignedEventEntity() {
-    }
+    public TaskAssignedEventEntity() {}
 
     public TaskAssignedEventEntity(CloudTaskAssignedEvent cloudEvent) {
         super(cloudEvent);
@@ -38,7 +36,10 @@ public class TaskAssignedEventEntity extends TaskAuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TaskAssignedEventEntity [toString()=").append(super.toString()).append("]");
+        builder
+            .append("TaskAssignedEventEntity [toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

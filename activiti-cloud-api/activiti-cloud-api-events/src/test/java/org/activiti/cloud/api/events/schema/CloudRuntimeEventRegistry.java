@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
@@ -80,7 +79,9 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudBPMNTimerScheduledEventImpl());
         eventImplementations.add(new CloudBPMNTimerExecutedEventImpl());
         eventImplementations.add(new CloudBPMNTimerFailedEventImpl());
-        eventImplementations.add(new CloudBPMNTimerRetriesDecrementedEventImpl());
+        eventImplementations.add(
+            new CloudBPMNTimerRetriesDecrementedEventImpl()
+        );
         eventImplementations.add(new CloudBPMNMessageWaitingEventImpl());
         eventImplementations.add(new CloudBPMNMessageReceivedEventImpl());
         eventImplementations.add(new CloudBPMNMessageSentEventImpl());
@@ -97,7 +98,9 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudProcessUpdatedEventImpl());
         eventImplementations.add(new CloudSequenceFlowTakenEventImpl());
         eventImplementations.add(new CloudStartMessageDeployedEventImpl());
-        eventImplementations.add(new CloudMessageSubscriptionCancelledEventImpl());
+        eventImplementations.add(
+            new CloudMessageSubscriptionCancelledEventImpl()
+        );
         eventImplementations.add(new CloudTaskCreatedEventImpl());
         eventImplementations.add(new CloudTaskUpdatedEventImpl());
         eventImplementations.add(new CloudTaskAssignedEventImpl());
@@ -114,16 +117,32 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudVariableDeletedEventImpl());
         eventImplementations.add(new CloudApplicationDeployedEventImpl());
         return eventImplementations
-                .stream()
-                .collect(Collectors.toMap(
-                        event -> event.getEventType().name(),
-                        this::findInterface));
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    event -> event.getEventType().name(),
+                    this::findInterface
+                )
+            );
     }
 
-    private Class<?> findInterface(RuntimeEvent<?, ?> eventImplementationClass) {
-        return Arrays.stream(eventImplementationClass.getClass().getInterfaces())
-                .filter(eventInterFace ->
-                                eventImplementationClass.getClass().getSimpleName().contains(eventInterFace.getSimpleName()))
-                .findFirst().orElseThrow(() -> new IllegalStateException("Unable to find interface for " + eventImplementationClass.getClass()));
+    private Class<?> findInterface(
+        RuntimeEvent<?, ?> eventImplementationClass
+    ) {
+        return Arrays
+            .stream(eventImplementationClass.getClass().getInterfaces())
+            .filter(eventInterFace ->
+                eventImplementationClass
+                    .getClass()
+                    .getSimpleName()
+                    .contains(eventInterFace.getSimpleName())
+            )
+            .findFirst()
+            .orElseThrow(() ->
+                new IllegalStateException(
+                    "Unable to find interface for " +
+                    eventImplementationClass.getClass()
+                )
+            );
     }
 }

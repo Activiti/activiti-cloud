@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 public enum ServiceTaskImplementationType {
-
     EMAIL_SERVICE("email-service."),
     DOCGEN_SERVICE("docgen-service."),
     CONTENT_SERVICE("content-service."),

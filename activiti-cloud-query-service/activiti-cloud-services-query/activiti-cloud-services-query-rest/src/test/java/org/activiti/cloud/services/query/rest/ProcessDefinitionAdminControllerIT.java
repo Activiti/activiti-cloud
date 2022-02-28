@@ -48,11 +48,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessDefinitionAdminController.class)
-@Import({
+@Import(
+    {
         QueryRestWebMvcAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -82,35 +84,46 @@ public class ProcessDefinitionAdminControllerIT {
     @Test
     public void shouldReturnAvailableProcessDefinitions() throws Exception {
         //given
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10);
-        given(processDefinitionRepository.findAll(any(),
-                                                  eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           pageRequest,
-                                           1));
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        given(processDefinitionRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultProcessDefinition()),
+                    pageRequest,
+                    1
+                )
+            );
 
         //when
-        mockMvc.perform(get("/admin/v1/process-definitions?page=0&size=10")
-                                .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
-
+        mockMvc
+            .perform(
+                get("/admin/v1/process-definitions?page=0&size=10")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat() throws Exception {
+    public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat()
+        throws Exception {
         //given
         given(processDefinitionRepository.findAll(any(), any(Pageable.class)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           PageRequest.of(1,10),
-                                           11));
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultProcessDefinition()),
+                    PageRequest.of(1, 10),
+                    11
+                )
+            );
 
         //when
-        mockMvc.perform(get("/admin/v1/process-definitions?skipCount=10&maxItems=10")
-                                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/admin/v1/process-definitions?skipCount=10&maxItems=10")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk());
     }
-
 }

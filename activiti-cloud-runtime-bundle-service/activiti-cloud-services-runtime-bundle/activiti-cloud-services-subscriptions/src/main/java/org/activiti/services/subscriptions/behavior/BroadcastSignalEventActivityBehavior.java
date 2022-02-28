@@ -26,22 +26,27 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.springframework.context.ApplicationEventPublisher;
 
-public class BroadcastSignalEventActivityBehavior extends IntermediateThrowSignalEventActivityBehavior {
+public class BroadcastSignalEventActivityBehavior
+    extends IntermediateThrowSignalEventActivityBehavior {
 
-    public static final String DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME = "defaultThrowSignalEventBehavior";
+    public static final String DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME =
+        "defaultThrowSignalEventBehavior";
 
     private static final long serialVersionUID = 1L;
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public BroadcastSignalEventActivityBehavior(ApplicationEventPublisher eventPublisher, SignalEventDefinition signalEventDefinition,
-                                                        Signal signal) {
+    public BroadcastSignalEventActivityBehavior(
+        ApplicationEventPublisher eventPublisher,
+        SignalEventDefinition signalEventDefinition,
+        Signal signal
+    ) {
         super(signalEventDefinition, signal);
         this.eventPublisher = eventPublisher;
     }
 
     public void execute(DelegateExecution execution) {
-    	if (processInstanceScope) {
+        if (processInstanceScope) {
             super.execute(execution);
             return;
         }
@@ -49,17 +54,27 @@ public class BroadcastSignalEventActivityBehavior extends IntermediateThrowSigna
         CommandContext commandContext = Context.getCommandContext();
         String eventSubscriptionName;
         if (signalEventName != null) {
-             eventSubscriptionName = signalEventName;
+            eventSubscriptionName = signalEventName;
         } else {
-             Expression expressionObject = commandContext.getProcessEngineConfiguration().getExpressionManager().createExpression(signalExpression);
-             eventSubscriptionName = expressionObject.getValue(execution).toString();
+            Expression expressionObject = commandContext
+                .getProcessEngineConfiguration()
+                .getExpressionManager()
+                .createExpression(signalExpression);
+            eventSubscriptionName =
+                expressionObject.getValue(execution).toString();
         }
 
-        SignalPayload signalPayload = new SignalPayload(eventSubscriptionName, execution.getVariables());
+        SignalPayload signalPayload = new SignalPayload(
+            eventSubscriptionName,
+            execution.getVariables()
+        );
         eventPublisher.publishEvent(signalPayload);
 
-        Context.getAgenda().planTakeOutgoingSequenceFlowsOperation((ExecutionEntity) execution,
-                true);
-
+        Context
+            .getAgenda()
+            .planTakeOutgoingSequenceFlowsOperation(
+                (ExecutionEntity) execution,
+                true
+            );
     }
 }

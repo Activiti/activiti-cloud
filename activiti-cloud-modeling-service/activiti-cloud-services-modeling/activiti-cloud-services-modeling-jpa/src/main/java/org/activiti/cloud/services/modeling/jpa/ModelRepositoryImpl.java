@@ -29,44 +29,64 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, ModelEntity> {
+public class ModelRepositoryImpl
+    implements ModelRepository<ProjectEntity, ModelEntity> {
 
     private final ModelJpaRepository modelJpaRepository;
     private final VersionGenerationHelper<ModelEntity, ModelVersionEntity> versionGenerationHelper;
 
     @Autowired
-   public ModelRepositoryImpl(ModelJpaRepository modelJpaRepository){
-
-       this.modelJpaRepository=modelJpaRepository;
-        versionGenerationHelper = new VersionGenerationHelper<>(ModelEntity.class, ModelVersionEntity.class);
-   }
-
+    public ModelRepositoryImpl(ModelJpaRepository modelJpaRepository) {
+        this.modelJpaRepository = modelJpaRepository;
+        versionGenerationHelper =
+            new VersionGenerationHelper<>(
+                ModelEntity.class,
+                ModelVersionEntity.class
+            );
+    }
 
     @Override
     public Page<ModelEntity> getModels(
-        ProjectEntity project, ModelType modelTypeFilter,
-        Pageable pageable) {
-        return modelJpaRepository.findAllByProjectIdAndTypeEquals(project.getId(),
+        ProjectEntity project,
+        ModelType modelTypeFilter,
+        Pageable pageable
+    ) {
+        return modelJpaRepository.findAllByProjectIdAndTypeEquals(
+            project.getId(),
             modelTypeFilter.getName(),
-            pageable);
+            pageable
+        );
     }
 
     @Override
     public Optional<ModelEntity> findModelByNameInProject(
-        ProjectEntity project, String modelName, String modelTypeFilter) {
-        List<ModelEntity> models = modelJpaRepository
-            .findModelByProjectIdAndNameEqualsAndTypeEquals(project != null ? project.getId() : null, modelName, modelTypeFilter);
+        ProjectEntity project,
+        String modelName,
+        String modelTypeFilter
+    ) {
+        List<ModelEntity> models = modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(
+            project != null ? project.getId() : null,
+            modelName,
+            modelTypeFilter
+        );
 
-        if(models!=null && !models.isEmpty()){
+        if (models != null && !models.isEmpty()) {
             return Optional.of(models.get(0));
-        }else{
+        } else {
             return Optional.empty();
         }
     }
 
     @Override
-    public Optional<ModelEntity> findGlobalModelByNameAndType(String modelName, String modelTypeFilter) {
-        List<ModelEntity> models = modelJpaRepository.findModelByNameAndScopeAndTypeEquals(modelName, ModelScope.GLOBAL, modelTypeFilter);
+    public Optional<ModelEntity> findGlobalModelByNameAndType(
+        String modelName,
+        String modelTypeFilter
+    ) {
+        List<ModelEntity> models = modelJpaRepository.findModelByNameAndScopeAndTypeEquals(
+            modelName,
+            ModelScope.GLOBAL,
+            modelTypeFilter
+        );
 
         if (models != null && !models.isEmpty()) {
             return Optional.of(models.get(0));
@@ -77,26 +97,21 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public Optional<ModelEntity> findModelById(String modelId) {
-
         return modelJpaRepository.findById(modelId);
     }
 
     @Override
     public byte[] getModelContent(ModelEntity model) {
-
-        return Optional.ofNullable(model.getContent())
-            .orElse(new byte[0]);
+        return Optional.ofNullable(model.getContent()).orElse(new byte[0]);
     }
 
     @Override
     public byte[] getModelExport(ModelEntity model) {
-
         return getModelContent(model);
     }
 
     @Override
     public ModelEntity createModel(ModelEntity model) {
-
         model.setId(null);
         versionGenerationHelper.generateNextVersion(model);
         return modelJpaRepository.save(model);
@@ -104,10 +119,14 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public ModelEntity updateModel(
-        ModelEntity modelToBeUpdated, ModelEntity newModel) {
-        Optional.ofNullable(newModel.getName())
+        ModelEntity modelToBeUpdated,
+        ModelEntity newModel
+    ) {
+        Optional
+            .ofNullable(newModel.getName())
             .ifPresent(modelToBeUpdated::setName);
-        Optional.ofNullable(newModel.getExtensions())
+        Optional
+            .ofNullable(newModel.getExtensions())
             .ifPresent(modelToBeUpdated::setExtensions);
         versionGenerationHelper.generateNextVersion(modelToBeUpdated);
         return modelJpaRepository.save(modelToBeUpdated);
@@ -115,7 +134,10 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public ModelEntity copyModel(ModelEntity model, ProjectEntity project) {
-        ModelEntity modelEntityClone = new ModelEntity(model.getName(), model.getType());
+        ModelEntity modelEntityClone = new ModelEntity(
+            model.getName(),
+            model.getType()
+        );
         modelEntityClone.setExtensions(model.getExtensions());
         modelEntityClone.setContentType(model.getContentType());
         modelEntityClone.setContent(model.getContent());
@@ -127,8 +149,8 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     @Override
     public ModelEntity updateModelContent(
         ModelEntity modelToBeUpdate,
-        FileContent fileContent) {
-
+        FileContent fileContent
+    ) {
         return modelJpaRepository.save(modelToBeUpdate);
     }
 
@@ -138,17 +160,23 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     }
 
     @Override
-    public Page<ModelEntity> getGlobalModels(ModelType modelTypeFilter, boolean includeOrphans, Pageable pageable) {
-        if(includeOrphans){
+    public Page<ModelEntity> getGlobalModels(
+        ModelType modelTypeFilter,
+        boolean includeOrphans,
+        Pageable pageable
+    ) {
+        if (includeOrphans) {
             return modelJpaRepository.findAllByScopeAndTypeEqualsWithOrphans(
                 ModelScope.GLOBAL,
                 modelTypeFilter.getName(),
-                pageable);
-        }else{
+                pageable
+            );
+        } else {
             return modelJpaRepository.findAllByScopeAndTypeEquals(
                 ModelScope.GLOBAL,
                 modelTypeFilter.getName(),
-                pageable);
+                pageable
+            );
         }
     }
 

@@ -24,6 +24,5 @@ import org.springframework.test.annotation.DirtiesContext;
 public class ApplicationTest {
 
     @Test
-    public void contextLoads() {
-    }
+    public void contextLoads() {}
 }

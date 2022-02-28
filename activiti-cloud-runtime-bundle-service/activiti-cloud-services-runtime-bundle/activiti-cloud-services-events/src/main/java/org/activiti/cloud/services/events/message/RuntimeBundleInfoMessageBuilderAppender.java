@@ -19,11 +19,14 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-public class RuntimeBundleInfoMessageBuilderAppender implements MessageBuilderAppender {
+public class RuntimeBundleInfoMessageBuilderAppender
+    implements MessageBuilderAppender {
 
     private final RuntimeBundleProperties properties;
 
-    public RuntimeBundleInfoMessageBuilderAppender(RuntimeBundleProperties properties) {
+    public RuntimeBundleInfoMessageBuilderAppender(
+        RuntimeBundleProperties properties
+    ) {
         Assert.notNull(properties, "properties must not be null");
 
         this.properties = properties;
@@ -32,12 +35,27 @@ public class RuntimeBundleInfoMessageBuilderAppender implements MessageBuilderAp
     @Override
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
-        
-        return request.setHeader(RuntimeBundleInfoMessageHeaders.APP_NAME, properties.getAppName())
-                .setHeader(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, properties.getServiceName())
-                .setHeader(RuntimeBundleInfoMessageHeaders.SERVICE_FULL_NAME, properties.getServiceFullName())
-                .setHeader(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE, properties.getServiceType())
-                .setHeader(RuntimeBundleInfoMessageHeaders.SERVICE_VERSION, properties.getServiceVersion());
-    }
 
+        return request
+            .setHeader(
+                RuntimeBundleInfoMessageHeaders.APP_NAME,
+                properties.getAppName()
+            )
+            .setHeader(
+                RuntimeBundleInfoMessageHeaders.SERVICE_NAME,
+                properties.getServiceName()
+            )
+            .setHeader(
+                RuntimeBundleInfoMessageHeaders.SERVICE_FULL_NAME,
+                properties.getServiceFullName()
+            )
+            .setHeader(
+                RuntimeBundleInfoMessageHeaders.SERVICE_TYPE,
+                properties.getServiceType()
+            )
+            .setHeader(
+                RuntimeBundleInfoMessageHeaders.SERVICE_VERSION,
+                properties.getServiceVersion()
+            );
+    }
 }

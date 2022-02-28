@@ -32,25 +32,29 @@ public class TokenRelayRequestInterceptor implements RequestInterceptor {
 
     private final SecurityContextTokenProvider securityContextTokenProvider;
 
-    public TokenRelayRequestInterceptor(SecurityContextTokenProvider securityContextTokenProvider) {
-        this(securityContextTokenProvider,
-             BEARER);
+    public TokenRelayRequestInterceptor(
+        SecurityContextTokenProvider securityContextTokenProvider
+    ) {
+        this(securityContextTokenProvider, BEARER);
     }
 
-    public TokenRelayRequestInterceptor(SecurityContextTokenProvider securityContextTokenProvider,
-                                        String tokenType) {
+    public TokenRelayRequestInterceptor(
+        SecurityContextTokenProvider securityContextTokenProvider,
+        String tokenType
+    ) {
         this.securityContextTokenProvider = securityContextTokenProvider;
         this.tokenType = tokenType;
     }
 
     @Override
     public void apply(RequestTemplate template) {
-        securityContextTokenProvider.getCurrentToken()
-                .ifPresent(token -> {
-                    template.header(AUTHORIZATION,
-                                    String.format("%s %s",
-                                                  tokenType,
-                                                  token));
-                });
+        securityContextTokenProvider
+            .getCurrentToken()
+            .ifPresent(token -> {
+                template.header(
+                    AUTHORIZATION,
+                    String.format("%s %s", tokenType, token)
+                );
+            });
     }
 }

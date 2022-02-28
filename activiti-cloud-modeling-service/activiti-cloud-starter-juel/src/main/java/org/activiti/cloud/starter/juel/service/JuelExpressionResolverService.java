@@ -23,7 +23,9 @@ import org.slf4j.LoggerFactory;
 
 public class JuelExpressionResolverService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JuelExpressionResolverService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        JuelExpressionResolverService.class
+    );
 
     private static final String RESULT = "result";
     private static final String EXPRESSION = "expression";
@@ -34,12 +36,27 @@ public class JuelExpressionResolverService {
      * @param inputVariables the input variables: expression and variables.
      * @return the resolved expression.
      */
-    public Map<String, Object> resolveExpression(final Map<String, Object> inputVariables) {
-        LOGGER.debug("Calling Juel Expression Resolver with parameters {}", inputVariables);
+    public Map<String, Object> resolveExpression(
+        final Map<String, Object> inputVariables
+    ) {
+        LOGGER.debug(
+            "Calling Juel Expression Resolver with parameters {}",
+            inputVariables
+        );
         try {
             final String expression = (String) inputVariables.get(EXPRESSION);
-            final Map<String, Object> conditionVariables = (Map<String, Object>) inputVariables.get(VARIABLES);
-            return Map.of(RESULT, new JuelExpressionResolver().resolveExpression(expression, conditionVariables, Object.class));
+            final Map<String, Object> conditionVariables = (Map<String, Object>) inputVariables.get(
+                VARIABLES
+            );
+            return Map.of(
+                RESULT,
+                new JuelExpressionResolver()
+                    .resolveExpression(
+                        expression,
+                        conditionVariables,
+                        Object.class
+                    )
+            );
         } catch (Exception e) {
             throw new JuelRuntimeException(e.getMessage(), e);
         }

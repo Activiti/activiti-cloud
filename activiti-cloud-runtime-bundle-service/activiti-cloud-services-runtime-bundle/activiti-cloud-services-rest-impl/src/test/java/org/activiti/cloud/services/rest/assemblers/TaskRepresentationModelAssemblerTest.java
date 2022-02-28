@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
+import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import java.util.Optional;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -24,14 +30,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
-
-import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
-import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
+import org.springframework.hateoas.Link;
 
 public class TaskRepresentationModelAssemblerTest {
 
@@ -52,7 +52,9 @@ public class TaskRepresentationModelAssemblerTest {
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
 
-        EntityModel<CloudTask> resource = representationModelAssembler.toModel(model);
+        EntityModel<CloudTask> resource = representationModelAssembler.toModel(
+            model
+        );
 
         Optional<Link> selfResourceLink = resource.getLink("self");
 
@@ -66,7 +68,9 @@ public class TaskRepresentationModelAssemblerTest {
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
 
-        EntityModel<CloudTask> resource = representationModelAssembler.toModel(model);
+        EntityModel<CloudTask> resource = representationModelAssembler.toModel(
+            model
+        );
 
         assertThat(resource.getLink("claim")).isPresent();
         assertThat(resource.getLink("release")).isNotPresent();
@@ -79,7 +83,9 @@ public class TaskRepresentationModelAssemblerTest {
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
 
-        EntityModel<CloudTask> resource = representationModelAssembler.toModel(model);
+        EntityModel<CloudTask> resource = representationModelAssembler.toModel(
+            model
+        );
 
         assertThat(resource.getLink("claim")).isNotPresent();
         assertThat(resource.getLink("release")).isPresent();
@@ -91,7 +97,9 @@ public class TaskRepresentationModelAssemblerTest {
         Task model = new TaskImpl("my-identifier", "myTask", CREATED);
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
-        EntityModel<CloudTask> resource = representationModelAssembler.toModel(model);
+        EntityModel<CloudTask> resource = representationModelAssembler.toModel(
+            model
+        );
 
         // a new standalone task doesn't have a bond to a process instance
         // and should not return the rel 'processInstance'
@@ -106,9 +114,10 @@ public class TaskRepresentationModelAssemblerTest {
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
 
-        EntityModel<CloudTask> resource = representationModelAssembler.toModel(model);
+        EntityModel<CloudTask> resource = representationModelAssembler.toModel(
+            model
+        );
 
         assertThat(resource.getLink("processInstance")).isPresent();
     }
-
 }

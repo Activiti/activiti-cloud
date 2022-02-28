@@ -48,21 +48,29 @@ public class IntegrationResultSenderImplTest {
     }
 
     @Test
-    public void sendShouldSendMessageBasedOnTheTargetApplication() throws Exception {
+    public void sendShouldSendMessageBasedOnTheTargetApplication()
+        throws Exception {
         //given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(
+            integrationContext
+        );
         integrationRequest.setServiceFullName("myApp");
         integrationRequest.setAppName("myAppName");
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
-        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
-                integrationRequest.getIntegrationContext());
+        IntegrationResult integrationResultEvent = new IntegrationResultImpl(
+            integrationRequest,
+            integrationRequest.getIntegrationContext()
+        );
 
-        given(resolver.resolveDestination(integrationRequest)).willReturn(messageChannel);
+        given(resolver.resolveDestination(integrationRequest))
+            .willReturn(messageChannel);
 
-        Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
+        Message<IntegrationResult> message = MessageBuilder
+            .withPayload(integrationResultEvent)
+            .build();
 
         //when
         integrationResultSender.send(message);

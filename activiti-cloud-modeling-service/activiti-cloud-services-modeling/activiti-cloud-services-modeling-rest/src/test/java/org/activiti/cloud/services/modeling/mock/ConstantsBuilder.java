@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.mock;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.activiti.cloud.modeling.api.process.Constant;
 
 public class ConstantsBuilder {
@@ -42,8 +41,7 @@ public class ConstantsBuilder {
         return this;
     }
 
-    public Map<String,  Map<String, Constant>> build() {
+    public Map<String, Map<String, Constant>> build() {
         return Collections.singletonMap(taskName, constants);
     }
-
 }

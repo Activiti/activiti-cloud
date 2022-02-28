@@ -19,7 +19,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 
-public interface CloudProcessCancelledEvent extends CloudProcessRuntimeEvent,
-        ProcessRuntimeEvent<ProcessInstance> {
+public interface CloudProcessCancelledEvent
+    extends CloudProcessRuntimeEvent, ProcessRuntimeEvent<ProcessInstance> {
     String getCause();
 }

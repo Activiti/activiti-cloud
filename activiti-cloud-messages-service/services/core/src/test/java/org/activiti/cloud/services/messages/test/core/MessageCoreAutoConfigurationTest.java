@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.messages.test.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.assertj.core.api.AbstractStringAssert;
 import org.junit.jupiter.api.Test;
@@ -24,9 +26,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.integration.dsl.IntegrationFlow;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@SpringBootTest(properties = "activiti.cloud.application.name=my-activiti-rb-app")
+@SpringBootTest(
+    properties = "activiti.cloud.application.name=my-activiti-rb-app"
+)
 public class MessageCoreAutoConfigurationTest {
 
     @Autowired
@@ -39,17 +41,21 @@ public class MessageCoreAutoConfigurationTest {
     private ApplicationContext applicationContext;
 
     @SpringBootApplication
-    static class Application {
-
-    }
+    static class Application {}
 
     @Test
     public void contextLoads() {
         assertThat(messageConnectorProcessor).isNotNull();
         assertThat(messageConnectorIntegrationFlow).isNotNull();
 
-        assertProperty("spring.cloud.stream.bindings.messageConnectorInput.destination").isEqualTo("messageEvents");
-        assertProperty("spring.cloud.stream.bindings.messageConnectorOutput.destination").isEqualTo("commandConsumer");
+        assertProperty(
+            "spring.cloud.stream.bindings.messageConnectorInput.destination"
+        )
+            .isEqualTo("messageEvents");
+        assertProperty(
+            "spring.cloud.stream.bindings.messageConnectorOutput.destination"
+        )
+            .isEqualTo("commandConsumer");
     }
 
     private AbstractStringAssert<?> assertProperty(String name) {
@@ -57,7 +63,6 @@ public class MessageCoreAutoConfigurationTest {
     }
 
     private String getProperty(String name) {
-        return applicationContext.getEnvironment()
-                                 .getProperty(name);
+        return applicationContext.getEnvironment().getProperty(name);
     }
 }

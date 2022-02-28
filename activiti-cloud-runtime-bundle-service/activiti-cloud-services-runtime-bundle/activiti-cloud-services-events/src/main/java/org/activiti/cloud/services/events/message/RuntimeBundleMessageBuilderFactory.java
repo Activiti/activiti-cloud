@@ -21,13 +21,15 @@ public class RuntimeBundleMessageBuilderFactory {
 
     private final RuntimeBundleProperties properties;
 
-    public RuntimeBundleMessageBuilderFactory(RuntimeBundleProperties properties) {
+    public RuntimeBundleMessageBuilderFactory(
+        RuntimeBundleProperties properties
+    ) {
         this.properties = properties;
     }
 
     public MessageBuilderAppenderChain create() {
         return new MessageBuilderAppenderChain()
-                .routingKeyResolver(new AuditProducerRoutingKeyResolver())
-                .chain(new RuntimeBundleInfoMessageBuilderAppender(properties));
+            .routingKeyResolver(new AuditProducerRoutingKeyResolver())
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties));
     }
 }

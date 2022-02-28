@@ -24,8 +24,10 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 
 public class ProcessStartedEventConverter extends BaseEventToEntityConverter {
-   
-    public ProcessStartedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+
+    public ProcessStartedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -35,16 +37,24 @@ public class ProcessStartedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected ProcessStartedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new ProcessStartedAuditEventEntity((CloudProcessStartedEvent) cloudRuntimeEvent);
+    protected ProcessStartedAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new ProcessStartedAuditEventEntity(
+            (CloudProcessStartedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         ProcessStartedAuditEventEntity processStartedAuditEventEntity = (ProcessStartedAuditEventEntity) auditEventEntity;
 
-        return new CloudProcessStartedEventImpl(processStartedAuditEventEntity.getEventId(),
-                                                processStartedAuditEventEntity.getTimestamp(),
-                                                processStartedAuditEventEntity.getProcessInstance());
+        return new CloudProcessStartedEventImpl(
+            processStartedAuditEventEntity.getEventId(),
+            processStartedAuditEventEntity.getTimestamp(),
+            processStartedAuditEventEntity.getProcessInstance()
+        );
     }
 }

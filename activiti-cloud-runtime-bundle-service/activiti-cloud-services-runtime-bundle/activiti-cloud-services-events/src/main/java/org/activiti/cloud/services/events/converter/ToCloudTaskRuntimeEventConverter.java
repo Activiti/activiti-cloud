@@ -53,74 +53,105 @@ public class ToCloudTaskRuntimeEventConverter {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    public ToCloudTaskRuntimeEventConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+    public ToCloudTaskRuntimeEventConverter(
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+    ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
     public CloudTaskCreatedEvent from(TaskCreatedEvent event) {
-        CloudTaskCreatedEventImpl cloudEvent = new CloudTaskCreatedEventImpl(event.getEntity());
+        CloudTaskCreatedEventImpl cloudEvent = new CloudTaskCreatedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudTaskUpdatedEvent from(TaskUpdatedEvent event) {
-        CloudTaskUpdatedEventImpl cloudEvent = new CloudTaskUpdatedEventImpl(event.getEntity());
+        CloudTaskUpdatedEventImpl cloudEvent = new CloudTaskUpdatedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudTaskAssignedEvent from(TaskAssignedEvent event) {
-        CloudTaskAssignedEventImpl cloudEvent = new CloudTaskAssignedEventImpl(event.getEntity());
+        CloudTaskAssignedEventImpl cloudEvent = new CloudTaskAssignedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudTaskCompletedEvent from(TaskCompletedEvent event) {
-        CloudTaskCompletedEventImpl cloudEvent = new CloudTaskCompletedEventImpl(event.getEntity());
+        CloudTaskCompletedEventImpl cloudEvent = new CloudTaskCompletedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudTaskCancelledEvent from(TaskCancelledEvent event) {
-        CloudTaskCancelledEventImpl cloudEvent = new CloudTaskCancelledEventImpl(event.getEntity());
+        CloudTaskCancelledEventImpl cloudEvent = new CloudTaskCancelledEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudTaskSuspendedEvent from(TaskSuspendedEvent event) {
-        CloudTaskSuspendedEventImpl cloudEvent = new CloudTaskSuspendedEventImpl(event.getEntity());
+        CloudTaskSuspendedEventImpl cloudEvent = new CloudTaskSuspendedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudTaskActivatedEvent from(TaskActivatedEvent event) {
-        CloudTaskActivatedEventImpl cloudEvent = new CloudTaskActivatedEventImpl(event.getEntity());
+        CloudTaskActivatedEventImpl cloudEvent = new CloudTaskActivatedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCandidateUserAddedEvent from(TaskCandidateUserAddedEvent event){
-        CloudTaskCandidateUserAddedEventImpl cloudEvent = new CloudTaskCandidateUserAddedEventImpl(event.getEntity());
+    public CloudTaskCandidateUserAddedEvent from(
+        TaskCandidateUserAddedEvent event
+    ) {
+        CloudTaskCandidateUserAddedEventImpl cloudEvent = new CloudTaskCandidateUserAddedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCandidateUserRemovedEvent from(TaskCandidateUserRemovedEvent event){
-        CloudTaskCandidateUserRemovedEventImpl cloudEvent = new CloudTaskCandidateUserRemovedEventImpl(event.getEntity());
+    public CloudTaskCandidateUserRemovedEvent from(
+        TaskCandidateUserRemovedEvent event
+    ) {
+        CloudTaskCandidateUserRemovedEventImpl cloudEvent = new CloudTaskCandidateUserRemovedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCandidateGroupAddedEvent from(TaskCandidateGroupAddedEvent event){
-        CloudTaskCandidateGroupAddedEventImpl cloudEvent = new CloudTaskCandidateGroupAddedEventImpl(event.getEntity());
+    public CloudTaskCandidateGroupAddedEvent from(
+        TaskCandidateGroupAddedEvent event
+    ) {
+        CloudTaskCandidateGroupAddedEventImpl cloudEvent = new CloudTaskCandidateGroupAddedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCandidateGroupRemovedEvent from(TaskCandidateGroupRemovedEvent event){
-        CloudTaskCandidateGroupRemovedEventImpl cloudEvent = new CloudTaskCandidateGroupRemovedEventImpl(event.getEntity());
+    public CloudTaskCandidateGroupRemovedEvent from(
+        TaskCandidateGroupRemovedEvent event
+    ) {
+        CloudTaskCandidateGroupRemovedEventImpl cloudEvent = new CloudTaskCandidateGroupRemovedEventImpl(
+            event.getEntity()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-
 }

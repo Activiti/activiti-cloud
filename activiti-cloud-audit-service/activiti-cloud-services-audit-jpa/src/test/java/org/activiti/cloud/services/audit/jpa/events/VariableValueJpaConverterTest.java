@@ -31,7 +31,9 @@ class VariableValueJpaConverterTest {
         VariableValue<String> variableValue = new VariableValue<>();
         variableValue.setValue("stringValue");
 
-        String result = variableValueJpaConverter.convertToDatabaseColumn(variableValue);
+        String result = variableValueJpaConverter.convertToDatabaseColumn(
+            variableValue
+        );
 
         assertThat(result).isEqualTo("{\"value\":\"stringValue\"}");
     }
@@ -41,7 +43,9 @@ class VariableValueJpaConverterTest {
         VariableValue<Integer> variableValue = new VariableValue<>();
         variableValue.setValue(12);
 
-        String result = variableValueJpaConverter.convertToDatabaseColumn(variableValue);
+        String result = variableValueJpaConverter.convertToDatabaseColumn(
+            variableValue
+        );
 
         assertThat(result).isEqualTo("{\"value\":12}");
     }
@@ -51,7 +55,9 @@ class VariableValueJpaConverterTest {
         VariableValue<Boolean> variableValue = new VariableValue<>();
         variableValue.setValue(true);
 
-        String result = variableValueJpaConverter.convertToDatabaseColumn(variableValue);
+        String result = variableValueJpaConverter.convertToDatabaseColumn(
+            variableValue
+        );
 
         assertThat(result).isEqualTo("{\"value\":true}");
     }
@@ -61,7 +67,9 @@ class VariableValueJpaConverterTest {
         VariableValue<Double> variableValue = new VariableValue<>();
         variableValue.setValue(12.34);
 
-        String result = variableValueJpaConverter.convertToDatabaseColumn(variableValue);
+        String result = variableValueJpaConverter.convertToDatabaseColumn(
+            variableValue
+        );
 
         assertThat(result).isEqualTo("{\"value\":12.34}");
     }
@@ -71,7 +79,9 @@ class VariableValueJpaConverterTest {
         VariableValue<BigDecimal> variableValue = new VariableValue<>();
         variableValue.setValue(BigDecimal.valueOf(1234.5678));
 
-        String result = variableValueJpaConverter.convertToDatabaseColumn(variableValue);
+        String result = variableValueJpaConverter.convertToDatabaseColumn(
+            variableValue
+        );
 
         assertThat(result).isEqualTo("{\"value\":1234.5678}");
     }
@@ -85,55 +95,66 @@ class VariableValueJpaConverterTest {
 
     @Test
     void should_convertToEntityAttribute_when_stringEntity() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute("{\"value\":\"stringValue\"}");
+        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute(
+            "{\"value\":\"stringValue\"}"
+        );
 
         assertThat(result.getValue()).isEqualTo("stringValue");
     }
 
     @Test
     void should_convertToEntityAttribute_when_booleanEntity() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute("{\"value\":true}");
+        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute(
+            "{\"value\":true}"
+        );
 
         assertThat(result.getValue()).isEqualTo(true);
     }
 
     @Test
     void should_convertToEntityAttribute_when_integerEntity() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute("{\"value\":123}");
+        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute(
+            "{\"value\":123}"
+        );
 
         assertThat(result.getValue()).isEqualTo(123);
     }
 
     @Test
     void should_convertToEntityAttribute_when_doubleEntity() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute("{\"value\":1234.5678}");
+        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute(
+            "{\"value\":1234.5678}"
+        );
 
         assertThat(result.getValue()).isEqualTo(1234.5678);
     }
 
     @Test
     void should_convertToEntityAttribute_when_entityNull() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute(null);
+        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute(
+            null
+        );
 
         assertThat(result).isNull();
     }
 
     @Test
     void should_convertToEntityAttribute_when_entityEmpty() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute("");
+        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute(
+            ""
+        );
 
         assertThat(result).isNull();
     }
 
     @Test
     void should_throwExceptionConvertToEntityAttribute() {
-        Throwable exception = catchThrowable( () -> variableValueJpaConverter.convertToEntityAttribute("{..invalidJson"));
+        Throwable exception = catchThrowable(() ->
+            variableValueJpaConverter.convertToEntityAttribute("{..invalidJson")
+        );
 
         assertThat(exception)
             .isInstanceOf(AuditException.class)
             .hasMessage("Unable to deserialize object.");
     }
-
-
-
 }

@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.audit.jpa.streams;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.HashMap;
+import java.util.UUID;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
@@ -29,13 +35,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import java.util.HashMap;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class AuditConsumerChannelHandlerImplTest {
 
@@ -60,43 +59,63 @@ public class AuditConsumerChannelHandlerImplTest {
     public void receiveEventShouldStoreEntity() {
         //given
         CloudRuntimeEvent cloudRuntimeEvent = mock(CloudRuntimeEventImpl.class);
-        when(cloudRuntimeEvent.getEventType()).thenReturn(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED);
+        when(cloudRuntimeEvent.getEventType())
+            .thenReturn(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED);
         EventToEntityConverter converter = mock(EventToEntityConverter.class);
-        when(converters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())).thenReturn(converter);
-        ProcessCreatedAuditEventEntity entity = mock(ProcessCreatedAuditEventEntity.class);
+        when(
+            converters.getConverterByEventTypeName(
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()
+            )
+        )
+            .thenReturn(converter);
+        ProcessCreatedAuditEventEntity entity = mock(
+            ProcessCreatedAuditEventEntity.class
+        );
         when(converter.convertToEntity(cloudRuntimeEvent)).thenReturn(entity);
 
-        CloudRuntimeEvent[] events = {cloudRuntimeEvent};
+        CloudRuntimeEvent[] events = { cloudRuntimeEvent };
 
         //when
-        handler.receiveCloudRuntimeEvent(new HashMap<String,Object>(){{put("id", UUID.randomUUID());}}, events);
+        handler.receiveCloudRuntimeEvent(
+            new HashMap<String, Object>() {
+                {
+                    put("id", UUID.randomUUID());
+                }
+            },
+            events
+        );
 
         //then
         verify(eventsRepository).saveAll(argumentCaptor.capture());
         assertThat(argumentCaptor.getValue()).containsOnly(entity);
-
     }
 
     @Test
-    public void messageIdShouldBeSet(){
+    public void messageIdShouldBeSet() {
         //given
         CloudRuntimeEvent cloudRuntimeEvent = mock(CloudRuntimeEventImpl.class);
-        when(cloudRuntimeEvent.getEventType()).thenReturn(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED);
+        when(cloudRuntimeEvent.getEventType())
+            .thenReturn(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED);
         EventToEntityConverter converter = mock(EventToEntityConverter.class);
-        when(converters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())).thenReturn(converter);
+        when(
+            converters.getConverterByEventTypeName(
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()
+            )
+        )
+            .thenReturn(converter);
         AuditEventEntity entity = mock(AuditEventEntity.class);
         when(converter.convertToEntity(cloudRuntimeEvent)).thenReturn(entity);
 
-        CloudRuntimeEvent[] events = {cloudRuntimeEvent};
+        CloudRuntimeEvent[] events = { cloudRuntimeEvent };
 
-        HashMap <String,Object> headers = new HashMap<>();
+        HashMap<String, Object> headers = new HashMap<>();
         headers.put("id", UUID.randomUUID());
 
         //when
         handler.receiveCloudRuntimeEvent(headers, events);
 
         //then
-        verify((CloudRuntimeEventImpl)cloudRuntimeEvent).setMessageId(headers.get("id").toString());
+        verify((CloudRuntimeEventImpl) cloudRuntimeEvent)
+            .setMessageId(headers.get("id").toString());
     }
-
 }

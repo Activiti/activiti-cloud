@@ -86,77 +86,115 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public CloudProcessInstance startProcess(StartProcessPayload payload) {
-        return dirtyContextHandler.dirty(processInstanceApiClient.startProcess(payload).getContent());
+        return dirtyContextHandler.dirty(
+            processInstanceApiClient.startProcess(payload).getContent()
+        );
     }
 
     @Step
-    public CloudProcessInstance startProcess(String process, boolean variables, String businessKey) throws IOException {
+    public CloudProcessInstance startProcess(
+        String process,
+        boolean variables,
+        String businessKey
+    ) throws IOException {
         StartProcessPayloadBuilder payload = ProcessPayloadBuilder
-                .start()
-                .withProcessDefinitionKey(process)
-                .withName("processInstanceName")
-                .withBusinessKey(businessKey);
+            .start()
+            .withProcessDefinitionKey(process)
+            .withName("processInstanceName")
+            .withBusinessKey(businessKey);
 
-
-        if(variables){
+        if (variables) {
             payload.withVariable("test_variable_name", "test-variable-value");
-            payload.withVariable("test_bigdecimal_variable_name", wrap(BigDecimal.valueOf(1234567890L, 2)));
-            payload.withVariable("test_date_variable_name", wrap(Date.from(Instant.EPOCH)));
+            payload.withVariable(
+                "test_bigdecimal_variable_name",
+                wrap(BigDecimal.valueOf(1234567890L, 2))
+            );
+            payload.withVariable(
+                "test_date_variable_name",
+                wrap(Date.from(Instant.EPOCH))
+            );
             payload.withVariable("test_long_variable_name", wrap(1234567890L));
             payload.withVariable("test_int_variable_name", 7);
             payload.withVariable("test_bool_variable_name", true);
-            payload.withVariable("test_json_variable_name",objectMapper.readTree("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}"));
-            payload.withVariable("test_long_json_variable_name",objectMapper.readTree("{ \"verylongjson\":\""+ StringUtils.repeat("a", 4000)+"\"}"));
+            payload.withVariable(
+                "test_json_variable_name",
+                objectMapper.readTree(
+                    "{ \"test-json-variable-element1\":\"test-json-variable-value1\"}"
+                )
+            );
+            payload.withVariable(
+                "test_long_json_variable_name",
+                objectMapper.readTree(
+                    "{ \"verylongjson\":\"" +
+                    StringUtils.repeat("a", 4000) +
+                    "\"}"
+                )
+            );
         }
 
         return startProcess(payload.build());
     }
 
     protected Map<String, String> wrap(BigDecimal value) {
-        return ProcessVariableValue.builder()
-                                   .type("bigdecimal")
-                                   .value(value.toString())
-                                   .build()
-                                   .toMap();
+        return ProcessVariableValue
+            .builder()
+            .type("bigdecimal")
+            .value(value.toString())
+            .build()
+            .toMap();
     }
 
     protected Map<String, String> wrap(Long value) {
-        return ProcessVariableValue.builder()
-                                   .type("long")
-                                   .value(value.toString())
-                                   .build()
-                                   .toMap();
+        return ProcessVariableValue
+            .builder()
+            .type("long")
+            .value(value.toString())
+            .build()
+            .toMap();
     }
 
     protected Map<String, String> wrap(Date value) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+        SimpleDateFormat formatter = new SimpleDateFormat(
+            "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'"
+        );
 
-        return ProcessVariableValue.builder()
-                                   .type("date")
-                                   .value(formatter.format(value))
-                                   .build()
-                                   .toMap();
+        return ProcessVariableValue
+            .builder()
+            .type("date")
+            .value(formatter.format(value))
+            .build()
+            .toMap();
     }
 
     @Step
-    public CloudProcessInstance startProcess(String process, boolean variables) throws IOException {
+    public CloudProcessInstance startProcess(String process, boolean variables)
+        throws IOException {
         return startProcess(process, variables, "businessKey");
     }
 
     @Step
     public CloudProcessInstance startProcess(String process) {
-        return startProcess(ProcessPayloadBuilder.start()
-                                                 .withProcessDefinitionKey(process)
-                                                 .withName("process-instance-name")
-                                                 .build());
+        return startProcess(
+            ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(process)
+                .withName("process-instance-name")
+                .build()
+        );
     }
 
     @Step
-    public CloudProcessInstance startProcessWithVariables(String process, Map<String,Object> variables) {
-        return startProcess(ProcessPayloadBuilder.start()
-                                                 .withProcessDefinitionKey(process)
-                                                 .withVariables(variables)
-                                                 .build());
+    public CloudProcessInstance startProcessWithVariables(
+        String process,
+        Map<String, Object> variables
+    ) {
+        return startProcess(
+            ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(process)
+                .withVariables(variables)
+                .build()
+        );
     }
 
     @Step
@@ -166,9 +204,16 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public void checkProcessInstanceNotFound(String processInstanceId) {
-        assertThatRestNotFoundErrorIsThrownBy(
-                () -> processInstanceApiClient.getProcessInstanceById(processInstanceId).getContent()
-        ).withMessageContaining("Unable to find process instance for the given id:'" + processInstanceId + "'");
+        assertThatRestNotFoundErrorIsThrownBy(() ->
+                processInstanceApiClient
+                    .getProcessInstanceById(processInstanceId)
+                    .getContent()
+            )
+            .withMessageContaining(
+                "Unable to find process instance for the given id:'" +
+                processInstanceId +
+                "'"
+            );
     }
 
     @Step
@@ -198,8 +243,9 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public Collection<CloudProcessInstance> getAllProcessInstances(){
-        return processInstanceApiClient.getProcessInstances(DEFAULT_PAGEABLE)
+    public Collection<CloudProcessInstance> getAllProcessInstances() {
+        return processInstanceApiClient
+            .getProcessInstances(DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -207,13 +253,14 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public CloudProcessInstance getProcessInstanceById(String id){
+    public CloudProcessInstance getProcessInstanceById(String id) {
         return processInstanceApiClient.getProcessInstanceById(id).getContent();
     }
 
     @Step
-    public Collection<CloudProcessInstance> getSubProcesses(String parentId){
-        return processInstanceApiClient.subprocesses(parentId, DEFAULT_PAGEABLE)
+    public Collection<CloudProcessInstance> getSubProcesses(String parentId) {
+        return processInstanceApiClient
+            .subprocesses(parentId, DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -221,8 +268,9 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public Collection<ProcessDefinition> getProcessDefinitions(){
-        return processDefinitionsApiClient.getProcessDefinitions(DEFAULT_PAGEABLE)
+    public Collection<ProcessDefinition> getProcessDefinitions() {
+        return processDefinitionsApiClient
+            .getProcessDefinitions(DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -230,13 +278,18 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public ProcessDefinition getProcessDefinitionByKey(String key){
-        return processDefinitionsApiClient.getProcessDefinition(key).getContent();
+    public ProcessDefinition getProcessDefinitionByKey(String key) {
+        return processDefinitionsApiClient
+            .getProcessDefinition(key)
+            .getContent();
     }
 
     @Step
-    public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) {
-        return processInstanceTasksApiClient.getTasks(processInstanceId, DEFAULT_PAGEABLE)
+    public Collection<CloudTask> getTaskByProcessInstanceId(
+        String processInstanceId
+    ) {
+        return processInstanceTasksApiClient
+            .getTasks(processInstanceId, DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -244,42 +297,63 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public CloudProcessInstance startProcessWithProcessInstanceName(String process,
-        String processName) {
-        return dirtyContextHandler.dirty(processInstanceApiClient.startProcess(ProcessPayloadBuilder
-            .start()
-            .withName(processName)
-            .withProcessDefinitionKey(process)
-            .build())
-            .getContent());
+    public CloudProcessInstance startProcessWithProcessInstanceName(
+        String process,
+        String processName
+    ) {
+        return dirtyContextHandler.dirty(
+            processInstanceApiClient
+                .startProcess(
+                    ProcessPayloadBuilder
+                        .start()
+                        .withName(processName)
+                        .withProcessDefinitionKey(process)
+                        .build()
+                )
+                .getContent()
+        );
     }
 
     @Step
-    public void checkProcessInstanceName(String processInstanceId, String processInstanceName) {
-        assertThat(processInstanceApiClient.getProcessInstanceById(processInstanceId)
-            .getContent()
-            .getName())
+    public void checkProcessInstanceName(
+        String processInstanceId,
+        String processInstanceName
+    ) {
+        assertThat(
+            processInstanceApiClient
+                .getProcessInstanceById(processInstanceId)
+                .getContent()
+                .getName()
+        )
             .isEqualTo(processInstanceName);
     }
 
-
     @Step
-    public CloudProcessInstance setProcessName(String processInstanceId, String processInstanceName) {
-        return processInstanceApiClient.updateProcess(
-            processInstanceId,
-            ProcessPayloadBuilder.update().withName(processInstanceName).build())
+    public CloudProcessInstance setProcessName(
+        String processInstanceId,
+        String processInstanceName
+    ) {
+        return processInstanceApiClient
+            .updateProcess(
+                processInstanceId,
+                ProcessPayloadBuilder
+                    .update()
+                    .withName(processInstanceName)
+                    .build()
+            )
             .getContent();
-
     }
 
     @Step
-    public CloudProcessInstance message(StartMessagePayload payload) throws IOException {
-        return dirtyContextHandler.dirty(processInstanceApiClient.sendStartMessage(payload).getContent());
+    public CloudProcessInstance message(StartMessagePayload payload)
+        throws IOException {
+        return dirtyContextHandler.dirty(
+            processInstanceApiClient.sendStartMessage(payload).getContent()
+        );
     }
 
     @Step
     public void message(ReceiveMessagePayload payload) throws IOException {
         processInstanceApiClient.receive(payload);
     }
-
 }

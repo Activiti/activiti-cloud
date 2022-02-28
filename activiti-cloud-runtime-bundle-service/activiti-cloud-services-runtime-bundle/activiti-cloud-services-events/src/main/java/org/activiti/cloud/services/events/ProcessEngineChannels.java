@@ -21,7 +21,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface ProcessEngineChannels {
-
     String COMMAND_CONSUMER = "commandConsumer";
 
     String COMMAND_RESULTS = "commandResults";

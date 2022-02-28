@@ -28,9 +28,13 @@ public class EventsLinkRelationProvider implements LinkRelationProvider {
 
     public static final String ITEM_RESOURCE_REL = "event";
 
-    private static final LinkRelation collectionResourceRel = LinkRelation.of(COLLECTION_RESOURCE_REL);
+    private static final LinkRelation collectionResourceRel = LinkRelation.of(
+        COLLECTION_RESOURCE_REL
+    );
 
-    private static final LinkRelation itemResourceRel = LinkRelation.of(ITEM_RESOURCE_REL);
+    private static final LinkRelation itemResourceRel = LinkRelation.of(
+        ITEM_RESOURCE_REL
+    );
 
     @Override
     public LinkRelation getItemResourceRelFor(Class<?> aClass) {

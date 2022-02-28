@@ -26,11 +26,10 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.querydsl.core.types.Predicate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
@@ -61,11 +60,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(TaskController.class)
-@Import({
+@Import(
+    {
         QueryRestWebMvcAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -96,103 +97,149 @@ public class TaskEntityControllerIT {
     private SecurityPoliciesProperties securityPoliciesProperties;
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(
+            11,
+            10,
+            PageRequest.of(0, 20)
+        );
 
-        given(taskRepository.findAll(any(),
-                                     eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                                           pageRequest,
-                                           12));
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultTask()),
+                    pageRequest,
+                    12
+                )
+            );
 
         //when
-        MvcResult result = mockMvc.perform(get("/v1/tasks?skipCount=11&maxItems=10")
-                                                   .accept(MediaType.APPLICATION_JSON))
-                                   //then
-                                   .andExpect(status().isOk())
-                                   .andReturn();
+        MvcResult result = mockMvc
+            .perform(
+                get("/v1/tasks?skipCount=11&maxItems=10")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+            .node("list.pagination.skipCount")
+            .isEqualTo(11)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(12);
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
+    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson()
+        throws Exception {
         //given
-        PageRequest pageRequest = PageRequest.of(1,
-                                                 10);
+        PageRequest pageRequest = PageRequest.of(1, 10);
 
-        given(taskRepository.findAll(any(),
-                                     eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                                           pageRequest,
-                                           11));
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultTask()),
+                    pageRequest,
+                    11
+                )
+            );
 
         //when
-        mockMvc.perform(get("/v1/tasks?page=1&size=10")
-                                .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/v1/tasks?page=1&size=10")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
-        given(entityFinder.findById(eq(taskRepository),
-                                    eq(taskEntity.getId()),
-                                    anyString()))
-                .willReturn(taskEntity);
+        given(
+            entityFinder.findById(
+                eq(taskRepository),
+                eq(taskEntity.getId()),
+                anyString()
+            )
+        )
+            .willReturn(taskEntity);
 
         Predicate restrictionPredicate = mock(Predicate.class);
-        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
-        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
+        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any()))
+            .willReturn(restrictionPredicate);
+        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate))
+            .willReturn(true);
 
         //when
-        this.mockMvc.perform(get("/v1/tasks/{taskId}",
-                                 taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                get("/v1/tasks/{taskId}", taskEntity.getId())
+                    .accept(MediaType.APPLICATION_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void should_returnCandidates_when_invokeGetTaskById() throws Exception {
+    public void should_returnCandidates_when_invokeGetTaskById()
+        throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         taskEntity.setTaskCandidateGroups(buildCandidateGroups(taskEntity));
         taskEntity.setTaskCandidateUsers(buildCandidateUsers(taskEntity));
 
-        given(entityFinder.findById(eq(taskRepository),
-                                    eq(taskEntity.getId()),
-                                    anyString()))
-                .willReturn(taskEntity);
+        given(
+            entityFinder.findById(
+                eq(taskRepository),
+                eq(taskEntity.getId()),
+                anyString()
+            )
+        )
+            .willReturn(taskEntity);
 
         Predicate restrictionPredicate = mock(Predicate.class);
-        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
-        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
+        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any()))
+            .willReturn(restrictionPredicate);
+        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate))
+            .willReturn(true);
 
         //when
-        MvcResult mvcResult = this.mockMvc.perform(get("/v1/tasks/{taskId}",
-                                                       taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                                      .andExpect(status().isOk())
-                                      .andReturn();
+        MvcResult mvcResult =
+            this.mockMvc.perform(
+                    get("/v1/tasks/{taskId}", taskEntity.getId())
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
 
         assertThatJson(mvcResult.getResponse().getContentAsString())
-                .node("entry.candidateUsers").isArray().ofLength(1).thatContains("testuser");
+            .node("entry.candidateUsers")
+            .isArray()
+            .ofLength(1)
+            .thatContains("testuser");
 
         assertThatJson(mvcResult.getResponse().getContentAsString())
-                .node("entry.candidateGroups").isArray().ofLength(1).thatContains("testgroup");
+            .node("entry.candidateGroups")
+            .isArray()
+            .ofLength(1)
+            .thatContains("testgroup");
     }
 
-    private Set<TaskCandidateGroupEntity> buildCandidateGroups(TaskEntity taskEntity) {
+    private Set<TaskCandidateGroupEntity> buildCandidateGroups(
+        TaskEntity taskEntity
+    ) {
         TaskCandidateGroupEntity taskCandidateGroup = new TaskCandidateGroupEntity();
         taskCandidateGroup.setGroupId("testgroup");
         taskCandidateGroup.setTask(taskEntity);
@@ -202,7 +249,9 @@ public class TaskEntityControllerIT {
         return groups;
     }
 
-    private Set<TaskCandidateUserEntity> buildCandidateUsers(TaskEntity taskEntity) {
+    private Set<TaskCandidateUserEntity> buildCandidateUsers(
+        TaskEntity taskEntity
+    ) {
         TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity();
         taskCandidateUser.setUserId("testuser");
         taskCandidateUser.setTask(taskEntity);

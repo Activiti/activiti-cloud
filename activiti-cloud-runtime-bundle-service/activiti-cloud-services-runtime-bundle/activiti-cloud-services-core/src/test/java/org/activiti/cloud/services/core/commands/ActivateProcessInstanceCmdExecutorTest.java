@@ -41,13 +41,15 @@ public class ActivateProcessInstanceCmdExecutorTest {
 
     @Test
     public void resumeProcessInstanceCmdExecutorTest() {
-        ResumeProcessPayload resumeProcessPayload = new ResumeProcessPayload("x");
+        ResumeProcessPayload resumeProcessPayload = new ResumeProcessPayload(
+            "x"
+        );
 
-        assertThat(activateProcessInstanceCmdExecutor.getHandledType()).isEqualTo(ResumeProcessPayload.class.getName());
+        assertThat(activateProcessInstanceCmdExecutor.getHandledType())
+            .isEqualTo(ResumeProcessPayload.class.getName());
 
         activateProcessInstanceCmdExecutor.execute(resumeProcessPayload);
 
         verify(processAdminRuntime).resume(resumeProcessPayload);
-
     }
 }

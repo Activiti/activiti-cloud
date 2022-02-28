@@ -30,8 +30,12 @@ public class CloudConnectorsMessagingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ConnectorImplementationsProvider connectorDestinationsProvider(RepositoryService repositoryService) {
-        return new RepositoryConnectorImplementationsProvider(repositoryService);
+    public ConnectorImplementationsProvider connectorDestinationsProvider(
+        RepositoryService repositoryService
+    ) {
+        return new RepositoryConnectorImplementationsProvider(
+            repositoryService
+        );
     }
 
     @Bean
@@ -42,12 +46,15 @@ public class CloudConnectorsMessagingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ConnectorMessagingDestinationsConfigurer connectorMessagingDestinationsConfigurer(BindingServiceProperties bindingServiceProperties,
-                                                                                             ConnectorImplementationsProvider destinationsProvider,
-                                                                                             ConnectorDestinationMappingStrategy destinationMappingStrategy) {
-        return new ConnectorMessagingDestinationsConfigurer(destinationsProvider,
-                                                            destinationMappingStrategy,
-                                                            bindingServiceProperties);
+    public ConnectorMessagingDestinationsConfigurer connectorMessagingDestinationsConfigurer(
+        BindingServiceProperties bindingServiceProperties,
+        ConnectorImplementationsProvider destinationsProvider,
+        ConnectorDestinationMappingStrategy destinationMappingStrategy
+    ) {
+        return new ConnectorMessagingDestinationsConfigurer(
+            destinationsProvider,
+            destinationMappingStrategy,
+            bindingServiceProperties
+        );
     }
-
 }

@@ -26,7 +26,9 @@ import org.springframework.core.io.ClassPathResource;
 
 public class SchemaProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(SchemaProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        SchemaProvider.class
+    );
 
     private String modelType;
     private String schemaFileName;
@@ -47,10 +49,20 @@ public class SchemaProvider {
     public JSONObject getJsonSchemaForType() {
         JSONObject schema = null;
         if (schemaFileName != null) {
-            try (InputStream inputStream = new ClassPathResource(schemaFileName).getInputStream()) {
-                schema = new JsonSchemaFlattener().flatten(new JSONObject(new JSONTokener(inputStream)));
+            try (
+                InputStream inputStream = new ClassPathResource(schemaFileName)
+                    .getInputStream()
+            ) {
+                schema =
+                    new JsonSchemaFlattener()
+                        .flatten(new JSONObject(new JSONTokener(inputStream)));
             } catch (IOException e) {
-                logger.error("Unable to read schema for model type {} in file {}: {}", modelType, schemaFileName, e);
+                logger.error(
+                    "Unable to read schema for model type {} in file {}: {}",
+                    modelType,
+                    schemaFileName,
+                    e
+                );
             }
         }
         return schema;

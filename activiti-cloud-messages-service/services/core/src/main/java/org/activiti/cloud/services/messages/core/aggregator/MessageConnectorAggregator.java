@@ -17,7 +17,6 @@ package org.activiti.cloud.services.messages.core.aggregator;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-
 import org.springframework.integration.aggregator.AbstractCorrelatingMessageHandler;
 import org.springframework.integration.aggregator.CorrelationStrategy;
 import org.springframework.integration.aggregator.MessageGroupProcessor;
@@ -33,17 +32,25 @@ import org.springframework.messaging.Message;
  * only if 'expireGroupsUponCompletion' flag is set to 'true'.
  *
  */
-public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandler {
+public class MessageConnectorAggregator
+    extends AbstractCorrelatingMessageHandler {
 
     private volatile boolean expireGroupsUponCompletion = false;
     private volatile boolean completeGroupsWhenEmpty = false;
 
-    public MessageConnectorAggregator(MessageGroupProcessor processor, MessageGroupStore store,
-            CorrelationStrategy correlationStrategy, ReleaseStrategy releaseStrategy) {
+    public MessageConnectorAggregator(
+        MessageGroupProcessor processor,
+        MessageGroupStore store,
+        CorrelationStrategy correlationStrategy,
+        ReleaseStrategy releaseStrategy
+    ) {
         super(processor, store, correlationStrategy, releaseStrategy);
     }
 
-    public MessageConnectorAggregator(MessageGroupProcessor processor, MessageGroupStore store) {
+    public MessageConnectorAggregator(
+        MessageGroupProcessor processor,
+        MessageGroupStore store
+    ) {
         super(processor, store);
     }
 
@@ -58,7 +65,9 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
      *
      * @see #afterRelease
      */
-    public void setExpireGroupsUponCompletion(boolean expireGroupsUponCompletion) {
+    public void setExpireGroupsUponCompletion(
+        boolean expireGroupsUponCompletion
+    ) {
         this.expireGroupsUponCompletion = expireGroupsUponCompletion;
     }
 
@@ -67,49 +76,50 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
         return this.expireGroupsUponCompletion;
     }
 
-    
     public boolean isCompleteGroupsWhenEmpty() {
         return completeGroupsWhenEmpty;
     }
 
-    
     public void setCompleteGroupsWhenEmpty(boolean completeGroupsWhenEmpty) {
         this.completeGroupsWhenEmpty = completeGroupsWhenEmpty;
-    }    
+    }
+
     /**
-     * Remove all completed messages from group. Complete the group if empty and remove if expired 
+     * Remove all completed messages from group. Complete the group if empty and remove if expired
      * If the {@link #expireGroupsUponCompletion} is true, then remove group fully.
      * @param messageGroup the group to clean up.
-     * @param completedMessages The completed messages. 
+     * @param completedMessages The completed messages.
      */
     @Override
-    protected void afterRelease(MessageGroup messageGroup, 
-                                @Nullable Collection<Message<?>> completedMessages) {
+    protected void afterRelease(
+        MessageGroup messageGroup,
+        @Nullable Collection<Message<?>> completedMessages
+    ) {
         Object groupId = messageGroup.getGroupId();
         MessageGroupStore messageStore = getMessageStore();
         boolean isCompleted = false;
 
         if (completedMessages != null && !completedMessages.isEmpty()) {
-            Collection<Message<?>> deletedMessages = messageGroup.getMessages()
-                        .stream()
-                        .filter(completedMessages::contains)
-                        .collect(Collectors.toList());
-                        
+            Collection<Message<?>> deletedMessages = messageGroup
+                .getMessages()
+                .stream()
+                .filter(completedMessages::contains)
+                .collect(Collectors.toList());
+
             if (!deletedMessages.isEmpty()) {
                 messageStore.removeMessagesFromGroup(groupId, deletedMessages);
             }
         }
-        
+
         if (this.completeGroupsWhenEmpty) {
             if (messageStore.messageGroupSize(groupId) == 0) {
                 messageStore.completeGroup(groupId);
                 isCompleted = true;
             }
         }
-        
+
         if (this.expireGroupsUponCompletion && isCompleted) {
             remove(messageGroup);
-        } 
+        }
     }
-    
 }

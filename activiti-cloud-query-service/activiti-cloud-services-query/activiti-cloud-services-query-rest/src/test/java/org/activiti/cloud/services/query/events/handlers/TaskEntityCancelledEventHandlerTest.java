@@ -15,6 +15,17 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -26,18 +37,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
  * Tests for {@link TaskCancelledEventHandler}
@@ -61,7 +60,8 @@ public class TaskEntityCancelledEventHandlerTest {
         CloudTaskCancelledEvent event = buildTaskCancelledEvent();
         String taskId = event.getEntity().getId();
         TaskEntity taskEntity = aTask().withId(taskId).build();
-        given(entityManager.find(TaskEntity.class, taskId)).willReturn(taskEntity);
+        given(entityManager.find(TaskEntity.class, taskId))
+            .willReturn(taskEntity);
 
         //when
         handler.handle(event);
@@ -73,9 +73,11 @@ public class TaskEntityCancelledEventHandlerTest {
     }
 
     private CloudTaskCancelledEvent buildTaskCancelledEvent() {
-        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
-                                     "to be cancelled",
-                                     Task.TaskStatus.CANCELLED);
+        TaskImpl task = new TaskImpl(
+            UUID.randomUUID().toString(),
+            "to be cancelled",
+            Task.TaskStatus.CANCELLED
+        );
         return new CloudTaskCancelledEventImpl(task);
     }
 
@@ -99,6 +101,7 @@ public class TaskEntityCancelledEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name());
+        assertThat(handledEvent)
+            .isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name());
     }
 }

@@ -52,7 +52,9 @@ public class ToCloudProcessRuntimeEventConverterTest {
         processInstance.setId("10");
         processInstance.setProcessDefinitionId("myProcessDef");
 
-        ProcessStartedEventImpl event = new ProcessStartedEventImpl(processInstance);
+        ProcessStartedEventImpl event = new ProcessStartedEventImpl(
+            processInstance
+        );
         event.setNestedProcessDefinitionId("myParentProcessDef");
         event.setNestedProcessInstanceId("2");
 
@@ -63,11 +65,14 @@ public class ToCloudProcessRuntimeEventConverterTest {
         assertThat(processStarted).isInstanceOf(CloudProcessStartedEvent.class);
 
         assertThat(processStarted.getEntity().getId()).isEqualTo("10");
-        assertThat(processStarted.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(processStarted.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
+        assertThat(processStarted.getEntity().getProcessDefinitionId())
+            .isEqualTo("myProcessDef");
+        assertThat(processStarted.getNestedProcessDefinitionId())
+            .isEqualTo("myParentProcessDef");
         assertThat(processStarted.getNestedProcessInstanceId()).isEqualTo("2");
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender)
+            .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
@@ -76,15 +81,20 @@ public class ToCloudProcessRuntimeEventConverterTest {
         BPMNSignalImpl signal = new BPMNSignalImpl();
         signal.setProcessDefinitionId("procDefId");
         signal.setProcessInstanceId("procInstId");
-        BPMNSignalReceivedEventImpl signalReceivedEvent = new BPMNSignalReceivedEventImpl(signal);
+        BPMNSignalReceivedEventImpl signalReceivedEvent = new BPMNSignalReceivedEventImpl(
+            signal
+        );
 
         //when
-        CloudBPMNSignalReceivedEvent cloudEvent = converter.from(signalReceivedEvent);
+        CloudBPMNSignalReceivedEvent cloudEvent = converter.from(
+            signalReceivedEvent
+        );
         assertThat(cloudEvent.getEntity()).isEqualTo(signal);
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
         //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender)
+            .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 }

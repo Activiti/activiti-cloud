@@ -22,6 +22,4 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @Import(QuerySwaggerConfig.class)
 @PropertySource("classpath:query-messaging.properties")
-public class ActivitiQueryAutoConfiguration {
-
-}
+public class ActivitiQueryAutoConfiguration {}

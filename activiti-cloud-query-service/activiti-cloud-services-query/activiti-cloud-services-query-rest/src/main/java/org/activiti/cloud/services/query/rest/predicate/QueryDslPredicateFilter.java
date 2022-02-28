@@ -20,7 +20,5 @@ import com.querydsl.core.types.Predicate;
 import javax.validation.constraints.NotNull;
 
 public interface QueryDslPredicateFilter {
-
     Predicate extend(@NotNull Predicate currentPredicate);
-
 }

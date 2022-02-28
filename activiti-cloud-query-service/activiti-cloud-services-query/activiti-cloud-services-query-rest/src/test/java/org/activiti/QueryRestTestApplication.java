@@ -22,7 +22,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class QueryRestTestApplication {
 
     public static void main(String[] args) {
-            SpringApplication.run(QueryRestTestApplication.class, args);
+        SpringApplication.run(QueryRestTestApplication.class, args);
     }
-
 }

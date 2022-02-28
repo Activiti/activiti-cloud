@@ -71,26 +71,44 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Test
     public void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
         //given
-        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
+        IntegrationContextImpl integrationContext = buildIntegrationContext(
+            Collections.singletonMap("var1", "v")
+        );
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
-        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+        given(integrationContextService.findById(integrationContext.getId()))
+            .willReturn(integrationContextEntity);
 
-        List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list()).thenReturn(executions);
-
+        List<Execution> executions = Collections.singletonList(
+            buildExecutionEntity()
+        );
+        when(
+            runtimeService
+                .createExecutionQuery()
+                .executionId(integrationContext.getExecutionId())
+                .list()
+        )
+            .thenReturn(executions);
 
         //when
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        handler.receive(
+            new IntegrationResultImpl(
+                new IntegrationRequestImpl(),
+                integrationContext
+            )
+        );
 
         //then
-        verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
+        verify(integrationContextService)
+            .deleteIntegrationContext(integrationContextEntity);
         final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(
-            CompositeCommand.class);
+            CompositeCommand.class
+        );
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();
         assertThat(command.getCommands()).hasSize(2);
         assertThat(command.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
-        assertThat(command.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+        assertThat(command.getCommands().get(1))
+            .isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
     }
 
     private ExecutionEntity buildExecutionEntity() {
@@ -111,17 +129,28 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Test
     public void receiveShouldDoNothingWhenIntegrationContextsIsNull() {
         //given
-        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
-        given(integrationContextService.findById(integrationContext.getId())).willReturn(null);
+        IntegrationContextImpl integrationContext = buildIntegrationContext(
+            Collections.singletonMap("var1", "v")
+        );
+        given(integrationContextService.findById(integrationContext.getId()))
+            .willReturn(null);
 
         //when
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        handler.receive(
+            new IntegrationResultImpl(
+                new IntegrationRequestImpl(),
+                integrationContext
+            )
+        );
 
         //then
-        verify(integrationContextService, never()).deleteIntegrationContext(any());
+        verify(integrationContextService, never())
+            .deleteIntegrationContext(any());
     }
 
-    private IntegrationContextImpl buildIntegrationContext(Map<String, Object> variables) {
+    private IntegrationContextImpl buildIntegrationContext(
+        Map<String, Object> variables
+    ) {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setExecutionId(EXECUTION_ID);
         integrationContext.setId(ENTITY_ID);
@@ -133,5 +162,4 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setClientType(CLIENT_TYPE);
         return integrationContext;
     }
-
 }

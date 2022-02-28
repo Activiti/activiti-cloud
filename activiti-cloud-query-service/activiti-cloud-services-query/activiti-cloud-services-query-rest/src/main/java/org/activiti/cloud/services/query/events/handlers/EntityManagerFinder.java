@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Map;
+import java.util.Optional;
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.hibernate.jpa.QueryHints;
-
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import java.util.Map;
-import java.util.Optional;
 
 public class EntityManagerFinder {
 
@@ -36,42 +35,68 @@ public class EntityManagerFinder {
     }
 
     public Optional<TaskEntity> findTaskWithVariables(String taskId) {
-        EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
+        EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(
+            TaskEntity.class
+        );
 
         entityGraph.addAttributeNodes(VARIABLES);
 
-        return Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                      taskId,
-                                                      Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+        return Optional.ofNullable(
+            entityManager.find(
+                TaskEntity.class,
+                taskId,
+                Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)
+            )
+        );
     }
 
     public Optional<TaskEntity> findTaskWithCandidateUsers(String taskId) {
-        EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
+        EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(
+            TaskEntity.class
+        );
 
         entityGraph.addAttributeNodes(TASK_CANDIDATE_USERS);
 
-        return Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                      taskId,
-                                                      Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+        return Optional.ofNullable(
+            entityManager.find(
+                TaskEntity.class,
+                taskId,
+                Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)
+            )
+        );
     }
 
     public Optional<TaskEntity> findTaskWithCandidateGroups(String taskId) {
-        EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
+        EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(
+            TaskEntity.class
+        );
 
         entityGraph.addAttributeNodes(TASK_CANDIDATE_GROUPS);
 
-        return Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                      taskId,
-                                                      Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+        return Optional.ofNullable(
+            entityManager.find(
+                TaskEntity.class,
+                taskId,
+                Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)
+            )
+        );
     }
 
-    public Optional<ProcessInstanceEntity> findProcessInstanceWithVariables(String processInstanceId) {
-        EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
+    public Optional<ProcessInstanceEntity> findProcessInstanceWithVariables(
+        String processInstanceId
+    ) {
+        EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(
+            ProcessInstanceEntity.class
+        );
 
         entityGraph.addAttributeNodes(VARIABLES);
 
-        return Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                      processInstanceId,
-                                                      Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+        return Optional.ofNullable(
+            entityManager.find(
+                ProcessInstanceEntity.class,
+                processInstanceId,
+                Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)
+            )
+        );
     }
 }

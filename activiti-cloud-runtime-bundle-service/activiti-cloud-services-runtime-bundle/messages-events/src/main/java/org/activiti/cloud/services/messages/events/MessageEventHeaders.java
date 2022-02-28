@@ -20,7 +20,10 @@ public final class MessageEventHeaders {
     public static final String MESSAGE_EVENT_ID = "messageEventId";
     public static final String MESSAGE_EVENT_NAME = "messageEventName";
     public static final String MESSAGE_EVENT_TYPE = "messageEventType";
-    public static final String MESSAGE_EVENT_CORRELATION_KEY = "messageEventCorrelationKey";
-    public static final String MESSAGE_EVENT_BUSINESS_KEY = "messageEventBusinessKey";
-    public static final String MESSAGE_EVENT_OUTPUT_DESTINATION = "messageEventOutputDestination";
+    public static final String MESSAGE_EVENT_CORRELATION_KEY =
+        "messageEventCorrelationKey";
+    public static final String MESSAGE_EVENT_BUSINESS_KEY =
+        "messageEventBusinessKey";
+    public static final String MESSAGE_EVENT_OUTPUT_DESTINATION =
+        "messageEventOutputDestination";
 }

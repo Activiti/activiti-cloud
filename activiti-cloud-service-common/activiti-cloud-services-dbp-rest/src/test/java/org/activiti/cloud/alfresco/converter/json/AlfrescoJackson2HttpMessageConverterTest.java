@@ -15,7 +15,17 @@
  */
 package org.activiti.cloud.alfresco.converter.json;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.lang.reflect.Type;
+import java.util.List;
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,17 +40,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-
-import java.lang.reflect.Type;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class AlfrescoJackson2HttpMessageConverterTest {
 
@@ -78,66 +77,95 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     }
 
     @Test
-    public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModel() throws Exception {
+    public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModel()
+        throws Exception {
         //given
-        given(pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(basePagedModel))
-                .willReturn(alfrescoPageContentListWrapper);
+        given(
+            pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(
+                basePagedModel
+            )
+        )
+            .willReturn(alfrescoPageContentListWrapper);
 
-        doNothing().when(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
-                                                                    type,
-                                                                    outputMessage);
+        doNothing()
+            .when(httpMessageConverter)
+            .defaultWriteInternal(
+                alfrescoPageContentListWrapper,
+                type,
+                outputMessage
+            );
 
         //when
-        httpMessageConverter.writeInternal(basePagedModel,
-                                           type,
-                                           outputMessage);
+        httpMessageConverter.writeInternal(basePagedModel, type, outputMessage);
 
         //then
-        verify(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
-                                                          type,
-                                                          outputMessage);
+        verify(httpMessageConverter)
+            .defaultWriteInternal(
+                alfrescoPageContentListWrapper,
+                type,
+                outputMessage
+            );
     }
 
     @Test
-    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfCollectionModel() throws Exception {
-
+    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfCollectionModel()
+        throws Exception {
         //given
-        given(pagedCollectionModelConverter.resourcesToListResponseContent(baseCollectionModel))
-                .willReturn(alfrescoPageContentListWrapper);
+        given(
+            pagedCollectionModelConverter.resourcesToListResponseContent(
+                baseCollectionModel
+            )
+        )
+            .willReturn(alfrescoPageContentListWrapper);
 
-        doNothing().when(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
+        doNothing()
+            .when(httpMessageConverter)
+            .defaultWriteInternal(
+                alfrescoPageContentListWrapper,
                 type,
-                outputMessage);
+                outputMessage
+            );
 
         //when
-        httpMessageConverter.writeInternal(baseCollectionModel,
-                type,
-                outputMessage);
+        httpMessageConverter.writeInternal(
+            baseCollectionModel,
+            type,
+            outputMessage
+        );
 
         //then
-        verify(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
+        verify(httpMessageConverter)
+            .defaultWriteInternal(
+                alfrescoPageContentListWrapper,
                 type,
-                outputMessage);
+                outputMessage
+            );
     }
 
-
     @Test
-    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource() throws Exception {
+    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource()
+        throws Exception {
         //given
-        doNothing().when(httpMessageConverter).defaultWriteInternal(any(),
-                                                                    eq(type),
-                                                                    eq(outputMessage));
+        doNothing()
+            .when(httpMessageConverter)
+            .defaultWriteInternal(any(), eq(type), eq(outputMessage));
 
         //when
-        httpMessageConverter.writeInternal(EntityModel.of("content"),
-                                           type,
-                                           outputMessage);
+        httpMessageConverter.writeInternal(
+            EntityModel.of("content"),
+            type,
+            outputMessage
+        );
 
         //then
-        verify(httpMessageConverter).defaultWriteInternal(contentEntryArgumentCaptor.capture(),
-                                                          eq(type),
-                                                          eq(outputMessage));
-        assertThat(contentEntryArgumentCaptor.getValue().getEntry()).isEqualTo("content");
+        verify(httpMessageConverter)
+            .defaultWriteInternal(
+                contentEntryArgumentCaptor.capture(),
+                eq(type),
+                eq(outputMessage)
+            );
+        assertThat(contentEntryArgumentCaptor.getValue().getEntry())
+            .isEqualTo("content");
     }
 
     @Test
@@ -146,7 +174,8 @@ public class AlfrescoJackson2HttpMessageConverterTest {
         List<MediaType> supportedMediaTypes = httpMessageConverter.getSupportedMediaTypes();
 
         //then
-        assertThat(supportedMediaTypes).containsExactly(MediaType.APPLICATION_JSON);
+        assertThat(supportedMediaTypes)
+            .containsExactly(MediaType.APPLICATION_JSON);
     }
 
     @Test
@@ -155,7 +184,11 @@ public class AlfrescoJackson2HttpMessageConverterTest {
         Class<String> clazz = String.class;
 
         //when
-        boolean canWrite = httpMessageConverter.canWrite(clazz, clazz, MediaType.APPLICATION_JSON);
+        boolean canWrite = httpMessageConverter.canWrite(
+            clazz,
+            clazz,
+            MediaType.APPLICATION_JSON
+        );
 
         //then
         assertThat(canWrite).isFalse();
@@ -165,13 +198,17 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     public void canWriteShouldReturnTrueWhenTypeIsNotStringAndMediaTypeIsApplicationJson() {
         //given
         Class<?> clazz = EntityModel.class;
-        given(httpMessageConverter.canWrite(clazz, MediaType.APPLICATION_JSON)).willReturn(true);
+        given(httpMessageConverter.canWrite(clazz, MediaType.APPLICATION_JSON))
+            .willReturn(true);
 
         //when
-        boolean canWrite = httpMessageConverter.canWrite(clazz, clazz, MediaType.APPLICATION_JSON);
+        boolean canWrite = httpMessageConverter.canWrite(
+            clazz,
+            clazz,
+            MediaType.APPLICATION_JSON
+        );
 
         //then
         assertThat(canWrite).isTrue();
     }
-
 }

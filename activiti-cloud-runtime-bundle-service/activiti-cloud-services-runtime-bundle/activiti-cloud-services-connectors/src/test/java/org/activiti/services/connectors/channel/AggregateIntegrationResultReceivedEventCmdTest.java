@@ -55,7 +55,12 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
     @Test
     public void receiveShouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() {
         //given
-        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
+        given(
+            runtimeBundleProperties
+                .getEventsProperties()
+                .isIntegrationAuditEventsEnabled()
+        )
+            .willReturn(true);
 
         //when
         command.execute(null);
@@ -64,13 +69,17 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
         verify(processEngineEventsAggregator).add(messageCaptor.capture());
         CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
         assertThat(event.getEntity()).isEqualTo(integrationContext);
-
     }
 
     @Test
     public void shouldNot_sentAuditEvent_when_integrationAuditEventsAreDisabled() {
         //given
-        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
+        given(
+            runtimeBundleProperties
+                .getEventsProperties()
+                .isIntegrationAuditEventsEnabled()
+        )
+            .willReturn(false);
 
         //when
         command.execute(null);
@@ -78,5 +87,4 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
         //then
         verifyNoInteractions(processEngineEventsAggregator);
     }
-
 }

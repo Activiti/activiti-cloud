@@ -27,14 +27,18 @@ import org.springframework.data.domain.Pageable;
  * Interface for {@link Model} entities repository
  */
 public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
+    Page<M> getModels(P project, ModelType modelTypeFilter, Pageable pageable);
 
-    Page<M> getModels(P project,
-                      ModelType modelTypeFilter,
-                      Pageable pageable);
+    Optional<M> findModelByNameInProject(
+        P project,
+        String modelName,
+        String modelTypeFilter
+    );
 
-    Optional<M> findModelByNameInProject(P project, String modelName, String modelTypeFilter);
-
-    Optional<M> findGlobalModelByNameAndType(String modelName, String modelTypeFilter);
+    Optional<M> findGlobalModelByNameAndType(
+        String modelName,
+        String modelTypeFilter
+    );
 
     Optional<M> findModelById(String modelId);
 
@@ -44,17 +48,19 @@ public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
 
     M createModel(M model);
 
-    M updateModel(M modelToUpdate,
-                  M newModel);
+    M updateModel(M modelToUpdate, M newModel);
 
     M copyModel(M model, P project);
 
-    M updateModelContent(M modelToBeUpdate,
-                         FileContent fileContent);
+    M updateModelContent(M modelToBeUpdate, FileContent fileContent);
 
     void deleteModel(M model);
 
     Class<M> getModelType();
 
-    Page<M> getGlobalModels(ModelType modelTypeFilter, boolean includeOrphans, Pageable pageable);
+    Page<M> getGlobalModels(
+        ModelType modelTypeFilter,
+        boolean includeOrphans,
+        Pageable pageable
+    );
 }

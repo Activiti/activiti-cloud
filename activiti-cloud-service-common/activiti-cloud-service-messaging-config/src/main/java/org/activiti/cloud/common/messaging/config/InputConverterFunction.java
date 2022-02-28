@@ -18,5 +18,4 @@ package org.activiti.cloud.common.messaging.config;
 
 import java.util.function.Function;
 
-public interface InputConverterFunction extends Function<String, String> {
-}
+public interface InputConverterFunction extends Function<String, String> {}

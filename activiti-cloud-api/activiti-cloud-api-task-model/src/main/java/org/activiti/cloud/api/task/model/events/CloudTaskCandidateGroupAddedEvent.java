@@ -15,6 +15,5 @@
  */
 package org.activiti.cloud.api.task.model.events;
 
-public interface CloudTaskCandidateGroupAddedEvent extends CloudTaskCandidateGroupEvent {
-
-}
+public interface CloudTaskCandidateGroupAddedEvent
+    extends CloudTaskCandidateGroupEvent {}

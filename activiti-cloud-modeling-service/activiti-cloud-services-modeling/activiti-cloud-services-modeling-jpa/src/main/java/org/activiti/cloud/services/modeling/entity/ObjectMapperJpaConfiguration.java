@@ -20,9 +20,9 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.process.Extensions;
-import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -35,22 +35,23 @@ public class ObjectMapperJpaConfiguration {
 
     @Bean
     public Module jsonModelingModuleJpa() {
-        SimpleModule module = new SimpleModule("jsonModelingModuleJpa",
-                                               Version.unknownVersion());
+        SimpleModule module = new SimpleModule(
+            "jsonModelingModuleJpa",
+            Version.unknownVersion()
+        );
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
 
-        resolver.addMapping(Project.class,
-                            ProjectEntity.class);
-        resolver.addMapping(Model.class,
-                            ModelEntity.class);
+        resolver.addMapping(Project.class, ProjectEntity.class);
+        resolver.addMapping(Model.class, ModelEntity.class);
 
         module.setAbstractTypes(resolver);
         return module;
     }
 
     @Bean
-    public JsonConverter<Extensions> extensionsConverter(ObjectMapper objectMapper) {
-        return new JsonConverter<>(Extensions.class,
-                                   objectMapper);
+    public JsonConverter<Extensions> extensionsConverter(
+        ObjectMapper objectMapper
+    ) {
+        return new JsonConverter<>(Extensions.class, objectMapper);
     }
 }

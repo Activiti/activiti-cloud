@@ -16,7 +16,6 @@
 package org.activiti.cloud.starter.messages.jdbc;
 
 import javax.sql.DataSource;
-
 import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -41,17 +40,24 @@ import org.springframework.util.StringUtils;
 
 @Configuration
 @ConditionalOnClass(JdbcMessageStore.class)
-@AutoConfigureBefore({MessagesCoreAutoConfiguration.class})
-@AutoConfigureAfter({
-    DataSourceAutoConfiguration.class,
-    DataSourceTransactionManagerAutoConfiguration.class
-})
-@PropertySource("classpath:config/activiti-cloud-starter-messages-jdbc.properties")
+@AutoConfigureBefore({ MessagesCoreAutoConfiguration.class })
+@AutoConfigureAfter(
+    {
+        DataSourceAutoConfiguration.class,
+        DataSourceTransactionManagerAutoConfiguration.class,
+    }
+)
+@PropertySource(
+    "classpath:config/activiti-cloud-starter-messages-jdbc.properties"
+)
 public class JdbcMessageStoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageGroupStore messageStore(JdbcTemplate jdbcTemplate, MessageAggregatorProperties properties) {
+    public MessageGroupStore messageStore(
+        JdbcTemplate jdbcTemplate,
+        MessageAggregatorProperties properties
+    ) {
         JdbcMessageStore messageStore = new JdbcMessageStore(jdbcTemplate);
         messageStore.setLazyLoadMessageGroups(false);
 
@@ -60,23 +66,22 @@ public class JdbcMessageStoreAutoConfiguration {
         }
         return messageStore;
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ConcurrentMetadataStore metadataStore(JdbcTemplate jdbcTemplate) {
         return new JdbcMetadataStore(jdbcTemplate);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public LockRepository lockRepository(DataSource dataSource) {
         return new DefaultLockRepository(dataSource);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public LockRegistry lockRegistry(LockRepository lockRepository) {
         return new JdbcLockRegistry(lockRepository);
-    }        
-
+    }
 }

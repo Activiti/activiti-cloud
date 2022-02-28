@@ -20,7 +20,8 @@ import org.activiti.api.task.model.payloads.ClaimTaskPayload;
 import org.activiti.api.task.model.results.TaskResult;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 
-public class ClaimTaskCmdExecutor extends AbstractCommandExecutor<ClaimTaskPayload> {
+public class ClaimTaskCmdExecutor
+    extends AbstractCommandExecutor<ClaimTaskPayload> {
 
     private TaskAdminRuntime taskAdminRuntime;
 
@@ -31,7 +32,7 @@ public class ClaimTaskCmdExecutor extends AbstractCommandExecutor<ClaimTaskPaylo
     @Override
     public TaskResult execute(ClaimTaskPayload claimTaskPayload) {
         Task task = taskAdminRuntime.claim(claimTaskPayload);
-        
+
         return new TaskResult(claimTaskPayload, task);
     }
 }

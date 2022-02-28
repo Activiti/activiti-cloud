@@ -16,6 +16,7 @@
 
 package org.activiti.services.connectors.conf;
 
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,19 +24,22 @@ import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.Ordered;
 
-import java.util.Map;
+public class ConnectorMessagingDestinationsConfigurer
+    implements InitializingBean, Ordered {
 
-public class ConnectorMessagingDestinationsConfigurer implements InitializingBean, Ordered {
-
-    private static final Logger logger = LoggerFactory.getLogger(ConnectorImplementationsProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        ConnectorImplementationsProvider.class
+    );
 
     private final ConnectorImplementationsProvider destinationsProvider;
     private final ConnectorDestinationMappingStrategy destinationMappingStrategy;
     private final BindingServiceProperties bindingServiceProperties;
 
-    public ConnectorMessagingDestinationsConfigurer(ConnectorImplementationsProvider destinationsProvider,
-                                                    ConnectorDestinationMappingStrategy destinationMappingStrategy,
-                                                    BindingServiceProperties bindingServiceProperties) {
+    public ConnectorMessagingDestinationsConfigurer(
+        ConnectorImplementationsProvider destinationsProvider,
+        ConnectorDestinationMappingStrategy destinationMappingStrategy,
+        BindingServiceProperties bindingServiceProperties
+    ) {
         this.destinationsProvider = destinationsProvider;
         this.destinationMappingStrategy = destinationMappingStrategy;
         this.bindingServiceProperties = bindingServiceProperties;
@@ -43,35 +47,40 @@ public class ConnectorMessagingDestinationsConfigurer implements InitializingBea
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        destinationsProvider.getImplementations()
-                            .stream()
-                            .map(this::resolveBindingDestination)
-                            .map(this::applyBindingDestination)
-                            .forEach(this::log);
+        destinationsProvider
+            .getImplementations()
+            .stream()
+            .map(this::resolveBindingDestination)
+            .map(this::applyBindingDestination)
+            .forEach(this::log);
     }
 
-    protected Map.Entry<String, String> resolveBindingDestination(String implementation) {
+    protected Map.Entry<String, String> resolveBindingDestination(
+        String implementation
+    ) {
         String destination = destinationMappingStrategy.apply(implementation);
 
-        return Map.entry(implementation,
-                         destination);
+        return Map.entry(implementation, destination);
     }
 
-    protected Map.Entry<String, BindingProperties> applyBindingDestination(Map.Entry<String, String> entry) {
-        BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(entry.getKey());
+    protected Map.Entry<String, BindingProperties> applyBindingDestination(
+        Map.Entry<String, String> entry
+    ) {
+        BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(
+            entry.getKey()
+        );
 
         bindingProperties.setDestination(entry.getValue());
 
-        return Map.entry(entry.getKey(),
-                         bindingProperties);
+        return Map.entry(entry.getKey(), bindingProperties);
     }
 
-
     protected void log(Map.Entry<String, BindingProperties> entry) {
-        logger.warn("Configured Connector '{}' implementation to '{}' destination",
-                    entry.getKey(),
-                    entry.getValue()
-                         .getDestination());
+        logger.warn(
+            "Configured Connector '{}' implementation to '{}' destination",
+            entry.getKey(),
+            entry.getValue().getDestination()
+        );
     }
 
     @Override

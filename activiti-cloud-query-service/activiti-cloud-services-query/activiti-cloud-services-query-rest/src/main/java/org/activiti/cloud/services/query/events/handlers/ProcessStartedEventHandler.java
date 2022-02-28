@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -24,13 +27,11 @@ import org.activiti.cloud.services.query.model.QueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
-
 public class ProcessStartedEventHandler implements QueryEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessStartedEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        ProcessStartedEventHandler.class
+    );
 
     private final EntityManager entityManager;
 
@@ -44,17 +45,32 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
         String processInstanceId = startedEvent.getEntity().getId();
         LOGGER.debug("Handling start of process Instance " + processInstanceId);
 
-        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                                                            processInstanceId));
-        ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(
-                () -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
+        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(
+            entityManager.find(ProcessInstanceEntity.class, processInstanceId)
+        );
+        ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(() ->
+            new QueryException(
+                "Unable to find process instance with the given id: " +
+                processInstanceId
+            )
+        );
 
-        if (ProcessInstance.ProcessInstanceStatus.CREATED.equals(processInstanceEntity.getStatus())) {
-            processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        if (
+            ProcessInstance.ProcessInstanceStatus.CREATED.equals(
+                processInstanceEntity.getStatus()
+            )
+        ) {
+            processInstanceEntity.setStatus(
+                ProcessInstance.ProcessInstanceStatus.RUNNING
+            );
             //instance name is not available in ProcessCreatedEvent, so we need to updated it here
             processInstanceEntity.setName(startedEvent.getEntity().getName());
-            processInstanceEntity.setLastModified(new Date(startedEvent.getTimestamp()));
-            processInstanceEntity.setStartDate(startedEvent.getEntity().getStartDate());
+            processInstanceEntity.setLastModified(
+                new Date(startedEvent.getTimestamp())
+            );
+            processInstanceEntity.setStartDate(
+                startedEvent.getEntity().getStartDate()
+            );
 
             entityManager.persist(processInstanceEntity);
         }

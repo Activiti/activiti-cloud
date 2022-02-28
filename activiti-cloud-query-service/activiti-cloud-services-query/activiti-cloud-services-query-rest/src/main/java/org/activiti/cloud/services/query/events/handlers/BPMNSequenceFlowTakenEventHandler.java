@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -23,13 +26,11 @@ import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
-
 public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(BPMNSequenceFlowTakenEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        BPMNSequenceFlowTakenEventHandler.class
+    );
 
     private final EntityManager entityManager;
 
@@ -39,28 +40,51 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudSequenceFlowTakenEvent activityEvent = CloudSequenceFlowTakenEvent.class.cast(event);
+        CloudSequenceFlowTakenEvent activityEvent =
+            CloudSequenceFlowTakenEvent.class.cast(event);
 
         BPMNSequenceFlow bpmnSequenceFlow = activityEvent.getEntity();
 
-        BPMNSequenceFlowEntity bpmnSequenceFlowEntity = new BPMNSequenceFlowEntity(event.getServiceName(),
-                                                                                   event.getServiceFullName(),
-                                                                                   event.getServiceVersion(),
-                                                                                   event.getAppName(),
-                                                                                   event.getAppVersion());
+        BPMNSequenceFlowEntity bpmnSequenceFlowEntity = new BPMNSequenceFlowEntity(
+            event.getServiceName(),
+            event.getServiceFullName(),
+            event.getServiceVersion(),
+            event.getAppName(),
+            event.getAppVersion()
+        );
         bpmnSequenceFlowEntity.setId(UUID.randomUUID().toString());
         bpmnSequenceFlowEntity.setElementId(bpmnSequenceFlow.getElementId());
-        bpmnSequenceFlowEntity.setProcessDefinitionId(bpmnSequenceFlow.getProcessDefinitionId());
-        bpmnSequenceFlowEntity.setProcessInstanceId(bpmnSequenceFlow.getProcessInstanceId());
+        bpmnSequenceFlowEntity.setProcessDefinitionId(
+            bpmnSequenceFlow.getProcessDefinitionId()
+        );
+        bpmnSequenceFlowEntity.setProcessInstanceId(
+            bpmnSequenceFlow.getProcessInstanceId()
+        );
         bpmnSequenceFlowEntity.setDate(new Date(activityEvent.getTimestamp()));
-        bpmnSequenceFlowEntity.setSourceActivityElementId(bpmnSequenceFlow.getSourceActivityElementId());
-        bpmnSequenceFlowEntity.setSourceActivityType(bpmnSequenceFlow.getSourceActivityType());
-        bpmnSequenceFlowEntity.setSourceActivityName(bpmnSequenceFlow.getSourceActivityName());
-        bpmnSequenceFlowEntity.setTargetActivityElementId(bpmnSequenceFlow.getTargetActivityElementId());
-        bpmnSequenceFlowEntity.setTargetActivityType(bpmnSequenceFlow.getTargetActivityType());
-        bpmnSequenceFlowEntity.setTargetActivityName(bpmnSequenceFlow.getTargetActivityName());
-        bpmnSequenceFlowEntity.setProcessDefinitionKey(event.getProcessDefinitionKey());
-        bpmnSequenceFlowEntity.setProcessDefinitionVersion(event.getProcessDefinitionVersion());
+        bpmnSequenceFlowEntity.setSourceActivityElementId(
+            bpmnSequenceFlow.getSourceActivityElementId()
+        );
+        bpmnSequenceFlowEntity.setSourceActivityType(
+            bpmnSequenceFlow.getSourceActivityType()
+        );
+        bpmnSequenceFlowEntity.setSourceActivityName(
+            bpmnSequenceFlow.getSourceActivityName()
+        );
+        bpmnSequenceFlowEntity.setTargetActivityElementId(
+            bpmnSequenceFlow.getTargetActivityElementId()
+        );
+        bpmnSequenceFlowEntity.setTargetActivityType(
+            bpmnSequenceFlow.getTargetActivityType()
+        );
+        bpmnSequenceFlowEntity.setTargetActivityName(
+            bpmnSequenceFlow.getTargetActivityName()
+        );
+        bpmnSequenceFlowEntity.setProcessDefinitionKey(
+            event.getProcessDefinitionKey()
+        );
+        bpmnSequenceFlowEntity.setProcessDefinitionVersion(
+            event.getProcessDefinitionVersion()
+        );
         bpmnSequenceFlowEntity.setBusinessKey(event.getBusinessKey());
         bpmnSequenceFlowEntity.setEventId(event.getId());
 

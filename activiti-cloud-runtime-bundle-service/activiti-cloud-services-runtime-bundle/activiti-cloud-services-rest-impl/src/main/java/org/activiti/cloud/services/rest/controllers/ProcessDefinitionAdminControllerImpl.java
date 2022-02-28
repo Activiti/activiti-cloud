@@ -40,13 +40,13 @@ import org.activiti.cloud.services.rest.api.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAdminController {
-
+public class ProcessDefinitionAdminControllerImpl
+    implements ProcessDefinitionAdminController {
 
     private final ProcessDefinitionRepresentationModelAssembler representationModelAssembler;
 
@@ -57,10 +57,12 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
     private final SpringPageConverter pageConverter;
 
     @Autowired
-    public ProcessDefinitionAdminControllerImpl(ProcessAdminRuntime processAdminRuntime,
-                                                ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
-                                                AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
-                                                SpringPageConverter pageConverter) {
+    public ProcessDefinitionAdminControllerImpl(
+        ProcessAdminRuntime processAdminRuntime,
+        ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
+        SpringPageConverter pageConverter
+    ) {
         this.processAdminRuntime = processAdminRuntime;
         this.representationModelAssembler = representationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
@@ -68,11 +70,16 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
     }
 
     @Override
-    public PagedModel<EntityModel<CloudProcessDefinition>> getAllProcessDefinitions(Pageable pageable) {
-        Page<ProcessDefinition> page = processAdminRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
-        return pagedCollectionModelAssembler.toModel(pageable,
-                pageConverter.toSpringPage(pageable, page),
-                representationModelAssembler);
+    public PagedModel<EntityModel<CloudProcessDefinition>> getAllProcessDefinitions(
+        Pageable pageable
+    ) {
+        Page<ProcessDefinition> page = processAdminRuntime.processDefinitions(
+            pageConverter.toAPIPageable(pageable)
+        );
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            pageConverter.toSpringPage(pageable, page),
+            representationModelAssembler
+        );
     }
-
 }

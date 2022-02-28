@@ -25,12 +25,18 @@ import org.activiti.cloud.services.events.message.MessageBuilderAppender;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-public class MessageSubscriptionMessageBuilderAppender implements MessageBuilderAppender {
+public class MessageSubscriptionMessageBuilderAppender
+    implements MessageBuilderAppender {
 
     private final MessageSubscription messageSubscription;
 
-    public MessageSubscriptionMessageBuilderAppender(MessageSubscription messageSubscription) {
-        Assert.notNull(messageSubscription, "messageSubscription must not be null");
+    public MessageSubscriptionMessageBuilderAppender(
+        MessageSubscription messageSubscription
+    ) {
+        Assert.notNull(
+            messageSubscription,
+            "messageSubscription must not be null"
+        );
 
         this.messageSubscription = messageSubscription;
     }
@@ -38,12 +44,17 @@ public class MessageSubscriptionMessageBuilderAppender implements MessageBuilder
     @Override
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
-        
-        return request.setHeader(MESSAGE_EVENT_BUSINESS_KEY, messageSubscription.getBusinessKey())
-                      .setHeader(MESSAGE_EVENT_CORRELATION_KEY, messageSubscription.getConfiguration())
-                      .setHeader(MESSAGE_EVENT_NAME, messageSubscription.getEventName())
-                      .setHeader(MESSAGE_EVENT_ID, messageSubscription.getId())
-       ;
-    }
 
+        return request
+            .setHeader(
+                MESSAGE_EVENT_BUSINESS_KEY,
+                messageSubscription.getBusinessKey()
+            )
+            .setHeader(
+                MESSAGE_EVENT_CORRELATION_KEY,
+                messageSubscription.getConfiguration()
+            )
+            .setHeader(MESSAGE_EVENT_NAME, messageSubscription.getEventName())
+            .setHeader(MESSAGE_EVENT_ID, messageSubscription.getId());
+    }
 }

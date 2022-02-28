@@ -15,8 +15,9 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import java.util.Optional;
-
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
@@ -26,26 +27,21 @@ import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
-
 @RestController
 @ExposesResourceFor(ProcessDefinitionEntity.class)
 @RequestMapping(
-        value = "/v1/process-definitions",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/v1/process-definitions",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ProcessDefinitionController {
 
     private ProcessDefinitionRepository repository;
@@ -56,26 +52,35 @@ public class ProcessDefinitionController {
 
     private ProcessDefinitionRestrictionService processDefinitionRestrictionService;
 
-    public ProcessDefinitionController(ProcessDefinitionRepository repository,
-                                       AlfrescoPagedModelAssembler<ProcessDefinitionEntity> pagedCollectionModelAssembler,
-                                       ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler,
-                                       ProcessDefinitionRestrictionService processDefinitionRestrictionService) {
+    public ProcessDefinitionController(
+        ProcessDefinitionRepository repository,
+        AlfrescoPagedModelAssembler<ProcessDefinitionEntity> pagedCollectionModelAssembler,
+        ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler,
+        ProcessDefinitionRestrictionService processDefinitionRestrictionService
+    ) {
         this.repository = repository;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
-        this.processDefinitionRepresentationModelAssembler = processDefinitionRepresentationModelAssembler;
-        this.processDefinitionRestrictionService = processDefinitionRestrictionService;
+        this.processDefinitionRepresentationModelAssembler =
+            processDefinitionRepresentationModelAssembler;
+        this.processDefinitionRestrictionService =
+            processDefinitionRestrictionService;
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
-                                                                    Pageable pageable) {
-
-        Predicate extendedPredicate = processDefinitionRestrictionService.restrictProcessDefinitionQuery(Optional.ofNullable(predicate)
-                                                                                                                 .orElseGet(BooleanBuilder::new),
-                                                                                                         SecurityPolicyAccess.READ);
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  repository.findAll(extendedPredicate,
-                                                                     pageable),
-                                                  processDefinitionRepresentationModelAssembler);
+    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(
+        @QuerydslPredicate(
+            root = ProcessDefinitionEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        Predicate extendedPredicate = processDefinitionRestrictionService.restrictProcessDefinitionQuery(
+            Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new),
+            SecurityPolicyAccess.READ
+        );
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            repository.findAll(extendedPredicate, pageable),
+            processDefinitionRepresentationModelAssembler
+        );
     }
 }

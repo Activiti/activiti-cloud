@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.jpa;
 
 import java.util.Optional;
-
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.springframework.data.domain.Page;
@@ -27,23 +26,26 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 /**
  * JPA Repository for {@link ProjectEntity} entity
  */
-@RepositoryRestResource(path = "projects",
-        collectionResourceRel = "projects",
-        itemResourceRel = "projects",
-        exported = false)
-public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, String>,
-                                              ProjectRepository<ProjectEntity> {
-
-    Page<ProjectEntity> findAllByNameContaining(String name,
-                                                Pageable pageable);
+@RepositoryRestResource(
+    path = "projects",
+    collectionResourceRel = "projects",
+    itemResourceRel = "projects",
+    exported = false
+)
+public interface ProjectJpaRepository
+    extends
+        JpaRepository<ProjectEntity, String>, ProjectRepository<ProjectEntity> {
+    Page<ProjectEntity> findAllByNameContaining(String name, Pageable pageable);
 
     @Override
-    default Page<ProjectEntity> getProjects(Pageable pageable,
-                                            String nameToFilter) {
-        return Optional.ofNullable(nameToFilter)
-                .map(name -> findAllByNameContaining(name,
-                                                     pageable))
-                .orElseGet(() -> findAll(pageable));
+    default Page<ProjectEntity> getProjects(
+        Pageable pageable,
+        String nameToFilter
+    ) {
+        return Optional
+            .ofNullable(nameToFilter)
+            .map(name -> findAllByNameContaining(name, pageable))
+            .orElseGet(() -> findAll(pageable));
     }
 
     @Override
@@ -62,7 +64,10 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Strin
     }
 
     @Override
-    default ProjectEntity copyProject(ProjectEntity projectToCopy, String newProjectName) {
+    default ProjectEntity copyProject(
+        ProjectEntity projectToCopy,
+        String newProjectName
+    ) {
         ProjectEntity projectEntityClone = new ProjectEntity(newProjectName);
         projectEntityClone.setDescription(projectToCopy.getDescription());
         return save(projectEntityClone);

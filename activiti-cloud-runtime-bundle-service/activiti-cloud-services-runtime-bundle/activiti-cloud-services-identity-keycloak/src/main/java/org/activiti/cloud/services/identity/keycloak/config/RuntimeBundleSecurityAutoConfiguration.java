@@ -30,5 +30,4 @@ public class RuntimeBundleSecurityAutoConfiguration {
     public KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
         return new KeycloakActivitiAuthenticationProvider();
     }
-
 }

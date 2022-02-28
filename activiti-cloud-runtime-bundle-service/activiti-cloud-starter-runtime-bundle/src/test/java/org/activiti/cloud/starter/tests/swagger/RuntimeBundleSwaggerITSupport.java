@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.starter.tests.swagger;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -31,11 +33,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    initializers = {
+        RabbitMQContainerApplicationInitializer.class,
+        KeycloakContainerApplicationInitializer.class,
+    }
+)
 class RuntimeBundleSwaggerITSupport {
 
     @Autowired
@@ -52,15 +58,25 @@ class RuntimeBundleSwaggerITSupport {
      */
     @Test
     void generateSwagger() throws Exception {
-        mockMvc.perform(get("/v3/api-docs?group=Runtime Bundle").accept(MediaType.APPLICATION_JSON))
-            .andDo((result) -> {
-                JsonNode jsonNodeTree = objectMapper
-                    .readTree(result.getResponse().getContentAsByteArray());
-                Files.write(new File("target/swagger.json").toPath(),
-                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(jsonNodeTree));
-                Files.write(new File("target/swagger.yaml").toPath(),
-                    new YAMLMapper().writeValueAsBytes(jsonNodeTree));
+        mockMvc
+            .perform(
+                get("/v3/api-docs?group=Runtime Bundle")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(result -> {
+                JsonNode jsonNodeTree = objectMapper.readTree(
+                    result.getResponse().getContentAsByteArray()
+                );
+                Files.write(
+                    new File("target/swagger.json").toPath(),
+                    objectMapper
+                        .writerWithDefaultPrettyPrinter()
+                        .writeValueAsBytes(jsonNodeTree)
+                );
+                Files.write(
+                    new File("target/swagger.yaml").toPath(),
+                    new YAMLMapper().writeValueAsBytes(jsonNodeTree)
+                );
             });
     }
-
 }

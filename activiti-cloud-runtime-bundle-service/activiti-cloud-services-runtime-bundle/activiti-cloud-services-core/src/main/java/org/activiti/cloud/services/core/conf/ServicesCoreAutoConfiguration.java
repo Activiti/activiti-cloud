@@ -66,97 +66,127 @@ import org.springframework.format.support.FormattingConversionService;
 public class ServicesCoreAutoConfiguration {
 
     @Bean
-    public SpringPageConverter pageConverter(){
+    public SpringPageConverter pageConverter() {
         return new SpringPageConverter();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ClaimTaskCmdExecutor claimTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+    public ClaimTaskCmdExecutor claimTaskCmdExecutor(
+        TaskAdminRuntime taskAdminRuntime
+    ) {
         return new ClaimTaskCmdExecutor(taskAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CompleteTaskCmdExecutor completeTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+    public CompleteTaskCmdExecutor completeTaskCmdExecutor(
+        TaskAdminRuntime taskAdminRuntime
+    ) {
         return new CompleteTaskCmdExecutor(taskAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CreateTaskVariableCmdExecutor createTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+    public CreateTaskVariableCmdExecutor createTaskVariableCmdExecutor(
+        TaskAdminRuntime taskAdminRuntime
+    ) {
         return new CreateTaskVariableCmdExecutor(taskAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ReleaseTaskCmdExecutor releaseTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+    public ReleaseTaskCmdExecutor releaseTaskCmdExecutor(
+        TaskAdminRuntime taskAdminRuntime
+    ) {
         return new ReleaseTaskCmdExecutor(taskAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public UpdateTaskVariableCmdExecutor updateTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+    public UpdateTaskVariableCmdExecutor updateTaskVariableCmdExecutor(
+        TaskAdminRuntime taskAdminRuntime
+    ) {
         return new UpdateTaskVariableCmdExecutor(taskAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public RemoveProcessVariablesCmdExecutor removeProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public RemoveProcessVariablesCmdExecutor removeProcessVariablesCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new RemoveProcessVariablesCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ResumeProcessInstanceCmdExecutor resumeProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public ResumeProcessInstanceCmdExecutor resumeProcessInstanceCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new ResumeProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SetProcessVariablesCmdExecutor setProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public SetProcessVariablesCmdExecutor setProcessVariablesCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new SetProcessVariablesCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SignalCmdExecutor signalCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public SignalCmdExecutor signalCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new SignalCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public StartProcessInstanceCmdExecutor startProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public StartProcessInstanceCmdExecutor startProcessInstanceCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new StartProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new SuspendProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public StartMessageCmdExecutor startMessageCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public StartMessageCmdExecutor startMessageCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new StartMessageCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ReceiveMessageCmdExecutor receiveMessageCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public ReceiveMessageCmdExecutor receiveMessageCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new ReceiveMessageCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public DeleteProcessInstanceCmdExecutor deleteProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public DeleteProcessInstanceCmdExecutor deleteProcessInstanceCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new DeleteProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
+    public <T extends Payload> CommandEndpoint<T> commandEndpoint(
+        Set<CommandExecutor<T>> cmdExecutors
+    ) {
         return new CommandEndpoint<T>(cmdExecutors);
     }
 
@@ -186,32 +216,47 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(ProcessDiagramGenerator processDiagramGenerator) {
+    public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(
+        ProcessDiagramGenerator processDiagramGenerator
+    ) {
         return new ProcessDiagramGeneratorWrapper(processDiagramGenerator);
     }
 
     @Bean
-    public ProcessVariableValueSpringConverter<Date> processVariableDateConverter(DateFormatterProvider dateFormatterProvider) {
+    public ProcessVariableValueSpringConverter<Date> processVariableDateConverter(
+        DateFormatterProvider dateFormatterProvider
+    ) {
         return new ProcessVariableDateConverter(dateFormatterProvider);
     }
 
     @Bean
     public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter(
-        ObjectMapper objectMapper) {
+        ObjectMapper objectMapper
+    ) {
         return new ProcessVariableJsonNodeConverter(objectMapper);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessVariableValueConverter processVariableValueConverter(List<ProcessVariableValueSpringConverter<?>> converters,
-                                                                       DateFormatterProvider dateFormatterProvider) {
+    public ProcessVariableValueConverter processVariableValueConverter(
+        List<ProcessVariableValueSpringConverter<?>> converters,
+        DateFormatterProvider dateFormatterProvider
+    ) {
         FormattingConversionService conversionService = new ApplicationConversionService();
 
         converters.forEach(conversionService::addConverter);
 
         DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
-        registrar.setDateFormatter(DateTimeFormatter.ofPattern(dateFormatterProvider.getDateFormatPattern()));
-        registrar.setDateTimeFormatter(DateTimeFormatter.ofPattern(dateFormatterProvider.getDateFormatPattern()));
+        registrar.setDateFormatter(
+            DateTimeFormatter.ofPattern(
+                dateFormatterProvider.getDateFormatPattern()
+            )
+        );
+        registrar.setDateTimeFormatter(
+            DateTimeFormatter.ofPattern(
+                dateFormatterProvider.getDateFormatPattern()
+            )
+        );
         registrar.registerFormatters(conversionService);
 
         return new ProcessVariableValueConverter(conversionService);
@@ -219,7 +264,9 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessVariablesPayloadConverter processVariablesPayloadConverter(ProcessVariableValueConverter variableValueConverter) {
+    public ProcessVariablesPayloadConverter processVariablesPayloadConverter(
+        ProcessVariableValueConverter variableValueConverter
+    ) {
         return new ProcessVariablesPayloadConverter(variableValueConverter);
     }
 }

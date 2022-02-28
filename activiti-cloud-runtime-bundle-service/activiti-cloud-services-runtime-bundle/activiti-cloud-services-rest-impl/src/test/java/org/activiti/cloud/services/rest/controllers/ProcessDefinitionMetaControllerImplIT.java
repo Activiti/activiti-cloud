@@ -40,7 +40,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessDefinitionMetaControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
+@EnableAutoConfiguration(
+    exclude = {
+        SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class,
+    }
+)
 public class ProcessDefinitionMetaControllerImplIT {
 
     @Autowired
@@ -54,17 +58,23 @@ public class ProcessDefinitionMetaControllerImplIT {
 
     @Test
     public void getProcessDefinitionMetadata() throws Exception {
-        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
-        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
+        ProcessDefinitionQuery processDefinitionQuery = mock(
+            ProcessDefinitionQuery.class
+        );
+        when(repositoryService.createProcessDefinitionQuery())
+            .thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.processDefinitionId("1"))
+            .thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.singleResult())
+            .thenReturn(new ProcessDefinitionEntityImpl());
 
         final BpmnModel bpmnModel = new BpmnModel();
         when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
 
-        this.mockMvc.perform(get("/v1/process-definitions/{id}/meta",
-                                 1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                get("/v1/process-definitions/{id}/meta", 1)
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk());
     }
-
 }

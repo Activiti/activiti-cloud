@@ -20,17 +20,22 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.payloads.DeleteProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 
-public class DeleteProcessInstanceCmdExecutor extends AbstractCommandExecutor<DeleteProcessPayload> {
+public class DeleteProcessInstanceCmdExecutor
+    extends AbstractCommandExecutor<DeleteProcessPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;
 
-    public DeleteProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public DeleteProcessInstanceCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         this.processAdminRuntime = processAdminRuntime;
     }
 
     @Override
     public EmptyResult execute(DeleteProcessPayload deleteProcessPayload) {
-        ProcessInstance processInstance = processAdminRuntime.delete(deleteProcessPayload);
+        ProcessInstance processInstance = processAdminRuntime.delete(
+            deleteProcessPayload
+        );
         if (processInstance != null) {
             return new EmptyResult(deleteProcessPayload);
         } else {

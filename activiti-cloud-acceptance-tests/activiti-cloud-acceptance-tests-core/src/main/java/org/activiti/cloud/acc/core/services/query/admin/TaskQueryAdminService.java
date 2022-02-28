@@ -24,7 +24,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 public interface TaskQueryAdminService {
-
     @RequestLine("GET /admin/v1/tasks/{taskId}")
     @Headers("Accept: application/hal+json;charset=UTF-8")
     CloudTask getTask(@Param("taskId") String taskId);
@@ -33,15 +32,23 @@ public interface TaskQueryAdminService {
     @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedModel<CloudTask> getTasks();
 
-    @RequestLine("GET /admin/v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc")
+    @RequestLine(
+        "GET /admin/v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc"
+    )
     @Headers("Content-Type: application/json")
-    PagedModel<CloudTask> getRootTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
+    PagedModel<CloudTask> getRootTasksByProcessInstance(
+        @Param("processInstanceId") String processInstanceId
+    );
 
-    @RequestLine("GET /admin/v1/tasks?standalone=true&sort=createdDate,desc&sort=id,desc")
+    @RequestLine(
+        "GET /admin/v1/tasks?standalone=true&sort=createdDate,desc&sort=id,desc"
+    )
     @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedModel<CloudTask> getStandaloneTasks();
 
-    @RequestLine("GET /admin/v1/tasks?standalone=false&sort=createdDate,desc&sort=id,desc")
+    @RequestLine(
+        "GET /admin/v1/tasks?standalone=false&sort=createdDate,desc&sort=id,desc"
+    )
     @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedModel<CloudTask> getNonStandaloneTasks();
 

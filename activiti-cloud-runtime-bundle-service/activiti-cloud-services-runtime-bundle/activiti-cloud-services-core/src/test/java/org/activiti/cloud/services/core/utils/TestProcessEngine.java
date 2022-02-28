@@ -15,12 +15,11 @@
  */
 package org.activiti.cloud.services.core.utils;
 
+import java.io.IOException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.runtime.ProcessInstance;
-
-import java.io.IOException;
 
 /**
  * Wrapper over ProcessEngine for testing purposes.
@@ -34,19 +33,26 @@ public class TestProcessEngine {
         this.processEngine = processEngine;
     }
 
-    public Deployment deploy(final String processDefinitionKey) throws IOException {
+    public Deployment deploy(final String processDefinitionKey)
+        throws IOException {
         return processEngine
-                .getRepositoryService()
-                .createDeployment()
-                .addClasspathResource(processDefinitionKey + ".bpmn20.xml")
-                .deploy();
+            .getRepositoryService()
+            .createDeployment()
+            .addClasspathResource(processDefinitionKey + ".bpmn20.xml")
+            .deploy();
     }
 
-    public ProcessInstance startProcessInstanceByKey(String processDefinitionKey) {
-        return processEngine.getRuntimeService().startProcessInstanceByKey(processDefinitionKey);
+    public ProcessInstance startProcessInstanceByKey(
+        String processDefinitionKey
+    ) {
+        return processEngine
+            .getRuntimeService()
+            .startProcessInstanceByKey(processDefinitionKey);
     }
 
     public BpmnModel getBpmnModel(String processDefinitionId) {
-        return processEngine.getRepositoryService().getBpmnModel(processDefinitionId);
+        return processEngine
+            .getRepositoryService()
+            .getBpmnModel(processDefinitionId);
     }
 }

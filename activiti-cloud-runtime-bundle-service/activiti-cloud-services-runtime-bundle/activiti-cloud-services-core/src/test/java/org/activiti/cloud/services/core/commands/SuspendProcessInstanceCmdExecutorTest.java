@@ -42,8 +42,11 @@ public class SuspendProcessInstanceCmdExecutorTest {
     @Test
     public void suspendProcessInstanceCmdExecutorTest() {
         //given
-        SuspendProcessPayload suspendProcessInstanceCmd = new SuspendProcessPayload("x");
-        assertThat(suspendProcessInstanceCmdExecutor.getHandledType()).isEqualTo(SuspendProcessPayload.class.getName());
+        SuspendProcessPayload suspendProcessInstanceCmd = new SuspendProcessPayload(
+            "x"
+        );
+        assertThat(suspendProcessInstanceCmdExecutor.getHandledType())
+            .isEqualTo(SuspendProcessPayload.class.getName());
 
         //when
         suspendProcessInstanceCmdExecutor.execute(suspendProcessInstanceCmd);

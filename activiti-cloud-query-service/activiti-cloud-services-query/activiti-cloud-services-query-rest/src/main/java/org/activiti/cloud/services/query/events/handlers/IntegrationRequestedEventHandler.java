@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -25,12 +27,13 @@ import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import java.util.Date;
+public class IntegrationRequestedEventHandler
+    extends BaseIntegrationEventHandler
+    implements QueryEventHandler {
 
-public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
-
-    private final static Logger logger = LoggerFactory.getLogger(IntegrationRequestedEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        IntegrationRequestedEventHandler.class
+    );
 
     public IntegrationRequestedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -38,32 +41,50 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudIntegrationRequestedEvent integrationEvent = CloudIntegrationRequestedEvent.class.cast(event);
+        CloudIntegrationRequestedEvent integrationEvent =
+            CloudIntegrationRequestedEvent.class.cast(event);
         IntegrationContext integrationContext = integrationEvent.getEntity();
-        String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
+        String entityId = IntegrationContextEntity.IdBuilderHelper.from(
+            integrationContext
+        );
 
-        IntegrationContextEntity entity = new IntegrationContextEntity(event.getServiceName(),
-                                                                       event.getServiceFullName(),
-                                                                       event.getServiceVersion(),
-                                                                       event.getAppName(),
-                                                                       event.getAppVersion());
+        IntegrationContextEntity entity = new IntegrationContextEntity(
+            event.getServiceName(),
+            event.getServiceFullName(),
+            event.getServiceVersion(),
+            event.getAppName(),
+            event.getAppVersion()
+        );
         entity.setId(entityId);
         entity.setClientId(integrationContext.getClientId());
         entity.setClientName(integrationContext.getClientName());
         entity.setClientType(integrationContext.getClientType());
         entity.setConnectorType(integrationContext.getConnectorType());
-        entity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
+        entity.setProcessDefinitionId(
+            integrationContext.getProcessDefinitionId()
+        );
         entity.setProcessInstanceId(integrationContext.getProcessInstanceId());
-        entity.setRootProcessInstanceId(integrationContext.getRootProcessInstanceId());
+        entity.setRootProcessInstanceId(
+            integrationContext.getRootProcessInstanceId()
+        );
         entity.setExecutionId(integrationContext.getExecutionId());
-        entity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
-        entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
+        entity.setProcessDefinitionKey(
+            integrationContext.getProcessDefinitionKey()
+        );
+        entity.setProcessDefinitionVersion(
+            integrationContext.getProcessDefinitionVersion()
+        );
         entity.setBusinessKey(integrationContext.getBusinessKey());
         entity.setRequestDate(new Date(integrationEvent.getTimestamp()));
         entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
-        entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
+        entity.setInBoundVariables(
+            integrationEvent.getEntity().getInBoundVariables()
+        );
 
-        ServiceTaskEntity serviceTaskEntity = entityManager.getReference(ServiceTaskEntity.class, entityId);
+        ServiceTaskEntity serviceTaskEntity = entityManager.getReference(
+            ServiceTaskEntity.class,
+            entityId
+        );
         entity.setServiceTask(serviceTaskEntity);
 
         entityManager.persist(entity);

@@ -15,41 +15,43 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessToken.Access;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class KeycloakAccessTokenPrincipalRolesProvider implements PrincipalRolesProvider {
+public class KeycloakAccessTokenPrincipalRolesProvider
+    implements PrincipalRolesProvider {
 
     private final KeycloakAccessTokenProvider keycloakAccessTokenProvider;
     private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
-    
-    public KeycloakAccessTokenPrincipalRolesProvider(@NonNull KeycloakAccessTokenProvider keycloakSecurityContextProvider,
-                                                     @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+
+    public KeycloakAccessTokenPrincipalRolesProvider(
+        @NonNull KeycloakAccessTokenProvider keycloakSecurityContextProvider,
+        @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator
+    ) {
         this.keycloakAccessTokenProvider = keycloakSecurityContextProvider;
         this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
     }
-    
+
     @Override
     public List<String> getRoles(@NonNull Principal principal) {
-        return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
-                                          .map(AccessToken::getRealmAccess)
-                                          .map(Access::getRoles)
-                                          .map(ArrayList::new)
-                                          .map(Collections::unmodifiableList)
-                                          .orElseGet(this::empty);
+        return keycloakAccessTokenProvider
+            .accessToken(principal)
+            .filter(keycloakAccessTokenValidator::isValid)
+            .map(AccessToken::getRealmAccess)
+            .map(Access::getRoles)
+            .map(ArrayList::new)
+            .map(Collections::unmodifiableList)
+            .orElseGet(this::empty);
     }
-    
+
     protected @Nullable List<String> empty() {
         return null;
     }
-    
 }

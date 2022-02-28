@@ -25,12 +25,18 @@ import org.activiti.cloud.services.events.message.MessageBuilderAppender;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-public class MessageEventPayloadMessageBuilderAppender implements MessageBuilderAppender {
+public class MessageEventPayloadMessageBuilderAppender
+    implements MessageBuilderAppender {
 
     private final MessageEventPayload messageEventPayload;
 
-    public MessageEventPayloadMessageBuilderAppender(MessageEventPayload messageEventPayload) {
-        Assert.notNull(messageEventPayload, "messageEventPayload must not be null");
+    public MessageEventPayloadMessageBuilderAppender(
+        MessageEventPayload messageEventPayload
+    ) {
+        Assert.notNull(
+            messageEventPayload,
+            "messageEventPayload must not be null"
+        );
 
         this.messageEventPayload = messageEventPayload;
     }
@@ -38,12 +44,17 @@ public class MessageEventPayloadMessageBuilderAppender implements MessageBuilder
     @Override
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
-        
-        return request.setHeader(MESSAGE_EVENT_ID, messageEventPayload.getId())
-                      .setHeader(MESSAGE_EVENT_BUSINESS_KEY, messageEventPayload.getBusinessKey())
-                      .setHeader(MESSAGE_EVENT_CORRELATION_KEY, messageEventPayload.getCorrelationKey())
-                      .setHeader(MESSAGE_EVENT_NAME, messageEventPayload.getName())
-        ;
-    }
 
+        return request
+            .setHeader(MESSAGE_EVENT_ID, messageEventPayload.getId())
+            .setHeader(
+                MESSAGE_EVENT_BUSINESS_KEY,
+                messageEventPayload.getBusinessKey()
+            )
+            .setHeader(
+                MESSAGE_EVENT_CORRELATION_KEY,
+                messageEventPayload.getCorrelationKey()
+            )
+            .setHeader(MESSAGE_EVENT_NAME, messageEventPayload.getName());
+    }
 }

@@ -17,7 +17,6 @@ package org.activiti.cloud.acc.modeling.modeling;
 
 import java.util.Collection;
 import java.util.Optional;
-
 import net.serenitybdd.core.Serenity;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -28,28 +27,34 @@ import org.springframework.hateoas.EntityModel;
  */
 public class ModelingContextHandler {
 
-    private static final String MODELING_CURRENT_CONTEXT = "modelingCurrentContext";
+    private static final String MODELING_CURRENT_CONTEXT =
+        "modelingCurrentContext";
 
     private static final String MODELING_CURRENT_FILE = "modelingCurrentFile";
 
-    private static final String MODELING_CURRENT_PROJECTS = "modelingCurrentProjects";
+    private static final String MODELING_CURRENT_PROJECTS =
+        "modelingCurrentProjects";
 
     public Optional<EntityModel<?>> getCurrentModelingContext() {
-        return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_CONTEXT));
+        return Optional.ofNullable(
+            Serenity.sessionVariableCalled(MODELING_CURRENT_CONTEXT)
+        );
     }
 
     public void setCurrentModelingObject(EntityModel<?> currentModelingObject) {
-        Serenity.setSessionVariable(MODELING_CURRENT_CONTEXT)
-                .to(currentModelingObject);
+        Serenity
+            .setSessionVariable(MODELING_CURRENT_CONTEXT)
+            .to(currentModelingObject);
     }
 
     public Optional<FileContent> getCurrentModelingFile() {
-        return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_FILE));
+        return Optional.ofNullable(
+            Serenity.sessionVariableCalled(MODELING_CURRENT_FILE)
+        );
     }
 
     public void setCurrentModelingFile(FileContent fileContent) {
-        Serenity.setSessionVariable(MODELING_CURRENT_FILE)
-                .to(fileContent);
+        Serenity.setSessionVariable(MODELING_CURRENT_FILE).to(fileContent);
     }
 
     public void setCurrentProjects(Collection<EntityModel<Project>> projects) {
@@ -57,7 +62,9 @@ public class ModelingContextHandler {
     }
 
     public Optional<Collection<EntityModel<Project>>> getCurrentProjects() {
-        return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_PROJECTS));
+        return Optional.ofNullable(
+            Serenity.sessionVariableCalled(MODELING_CURRENT_PROJECTS)
+        );
     }
 
     public static void resetCurrentModelingObject() {

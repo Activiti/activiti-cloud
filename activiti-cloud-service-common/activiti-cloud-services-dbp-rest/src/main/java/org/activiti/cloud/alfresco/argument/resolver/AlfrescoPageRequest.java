@@ -21,14 +21,19 @@ import org.springframework.data.domain.AbstractPageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable {
+public class AlfrescoPageRequest
+    extends AbstractPageRequest
+    implements Pageable {
 
     private final long skipCount;
     private final Pageable pageable;
 
-    public AlfrescoPageRequest(long skipCount, int maxItems, Pageable pageable) {
+    public AlfrescoPageRequest(
+        long skipCount,
+        int maxItems,
+        Pageable pageable
+    ) {
         super(0, maxItems);
-
         this.skipCount = skipCount;
         this.pageable = pageable;
     }
@@ -40,7 +45,11 @@ public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable
 
     @Override
     public AlfrescoPageRequest next() {
-        return new AlfrescoPageRequest(skipCount + getPageSize(), getPageSize(), getPageable());
+        return new AlfrescoPageRequest(
+            skipCount + getPageSize(),
+            getPageSize(),
+            getPageable()
+        );
     }
 
     @Override
@@ -71,13 +80,19 @@ public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable
             nextPageSize = Math.toIntExact(skipCount);
         }
 
-        return new AlfrescoPageRequest(newSkipCount, nextPageSize, getPageable());
+        return new AlfrescoPageRequest(
+            newSkipCount,
+            nextPageSize,
+            getPageable()
+        );
     }
 
     @Override
     public AlfrescoPageRequest first() {
         long remainder = skipCount % getPageSize();
-        int pageSize = Math.toIntExact(remainder == 0 ? getPageSize() : remainder);
+        int pageSize = Math.toIntExact(
+            remainder == 0 ? getPageSize() : remainder
+        );
 
         return new AlfrescoPageRequest(0, pageSize, getPageable());
     }
@@ -85,12 +100,20 @@ public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable
     @Override
     public Pageable withPage(int pageNumber) {
         if (pageNumber < 0) {
-            throw new IllegalArgumentException(format("Invalid request of a pageNumber %d. "
-                + "pageNumber must be a non negative number", pageNumber));
+            throw new IllegalArgumentException(
+                format(
+                    "Invalid request of a pageNumber %d. " +
+                    "pageNumber must be a non negative number",
+                    pageNumber
+                )
+            );
         }
 
         return new AlfrescoPageRequest(
-            (long) pageNumber * getPageSize(), getPageSize(), getPageable());
+            (long) pageNumber * getPageSize(),
+            getPageSize(),
+            getPageable()
+        );
     }
 
     @Override
@@ -119,7 +142,9 @@ public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable
         if (skipCount != that.skipCount) {
             return false;
         }
-        return pageable != null ? pageable.equals(that.pageable) : that.pageable == null;
+        return pageable != null
+            ? pageable.equals(that.pageable)
+            : that.pageable == null;
     }
 
     @Override

@@ -22,7 +22,8 @@ import org.keycloak.adapters.OIDCHttpFacade;
 import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class CustomKeycloakSpringConfigResolver implements KeycloakConfigResolver {
+public class CustomKeycloakSpringConfigResolver
+    implements KeycloakConfigResolver {
 
     private AdapterConfig adapterConfig;
     private KeycloakDeployment keycloakDeployment;

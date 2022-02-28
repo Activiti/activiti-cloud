@@ -15,12 +15,9 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
+import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 
-import graphql.schema.DataFetchingEnvironment;
-
 public interface DataFetcherDestinationResolver {
-
-	List<String> resolveDestinations(DataFetchingEnvironment environment);
-
+    List<String> resolveDestinations(DataFetchingEnvironment environment);
 }

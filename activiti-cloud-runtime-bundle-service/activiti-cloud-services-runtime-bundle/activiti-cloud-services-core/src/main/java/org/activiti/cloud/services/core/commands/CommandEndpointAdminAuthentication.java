@@ -17,25 +17,28 @@ package org.activiti.cloud.services.core.commands;
 
 import java.util.Arrays;
 import java.util.Collection;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-public class CommandEndpointAdminAuthentication extends UsernamePasswordAuthenticationToken {
+public class CommandEndpointAdminAuthentication
+    extends UsernamePasswordAuthenticationToken {
 
     private static final long serialVersionUID = 1L;
 
-    public CommandEndpointAdminAuthentication(Object principal,
-                                              Object credentials,
-                                              Collection<? extends GrantedAuthority> authorities) {
+    public CommandEndpointAdminAuthentication(
+        Object principal,
+        Object credentials,
+        Collection<? extends GrantedAuthority> authorities
+    ) {
         super(principal, credentials, authorities);
     }
 
     public CommandEndpointAdminAuthentication() {
-        this("commandExecutor",
-             null,
-             Arrays.asList(new SimpleGrantedAuthority("ROLE_ACTIVITI_ADMIN")));
+        this(
+            "commandExecutor",
+            null,
+            Arrays.asList(new SimpleGrantedAuthority("ROLE_ACTIVITI_ADMIN"))
+        );
     }
-
 }

@@ -24,14 +24,19 @@ public class ToCloudVariableInstanceConverter {
 
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    public ToCloudVariableInstanceConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+    public ToCloudVariableInstanceConverter(
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+    ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
     public CloudVariableInstance from(VariableInstance variableInstance) {
-        CloudVariableInstanceImpl<Object> cloudVariableInstance = new CloudVariableInstanceImpl<>(variableInstance);
-        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudVariableInstance);
+        CloudVariableInstanceImpl<Object> cloudVariableInstance = new CloudVariableInstanceImpl<>(
+            variableInstance
+        );
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(
+            cloudVariableInstance
+        );
         return cloudVariableInstance;
     }
-
 }

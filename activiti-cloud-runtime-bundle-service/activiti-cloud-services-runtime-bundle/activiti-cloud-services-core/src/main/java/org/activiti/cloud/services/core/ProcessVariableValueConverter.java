@@ -26,7 +26,7 @@ import org.activiti.engine.ActivitiException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 
-public class ProcessVariableValueConverter  {
+public class ProcessVariableValueConverter {
 
     private static Map<String, Class<?>> typeRegistry = new HashMap<>();
 
@@ -52,7 +52,10 @@ public class ProcessVariableValueConverter  {
 
     @SuppressWarnings("unchecked")
     public <T> T convert(ProcessVariableValue variableValue) {
-        Class<?> type = typeRegistry.getOrDefault(variableValue.getType().toLowerCase(), Object.class);
+        Class<?> type = typeRegistry.getOrDefault(
+            variableValue.getType().toLowerCase(),
+            Object.class
+        );
         Object value = variableValue.getValue();
 
         try {
@@ -61,5 +64,4 @@ public class ProcessVariableValueConverter  {
             throw new ActivitiException("VariableValue conversion error", ex);
         }
     }
-
 }

@@ -19,7 +19,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.getExtens
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test ;
+import org.junit.jupiter.api.Test;
 
 public class ContentTypeUtilsTest {
 
@@ -53,8 +53,8 @@ public class ContentTypeUtilsTest {
         assertThat(removeExtension("a.b\\c")).isEqualTo("a.b\\c");
         assertThat(removeExtension("a.b\\c.txt")).isEqualTo("a.b\\c");
         assertThat(removeExtension("a\\b\\c")).isEqualTo("a\\b\\c");
-        assertThat(removeExtension("C:\\temp\\foo.bar\\README")).isEqualTo("C:\\temp\\foo.bar\\README");
+        assertThat(removeExtension("C:\\temp\\foo.bar\\README"))
+            .isEqualTo("C:\\temp\\foo.bar\\README");
         assertThat(removeExtension("../filename.ext")).isEqualTo("../filename");
     }
-
 }

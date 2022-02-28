@@ -24,6 +24,4 @@ public class StdDateFormatWithoutColonInTimeZone extends StdDateFormat {
     public StdDateFormatWithoutColonInTimeZone() {
         super(DEFAULT_TIMEZONE, DEFAULT_LOCALE, null, false);
     }
-
-
 }

@@ -15,12 +15,11 @@
  */
 package org.activiti.cloud.services.test.asserts;
 
-import java.io.IOException;
-
-import org.activiti.cloud.services.common.file.FileContent;
-
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_ZIP;
 import static org.assertj.core.api.Assertions.*;
+
+import java.io.IOException;
+import org.activiti.cloud.services.common.file.FileContent;
 
 /**
  * Asserts for file content
@@ -64,11 +63,14 @@ public class AssertFileContent {
     public AssertFileContent hasContent(String expectedContent) {
         assertThat(fileContent).isNotNull();
         assertThat(fileContent.getFileContent()).isNotNull();
-        assertThat(new String(fileContent.getFileContent())).isEqualTo(expectedContent);
+        assertThat(new String(fileContent.getFileContent()))
+            .isEqualTo(expectedContent);
         return this;
     }
 
-    public static AssertFileContent assertThatFileContent(FileContent fileContent) {
+    public static AssertFileContent assertThatFileContent(
+        FileContent fileContent
+    ) {
         return new AssertFileContent(fileContent);
     }
 }

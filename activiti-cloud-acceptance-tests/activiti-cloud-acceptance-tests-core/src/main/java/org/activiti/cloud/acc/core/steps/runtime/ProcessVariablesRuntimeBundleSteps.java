@@ -49,9 +49,13 @@ public class ProcessVariablesRuntimeBundleSteps {
     }
 
     @Step
-    public ResponseEntity<Void> setVariables(String id,
-                                      SetProcessVariablesPayload setProcessVariablesPayload) {
-        return processVariablesRuntimeService.setVariables(id, setProcessVariablesPayload);
+    public ResponseEntity<Void> setVariables(
+        String id,
+        SetProcessVariablesPayload setProcessVariablesPayload
+    ) {
+        return processVariablesRuntimeService.setVariables(
+            id,
+            setProcessVariablesPayload
+        );
     }
-
 }

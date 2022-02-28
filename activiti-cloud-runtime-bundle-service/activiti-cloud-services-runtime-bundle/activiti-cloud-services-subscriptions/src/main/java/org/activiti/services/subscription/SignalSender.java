@@ -37,7 +37,9 @@ public class SignalSender implements SignalPayloadEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendSignal(SignalPayload signalPayload) {
-        Message<SignalPayload> message = MessageBuilder.withPayload(signalPayload).build();
+        Message<SignalPayload> message = MessageBuilder
+            .withPayload(signalPayload)
+            .build();
         messageChannel.send(message);
     }
 }

@@ -19,10 +19,9 @@ package org.activiti.cloud.modeling.api;
  * Interface for model content
  */
 public interface ModelContent {
+    String getId();
 
-  String getId();
+    void setId(String id);
 
-  void setId(String id);
-
-  String getTemplate();
+    String getTemplate();
 }

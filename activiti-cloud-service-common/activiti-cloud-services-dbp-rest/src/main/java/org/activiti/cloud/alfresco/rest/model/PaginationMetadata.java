@@ -27,14 +27,15 @@ public class PaginationMetadata {
 
     private long totalItems;
 
-    public PaginationMetadata() {
-    }
+    public PaginationMetadata() {}
 
-    public PaginationMetadata(long skipCount,
-                              long maxItems,
-                              long count,
-                              boolean hasMoreItems,
-                              long totalItems) {
+    public PaginationMetadata(
+        long skipCount,
+        long maxItems,
+        long count,
+        boolean hasMoreItems,
+        long totalItems
+    ) {
         this.skipCount = skipCount;
         this.maxItems = maxItems;
         this.count = count;
@@ -61,5 +62,4 @@ public class PaginationMetadata {
     public long getTotalItems() {
         return totalItems;
     }
-
 }

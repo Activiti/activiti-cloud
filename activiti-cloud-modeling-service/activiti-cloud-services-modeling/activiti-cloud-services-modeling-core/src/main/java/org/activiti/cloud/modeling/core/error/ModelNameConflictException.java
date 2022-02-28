@@ -20,8 +20,7 @@ package org.activiti.cloud.modeling.core.error;
  */
 public class ModelNameConflictException extends ModelingException {
 
-    public ModelNameConflictException() {
-    }
+    public ModelNameConflictException() {}
 
     public ModelNameConflictException(Throwable cause) {
         super(cause);
@@ -31,9 +30,7 @@ public class ModelNameConflictException extends ModelingException {
         super(message);
     }
 
-    public ModelNameConflictException(String message,
-                                Throwable cause) {
-        super(message,
-              cause);
+    public ModelNameConflictException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

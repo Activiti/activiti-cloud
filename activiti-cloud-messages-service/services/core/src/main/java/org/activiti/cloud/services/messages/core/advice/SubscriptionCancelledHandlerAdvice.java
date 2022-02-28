@@ -21,7 +21,6 @@ import static org.activiti.cloud.services.messages.core.support.Predicates.not;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
 import org.springframework.integration.aggregator.CorrelationStrategy;
 import org.springframework.integration.store.MessageGroup;
@@ -29,43 +28,49 @@ import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.util.UUIDConverter;
 import org.springframework.messaging.Message;
 
-public class SubscriptionCancelledHandlerAdvice extends AbstractMessageConnectorHandlerAdvice {
+public class SubscriptionCancelledHandlerAdvice
+    extends AbstractMessageConnectorHandlerAdvice {
 
     private final MessageGroupStore messageStore;
     private final LockTemplate lockTemplate;
     private final CorrelationStrategy correlationStrategy;
-    
-    public SubscriptionCancelledHandlerAdvice(MessageGroupStore messageStore,
-                                              CorrelationStrategy correlationStrategy,
-                                              LockTemplate lockTemplate) {
+
+    public SubscriptionCancelledHandlerAdvice(
+        MessageGroupStore messageStore,
+        CorrelationStrategy correlationStrategy,
+        LockTemplate lockTemplate
+    ) {
         this.messageStore = messageStore;
         this.lockTemplate = lockTemplate;
         this.correlationStrategy = correlationStrategy;
     }
-    
+
     @Override
     public <T> T doHandle(Message<?> message) {
         Object groupId = correlationStrategy.getCorrelationKey(message);
         Object key = UUIDConverter.getUUID(groupId).toString();
 
-        lockTemplate.lockInterruptibly(key, () -> {
-            MessageGroup group = messageStore.getMessageGroup(groupId);
-            
-            Collection<Message<?>> messages = group.getMessages()
-                                                   .stream()
-                                                   .filter(not(START_MESSAGE_DEPLOYED))
-                                                   .collect(Collectors.toList());
-            if(!messages.isEmpty()) {
-                messageStore.removeMessagesFromGroup(groupId, messages);
+        lockTemplate.lockInterruptibly(
+            key,
+            () -> {
+                MessageGroup group = messageStore.getMessageGroup(groupId);
+
+                Collection<Message<?>> messages = group
+                    .getMessages()
+                    .stream()
+                    .filter(not(START_MESSAGE_DEPLOYED))
+                    .collect(Collectors.toList());
+                if (!messages.isEmpty()) {
+                    messageStore.removeMessagesFromGroup(groupId, messages);
+                }
             }
-        });
-        
+        );
+
         return null;
-    } 
-    
-    @Override
-    public boolean canHandle(Message<?> message) {
-        return MESSAGE_SUBSCRIPTION_CANCELLED.test(message);        
     }
 
+    @Override
+    public boolean canHandle(Message<?> message) {
+        return MESSAGE_SUBSCRIPTION_CANCELLED.test(message);
+    }
 }

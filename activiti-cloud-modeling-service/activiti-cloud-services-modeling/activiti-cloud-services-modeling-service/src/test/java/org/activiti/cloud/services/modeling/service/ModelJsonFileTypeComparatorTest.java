@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.util.Comparator;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,8 +48,26 @@ public class ModelJsonFileTypeComparatorTest {
 
     @Test
     public void testCompare() throws Exception {
-        assertEquals(modelJsonFileTypeComparator.compare(formModelJsonFile, testModelJsonFile), -1);
-        assertEquals(modelJsonFileTypeComparator.compare(formModelJsonFile, formModelJsonFile), 0);
-        assertEquals(modelJsonFileTypeComparator.compare(testModelJsonFile, formModelJsonFile), 1);
+        assertEquals(
+            modelJsonFileTypeComparator.compare(
+                formModelJsonFile,
+                testModelJsonFile
+            ),
+            -1
+        );
+        assertEquals(
+            modelJsonFileTypeComparator.compare(
+                formModelJsonFile,
+                formModelJsonFile
+            ),
+            0
+        );
+        assertEquals(
+            modelJsonFileTypeComparator.compare(
+                testModelJsonFile,
+                formModelJsonFile
+            ),
+            1
+        );
     }
 }

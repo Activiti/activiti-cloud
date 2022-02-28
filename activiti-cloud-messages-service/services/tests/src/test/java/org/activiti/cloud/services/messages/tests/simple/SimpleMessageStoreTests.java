@@ -25,10 +25,12 @@ import org.springframework.integration.store.SimpleMessageStore;
 
 @SpringBootConfiguration
 @EnableAutoConfiguration
-public class SimpleMessageStoreTests extends AbstractMessagesCoreIntegrationTests {
+public class SimpleMessageStoreTests
+    extends AbstractMessagesCoreIntegrationTests {
 
     @Test
     public void testMessageStore() throws Exception {
-        assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(SimpleMessageStore.class);
+        assertThat(this.aggregatingMessageHandler.getMessageStore())
+            .isInstanceOf(SimpleMessageStore.class);
     }
 }

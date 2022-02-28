@@ -23,9 +23,12 @@ import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployed
 import org.activiti.cloud.services.audit.jpa.events.ApplicationDeployedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 
-public class ApplicationDeployedEventConverter extends BaseEventToEntityConverter {
+public class ApplicationDeployedEventConverter
+    extends BaseEventToEntityConverter {
 
-    public ApplicationDeployedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ApplicationDeployedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -35,13 +38,21 @@ public class ApplicationDeployedEventConverter extends BaseEventToEntityConverte
     }
 
     @Override
-    protected ApplicationDeployedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new ApplicationDeployedAuditEventEntity((CloudApplicationDeployedEvent) cloudRuntimeEvent);
+    protected ApplicationDeployedAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new ApplicationDeployedAuditEventEntity(
+            (CloudApplicationDeployedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         ApplicationDeployedAuditEventEntity applicationDeployedAuditEventEntity = (ApplicationDeployedAuditEventEntity) auditEventEntity;
-        return new CloudApplicationDeployedEventImpl(applicationDeployedAuditEventEntity.getDeployment());
+        return new CloudApplicationDeployedEventImpl(
+            applicationDeployedAuditEventEntity.getDeployment()
+        );
     }
 }

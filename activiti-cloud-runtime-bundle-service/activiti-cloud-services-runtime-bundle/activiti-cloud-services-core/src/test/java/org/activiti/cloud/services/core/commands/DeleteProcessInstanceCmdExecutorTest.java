@@ -45,19 +45,21 @@ public class DeleteProcessInstanceCmdExecutorTest {
 
     @Test
     public void startProcessInstanceCmdExecutorTest() {
-        DeleteProcessPayload payload = ProcessPayloadBuilder.delete()
-                                                            .withProcessInstanceId("def key")
-                                                            .build();
+        DeleteProcessPayload payload = ProcessPayloadBuilder
+            .delete()
+            .withProcessInstanceId("def key")
+            .build();
 
         ProcessInstance fakeProcessInstance = mock(ProcessInstance.class);
 
-        given(processAdminRuntime.delete(payload)).willReturn(fakeProcessInstance);
+        given(processAdminRuntime.delete(payload))
+            .willReturn(fakeProcessInstance);
 
-        assertThat(subject.getHandledType()).isEqualTo(DeleteProcessPayload.class.getName());
+        assertThat(subject.getHandledType())
+            .isEqualTo(DeleteProcessPayload.class.getName());
 
         subject.execute(payload);
 
         verify(processAdminRuntime).delete(payload);
-
     }
 }

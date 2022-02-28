@@ -23,6 +23,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.Principal;
+import java.util.Arrays;
+import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,11 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.KeycloakPrincipal;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.List;
-
 
 public class KeycloakPrincipalGroupsProviderChainTest {
 
@@ -50,7 +48,10 @@ public class KeycloakPrincipalGroupsProviderChainTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        subject = new KeycloakPrincipalGroupsProviderChain(Arrays.asList(provider1, provider2));
+        subject =
+            new KeycloakPrincipalGroupsProviderChain(
+                Arrays.asList(provider1, provider2)
+            );
     }
 
     @Test
@@ -58,16 +59,14 @@ public class KeycloakPrincipalGroupsProviderChainTest {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
         when(provider1.getGroups(any())).thenReturn(null);
-        when(provider2.getGroups(any())).thenReturn(Arrays.asList("group1",
-                                                                          "group2"));
+        when(provider2.getGroups(any()))
+            .thenReturn(Arrays.asList("group1", "group2"));
 
         // when
         List<String> result = subject.getGroups(principal);
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("group1",
-                                           "group2");
+        assertThat(result).isNotEmpty().containsExactly("group1", "group2");
 
         verify(provider1).getGroups(eq(principal));
         verify(provider2).getGroups(eq(principal));
@@ -81,13 +80,14 @@ public class KeycloakPrincipalGroupsProviderChainTest {
         when(provider2.getGroups(any())).thenReturn(null);
 
         // when
-        Throwable thrown = catchThrowable(() -> { subject.getGroups(principal); });
+        Throwable thrown = catchThrowable(() -> {
+            subject.getGroups(principal);
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
 
         verify(provider1).getGroups(eq(principal));
         verify(provider2).getGroups(eq(principal));
-
     }
 }

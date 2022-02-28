@@ -18,12 +18,11 @@ package org.activiti.cloud.starters.test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public class EventsAggregator {
 
-    private List<CloudRuntimeEvent<?,?>> events = new ArrayList<>();
+    private List<CloudRuntimeEvent<?, ?>> events = new ArrayList<>();
 
     private MyProducer producer;
 
@@ -31,12 +30,12 @@ public class EventsAggregator {
         this.producer = producer;
     }
 
-    public void addEvents(CloudRuntimeEvent<?, ?> ... events) {
+    public void addEvents(CloudRuntimeEvent<?, ?>... events) {
         this.events.addAll(Arrays.asList(events));
     }
 
     public void sendAll() {
-        producer.send(events.toArray(new CloudRuntimeEvent<?,?>[]{}));
+        producer.send(events.toArray(new CloudRuntimeEvent<?, ?>[] {}));
         events.clear();
     }
 }

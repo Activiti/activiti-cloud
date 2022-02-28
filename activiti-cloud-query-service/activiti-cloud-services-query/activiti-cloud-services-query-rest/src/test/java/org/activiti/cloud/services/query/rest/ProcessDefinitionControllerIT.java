@@ -52,11 +52,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessDefinitionController.class)
-@Import({
+@Import(
+    {
         QueryRestWebMvcAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -90,39 +92,66 @@ public class ProcessDefinitionControllerIT {
     public void shouldReturnAvailableProcessDefinitions() throws Exception {
         //given
         Predicate predicate = mock(Predicate.class);
-        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
-                .willReturn(predicate);
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10);
-        given(processDefinitionRepository.findAll(predicate,
-                                                  pageRequest))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           pageRequest,
-                                           1));
+        given(
+            processDefinitionRestrictionService.restrictProcessDefinitionQuery(
+                any(),
+                eq(SecurityPolicyAccess.READ)
+            )
+        )
+            .willReturn(predicate);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        given(processDefinitionRepository.findAll(predicate, pageRequest))
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultProcessDefinition()),
+                    pageRequest,
+                    1
+                )
+            );
 
         //when
-        mockMvc.perform(get("/v1/process-definitions?page=0&size=10")
-                                .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/v1/process-definitions?page=0&size=10")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat() throws Exception {
+    public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat()
+        throws Exception {
         //given
         Predicate predicate = mock(Predicate.class);
-        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
-                .willReturn(predicate);
-        given(processDefinitionRepository.findAll(eq(predicate), any(Pageable.class)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           PageRequest.of(1,10),
-                                           11));
+        given(
+            processDefinitionRestrictionService.restrictProcessDefinitionQuery(
+                any(),
+                eq(SecurityPolicyAccess.READ)
+            )
+        )
+            .willReturn(predicate);
+        given(
+            processDefinitionRepository.findAll(
+                eq(predicate),
+                any(Pageable.class)
+            )
+        )
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultProcessDefinition()),
+                    PageRequest.of(1, 10),
+                    11
+                )
+            );
 
         //when
-        mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10")
-                                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/v1/process-definitions?skipCount=10&maxItems=10")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk());
     }
-
 }

@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task.TaskStatus;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
@@ -24,14 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskEntityVariableEntityDeletedEventHandlerTest {
@@ -48,10 +47,16 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
     @Test
     public void handleShouldDeleteIt() {
         //given
-        VariableInstanceImpl<String> variableInstance = new VariableInstanceImpl<>("var",
-                                                                                   "string",
-                                                                                   "v1", "procInstId", "taskId");
-        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(variableInstance);
+        VariableInstanceImpl<String> variableInstance = new VariableInstanceImpl<>(
+            "var",
+            "string",
+            "v1",
+            "procInstId",
+            "taskId"
+        );
+        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(
+            variableInstance
+        );
 
         TaskVariableEntity variableEntity = new TaskVariableEntity();
         variableEntity.setName("var");
@@ -59,7 +64,8 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
         taskEntity.setStatus(TaskStatus.CREATED);
         taskEntity.getVariables().add(variableEntity);
 
-        when(entityManagerFinder.findTaskWithVariables("taskId")).thenReturn(Optional.of(taskEntity));
+        when(entityManagerFinder.findTaskWithVariables("taskId"))
+            .thenReturn(Optional.of(taskEntity));
 
         //when
         handler.handle(event);
@@ -68,5 +74,4 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
         verify(entityManager).remove(variableEntity);
         assertThat(taskEntity.getVariables()).isEmpty();
     }
-
 }

@@ -19,11 +19,11 @@ import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudApplication;
 
 public class CloudApplicationImpl implements CloudApplication {
-    
+
     private String id;
     private String name;
     private String version;
-    
+
     public void setId(String id) {
         this.id = id;
     }
@@ -35,7 +35,7 @@ public class CloudApplicationImpl implements CloudApplication {
     public void setVersion(String version) {
         this.version = version;
     }
-    
+
     @Override
     public String getName() {
         return name;
@@ -63,21 +63,24 @@ public class CloudApplicationImpl implements CloudApplication {
             return false;
         }
         CloudApplicationImpl other = (CloudApplicationImpl) obj;
-        return Objects.equals(id, other.id) &&
-                Objects.equals(name, other.name) &&
-                Objects.equals(version, other.version);
+        return (
+            Objects.equals(id, other.id) &&
+            Objects.equals(name, other.name) &&
+            Objects.equals(version, other.version)
+        );
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudApplicationImpl [id=")
-                .append(id)
-                .append(", name=")
-                .append(name)
-                .append(", version=")
-                .append(version)
-                .append("]");
+        builder
+            .append("CloudApplicationImpl [id=")
+            .append(id)
+            .append(", name=")
+            .append(name)
+            .append(", version=")
+            .append(version)
+            .append("]");
         return builder.toString();
     }
 }

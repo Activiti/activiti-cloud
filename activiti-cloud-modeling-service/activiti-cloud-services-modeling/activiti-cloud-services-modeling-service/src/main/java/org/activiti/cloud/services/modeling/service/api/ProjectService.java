@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.modeling.service.api;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Optional;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
@@ -23,22 +27,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Optional;
-
 /**
  * Business logic related to {@link Project} entities
  */
 public interface ProjectService {
-    Page<Project> getProjects(Pageable pageable,
-                              String name);
+    Page<Project> getProjects(Pageable pageable, String name);
 
     Project createProject(Project project);
 
-    Project updateProject(Project projectToUpdate,
-                          Project newProject);
+    Project updateProject(Project projectToUpdate, Project newProject);
 
     void deleteProject(Project project);
 
@@ -46,24 +43,32 @@ public interface ProjectService {
 
     FileContent exportProject(Project project) throws IOException;
 
-    Project copyProject(Project projectToCopy,
-                        String newProjectName);
+    Project copyProject(Project projectToCopy, String newProjectName);
 
     ProjectAccessControl getProjectAccessControl(Project project);
 
-    Project importProject(MultipartFile file, @Nullable String name) throws IOException;
+    Project importProject(MultipartFile file, @Nullable String name)
+        throws IOException;
 
-    Project importProject(final InputStream file, String name) throws IOException;
+    Project importProject(final InputStream file, String name)
+        throws IOException;
 
     void validateProject(Project project);
 
-    Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException;
+    Project replaceProjectContentWithProvidedModelsInFile(
+        Project project,
+        InputStream inputStream
+    ) throws IOException;
 
-    default Page<Project> getProjects(Pageable pageable, String name, List<String> filters) {
+    default Page<Project> getProjects(
+        Pageable pageable,
+        String name,
+        List<String> filters
+    ) {
         return getProjects(pageable, name);
     }
 
-    default Optional<Project> findProjectRepresentationById(String projectId){
+    default Optional<Project> findProjectRepresentationById(String projectId) {
         return findProjectById(projectId);
     }
 }

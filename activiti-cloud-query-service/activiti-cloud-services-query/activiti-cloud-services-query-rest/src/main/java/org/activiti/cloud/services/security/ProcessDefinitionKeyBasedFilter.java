@@ -18,9 +18,7 @@ package org.activiti.cloud.services.security;
 import com.querydsl.core.types.Predicate;
 
 public interface ProcessDefinitionKeyBasedFilter {
-
     ProcessDefinitionRestrictionProperties getRestrictionProperties();
 
     Predicate buildImpossiblePredicate();
-
 }

@@ -16,10 +16,10 @@
 package org.activiti.cloud.services.core;
 
 import java.util.Date;
-
 import org.activiti.common.util.DateFormatterProvider;
 
-public class ProcessVariableDateConverter implements ProcessVariableValueSpringConverter<Date> {
+public class ProcessVariableDateConverter
+    implements ProcessVariableValueSpringConverter<Date> {
 
     private final DateFormatterProvider provider;
 

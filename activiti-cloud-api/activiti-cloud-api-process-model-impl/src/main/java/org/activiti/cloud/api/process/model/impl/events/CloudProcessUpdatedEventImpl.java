@@ -18,21 +18,22 @@ package org.activiti.cloud.api.process.model.impl.events;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;
 
-public class CloudProcessUpdatedEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessUpdatedEvent {
+public class CloudProcessUpdatedEventImpl
+    extends CloudProcessInstanceEventImpl
+    implements CloudProcessUpdatedEvent {
 
-    public CloudProcessUpdatedEventImpl() {
-    }
+    public CloudProcessUpdatedEventImpl() {}
 
     public CloudProcessUpdatedEventImpl(ProcessInstance processInstance) {
         super(processInstance);
     }
 
-    public CloudProcessUpdatedEventImpl(String id,
-                                          Long timestamp,
-                                          ProcessInstance processInstance) {
-        super(id,
-              timestamp,
-              processInstance);
+    public CloudProcessUpdatedEventImpl(
+        String id,
+        Long timestamp,
+        ProcessInstance processInstance
+    ) {
+        super(id, timestamp, processInstance);
     }
 
     @Override

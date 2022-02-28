@@ -15,6 +15,4 @@
  */
 package org.activiti.cloud.api.process.model;
 
-public interface CloudServiceTask extends CloudBPMNActivity {
-
-}
+public interface CloudServiceTask extends CloudBPMNActivity {}

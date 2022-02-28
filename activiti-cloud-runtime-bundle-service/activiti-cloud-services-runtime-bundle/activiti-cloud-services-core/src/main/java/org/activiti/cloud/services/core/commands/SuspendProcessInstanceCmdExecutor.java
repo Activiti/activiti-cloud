@@ -20,18 +20,28 @@ import org.activiti.api.process.model.payloads.SuspendProcessPayload;
 import org.activiti.api.process.model.results.ProcessInstanceResult;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 
-public class SuspendProcessInstanceCmdExecutor extends AbstractCommandExecutor<SuspendProcessPayload> {
+public class SuspendProcessInstanceCmdExecutor
+    extends AbstractCommandExecutor<SuspendProcessPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;
 
-    public SuspendProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public SuspendProcessInstanceCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         this.processAdminRuntime = processAdminRuntime;
     }
 
     @Override
-    public ProcessInstanceResult execute(SuspendProcessPayload suspendProcessPayload) {
-        ProcessInstance processInstance = processAdminRuntime.suspend(suspendProcessPayload);
-        
-        return new ProcessInstanceResult(suspendProcessPayload,processInstance);
+    public ProcessInstanceResult execute(
+        SuspendProcessPayload suspendProcessPayload
+    ) {
+        ProcessInstance processInstance = processAdminRuntime.suspend(
+            suspendProcessPayload
+        );
+
+        return new ProcessInstanceResult(
+            suspendProcessPayload,
+            processInstance
+        );
     }
 }

@@ -23,8 +23,9 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 public interface AuditAdminService {
-
-    @RequestLine("GET /admin/v1/events?search={search}&sort=timestamp,desc&sort=id,desc")
+    @RequestLine(
+        "GET /admin/v1/events?search={search}&sort=timestamp,desc&sort=id,desc"
+    )
     PagedModel<CloudRuntimeEvent> getEvents(@Param("search") String search);
 
     @RequestLine("GET /admin/v1/events?sort=timestamp,desc&sort=id,desc")

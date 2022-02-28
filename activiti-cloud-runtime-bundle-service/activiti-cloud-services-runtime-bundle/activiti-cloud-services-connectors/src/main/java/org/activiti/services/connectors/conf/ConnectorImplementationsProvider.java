@@ -19,7 +19,5 @@ package org.activiti.services.connectors.conf;
 import java.util.List;
 
 public interface ConnectorImplementationsProvider {
-
     List<String> getImplementations();
-
 }

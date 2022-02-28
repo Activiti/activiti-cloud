@@ -43,7 +43,10 @@ public class FlowElementsExtractorTest {
         model.addProcess(process);
 
         //when
-        final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(model, UserTask.class);
+        final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(
+            model,
+            UserTask.class
+        );
 
         //then
         assertThat(userTasks)
@@ -65,12 +68,18 @@ public class FlowElementsExtractorTest {
         model.addProcess(process);
 
         //when
-        final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(model, UserTask.class);
+        final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(
+            model,
+            UserTask.class
+        );
 
         //then
         assertThat(userTasks)
             .extracting(UserTask::getName)
-            .containsExactlyInAnyOrder("Task from main process", "Task from sub-process");
+            .containsExactlyInAnyOrder(
+                "Task from main process",
+                "Task from sub-process"
+            );
     }
 
     @Test
@@ -91,12 +100,18 @@ public class FlowElementsExtractorTest {
         model.addProcess(process2);
 
         //when
-        final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(model, UserTask.class);
+        final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(
+            model,
+            UserTask.class
+        );
 
         //then
         assertThat(userTasks)
             .extracting(UserTask::getName)
-            .containsExactlyInAnyOrder("Task from process 1", "Task from process 2");
+            .containsExactlyInAnyOrder(
+                "Task from process 1",
+                "Task from process 2"
+            );
     }
 
     private UserTask buildUserTask(String name) {

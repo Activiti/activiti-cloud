@@ -24,14 +24,19 @@ public class ToCloudProcessDefinitionConverter {
 
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    public ToCloudProcessDefinitionConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+    public ToCloudProcessDefinitionConverter(
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+    ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
     public CloudProcessDefinition from(ProcessDefinition processDefinition) {
-        CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
-        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDefinition);
+        CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(
+            processDefinition
+        );
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(
+            cloudProcessDefinition
+        );
         return cloudProcessDefinition;
     }
-
 }

@@ -15,32 +15,37 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
-import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
-import org.springframework.lang.NonNull;
-
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
+import org.springframework.lang.NonNull;
 
-public class KeycloakPrincipalRolesProviderChain implements PrincipalRolesProvider {
-    
+public class KeycloakPrincipalRolesProviderChain
+    implements PrincipalRolesProvider {
+
     private final List<PrincipalRolesProvider> providers;
-    
-    public KeycloakPrincipalRolesProviderChain(@NonNull List<PrincipalRolesProvider> providers) {
+
+    public KeycloakPrincipalRolesProviderChain(
+        @NonNull List<PrincipalRolesProvider> providers
+    ) {
         this.providers = Collections.unmodifiableList(providers);
     }
 
     @Override
     public List<String> getRoles(@NonNull Principal principal) {
-        return providers.stream()
-                        .map(provider -> provider.getRoles(principal))
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElseThrow(this::securityException);
+        return providers
+            .stream()
+            .map(provider -> provider.getRoles(principal))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElseThrow(this::securityException);
     }
-    
+
     protected SecurityException securityException() {
-        return new SecurityException("Invalid principal security access token roles");
+        return new SecurityException(
+            "Invalid principal security access token roles"
+        );
     }
 }

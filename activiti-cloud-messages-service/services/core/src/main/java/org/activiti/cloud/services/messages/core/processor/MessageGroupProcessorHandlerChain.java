@@ -18,10 +18,11 @@ package org.activiti.cloud.services.messages.core.processor;
 import org.springframework.integration.aggregator.MessageGroupProcessor;
 import org.springframework.integration.store.MessageGroup;
 
-public class MessageGroupProcessorHandlerChain implements MessageGroupProcessor {
-    
+public class MessageGroupProcessorHandlerChain
+    implements MessageGroupProcessor {
+
     private final MessageGroupProcessorChain chain;
-    
+
     public MessageGroupProcessorHandlerChain(MessageGroupProcessorChain chain) {
         this.chain = chain;
     }
@@ -30,5 +31,4 @@ public class MessageGroupProcessorHandlerChain implements MessageGroupProcessor 
     public Object processMessageGroup(MessageGroup group) {
         return chain.handle(group);
     }
-    
 }

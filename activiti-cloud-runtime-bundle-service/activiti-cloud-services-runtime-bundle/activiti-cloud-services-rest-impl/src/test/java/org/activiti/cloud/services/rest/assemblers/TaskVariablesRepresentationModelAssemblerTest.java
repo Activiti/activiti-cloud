@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import java.util.Optional;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
@@ -24,12 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
+import org.springframework.hateoas.Link;
 
 public class TaskVariablesRepresentationModelAssemblerTest {
 
@@ -47,16 +47,26 @@ public class TaskVariablesRepresentationModelAssemblerTest {
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {
         //given
-        VariableInstance model = new VariableInstanceImpl<>("var", "string", "value", "procInstId", "my-identifier");
-        given(converter.from(model)).willReturn(new CloudVariableInstanceImpl<>(model));
+        VariableInstance model = new VariableInstanceImpl<>(
+            "var",
+            "string",
+            "value",
+            "procInstId",
+            "my-identifier"
+        );
+        given(converter.from(model))
+            .willReturn(new CloudVariableInstanceImpl<>(model));
 
         //when
-        EntityModel<CloudVariableInstance> resource = representationModelAssembler.toModel(model);
+        EntityModel<CloudVariableInstance> resource = representationModelAssembler.toModel(
+            model
+        );
 
         //then
         Optional<Link> globalVariablesLink = resource.getLink("variables");
 
         assertThat(globalVariablesLink).isPresent();
-        assertThat(globalVariablesLink.get().getHref()).contains("my-identifier");
+        assertThat(globalVariablesLink.get().getHref())
+            .contains("my-identifier");
     }
 }

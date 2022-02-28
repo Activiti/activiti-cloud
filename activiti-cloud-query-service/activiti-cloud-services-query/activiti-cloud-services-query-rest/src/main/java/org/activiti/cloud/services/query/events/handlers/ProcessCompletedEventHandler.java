@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
 
 public class ProcessCompletedEventHandler implements QueryEventHandler {
 
@@ -38,16 +37,26 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessCompletedEvent completedEvent = (CloudProcessCompletedEvent) event;
         String processInstanceId = completedEvent.getEntity().getId();
-        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                                                            processInstanceId));
+        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(
+            entityManager.find(ProcessInstanceEntity.class, processInstanceId)
+        );
         if (findResult.isPresent()) {
             ProcessInstanceEntity processInstanceEntity = findResult.get();
-            processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
-            processInstanceEntity.setLastModified(new Date(completedEvent.getTimestamp()));
-            processInstanceEntity.setCompletedDate(new Date(completedEvent.getTimestamp()));
+            processInstanceEntity.setStatus(
+                ProcessInstance.ProcessInstanceStatus.COMPLETED
+            );
+            processInstanceEntity.setLastModified(
+                new Date(completedEvent.getTimestamp())
+            );
+            processInstanceEntity.setCompletedDate(
+                new Date(completedEvent.getTimestamp())
+            );
             entityManager.persist(processInstanceEntity);
         } else {
-            throw new QueryException("Unable to find process instance with the given id: " + processInstanceId);
+            throw new QueryException(
+                "Unable to find process instance with the given id: " +
+                processInstanceId
+            );
         }
     }
 

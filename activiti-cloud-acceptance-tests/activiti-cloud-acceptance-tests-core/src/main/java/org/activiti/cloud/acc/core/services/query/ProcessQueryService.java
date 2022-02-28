@@ -24,10 +24,11 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.hateoas.PagedModel;
 
 public interface ProcessQueryService {
-
     @RequestLine("GET /v1/process-instances/{processInstanceId}")
     @Headers("Content-Type: application/json")
-    CloudProcessInstance getProcessInstance(@Param("processInstanceId") String processInstanceId);
+    CloudProcessInstance getProcessInstance(
+        @Param("processInstanceId") String processInstanceId
+    );
 
     @RequestLine("GET /v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
@@ -35,16 +36,23 @@ public interface ProcessQueryService {
 
     @RequestLine("GET /v1/process-instances/{processInstanceId}/variables")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudVariableInstance> getProcessInstanceVariables(@Param("processInstanceId") String processInstanceId);
+    PagedModel<CloudVariableInstance> getProcessInstanceVariables(
+        @Param("processInstanceId") String processInstanceId
+    );
 
     @RequestLine("GET /v1/process-definitions")
     @Headers("Content-Type: application/json")
     PagedModel<ProcessDefinition> getProcessDefinitions();
 
     @RequestLine("GET /v1/process-instances?name={processName}")
-    PagedModel<CloudProcessInstance> getProcessInstancesByName(@Param("processName") String processName);
+    PagedModel<CloudProcessInstance> getProcessInstancesByName(
+        @Param("processName") String processName
+    );
 
-    @RequestLine("GET /v1/process-instances?processDefinitionKey={processDefinitionKey}")
-    PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(@Param("processDefinitionKey") String processDefinitionKey);
-
+    @RequestLine(
+        "GET /v1/process-instances?processDefinitionKey={processDefinitionKey}"
+    )
+    PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(
+        @Param("processDefinitionKey") String processDefinitionKey
+    );
 }

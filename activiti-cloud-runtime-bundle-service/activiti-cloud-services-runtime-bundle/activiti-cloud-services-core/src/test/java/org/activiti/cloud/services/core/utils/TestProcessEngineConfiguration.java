@@ -63,9 +63,11 @@ public class TestProcessEngineConfiguration {
     @Bean
     public ProcessEngine processEngine() {
         return ProcessEngineConfiguration
-                .createStandaloneInMemProcessEngineConfiguration()
-                .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE)
-                .buildProcessEngine();
+            .createStandaloneInMemProcessEngineConfiguration()
+            .setDatabaseSchemaUpdate(
+                ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE
+            )
+            .buildProcessEngine();
     }
 
     @Bean
@@ -96,7 +98,10 @@ public class TestProcessEngineConfiguration {
     @Bean
     public ProcessValidator processValidator() {
         ProcessValidatorImpl processValidator = new ProcessValidatorImpl();
-        processValidator.addValidatorSet(new ValidatorSetFactory().createActivitiExecutableProcessValidatorSet());
+        processValidator.addValidatorSet(
+            new ValidatorSetFactory()
+                .createActivitiExecutableProcessValidatorSet()
+        );
         return processValidator;
     }
 

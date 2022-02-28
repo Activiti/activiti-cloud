@@ -53,11 +53,13 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(TaskVariableAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({
-    QueryRestWebMvcAutoConfiguration.class,
-    CommonModelAutoConfiguration.class,
-    AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    {
+        QueryRestWebMvcAutoConfiguration.class,
+        CommonModelAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @WithMockUser
 public class VariableEntityAdminControllerIT {
 
@@ -83,47 +85,64 @@ public class VariableEntityAdminControllerIT {
     private TaskRepository taskRepository;
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(
+            11,
+            10,
+            PageRequest.of(0, 20)
+        );
 
-        TaskVariableEntity variableEntity = new TaskVariableEntity(1L,
-                                                           String.class.getName(),
-                                                           "firstName",
-                                                           UUID.randomUUID().toString(),
-                                                           "My app",
-                                                           "My app",
-                                                           "1",
-                                                           null,
-                                                           null,
-                                                           UUID.randomUUID().toString(),
-                                                           new Date(),
-                                                           new Date(),
-                                                           UUID.randomUUID().toString());
+        TaskVariableEntity variableEntity = new TaskVariableEntity(
+            1L,
+            String.class.getName(),
+            "firstName",
+            UUID.randomUUID().toString(),
+            "My app",
+            "My app",
+            "1",
+            null,
+            null,
+            UUID.randomUUID().toString(),
+            new Date(),
+            new Date(),
+            UUID.randomUUID().toString()
+        );
         variableEntity.setValue("John");
 
-        given(variableRepository.findAll(any(),
-                                         eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(variableEntity),
-                                           pageRequest,
-                                           12));
+        given(variableRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(variableEntity),
+                    pageRequest,
+                    12
+                )
+            );
 
         //when
-        MvcResult result = mockMvc.perform(get("/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10",
-                                               variableEntity.getTaskId())
-                                                   .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc
+            .perform(
+                get(
+                    "/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10",
+                    variableEntity.getTaskId()
+                )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+            .node("list.pagination.skipCount")
+            .isEqualTo(11)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(12);
     }
 }

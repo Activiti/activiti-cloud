@@ -24,7 +24,8 @@ import springfox.documentation.oas.web.OpenApiTransformationContext;
 import springfox.documentation.oas.web.WebMvcOpenApiTransformationFilter;
 import springfox.documentation.spi.DocumentationType;
 
-public class PathPrefixTransformationFilter implements WebMvcOpenApiTransformationFilter {
+public class PathPrefixTransformationFilter
+    implements WebMvcOpenApiTransformationFilter {
 
     private final String swaggerBasePath;
 
@@ -33,10 +34,13 @@ public class PathPrefixTransformationFilter implements WebMvcOpenApiTransformati
     }
 
     @Override
-    public OpenAPI transform(OpenApiTransformationContext<HttpServletRequest> context) {
+    public OpenAPI transform(
+        OpenApiTransformationContext<HttpServletRequest> context
+    ) {
         final OpenAPI openApi = context.getSpecification();
         String servicePrefix = getServicePrefix(openApi);
-        final String url = (swaggerBasePath + servicePrefix).replaceAll("//", "/");
+        final String url =
+            (swaggerBasePath + servicePrefix).replaceAll("//", "/");
         replaceServer(openApi, url);
         return openApi;
     }
@@ -51,7 +55,9 @@ public class PathPrefixTransformationFilter implements WebMvcOpenApiTransformati
 
     private String getServicePrefix(OpenAPI openApi) {
         String servicePrefix = "";
-        final String configuredPrefix = (String) openApi.getExtensions().get(SwaggerDocketBuilder.SERVICE_URL_PREFIX);
+        final String configuredPrefix = (String) openApi
+            .getExtensions()
+            .get(SwaggerDocketBuilder.SERVICE_URL_PREFIX);
         if (configuredPrefix != null) {
             servicePrefix = configuredPrefix;
         }

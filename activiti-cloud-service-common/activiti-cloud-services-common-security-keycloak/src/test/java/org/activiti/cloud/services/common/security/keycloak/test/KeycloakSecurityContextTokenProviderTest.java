@@ -18,6 +18,9 @@ package org.activiti.cloud.services.common.security.keycloak.test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,11 +33,6 @@ import org.keycloak.representations.AccessToken;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
-
 
 public class KeycloakSecurityContextTokenProviderTest {
 
@@ -53,7 +51,8 @@ public class KeycloakSecurityContextTokenProviderTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(principal.getKeycloakSecurityContext()).thenReturn(keycloakSecurityContext);
+        when(principal.getKeycloakSecurityContext())
+            .thenReturn(keycloakSecurityContext);
         when(keycloakSecurityContext.getTokenString()).thenReturn("bearer");
     }
 
@@ -61,24 +60,26 @@ public class KeycloakSecurityContextTokenProviderTest {
     public void testGetCurrentToken() {
         // given
         String subjectId = UUID.randomUUID().toString();
-        KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal = new KeycloakPrincipal<>(subjectId,
-                                                                                                  keycloakSecurityContext);
-        KeycloakAccount account = new SimpleKeycloakAccount(principal,
-                                                            Collections.emptySet(),
-                                                            principal.getKeycloakSecurityContext());
+        KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal = new KeycloakPrincipal<>(
+            subjectId,
+            keycloakSecurityContext
+        );
+        KeycloakAccount account = new SimpleKeycloakAccount(
+            principal,
+            Collections.emptySet(),
+            principal.getKeycloakSecurityContext()
+        );
 
-        SecurityContextHolder.getContext()
-                             .setAuthentication(new KeycloakAuthenticationToken(account,
-                                                                                false));
+        SecurityContextHolder
+            .getContext()
+            .setAuthentication(new KeycloakAuthenticationToken(account, false));
 
         // when
         Optional<String> result = subject.getCurrentToken();
 
         // then
-        assertThat(result).isPresent()
-                          .contains("bearer");
+        assertThat(result).isPresent().contains("bearer");
     }
-
 
     @Test
     public void testGetCurrentTokenEmpty() {
@@ -91,5 +92,4 @@ public class KeycloakSecurityContextTokenProviderTest {
         // then
         assertThat(result).isEmpty();
     }
-
 }

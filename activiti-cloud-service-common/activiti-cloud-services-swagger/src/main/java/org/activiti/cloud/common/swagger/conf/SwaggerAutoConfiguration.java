@@ -16,11 +16,14 @@
 package org.activiti.cloud.common.swagger.conf;
 
 import com.fasterxml.classmate.TypeResolver;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.function.Predicate;
 import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
-import org.activiti.cloud.common.swagger.SwaggerOperationIdTrimmer;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.PathPrefixTransformationFilter;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
+import org.activiti.cloud.common.swagger.SwaggerOperationIdTrimmer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -37,10 +40,6 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.spring.web.plugins.WebFluxRequestHandlerProvider;
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
-
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * Provides base springfox configuration for swagger auto-generated specification file. It provides two
@@ -66,9 +65,16 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SwaggerDocketBuilder swaggerDocketBuilder(BuildProperties buildProperties, TypeResolver typeResolver,
-        List<DocketCustomizer> docketCustomizers) {
-        return new SwaggerDocketBuilder(new BaseAPIInfoBuilder(buildProperties), typeResolver, docketCustomizers);
+    public SwaggerDocketBuilder swaggerDocketBuilder(
+        BuildProperties buildProperties,
+        TypeResolver typeResolver,
+        List<DocketCustomizer> docketCustomizers
+    ) {
+        return new SwaggerDocketBuilder(
+            new BaseAPIInfoBuilder(buildProperties),
+            typeResolver,
+            docketCustomizers
+        );
     }
 
     @Bean
@@ -79,7 +85,9 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PathPrefixTransformationFilter pathPrefixTransformationFilter(@Value("${activiti.cloud.swagger.base-path:/}") String swaggerBasePath) {
+    public PathPrefixTransformationFilter pathPrefixTransformationFilter(
+        @Value("${activiti.cloud.swagger.base-path:/}") String swaggerBasePath
+    ) {
         return new PathPrefixTransformationFilter(swaggerBasePath);
     }
 
@@ -90,30 +98,44 @@ public class SwaggerAutoConfiguration {
     @Bean
     public static BeanPostProcessor springfoxHandlerProviderBeanPostProcessor() {
         return new BeanPostProcessor() {
-
             @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof WebMvcRequestHandlerProvider || bean instanceof WebFluxRequestHandlerProvider) {
+            public Object postProcessAfterInitialization(
+                Object bean,
+                String beanName
+            ) throws BeansException {
+                if (
+                    bean instanceof WebMvcRequestHandlerProvider ||
+                    bean instanceof WebFluxRequestHandlerProvider
+                ) {
                     customizeSpringfoxHandlerMappings(getHandlerMappings(bean));
                 }
                 return bean;
             }
 
-            private <T extends RequestMappingInfoHandlerMapping> void customizeSpringfoxHandlerMappings(List<T> mappings) {
-                mappings.removeIf(mapping -> mapping.getPatternParser() != null);
+            private <
+                T extends RequestMappingInfoHandlerMapping
+            > void customizeSpringfoxHandlerMappings(List<T> mappings) {
+                mappings.removeIf(mapping -> mapping.getPatternParser() != null
+                );
             }
 
             @SuppressWarnings("unchecked")
-            private List<RequestMappingInfoHandlerMapping> getHandlerMappings(Object bean) {
+            private List<RequestMappingInfoHandlerMapping> getHandlerMappings(
+                Object bean
+            ) {
                 try {
-                    Field field = ReflectionUtils.findField(bean.getClass(), "handlerMappings");
+                    Field field = ReflectionUtils.findField(
+                        bean.getClass(),
+                        "handlerMappings"
+                    );
                     field.setAccessible(true);
-                    return (List<RequestMappingInfoHandlerMapping>) field.get(bean);
+                    return (List<RequestMappingInfoHandlerMapping>) field.get(
+                        bean
+                    );
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     throw new IllegalStateException(e);
                 }
             }
         };
     }
-
 }

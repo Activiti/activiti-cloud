@@ -17,10 +17,7 @@ package org.activiti.cloud.alfresco.argument.resolver;
 
 public class MaxItemsParameter extends AlfrescoParameter<Integer> {
 
-    public MaxItemsParameter(boolean set,
-                             Integer value) {
-        super(set,
-              value);
+    public MaxItemsParameter(boolean set, Integer value) {
+        super(set, value);
     }
-
 }

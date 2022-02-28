@@ -20,5 +20,4 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource("classpath:activiti-monitoring.properties")
-public class ActivitiMonitoringAutoConfiguration {
-}
+public class ActivitiMonitoringAutoConfiguration {}

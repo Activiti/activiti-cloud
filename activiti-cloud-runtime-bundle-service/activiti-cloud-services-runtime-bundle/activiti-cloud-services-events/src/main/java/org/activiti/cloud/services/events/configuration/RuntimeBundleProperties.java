@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.events.configuration;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
 
 @Configuration
 @ConfigurationProperties(prefix = "activiti.cloud.runtime-bundle")
@@ -47,13 +46,13 @@ public class RuntimeBundleProperties {
         return rbSpringAppName;
     }
 
-    public String getServiceFullName(){
+    public String getServiceFullName() {
         //if we change this then we also have to change integration-result-stream.properties
         return rbSpringAppName;
     }
 
     // a level of indirection here as we may change this to use its own property
-    public String getServiceName(){
+    public String getServiceName() {
         return getRbSpringAppName();
     }
 
@@ -89,12 +88,13 @@ public class RuntimeBundleProperties {
         return eventsProperties;
     }
 
-    public void setEventsProperties(RuntimeBundleEventsProperties eventsProperties) {
+    public void setEventsProperties(
+        RuntimeBundleEventsProperties eventsProperties
+    ) {
         this.eventsProperties = eventsProperties;
     }
 
     public static class RuntimeBundleEventsProperties {
-
 
         private boolean integrationAuditEventsEnabled = true;
 
@@ -105,7 +105,9 @@ public class RuntimeBundleProperties {
             return integrationAuditEventsEnabled;
         }
 
-        public void setIntegrationAuditEventsEnabled(boolean integrationAuditEventsEnabled) {
+        public void setIntegrationAuditEventsEnabled(
+            boolean integrationAuditEventsEnabled
+        ) {
             this.integrationAuditEventsEnabled = integrationAuditEventsEnabled;
         }
 
@@ -116,6 +118,5 @@ public class RuntimeBundleProperties {
         public void setChunkSize(Integer chunkSize) {
             this.chunkSize = chunkSize;
         }
-
     }
 }

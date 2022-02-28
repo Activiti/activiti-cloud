@@ -42,8 +42,11 @@ public class ReleaseTaskCmdExecutorTest {
     @Test
     public void releaseTaskCmdExecutorTest() {
         //given
-        ReleaseTaskPayload releaseTaskPayload = new ReleaseTaskPayload("taskId");
-        assertThat(releaseTaskCmdExecutor.getHandledType()).isEqualTo(ReleaseTaskPayload.class.getName());
+        ReleaseTaskPayload releaseTaskPayload = new ReleaseTaskPayload(
+            "taskId"
+        );
+        assertThat(releaseTaskCmdExecutor.getHandledType())
+            .isEqualTo(ReleaseTaskPayload.class.getName());
 
         //when
         releaseTaskCmdExecutor.execute(releaseTaskPayload);

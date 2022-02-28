@@ -20,11 +20,13 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.springframework.util.Assert;
 
 public class CloudRuntimeEventMessageBuilderFactory
-        implements MessageBuilderChainFactory<CloudRuntimeEvent<?, ?>> {
+    implements MessageBuilderChainFactory<CloudRuntimeEvent<?, ?>> {
 
     private final RuntimeBundleProperties properties;
 
-    public CloudRuntimeEventMessageBuilderFactory(RuntimeBundleProperties properties) {
+    public CloudRuntimeEventMessageBuilderFactory(
+        RuntimeBundleProperties properties
+    ) {
         Assert.notNull(properties, "properties must not be null");
 
         this.properties = properties;
@@ -35,9 +37,8 @@ public class CloudRuntimeEventMessageBuilderFactory
         Assert.notNull(event, "event must not be null");
 
         return new MessageBuilderAppenderChain()
-                .routingKeyResolver(new AuditProducerRoutingKeyResolver())
-                .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                .chain(new CloudRuntimeEventMessageBuilderAppender(event));
+            .routingKeyResolver(new AuditProducerRoutingKeyResolver())
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+            .chain(new CloudRuntimeEventMessageBuilderAppender(event));
     }
-
 }

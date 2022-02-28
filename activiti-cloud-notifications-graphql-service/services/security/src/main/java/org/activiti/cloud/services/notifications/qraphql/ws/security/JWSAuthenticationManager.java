@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
 import java.util.Collection;
-
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,7 +39,8 @@ public class JWSAuthenticationManager implements AuthenticationManager {
     }
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication)
+        throws AuthenticationException {
         JWSAuthentication token = null;
         try {
             token = JWSAuthentication.class.cast(authentication);
@@ -49,13 +49,17 @@ public class JWSAuthenticationManager implements AuthenticationManager {
 
             AccessToken accessToken = tokenVerifier.verifyToken(credentials);
 
-            Collection<? extends GrantedAuthority> authorities = authoritiesMapper.getGrantedAuthorities(accessToken.getRealmAccess()
-                                                                                                                    .getRoles());
-            User user = new User(accessToken.getPreferredUsername(), credentials, authorities);
+            Collection<? extends GrantedAuthority> authorities = authoritiesMapper.getGrantedAuthorities(
+                accessToken.getRealmAccess().getRoles()
+            );
+            User user = new User(
+                accessToken.getPreferredUsername(),
+                credentials,
+                authorities
+            );
 
             token = new JWSAuthentication(credentials, user, authorities);
             token.setDetails(accessToken);
-
         } catch (VerificationException e) {
             throw new BadCredentialsException("Invalid token", e);
         }
@@ -63,8 +67,9 @@ public class JWSAuthenticationManager implements AuthenticationManager {
         return token;
     }
 
-    public void setAuthoritiesMapper(Attributes2GrantedAuthoritiesMapper authoritiesMapper) {
+    public void setAuthoritiesMapper(
+        Attributes2GrantedAuthoritiesMapper authoritiesMapper
+    ) {
         this.authoritiesMapper = authoritiesMapper;
     }
-
 }

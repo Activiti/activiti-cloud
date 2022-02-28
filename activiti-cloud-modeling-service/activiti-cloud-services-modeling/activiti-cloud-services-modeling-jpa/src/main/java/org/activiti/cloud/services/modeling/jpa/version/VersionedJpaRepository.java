@@ -22,7 +22,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  * Custom JPA Repository for version entities
  */
 @NoRepositoryBean
-public interface VersionedJpaRepository<T extends VersionedEntity, K, V extends VersionEntity>
-        extends JpaRepository<T, K> {
-
-}
+public interface VersionedJpaRepository<
+    T extends VersionedEntity, K, V extends VersionEntity
+>
+    extends JpaRepository<T, K> {}

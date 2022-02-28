@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-
 import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
@@ -24,9 +23,12 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultRe
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationResultReceivedEventEntity;
 
-public class IntegrationResultReceivedEventConverter extends BaseEventToEntityConverter {
+public class IntegrationResultReceivedEventConverter
+    extends BaseEventToEntityConverter {
 
-    public IntegrationResultReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public IntegrationResultReceivedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -36,14 +38,23 @@ public class IntegrationResultReceivedEventConverter extends BaseEventToEntityCo
     }
 
     @Override
-    protected IntegrationResultReceivedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new IntegrationResultReceivedEventEntity(CloudIntegrationResultReceivedEvent.class.cast(cloudRuntimeEvent));
+    protected IntegrationResultReceivedEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new IntegrationResultReceivedEventEntity(
+            CloudIntegrationResultReceivedEvent.class.cast(cloudRuntimeEvent)
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        IntegrationResultReceivedEventEntity entity = IntegrationResultReceivedEventEntity.class.cast(auditEventEntity);
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
+        IntegrationResultReceivedEventEntity entity =
+            IntegrationResultReceivedEventEntity.class.cast(auditEventEntity);
 
-        return new CloudIntegrationResultReceivedEventImpl(entity.getIntegrationContext());
+        return new CloudIntegrationResultReceivedEventImpl(
+            entity.getIntegrationContext()
+        );
     }
 }

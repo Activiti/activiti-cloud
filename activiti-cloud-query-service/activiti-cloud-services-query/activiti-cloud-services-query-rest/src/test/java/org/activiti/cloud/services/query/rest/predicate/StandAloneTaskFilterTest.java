@@ -27,24 +27,37 @@ public class StandAloneTaskFilterTest {
     @Test
     public void should_addProcessInstanceIsNullPredicate_when_isStandAlone() {
         //given
-        StandAloneTaskFilter standAloneTaskFilter = new StandAloneTaskFilter(true);
+        StandAloneTaskFilter standAloneTaskFilter = new StandAloneTaskFilter(
+            true
+        );
         Predicate currentPredicate = QTaskEntity.taskEntity.name.eq("Task1");
 
         //when
-        Predicate extendedPredicate = standAloneTaskFilter.extend(currentPredicate);
+        Predicate extendedPredicate = standAloneTaskFilter.extend(
+            currentPredicate
+        );
 
         //then
-        assertThat(extendedPredicate).isEqualTo(QTaskEntity.taskEntity.processInstanceId.isNull().and(currentPredicate));
+        assertThat(extendedPredicate)
+            .isEqualTo(
+                QTaskEntity.taskEntity.processInstanceId
+                    .isNull()
+                    .and(currentPredicate)
+            );
     }
 
     @Test
     public void should_returnInitialPredicate_when_isNotStandAlone() {
         //given
-        StandAloneTaskFilter standAloneTaskFilter = new StandAloneTaskFilter(false);
+        StandAloneTaskFilter standAloneTaskFilter = new StandAloneTaskFilter(
+            false
+        );
         Predicate currentPredicate = QTaskEntity.taskEntity.name.eq("Task1");
 
         //when
-        Predicate extendedPredicate = standAloneTaskFilter.extend(currentPredicate);
+        Predicate extendedPredicate = standAloneTaskFilter.extend(
+            currentPredicate
+        );
 
         //then
         assertThat(extendedPredicate).isEqualTo(currentPredicate);

@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.security.Principal;
+import java.util.Optional;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,13 +31,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-import java.security.Principal;
-import java.util.Optional;
-
-
 public class KeycloakAccessTokenProviderTest {
 
-    private KeycloakAccessTokenProvider subject = new KeycloakAccessTokenProvider() { };
+    private KeycloakAccessTokenProvider subject = new KeycloakAccessTokenProvider() {};
 
     @Mock
     private KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
@@ -54,16 +52,15 @@ public class KeycloakAccessTokenProviderTest {
     @Test
     public void testAccessToken() {
         // given
-        when(principal.getKeycloakSecurityContext()).thenReturn(keycloakSecurityContext);
+        when(principal.getKeycloakSecurityContext())
+            .thenReturn(keycloakSecurityContext);
         when(keycloakSecurityContext.getToken()).thenReturn(accessToken);
 
         // when
         Optional<AccessToken> result = subject.accessToken(principal);
 
         // then
-        assertThat(result).isPresent()
-                          .contains(accessToken);
-
+        assertThat(result).isPresent().contains(accessToken);
     }
 
     @Test
@@ -77,5 +74,4 @@ public class KeycloakAccessTokenProviderTest {
         // then
         assertThat(result).isEmpty();
     }
-
 }

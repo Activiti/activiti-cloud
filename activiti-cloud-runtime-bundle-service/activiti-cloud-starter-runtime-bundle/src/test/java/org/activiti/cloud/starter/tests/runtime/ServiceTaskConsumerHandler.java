@@ -15,8 +15,16 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -32,20 +40,12 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.support.MessageBuilder;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 @TestComponent
 @EnableBinding(ConnectorIntegrationChannels.class)
 public class ServiceTaskConsumerHandler {
 
-    private static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
+    private static final String PARENT_PROCESS_INSTANCE_ID =
+        "parentProcessInstanceId";
     private static final String SERVICE_FULL_NAME = "serviceFullName";
     private static final String SERVICE_VERSION = "serviceVersion";
     private static final String SERVICE_TYPE = "serviceType";
@@ -58,7 +58,8 @@ public class ServiceTaskConsumerHandler {
     private static final String CONNECTOR_TYPE = "connectorType";
     private static final String BUSINESS_KEY = "businessKey";
     private static final String PROCESS_DEFINITION_KEY = "processDefinitionKey";
-    private static final String PROCESS_DEFINITION_VERSION = "processDefinitionVersion";
+    private static final String PROCESS_DEFINITION_VERSION =
+        "processDefinitionVersion";
     private static final String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
     private static final String ROUTING_KEY = "routingKey";
 
@@ -72,18 +73,27 @@ public class ServiceTaskConsumerHandler {
     private List<String> sizes = Arrays.asList("small", "medium");
 
     @Autowired
-    public ServiceTaskConsumerHandler(BinderAwareChannelResolver resolver,
+    public ServiceTaskConsumerHandler(
+        BinderAwareChannelResolver resolver,
         RuntimeBundleProperties runtimeBundleProperties,
         ObjectMapper objectMapper,
-        @Value("${activiti.cloud.messaging.destination-separator}") String destinationSeparator) {
+        @Value(
+            "${activiti.cloud.messaging.destination-separator}"
+        ) String destinationSeparator
+    ) {
         this.resolver = resolver;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.objectMapper = objectMapper;
         this.destinationSeparator = destinationSeparator;
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
-    public void receive(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
+    @StreamListener(
+        value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER
+    )
+    public void receive(
+        IntegrationRequest integrationRequest,
+        @Headers Map<String, Object> headers
+    ) {
         assertIntegrationContextHeaders(integrationRequest, headers);
 
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
@@ -95,37 +105,61 @@ public class ServiceTaskConsumerHandler {
         String variableToUpdate = "age";
 
         HashMap<String, Object> resultVariables = new HashMap<>();
-        resultVariables.put(variableToUpdate,
-            ((Integer) requestVariables.get(variableToUpdate)) + 1);
+        resultVariables.put(
+            variableToUpdate,
+            ((Integer) requestVariables.get(variableToUpdate)) + 1
+        );
         //invert value of boolean
-        resultVariables.put("boolVar", !(Boolean) requestVariables.get("boolVar"));
+        resultVariables.put(
+            "boolVar",
+            !(Boolean) requestVariables.get("boolVar")
+        );
 
-        resultVariables.put("customPojoTypeInConnector", "Type of customPojo var in connector is " + customPojo.getClass());
-        resultVariables.put("customPojoField1InConnector", "Value of field1 on customPojo is " + objectMapper.convertValue(customPojo, CustomPojo.class).getField1());
+        resultVariables.put(
+            "customPojoTypeInConnector",
+            "Type of customPojo var in connector is " + customPojo.getClass()
+        );
+        resultVariables.put(
+            "customPojoField1InConnector",
+            "Value of field1 on customPojo is " +
+            objectMapper.convertValue(customPojo, CustomPojo.class).getField1()
+        );
         //even the annotated pojo in connector won't be deserialized as the relevant type unless we tell objectMapper to do so
-        resultVariables.put("customPojoAnnotatedTypeInConnector", "Type of customPojoAnnotated var in connector is " + requestVariables.get("customPojoAnnotated").getClass());
+        resultVariables.put(
+            "customPojoAnnotatedTypeInConnector",
+            "Type of customPojoAnnotated var in connector is " +
+            requestVariables.get("customPojoAnnotated").getClass()
+        );
 
         integrationContext.addOutBoundVariables(resultVariables);
 
         sendIntegrationResult(integrationRequest, integrationContext);
     }
 
-    private void sendIntegrationResult(IntegrationRequest integrationRequest,
-        IntegrationContext integrationContext) {
-        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest,
-            integrationContext);
-        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult)
+    private void sendIntegrationResult(
+        IntegrationRequest integrationRequest,
+        IntegrationContext integrationContext
+    ) {
+        IntegrationResultImpl integrationResult = new IntegrationResultImpl(
+            integrationRequest,
+            integrationContext
+        );
+        Message<IntegrationResultImpl> message = MessageBuilder
+            .withPayload(integrationResult)
             .build();
 
         String destination = integrationRequest.getResultDestination();
 
-        resolver
-            .resolveDestination(destination)
-            .send(message);
+        resolver.resolveDestination(destination).send(message);
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
-    public void receiveVariablesConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) throws Exception {
+    @StreamListener(
+        value = ConnectorIntegrationChannels.VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER
+    )
+    public void receiveVariablesConnector(
+        IntegrationRequest integrationRequest,
+        @Headers Map<String, Object> headers
+    ) throws Exception {
         assertIntegrationContextHeaders(integrationRequest, headers);
 
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
@@ -140,42 +174,56 @@ public class ServiceTaskConsumerHandler {
         Integer offSet = (Integer) inBoundVariables.get(variableThree);
 
         assertThat(inBoundVariables.entrySet())
-            .extracting(Map.Entry::getKey,
-                Map.Entry::getValue)
+            .extracting(Map.Entry::getKey, Map.Entry::getValue)
             .containsOnly(
-                tuple(variableOne,
-                    "inName"),
-                tuple(variableTwo,
-                    20),
-                tuple(variableThree,
-                    5),
-                tuple(constant,
-                    "myConstantValue"));
+                tuple(variableOne, "inName"),
+                tuple(variableTwo, 20),
+                tuple(variableThree, 5),
+                tuple(constant, "myConstantValue")
+            );
 
-        integrationContext.addOutBoundVariable("out_variable_name_1",
-            "outName");
-        integrationContext.addOutBoundVariable("out_variable_name_2",
-            currentAge + offSet);
-        integrationContext.addOutBoundVariable("out_unmapped_variable_matching_name",
-            "outTest");
-        integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name",
-            "outTest");
+        integrationContext.addOutBoundVariable(
+            "out_variable_name_1",
+            "outName"
+        );
+        integrationContext.addOutBoundVariable(
+            "out_variable_name_2",
+            currentAge + offSet
+        );
+        integrationContext.addOutBoundVariable(
+            "out_unmapped_variable_matching_name",
+            "outTest"
+        );
+        integrationContext.addOutBoundVariable(
+            "out_unmapped_variable_non_matching_name",
+            "outTest"
+        );
 
-        JsonNode value = new ObjectMapper().readTree("{\n"
-            + "  \"city\": {\n"
-            + "    \"name\": \"London\",\n"
-            + "    \"place\": \"Tower of London\"\n"
-            + "  }\n"
-            + "}");
+        JsonNode value = new ObjectMapper()
+            .readTree(
+                "{\n" +
+                "  \"city\": {\n" +
+                "    \"name\": \"London\",\n" +
+                "    \"place\": \"Tower of London\"\n" +
+                "  }\n" +
+                "}"
+            );
         integrationContext.addOutBoundVariable("sightSeeing", value);
-        integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
+        integrationContext.addOutBoundVariable(
+            "visitors",
+            Arrays.asList("Peter", "Paul", "Jack")
+        );
 
         sendIntegrationResult(integrationRequest, integrationContext);
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
-    public void receiveConstantsConnector(IntegrationRequest integrationRequest,
-        @Headers Map<String, Object> headers) {
+    @StreamListener(
+        value = ConnectorIntegrationChannels.CONSTANTS_INTEGRATION_EVENTS_CONSUMER
+    )
+    public void receiveConstantsConnector(
+        IntegrationRequest integrationRequest,
+        @Headers Map<String, Object> headers
+    ) {
         assertIntegrationContextHeaders(integrationRequest, headers);
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
@@ -183,25 +231,31 @@ public class ServiceTaskConsumerHandler {
         Object constantValue = inBoundVariables.get("_constant_value_");
 
         assertThat(inBoundVariables.entrySet())
-            .extracting(Map.Entry::getKey,
-                Map.Entry::getValue)
-            .containsOnly(tuple("name",
-                "inName"),
-                tuple("age",
-                    20),
-                tuple("_constant_value_",
-                    "myConstantValue"));
+            .extracting(Map.Entry::getKey, Map.Entry::getValue)
+            .containsOnly(
+                tuple("name", "inName"),
+                tuple("age", 20),
+                tuple("_constant_value_", "myConstantValue")
+            );
 
         integrationContext.addOutBoundVariable("name", "outName");
         integrationContext.addOutBoundVariable("age", 25);
-        integrationContext.addOutBoundVariable("_constant_value_", constantValue);
+        integrationContext.addOutBoundVariable(
+            "_constant_value_",
+            constantValue
+        );
 
         sendIntegrationResult(integrationRequest, integrationContext);
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER,
-        condition = "headers['processDefinitionVersion']!=null")
-    public void receiveRestConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
+    @StreamListener(
+        value = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER,
+        condition = "headers['processDefinitionVersion']!=null"
+    )
+    public void receiveRestConnector(
+        IntegrationRequest integrationRequest,
+        @Headers Map<String, Object> headers
+    ) {
         assertIntegrationContextHeaders(integrationRequest, headers);
 
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
@@ -210,41 +264,78 @@ public class ServiceTaskConsumerHandler {
         sendIntegrationResult(integrationRequest, integrationContext);
     }
 
-
-    private void assertIntegrationContextHeaders(IntegrationRequest integrationRequest, Map<String, Object> headers) {
+    private void assertIntegrationContextHeaders(
+        IntegrationRequest integrationRequest,
+        Map<String, Object> headers
+    ) {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
 
         // Mandatory headers assertions
-        Assertions.assertThat(headers)
+        Assertions
+            .assertThat(headers)
             .containsKey(ROUTING_KEY)
             .containsKey(MESSAGE_PAYLOAD_TYPE)
-            .containsEntry(PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
-            .containsEntry(PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
-            .containsEntry(CONNECTOR_TYPE, integrationContext.getConnectorType())
+            .containsEntry(
+                PROCESS_DEFINITION_VERSION,
+                integrationContext.getProcessDefinitionVersion()
+            )
+            .containsEntry(
+                PROCESS_DEFINITION_KEY,
+                integrationContext.getProcessDefinitionKey()
+            )
+            .containsEntry(
+                CONNECTOR_TYPE,
+                integrationContext.getConnectorType()
+            )
             .containsEntry(INTEGRATION_CONTEXT_ID, integrationContext.getId())
-            .containsEntry(PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
-            .containsEntry(PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
+            .containsEntry(
+                PROCESS_INSTANCE_ID,
+                integrationContext.getProcessInstanceId()
+            )
+            .containsEntry(
+                PROCESS_DEFINITION_ID,
+                integrationContext.getProcessDefinitionId()
+            )
             .containsEntry(APP_NAME, integrationRequest.getAppName())
-            .containsEntry(APP_VERSION, integrationRequest.getIntegrationContext().getAppVersion())
+            .containsEntry(
+                APP_VERSION,
+                integrationRequest.getIntegrationContext().getAppVersion()
+            )
             .containsEntry(SERVICE_NAME, integrationRequest.getServiceName())
             .containsEntry(SERVICE_TYPE, integrationRequest.getServiceType())
-            .containsEntry(SERVICE_VERSION, integrationRequest.getServiceVersion())
-            .containsEntry(SERVICE_FULL_NAME, integrationRequest.getServiceFullName());
+            .containsEntry(
+                SERVICE_VERSION,
+                integrationRequest.getServiceVersion()
+            )
+            .containsEntry(
+                SERVICE_FULL_NAME,
+                integrationRequest.getServiceFullName()
+            );
 
         // conditional on existing businessKey in integration context
         if (integrationContext.getBusinessKey() != null) {
-            Assertions.assertThat(headers)
-                .containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey());
+            Assertions
+                .assertThat(headers)
+                .containsEntry(
+                    BUSINESS_KEY,
+                    integrationContext.getBusinessKey()
+                );
         }
 
         // conditional on existing parentProcessInstanceId in integration context
         if (integrationContext.getParentProcessInstanceId() != null) {
-            Assertions.assertThat(headers)
-                .containsEntry(PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
+            Assertions
+                .assertThat(headers)
+                .containsEntry(
+                    PARENT_PROCESS_INSTANCE_ID,
+                    integrationContext.getParentProcessInstanceId()
+                );
         }
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.MEALS_CONNECTOR_CONSUMER)
+    @StreamListener(
+        value = ConnectorIntegrationChannels.MEALS_CONNECTOR_CONSUMER
+    )
     public void receiveMealsConnector(IntegrationRequest integrationRequest) {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         int remainder = currentMealIndex.getAndIncrement() % meals.size();
@@ -254,10 +345,15 @@ public class ServiceTaskConsumerHandler {
         sendIntegrationResult(integrationRequest, integrationContext);
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.VALUE_PROCESSOR_CONSUMER)
+    @StreamListener(
+        value = ConnectorIntegrationChannels.VALUE_PROCESSOR_CONSUMER
+    )
     public void valueProcessorConnector(IntegrationRequest integrationRequest) {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
-        integrationContext.addOutBoundVariable("providedValue", integrationContext.getInBoundVariable("input"));
+        integrationContext.addOutBoundVariable(
+            "providedValue",
+            integrationContext.getInBoundVariable("input")
+        );
         sendIntegrationResult(integrationRequest, integrationContext);
     }
 }

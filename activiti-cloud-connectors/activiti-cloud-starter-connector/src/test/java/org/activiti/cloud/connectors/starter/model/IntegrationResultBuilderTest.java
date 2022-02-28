@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
+import static org.activiti.test.Assertions.assertThat;
+
+import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -22,10 +25,6 @@ import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
-
-import java.util.Collections;
-
-import static org.activiti.test.Assertions.assertThat;
 
 public class IntegrationResultBuilderTest {
 
@@ -40,7 +39,8 @@ public class IntegrationResultBuilderTest {
     private ConnectorProperties connectorProperties = new ConnectorProperties();
 
     @Test
-    public void shouldBuildIntegrationResultBasedOnInformationFromIntegrationRequest() throws Exception {
+    public void shouldBuildIntegrationResultBasedOnInformationFromIntegrationRequest()
+        throws Exception {
         //given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
@@ -48,30 +48,30 @@ public class IntegrationResultBuilderTest {
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
-        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(
+            integrationContext
+        );
         integrationRequestEvent.setAppName(APP_NAME);
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
         IntegrationResult resultEvent = IntegrationResultBuilder
-                .resultFor(integrationRequestEvent,
-                           connectorProperties)
-                .withOutboundVariables(Collections.singletonMap(VAR,
-                                                                VALUE))
-                .build();
+            .resultFor(integrationRequestEvent, connectorProperties)
+            .withOutboundVariables(Collections.singletonMap(VAR, VALUE))
+            .build();
 
         //then
         assertThat(resultEvent)
-                .hasIntegrationContext(integrationContext)
-                .hasIntegrationRequest(integrationRequestEvent);
+            .hasIntegrationContext(integrationContext)
+            .hasIntegrationRequest(integrationRequestEvent);
         assertThat(integrationContext)
-                .hasClientId(ACTIVITY_ELEMENT_ID)
-                .hasOutBoundVariables(Collections.singletonMap(VAR,
-                                                               VALUE));
+            .hasClientId(ACTIVITY_ELEMENT_ID)
+            .hasOutBoundVariables(Collections.singletonMap(VAR, VALUE));
     }
 
     @Test
-    public void shouldBuildMessageWithTargetApplicationHeader() throws Exception {
+    public void shouldBuildMessageWithTargetApplicationHeader()
+        throws Exception {
         //given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
@@ -79,17 +79,21 @@ public class IntegrationResultBuilderTest {
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
-        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(
+            integrationContext
+        );
         integrationRequestEvent.setAppName(APP_NAME);
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
         Message<IntegrationResult> message = IntegrationResultBuilder
-                .resultFor(integrationRequestEvent, connectorProperties)
-                .buildMessage();
+            .resultFor(integrationRequestEvent, connectorProperties)
+            .buildMessage();
 
         //then
-        Assertions.assertThat(message.getHeaders()).containsEntry("targetService", RB_NAME)
-                                                   .containsEntry("targetAppName", APP_NAME);
+        Assertions
+            .assertThat(message.getHeaders())
+            .containsEntry("targetService", RB_NAME)
+            .containsEntry("targetAppName", APP_NAME);
     }
 }

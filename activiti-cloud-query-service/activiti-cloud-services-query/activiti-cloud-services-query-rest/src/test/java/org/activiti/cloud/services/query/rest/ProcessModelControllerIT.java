@@ -51,11 +51,13 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessModelController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({
-    QueryRestWebMvcAutoConfiguration.class,
-    CommonModelAutoConfiguration.class,
-    AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    {
+        QueryRestWebMvcAutoConfiguration.class,
+        CommonModelAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @WithMockUser
 public class ProcessModelControllerIT {
 
@@ -93,23 +95,40 @@ public class ProcessModelControllerIT {
         processDefinition.setKey("processKey");
         processDefinition.setServiceName("serviceName");
 
-        given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
-                .willReturn(true);
+        given(
+            securityPoliciesManager.canRead(
+                processDefinition.getKey(),
+                processDefinition.getServiceName()
+            )
+        )
+            .willReturn(true);
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-        .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
+        given(
+            entityFinder.findById(
+                eq(processModelRepository),
+                eq(processDefinitionId),
+                anyString()
+            )
+        )
+            .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
 
         //when
-       mockMvc.perform(get("/v1/process-definitions/{processDefinitionId}/model",
-                                                  processDefinitionId)
-                                                      .accept(MediaType.APPLICATION_XML_VALUE))
-                //then
-                .andExpect(status().isOk())
-                .andExpect(content().xml("<model/>"));
+        mockMvc
+            .perform(
+                get(
+                    "/v1/process-definitions/{processDefinitionId}/model",
+                    processDefinitionId
+                )
+                    .accept(MediaType.APPLICATION_XML_VALUE)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andExpect(content().xml("<model/>"));
     }
 
     @Test
-    public void shouldThrowExceptionWhenUserCannotReadGivenProcess() throws Exception {
+    public void shouldThrowExceptionWhenUserCannotReadGivenProcess()
+        throws Exception {
         //given
         given(securityPoliciesManager.arePoliciesDefined()).willReturn(true);
 
@@ -118,19 +137,42 @@ public class ProcessModelControllerIT {
         processDefinition.setKey("processKey");
         processDefinition.setServiceName("serviceName");
 
-        given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
-                .willReturn(false);
+        given(
+            securityPoliciesManager.canRead(
+                processDefinition.getKey(),
+                processDefinition.getServiceName()
+            )
+        )
+            .willReturn(false);
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-                .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
+        given(
+            entityFinder.findById(
+                eq(processModelRepository),
+                eq(processDefinitionId),
+                anyString()
+            )
+        )
+            .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
 
         //when
-        mockMvc.perform(get("/v1/process-definitions/{processDefinitionId}/model",
-                            processDefinitionId)
-                                .accept(MediaType.APPLICATION_XML_VALUE))
-                //then
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("entry.message", is("Operation not permitted for " + processDefinition.getKey())));
+        mockMvc
+            .perform(
+                get(
+                    "/v1/process-definitions/{processDefinitionId}/model",
+                    processDefinitionId
+                )
+                    .accept(MediaType.APPLICATION_XML_VALUE)
+            )
+            //then
+            .andExpect(status().isForbidden())
+            .andExpect(
+                jsonPath(
+                    "entry.message",
+                    is(
+                        "Operation not permitted for " +
+                        processDefinition.getKey()
+                    )
+                )
+            );
     }
-
 }

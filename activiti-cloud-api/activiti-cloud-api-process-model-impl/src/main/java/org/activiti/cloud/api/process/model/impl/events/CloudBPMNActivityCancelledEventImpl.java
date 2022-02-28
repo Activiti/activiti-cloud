@@ -19,34 +19,33 @@ import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
 
-public class CloudBPMNActivityCancelledEventImpl extends CloudBPMNActivityEventImpl implements CloudBPMNActivityCancelledEvent {
+public class CloudBPMNActivityCancelledEventImpl
+    extends CloudBPMNActivityEventImpl
+    implements CloudBPMNActivityCancelledEvent {
 
     private String cause;
 
-    public CloudBPMNActivityCancelledEventImpl() {
-    }
+    public CloudBPMNActivityCancelledEventImpl() {}
 
-    public CloudBPMNActivityCancelledEventImpl(BPMNActivity entity,
-                                               String processDefinitionId,
-                                               String processInstanceId,
-                                               String cause) {
-        super(entity,
-              processDefinitionId,
-              processInstanceId);
+    public CloudBPMNActivityCancelledEventImpl(
+        BPMNActivity entity,
+        String processDefinitionId,
+        String processInstanceId,
+        String cause
+    ) {
+        super(entity, processDefinitionId, processInstanceId);
         this.cause = cause;
     }
 
-    public CloudBPMNActivityCancelledEventImpl(String id,
-                                               Long timestamp,
-                                               BPMNActivity entity,
-                                               String processDefinitionId,
-                                               String processInstanceId,
-                                               String cause) {
-        super(id,
-              timestamp,
-              entity,
-              processDefinitionId,
-              processInstanceId);
+    public CloudBPMNActivityCancelledEventImpl(
+        String id,
+        Long timestamp,
+        BPMNActivity entity,
+        String processDefinitionId,
+        String processInstanceId,
+        String cause
+    ) {
+        super(id, timestamp, entity, processDefinitionId, processInstanceId);
         this.cause = cause;
     }
 

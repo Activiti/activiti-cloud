@@ -15,11 +15,14 @@
  */
 package org.activiti.cloud.alfresco.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,15 +30,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 @ExtendWith(MockitoExtension.class)
 public class AlfrescoWebAutoConfigurationTest {
@@ -47,7 +46,11 @@ public class AlfrescoWebAutoConfigurationTest {
 
     @BeforeEach
     public void setUp() {
-        configurer = new AlfrescoWebAutoConfiguration(pageableHandlerMethodArgumentResolver, 100);
+        configurer =
+            new AlfrescoWebAutoConfiguration(
+                pageableHandlerMethodArgumentResolver,
+                100
+            );
     }
 
     @Test
@@ -60,7 +63,8 @@ public class AlfrescoWebAutoConfigurationTest {
         configurer.addArgumentResolvers(resolvers);
 
         //then
-        assertThat(resolvers.get(0)).isInstanceOf(AlfrescoPageArgumentMethodResolver.class);
+        assertThat(resolvers.get(0))
+            .isInstanceOf(AlfrescoPageArgumentMethodResolver.class);
     }
 
     @Test
@@ -68,12 +72,18 @@ public class AlfrescoWebAutoConfigurationTest {
         //given
 
         //when
-        TypeConstrainedMappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(EntityModel.class);
-        halConverter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON,
-                                                          MediaType.APPLICATION_JSON));
-        configurer.extendMessageConverters(Collections.singletonList(halConverter));
+        TypeConstrainedMappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
+            EntityModel.class
+        );
+        halConverter.setSupportedMediaTypes(
+            Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON)
+        );
+        configurer.extendMessageConverters(
+            Collections.singletonList(halConverter)
+        );
 
         //then
-        assertThat(halConverter.getSupportedMediaTypes()).containsExactly(MediaTypes.HAL_JSON);
+        assertThat(halConverter.getSupportedMediaTypes())
+            .containsExactly(MediaTypes.HAL_JSON);
     }
 }

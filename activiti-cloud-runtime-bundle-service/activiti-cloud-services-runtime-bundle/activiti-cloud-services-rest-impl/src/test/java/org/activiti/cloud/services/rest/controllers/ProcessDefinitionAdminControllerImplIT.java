@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
@@ -62,13 +61,17 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(ProcessDefinitionAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({RuntimeBundleProperties.class,
+@Import(
+    {
+        RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 public class ProcessDefinitionAdminControllerImplIT {
 
     @Autowired
@@ -106,7 +109,6 @@ public class ProcessDefinitionAdminControllerImplIT {
 
     @Test
     public void getProcessDefinitions() throws Exception {
-
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId("procId");
         processDefinition.setName("my process");
@@ -116,22 +118,34 @@ public class ProcessDefinitionAdminControllerImplIT {
         String my_process = "my process";
         String this_is_my_process = "this is my process";
         int version = 1;
-        List<ProcessDefinition> processDefinitionList = Collections.singletonList(buildProcessDefinition(procId,
+        List<ProcessDefinition> processDefinitionList = Collections.singletonList(
+            buildProcessDefinition(
+                procId,
                 my_process,
                 this_is_my_process,
-                version));
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                processDefinitionList.size());
-        when(processAdminRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+                version
+            )
+        );
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processAdminRuntime.processDefinitions(any()))
+            .thenReturn(processDefinitionPage);
 
-        this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                get("/admin/v1/process-definitions")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk());
     }
 
-    private ProcessDefinition buildProcessDefinition(String processDefinitionId,
-                                                     String name,
-                                                     String description,
-                                                     int version) {
+    private ProcessDefinition buildProcessDefinition(
+        String processDefinitionId,
+        String name,
+        String description,
+        int version
+    ) {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId(processDefinitionId);
         processDefinition.setName(name);
@@ -140,9 +154,9 @@ public class ProcessDefinitionAdminControllerImplIT {
         return processDefinition;
     }
 
-
     @Test
-    public void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
         String processDefId = UUID.randomUUID().toString();
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
@@ -151,28 +165,48 @@ public class ProcessDefinitionAdminControllerImplIT {
         processDefinition.setDescription("This is my process");
         processDefinition.setVersion(1);
 
-        List<ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                11);
-        given(processAdminRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
+        List<ProcessDefinition> processDefinitionList = Collections.singletonList(
+            processDefinition
+        );
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            11
+        );
+        given(processAdminRuntime.processDefinitions(any()))
+            .willReturn(processDefinitionPage);
 
         //when
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
+        MvcResult result =
+            this.mockMvc.perform(
+                    get(
+                        "/admin/v1/process-definitions?skipCount=10&maxItems=10"
+                    )
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
         //then
         String responseContent = result.getResponse().getContentAsString();
         assertThatJson(responseContent)
-                .node("list.pagination.skipCount").isEqualTo(10)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(11);
+            .node("list.pagination.skipCount")
+            .isEqualTo(10)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(11);
         assertThatJson(responseContent)
-                .node("list.entries[0].entry.id").isEqualTo(processDefId)
-                .node("list.entries[0].entry.name").isEqualTo("my process")
-                .node("list.entries[0].entry.description").isEqualTo("This is my process")
-                .node("list.entries[0].entry.version").isEqualTo(1);
+            .node("list.entries[0].entry.id")
+            .isEqualTo(processDefId)
+            .node("list.entries[0].entry.name")
+            .isEqualTo("my process")
+            .node("list.entries[0].entry.description")
+            .isEqualTo("This is my process")
+            .node("list.entries[0].entry.version")
+            .isEqualTo(1);
     }
 }

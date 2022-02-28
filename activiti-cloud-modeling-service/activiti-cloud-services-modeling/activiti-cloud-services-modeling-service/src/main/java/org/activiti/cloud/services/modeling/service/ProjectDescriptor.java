@@ -52,7 +52,7 @@ public class ProjectDescriptor {
     public String getName() {
         return project.getName();
     }
-    
+
     public String getVersion() {
         return project.getVersion();
     }
@@ -77,8 +77,7 @@ public class ProjectDescriptor {
         return project.getLastModifiedDate();
     }
 
-    public Project toProject(){
+    public Project toProject() {
         return this.project;
     }
-
 }

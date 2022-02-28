@@ -25,7 +25,9 @@ import org.activiti.cloud.services.audit.jpa.events.TimerExecutedAuditEventEntit
 
 public class TimerExecutedEventConverter extends BaseEventToEntityConverter {
 
-    public TimerExecutedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TimerExecutedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -35,18 +37,26 @@ public class TimerExecutedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected TimerExecutedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new TimerExecutedAuditEventEntity((CloudBPMNTimerExecutedEvent) cloudRuntimeEvent);
+    protected TimerExecutedAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new TimerExecutedAuditEventEntity(
+            (CloudBPMNTimerExecutedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         TimerExecutedAuditEventEntity timerEventEntity = (TimerExecutedAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNTimerExecutedEventImpl(timerEventEntity.getEventId(),
-                                                   timerEventEntity.getTimestamp(),
-                                                   timerEventEntity.getTimer(),
-                                                   timerEventEntity.getProcessDefinitionId(),
-                                                   timerEventEntity.getProcessInstanceId());
+        return new CloudBPMNTimerExecutedEventImpl(
+            timerEventEntity.getEventId(),
+            timerEventEntity.getTimestamp(),
+            timerEventEntity.getTimer(),
+            timerEventEntity.getProcessDefinitionId(),
+            timerEventEntity.getProcessInstanceId()
+        );
     }
 }

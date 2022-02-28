@@ -27,7 +27,9 @@ public class SwaggerRuntimeBundleSteps {
     private SwaggerService runtimeBundleSwaggerService;
 
     @Step
-    public String getSwaggerSpecification(){
-        return runtimeBundleSwaggerService.getSwaggerSpecification("Runtime Bundle");
+    public String getSwaggerSpecification() {
+        return runtimeBundleSwaggerService.getSwaggerSpecification(
+            "Runtime Bundle"
+        );
     }
 }

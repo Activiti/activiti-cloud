@@ -1,4 +1,5 @@
 package org.activiti.cloud.acc.core.steps.query;
+
 /*
  * Copyright 2017-2020 Alfresco Software, Ltd.
  *
@@ -27,6 +28,7 @@ import org.springframework.hateoas.PagedModel;
 
 @EnableRuntimeFeignContext
 public class ApplicationQuerySteps {
+
     @Autowired
     private ApplicationQueryService applicationQueryService;
 
@@ -40,8 +42,7 @@ public class ApplicationQuerySteps {
     }
 
     @Step
-    public PagedModel<CloudApplication> getAllApplications(){
+    public PagedModel<CloudApplication> getAllApplications() {
         return applicationQueryService.getApplications();
     }
-
 }

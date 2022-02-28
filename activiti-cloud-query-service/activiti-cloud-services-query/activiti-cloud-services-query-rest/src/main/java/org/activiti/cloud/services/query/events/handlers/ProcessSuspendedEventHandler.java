@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
 
 public class ProcessSuspendedEventHandler implements QueryEventHandler {
 
@@ -39,12 +38,28 @@ public class ProcessSuspendedEventHandler implements QueryEventHandler {
         CloudProcessSuspendedEvent suspendedEvent = (CloudProcessSuspendedEvent) event;
         String processInstanceId = suspendedEvent.getEntity().getId();
 
-        ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                                                             processInstanceId))
-                                                              .orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
-        processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
-        processInstanceEntity.setLastModified(new Date(suspendedEvent.getTimestamp()));
-        processInstanceEntity.setSuspendedDate(new Date(suspendedEvent.getTimestamp()));
+        ProcessInstanceEntity processInstanceEntity = Optional
+            .ofNullable(
+                entityManager.find(
+                    ProcessInstanceEntity.class,
+                    processInstanceId
+                )
+            )
+            .orElseThrow(() ->
+                new QueryException(
+                    "Unable to find process instance with the given id: " +
+                    processInstanceId
+                )
+            );
+        processInstanceEntity.setStatus(
+            ProcessInstance.ProcessInstanceStatus.SUSPENDED
+        );
+        processInstanceEntity.setLastModified(
+            new Date(suspendedEvent.getTimestamp())
+        );
+        processInstanceEntity.setSuspendedDate(
+            new Date(suspendedEvent.getTimestamp())
+        );
 
         //All important parameters like processDefinitionKey, businessKey, processDefinitionId etc. are already set by CloudProcessCreatedEvent
         entityManager.persist(processInstanceEntity);

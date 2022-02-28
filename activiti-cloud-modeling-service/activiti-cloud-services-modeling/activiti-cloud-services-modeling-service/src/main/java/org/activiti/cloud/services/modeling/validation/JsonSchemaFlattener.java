@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -32,24 +31,23 @@ import org.springframework.core.io.ClassPathResource;
 
 public class JsonSchemaFlattener {
 
-    public JsonSchemaFlattener() {
+    public JsonSchemaFlattener() {}
 
-    }
-
-    private void handleObject(Object value,
-                              Map<String, Object> addDefinitions) {
+    private void handleObject(
+        Object value,
+        Map<String, Object> addDefinitions
+    ) {
         if (value instanceof JSONObject) {
-            handleJSONObject((JSONObject) value,
-                              addDefinitions);
+            handleJSONObject((JSONObject) value, addDefinitions);
         } else if (value instanceof JSONArray) {
-            handleJSONArray((JSONArray) value,
-                             addDefinitions);
+            handleJSONArray((JSONArray) value, addDefinitions);
         }
     }
 
-    private void handleJSONObject(JSONObject jsonObject,
-                                  Map<String, Object> addDefinitions) {
-
+    private void handleJSONObject(
+        JSONObject jsonObject,
+        Map<String, Object> addDefinitions
+    ) {
         if (!jsonObject.isEmpty()) {
             Iterator iterator = jsonObject.keys();
 
@@ -58,23 +56,25 @@ public class JsonSchemaFlattener {
                 Object value = jsonObject.get(key);
 
                 if (isKeyToCheck(key)) {
-                    getUpdatedValue(value, addDefinitions).ifPresent(updatedValue -> jsonObject.put(key, updatedValue));
+                    getUpdatedValue(value, addDefinitions)
+                        .ifPresent(updatedValue ->
+                            jsonObject.put(key, updatedValue)
+                        );
                 } else {
                     handleObject(value, addDefinitions);
                 }
-
             }
         }
     }
 
-    private void handleJSONArray(JSONArray jsonArray,
-                                 Map<String, Object> addDefinitions) {
-
+    private void handleJSONArray(
+        JSONArray jsonArray,
+        Map<String, Object> addDefinitions
+    ) {
         for (int i = 0; i < jsonArray.length(); i++) {
-            handleObject(jsonArray.get(i),
-                         addDefinitions);
+            handleObject(jsonArray.get(i), addDefinitions);
         }
-   }
+    }
 
     private boolean isKeyToCheck(String key) {
         return Objects.equals("$ref", key);
@@ -82,8 +82,7 @@ public class JsonSchemaFlattener {
 
     private Optional<String> getClassPathFileName(String value) {
         String regex = "classpath:\\/\\/(.*)";
-        Matcher matcher = Pattern.compile(regex)
-                                 .matcher(value);
+        Matcher matcher = Pattern.compile(regex).matcher(value);
         if (matcher.find()) {
             return Optional.of(matcher.group(1).toString());
         }
@@ -91,23 +90,25 @@ public class JsonSchemaFlattener {
         return Optional.empty();
     }
 
-    private Optional<String> getUpdatedValue(Object value,
-                                             Map<String, Object> addDefinitions) {
-
-        Optional<String> stringValue = Optional.of(value)
-                                        .filter(String.class::isInstance)
-                                        .map(String.class::cast)
-                                        .filter(s -> !s.startsWith("#"));
+    private Optional<String> getUpdatedValue(
+        Object value,
+        Map<String, Object> addDefinitions
+    ) {
+        Optional<String> stringValue = Optional
+            .of(value)
+            .filter(String.class::isInstance)
+            .map(String.class::cast)
+            .filter(s -> !s.startsWith("#"));
 
         if (stringValue.isPresent()) {
-
             Optional<String> stringRef = Optional.empty();
             Optional<String> fileName = getClassPathFileName(stringValue.get());
 
             if (!fileName.isPresent()) {
                 String regex = "(.*)\\/#\\/(.*)";
-                Matcher matcher = Pattern.compile(regex)
-                                         .matcher(stringValue.get());
+                Matcher matcher = Pattern
+                    .compile(regex)
+                    .matcher(stringValue.get());
                 if (matcher.find()) {
                     fileName = Optional.of(matcher.group(1).toString());
                     stringRef = Optional.of(matcher.group(2).toString());
@@ -117,43 +118,55 @@ public class JsonSchemaFlattener {
             }
 
             if (fileName.isPresent()) {
-
                 String sectionName = getSectionNameFromFileName(fileName.get());
-                JSONObject jsonObject = (JSONObject)addDefinitions.get(sectionName);
+                JSONObject jsonObject = (JSONObject) addDefinitions.get(
+                    sectionName
+                );
 
                 if (jsonObject == null) {
-
                     try {
                         jsonObject = loadResourceFromClassPass(fileName.get());
                     } catch (IOException e) {
-                        jsonObject = null;;
+                        jsonObject = null;
                     }
                 }
 
                 if (jsonObject != null) {
-                    addDefinitions.put(sectionName, flattenIntern(jsonObject, addDefinitions).get());
+                    addDefinitions.put(
+                        sectionName,
+                        flattenIntern(jsonObject, addDefinitions).get()
+                    );
 
-                    return Optional.of("#/definitions/" + sectionName + (stringRef.isPresent() ? stringRef.get() : ""));
+                    return Optional.of(
+                        "#/definitions/" +
+                        sectionName +
+                        (stringRef.isPresent() ? stringRef.get() : "")
+                    );
                 }
-
             }
         }
 
         return Optional.empty();
     }
 
-    private JSONObject loadResourceFromClassPass(String schemaFileName) throws IOException  {
-
-        try (InputStream schemaInputStream = new ClassPathResource(schemaFileName).getInputStream()) {
-            return  new JSONObject(new JSONTokener(schemaInputStream));
+    private JSONObject loadResourceFromClassPass(String schemaFileName)
+        throws IOException {
+        try (
+            InputStream schemaInputStream = new ClassPathResource(
+                schemaFileName
+            )
+                .getInputStream()
+        ) {
+            return new JSONObject(new JSONTokener(schemaInputStream));
         }
     }
 
-    private Optional<JSONObject> flattenIntern(JSONObject jsonSchema,
-                                               Map<String, Object> addDefinitions) {
+    private Optional<JSONObject> flattenIntern(
+        JSONObject jsonSchema,
+        Map<String, Object> addDefinitions
+    ) {
         if (!jsonSchema.isEmpty()) {
-            handleJSONObject(jsonSchema,
-                             addDefinitions);
+            handleJSONObject(jsonSchema, addDefinitions);
         }
         return Optional.of(jsonSchema);
     }
@@ -164,28 +177,25 @@ public class JsonSchemaFlattener {
         }
 
         return fileName
-                .replaceAll(".json","")
-                .replaceAll("[/-]","_")
-                .replaceAll("[^a-zA-Z0-9_]+","");
+            .replaceAll(".json", "")
+            .replaceAll("[/-]", "_")
+            .replaceAll("[^a-zA-Z0-9_]+", "");
     }
 
     public JSONObject flatten(JSONObject jsonSchema) {
-
         if (jsonSchema == null) {
             return new JSONObject();
         }
 
         Map<String, Object> addDefinitions = new HashMap<>();
-        Optional<JSONObject> reply = flattenIntern(jsonSchema,
-                                                   addDefinitions);
+        Optional<JSONObject> reply = flattenIntern(jsonSchema, addDefinitions);
 
         JSONObject replyObject = reply.isPresent() ? reply.get() : jsonSchema;
 
         if (!addDefinitions.isEmpty()) {
-
             JSONObject definitions = null;
             if (replyObject.has("definitions")) {
-                definitions = (JSONObject)replyObject.get("definitions");
+                definitions = (JSONObject) replyObject.get("definitions");
             } else {
                 definitions = new JSONObject();
             }
@@ -198,5 +208,4 @@ public class JsonSchemaFlattener {
 
         return replyObject;
     }
-
 }

@@ -19,6 +19,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
@@ -30,12 +34,6 @@ import org.keycloak.representations.AccessToken;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-
 
 public class KeycloakAccessTokenPrincipalRolesProviderTest {
 
@@ -62,23 +60,26 @@ public class KeycloakAccessTokenPrincipalRolesProviderTest {
     @Test
     public void testGetRoles() {
         // given
-        when(keycloakSecurityContextProvider.accessToken(any())).thenReturn(Optional.of(accessToken));
+        when(keycloakSecurityContextProvider.accessToken(any()))
+            .thenReturn(Optional.of(accessToken));
         when(keycloakAccessTokenValidator.isValid(any())).thenReturn(true);
-        when(accessToken.getRealmAccess()).thenReturn(new AccessToken.Access().roles(new LinkedHashSet<>(Arrays.asList("role1",
-                                                                                                                       "role2"))));
+        when(accessToken.getRealmAccess())
+            .thenReturn(
+                new AccessToken.Access()
+                    .roles(new LinkedHashSet<>(Arrays.asList("role1", "role2")))
+            );
         // when
         List<String> result = subject.getRoles(keycloakPrincipal);
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("role1",
-                                           "role2");
+        assertThat(result).isNotEmpty().containsExactly("role1", "role2");
     }
 
     @Test
     public void testGetRolesInvalidToken() {
         // given
-        when(keycloakSecurityContextProvider.accessToken(any())).thenReturn(Optional.of(accessToken));
+        when(keycloakSecurityContextProvider.accessToken(any()))
+            .thenReturn(Optional.of(accessToken));
         when(keycloakAccessTokenValidator.isValid(any())).thenReturn(false);
 
         // when

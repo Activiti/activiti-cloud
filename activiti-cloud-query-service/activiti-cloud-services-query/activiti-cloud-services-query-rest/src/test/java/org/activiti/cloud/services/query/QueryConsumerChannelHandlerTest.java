@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.query;
 
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -25,13 +31,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class QueryConsumerChannelHandlerTest {
 
@@ -55,8 +54,10 @@ public class QueryConsumerChannelHandlerTest {
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
 
-        List<CloudRuntimeEvent<?,?>> events = asList(processCreatedEvent,
-                                                     processStartedEvent);
+        List<CloudRuntimeEvent<?, ?>> events = asList(
+            processCreatedEvent,
+            processStartedEvent
+        );
 
         when(optimizer.optimize(events)).thenReturn(events);
 
@@ -65,7 +66,7 @@ public class QueryConsumerChannelHandlerTest {
 
         //then
         verify(optimizer).optimize(events);
-        verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
+        verify(eventHandlerContext)
+            .handle(processCreatedEvent, processStartedEvent);
     }
-
 }

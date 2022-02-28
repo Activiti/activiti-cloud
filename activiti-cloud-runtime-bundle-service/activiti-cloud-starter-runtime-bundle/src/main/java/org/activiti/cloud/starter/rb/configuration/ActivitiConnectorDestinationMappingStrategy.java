@@ -16,22 +16,25 @@
 
 package org.activiti.cloud.starter.rb.configuration;
 
+import java.util.Optional;
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
 import org.activiti.services.connectors.conf.ConnectorDestinationMappingStrategy;
 
-import java.util.Optional;
-
-public class ActivitiConnectorDestinationMappingStrategy implements ConnectorDestinationMappingStrategy {
+public class ActivitiConnectorDestinationMappingStrategy
+    implements ConnectorDestinationMappingStrategy {
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
 
-    public ActivitiConnectorDestinationMappingStrategy(ActivitiMessagingDestinationTransformer destinationTransformer) {
+    public ActivitiConnectorDestinationMappingStrategy(
+        ActivitiMessagingDestinationTransformer destinationTransformer
+    ) {
         this.destinationTransformer = destinationTransformer;
     }
 
     @Override
     public String apply(String implementation) {
-        return Optional.ofNullable(destinationTransformer.apply(implementation))
-                       .orElse(implementation);
+        return Optional
+            .ofNullable(destinationTransformer.apply(implementation))
+            .orElse(implementation);
     }
 }

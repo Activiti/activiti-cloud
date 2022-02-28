@@ -22,14 +22,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import graphql.ExecutionResultImpl;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.websocket.Session;
-
-import graphql.ExecutionResultImpl;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,9 +62,19 @@ public class GraphQLBrokerChannelSubscriberTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        Message<GraphQLMessage> startMessage = startMessage("operationId", "sessionId");
+        Message<GraphQLMessage> startMessage = startMessage(
+            "operationId",
+            "sessionId"
+        );
 
-        this.testSubject = new GraphQLBrokerChannelSubscriber(startMessage, "operationId", messageChannel, 1000, 1);
+        this.testSubject =
+            new GraphQLBrokerChannelSubscriber(
+                startMessage,
+                "operationId",
+                messageChannel,
+                1000,
+                1
+            );
     }
 
     @Test
@@ -98,13 +106,18 @@ public class GraphQLBrokerChannelSubscriberTest {
         testOnSubscribe();
 
         // when
-        testSubject.onNext(new ExecutionResultImpl(Collections.singletonMap("key", "value"), Collections.emptyList()));
+        testSubject.onNext(
+            new ExecutionResultImpl(
+                Collections.singletonMap("key", "value"),
+                Collections.emptyList()
+            )
+        );
 
         // then
         verify(messageChannel).send(messageCaptor.capture());
 
-        assertThat(messageCaptor.getValue().getPayload().getType()).isEqualTo(GraphQLMessageType.DATA);
-
+        assertThat(messageCaptor.getValue().getPayload().getType())
+            .isEqualTo(GraphQLMessageType.DATA);
     }
 
     @Test
@@ -119,7 +132,8 @@ public class GraphQLBrokerChannelSubscriberTest {
         verify(messageChannel).send(messageCaptor.capture());
         verifyNoMoreInteractions(messageChannel, subscription);
 
-        assertThat(messageCaptor.getValue().getPayload().getType()).isEqualTo(GraphQLMessageType.ERROR);
+        assertThat(messageCaptor.getValue().getPayload().getType())
+            .isEqualTo(GraphQLMessageType.ERROR);
     }
 
     @Test
@@ -134,40 +148,57 @@ public class GraphQLBrokerChannelSubscriberTest {
         verify(messageChannel).send(messageCaptor.capture());
         verify(subscription).cancel();
 
-        assertThat(messageCaptor.getValue().getPayload().getType()).isEqualTo(GraphQLMessageType.COMPLETE);
-
+        assertThat(messageCaptor.getValue().getPayload().getType())
+            .isEqualTo(GraphQLMessageType.COMPLETE);
     }
 
-    private Message<GraphQLMessage> startMessage(String operationId, String sessionId) {
-        SimpMessageHeaderAccessor headerAccessor = simpHeaderAccessor(mockWebSocketSession(sessionId));
+    private Message<GraphQLMessage> startMessage(
+        String operationId,
+        String sessionId
+    ) {
+        SimpMessageHeaderAccessor headerAccessor = simpHeaderAccessor(
+            mockWebSocketSession(sessionId)
+        );
 
         Map<String, Object> json = new HashMap<>();
         json.put("query", "{}");
         json.put("variables", "{}");
 
-        GraphQLMessage payload = new GraphQLMessage(operationId,
-                                                    GraphQLMessageType.START,
-                                                    json);
+        GraphQLMessage payload = new GraphQLMessage(
+            operationId,
+            GraphQLMessageType.START,
+            json
+        );
 
-        return MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
+        return MessageBuilder.createMessage(
+            payload,
+            headerAccessor.getMessageHeaders()
+        );
     }
 
     private WebSocketSession mockWebSocketSession(String sessionId) {
         Session nativeSession = mock(Session.class);
         when(nativeSession.getId()).thenReturn(sessionId);
-        when(nativeSession.getUserPrincipal()).thenReturn(mock(Principal.class));
+        when(nativeSession.getUserPrincipal())
+            .thenReturn(mock(Principal.class));
 
-        StandardWebSocketSession wsSession = new StandardWebSocketSession(null,
-                                                                          null,
-                                                                          null,
-                                                                          null);
+        StandardWebSocketSession wsSession = new StandardWebSocketSession(
+            null,
+            null,
+            null,
+            null
+        );
         wsSession.initializeNativeSession(nativeSession);
 
         return wsSession;
     }
 
-    private SimpMessageHeaderAccessor simpHeaderAccessor(WebSocketSession session) {
-        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+    private SimpMessageHeaderAccessor simpHeaderAccessor(
+        WebSocketSession session
+    ) {
+        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(
+            SimpMessageType.MESSAGE
+        );
 
         headerAccessor.setDestination("/destination");
         headerAccessor.setSessionId(session.getId());
@@ -177,5 +208,4 @@ public class GraphQLBrokerChannelSubscriberTest {
 
         return headerAccessor;
     }
-
 }

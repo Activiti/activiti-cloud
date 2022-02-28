@@ -47,7 +47,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class QueryRestWebMvcAutoConfiguration  {
+public class QueryRestWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
@@ -84,6 +84,7 @@ public class QueryRestWebMvcAutoConfiguration  {
     public IntegrationContextRepresentationModelAssembler integrationContextRepresentationModelAssembler() {
         return new IntegrationContextRepresentationModelAssembler();
     }
+
     @Bean
     @ConditionalOnMissingBean
     public TaskVariableRepresentationModelAssembler taskVariableRepresentationModelAssembler() {
@@ -98,16 +99,22 @@ public class QueryRestWebMvcAutoConfiguration  {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskLookupRestrictionService taskLookupRestrictionService(SecurityManager securityManager) {
+    public TaskLookupRestrictionService taskLookupRestrictionService(
+        SecurityManager securityManager
+    ) {
         return new TaskLookupRestrictionService(securityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDefinitionKeyBasedRestrictionBuilder serviceNameRestrictionBuilder(SecurityPoliciesManager securityPoliciesManager,
-                                                                                     SecurityPoliciesProperties securityPoliciesProperties) {
-        return new ProcessDefinitionKeyBasedRestrictionBuilder(securityPoliciesManager,
-                                                               securityPoliciesProperties);
+    public ProcessDefinitionKeyBasedRestrictionBuilder serviceNameRestrictionBuilder(
+        SecurityPoliciesManager securityPoliciesManager,
+        SecurityPoliciesProperties securityPoliciesProperties
+    ) {
+        return new ProcessDefinitionKeyBasedRestrictionBuilder(
+            securityPoliciesManager,
+            securityPoliciesProperties
+        );
     }
 
     @Bean
@@ -118,24 +125,34 @@ public class QueryRestWebMvcAutoConfiguration  {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessVariableRestrictionService processVariableRestrictionService(SecurityPoliciesManager securityPoliciesManager,
-                                                                               ProcessInstanceVariableFilter processInstanceVariableFilter,
-                                                                               ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
-        return new ProcessVariableRestrictionService(securityPoliciesManager,
-                                                     processInstanceVariableFilter,
-                                                     restrictionBuilder);
+    public ProcessVariableRestrictionService processVariableRestrictionService(
+        SecurityPoliciesManager securityPoliciesManager,
+        ProcessInstanceVariableFilter processInstanceVariableFilter,
+        ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder
+    ) {
+        return new ProcessVariableRestrictionService(
+            securityPoliciesManager,
+            processInstanceVariableFilter,
+            restrictionBuilder
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessVariableLookupRestrictionService variableLookupRestrictionService(ProcessVariableRestrictionService restrictionService) {
+    public ProcessVariableLookupRestrictionService variableLookupRestrictionService(
+        ProcessVariableRestrictionService restrictionService
+    ) {
         return new ProcessVariableLookupRestrictionService(restrictionService);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskVariableLookupRestrictionService taskVariableLookupRestrictionService(TaskLookupRestrictionService taskLookupRestrictionService) {
-        return new TaskVariableLookupRestrictionService(taskLookupRestrictionService);
+    public TaskVariableLookupRestrictionService taskVariableLookupRestrictionService(
+        TaskLookupRestrictionService taskLookupRestrictionService
+    ) {
+        return new TaskVariableLookupRestrictionService(
+            taskLookupRestrictionService
+        );
     }
 
     @Bean
@@ -146,12 +163,16 @@ public class QueryRestWebMvcAutoConfiguration  {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessInstanceRestrictionService processInstanceRestrictionService(SecurityPoliciesManager securityPoliciesManager,
-                                                                               ProcessInstanceFilter processInstanceFilter,
-                                                                               ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
-        return new ProcessInstanceRestrictionService(securityPoliciesManager,
-                                                     processInstanceFilter,
-                                                     restrictionBuilder);
+    public ProcessInstanceRestrictionService processInstanceRestrictionService(
+        SecurityPoliciesManager securityPoliciesManager,
+        ProcessInstanceFilter processInstanceFilter,
+        ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder
+    ) {
+        return new ProcessInstanceRestrictionService(
+            securityPoliciesManager,
+            processInstanceFilter,
+            restrictionBuilder
+        );
     }
 
     @Bean
@@ -162,25 +183,33 @@ public class QueryRestWebMvcAutoConfiguration  {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDefinitionRestrictionService processDefinitionRestrictionService(SecurityPoliciesManager securityPoliciesManager,
-                                                                                   ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder,
-                                                                                   ProcessDefinitionFilter processDefinitionFilter) {
-        return new ProcessDefinitionRestrictionService(securityPoliciesManager,
-                                                       restrictionBuilder,
-                                                       processDefinitionFilter);
+    public ProcessDefinitionRestrictionService processDefinitionRestrictionService(
+        SecurityPoliciesManager securityPoliciesManager,
+        ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder,
+        ProcessDefinitionFilter processDefinitionFilter
+    ) {
+        return new ProcessDefinitionRestrictionService(
+            securityPoliciesManager,
+            restrictionBuilder,
+            processDefinitionFilter
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskControllerHelper taskControllerHelper(TaskRepository taskRepository, 
-                                                     AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler, 
-                                                     TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                                     TaskLookupRestrictionService taskLookupRestrictionService) {
-        return new TaskControllerHelper(taskRepository, 
-                                        pagedCollectionModelAssembler, 
-                                        new QueryDslPredicateAggregator(), 
-                                        taskRepresentationModelAssembler, 
-                                        taskLookupRestrictionService);
+    public TaskControllerHelper taskControllerHelper(
+        TaskRepository taskRepository,
+        AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
+        TaskRepresentationModelAssembler taskRepresentationModelAssembler,
+        TaskLookupRestrictionService taskLookupRestrictionService
+    ) {
+        return new TaskControllerHelper(
+            taskRepository,
+            pagedCollectionModelAssembler,
+            new QueryDslPredicateAggregator(),
+            taskRepresentationModelAssembler,
+            taskLookupRestrictionService
+        );
     }
 
     @Bean

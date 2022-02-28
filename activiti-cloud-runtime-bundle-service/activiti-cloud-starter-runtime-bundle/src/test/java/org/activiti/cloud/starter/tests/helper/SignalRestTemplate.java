@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.starter.tests.helper;
 
+import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -23,9 +26,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @TestComponent
 public class SignalRestTemplate {
@@ -37,13 +37,13 @@ public class SignalRestTemplate {
     }
 
     public void signal(SignalPayload signalProcessInstancesCmd) {
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
-                                                                    HttpMethod.POST,
-                                                                    new HttpEntity<>(signalProcessInstancesCmd),
-                                                                    new ParameterizedTypeReference<Void>() {
-                                                                    });
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_RELATIVE_URL + "/signal",
+            HttpMethod.POST,
+            new HttpEntity<>(signalProcessInstancesCmd),
+            new ParameterizedTypeReference<Void>() {}
+        );
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
-
 }

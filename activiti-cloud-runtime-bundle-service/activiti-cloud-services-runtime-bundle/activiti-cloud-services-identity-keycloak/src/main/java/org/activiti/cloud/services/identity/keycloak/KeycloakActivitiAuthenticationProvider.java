@@ -22,11 +22,12 @@ import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
-public class KeycloakActivitiAuthenticationProvider extends KeycloakAuthenticationProvider {
+public class KeycloakActivitiAuthenticationProvider
+    extends KeycloakAuthenticationProvider {
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-
+    public Authentication authenticate(Authentication authentication)
+        throws AuthenticationException {
         KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) authentication;
 
         String userId = authentication.getName(); //this will be keycloak id
@@ -34,8 +35,19 @@ public class KeycloakActivitiAuthenticationProvider extends KeycloakAuthenticati
         if (token.getPrincipal() instanceof KeycloakPrincipal) {
             KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) token.getPrincipal();
             //option to use username instead of id
-            if (kp.getKeycloakSecurityContext().getToken() != null && kp.getKeycloakSecurityContext().getToken().getPreferredUsername() != null) {
-                userId = kp.getKeycloakSecurityContext().getToken().getPreferredUsername(); //replace with username - could be changed to e.g. email if desired
+            if (
+                kp.getKeycloakSecurityContext().getToken() != null &&
+                kp
+                    .getKeycloakSecurityContext()
+                    .getToken()
+                    .getPreferredUsername() !=
+                null
+            ) {
+                userId =
+                    kp
+                        .getKeycloakSecurityContext()
+                        .getToken()
+                        .getPreferredUsername(); //replace with username - could be changed to e.g. email if desired
             }
         }
 
@@ -44,6 +56,8 @@ public class KeycloakActivitiAuthenticationProvider extends KeycloakAuthenticati
     }
 
     public void setAuthenticatedUserId(String userId) {
-        org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(userId);
+        org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(
+            userId
+        );
     }
 }

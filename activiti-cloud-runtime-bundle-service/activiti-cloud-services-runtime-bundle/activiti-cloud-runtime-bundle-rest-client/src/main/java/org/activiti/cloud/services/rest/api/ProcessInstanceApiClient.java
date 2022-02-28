@@ -18,10 +18,10 @@ package org.activiti.cloud.services.rest.api;
 import org.activiti.cloud.services.rest.api.configuration.ClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 
-@FeignClient(value = "processInstanceApiClient",
+@FeignClient(
+    value = "processInstanceApiClient",
     url = "${runtime.url}",
     path = "${runtime.path}",
-    configuration = {ClientConfiguration.class})
-public interface ProcessInstanceApiClient extends ProcessInstanceController {
-
-}
+    configuration = { ClientConfiguration.class }
+)
+public interface ProcessInstanceApiClient extends ProcessInstanceController {}

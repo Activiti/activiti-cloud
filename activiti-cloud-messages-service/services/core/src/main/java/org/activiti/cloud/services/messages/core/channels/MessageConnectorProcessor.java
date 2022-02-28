@@ -15,6 +15,5 @@
  */
 package org.activiti.cloud.services.messages.core.channels;
 
-public interface MessageConnectorProcessor extends MessageConnectorSource, MessageConnectorSink {
-
-}
+public interface MessageConnectorProcessor
+    extends MessageConnectorSource, MessageConnectorSink {}

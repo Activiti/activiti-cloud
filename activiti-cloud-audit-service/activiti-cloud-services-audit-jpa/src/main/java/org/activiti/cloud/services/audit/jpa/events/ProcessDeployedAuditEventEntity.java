@@ -15,31 +15,34 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessDefinitionJpaJsonConverter;
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 @Entity(name = ProcessDeployedAuditEventEntity.PROCESS_DEPLOYED_EVENT)
-@DiscriminatorValue(value = ProcessDeployedAuditEventEntity.PROCESS_DEPLOYED_EVENT)
+@DiscriminatorValue(
+    value = ProcessDeployedAuditEventEntity.PROCESS_DEPLOYED_EVENT
+)
 @DynamicInsert
 public class ProcessDeployedAuditEventEntity extends AuditEventEntity {
 
-    protected static final String PROCESS_DEPLOYED_EVENT = "ProcessDeployedEvent";
+    protected static final String PROCESS_DEPLOYED_EVENT =
+        "ProcessDeployedEvent";
 
     @Convert(converter = ProcessDefinitionJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private ProcessDefinition processDefinition;
 
-    public ProcessDeployedAuditEventEntity() {
-    }
+    public ProcessDeployedAuditEventEntity() {}
 
-    public ProcessDeployedAuditEventEntity(CloudProcessDeployedEvent cloudEvent) {
+    public ProcessDeployedAuditEventEntity(
+        CloudProcessDeployedEvent cloudEvent
+    ) {
         super(cloudEvent);
         setProcessDefinition(cloudEvent.getEntity());
     }
@@ -55,11 +58,12 @@ public class ProcessDeployedAuditEventEntity extends AuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ProcessDeployedAuditEventEntity [processDefinition=")
-               .append(processDefinition)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("ProcessDeployedAuditEventEntity [processDefinition=")
+            .append(processDefinition)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

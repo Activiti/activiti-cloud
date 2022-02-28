@@ -16,16 +16,18 @@
 
 package org.activiti.cloud.starter.tests.support;
 
+import java.util.concurrent.CountDownLatch;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CountDownLatch;
+public class CountDownLatchActvitiEventListener
+    implements ActivitiEventListener {
 
-public class CountDownLatchActvitiEventListener implements ActivitiEventListener {
-
-    private static final Logger logger = LoggerFactory.getLogger(CountDownLatchActvitiEventListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        CountDownLatchActvitiEventListener.class
+    );
 
     private final CountDownLatch countDownLatch;
 
@@ -44,5 +46,4 @@ public class CountDownLatchActvitiEventListener implements ActivitiEventListener
     public boolean isFailOnException() {
         return false;
     }
-
 }

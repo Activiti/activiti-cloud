@@ -43,12 +43,17 @@ public class DirtyContextHandler {
     }
 
     public String dirty(String uri) {
-        Serenity.setSessionVariable(DIRTY_CONTEXT)
-                .to(Serenity.hasASessionVariableCalled(DIRTY_CONTEXT) ?
-                            String.join(DIRTY_CONTEXT_DELIMITER,
-                                        uri,
-                                        Serenity.sessionVariableCalled(DIRTY_CONTEXT)) :
-                            uri);
+        Serenity
+            .setSessionVariable(DIRTY_CONTEXT)
+            .to(
+                Serenity.hasASessionVariableCalled(DIRTY_CONTEXT)
+                    ? String.join(
+                        DIRTY_CONTEXT_DELIMITER,
+                        uri,
+                        Serenity.sessionVariableCalled(DIRTY_CONTEXT)
+                    )
+                    : uri
+            );
         return uri;
     }
 
@@ -70,10 +75,10 @@ public class DirtyContextHandler {
     }
 
     public void deleteByUri(String uri) {
-        FeignRestDataClient.builder(new GsonEncoder(), new feign.codec.Decoder.Default())
-                .target(DeleteByUriClient.class,
-                        uri)
-                .delete();
+        FeignRestDataClient
+            .builder(new GsonEncoder(), new feign.codec.Decoder.Default())
+            .target(DeleteByUriClient.class, uri)
+            .delete();
     }
 
     private interface DeleteByUriClient {

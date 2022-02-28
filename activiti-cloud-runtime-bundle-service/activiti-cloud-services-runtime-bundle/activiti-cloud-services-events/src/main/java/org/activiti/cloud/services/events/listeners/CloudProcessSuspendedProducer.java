@@ -19,13 +19,16 @@ import org.activiti.api.process.runtime.events.ProcessSuspendedEvent;
 import org.activiti.api.process.runtime.events.listener.ProcessEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 
-public class CloudProcessSuspendedProducer implements ProcessEventListener<ProcessSuspendedEvent> {
+public class CloudProcessSuspendedProducer
+    implements ProcessEventListener<ProcessSuspendedEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudProcessSuspendedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                         ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudProcessSuspendedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }
@@ -34,5 +37,4 @@ public class CloudProcessSuspendedProducer implements ProcessEventListener<Proce
     public void onEvent(ProcessSuspendedEvent event) {
         eventsAggregator.add(eventConverter.from(event));
     }
-
 }

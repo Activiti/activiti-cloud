@@ -28,6 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -94,40 +95,62 @@ public class ProjectServiceImplTest {
     public void should_getUsersAndGroupsBelongingToAProject_when_getProcessAccessControl() {
         List<UserTask> userTasks = asList(taskOne, taskTwo);
 
-        when(taskOne.getCandidateGroups()).thenReturn(asList("groupOne", "groupTwo"));
-        when(taskOne.getCandidateUsers()).thenReturn(asList("userOne", "userTwo"));
+        when(taskOne.getCandidateGroups())
+            .thenReturn(asList("groupOne", "groupTwo"));
+        when(taskOne.getCandidateUsers())
+            .thenReturn(asList("userOne", "userTwo"));
         when(taskTwo.getAssignee()).thenReturn("userThree");
-        when(modelService.getTasksBy(eq(project), any(ProcessModelType.class), eq(UserTask.class)))
-                .thenReturn(userTasks);
+        when(
+            modelService.getTasksBy(
+                eq(project),
+                any(ProcessModelType.class),
+                eq(UserTask.class)
+            )
+        )
+            .thenReturn(userTasks);
 
-        ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(project);
+        ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(
+            project
+        );
 
         assertThat(projectAccessControl.getGroups())
-                .hasSize(2)
-                .contains("groupOne", "groupTwo");
+            .hasSize(2)
+            .contains("groupOne", "groupTwo");
         assertThat(projectAccessControl.getUsers())
-                .hasSize(3)
-                .contains("userOne", "userTwo", "userThree");
+            .hasSize(3)
+            .contains("userOne", "userTwo", "userThree");
     }
 
     @Test
     public void should_getUsersAndGroupsBelongingToAProjectExludingExpressions_when_getProcessAccessControl() {
         List<UserTask> userTasks = asList(taskOne, taskTwo);
 
-        when(taskOne.getCandidateGroups()).thenReturn(asList("groupOne", "${processsVariable.groupName}", "groupTwo"));
-        when(taskOne.getCandidateUsers()).thenReturn(asList("${username_Var}", "userOne"));
+        when(taskOne.getCandidateGroups())
+            .thenReturn(
+                asList("groupOne", "${processsVariable.groupName}", "groupTwo")
+            );
+        when(taskOne.getCandidateUsers())
+            .thenReturn(asList("${username_Var}", "userOne"));
         when(taskTwo.getAssignee()).thenReturn("${processsVariable.username}");
-        when(modelService.getTasksBy(eq(project), any(ProcessModelType.class), eq(UserTask.class)))
-                .thenReturn(userTasks);
+        when(
+            modelService.getTasksBy(
+                eq(project),
+                any(ProcessModelType.class),
+                eq(UserTask.class)
+            )
+        )
+            .thenReturn(userTasks);
 
-        ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(project);
+        ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(
+            project
+        );
 
         assertThat(projectAccessControl.getGroups())
-                .hasSize(2)
-                .contains("groupOne", "groupTwo");
+            .hasSize(2)
+            .contains("groupOne", "groupTwo");
         assertThat(projectAccessControl.getUsers())
-                .hasSize(1)
-                .contains("userOne");
+            .hasSize(1)
+            .contains("userOne");
     }
 
     @Test
@@ -137,10 +160,18 @@ public class ProjectServiceImplTest {
         when(taskOne.getCandidateGroups()).thenReturn(null);
         when(taskOne.getCandidateUsers()).thenReturn(null);
         when(taskTwo.getAssignee()).thenReturn(null);
-        when(modelService.getTasksBy(eq(project), any(ProcessModelType.class), eq(UserTask.class)))
-                .thenReturn(userTasks);
+        when(
+            modelService.getTasksBy(
+                eq(project),
+                any(ProcessModelType.class),
+                eq(UserTask.class)
+            )
+        )
+            .thenReturn(userTasks);
 
-        ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(project);
+        ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(
+            project
+        );
 
         assertThat(projectAccessControl.getGroups()).isEmpty();
         assertThat(projectAccessControl.getUsers()).isEmpty();
@@ -149,10 +180,18 @@ public class ProjectServiceImplTest {
     @Test
     public void should_returnEmptyLists_when_thereAreNotUserTasks() {
         List<UserTask> userTasks = new LinkedList<>();
-        when(modelService.getTasksBy(eq(project), any(ProcessModelType.class), eq(UserTask.class)))
-                .thenReturn(userTasks);
+        when(
+            modelService.getTasksBy(
+                eq(project),
+                any(ProcessModelType.class),
+                eq(UserTask.class)
+            )
+        )
+            .thenReturn(userTasks);
 
-        ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(project);
+        ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(
+            project
+        );
 
         assertThat(projectAccessControl.getGroups()).isEmpty();
         assertThat(projectAccessControl.getUsers()).isEmpty();
@@ -166,7 +205,8 @@ public class ProjectServiceImplTest {
         Model projectModel = new ModelImpl();
         projectModel.setScope(ModelScope.PROJECT);
         projectModel.setId("project");
-        when(modelService.getAllModels(project)).thenReturn(List.of(globalModel, projectModel));
+        when(modelService.getAllModels(project))
+            .thenReturn(List.of(globalModel, projectModel));
         doNothing().when(modelService).deleteModel(any());
         doNothing().when(projectRepository).deleteProject(any());
 
@@ -177,33 +217,45 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    public void should_returnProject_importingValidProject() throws IOException {
+    public void should_returnProject_importingValidProject()
+        throws IOException {
         Project project = new ProjectImpl("name", "id");
         Optional<InputStream> file = resourceAsStream("project/project-xy.zip");
 
-        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
-        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
+        when(jsonConverter.tryConvertToEntity(any(byte[].class)))
+            .thenReturn(Optional.of(project));
+        when(modelTypeService.findModelTypeByFolderName("processes"))
+            .thenReturn(Optional.of(new ProcessModelType()));
         projectValidators.add(new ProjectNameValidator());
         when(projectRepository.createProject(any())).thenReturn(project);
 
         projectService.importProject(file.get(), "new-project-name");
 
         verify(jsonConverter, times(1)).tryConvertToEntity(any(byte[].class));
-        verify(modelTypeService, times(4)).findModelTypeByFolderName("processes");
+        verify(modelTypeService, times(4))
+            .findModelTypeByFolderName("processes");
         verify(projectRepository, times(1)).createProject(any());
     }
 
     @Test
-    public void should_throwImportProjectException_importingInvalidProject() throws IOException {
+    public void should_throwImportProjectException_importingInvalidProject()
+        throws IOException {
         Project project = new ProjectImpl("name", "id");
-        Optional<InputStream> file = resourceAsStream("project/project-xy-invalid.zip");
+        Optional<InputStream> file = resourceAsStream(
+            "project/project-xy-invalid.zip"
+        );
 
-        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
-        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
+        when(jsonConverter.tryConvertToEntity(any(byte[].class)))
+            .thenReturn(Optional.of(project));
+        when(modelTypeService.findModelTypeByFolderName("processes"))
+            .thenReturn(Optional.of(new ProcessModelType()));
 
-        Exception exception = assertThrows(ImportProjectException.class, () -> {
-            projectService.importProject(file.get(), "new-project-name");
-        });
+        Exception exception = assertThrows(
+            ImportProjectException.class,
+            () -> {
+                projectService.importProject(file.get(), "new-project-name");
+            }
+        );
         String expectedMessage = "No valid project entry found to import";
         String actualMessage = exception.getMessage();
 
@@ -215,27 +267,42 @@ public class ProjectServiceImplTest {
         String copiedProjectName = "copied-project";
         Project projectToCopy = new ProjectImpl("id", "copied-project");
 
-        when(projectRepository.copyProject(projectToCopy, copiedProjectName)).thenReturn(projectToCopy);
+        when(projectRepository.copyProject(projectToCopy, copiedProjectName))
+            .thenReturn(projectToCopy);
         when(modelService.getAllModels(any())).thenReturn(asList(modelOne));
 
-        Project copiedProject = projectService.copyProject(projectToCopy, copiedProjectName);
+        Project copiedProject = projectService.copyProject(
+            projectToCopy,
+            copiedProjectName
+        );
 
         assertThat(copiedProject.getName()).isEqualTo(copiedProjectName);
-        verify(projectRepository, times(1)).copyProject(projectToCopy, copiedProjectName);
+        verify(projectRepository, times(1))
+            .copyProject(projectToCopy, copiedProjectName);
         verify(modelService, times(1)).copyModel(modelOne, projectToCopy);
         verify(modelService, times(1)).cleanModelIdList();
     }
 
     @Test
     public void should_throwImportProjectException_replacingProjectContentWithInvalidProject() {
-        Optional<InputStream> file = resourceAsStream("project/project-xy-invalid.zip");
+        Optional<InputStream> file = resourceAsStream(
+            "project/project-xy-invalid.zip"
+        );
 
-        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
-        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
+        when(jsonConverter.tryConvertToEntity(any(byte[].class)))
+            .thenReturn(Optional.of(project));
+        when(modelTypeService.findModelTypeByFolderName("processes"))
+            .thenReturn(Optional.of(new ProcessModelType()));
 
-        Exception exception = assertThrows(ImportProjectException.class, () -> {
-            projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
-        });
+        Exception exception = assertThrows(
+            ImportProjectException.class,
+            () -> {
+                projectService.replaceProjectContentWithProvidedModelsInFile(
+                    project,
+                    file.get()
+                );
+            }
+        );
         String expectedMessage = "No valid project entry found to import";
         String actualMessage = exception.getMessage();
 
@@ -243,7 +310,8 @@ public class ProjectServiceImplTest {
     }
 
     @Test
-    public void should_deleteProjectScopedModelsOnly_when_replacingProjectContent() throws IOException {
+    public void should_deleteProjectScopedModelsOnly_when_replacingProjectContent()
+        throws IOException {
         Model globalModel = new ModelImpl();
         globalModel.setScope(ModelScope.GLOBAL);
         globalModel.setId("global-model");
@@ -251,44 +319,73 @@ public class ProjectServiceImplTest {
         Model projectModel = new ModelImpl();
         projectModel.setScope(ModelScope.PROJECT);
         projectModel.setId("project-model");
-        when(modelService.getAllModels(project)).thenReturn(List.of(globalModel, projectModel));
+        when(modelService.getAllModels(project))
+            .thenReturn(List.of(globalModel, projectModel));
         doNothing().when(modelService).deleteModel(any());
 
         Optional<InputStream> file = resourceAsStream("project/project-xy.zip");
-        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
-        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
+        when(jsonConverter.tryConvertToEntity(any(byte[].class)))
+            .thenReturn(Optional.of(project));
+        when(modelTypeService.findModelTypeByFolderName("processes"))
+            .thenReturn(Optional.of(new ProcessModelType()));
         projectValidators.add(new ProjectNameValidator());
         when(projectRepository.createProject(any())).thenReturn(project);
 
-        projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
+        projectService.replaceProjectContentWithProvidedModelsInFile(
+            project,
+            file.get()
+        );
 
         verify(modelService).deleteModel(projectModel);
         verify(modelService, never()).deleteModel(globalModel);
     }
 
     @Test
-    public void should_importModelsInZipFile_when_replacingProjectContent() throws IOException {
+    public void should_importModelsInZipFile_when_replacingProjectContent()
+        throws IOException {
         Optional<InputStream> file = resourceAsStream("project/project-xy.zip");
 
-        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
+        when(jsonConverter.tryConvertToEntity(any(byte[].class)))
+            .thenReturn(Optional.of(project));
         ProcessModelType processModelType = new ProcessModelType();
-        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(processModelType));
+        when(modelTypeService.findModelTypeByFolderName("processes"))
+            .thenReturn(Optional.of(processModelType));
         projectValidators.add(new ProjectNameValidator());
         when(projectRepository.createProject(any())).thenReturn(project);
-        when(modelService.contentFilenameToModelName("process-x.bpmn20.xml", processModelType)).thenReturn(Optional.of("process-x"));
-        when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType)).thenReturn(Optional.of("process-y"));
-        when(modelService.importModel(eq(project),eq(processModelType),any())).thenReturn(new ModelImpl());
+        when(
+            modelService.contentFilenameToModelName(
+                "process-x.bpmn20.xml",
+                processModelType
+            )
+        )
+            .thenReturn(Optional.of("process-x"));
+        when(
+            modelService.contentFilenameToModelName(
+                "process-y.bpmn20.xml",
+                processModelType
+            )
+        )
+            .thenReturn(Optional.of("process-y"));
+        when(modelService.importModel(eq(project), eq(processModelType), any()))
+            .thenReturn(new ModelImpl());
 
-        projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
+        projectService.replaceProjectContentWithProvidedModelsInFile(
+            project,
+            file.get()
+        );
 
-        verify(modelService, times(2)).importModel(eq(project), eq(processModelType), any());
+        verify(modelService, times(2))
+            .importModel(eq(project), eq(processModelType), any());
     }
 
     @Test
     void should_findProjectRepresentationById() {
         ProjectImpl givenProject = new ProjectImpl("projectId", "name");
-        when(projectRepository.findProjectById("projectId")).thenReturn(Optional.of(givenProject));
-        Optional<Project> foundProjectOptional = projectService.findProjectRepresentationById("projectId");
+        when(projectRepository.findProjectById("projectId"))
+            .thenReturn(Optional.of(givenProject));
+        Optional<Project> foundProjectOptional = projectService.findProjectRepresentationById(
+            "projectId"
+        );
         assertThat(foundProjectOptional.get()).isEqualTo(givenProject);
     }
 }

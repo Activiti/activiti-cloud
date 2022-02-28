@@ -25,7 +25,9 @@ import org.activiti.cloud.services.audit.jpa.events.TimerFailedAuditEventEntity;
 
 public class TimerFailedEventConverter extends BaseEventToEntityConverter {
 
-    public TimerFailedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TimerFailedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -35,18 +37,26 @@ public class TimerFailedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected TimerFailedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new TimerFailedAuditEventEntity((CloudBPMNTimerFailedEvent) cloudRuntimeEvent);
+    protected TimerFailedAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new TimerFailedAuditEventEntity(
+            (CloudBPMNTimerFailedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         TimerFailedAuditEventEntity timerEventEntity = (TimerFailedAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNTimerFailedEventImpl(timerEventEntity.getEventId(),
-                                                 timerEventEntity.getTimestamp(),
-                                                 timerEventEntity.getTimer(),
-                                                 timerEventEntity.getProcessDefinitionId(),
-                                                 timerEventEntity.getProcessInstanceId());
+        return new CloudBPMNTimerFailedEventImpl(
+            timerEventEntity.getEventId(),
+            timerEventEntity.getTimestamp(),
+            timerEventEntity.getTimer(),
+            timerEventEntity.getProcessDefinitionId(),
+            timerEventEntity.getProcessInstanceId()
+        );
     }
 }

@@ -17,7 +17,5 @@ package org.activiti.cloud.api.task.model.events;
 
 import org.activiti.api.task.runtime.events.TaskCompletedEvent;
 
-public interface CloudTaskCompletedEvent extends CloudTaskRuntimeEvent,
-                                                 TaskCompletedEvent {
-
-}
+public interface CloudTaskCompletedEvent
+    extends CloudTaskRuntimeEvent, TaskCompletedEvent {}

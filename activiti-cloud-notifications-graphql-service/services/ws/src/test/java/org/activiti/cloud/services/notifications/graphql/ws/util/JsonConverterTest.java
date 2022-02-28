@@ -17,22 +17,21 @@ package org.activiti.cloud.services.notifications.graphql.ws.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import org.activiti.cloud.services.notifications.graphql.ws.util.JsonConverter;
 import org.junit.jupiter.api.Test;
-
 
 public class JsonConverterTest {
 
     @Test
-    public void testToMapEmptyString() throws JsonParseException, JsonMappingException, IOException {
+    public void testToMapEmptyString()
+        throws JsonParseException, JsonMappingException, IOException {
         // given
         String jsonStr = "";
 
@@ -41,11 +40,11 @@ public class JsonConverterTest {
 
         // then
         assertThat(result).isEqualTo(Collections.emptyMap());
-
     }
 
     @Test
-    public void testToMapNullValue() throws JsonParseException, JsonMappingException, IOException {
+    public void testToMapNullValue()
+        throws JsonParseException, JsonMappingException, IOException {
         // given
         String jsonStr = "{\"key\":null}";
 
@@ -70,5 +69,4 @@ public class JsonConverterTest {
         // then
         assertThat(result).isEqualTo("{\"key\":null}");
     }
-
 }

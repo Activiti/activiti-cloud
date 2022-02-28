@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.core.pageable.sort;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.activiti.engine.impl.TaskQueryProperty;
 import org.activiti.engine.query.QueryProperty;
 import org.activiti.engine.task.TaskQuery;
 import org.springframework.data.domain.Sort;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class TaskSortApplier extends BaseSortApplier<TaskQuery> {
 
@@ -42,5 +41,4 @@ public class TaskSortApplier extends BaseSortApplier<TaskQuery> {
     protected QueryProperty getOrderByProperty(Sort.Order order) {
         return orderByProperties.get(order.getProperty());
     }
-
 }

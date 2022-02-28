@@ -57,11 +57,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceController.class)
-@Import({
+@Import(
+    {
         QueryRestWebMvcAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -98,68 +100,121 @@ public class ProcessInstanceEntityControllerIT {
     private TaskRepository taskRepository;
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
-        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(),
-                                                                              eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
-        given(processInstanceRepository.findAll(eq(restrictedPredicate),
-                                                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                                                                                                             PageRequest.of(1,
-                                                                                                                            10),
-                                                                                                             11));
-
+        given(
+            processInstanceRestrictionService.restrictProcessInstanceQuery(
+                any(),
+                eq(SecurityPolicyAccess.READ)
+            )
+        )
+            .willReturn(restrictedPredicate);
+        given(
+            processInstanceRepository.findAll(
+                eq(restrictedPredicate),
+                any(Pageable.class)
+            )
+        )
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultProcessInstance()),
+                    PageRequest.of(1, 10),
+                    11
+                )
+            );
 
         //when
-        mockMvc.perform(get("/v1/process-instances?skipCount=10&maxItems=10")
-                                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/v1/process-instances?skipCount=10&maxItems=10")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
+    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson()
+        throws Exception {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
-        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(),
-                                                                              eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
-        given(processInstanceRepository.findAll(eq(restrictedPredicate),
-                                                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                                                                                                             PageRequest.of(1,
-                                                                                                                            10),
-                                                                                                             11));
-
+        given(
+            processInstanceRestrictionService.restrictProcessInstanceQuery(
+                any(),
+                eq(SecurityPolicyAccess.READ)
+            )
+        )
+            .willReturn(restrictedPredicate);
+        given(
+            processInstanceRepository.findAll(
+                eq(restrictedPredicate),
+                any(Pageable.class)
+            )
+        )
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultProcessInstance()),
+                    PageRequest.of(1, 10),
+                    11
+                )
+            );
 
         //when
-        mockMvc.perform(get("/v1/process-instances?page=1&size=10")
-                                .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/v1/process-instances?page=1&size=10")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
-
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,
-                                         UUID.randomUUID().toString(),
-                                         UUID.randomUUID().toString(),
-                                         ProcessInstance.ProcessInstanceStatus.RUNNING,
-                                         new Date());
+        return new ProcessInstanceEntity(
+            "My-app",
+            "My-app",
+            "1",
+            null,
+            null,
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(),
+            ProcessInstance.ProcessInstanceStatus.RUNNING,
+            new Date()
+        );
     }
 
     @Test
-    public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
         ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
-        given(entityFinder.findById(eq(processInstanceRepository), eq(processInstanceEntity.getId()), any())).willReturn(processInstanceEntity);
-        given(securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(), processInstanceEntity.getServiceName()))
-                .willReturn(true);
+        given(
+            entityFinder.findById(
+                eq(processInstanceRepository),
+                eq(processInstanceEntity.getId()),
+                any()
+            )
+        )
+            .willReturn(processInstanceEntity);
+        given(
+            securityPoliciesApplicationService.canRead(
+                processInstanceEntity.getProcessDefinitionKey(),
+                processInstanceEntity.getServiceName()
+            )
+        )
+            .willReturn(true);
 
         //when
-        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}",
-                                 processInstanceEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
-
+        this.mockMvc.perform(
+                get(
+                    "/v1/process-instances/{processInstanceId}",
+                    processInstanceEntity.getId()
+                )
+                    .accept(MediaType.APPLICATION_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
-
 }

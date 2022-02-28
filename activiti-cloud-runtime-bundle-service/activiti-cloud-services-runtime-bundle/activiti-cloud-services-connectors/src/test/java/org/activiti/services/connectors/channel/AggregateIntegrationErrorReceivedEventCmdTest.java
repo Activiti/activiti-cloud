@@ -52,28 +52,41 @@ public class AggregateIntegrationErrorReceivedEventCmdTest {
     public void should_aggregateIntegrationErrorReceivedEvent_when_auditEventAreEnabled() {
         //given
         final IntegrationError integrationError = mock(IntegrationError.class);
-        final IntegrationContext integrationContext = mock(IntegrationContext.class);
-        when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
+        final IntegrationContext integrationContext = mock(
+            IntegrationContext.class
+        );
+        when(integrationError.getIntegrationContext())
+            .thenReturn(integrationContext);
         when(integrationError.getErrorCode()).thenReturn("myErrorCode");
         when(integrationError.getErrorMessage()).thenReturn("my error message");
         when(integrationError.getErrorClassName()).thenReturn("className");
-        final List<StackTraceElement> stackTraceElements = Collections.singletonList(mock(StackTraceElement.class));
-        when(integrationError.getStackTraceElements()).thenReturn(
-            stackTraceElements);
+        final List<StackTraceElement> stackTraceElements = Collections.singletonList(
+            mock(StackTraceElement.class)
+        );
+        when(integrationError.getStackTraceElements())
+            .thenReturn(stackTraceElements);
         final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
-            integrationError, runtimeBundleProperties, processEngineEventsAggregator);
+            integrationError,
+            runtimeBundleProperties,
+            processEngineEventsAggregator
+        );
 
         //when
         command.execute(mock(CommandContext.class));
 
         //then
-        verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
+        verify(processEngineEventsAggregator)
+            .add(cloudRuntimeEventArgumentCaptor.capture());
         final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
-        assertThat(event).isInstanceOf(CloudIntegrationErrorReceivedEvent.class);
+        assertThat(event)
+            .isInstanceOf(CloudIntegrationErrorReceivedEvent.class);
         CloudIntegrationErrorReceivedEvent errorReceivedEvent = (CloudIntegrationErrorReceivedEvent) event;
         assertThat(errorReceivedEvent.getErrorCode()).isEqualTo("myErrorCode");
-        assertThat(errorReceivedEvent.getErrorMessage()).isEqualTo("my error message");
-        assertThat(errorReceivedEvent.getErrorClassName()).isEqualTo("className");
-        assertThat(errorReceivedEvent.getStackTraceElements()).isEqualTo(stackTraceElements);
+        assertThat(errorReceivedEvent.getErrorMessage())
+            .isEqualTo("my error message");
+        assertThat(errorReceivedEvent.getErrorClassName())
+            .isEqualTo("className");
+        assertThat(errorReceivedEvent.getStackTraceElements())
+            .isEqualTo(stackTraceElements);
     }
 }

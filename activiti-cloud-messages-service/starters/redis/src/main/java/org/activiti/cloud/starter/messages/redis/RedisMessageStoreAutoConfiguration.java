@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.starter.messages.redis;
 
-
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -37,7 +36,7 @@ import org.springframework.integration.support.locks.LockRegistry;
 
 @Configuration
 @ConditionalOnClass(RedisMessageStore.class)
-@AutoConfigureBefore({MessagesCoreAutoConfiguration.class})
+@AutoConfigureBefore({ MessagesCoreAutoConfiguration.class })
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 public class RedisMessageStoreAutoConfiguration {
 
@@ -45,25 +44,28 @@ public class RedisMessageStoreAutoConfiguration {
     public void configure(RedisTemplate<Object, Object> redisTemplate) {
         redisTemplate.setEnableTransactionSupport(true);
     }
-    
+
     @Bean
     public MessageGroupStore messageStore(RedisTemplate<?, ?> redisTemplate) {
-        RedisMessageStore messageStore = new RedisMessageStore(redisTemplate.getConnectionFactory());
+        RedisMessageStore messageStore = new RedisMessageStore(
+            redisTemplate.getConnectionFactory()
+        );
         messageStore.setLazyLoadMessageGroups(false);
-        
+
         return messageStore;
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
-    public ConcurrentMetadataStore metadataStore(RedisConnectionFactory connectionFactory) {
+    public ConcurrentMetadataStore metadataStore(
+        RedisConnectionFactory connectionFactory
+    ) {
         return new RedisMetadataStore(connectionFactory);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public LockRegistry lockRegistry(RedisConnectionFactory connectionFactory) {
         return new RedisLockRegistry(connectionFactory, "RedisLockRegistry");
     }
-    
 }

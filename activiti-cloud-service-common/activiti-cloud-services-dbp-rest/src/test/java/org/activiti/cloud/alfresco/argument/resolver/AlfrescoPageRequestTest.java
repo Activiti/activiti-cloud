@@ -29,8 +29,11 @@ class AlfrescoPageRequestTest {
     @Test
     void getPageNumberShouldBeTheDivisionOfSkipCountOverPageSizeWhenNoRemainder() {
         //when
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(30, 10, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            30,
+            10,
+            null
+        );
 
         //then
         assertThat(alfrescoPageRequest).hasPageNumber(3);
@@ -39,8 +42,11 @@ class AlfrescoPageRequestTest {
     @Test
     void getPageNumberShouldBeTheDivisionOfSkipCountOverPageSizePlusOneWhenThereIsARemainder() {
         //when
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(31, 10, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            31,
+            10,
+            null
+        );
 
         //then
         assertThat(alfrescoPageRequest).hasPageNumber(4);
@@ -64,8 +70,11 @@ class AlfrescoPageRequestTest {
     @Test
     void previousShouldReturnItselfWhenSkipCountIsZero() {
         //given
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(0, 10, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            0,
+            10,
+            null
+        );
 
         //when
         AlfrescoPageRequest previous = alfrescoPageRequest.previous();
@@ -77,8 +86,11 @@ class AlfrescoPageRequestTest {
     @Test
     void previousShouldReturnSmallerPageWhenThereAreNotEnoughElementsInTheSkipCount() {
         //given
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(3, 10, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            3,
+            10,
+            null
+        );
 
         //when
         AlfrescoPageRequest previous = alfrescoPageRequest.previous();
@@ -92,8 +104,11 @@ class AlfrescoPageRequestTest {
     @Test
     void nextShouldIncrementSkipCountByPageSize() {
         //given
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(4, 10, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            4,
+            10,
+            null
+        );
 
         //when
         AlfrescoPageRequest next = alfrescoPageRequest.next();
@@ -105,8 +120,11 @@ class AlfrescoPageRequestTest {
     @Test
     void firstShouldReturnPageWithZeroSkipCountAndSameSizeWhenSkipCountIsDivisible() {
         //given
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(400, 100, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            400,
+            100,
+            null
+        );
 
         //when
         AlfrescoPageRequest first = alfrescoPageRequest.first();
@@ -118,8 +136,11 @@ class AlfrescoPageRequestTest {
     @Test
     void firstShouldReturnPageWithZeroSkipCountAndSmallerSizeWhenSkipCountIsNotDivisible() {
         //given
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(450, 100, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            450,
+            100,
+            null
+        );
 
         //when
         AlfrescoPageRequest first = alfrescoPageRequest.first();
@@ -131,8 +152,11 @@ class AlfrescoPageRequestTest {
     @Test
     void hasPreviousShouldReturnTrueWhenSkipCountIsGreaterThanZero() {
         //given
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(1, 10, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            1,
+            10,
+            null
+        );
 
         //then
         assertThat(alfrescoPageRequest).hasPrevious();
@@ -141,8 +165,11 @@ class AlfrescoPageRequestTest {
     @Test
     void hasPreviousShouldReturnFalseWhenSkipCountIsZero() {
         //given
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(0, 10, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            0,
+            10,
+            null
+        );
 
         //then
         assertThat(alfrescoPageRequest).doesNotHavePrevious();
@@ -153,8 +180,11 @@ class AlfrescoPageRequestTest {
         //given
         Sort sort = mock(Sort.class);
         PageRequest basePage = PageRequest.of(0, 10, sort);
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(0, 10, basePage);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            0,
+            10,
+            basePage
+        );
 
         //then
         assertThat(alfrescoPageRequest).hasSort(sort);
@@ -163,8 +193,11 @@ class AlfrescoPageRequestTest {
     @Test
     void withPage_ReturnsAPageWithMaxItemTimesPageNumber() {
         //given
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(4, 10, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            4,
+            10,
+            null
+        );
 
         //then
         Pageable actual = alfrescoPageRequest.withPage(4);
@@ -175,14 +208,16 @@ class AlfrescoPageRequestTest {
     @Test
     void withPage_WithNegativePageNumberThrowsException() {
         //given
-        AlfrescoPageRequest alfrescoPageRequest =
-            new AlfrescoPageRequest(4, 10, null);
+        AlfrescoPageRequest alfrescoPageRequest = new AlfrescoPageRequest(
+            4,
+            10,
+            null
+        );
 
         //then
-        assertThrows(IllegalArgumentException.class,
-            () -> alfrescoPageRequest.withPage(-4));
-
-
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> alfrescoPageRequest.withPage(-4)
+        );
     }
-
 }

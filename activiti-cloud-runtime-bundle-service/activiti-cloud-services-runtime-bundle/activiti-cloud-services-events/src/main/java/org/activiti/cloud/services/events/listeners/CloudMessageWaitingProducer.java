@@ -19,13 +19,16 @@ import org.activiti.api.process.model.events.BPMNMessageWaitingEvent;
 import org.activiti.api.process.runtime.events.listener.BPMNElementEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 
-public class CloudMessageWaitingProducer implements BPMNElementEventListener<BPMNMessageWaitingEvent> {
+public class CloudMessageWaitingProducer
+    implements BPMNElementEventListener<BPMNMessageWaitingEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudMessageWaitingProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                       ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudMessageWaitingProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

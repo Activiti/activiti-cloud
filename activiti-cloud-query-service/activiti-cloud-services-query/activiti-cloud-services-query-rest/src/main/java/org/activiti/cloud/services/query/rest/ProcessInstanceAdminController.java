@@ -15,8 +15,9 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import java.util.Optional;
-
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -26,25 +27,20 @@ import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresent
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
-
 @RestController
 @RequestMapping(
-        value = "/admin/v1/process-instances",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/admin/v1/process-instances",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ProcessInstanceAdminController {
 
     private final ProcessInstanceRepository processInstanceRepository;
@@ -56,38 +52,47 @@ public class ProcessInstanceAdminController {
     private EntityFinder entityFinder;
 
     @Autowired
-    public ProcessInstanceAdminController(ProcessInstanceRepository processInstanceRepository,
-                                          ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
-                                          AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
-                                          EntityFinder entityFinder) {
+    public ProcessInstanceAdminController(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
+        EntityFinder entityFinder
+    ) {
         this.processInstanceRepository = processInstanceRepository;
-        this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
+        this.processInstanceRepresentationModelAssembler =
+            processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
-        this.entityFinder=entityFinder;
+        this.entityFinder = entityFinder;
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                  Pageable pageable) {
+    public PagedModel<EntityModel<CloudProcessInstance>> findAll(
+        @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        predicate =
+            Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
 
-        predicate = Optional.ofNullable(predicate)
-                            .orElseGet(BooleanBuilder::new);
-
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  processInstanceRepository.findAll(predicate,
-                                                                                    pageable),
-                                                  processInstanceRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            processInstanceRepository.findAll(predicate, pageable),
+            processInstanceRepresentationModelAssembler
+        );
     }
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
-
-        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
-                                                                            processInstanceId,
-                                                                            "Unable to find task for the given id:'" + processInstanceId + "'");
-        return processInstanceRepresentationModelAssembler.toModel(processInstanceEntity);
+    public EntityModel<CloudProcessInstance> findById(
+        @PathVariable String processInstanceId
+    ) {
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
+            processInstanceRepository,
+            processInstanceId,
+            "Unable to find task for the given id:'" + processInstanceId + "'"
+        );
+        return processInstanceRepresentationModelAssembler.toModel(
+            processInstanceEntity
+        );
     }
-
-
-
 }

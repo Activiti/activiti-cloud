@@ -16,7 +16,6 @@
 package org.activiti.cloud.modeling.core.error;
 
 import java.util.List;
-
 import org.activiti.cloud.modeling.api.ModelValidationError;
 
 /**
@@ -26,24 +25,34 @@ public class SemanticModelValidationException extends ModelingException {
 
     private final List<ModelValidationError> validationErrors;
 
-    public SemanticModelValidationException(List<ModelValidationError> validationErrors) {
+    public SemanticModelValidationException(
+        List<ModelValidationError> validationErrors
+    ) {
         super();
         this.validationErrors = validationErrors;
     }
 
-    public SemanticModelValidationException(String message, List<ModelValidationError> validationErrors) {
+    public SemanticModelValidationException(
+        String message,
+        List<ModelValidationError> validationErrors
+    ) {
         super(message);
         this.validationErrors = validationErrors;
     }
 
-    public SemanticModelValidationException(List<ModelValidationError> validationErrors,
-                                            Throwable cause) {
-        super( cause);
+    public SemanticModelValidationException(
+        List<ModelValidationError> validationErrors,
+        Throwable cause
+    ) {
+        super(cause);
         this.validationErrors = validationErrors;
     }
 
-    public SemanticModelValidationException(String message, List<ModelValidationError> validationErrors,
-                                            Throwable cause) {
+    public SemanticModelValidationException(
+        String message,
+        List<ModelValidationError> validationErrors,
+        Throwable cause
+    ) {
         super(message, cause);
         this.validationErrors = validationErrors;
     }

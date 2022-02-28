@@ -17,7 +17,8 @@ package org.activiti.cloud.services.audit.jpa.converters.json;
 
 import org.activiti.api.process.model.MessageSubscription;
 
-public class MessageSubscriptionJpaJsonConverter extends JpaJsonConverter<MessageSubscription> {
+public class MessageSubscriptionJpaJsonConverter
+    extends JpaJsonConverter<MessageSubscription> {
 
     public MessageSubscriptionJpaJsonConverter() {
         super(MessageSubscription.class);

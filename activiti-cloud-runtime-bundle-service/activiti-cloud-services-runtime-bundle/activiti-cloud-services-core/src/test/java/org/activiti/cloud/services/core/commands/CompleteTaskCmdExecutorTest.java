@@ -21,7 +21,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,10 +44,13 @@ public class CompleteTaskCmdExecutorTest {
     @Test
     public void completeTaskCmdExecutorTest() {
         Map<String, Object> variables = new HashMap<>();
-        CompleteTaskPayload completeTaskPayload = new CompleteTaskPayload("taskId",
-                                                                          variables);
+        CompleteTaskPayload completeTaskPayload = new CompleteTaskPayload(
+            "taskId",
+            variables
+        );
 
-        assertThat(completeTaskCmdExecutor.getHandledType()).isEqualTo(CompleteTaskPayload.class.getName());
+        assertThat(completeTaskCmdExecutor.getHandledType())
+            .isEqualTo(CompleteTaskPayload.class.getName());
 
         completeTaskCmdExecutor.execute(completeTaskPayload);
 

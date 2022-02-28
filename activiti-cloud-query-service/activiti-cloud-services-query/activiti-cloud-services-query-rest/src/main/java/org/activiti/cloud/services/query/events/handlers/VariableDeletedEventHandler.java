@@ -23,14 +23,18 @@ import org.slf4j.LoggerFactory;
 
 public class VariableDeletedEventHandler implements QueryEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VariableDeletedEventHandler.class);
-    
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        VariableDeletedEventHandler.class
+    );
+
     private final ProcessVariableDeletedEventHandler processVariableDeletedHandler;
 
     private final TaskVariableDeletedEventHandler taskVariableDeletedEventHandler;
 
-    public VariableDeletedEventHandler(ProcessVariableDeletedEventHandler processVariableDeletedHandler,
-                                       TaskVariableDeletedEventHandler taskVariableDeletedEventHandler) {
+    public VariableDeletedEventHandler(
+        ProcessVariableDeletedEventHandler processVariableDeletedHandler,
+        TaskVariableDeletedEventHandler taskVariableDeletedEventHandler
+    ) {
         this.processVariableDeletedHandler = processVariableDeletedHandler;
         this.taskVariableDeletedEventHandler = taskVariableDeletedEventHandler;
     }
@@ -38,15 +42,17 @@ public class VariableDeletedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudVariableDeletedEvent variableDeletedEvent = (CloudVariableDeletedEvent) event;
-        try { 
+        try {
             if (variableDeletedEvent.getEntity().isTaskVariable()) {
                 taskVariableDeletedEventHandler.handle(variableDeletedEvent);
             } else {
                 processVariableDeletedHandler.handle(variableDeletedEvent);
             }
         } catch (Exception cause) {
-            LOGGER.debug("Error handling VariableDeletedEvent[" + event + "]",
-                     cause);
+            LOGGER.debug(
+                "Error handling VariableDeletedEvent[" + event + "]",
+                cause
+            );
         }
     }
 

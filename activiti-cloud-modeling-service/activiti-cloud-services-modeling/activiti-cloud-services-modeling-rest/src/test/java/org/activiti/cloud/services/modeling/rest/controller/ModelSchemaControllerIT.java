@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.SchemaService;
@@ -42,6 +43,7 @@ public class ModelSchemaControllerIT {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
     @Autowired
     private SchemaService schemaService;
 
@@ -51,26 +53,44 @@ public class ModelSchemaControllerIT {
     }
 
     @Test
-    public void should_return200andAConnectorJsonSchema_when_connectorSchemaIsRequested() throws Exception {
+    public void should_return200andAConnectorJsonSchema_when_connectorSchemaIsRequested()
+        throws Exception {
         mockMvc
             .perform(get("/v1/schemas/CONNECTOR"))
             .andExpect(status().isOk())
-            .andExpect(content().json(schemaService.getJsonSchemaFromType("CONNECTOR").get().toString()));
+            .andExpect(
+                content()
+                    .json(
+                        schemaService
+                            .getJsonSchemaFromType("CONNECTOR")
+                            .get()
+                            .toString()
+                    )
+            );
     }
 
     @Test
-    public void should_return200andAExtensionProcessJsonSchema_when_extensionProcessSchemaIsRequested() throws Exception {
+    public void should_return200andAExtensionProcessJsonSchema_when_extensionProcessSchemaIsRequested()
+        throws Exception {
         mockMvc
             .perform(get("/v1/schemas/PROCESS-EXTENSION"))
             .andExpect(status().isOk())
-            .andExpect(content().json(schemaService.getJsonSchemaFromType("PROCESS-EXTENSION").get().toString()));
+            .andExpect(
+                content()
+                    .json(
+                        schemaService
+                            .getJsonSchemaFromType("PROCESS-EXTENSION")
+                            .get()
+                            .toString()
+                    )
+            );
     }
 
     @Test
-    public void should_return404_when_isRequestedAnonDefinedSchema() throws Exception {
+    public void should_return404_when_isRequestedAnonDefinedSchema()
+        throws Exception {
         mockMvc
             .perform(get("/v1/schemas/test"))
             .andExpect(status().isNotFound());
     }
-
 }

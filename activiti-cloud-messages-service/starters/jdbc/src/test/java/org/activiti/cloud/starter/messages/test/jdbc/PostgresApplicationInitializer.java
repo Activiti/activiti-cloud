@@ -21,21 +21,24 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-public class PostgresApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class PostgresApplicationInitializer
+    implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private PostgreSQLContainer container = (PostgreSQLContainer) new PostgreSQLContainer("postgres:10")
+    private PostgreSQLContainer container = (PostgreSQLContainer) new PostgreSQLContainer(
+        "postgres:10"
+    )
         .withReuse(false);
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
-
         container.start();
 
-        TestPropertyValues.of(
-            "spring.datasource.url=" + container.getJdbcUrl(),
-            "spring.datasource.username=" + container.getUsername(),
-            "spring.datasource.password=" + container.getPassword()
-        ).applyTo(context.getEnvironment());
-
+        TestPropertyValues
+            .of(
+                "spring.datasource.url=" + container.getJdbcUrl(),
+                "spring.datasource.username=" + container.getUsername(),
+                "spring.datasource.password=" + container.getPassword()
+            )
+            .applyTo(context.getEnvironment());
     }
 }

@@ -40,7 +40,9 @@ public class ProcessModelValidatorTest {
     private ProcessModelValidator processModelValidator;
 
     @Spy
-    private Set<BpmnCommonModelValidator> bpmnCommonModelValidators = new HashSet<>(Arrays.asList(new BpmnModelValidator()));
+    private Set<BpmnCommonModelValidator> bpmnCommonModelValidators = new HashSet<>(
+        Arrays.asList(new BpmnModelValidator())
+    );
 
     @Mock
     private ProcessModelValidator ProcessModelType;
@@ -57,9 +59,12 @@ public class ProcessModelValidatorTest {
         given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
             .willReturn(bpmnModel);
 
-        Throwable exception = catchThrowable( () ->
-        processModelValidator.validate(bytesFromModel,
-            new ProjectValidationContext()));
+        Throwable exception = catchThrowable(() ->
+            processModelValidator.validate(
+                bytesFromModel,
+                new ProjectValidationContext()
+            )
+        );
 
         assertThat(exception).isNull();
     }
@@ -73,9 +78,12 @@ public class ProcessModelValidatorTest {
         given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
             .willReturn(bpmnModel);
 
-        Throwable exception = catchThrowable( () ->
-            processModelValidator.validate(bytesFromModel,
-                new ProjectValidationContext()));
+        Throwable exception = catchThrowable(() ->
+            processModelValidator.validate(
+                bytesFromModel,
+                new ProjectValidationContext()
+            )
+        );
 
         assertThat(exception).isNull();
     }
@@ -88,13 +96,17 @@ public class ProcessModelValidatorTest {
         given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
             .willReturn(bpmnModel);
 
-        Throwable exception = catchThrowable( () ->
-            processModelValidator.validate(bytesFromModel,
-                new ProjectValidationContext()));
+        Throwable exception = catchThrowable(() ->
+            processModelValidator.validate(
+                bytesFromModel,
+                new ProjectValidationContext()
+            )
+        );
 
         assertThat(exception)
             .isInstanceOf(SemanticModelValidationException.class)
-            .hasMessage("Semantic process model validation errors encountered: [The process category needs to be set]");
-
+            .hasMessage(
+                "Semantic process model validation errors encountered: [The process category needs to be set]"
+            );
     }
 }

@@ -28,9 +28,13 @@ public class ModelTypeLinkRelationProvider implements LinkRelationProvider {
 
     public static final String ITEM_RESOURCE_REL = "model-type";
 
-    public static final LinkRelation collectionResourceRel = LinkRelation.of("model-types");
+    public static final LinkRelation collectionResourceRel = LinkRelation.of(
+        "model-types"
+    );
 
-    public static final LinkRelation itemResourceRel = LinkRelation.of("model-type");
+    public static final LinkRelation itemResourceRel = LinkRelation.of(
+        "model-type"
+    );
 
     @Override
     public LinkRelation getItemResourceRelFor(Class<?> type) {
@@ -46,5 +50,4 @@ public class ModelTypeLinkRelationProvider implements LinkRelationProvider {
     public boolean supports(LookupContext delimiter) {
         return ModelType.class.isAssignableFrom(delimiter.getType());
     }
-
 }

@@ -51,10 +51,14 @@ public class VariableSearchArgumentResolverTest {
     @Test
     public void supportsParameter_should_returnTrue_when_itsVariableSearch() {
         //given
-        MethodParameter methodParameter = buildMethodParameter(VariableSearch.class);
+        MethodParameter methodParameter = buildMethodParameter(
+            VariableSearch.class
+        );
 
         //when
-        boolean supportsParameter = argumentResolver.supportsParameter(methodParameter);
+        boolean supportsParameter = argumentResolver.supportsParameter(
+            methodParameter
+        );
 
         //then
         assertThat(supportsParameter).isTrue();
@@ -66,7 +70,9 @@ public class VariableSearchArgumentResolverTest {
         MethodParameter methodParameter = buildMethodParameter(String.class);
 
         //when
-        boolean supportsParameter = argumentResolver.supportsParameter(methodParameter);
+        boolean supportsParameter = argumentResolver.supportsParameter(
+            methodParameter
+        );
 
         //then
         assertThat(supportsParameter).isFalse();
@@ -84,16 +90,24 @@ public class VariableSearchArgumentResolverTest {
         String variableName = "myVar";
         String variableValue = "10";
         String variableType = "integer";
-        NativeWebRequest webRequest = buildWebRequest(variableName, variableValue, variableType);
-        given(conversionService.convert(variableValue, Integer.class)).willReturn(10);
+        NativeWebRequest webRequest = buildWebRequest(
+            variableName,
+            variableValue,
+            variableType
+        );
+        given(conversionService.convert(variableValue, Integer.class))
+            .willReturn(10);
 
         //when
-        Object resolvedArgument = argumentResolver
-            .resolveArgument(mock(MethodParameter.class), null, webRequest, null);
+        Object resolvedArgument = argumentResolver.resolveArgument(
+            mock(MethodParameter.class),
+            null,
+            webRequest,
+            null
+        );
 
         //then
-        assertThat(resolvedArgument)
-            .isInstanceOf(VariableSearch.class);
+        assertThat(resolvedArgument).isInstanceOf(VariableSearch.class);
         VariableSearch variableSearch = (VariableSearch) resolvedArgument;
         assertThat(variableSearch.getName()).isEqualTo(variableName);
         assertThat(variableSearch.getValue().getValue()).isEqualTo(10);
@@ -106,34 +120,54 @@ public class VariableSearchArgumentResolverTest {
         String variableName = "myVar";
         String variableValue = "text";
         String variableType = "string";
-        NativeWebRequest webRequest = buildWebRequest(variableName, variableValue, variableType);
+        NativeWebRequest webRequest = buildWebRequest(
+            variableName,
+            variableValue,
+            variableType
+        );
 
         //when
-        Object resolvedArgument = argumentResolver
-            .resolveArgument(mock(MethodParameter.class), null, webRequest, null);
+        Object resolvedArgument = argumentResolver.resolveArgument(
+            mock(MethodParameter.class),
+            null,
+            webRequest,
+            null
+        );
 
         //then
-        assertThat(resolvedArgument)
-            .isInstanceOf(VariableSearch.class);
+        assertThat(resolvedArgument).isInstanceOf(VariableSearch.class);
         VariableSearch variableSearch = (VariableSearch) resolvedArgument;
         assertThat(variableSearch.getName()).isEqualTo(variableName);
-        assertThat(variableSearch.getValue().getValue()).isEqualTo(variableValue);
+        assertThat(variableSearch.getValue().getValue())
+            .isEqualTo(variableValue);
         assertThat(variableSearch.getType()).isEqualTo(variableType);
 
         verifyNoInteractions(conversionService);
     }
 
-    private NativeWebRequest buildWebRequest(String variableName, String variableValue,
-        String variableType) {
-        NativeWebRequest webRequest = buildWebRequest(variableName, variableValue);
-        given(webRequest.getParameter(VARIABLES_TYPE_KEY)).willReturn(variableType);
+    private NativeWebRequest buildWebRequest(
+        String variableName,
+        String variableValue,
+        String variableType
+    ) {
+        NativeWebRequest webRequest = buildWebRequest(
+            variableName,
+            variableValue
+        );
+        given(webRequest.getParameter(VARIABLES_TYPE_KEY))
+            .willReturn(variableType);
         return webRequest;
     }
 
-    private NativeWebRequest buildWebRequest(String variableName, String variableValue) {
+    private NativeWebRequest buildWebRequest(
+        String variableName,
+        String variableValue
+    ) {
         NativeWebRequest webRequest = mock(NativeWebRequest.class);
-        given(webRequest.getParameter(VARIABLES_NAME_KEY)).willReturn(variableName);
-        given(webRequest.getParameter(VARIABLES_VALUE_KEY)).willReturn(variableValue);
+        given(webRequest.getParameter(VARIABLES_NAME_KEY))
+            .willReturn(variableName);
+        given(webRequest.getParameter(VARIABLES_VALUE_KEY))
+            .willReturn(variableValue);
         return webRequest;
     }
 }

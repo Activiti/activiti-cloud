@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import static org.activiti.test.Assertions.assertThat;
+
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.junit.jupiter.api.Test;
-
-import static org.activiti.test.Assertions.assertThat;
 
 public class ProcessStartedAuditEventEntityTest {
 
@@ -27,9 +27,11 @@ public class ProcessStartedAuditEventEntityTest {
     public void shouldSetAllInformationAvailableFromCloudEvent() {
         //given
         long timestamp = System.currentTimeMillis();
-        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl("eventId",
-                                                                                            timestamp,
-                                                                                            new ProcessInstanceImpl());
+        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl(
+            "eventId",
+            timestamp,
+            new ProcessInstanceImpl()
+        );
         processStartedEvent.setAppName("appName");
         processStartedEvent.setAppVersion("appV1");
         processStartedEvent.setServiceName("serviceName");
@@ -46,26 +48,28 @@ public class ProcessStartedAuditEventEntityTest {
         processStartedEvent.setParentProcessInstanceId("parentProcId");
 
         //when
-        ProcessStartedAuditEventEntity auditEventEntity = new ProcessStartedAuditEventEntity(processStartedEvent);
+        ProcessStartedAuditEventEntity auditEventEntity = new ProcessStartedAuditEventEntity(
+            processStartedEvent
+        );
 
         //then
         assertThat(auditEventEntity)
-                .hasEventId(processStartedEvent.getId())
-                .hasTimestamp(timestamp)
-                .hasEventType(processStartedEvent.getEventType().name())
-                .hasAppName("appName")
-                .hasAppVersion("appV1")
-                .hasServiceName("serviceName")
-                .hasServiceFullName("serviceFN")
-                .hasServiceType("Audit")
-                .hasServiceVersion("serviceV2")
-                .hasMessageId("messageId")
-                .hasSequenceNumber(3)
-                .hasEntityId("entityID")
-                .hasProcessInstanceId("procInstId")
-                .hasProcessDefinitionId("procDefId")
-                .hasProcessDefinitionKey("procDefKey")
-                .hasBusinessKey("BusinessKey")
-                .hasParentProcessInstanceId("parentProcId");
+            .hasEventId(processStartedEvent.getId())
+            .hasTimestamp(timestamp)
+            .hasEventType(processStartedEvent.getEventType().name())
+            .hasAppName("appName")
+            .hasAppVersion("appV1")
+            .hasServiceName("serviceName")
+            .hasServiceFullName("serviceFN")
+            .hasServiceType("Audit")
+            .hasServiceVersion("serviceV2")
+            .hasMessageId("messageId")
+            .hasSequenceNumber(3)
+            .hasEntityId("entityID")
+            .hasProcessInstanceId("procInstId")
+            .hasProcessDefinitionId("procDefId")
+            .hasProcessDefinitionKey("procDefKey")
+            .hasBusinessKey("BusinessKey")
+            .hasParentProcessInstanceId("parentProcId");
     }
 }

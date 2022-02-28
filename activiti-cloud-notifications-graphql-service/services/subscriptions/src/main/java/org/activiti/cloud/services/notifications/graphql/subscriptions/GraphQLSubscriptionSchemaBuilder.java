@@ -17,12 +17,6 @@ package org.activiti.cloud.services.notifications.graphql.subscriptions;
 
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Optional;
-
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
@@ -30,6 +24,11 @@ import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.TypeRuntimeWiring;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Optional;
 import org.springframework.core.io.DefaultResourceLoader;
 
 public class GraphQLSubscriptionSchemaBuilder {
@@ -37,7 +36,7 @@ public class GraphQLSubscriptionSchemaBuilder {
     private GraphQLSchema graphQLSchema = null;
 
     private final TypeDefinitionRegistry typeRegistry;
-    private final  RuntimeWiring.Builder wiring;
+    private final RuntimeWiring.Builder wiring;
 
     public GraphQLSubscriptionSchemaBuilder(String schemaFileName) {
         //
@@ -50,35 +49,37 @@ public class GraphQLSubscriptionSchemaBuilder {
             throw new RuntimeException(cause);
         }
         this.typeRegistry = new SchemaParser().parse(streamReader);
-        
-        this.wiring = RuntimeWiring.newRuntimeWiring()
-                                   .scalar(new ObjectScalar());
-   }
+
+        this.wiring =
+            RuntimeWiring.newRuntimeWiring().scalar(new ObjectScalar());
+    }
 
     private GraphQLSchema buildSchema() {
-        return new SchemaGenerator().makeExecutableSchema(typeRegistry, wiring.build());
+        return new SchemaGenerator()
+            .makeExecutableSchema(typeRegistry, wiring.build());
     }
 
     public TypeRuntimeWiring.Builder withTypeWiring(String typeName) {
-    	TypeRuntimeWiring.Builder builder = newTypeWiring(typeName);
+        TypeRuntimeWiring.Builder builder = newTypeWiring(typeName);
 
-    	wiring.type(builder);
+        wiring.type(builder);
 
-    	return builder;
+        return builder;
     }
 
-    public TypeRuntimeWiring.Builder withSubscription(String fieldName, DataFetcher<?> dataFetcher) {
-    	TypeRuntimeWiring.Builder builder = newTypeWiring("Subscription");
+    public TypeRuntimeWiring.Builder withSubscription(
+        String fieldName,
+        DataFetcher<?> dataFetcher
+    ) {
+        TypeRuntimeWiring.Builder builder = newTypeWiring("Subscription");
 
-    	wiring.type(builder.dataFetcher(fieldName, dataFetcher));
+        wiring.type(builder.dataFetcher(fieldName, dataFetcher));
 
-    	return builder;
+        return builder;
     }
-
 
     public GraphQLSchema getGraphQLSchema() {
-        return Optional.ofNullable(graphQLSchema)
-        		.orElseGet(this::buildSchema);
+        return Optional.ofNullable(graphQLSchema).orElseGet(this::buildSchema);
     }
 
     protected Reader loadSchemaFile(String name) throws IOException {
@@ -87,5 +88,4 @@ public class GraphQLSubscriptionSchemaBuilder {
         InputStream stream = resourceLoader.getResource(name).getInputStream();
         return new InputStreamReader(stream);
     }
-
 }

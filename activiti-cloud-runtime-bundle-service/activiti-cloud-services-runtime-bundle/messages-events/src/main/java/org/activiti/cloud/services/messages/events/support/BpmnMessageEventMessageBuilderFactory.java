@@ -24,12 +24,19 @@ public class BpmnMessageEventMessageBuilderFactory {
 
     private final RuntimeBundleProperties properties;
 
-    public BpmnMessageEventMessageBuilderFactory(RuntimeBundleProperties properties) {
+    public BpmnMessageEventMessageBuilderFactory(
+        RuntimeBundleProperties properties
+    ) {
         this.properties = properties;
     }
 
     public MessageBuilderAppenderChain create(BPMNMessage bpmnMessage) {
-        return new MessageBuilderAppenderChain().chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                                                .chain(new MessageEventPayloadMessageBuilderAppender(bpmnMessage.getMessagePayload()));
+        return new MessageBuilderAppenderChain()
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+            .chain(
+                new MessageEventPayloadMessageBuilderAppender(
+                    bpmnMessage.getMessagePayload()
+                )
+            );
     }
 }

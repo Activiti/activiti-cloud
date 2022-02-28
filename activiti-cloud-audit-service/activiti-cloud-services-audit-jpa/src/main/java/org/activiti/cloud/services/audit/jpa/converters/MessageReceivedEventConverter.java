@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-
 import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
@@ -26,7 +25,9 @@ import org.activiti.cloud.services.audit.jpa.events.MessageReceivedAuditEventEnt
 
 public class MessageReceivedEventConverter extends BaseEventToEntityConverter {
 
-    public MessageReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public MessageReceivedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -36,18 +37,26 @@ public class MessageReceivedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected MessageReceivedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new MessageReceivedAuditEventEntity(CloudBPMNMessageReceivedEvent.class.cast(cloudRuntimeEvent));
+    protected MessageReceivedAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new MessageReceivedAuditEventEntity(
+            CloudBPMNMessageReceivedEvent.class.cast(cloudRuntimeEvent)
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         MessageReceivedAuditEventEntity messageEventEntity = (MessageReceivedAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNMessageReceivedEventImpl(messageEventEntity.getEventId(),
-                                                     messageEventEntity.getTimestamp(),
-                                                     messageEventEntity.getMessage(),
-                                                     messageEventEntity.getProcessDefinitionId(),
-                                                     messageEventEntity.getProcessInstanceId());
+        return new CloudBPMNMessageReceivedEventImpl(
+            messageEventEntity.getEventId(),
+            messageEventEntity.getTimestamp(),
+            messageEventEntity.getMessage(),
+            messageEventEntity.getProcessDefinitionId(),
+            messageEventEntity.getProcessInstanceId()
+        );
     }
 }

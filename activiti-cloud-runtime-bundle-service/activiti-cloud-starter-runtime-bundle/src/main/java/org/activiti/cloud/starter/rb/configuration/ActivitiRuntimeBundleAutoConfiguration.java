@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
+import static org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerPartitionKeyExtractor.ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME;
+import static org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerPartitionKeyExtractor.ACTIVITI_CLOUD_MESSAGING_PARTITIONED;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,16 +26,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-import static org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerPartitionKeyExtractor.ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME;
-import static org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerPartitionKeyExtractor.ACTIVITI_CLOUD_MESSAGING_PARTITIONED;
-
 @Configuration
 @Import(RuntimeBundleSwaggerConfig.class)
 public class ActivitiRuntimeBundleAutoConfiguration {
 
     @Bean
-    @ConditionalOnProperty(name=ACTIVITI_CLOUD_MESSAGING_PARTITIONED, havingValue = "true")
-    @ConditionalOnMissingBean(name=ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME)
+    @ConditionalOnProperty(
+        name = ACTIVITI_CLOUD_MESSAGING_PARTITIONED,
+        havingValue = "true"
+    )
+    @ConditionalOnMissingBean(
+        name = ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME
+    )
     public ActivitiAuditProducerPartitionKeyExtractor activitiAuditProducerPartitionKeyExtractor() {
         return new ActivitiAuditProducerPartitionKeyExtractor();
     }

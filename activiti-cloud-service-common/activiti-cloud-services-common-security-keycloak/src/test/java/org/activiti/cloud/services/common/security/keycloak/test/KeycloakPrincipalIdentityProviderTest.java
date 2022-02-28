@@ -47,13 +47,17 @@ public class KeycloakPrincipalIdentityProviderTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        KeycloakAccessTokenProvider keycloakAccessTokenProvider = new KeycloakAccessTokenProvider() { };
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator = new KeycloakAccessTokenValidator() { };
+        KeycloakAccessTokenProvider keycloakAccessTokenProvider = new KeycloakAccessTokenProvider() {};
+        KeycloakAccessTokenValidator keycloakAccessTokenValidator = new KeycloakAccessTokenValidator() {};
 
-        subject = new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider,
-                                                        keycloakAccessTokenValidator);
+        subject =
+            new KeycloakPrincipalIdentityProvider(
+                keycloakAccessTokenProvider,
+                keycloakAccessTokenValidator
+            );
 
-        when(principal.getKeycloakSecurityContext()).thenReturn(keycloakSecurityContext);
+        when(principal.getKeycloakSecurityContext())
+            .thenReturn(keycloakSecurityContext);
         when(keycloakSecurityContext.getToken()).thenReturn(accessToken);
         when(accessToken.getPreferredUsername()).thenReturn("username");
     }
@@ -76,11 +80,11 @@ public class KeycloakPrincipalIdentityProviderTest {
         when(accessToken.isActive()).thenReturn(false);
 
         // when
-        Throwable thrown = catchThrowable(() -> { subject.getUserId(principal); });
+        Throwable thrown = catchThrowable(() -> {
+            subject.getUserId(principal);
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
     }
-
-
 }

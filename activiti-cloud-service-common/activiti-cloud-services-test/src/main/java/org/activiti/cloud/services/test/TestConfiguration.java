@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.test;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -48,16 +47,22 @@ public class TestConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public KeycloakTokenProducer keycloakTokenProducer(KeycloakProperties keycloakProperties) {
+    public KeycloakTokenProducer keycloakTokenProducer(
+        KeycloakProperties keycloakProperties
+    ) {
         return new KeycloakTokenProducer(keycloakProperties);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public RestTemplateBuilder restTemplateBuilder(KeycloakTokenProducer keycloakTokenProducer) {
+    public RestTemplateBuilder restTemplateBuilder(
+        KeycloakTokenProducer keycloakTokenProducer
+    ) {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                         false);
+        mapper.configure(
+            DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+            false
+        );
 
         mapper.registerModule(new Jackson2HalModule());
 
@@ -68,12 +73,16 @@ public class TestConfiguration {
         }
 
         MappingJackson2HttpMessageConverter jackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
-        jackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON));
+        jackson2HttpMessageConverter.setSupportedMediaTypes(
+            Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON)
+        );
         jackson2HttpMessageConverter.setObjectMapper(mapper);
 
-        return new RestTemplateBuilder().additionalMessageConverters(
+        return new RestTemplateBuilder()
+            .additionalMessageConverters(
                 jackson2HttpMessageConverter,
-                new StringHttpMessageConverter(StandardCharsets.UTF_8)).additionalInterceptors(keycloakTokenProducer);
+                new StringHttpMessageConverter(StandardCharsets.UTF_8)
+            )
+            .additionalInterceptors(keycloakTokenProducer);
     }
-
 }

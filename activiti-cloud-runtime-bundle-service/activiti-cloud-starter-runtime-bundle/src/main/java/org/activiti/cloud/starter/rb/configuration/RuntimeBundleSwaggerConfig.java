@@ -31,10 +31,18 @@ public class RuntimeBundleSwaggerConfig {
 
     @Bean(name = "rbApiDocket")
     @ConditionalOnMissingBean(name = "rbApiDocket")
-    public Docket rbApiDocket(SwaggerDocketBuilder docketBuilder,
-        @Value("${activiti.cloud.swagger.rb-base-path:}") String rbSwaggerBasePath) {
-        return docketBuilder.buildApiDocket("Runtime Bundle ReST API", "Runtime Bundle",
-            rbSwaggerBasePath, "org.activiti.cloud.services.rest");
+    public Docket rbApiDocket(
+        SwaggerDocketBuilder docketBuilder,
+        @Value(
+            "${activiti.cloud.swagger.rb-base-path:}"
+        ) String rbSwaggerBasePath
+    ) {
+        return docketBuilder.buildApiDocket(
+            "Runtime Bundle ReST API",
+            "Runtime Bundle",
+            rbSwaggerBasePath,
+            "org.activiti.cloud.services.rest"
+        );
     }
 
     @Bean
@@ -42,5 +50,4 @@ public class RuntimeBundleSwaggerConfig {
     public PayloadsDocketCustomizer payloadsDocketCustomizer() {
         return new PayloadsDocketCustomizer();
     }
-
 }

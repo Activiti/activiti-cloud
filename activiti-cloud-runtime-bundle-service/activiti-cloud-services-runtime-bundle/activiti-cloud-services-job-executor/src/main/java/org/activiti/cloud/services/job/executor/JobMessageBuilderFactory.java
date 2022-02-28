@@ -29,7 +29,8 @@ public class JobMessageBuilderFactory {
     }
 
     public MessageBuilderAppenderChain create(Job job) {
-        return new MessageBuilderAppenderChain().chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                                                .chain(new JobMessageBuilderAppender(job));
+        return new MessageBuilderAppenderChain()
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+            .chain(new JobMessageBuilderAppender(job));
     }
 }

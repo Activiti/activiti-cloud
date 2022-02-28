@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
@@ -36,12 +38,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RestController
-@RequestMapping(value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-public class AuditEventsAdminControllerImpl implements AuditEventsAdminController {
+@RequestMapping(
+    value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
+public class AuditEventsAdminControllerImpl
+    implements AuditEventsAdminController {
 
     private final EventsRepository eventsRepository;
 
@@ -52,30 +55,41 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     private final APIEventToEntityConverters eventConverters;
 
     @Autowired
-    public AuditEventsAdminControllerImpl(EventsRepository eventsRepository,
-                                          EventRepresentationModelAssembler eventRepresentationModelAssembler,
-                                          APIEventToEntityConverters eventConverters,
-                                          AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler) {
+    public AuditEventsAdminControllerImpl(
+        EventsRepository eventsRepository,
+        EventRepresentationModelAssembler eventRepresentationModelAssembler,
+        APIEventToEntityConverters eventConverters,
+        AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler
+    ) {
         this.eventsRepository = eventsRepository;
-        this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
+        this.eventRepresentationModelAssembler =
+            eventRepresentationModelAssembler;
         this.eventConverters = eventConverters;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
-        Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(
+        Pageable pageable
+    ) {
+        Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(
+            pageable
+        );
 
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 
         for (AuditEventEntity aee : allAuditInPage.getContent()) {
-            events.add(eventConverters.getConverterByEventTypeName(aee.getEventType()).convertToAPI(aee));
+            events.add(
+                eventConverters
+                    .getConverterByEventTypeName(aee.getEventType())
+                    .convertToAPI(aee)
+            );
         }
 
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  new PageImpl<>(events,
-                                                                 pageable,
-                                                                 allAuditInPage.getTotalElements()),
-                                                  eventRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            new PageImpl<>(events, pageable, allAuditInPage.getTotalElements()),
+            eventRepresentationModelAssembler
+        );
     }
 }

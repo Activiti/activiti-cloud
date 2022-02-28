@@ -24,12 +24,15 @@ public class TaskVariableLookupRestrictionService {
 
     private final TaskLookupRestrictionService taskLookupRestrictionService;
 
-    public TaskVariableLookupRestrictionService(TaskLookupRestrictionService taskLookupRestrictionService) {
+    public TaskVariableLookupRestrictionService(
+        TaskLookupRestrictionService taskLookupRestrictionService
+    ) {
         this.taskLookupRestrictionService = taskLookupRestrictionService;
     }
 
-    public Predicate restrictTaskVariableQuery(Predicate predicate){
-        return taskLookupRestrictionService.restrictTaskVariableQuery(predicate);
+    public Predicate restrictTaskVariableQuery(Predicate predicate) {
+        return taskLookupRestrictionService.restrictTaskVariableQuery(
+            predicate
+        );
     }
-
 }

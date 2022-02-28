@@ -15,17 +15,17 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
+import java.util.Optional;
 import org.keycloak.representations.AccessToken;
 import org.springframework.lang.NonNull;
 
-import java.util.Optional;
-
 public interface KeycloakAccessTokenValidator {
-    
     default boolean isValid(@NonNull AccessToken accessToken) {
-        return Optional.ofNullable(accessToken)
-                       .map(AccessToken::isActive)
-                       .orElseThrow(() -> new SecurityException("Invalid access token instance"));
-    };
-
+        return Optional
+            .ofNullable(accessToken)
+            .map(AccessToken::isActive)
+            .orElseThrow(() ->
+                new SecurityException("Invalid access token instance")
+            );
+    }
 }

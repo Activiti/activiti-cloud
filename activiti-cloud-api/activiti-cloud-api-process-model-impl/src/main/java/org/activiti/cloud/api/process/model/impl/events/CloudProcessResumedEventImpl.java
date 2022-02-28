@@ -18,21 +18,22 @@ package org.activiti.cloud.api.process.model.impl.events;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
 
-public class CloudProcessResumedEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessResumedEvent {
+public class CloudProcessResumedEventImpl
+    extends CloudProcessInstanceEventImpl
+    implements CloudProcessResumedEvent {
 
-    public CloudProcessResumedEventImpl() {
-    }
+    public CloudProcessResumedEventImpl() {}
 
     public CloudProcessResumedEventImpl(ProcessInstance processInstance) {
         super(processInstance);
     }
 
-    public CloudProcessResumedEventImpl(String id,
-                                        Long timestamp,
-                                        ProcessInstance processInstance) {
-        super(id,
-              timestamp,
-              processInstance);
+    public CloudProcessResumedEventImpl(
+        String id,
+        Long timestamp,
+        ProcessInstance processInstance
+    ) {
+        super(id, timestamp, processInstance);
     }
 
     @Override

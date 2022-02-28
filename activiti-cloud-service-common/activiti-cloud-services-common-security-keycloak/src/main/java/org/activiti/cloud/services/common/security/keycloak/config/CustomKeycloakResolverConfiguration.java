@@ -24,7 +24,9 @@ import org.springframework.context.annotation.Configuration;
 public class CustomKeycloakResolverConfiguration {
 
     @Bean("keycloakConfigResolver")
-    public KeycloakConfigResolver KeycloakConfigResolver(AdapterConfig adapterConfig) {
+    public KeycloakConfigResolver KeycloakConfigResolver(
+        AdapterConfig adapterConfig
+    ) {
         return new CustomKeycloakSpringConfigResolver(adapterConfig);
     }
 }

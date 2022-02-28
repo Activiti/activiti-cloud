@@ -17,7 +17,8 @@ package org.activiti.cloud.services.audit.jpa.converters.json;
 
 import org.activiti.api.process.model.ProcessDefinition;
 
-public class ProcessDefinitionJpaJsonConverter extends JpaJsonConverter<ProcessDefinition> {
+public class ProcessDefinitionJpaJsonConverter
+    extends JpaJsonConverter<ProcessDefinition> {
 
     public ProcessDefinitionJpaJsonConverter() {
         super(ProcessDefinition.class);

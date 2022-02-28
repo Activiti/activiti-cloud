@@ -15,17 +15,17 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class VariableValueJsonConverterTest {
 
@@ -35,7 +35,9 @@ public class VariableValueJsonConverterTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    private static final VariableValue<Integer> ENTITY_REPRESENTATION = new VariableValue<>(10);
+    private static final VariableValue<Integer> ENTITY_REPRESENTATION = new VariableValue<>(
+        10
+    );
     private static final String JSON_REPRESENTATION = "{\"value\": 10}";
 
     @BeforeEach
@@ -46,59 +48,73 @@ public class VariableValueJsonConverterTest {
     @Test
     public void convertToDatabaseColumnShouldConvertToJson() throws Exception {
         //given
-        given(objectMapper.writeValueAsString(ENTITY_REPRESENTATION)).willReturn(JSON_REPRESENTATION);
+        given(objectMapper.writeValueAsString(ENTITY_REPRESENTATION))
+            .willReturn(JSON_REPRESENTATION);
 
         //when
-        String convertedValue = converter.convertToDatabaseColumn(ENTITY_REPRESENTATION);
+        String convertedValue = converter.convertToDatabaseColumn(
+            ENTITY_REPRESENTATION
+        );
 
         //then
         assertThat(convertedValue).isEqualTo(JSON_REPRESENTATION);
     }
 
     @Test
-    public void convertToDatabaseColumnShouldThrowQueryExceptionWhenAnExceptionOccursWhileProcessing() throws Exception {
+    public void convertToDatabaseColumnShouldThrowQueryExceptionWhenAnExceptionOccursWhileProcessing()
+        throws Exception {
         //given
-        MockJsonProcessingException exception = new MockJsonProcessingException("any");
-        given(objectMapper.writeValueAsString(ENTITY_REPRESENTATION)).willThrow(exception);
+        MockJsonProcessingException exception = new MockJsonProcessingException(
+            "any"
+        );
+        given(objectMapper.writeValueAsString(ENTITY_REPRESENTATION))
+            .willThrow(exception);
 
         //when
         Throwable thrown = catchThrowable(() ->
-                                                  converter.convertToDatabaseColumn(ENTITY_REPRESENTATION));
+            converter.convertToDatabaseColumn(ENTITY_REPRESENTATION)
+        );
 
         //then
         assertThat(thrown)
-                .isInstanceOf(QueryException.class)
-                .hasMessage("Unable to serialize variable.")
-                .hasCause(exception);
+            .isInstanceOf(QueryException.class)
+            .hasMessage("Unable to serialize variable.")
+            .hasCause(exception);
     }
 
     @Test
-    public void convertToEntityAttributeShouldConvertFromJson() throws Exception {
+    public void convertToEntityAttributeShouldConvertFromJson()
+        throws Exception {
         //given
-        given(objectMapper.readValue(JSON_REPRESENTATION,
-                                     VariableValue.class)).willReturn(ENTITY_REPRESENTATION);
+        given(objectMapper.readValue(JSON_REPRESENTATION, VariableValue.class))
+            .willReturn(ENTITY_REPRESENTATION);
 
         //when
-        VariableValue<?> convertedValue = converter.convertToEntityAttribute(JSON_REPRESENTATION);
+        VariableValue<?> convertedValue = converter.convertToEntityAttribute(
+            JSON_REPRESENTATION
+        );
 
         //then
         assertThat(convertedValue).isEqualTo(ENTITY_REPRESENTATION);
     }
 
     @Test
-    public void convertToEntityAttributeShouldThrowExceptionWhenExceptionOccursWhileReading() throws Exception {
+    public void convertToEntityAttributeShouldThrowExceptionWhenExceptionOccursWhileReading()
+        throws Exception {
         //given
         JsonMappingException exception = new JsonMappingException(null, "test");
-        given(objectMapper.readValue(JSON_REPRESENTATION,
-                                     VariableValue.class)).willThrow(exception);
+        given(objectMapper.readValue(JSON_REPRESENTATION, VariableValue.class))
+            .willThrow(exception);
 
         //when
-        Throwable thrown = catchThrowable(() -> converter.convertToEntityAttribute(JSON_REPRESENTATION));
+        Throwable thrown = catchThrowable(() ->
+            converter.convertToEntityAttribute(JSON_REPRESENTATION)
+        );
 
         //then
         assertThat(thrown)
-        .isInstanceOf(QueryException.class)
-        .hasMessage("Unable to deserialize variable.")
-        .hasCause(exception);
+            .isInstanceOf(QueryException.class)
+            .hasMessage("Unable to deserialize variable.")
+            .hasCause(exception);
     }
 }

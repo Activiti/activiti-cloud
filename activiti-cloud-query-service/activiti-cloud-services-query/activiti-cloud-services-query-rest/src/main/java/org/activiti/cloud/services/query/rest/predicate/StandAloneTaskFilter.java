@@ -38,5 +38,4 @@ public class StandAloneTaskFilter implements QueryDslPredicateFilter {
         }
         return extendedPredicate;
     }
-
 }

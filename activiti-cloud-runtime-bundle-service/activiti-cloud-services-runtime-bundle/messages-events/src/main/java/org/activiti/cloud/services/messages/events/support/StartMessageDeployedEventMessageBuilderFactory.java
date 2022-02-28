@@ -24,12 +24,21 @@ public class StartMessageDeployedEventMessageBuilderFactory {
 
     private final RuntimeBundleProperties properties;
 
-    public StartMessageDeployedEventMessageBuilderFactory(RuntimeBundleProperties properties) {
+    public StartMessageDeployedEventMessageBuilderFactory(
+        RuntimeBundleProperties properties
+    ) {
         this.properties = properties;
     }
 
-    public MessageBuilderAppenderChain create(StartMessageDeployedEvent messageDeployedEvent) {
-        return new MessageBuilderAppenderChain().chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                                                .chain(new StartMessageDeploymentDefinitionMessageBuilderAppender(messageDeployedEvent.getEntity()));
+    public MessageBuilderAppenderChain create(
+        StartMessageDeployedEvent messageDeployedEvent
+    ) {
+        return new MessageBuilderAppenderChain()
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+            .chain(
+                new StartMessageDeploymentDefinitionMessageBuilderAppender(
+                    messageDeployedEvent.getEntity()
+                )
+            );
     }
 }

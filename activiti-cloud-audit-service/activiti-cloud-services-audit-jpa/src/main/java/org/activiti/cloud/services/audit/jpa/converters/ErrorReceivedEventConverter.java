@@ -25,7 +25,9 @@ import org.activiti.cloud.services.audit.jpa.events.ErrorReceivedAuditEventEntit
 
 public class ErrorReceivedEventConverter extends BaseEventToEntityConverter {
 
-    public ErrorReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ErrorReceivedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -35,18 +37,26 @@ public class ErrorReceivedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected ErrorReceivedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new ErrorReceivedAuditEventEntity((CloudBPMNErrorReceivedEvent) cloudRuntimeEvent);
+    protected ErrorReceivedAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new ErrorReceivedAuditEventEntity(
+            (CloudBPMNErrorReceivedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         ErrorReceivedAuditEventEntity errorReceivedAuditEventEntity = (ErrorReceivedAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNErrorReceivedEventImpl(errorReceivedAuditEventEntity.getEventId(),
-                                                   errorReceivedAuditEventEntity.getTimestamp(),
-                                                   errorReceivedAuditEventEntity.getError(),
-                                                   errorReceivedAuditEventEntity.getProcessDefinitionId(),
-                                                   errorReceivedAuditEventEntity.getProcessInstanceId());
+        return new CloudBPMNErrorReceivedEventImpl(
+            errorReceivedAuditEventEntity.getEventId(),
+            errorReceivedAuditEventEntity.getTimestamp(),
+            errorReceivedAuditEventEntity.getError(),
+            errorReceivedAuditEventEntity.getProcessDefinitionId(),
+            errorReceivedAuditEventEntity.getProcessInstanceId()
+        );
     }
 }

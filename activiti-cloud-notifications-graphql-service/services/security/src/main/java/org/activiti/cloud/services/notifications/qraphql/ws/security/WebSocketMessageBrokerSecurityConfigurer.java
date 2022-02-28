@@ -21,12 +21,17 @@ import org.springframework.security.config.annotation.web.messaging.MessageSecur
 import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
 
 @Configuration
-public class WebSocketMessageBrokerSecurityConfigurer extends AbstractSecurityWebSocketMessageBrokerConfigurer {
+public class WebSocketMessageBrokerSecurityConfigurer
+    extends AbstractSecurityWebSocketMessageBrokerConfigurer {
 
-    @Value("${spring.activiti.cloud.services.notifications.graphql.ws.endpoint}")
+    @Value(
+        "${spring.activiti.cloud.services.notifications.graphql.ws.endpoint}"
+    )
     private String endpoint;
 
-    @Value("${spring.activiti.cloud.services.notifications.graphql.ws.security.authorities}")
+    @Value(
+        "${spring.activiti.cloud.services.notifications.graphql.ws.security.authorities}"
+    )
     private String[] authorities;
 
     @Override
@@ -35,7 +40,9 @@ public class WebSocketMessageBrokerSecurityConfigurer extends AbstractSecurityWe
     }
 
     @Override
-    protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
+    protected void configureInbound(
+        MessageSecurityMetadataSourceRegistry messages
+    ) {
         messages.simpMessageDestMatchers(endpoint).hasAnyRole(authorities);
     }
 

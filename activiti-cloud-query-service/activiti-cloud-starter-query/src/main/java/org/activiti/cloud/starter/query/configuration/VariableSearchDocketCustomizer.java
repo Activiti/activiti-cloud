@@ -33,11 +33,14 @@ public class VariableSearchDocketCustomizer implements DocketCustomizer {
     }
 
     @Override
-    public Docket customize(
-        Docket docket) {
-        return docket.alternateTypeRules(newRule(typeResolver.resolve(VariableSearch.class),
-            typeResolver.resolve(VariableSearchWrapperMixin.class),
-            Ordered.HIGHEST_PRECEDENCE));
+    public Docket customize(Docket docket) {
+        return docket.alternateTypeRules(
+            newRule(
+                typeResolver.resolve(VariableSearch.class),
+                typeResolver.resolve(VariableSearchWrapperMixin.class),
+                Ordered.HIGHEST_PRECEDENCE
+            )
+        );
     }
 
     //the only purpose of this class is customizing the name of the parameters in the
@@ -69,5 +72,4 @@ public class VariableSearchDocketCustomizer implements DocketCustomizer {
             return variables;
         }
     }
-
 }

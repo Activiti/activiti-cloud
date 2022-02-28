@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.common.swagger;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
@@ -34,7 +33,9 @@ import springfox.documentation.spi.DocumentationType;
 @ExtendWith(MockitoExtension.class)
 public class PathPrefixTransformationFilterTest {
 
-    private PathPrefixTransformationFilter transformationFilter = new PathPrefixTransformationFilter("/base");
+    private PathPrefixTransformationFilter transformationFilter = new PathPrefixTransformationFilter(
+        "/base"
+    );
 
     @Mock
     private OpenApiTransformationContext<HttpServletRequest> context;
@@ -48,7 +49,9 @@ public class PathPrefixTransformationFilterTest {
         transformationFilter.transform(context);
 
         //then
-        assertThat(openAPI.getServers()).extracting(Server::getUrl).containsExactly("/base/service");
+        assertThat(openAPI.getServers())
+            .extracting(Server::getUrl)
+            .containsExactly("/base/service");
     }
 
     @Test
@@ -60,13 +63,19 @@ public class PathPrefixTransformationFilterTest {
         transformationFilter.transform(context);
 
         //then
-        assertThat(openAPI.getServers()).extracting(Server::getUrl).containsExactly("/base");
+        assertThat(openAPI.getServers())
+            .extracting(Server::getUrl)
+            .containsExactly("/base");
     }
 
     private OpenAPI buildOpenAPI(String servicePrefix) {
         final OpenAPI openAPI = new OpenAPI();
-        openAPI.setExtensions(Collections.singletonMap(SwaggerDocketBuilder.SERVICE_URL_PREFIX,
-            servicePrefix));
+        openAPI.setExtensions(
+            Collections.singletonMap(
+                SwaggerDocketBuilder.SERVICE_URL_PREFIX,
+                servicePrefix
+            )
+        );
         given(context.getSpecification()).willReturn(openAPI);
         return openAPI;
     }
@@ -74,23 +83,29 @@ public class PathPrefixTransformationFilterTest {
     @Test
     public void transform_should_convertDoubleSlashToSingleSlash_when_concatenationResultsInDoubleSlash() {
         //given
-        PathPrefixTransformationFilter transformationFilter = new PathPrefixTransformationFilter("/");
+        PathPrefixTransformationFilter transformationFilter = new PathPrefixTransformationFilter(
+            "/"
+        );
         final OpenAPI openAPI = buildOpenAPI("/service");
 
         //when
         transformationFilter.transform(context);
 
         //then
-        assertThat(openAPI.getServers()).extracting(Server::getUrl).containsExactly("/service");
+        assertThat(openAPI.getServers())
+            .extracting(Server::getUrl)
+            .containsExactly("/service");
     }
 
     @Test
     public void should_supportOAS3() {
-        assertThat(transformationFilter.supports(DocumentationType.OAS_30)).isTrue();
+        assertThat(transformationFilter.supports(DocumentationType.OAS_30))
+            .isTrue();
     }
 
     @Test
     public void shouldNot_supportSwagger2() {
-        assertThat(transformationFilter.supports(DocumentationType.SWAGGER_2)).isFalse();
+        assertThat(transformationFilter.supports(DocumentationType.SWAGGER_2))
+            .isFalse();
     }
 }

@@ -15,6 +15,15 @@
  */
 package org.activiti.cloud.services.test.rest.support;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
@@ -31,23 +40,14 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * Helper methods for rest api web integration testing from spring-data-rest-tests-core module
  *
  */
 public class TestMvcClient {
 
-    public static MediaType DEFAULT_MEDIA_TYPE = org.springframework.hateoas.MediaTypes.HAL_JSON;
+    public static MediaType DEFAULT_MEDIA_TYPE =
+        org.springframework.hateoas.MediaTypes.HAL_JSON;
 
     private final MockMvc mvc;
     private final LinkDiscoverers discoverers;
@@ -60,7 +60,6 @@ public class TestMvcClient {
      * @param discoverers must not be {@literal null}.
      */
     public TestMvcClient(MockMvc mvc, LinkDiscoverers discoverers) {
-
         assertThat(mvc).isNotNull();
         assertThat(discoverers).isNotNull();
 
@@ -84,14 +83,17 @@ public class TestMvcClient {
      * Initializes web tests. Will register a {@link MockHttpServletRequest} for the current thread.
      */
     public static void initWebTest() {
-
         MockHttpServletRequest request = new MockHttpServletRequest();
-        ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
+        ServletRequestAttributes requestAttributes = new ServletRequestAttributes(
+            request
+        );
         RequestContextHolder.setRequestAttributes(requestAttributes);
     }
 
-    public static void assertAllowHeaders(HttpEntity<?> response, HttpMethod... methods) {
-
+    public static void assertAllowHeaders(
+        HttpEntity<?> response,
+        HttpMethod... methods
+    ) {
         HttpHeaders headers = response.getHeaders();
 
         assertThat(headers.getAllow()).containsExactly(methods);
@@ -106,11 +108,14 @@ public class TestMvcClient {
      * @return a mocked servlet response with results from GET [href]
      * @throws Exception
      */
-    public MockHttpServletResponse request(String href, MediaType contentType) throws Exception {
-        return mvc.perform(get(href).accept(contentType)). //
-                  andExpect(status().isOk()). //
-                  andExpect(content().contentTypeCompatibleWith(contentType)). //
-                  andReturn().getResponse();
+    public MockHttpServletResponse request(String href, MediaType contentType)
+        throws Exception {
+        return mvc
+            .perform(get(href).accept(contentType))
+            .andExpect(status().isOk()) //
+            .andExpect(content().contentTypeCompatibleWith(contentType)) //
+            .andReturn() //
+            .getResponse();
     }
 
     /**
@@ -122,12 +127,17 @@ public class TestMvcClient {
      * @return a mocked servlet response with results from GET [href]
      * @throws Exception
      */
-    public MockHttpServletResponse request(String href, MediaType contentType, HttpHeaders httpHeaders)
-                                                                                                        throws Exception {
-        return mvc.perform(get(href).accept(contentType).headers(httpHeaders)). //
-                  andExpect(status().isOk()). //
-                  andExpect(content().contentType(contentType)). //
-                  andReturn().getResponse();
+    public MockHttpServletResponse request(
+        String href,
+        MediaType contentType,
+        HttpHeaders httpHeaders
+    ) throws Exception {
+        return mvc
+            .perform(get(href).accept(contentType).headers(httpHeaders))
+            .andExpect(status().isOk()) //
+            .andExpect(content().contentType(contentType)) //
+            .andReturn() //
+            .getResponse();
     }
 
     /**
@@ -151,7 +161,8 @@ public class TestMvcClient {
      * @return
      * @throws Exception
      */
-    public MockHttpServletResponse request(Link link, MediaType mediaType) throws Exception {
+    public MockHttpServletResponse request(Link link, MediaType mediaType)
+        throws Exception {
         return request(link.expand().getHref(), mediaType);
     }
 
@@ -208,8 +219,11 @@ public class TestMvcClient {
      * @return
      * @throws Exception
      */
-    public ResultActions follow(String href, MediaType accept) throws Exception {
-        return mvc.perform(get(href).header(HttpHeaders.ACCEPT, accept.toString()));
+    public ResultActions follow(String href, MediaType accept)
+        throws Exception {
+        return mvc.perform(
+            get(href).header(HttpHeaders.ACCEPT, accept.toString())
+        );
     }
 
     /**
@@ -231,7 +245,6 @@ public class TestMvcClient {
      * @throws Exception
      */
     public Link discoverUnique(String rel) throws Exception {
-
         List<Link> discover = discover(rel);
         assertThat(discover).hasSize(1);
         return discover.get(0);
@@ -245,14 +258,15 @@ public class TestMvcClient {
      * @throws Exception
      */
     public Link discoverUnique(String... rels) throws Exception {
-
         Iterator<String> toTraverse = Arrays.asList(rels).iterator();
         Link lastLink = null;
 
         while (toTraverse.hasNext()) {
-
             String rel = toTraverse.next();
-            lastLink = lastLink == null ? discoverUnique(rel) : discoverUnique(lastLink, rel);
+            lastLink =
+                lastLink == null
+                    ? discoverUnique(rel)
+                    : discoverUnique(lastLink, rel);
         }
 
         return lastLink;
@@ -267,11 +281,12 @@ public class TestMvcClient {
      * @throws Exception
      */
     public List<Link> discover(Link root, String rel) throws Exception {
-
-        MockHttpServletResponse response = mvc.perform(get(root.expand().getHref()).accept(DEFAULT_MEDIA_TYPE)).//
-                                              andExpect(status().isOk()).//
-                                              andExpect(hasLinkWithRel(rel)).//
-                                              andReturn().getResponse();
+        MockHttpServletResponse response = mvc
+            .perform(get(root.expand().getHref()).accept(DEFAULT_MEDIA_TYPE))
+            .andExpect(status().isOk()) //
+            .andExpect(hasLinkWithRel(rel)) //
+            .andReturn() //
+            .getResponse();
 
         String s = response.getContentAsString();
         return getDiscoverer(response).findLinksWithRel(rel, s).toList();
@@ -298,15 +313,17 @@ public class TestMvcClient {
      * @return {@link org.springframework.hateoas.Link Link} tied to a given rel
      * @throws Exception
      */
-    public Link discoverUnique(Link root, String rel, MediaType mediaType) throws Exception {
-
+    public Link discoverUnique(Link root, String rel, MediaType mediaType)
+        throws Exception {
         MockHttpServletResponse response = mvc
-                                              .perform(get(root.expand().getHref())//
-                                                                                   .accept(mediaType))
-                                              .andExpect(status().isOk())//
-                                              .andExpect(hasLinkWithRel(rel))//
-                                              .andReturn()
-                                              .getResponse();
+            .perform(
+                get(root.expand().getHref()) //
+                    .accept(mediaType)
+            )
+            .andExpect(status().isOk()) //
+            .andExpect(hasLinkWithRel(rel)) //
+            .andReturn()
+            .getResponse();
 
         return assertHasLinkWithRel(rel, response);
     }
@@ -319,13 +336,22 @@ public class TestMvcClient {
      * @return {@link org.springframework.hateoas.Link} of the rel found in the response
      * @throws Exception
      */
-    public Link assertHasLinkWithRel(String rel, MockHttpServletResponse response) throws Exception {
-
+    public Link assertHasLinkWithRel(
+        String rel,
+        MockHttpServletResponse response
+    ) throws Exception {
         String content = response.getContentAsString();
-        Optional<Link> link = getDiscoverer(response).findLinkWithRel(rel, content);
+        Optional<Link> link = getDiscoverer(response)
+            .findLinkWithRel(rel, content);
 
         assertThat(link)
-            .describedAs("Expected to find link with rel " + rel + " but found none in " + content + "!")
+            .describedAs(
+                "Expected to find link with rel " +
+                rel +
+                " but found none in " +
+                content +
+                "!"
+            )
             .isPresent();
 
         return link.get();
@@ -338,18 +364,20 @@ public class TestMvcClient {
      * @return
      */
     public ResultMatcher hasLinkWithRel(final String rel) {
-
         return new ResultMatcher() {
-
             @Override
             public void match(MvcResult result) throws Exception {
-
                 MockHttpServletResponse response = result.getResponse();
                 String s = response.getContentAsString();
 
                 assertThat(getDiscoverer(response).findLinkWithRel(rel, s))
-                           .describedAs("Expected to find link with rel " + rel + " but found none in " + s)
-                           .isNotNull();
+                    .describedAs(
+                        "Expected to find link with rel " +
+                        rel +
+                        " but found none in " +
+                        s
+                    )
+                    .isNotNull();
             }
         };
     }
@@ -361,12 +389,17 @@ public class TestMvcClient {
      * @return {@link org.springframework.hateoas.client.LinkDiscoverer}
      */
     public LinkDiscoverer getDiscoverer(MockHttpServletResponse response) {
-
         String contentType = response.getContentType();
-        Optional<LinkDiscoverer> linkDiscovererFor = discoverers.getLinkDiscovererFor(contentType);
+        Optional<LinkDiscoverer> linkDiscovererFor = discoverers.getLinkDiscovererFor(
+            contentType
+        );
 
         assertThat(linkDiscovererFor)
-            .describedAs("Did not find a LinkDiscoverer for returned media type " + contentType + "!")
+            .describedAs(
+                "Did not find a LinkDiscoverer for returned media type " +
+                contentType +
+                "!"
+            )
             .isPresent();
 
         return linkDiscovererFor.get();

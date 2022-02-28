@@ -19,13 +19,16 @@ import org.activiti.api.process.model.events.BPMNMessageReceivedEvent;
 import org.activiti.api.process.runtime.events.listener.BPMNElementEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 
-public class CloudMessageReceivedProducer implements BPMNElementEventListener<BPMNMessageReceivedEvent> {
+public class CloudMessageReceivedProducer
+    implements BPMNElementEventListener<BPMNMessageReceivedEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudMessageReceivedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                        ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudMessageReceivedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

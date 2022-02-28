@@ -52,11 +52,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceAdminController.class)
-@Import({
+@Import(
+    {
         QueryRestWebMvcAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -90,45 +92,62 @@ public class ProcessInstanceEntityAdminControllerIT {
     private TaskRepository taskRepository;
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
-        given(processInstanceRepository.findAll(any(),
-                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                PageRequest.of(1,
-                        10),
-                11));
-
+        given(processInstanceRepository.findAll(any(), any(Pageable.class)))
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultProcessInstance()),
+                    PageRequest.of(1, 10),
+                    11
+                )
+            );
 
         //when
-        mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10")
-                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/admin/v1/process-instances?skipCount=10&maxItems=10")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
+    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson()
+        throws Exception {
         //given
         given(processInstanceRepository.findAll(any(), any(Pageable.class)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                PageRequest.of(1, 10),
-                11));
-
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultProcessInstance()),
+                    PageRequest.of(1, 10),
+                    11
+                )
+            );
 
         //when
-        mockMvc.perform(get("/admin/v1/process-instances?page=1&size=10")
-                .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/admin/v1/process-instances?page=1&size=10")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
-
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,
-                UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(),
-                ProcessInstance.ProcessInstanceStatus.RUNNING,
-                new Date());
+        return new ProcessInstanceEntity(
+            "My-app",
+            "My-app",
+            "1",
+            null,
+            null,
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(),
+            ProcessInstance.ProcessInstanceStatus.RUNNING,
+            new Date()
+        );
     }
-
 }

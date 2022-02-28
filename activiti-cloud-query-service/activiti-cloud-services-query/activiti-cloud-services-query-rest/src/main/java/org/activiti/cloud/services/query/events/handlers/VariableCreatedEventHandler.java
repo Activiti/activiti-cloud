@@ -23,21 +23,29 @@ import org.slf4j.LoggerFactory;
 
 public class VariableCreatedEventHandler implements QueryEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VariableCreatedEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        VariableCreatedEventHandler.class
+    );
 
     private final ProcessVariableCreatedEventHandler processVariableCreatedEventHandler;
     private final TaskVariableCreatedEventHandler taskVariableCreatedEventHandler;
 
-    public VariableCreatedEventHandler(TaskVariableCreatedEventHandler taskVariableCreatedEventHandler,
-                                       ProcessVariableCreatedEventHandler processVariableCreatedEventHandler) {
+    public VariableCreatedEventHandler(
+        TaskVariableCreatedEventHandler taskVariableCreatedEventHandler,
+        ProcessVariableCreatedEventHandler processVariableCreatedEventHandler
+    ) {
         this.taskVariableCreatedEventHandler = taskVariableCreatedEventHandler;
-        this.processVariableCreatedEventHandler = processVariableCreatedEventHandler;
+        this.processVariableCreatedEventHandler =
+            processVariableCreatedEventHandler;
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudVariableCreatedEvent variableCreatedEvent = (CloudVariableCreatedEvent) event;
-        LOGGER.debug("Handling variableEntity created event: " + variableCreatedEvent.getEntity().getName());
+        LOGGER.debug(
+            "Handling variableEntity created event: " +
+            variableCreatedEvent.getEntity().getName()
+        );
 
         try {
             if (variableCreatedEvent.getEntity().isTaskVariable()) {
@@ -45,10 +53,11 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
             } else {
                 processVariableCreatedEventHandler.handle(variableCreatedEvent);
             }
-
         } catch (Exception cause) {
-            LOGGER.error("Error handling VariableCreatedEvent[" + event + "]",
-                         cause);
+            LOGGER.error(
+                "Error handling VariableCreatedEvent[" + event + "]",
+                cause
+            );
         }
     }
 

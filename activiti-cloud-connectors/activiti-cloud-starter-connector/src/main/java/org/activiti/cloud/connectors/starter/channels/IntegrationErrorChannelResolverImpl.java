@@ -19,26 +19,28 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.MessageChannel;
 
-public class IntegrationErrorChannelResolverImpl implements IntegrationErrorChannelResolver {
+public class IntegrationErrorChannelResolverImpl
+    implements IntegrationErrorChannelResolver {
 
     private final BinderAwareChannelResolver resolver;
 
     private final IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder;
 
-    public IntegrationErrorChannelResolverImpl(BinderAwareChannelResolver resolver,
-                                               IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder) {
+    public IntegrationErrorChannelResolverImpl(
+        BinderAwareChannelResolver resolver,
+        IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder
+    ) {
         this.resolver = resolver;
-        this.integrationErrorDestinationBuilder = integrationErrorDestinationBuilder;
+        this.integrationErrorDestinationBuilder =
+            integrationErrorDestinationBuilder;
     }
 
     @Override
     public MessageChannel resolveDestination(IntegrationRequest event) {
-        String destination = integrationErrorDestinationBuilder.buildDestination(event);
+        String destination = integrationErrorDestinationBuilder.buildDestination(
+            event
+        );
 
         return resolver.resolveDestination(destination);
     }
-
-
-
-
 }

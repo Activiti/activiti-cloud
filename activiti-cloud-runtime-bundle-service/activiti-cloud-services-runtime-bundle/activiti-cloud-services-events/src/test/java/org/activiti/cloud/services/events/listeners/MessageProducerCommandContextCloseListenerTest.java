@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -53,9 +52,12 @@ import org.springframework.messaging.MessageChannel;
 
 public class MessageProducerCommandContextCloseListenerTest {
 
-    private static final String MOCK_ROUTING_KEY = "engineEvents.springAppName.appName";
-    private static final String MOCK_PARENT_PROCESS_NAME = "mockParentProcessName";
-    private static final String LORG_ACTIVITI_CLOUD_API_MODEL_SHARED_EVENTS_CLOUD_RUNTIME_EVENT = "[Lorg.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;";
+    private static final String MOCK_ROUTING_KEY =
+        "engineEvents.springAppName.appName";
+    private static final String MOCK_PARENT_PROCESS_NAME =
+        "mockParentProcessName";
+    private static final String LORG_ACTIVITI_CLOUD_API_MODEL_SHARED_EVENTS_CLOUD_RUNTIME_EVENT =
+        "[Lorg.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;";
     private static final String MOCK_PROCESS_NAME = "mockProcessName";
     private static final String SPRING_APP_NAME = "springAppName";
     private static final String SERVICE_VERSION = "serviceVersion";
@@ -64,13 +66,19 @@ public class MessageProducerCommandContextCloseListenerTest {
     private static final String MOCK_DEPLOYMENT_NAME = "mockDeploymentName";
     private static final String MOCK_DEPLOYMENT_ID = "mockDeploymentId";
     private static final int MOCK_PROCESS_DEFINITION_VERSION = 0;
-    private static final String MOCK_PROCESS_DEFINITION_KEY = "mockProcessDefinitionKey";
-    private static final String MOCK_PROCESS_DEFINITION_ID = "mockProcessDefinitionId";
-    private static final String MOCK_PARENT_PROCESS_INSTANCE_ID = "mockParentId";
-    private static final String MOCK_PROCESS_INSTANCE_ID = "mockProcessInstanceId";
+    private static final String MOCK_PROCESS_DEFINITION_KEY =
+        "mockProcessDefinitionKey";
+    private static final String MOCK_PROCESS_DEFINITION_ID =
+        "mockProcessDefinitionId";
+    private static final String MOCK_PARENT_PROCESS_INSTANCE_ID =
+        "mockParentId";
+    private static final String MOCK_PROCESS_INSTANCE_ID =
+        "mockProcessInstanceId";
     private static final String MOCK_BUSINESS_KEY = "mockBusinessKey";
-    private static final String MOCK_SUPER_EXECTUION_ID = "mockSuperExectuionId";
-    private static final String MOCK_PROCESS_DEFINITION_NAME = "mockProcessDefinitionName";
+    private static final String MOCK_SUPER_EXECTUION_ID =
+        "mockSuperExectuionId";
+    private static final String MOCK_PROCESS_DEFINITION_NAME =
+        "mockProcessDefinitionName";
 
     @InjectMocks
     private MessageProducerCommandContextCloseListener closeListener;
@@ -89,15 +97,16 @@ public class MessageProducerCommandContextCloseListenerTest {
     };
 
     @Spy
-    private ExecutionContextMessageBuilderFactory messageBuilderChainFactory =
-                new ExecutionContextMessageBuilderFactory(properties);
+    private ExecutionContextMessageBuilderFactory messageBuilderChainFactory = new ExecutionContextMessageBuilderFactory(
+        properties
+    );
 
     private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     @Spy
-    private RuntimeBundleInfoAppender runtimeBundleInfoAppender =
-                new RuntimeBundleInfoAppender(properties);
-
+    private RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(
+        properties
+    );
 
     @Mock
     private MessageChannel auditChannel;
@@ -118,41 +127,53 @@ public class MessageProducerCommandContextCloseListenerTest {
 
         when(producer.auditProducer()).thenReturn(auditChannel);
 
-        processEngineEventsAggregator = spy(new ProcessEngineEventsAggregator(closeListener));
+        processEngineEventsAggregator =
+            spy(new ProcessEngineEventsAggregator(closeListener));
 
-        when(processEngineEventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
+        when(processEngineEventsAggregator.getCurrentCommandContext())
+            .thenReturn(commandContext);
 
         ExecutionContext executionContext = mockExecutionContext();
         given(commandContext.getGenericAttribute(event.getEntityId()))
-                .willReturn(executionContext);
-
+            .willReturn(executionContext);
     }
 
     @Test
     public void closedShouldSendEventsRegisteredOnTheCommandContext() {
         // given
         processEngineEventsAggregator.add(event);
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-                .willReturn(Collections.singletonList(event));
+        given(
+            commandContext.getGenericAttribute(
+                MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS
+            )
+        )
+            .willReturn(Collections.singletonList(event));
 
         // when
         closeListener.closed(commandContext);
 
         // then
         verify(auditChannel).send(messageArgumentCaptor.capture());
-        assertThat(messageArgumentCaptor.getValue()
-                                        .getPayload()).containsExactly(event);
+        assertThat(messageArgumentCaptor.getValue().getPayload())
+            .containsExactly(event);
 
-        CloudRuntimeEvent<?, ?>[] result = messageArgumentCaptor.getValue().getPayload();
+        CloudRuntimeEvent<?, ?>[] result = messageArgumentCaptor
+            .getValue()
+            .getPayload();
 
         assertThat(result).hasSize(1);
 
-        assertThat(result[0].getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
-        assertThat(result[0].getParentProcessInstanceId()).isEqualTo(MOCK_PARENT_PROCESS_INSTANCE_ID);
+        assertThat(result[0].getProcessInstanceId())
+            .isEqualTo(MOCK_PROCESS_INSTANCE_ID);
+        assertThat(result[0].getParentProcessInstanceId())
+            .isEqualTo(MOCK_PARENT_PROCESS_INSTANCE_ID);
         assertThat(result[0].getBusinessKey()).isEqualTo(MOCK_BUSINESS_KEY);
-        assertThat(result[0].getProcessDefinitionId()).isEqualTo(MOCK_PROCESS_DEFINITION_ID);
-        assertThat(result[0].getProcessDefinitionKey()).isEqualTo(MOCK_PROCESS_DEFINITION_KEY);
-        assertThat(result[0].getProcessDefinitionVersion()).isEqualTo(MOCK_PROCESS_DEFINITION_VERSION);
+        assertThat(result[0].getProcessDefinitionId())
+            .isEqualTo(MOCK_PROCESS_DEFINITION_ID);
+        assertThat(result[0].getProcessDefinitionKey())
+            .isEqualTo(MOCK_PROCESS_DEFINITION_KEY);
+        assertThat(result[0].getProcessDefinitionVersion())
+            .isEqualTo(MOCK_PROCESS_DEFINITION_VERSION);
 
         assertThat(result[0].getAppName()).isEqualTo(APP_NAME);
         assertThat(result[0].getServiceName()).isEqualTo(SPRING_APP_NAME);
@@ -163,51 +184,63 @@ public class MessageProducerCommandContextCloseListenerTest {
     @Test
     public void closedShouldDoNothingWhenRegisteredEventsIsNull() {
         // given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-                .willReturn(null);
+        given(
+            commandContext.getGenericAttribute(
+                MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS
+            )
+        )
+            .willReturn(null);
 
         // when
         closeListener.closed(commandContext);
 
         // then
-        verify(auditChannel,
-               never()).send(any());
+        verify(auditChannel, never()).send(any());
     }
 
     @Test
     public void closedShouldDoNothingWhenRegisteredEventsIsEmpty() {
         // given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-                .willReturn(Collections.emptyList());
+        given(
+            commandContext.getGenericAttribute(
+                MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS
+            )
+        )
+            .willReturn(Collections.emptyList());
 
         // when
         closeListener.closed(commandContext);
 
         // then
-        verify(auditChannel,
-               never()).send(any());
+        verify(auditChannel, never()).send(any());
     }
 
     @Test
     public void closedShouldSendMessageHeadersWithExecutionContext() {
         // given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-                .willReturn(Collections.singletonList(event));
+        given(
+            commandContext.getGenericAttribute(
+                MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS
+            )
+        )
+            .willReturn(Collections.singletonList(event));
 
         // when
         closeListener.closed(commandContext);
 
         // then
         verify(auditChannel).send(messageArgumentCaptor.capture());
-        assertThat(messageArgumentCaptor.getValue()
-                                        .getHeaders()).containsEntry("routingKey", MOCK_ROUTING_KEY)
-                                                      .containsEntry("messagePayloadType",LORG_ACTIVITI_CLOUD_API_MODEL_SHARED_EVENTS_CLOUD_RUNTIME_EVENT)
-                                                      .containsEntry("appName", APP_NAME)
-                                                      .containsEntry("serviceName",SPRING_APP_NAME)
-                                                      .containsEntry("serviceType", SERVICE_TYPE)
-                                                      .containsEntry("serviceVersion", SERVICE_VERSION)
-                                                      .containsEntry("serviceFullName",SPRING_APP_NAME);
-
+        assertThat(messageArgumentCaptor.getValue().getHeaders())
+            .containsEntry("routingKey", MOCK_ROUTING_KEY)
+            .containsEntry(
+                "messagePayloadType",
+                LORG_ACTIVITI_CLOUD_API_MODEL_SHARED_EVENTS_CLOUD_RUNTIME_EVENT
+            )
+            .containsEntry("appName", APP_NAME)
+            .containsEntry("serviceName", SPRING_APP_NAME)
+            .containsEntry("serviceType", SERVICE_TYPE)
+            .containsEntry("serviceVersion", SERVICE_VERSION)
+            .containsEntry("serviceFullName", SPRING_APP_NAME);
     }
 
     private ExecutionContext mockExecutionContext() {
@@ -225,19 +258,27 @@ public class MessageProducerCommandContextCloseListenerTest {
         when(processInstance.getName()).thenReturn(MOCK_PROCESS_NAME);
 
         ExecutionEntity superExectuion = mock(ExecutionEntity.class);
-        when(processInstance.getSuperExecutionId()).thenReturn(MOCK_SUPER_EXECTUION_ID);
+        when(processInstance.getSuperExecutionId())
+            .thenReturn(MOCK_SUPER_EXECTUION_ID);
         when(processInstance.getSuperExecution()).thenReturn(superExectuion);
 
         ExecutionEntity parentProcessInstance = mock(ExecutionEntity.class);
-        when(superExectuion.getProcessInstanceId()).thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
-        when(superExectuion.getProcessInstance()).thenReturn(parentProcessInstance);
-        when(parentProcessInstance.getId()).thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
-        when(parentProcessInstance.getName()).thenReturn(MOCK_PARENT_PROCESS_NAME);
+        when(superExectuion.getProcessInstanceId())
+            .thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
+        when(superExectuion.getProcessInstance())
+            .thenReturn(parentProcessInstance);
+        when(parentProcessInstance.getId())
+            .thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
+        when(parentProcessInstance.getName())
+            .thenReturn(MOCK_PARENT_PROCESS_NAME);
 
         when(processDefinition.getId()).thenReturn(MOCK_PROCESS_DEFINITION_ID);
-        when(processDefinition.getKey()).thenReturn(MOCK_PROCESS_DEFINITION_KEY);
-        when(processDefinition.getVersion()).thenReturn(MOCK_PROCESS_DEFINITION_VERSION);
-        when(processDefinition.getName()).thenReturn(MOCK_PROCESS_DEFINITION_NAME);
+        when(processDefinition.getKey())
+            .thenReturn(MOCK_PROCESS_DEFINITION_KEY);
+        when(processDefinition.getVersion())
+            .thenReturn(MOCK_PROCESS_DEFINITION_VERSION);
+        when(processDefinition.getName())
+            .thenReturn(MOCK_PROCESS_DEFINITION_NAME);
 
         when(deploymentEntity.getId()).thenReturn(MOCK_DEPLOYMENT_ID);
         when(deploymentEntity.getName()).thenReturn(MOCK_DEPLOYMENT_NAME);

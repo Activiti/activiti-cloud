@@ -15,14 +15,11 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.springframework.data.repository.support.PageableExecutionUtils.getPage;
-
-import org.activiti.cloud.modeling.api.ModelType;
-import org.activiti.cloud.modeling.api.ProcessModelType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import static org.springframework.data.repository.support.PageableExecutionUtils.getPage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,16 +29,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ProcessModelType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
-import static org.springframework.data.repository.support.PageableExecutionUtils.getPage;
 
 /**
  * Handler for model types
@@ -54,15 +51,22 @@ public class ModelTypeService {
 
     @Autowired
     public ModelTypeService(Set<ModelType> availableModelTypes) {
-        this.modelTypesMapByName = availableModelTypes
+        this.modelTypesMapByName =
+            availableModelTypes
                 .stream()
-                .collect(Collectors.toMap(ModelType::getName,
-                                          Function.identity()));
+                .collect(
+                    Collectors.toMap(ModelType::getName, Function.identity())
+                );
 
-        this.modelTypesMapByFolderName = availableModelTypes
+        this.modelTypesMapByFolderName =
+            availableModelTypes
                 .stream()
-                .collect(Collectors.toMap(ModelType::getFolderName,
-                                          Function.identity()));
+                .collect(
+                    Collectors.toMap(
+                        ModelType::getFolderName,
+                        Function.identity()
+                    )
+                );
     }
 
     public Optional<ModelType> findModelTypeByName(String name) {
@@ -78,21 +82,30 @@ public class ModelTypeService {
     }
 
     public Page<ModelType> getModelTypeNames(Pageable pageable) {
-        List<ModelType> availableModelTypeNames = new ArrayList<>(getAvailableModelTypes());
-        return getPage(availableModelTypeNames,
-                       pageable,
-                       availableModelTypeNames::size);
+        List<ModelType> availableModelTypeNames = new ArrayList<>(
+            getAvailableModelTypes()
+        );
+        return getPage(
+            availableModelTypeNames,
+            pageable,
+            availableModelTypeNames::size
+        );
     }
 
     public boolean isJson(ModelType modelType) {
         return JSON.equals(modelType.getContentFileExtension());
     }
 
-    public  boolean isContentXML(ModelType modelType) {
-      return CONTENT_TYPE_XML.equalsIgnoreCase(modelType.getContentFileExtension());
+    public boolean isContentXML(ModelType modelType) {
+        return CONTENT_TYPE_XML.equalsIgnoreCase(
+            modelType.getContentFileExtension()
+        );
     }
 
     public boolean isProcessContnent(ModelType modelType) {
-      return this.isContentXML(modelType) && ProcessModelType.PROCESS.contains(modelType.getName());
+        return (
+            this.isContentXML(modelType) &&
+            ProcessModelType.PROCESS.contains(modelType.getName())
+        );
     }
 }

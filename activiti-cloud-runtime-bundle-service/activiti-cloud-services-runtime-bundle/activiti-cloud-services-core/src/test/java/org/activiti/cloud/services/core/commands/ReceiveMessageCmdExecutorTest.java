@@ -20,7 +20,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
-
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,11 +42,14 @@ public class ReceiveMessageCmdExecutorTest {
 
     @Test
     public void signalProcessInstancesCmdExecutorTest() {
-        ReceiveMessagePayload payload = new ReceiveMessagePayload("messageName",
-                                                                  "correlationKey",
-                                                                  Collections.emptyMap());
+        ReceiveMessagePayload payload = new ReceiveMessagePayload(
+            "messageName",
+            "correlationKey",
+            Collections.emptyMap()
+        );
 
-        assertThat(subject.getHandledType()).isEqualTo(ReceiveMessagePayload.class.getName());
+        assertThat(subject.getHandledType())
+            .isEqualTo(ReceiveMessagePayload.class.getName());
 
         subject.execute(payload);
 

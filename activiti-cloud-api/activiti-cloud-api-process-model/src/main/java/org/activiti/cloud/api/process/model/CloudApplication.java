@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.api.process.model;
 
-public interface CloudApplication  {
+public interface CloudApplication {
     String getName();
 
     String getId();

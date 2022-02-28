@@ -15,23 +15,29 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecrementedEvent;
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
-@Entity(name = TimerRetriesDecrementedAuditEventEntity.TIMER_RETRIES_DECREMENTED_EVENT)
-@DiscriminatorValue(value = TimerRetriesDecrementedAuditEventEntity.TIMER_RETRIES_DECREMENTED_EVENT)
+@Entity(
+    name = TimerRetriesDecrementedAuditEventEntity.TIMER_RETRIES_DECREMENTED_EVENT
+)
+@DiscriminatorValue(
+    value = TimerRetriesDecrementedAuditEventEntity.TIMER_RETRIES_DECREMENTED_EVENT
+)
 @DynamicInsert
-public class TimerRetriesDecrementedAuditEventEntity extends TimerAuditEventEntity {
+public class TimerRetriesDecrementedAuditEventEntity
+    extends TimerAuditEventEntity {
 
-    protected static final String TIMER_RETRIES_DECREMENTED_EVENT = "TimerRetriesDecrementedEvent";
+    protected static final String TIMER_RETRIES_DECREMENTED_EVENT =
+        "TimerRetriesDecrementedEvent";
 
-    public TimerRetriesDecrementedAuditEventEntity() {
-    }
+    public TimerRetriesDecrementedAuditEventEntity() {}
 
-    public TimerRetriesDecrementedAuditEventEntity(CloudBPMNTimerRetriesDecrementedEvent cloudEvent) {
+    public TimerRetriesDecrementedAuditEventEntity(
+        CloudBPMNTimerRetriesDecrementedEvent cloudEvent
+    ) {
         super(cloudEvent);
     }
 
@@ -39,5 +45,4 @@ public class TimerRetriesDecrementedAuditEventEntity extends TimerAuditEventEnti
     public int hashCode() {
         return super.hashCode();
     }
-
 }

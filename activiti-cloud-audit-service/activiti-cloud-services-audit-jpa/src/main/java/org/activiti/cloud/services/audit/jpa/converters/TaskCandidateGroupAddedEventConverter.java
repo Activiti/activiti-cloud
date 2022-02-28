@@ -23,28 +23,39 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAdde
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskCandidateGroupAddedEventEntity;
 
-public class TaskCandidateGroupAddedEventConverter extends BaseEventToEntityConverter {
+public class TaskCandidateGroupAddedEventConverter
+    extends BaseEventToEntityConverter {
 
-    public TaskCandidateGroupAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TaskCandidateGroupAddedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name();
     }
 
     @Override
-    public TaskCandidateGroupAddedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {          
-        return new TaskCandidateGroupAddedEventEntity((CloudTaskCandidateGroupAddedEvent) cloudRuntimeEvent);
+    public TaskCandidateGroupAddedEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new TaskCandidateGroupAddedEventEntity(
+            (CloudTaskCandidateGroupAddedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         TaskCandidateGroupAddedEventEntity eventEntity = (TaskCandidateGroupAddedEventEntity) auditEventEntity;
 
-        return new CloudTaskCandidateGroupAddedEventImpl(eventEntity.getEventId(),
-                                                         eventEntity.getTimestamp(),
-                                                         eventEntity.getCandidateGroup());
+        return new CloudTaskCandidateGroupAddedEventImpl(
+            eventEntity.getEventId(),
+            eventEntity.getTimestamp(),
+            eventEntity.getCandidateGroup()
+        );
     }
 }

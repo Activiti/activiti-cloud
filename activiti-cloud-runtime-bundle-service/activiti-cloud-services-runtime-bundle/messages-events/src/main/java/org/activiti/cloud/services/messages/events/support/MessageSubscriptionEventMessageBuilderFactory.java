@@ -24,12 +24,21 @@ public class MessageSubscriptionEventMessageBuilderFactory {
 
     private final RuntimeBundleProperties properties;
 
-    public MessageSubscriptionEventMessageBuilderFactory(RuntimeBundleProperties properties) {
+    public MessageSubscriptionEventMessageBuilderFactory(
+        RuntimeBundleProperties properties
+    ) {
         this.properties = properties;
     }
 
-    public MessageBuilderAppenderChain create(MessageSubscription messageSubscription) {
-        return new MessageBuilderAppenderChain().chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                                                .chain(new MessageSubscriptionMessageBuilderAppender(messageSubscription));
+    public MessageBuilderAppenderChain create(
+        MessageSubscription messageSubscription
+    ) {
+        return new MessageBuilderAppenderChain()
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+            .chain(
+                new MessageSubscriptionMessageBuilderAppender(
+                    messageSubscription
+                )
+            );
     }
 }

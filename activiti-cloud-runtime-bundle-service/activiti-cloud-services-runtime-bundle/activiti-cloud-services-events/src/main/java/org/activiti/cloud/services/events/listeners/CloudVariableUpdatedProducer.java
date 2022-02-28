@@ -19,13 +19,16 @@ import org.activiti.api.model.shared.event.VariableUpdatedEvent;
 import org.activiti.api.runtime.shared.events.VariableEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudVariableEventConverter;
 
-public class CloudVariableUpdatedProducer implements VariableEventListener<VariableUpdatedEvent> {
+public class CloudVariableUpdatedProducer
+    implements VariableEventListener<VariableUpdatedEvent> {
 
     private ToCloudVariableEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudVariableUpdatedProducer(ToCloudVariableEventConverter converter,
-                                        ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudVariableUpdatedProducer(
+        ToCloudVariableEventConverter converter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }
@@ -34,5 +37,4 @@ public class CloudVariableUpdatedProducer implements VariableEventListener<Varia
     public void onEvent(VariableUpdatedEvent event) {
         eventsAggregator.add(converter.from(event));
     }
-
 }

@@ -28,7 +28,10 @@ class PropagateCloudBpmnErrorCmd implements Command<Void> {
     private final DelegateExecution execution;
     private final IntegrationError integrationError;
 
-    PropagateCloudBpmnErrorCmd(IntegrationError integrationError, DelegateExecution execution) {
+    PropagateCloudBpmnErrorCmd(
+        IntegrationError integrationError,
+        DelegateExecution execution
+    ) {
         this.integrationError = integrationError;
         this.execution = execution;
     }
@@ -36,7 +39,8 @@ class PropagateCloudBpmnErrorCmd implements Command<Void> {
     @Override
     public Void execute(CommandContext commandContext) {
         // Fallback to error message for backward compatibility
-        String errorCode = Optional.ofNullable(integrationError.getErrorCode())
+        String errorCode = Optional
+            .ofNullable(integrationError.getErrorCode())
             .orElse(integrationError.getErrorMessage());
 
         propagateError(errorCode);
@@ -46,8 +50,6 @@ class PropagateCloudBpmnErrorCmd implements Command<Void> {
 
     protected void propagateError(String errorCode) {
         // throw business fault so that it can be caught by an Error Intermediate Event or Error Event Sub-Process in the process
-        ErrorPropagation.propagateError(errorCode,
-            execution);
+        ErrorPropagation.propagateError(errorCode, execution);
     }
-
 }

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
+import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -22,35 +23,58 @@ import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
-import java.util.Map;
-
 public class IntegrationResultBuilder {
 
     private IntegrationRequest requestEvent;
 
     private IntegrationResultImpl integrationResult;
 
-
-    private IntegrationResultBuilder(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
+    private IntegrationResultBuilder(
+        IntegrationRequest integrationRequest,
+        ConnectorProperties connectorProperties
+    ) {
         this.requestEvent = integrationRequest;
-        this.integrationResult = new IntegrationResultImpl(integrationRequest, integrationRequest.getIntegrationContext());
-        if(connectorProperties != null) {
+        this.integrationResult =
+            new IntegrationResultImpl(
+                integrationRequest,
+                integrationRequest.getIntegrationContext()
+            );
+        if (connectorProperties != null) {
             this.integrationResult.setAppName(connectorProperties.getAppName());
-            this.integrationResult.setAppVersion(connectorProperties.getAppVersion());
-            this.integrationResult.setServiceFullName(connectorProperties.getServiceFullName());
-            this.integrationResult.setServiceType(connectorProperties.getServiceType());
-            this.integrationResult.setServiceVersion(connectorProperties.getServiceVersion());
-            this.integrationResult.setServiceName(connectorProperties.getServiceName());
+            this.integrationResult.setAppVersion(
+                    connectorProperties.getAppVersion()
+                );
+            this.integrationResult.setServiceFullName(
+                    connectorProperties.getServiceFullName()
+                );
+            this.integrationResult.setServiceType(
+                    connectorProperties.getServiceType()
+                );
+            this.integrationResult.setServiceVersion(
+                    connectorProperties.getServiceVersion()
+                );
+            this.integrationResult.setServiceName(
+                    connectorProperties.getServiceName()
+                );
         }
-
     }
 
-    public static IntegrationResultBuilder resultFor(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
-        return new IntegrationResultBuilder(integrationRequest, connectorProperties);
+    public static IntegrationResultBuilder resultFor(
+        IntegrationRequest integrationRequest,
+        ConnectorProperties connectorProperties
+    ) {
+        return new IntegrationResultBuilder(
+            integrationRequest,
+            connectorProperties
+        );
     }
 
-    public IntegrationResultBuilder withOutboundVariables(Map<String, Object> variables) {
-        integrationResult.getIntegrationContext().addOutBoundVariables(variables);
+    public IntegrationResultBuilder withOutboundVariables(
+        Map<String, Object> variables
+    ) {
+        integrationResult
+            .getIntegrationContext()
+            .addOutBoundVariables(variables);
         return this;
     }
 
@@ -63,8 +87,9 @@ public class IntegrationResultBuilder {
     }
 
     public MessageBuilder<IntegrationResult> getMessageBuilder() {
-        return MessageBuilder.withPayload((IntegrationResult)integrationResult)
-                             .setHeader("targetAppName", requestEvent.getAppName())
-                             .setHeader("targetService", requestEvent.getServiceFullName());
+        return MessageBuilder
+            .withPayload((IntegrationResult) integrationResult)
+            .setHeader("targetAppName", requestEvent.getAppName())
+            .setHeader("targetService", requestEvent.getServiceFullName());
     }
 }

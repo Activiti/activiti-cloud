@@ -15,6 +15,17 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -25,18 +36,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityCompletedEventHandlerTest {
 
@@ -57,12 +56,13 @@ public class TaskEntityCompletedEventHandlerTest {
         CloudTaskCompletedEventImpl event = buildTaskCompletedEvent();
         String taskId = event.getEntity().getId();
         TaskEntity eventTaskEntity = aTask()
-                                    .withId(taskId)
-                                    .withCreatedDate(new Date(System.currentTimeMillis() - 86400000L))
-                                    .withCompletedDate(new Date())
-                                    .build();
+            .withId(taskId)
+            .withCreatedDate(new Date(System.currentTimeMillis() - 86400000L))
+            .withCompletedDate(new Date())
+            .build();
 
-        given(entityManager.find(TaskEntity.class, taskId)).willReturn(eventTaskEntity);
+        given(entityManager.find(TaskEntity.class, taskId))
+            .willReturn(eventTaskEntity);
 
         //when
         handler.handle(event);
@@ -74,9 +74,13 @@ public class TaskEntityCompletedEventHandlerTest {
     }
 
     private CloudTaskCompletedEventImpl buildTaskCompletedEvent() {
-        return new CloudTaskCompletedEventImpl(new TaskImpl(UUID.randomUUID().toString(),
-                                                            "my task",
-                                                            Task.TaskStatus.COMPLETED));
+        return new CloudTaskCompletedEventImpl(
+            new TaskImpl(
+                UUID.randomUUID().toString(),
+                "my task",
+                Task.TaskStatus.COMPLETED
+            )
+        );
     }
 
     @Test
@@ -99,6 +103,7 @@ public class TaskEntityCompletedEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name());
+        assertThat(handledEvent)
+            .isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name());
     }
 }

@@ -22,15 +22,21 @@ public class ProcessInstanceFilter implements ProcessDefinitionKeyBasedFilter {
 
     @Override
     public ProcessDefinitionRestrictionProperties getRestrictionProperties() {
-        QProcessInstanceEntity qProcessInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
-        return new ProcessDefinitionRestrictionProperties(qProcessInstanceEntity.serviceName,
-                                                          qProcessInstanceEntity.serviceFullName,
-                                                          qProcessInstanceEntity.processDefinitionKey);
+        QProcessInstanceEntity qProcessInstanceEntity =
+            QProcessInstanceEntity.processInstanceEntity;
+        return new ProcessDefinitionRestrictionProperties(
+            qProcessInstanceEntity.serviceName,
+            qProcessInstanceEntity.serviceFullName,
+            qProcessInstanceEntity.processDefinitionKey
+        );
     }
 
     @Override
     public Predicate buildImpossiblePredicate() {
-        QProcessInstanceEntity qProcessInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
-        return qProcessInstanceEntity.id.eq("1").and(qProcessInstanceEntity.id.eq("2"));
+        QProcessInstanceEntity qProcessInstanceEntity =
+            QProcessInstanceEntity.processInstanceEntity;
+        return qProcessInstanceEntity.id
+            .eq("1")
+            .and(qProcessInstanceEntity.id.eq("2"));
     }
 }

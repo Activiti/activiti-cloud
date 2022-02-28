@@ -19,13 +19,16 @@ import org.activiti.api.task.runtime.events.TaskCandidateUserAddedEvent;
 import org.activiti.api.task.runtime.events.listener.TaskCandidateEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
 
-public class CloudTaskCandidateUserAddedProducer implements TaskCandidateEventListener<TaskCandidateUserAddedEvent> {
+public class CloudTaskCandidateUserAddedProducer
+    implements TaskCandidateEventListener<TaskCandidateUserAddedEvent> {
 
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTaskCandidateUserAddedProducer(ToCloudTaskRuntimeEventConverter converter,
-                                               ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTaskCandidateUserAddedProducer(
+        ToCloudTaskRuntimeEventConverter converter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }

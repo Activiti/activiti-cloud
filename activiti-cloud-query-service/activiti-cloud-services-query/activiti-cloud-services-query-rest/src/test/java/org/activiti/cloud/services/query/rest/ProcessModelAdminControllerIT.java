@@ -49,11 +49,13 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessModelAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({
-    QueryRestWebMvcAutoConfiguration.class,
-    CommonModelAutoConfiguration.class,
-    AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    {
+        QueryRestWebMvcAutoConfiguration.class,
+        CommonModelAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @WithMockUser
 public class ProcessModelAdminControllerIT {
 
@@ -86,16 +88,31 @@ public class ProcessModelAdminControllerIT {
         //given
         String processDefinitionId = UUID.randomUUID().toString();
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-                .willReturn(new ProcessModelEntity(new ProcessDefinitionEntity(), "<model/>"));
+        given(
+            entityFinder.findById(
+                eq(processModelRepository),
+                eq(processDefinitionId),
+                anyString()
+            )
+        )
+            .willReturn(
+                new ProcessModelEntity(
+                    new ProcessDefinitionEntity(),
+                    "<model/>"
+                )
+            );
 
         //when
-        mockMvc.perform(get("/admin/v1/process-definitions/{processDefinitionId}/model",
-                            processDefinitionId)
-                                .accept(MediaType.APPLICATION_XML_VALUE))
-                //then
-                .andExpect(status().isOk())
-                .andExpect(content().xml("<model/>"));
+        mockMvc
+            .perform(
+                get(
+                    "/admin/v1/process-definitions/{processDefinitionId}/model",
+                    processDefinitionId
+                )
+                    .accept(MediaType.APPLICATION_XML_VALUE)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andExpect(content().xml("<model/>"));
     }
-
 }

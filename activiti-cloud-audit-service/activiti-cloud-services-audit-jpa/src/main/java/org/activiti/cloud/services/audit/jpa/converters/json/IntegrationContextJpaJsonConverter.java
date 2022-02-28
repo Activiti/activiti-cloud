@@ -17,7 +17,8 @@ package org.activiti.cloud.services.audit.jpa.converters.json;
 
 import org.activiti.api.process.model.IntegrationContext;
 
-public class IntegrationContextJpaJsonConverter extends JpaJsonConverter<IntegrationContext> {
+public class IntegrationContextJpaJsonConverter
+    extends JpaJsonConverter<IntegrationContext> {
 
     public IntegrationContextJpaJsonConverter() {
         super(IntegrationContext.class);

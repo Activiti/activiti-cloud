@@ -37,15 +37,28 @@ public class ActivitiCloudEngineAutoConfiguration {
 
     @Bean(BEHAVIOR_FACTORY_MAPPING_CONFIGURER)
     @ConditionalOnMissingBean(name = BEHAVIOR_FACTORY_MAPPING_CONFIGURER)
-    public SignalBehaviourConfigurer signalBehaviourConfigurator(ApplicationContext applicationContext,
-        ExtensionsVariablesMappingProvider variablesMappingProvider, ProcessVariablesInitiator processVariablesInitiator,
-        EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider, VariablesPropagator variablesPropagator) {
-        return new SignalBehaviourConfigurer(applicationContext, variablesMappingProvider, processVariablesInitiator,
-            eventSubscriptionPayloadMappingProvider, variablesPropagator);
+    public SignalBehaviourConfigurer signalBehaviourConfigurator(
+        ApplicationContext applicationContext,
+        ExtensionsVariablesMappingProvider variablesMappingProvider,
+        ProcessVariablesInitiator processVariablesInitiator,
+        EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider,
+        VariablesPropagator variablesPropagator
+    ) {
+        return new SignalBehaviourConfigurer(
+            applicationContext,
+            variablesMappingProvider,
+            processVariablesInitiator,
+            eventSubscriptionPayloadMappingProvider,
+            variablesPropagator
+        );
     }
 
     @Bean
-    public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(ActivitiMessagingDestinationTransformer destinationTransformer) {
-        return new ActivitiConnectorDestinationMappingStrategy(destinationTransformer);
+    public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(
+        ActivitiMessagingDestinationTransformer destinationTransformer
+    ) {
+        return new ActivitiConnectorDestinationMappingStrategy(
+            destinationTransformer
+        );
     }
 }

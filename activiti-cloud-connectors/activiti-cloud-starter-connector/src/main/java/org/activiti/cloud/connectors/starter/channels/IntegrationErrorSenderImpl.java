@@ -24,13 +24,17 @@ public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
     private final IntegrationErrorChannelResolver resolver;
 
-    public IntegrationErrorSenderImpl(IntegrationErrorChannelResolver resolver) {
+    public IntegrationErrorSenderImpl(
+        IntegrationErrorChannelResolver resolver
+    ) {
         this.resolver = resolver;
     }
 
     @Override
     public void send(Message<IntegrationError> message) {
-        IntegrationRequest request = message.getPayload().getIntegrationRequest();
+        IntegrationRequest request = message
+            .getPayload()
+            .getIntegrationRequest();
 
         MessageChannel destination = resolver.resolveDestination(request);
 

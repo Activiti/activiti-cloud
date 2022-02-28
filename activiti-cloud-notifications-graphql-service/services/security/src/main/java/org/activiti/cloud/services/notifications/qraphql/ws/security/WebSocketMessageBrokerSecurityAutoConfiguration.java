@@ -25,38 +25,60 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
 @Configuration
-@ConditionalOnProperty(name="spring.activiti.cloud.services.notification.graphql.ws.security.enabled", matchIfMissing = true)
+@ConditionalOnProperty(
+    name = "spring.activiti.cloud.services.notification.graphql.ws.security.enabled",
+    matchIfMissing = true
+)
 @Import(WebSocketMessageBrokerSecurityConfigurer.class)
 public class WebSocketMessageBrokerSecurityAutoConfiguration {
 
     @Configuration
-    @PropertySources(value= {
-            @PropertySource(value="classpath:META-INF/graphql-security.properties"),
-            @PropertySource(value="classpath:graphql-security.properties", ignoreResourceNotFound = true)
-    })
+    @PropertySources(
+        value = {
+            @PropertySource(
+                value = "classpath:META-INF/graphql-security.properties"
+            ),
+            @PropertySource(
+                value = "classpath:graphql-security.properties",
+                ignoreResourceNotFound = true
+            ),
+        }
+    )
     public static class DefaultWebSocketMessageBrokerSecurityConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public JWSAuthenticationInterceptorConfigurer jwsTokenChannelSecurityContextConfigurer(JWSAuthenticationManager keycloakWebSocketAuthManager) {
-            return new JWSAuthenticationInterceptorConfigurer(keycloakWebSocketAuthManager);
+        public JWSAuthenticationInterceptorConfigurer jwsTokenChannelSecurityContextConfigurer(
+            JWSAuthenticationManager keycloakWebSocketAuthManager
+        ) {
+            return new JWSAuthenticationInterceptorConfigurer(
+                keycloakWebSocketAuthManager
+            );
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
-        public KeycloakSecurityContextInerceptorConfigurer jwsTokenChannelAuthenticationConfigurer(KeycloakAccessTokenVerifier keycloakTokenVerifier) {
-            return new KeycloakSecurityContextInerceptorConfigurer(keycloakTokenVerifier);
+        public KeycloakSecurityContextInerceptorConfigurer jwsTokenChannelAuthenticationConfigurer(
+            KeycloakAccessTokenVerifier keycloakTokenVerifier
+        ) {
+            return new KeycloakSecurityContextInerceptorConfigurer(
+                keycloakTokenVerifier
+            );
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
-        public KeycloakAccessTokenVerifier keycloakTokenVerifier(KeycloakProperties keycloakProperties) {
+        public KeycloakAccessTokenVerifier keycloakTokenVerifier(
+            KeycloakProperties keycloakProperties
+        ) {
             return new KeycloakAccessTokenVerifier(keycloakProperties);
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
-        public JWSAuthenticationManager keycloakWebSocketAuthManager(KeycloakAccessTokenVerifier keycloakTokenVerifier) {
+        public JWSAuthenticationManager keycloakWebSocketAuthManager(
+            KeycloakAccessTokenVerifier keycloakTokenVerifier
+        ) {
             return new JWSAuthenticationManager(keycloakTokenVerifier);
         }
     }

@@ -24,7 +24,6 @@ import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenV
 import org.junit.jupiter.api.Test;
 import org.keycloak.representations.AccessToken;
 
-
 public class KeycloakAccessTokenValidatorTest {
 
     private KeycloakAccessTokenValidator subject = new KeycloakAccessTokenValidator() {};
@@ -63,10 +62,11 @@ public class KeycloakAccessTokenValidatorTest {
         AccessToken accessToken = null;
 
         // when
-        Throwable result = catchThrowable(() -> { subject.isValid(accessToken); });
+        Throwable result = catchThrowable(() -> {
+            subject.isValid(accessToken);
+        });
 
         // then
         assertThat(result).isInstanceOf(SecurityException.class);
     }
-
 }

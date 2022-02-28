@@ -19,13 +19,16 @@ import org.activiti.api.process.runtime.events.ProcessCancelledEvent;
 import org.activiti.api.process.runtime.events.listener.ProcessEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 
-public class CloudProcessCancelledProducer implements ProcessEventListener<ProcessCancelledEvent> {
+public class CloudProcessCancelledProducer
+    implements ProcessEventListener<ProcessCancelledEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudProcessCancelledProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                         ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudProcessCancelledProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

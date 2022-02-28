@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.Collection;
+import java.util.List;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.task.model.Task;
@@ -29,11 +31,8 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.CollectionModel;
-
-import java.util.Collection;
-import java.util.List;
+import org.springframework.hateoas.PagedModel;
 
 @EnableRuntimeFeignContext
 public class TaskQuerySteps {
@@ -51,104 +50,132 @@ public class TaskQuerySteps {
     }
 
     @Step
-    public void checkTaskStatus(String taskId,
-                                Task.TaskStatus expectedStatus) {
-
-        await().untilAsserted(() -> assertThat(taskQueryService.queryTasksByIdAnsStatus(taskId,
-                expectedStatus).getContent())
-                .isNotNull()
-                .isNotEmpty()
-                .hasSize(1));
+    public void checkTaskStatus(String taskId, Task.TaskStatus expectedStatus) {
+        await()
+            .untilAsserted(() ->
+                assertThat(
+                    taskQueryService
+                        .queryTasksByIdAnsStatus(taskId, expectedStatus)
+                        .getContent()
+                )
+                    .isNotNull()
+                    .isNotEmpty()
+                    .hasSize(1)
+            );
     }
 
     @Step
-    public void checkSubtaskHasParentTaskId(String subtaskId,
-                                            String parentTaskId) {
+    public void checkSubtaskHasParentTaskId(
+        String subtaskId,
+        String parentTaskId
+    ) {
+        await()
+            .untilAsserted(() -> {
+                final Collection<CloudTask> tasks = taskQueryService
+                    .getTask(subtaskId)
+                    .getContent();
 
-        await().untilAsserted(() -> {
-
-            final Collection<CloudTask> tasks = taskQueryService.getTask(subtaskId).getContent();
-
-            assertThat(tasks).isNotNull().isNotEmpty().hasSize(1).extracting(Task::getId,
-                    Task::getParentTaskId).containsOnly(tuple(subtaskId,
-                    parentTaskId));
-
-        });
-
-
+                assertThat(tasks)
+                    .isNotNull()
+                    .isNotEmpty()
+                    .hasSize(1)
+                    .extracting(Task::getId, Task::getParentTaskId)
+                    .containsOnly(tuple(subtaskId, parentTaskId));
+            });
     }
 
     @Step
-    public PagedModel<CloudTask> getAllTasks(){
+    public PagedModel<CloudTask> getAllTasks() {
         return taskQueryService.getTasks();
     }
 
     @Step
-    public CloudTask getTaskById(String id){
+    public CloudTask getTaskById(String id) {
         return taskQueryService.getTask(id).getContent().iterator().next();
     }
 
     @Step
-    public void checkTaskHasVariable(String taskId, String variableName, String variableValue) throws Exception {
+    public void checkTaskHasVariable(
+        String taskId,
+        String variableName,
+        String variableValue
+    ) throws Exception {
+        await()
+            .untilAsserted(() -> {
+                assertThat(variableName).isNotNull();
 
-        await().untilAsserted(() -> {
+                final Collection<CloudVariableInstance> variableInstances = taskQueryService
+                    .getTaskVariables(taskId)
+                    .getContent();
 
-            assertThat(variableName).isNotNull();
+                assertThat(variableInstances).isNotNull();
+                assertThat(variableInstances).isNotEmpty();
 
-            final Collection<CloudVariableInstance> variableInstances = taskQueryService.getTaskVariables(taskId).getContent();
+                //one of the variables should have name matching variableName
+                assertThat(variableInstances)
+                    .extracting(VariableInstance::getName)
+                    .contains(variableName);
 
-            assertThat(variableInstances).isNotNull();
-            assertThat(variableInstances).isNotEmpty();
-
-            //one of the variables should have name matching variableName
-            assertThat(variableInstances).extracting(VariableInstance::getName).contains(variableName);
-
-            if(variableValue!=null){
-                assertThat(variableInstances).extracting(VariableInstance::getName, VariableInstance::getValue).contains(tuple(variableName,variableValue));
-            }
-
-        });
+                if (variableValue != null) {
+                    assertThat(variableInstances)
+                        .extracting(
+                            VariableInstance::getName,
+                            VariableInstance::getValue
+                        )
+                        .contains(tuple(variableName, variableValue));
+                }
+            });
     }
 
     @Step
-    public PagedModel<CloudTask> getTasksByProcessInstance(String processInstanceId){
+    public PagedModel<CloudTask> getTasksByProcessInstance(
+        String processInstanceId
+    ) {
         return taskQueryService.getTasksByProcessInstance(processInstanceId);
     }
 
     @Step
-    public PagedModel<CloudTask> getRootTasksByProcessInstance(String processInstanceId){
-        return taskQueryService.getRootTasksByProcessInstance(processInstanceId);
+    public PagedModel<CloudTask> getRootTasksByProcessInstance(
+        String processInstanceId
+    ) {
+        return taskQueryService.getRootTasksByProcessInstance(
+            processInstanceId
+        );
     }
 
     @Step
-    public PagedModel<CloudTask> getStandaloneTasks(){
+    public PagedModel<CloudTask> getStandaloneTasks() {
         return taskQueryService.getStandaloneTasks();
     }
 
     @Step
-    public PagedModel<CloudTask> getNonStandaloneTasks(){
+    public PagedModel<CloudTask> getNonStandaloneTasks() {
         return taskQueryService.getNonStandaloneTasks();
     }
 
     @Step
-    public PagedModel<CloudTask> getTasksByNameAndDescription(String taskName, String taskDescription){
-        return taskQueryService.getTasksByNameAndDescription(taskName,
-                                                                taskDescription);
+    public PagedModel<CloudTask> getTasksByNameAndDescription(
+        String taskName,
+        String taskDescription
+    ) {
+        return taskQueryService.getTasksByNameAndDescription(
+            taskName,
+            taskDescription
+        );
     }
 
     @Step
-    public CollectionModel<CloudVariableInstance> getVariables(String taskId){
+    public CollectionModel<CloudVariableInstance> getVariables(String taskId) {
         return taskQueryService.getVariables(taskId);
     }
 
     @Step
-    public List<String> getCandidateGroups(String taskId){
+    public List<String> getCandidateGroups(String taskId) {
         return taskQueryService.getTaskCandidateGroups(taskId);
     }
 
     @Step
-    public List<String> getCandidateUsers(String taskId){
+    public List<String> getCandidateUsers(String taskId) {
         return taskQueryService.getTaskCandidateUsers(taskId);
     }
-
 }

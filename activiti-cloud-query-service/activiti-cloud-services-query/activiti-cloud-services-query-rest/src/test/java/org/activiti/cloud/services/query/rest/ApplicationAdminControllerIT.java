@@ -48,11 +48,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ApplicationAdminController.class)
-@Import({
+@Import(
+    {
         QueryRestWebMvcAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -77,42 +79,53 @@ public class ApplicationAdminControllerIT {
     private TaskRepository taskRepository;
 
     @Test
-    public void shouldReturnDeployedApplicationsWhenMediaTypeIsApplicationHalJson() throws Exception {
+    public void shouldReturnDeployedApplicationsWhenMediaTypeIsApplicationHalJson()
+        throws Exception {
         //given
-        PageRequest pageRequest = PageRequest.of(0,
-                10);
-        given(applicationRepository.findAll(any(),
-                eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultApplicationEntity()),
-                        pageRequest,
-                        1));
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        given(applicationRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultApplicationEntity()),
+                    pageRequest,
+                    1
+                )
+            );
 
         //when
-        mockMvc.perform(get("/admin/v1/applications?page=0&size=10")
-                .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/admin/v1/applications?page=0&size=10")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldReturnDeployedApplicationsWhenMediaTypeIsApplicationJson() throws Exception {
+    public void shouldReturnDeployedApplicationsWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
         given(applicationRepository.findAll(any(), any(Pageable.class)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultApplicationEntity()),
-                        PageRequest.of(1,10),
-                        11));
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(buildDefaultApplicationEntity()),
+                    PageRequest.of(1, 10),
+                    11
+                )
+            );
 
         //when
-        mockMvc.perform(get("/admin/v1/applications?skipCount=10&maxItems=10")
-                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get("/admin/v1/applications?skipCount=10&maxItems=10")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 
     private ApplicationEntity buildDefaultApplicationEntity() {
-        return new ApplicationEntity(
-                UUID.randomUUID().toString(),
-                "name",
-                "1");
+        return new ApplicationEntity(UUID.randomUUID().toString(), "name", "1");
     }
 }

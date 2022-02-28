@@ -15,21 +15,20 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessCompletedEventEntity.PROCESS_COMPLETED_EVENT)
 @DiscriminatorValue(value = ProcessCompletedEventEntity.PROCESS_COMPLETED_EVENT)
 @DynamicInsert
 public class ProcessCompletedEventEntity extends ProcessAuditEventEntity {
 
-    protected static final String PROCESS_COMPLETED_EVENT = "ProcessCompletedEvent";
+    protected static final String PROCESS_COMPLETED_EVENT =
+        "ProcessCompletedEvent";
 
-    public ProcessCompletedEventEntity() {
-    }
+    public ProcessCompletedEventEntity() {}
 
     public ProcessCompletedEventEntity(CloudProcessCompletedEvent cloudEvent) {
         super(cloudEvent);
@@ -38,7 +37,10 @@ public class ProcessCompletedEventEntity extends ProcessAuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ProcessCompletedEventEntity [toString()=").append(super.toString()).append("]");
+        builder
+            .append("ProcessCompletedEventEntity [toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

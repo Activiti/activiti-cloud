@@ -21,10 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Optional;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
-
 
 /**
  * Utils for handling files
@@ -38,7 +36,11 @@ public class FileUtils {
      * @throws IOException if the resource cannot be read
      */
     public static byte[] resourceAsByteArray(String path) throws IOException {
-        try (InputStream inputStream = new FileInputStream(new ClassPathResource(path).getFile())) {
+        try (
+            InputStream inputStream = new FileInputStream(
+                new ClassPathResource(path).getFile()
+            )
+        ) {
             return StreamUtils.copyToByteArray(inputStream);
         }
     }
@@ -50,10 +52,11 @@ public class FileUtils {
      */
     public static Optional<File> resourceAsFile(String name) {
         ClassLoader classLoader = classLoader();
-        return Optional.ofNullable(name)
-                .map(classLoader::getResource)
-                .map(URL::getFile)
-                .map(File::new);
+        return Optional
+            .ofNullable(name)
+            .map(classLoader::getResource)
+            .map(URL::getFile)
+            .map(File::new);
     }
 
     /**
@@ -63,8 +66,7 @@ public class FileUtils {
      */
     public static Optional<InputStream> resourceAsStream(String name) {
         ClassLoader classLoader = classLoader();
-        return Optional.ofNullable(name)
-                .map(classLoader::getResourceAsStream);
+        return Optional.ofNullable(name).map(classLoader::getResourceAsStream);
     }
 
     /**

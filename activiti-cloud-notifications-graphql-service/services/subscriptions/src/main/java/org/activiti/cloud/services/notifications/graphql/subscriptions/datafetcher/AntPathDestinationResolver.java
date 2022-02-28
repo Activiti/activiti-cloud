@@ -21,8 +21,7 @@ public class AntPathDestinationResolver extends AbstractDestinationResolver {
     private static final String WILDCARD = "*";
     private static final String DOT = ".";
 
-    public AntPathDestinationResolver() {
-    }
+    public AntPathDestinationResolver() {}
 
     @Override
     protected String any() {
@@ -38,6 +37,4 @@ public class AntPathDestinationResolver extends AbstractDestinationResolver {
     protected String path() {
         return DOT;
     }
-
-
 }

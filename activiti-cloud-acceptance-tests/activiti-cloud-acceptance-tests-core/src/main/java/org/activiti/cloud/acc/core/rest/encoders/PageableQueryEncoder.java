@@ -34,22 +34,27 @@ public class PageableQueryEncoder implements Encoder {
     }
 
     @Override
-    public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
-
+    public void encode(Object object, Type bodyType, RequestTemplate template)
+        throws EncodeException {
         if (object instanceof Pageable) {
             Pageable pageable = (Pageable) object;
             template.query("page", String.valueOf(pageable.getPageNumber()));
             template.query("size", String.valueOf(pageable.getPageSize()));
 
             if (pageable.getSort() != null) {
-                Collection<String> existingSorts = template.queries().get("sort");
-                List<String> sortQueries = existingSorts != null ? new ArrayList<>(existingSorts) : new ArrayList<>();
+                Collection<String> existingSorts = template
+                    .queries()
+                    .get("sort");
+                List<String> sortQueries = existingSorts != null
+                    ? new ArrayList<>(existingSorts)
+                    : new ArrayList<>();
                 for (Sort.Order order : pageable.getSort()) {
-                    sortQueries.add(order.getProperty() + "," + order.getDirection());
+                    sortQueries.add(
+                        order.getProperty() + "," + order.getDirection()
+                    );
                 }
                 template.query("sort", sortQueries);
             }
-
         } else {
             delegate.encode(object, bodyType, template);
         }

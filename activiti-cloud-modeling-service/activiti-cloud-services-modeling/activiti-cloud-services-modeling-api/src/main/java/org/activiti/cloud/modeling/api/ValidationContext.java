@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.modeling.api;
 
-import java.util.List;
-
 import static java.util.Collections.emptyList;
+
+import java.util.List;
 
 /**
  * Generic context for validations
  */
 public interface ValidationContext {
-
     ValidationContext EMPTY_CONTEXT = new ValidationContext() {
         @Override
         public List<Model> getAvailableModels(ModelType modelType) {

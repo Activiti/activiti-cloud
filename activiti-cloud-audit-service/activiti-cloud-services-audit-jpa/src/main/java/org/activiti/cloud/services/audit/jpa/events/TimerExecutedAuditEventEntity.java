@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.process.model.events.CloudBPMNTimerExecutedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.process.model.events.CloudBPMNTimerExecutedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TimerExecutedAuditEventEntity.TIMER_EXECUTED_EVENT)
 @DiscriminatorValue(value = TimerExecutedAuditEventEntity.TIMER_EXECUTED_EVENT)
@@ -28,17 +27,21 @@ public class TimerExecutedAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_EXECUTED_EVENT = "TimerExecutedEvent";
 
-    public TimerExecutedAuditEventEntity() {
-    }
+    public TimerExecutedAuditEventEntity() {}
 
-    public TimerExecutedAuditEventEntity(CloudBPMNTimerExecutedEvent cloudEvent) {
+    public TimerExecutedAuditEventEntity(
+        CloudBPMNTimerExecutedEvent cloudEvent
+    ) {
         super(cloudEvent);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TimerExecutedAuditEventEntity [toString()=").append(super.toString()).append("]");
+        builder
+            .append("TimerExecutedAuditEventEntity [toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

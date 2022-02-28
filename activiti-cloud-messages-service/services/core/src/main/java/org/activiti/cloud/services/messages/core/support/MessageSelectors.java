@@ -18,27 +18,25 @@ package org.activiti.cloud.services.messages.core.support;
 import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
 
 import java.util.Optional;
-
 import org.springframework.integration.core.MessageSelector;
 import org.springframework.messaging.Message;
 
 public class MessageSelectors {
 
     public static class MessageEventTypeSelector implements MessageSelector {
-        
+
         private final Enum<?> type;
-        
+
         public MessageEventTypeSelector(Enum<?> type) {
             this.type = type;
         }
 
         @Override
         public boolean accept(Message<?> message) {
-            return Optional.ofNullable(message.getHeaders()
-                                              .get(MESSAGE_EVENT_TYPE))
-                           .filter(type.name()::equals)
-                           .isPresent();
+            return Optional
+                .ofNullable(message.getHeaders().get(MESSAGE_EVENT_TYPE))
+                .filter(type.name()::equals)
+                .isPresent();
         }
-        
     }
 }

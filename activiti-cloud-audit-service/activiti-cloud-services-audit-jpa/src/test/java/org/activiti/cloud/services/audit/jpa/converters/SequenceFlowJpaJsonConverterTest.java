@@ -15,24 +15,28 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.activiti.test.Assertions.assertThat;
+
 import org.activiti.api.process.model.BPMNElement;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.cloud.services.audit.jpa.converters.json.SequenceFlowJpaJsonConverter;
 import org.junit.jupiter.api.Test;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.test.Assertions.assertThat;
-
 public class SequenceFlowJpaJsonConverterTest {
 
     private SequenceFlowJpaJsonConverter converter = new SequenceFlowJpaJsonConverter();
 
     @Test
-    public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
+    public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation()
+        throws Exception {
         //given
-        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sequence-flow-element-id","source-element-id",
-                                                             "target-element-id");
+        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl(
+            "sequence-flow-element-id",
+            "source-element-id",
+            "target-element-id"
+        );
 
         sequenceFlow.setSourceActivityName("source-activity-name");
         sequenceFlow.setSourceActivityType("source-activity-type");
@@ -41,51 +45,66 @@ public class SequenceFlowJpaJsonConverterTest {
         sequenceFlow.setProcessDefinitionId("proc-def-id");
         sequenceFlow.setProcessInstanceId("proc-inst-id");
         //when
-        String jsonRepresentation = converter.convertToDatabaseColumn(sequenceFlow);
+        String jsonRepresentation = converter.convertToDatabaseColumn(
+            sequenceFlow
+        );
 
         //then
         assertThatJson(jsonRepresentation)
-                .node("elementId").isEqualTo("sequence-flow-element-id")
-                .node("sourceActivityElementId").isEqualTo("source-element-id")
-                .node("sourceActivityName").isEqualTo("source-activity-name")
-                .node("sourceActivityType").isEqualTo("source-activity-type")
-                .node("targetActivityElementId").isEqualTo("target-element-id")
-                .node("targetActivityName").isEqualTo("target-activity-name")
-                .node("targetActivityType").isEqualTo("target-activity-type")
-                .node("processDefinitionId").isEqualTo("proc-def-id")
-                .node("processInstanceId").isEqualTo("proc-inst-id");
+            .node("elementId")
+            .isEqualTo("sequence-flow-element-id")
+            .node("sourceActivityElementId")
+            .isEqualTo("source-element-id")
+            .node("sourceActivityName")
+            .isEqualTo("source-activity-name")
+            .node("sourceActivityType")
+            .isEqualTo("source-activity-type")
+            .node("targetActivityElementId")
+            .isEqualTo("target-element-id")
+            .node("targetActivityName")
+            .isEqualTo("target-activity-name")
+            .node("targetActivityType")
+            .isEqualTo("target-activity-type")
+            .node("processDefinitionId")
+            .isEqualTo("proc-def-id")
+            .node("processInstanceId")
+            .isEqualTo("proc-inst-id");
     }
 
     @Test
-    public void convertToEntityAttributeShouldCreateAProcessInstanceWithFieldsSet() throws Exception {
+    public void convertToEntityAttributeShouldCreateAProcessInstanceWithFieldsSet()
+        throws Exception {
         //given
         String jsonRepresentation =
-                "{" +   "\"elementId\":\"sequence-flow-element-id\"," +
-                        "\"sourceActivityElementId\":\"source-element-id\"," +
-                        "\"sourceActivityName\":\"source-activity-name\"," +
-                        "\"sourceActivityType\":\"source-activity-type\"," +
-                        "\"targetActivityElementId\":\"target-element-id\"," +
-                        "\"targetActivityName\":\"target-activity-name\"," +
-                        "\"targetActivityType\":\"target-activity-type\"," +
-                        "\"processDefinitionId\":\"proc-def-id\"," +
-                        "\"processInstanceId\":\"proc-inst-id\"}";
+            "{" +
+            "\"elementId\":\"sequence-flow-element-id\"," +
+            "\"sourceActivityElementId\":\"source-element-id\"," +
+            "\"sourceActivityName\":\"source-activity-name\"," +
+            "\"sourceActivityType\":\"source-activity-type\"," +
+            "\"targetActivityElementId\":\"target-element-id\"," +
+            "\"targetActivityName\":\"target-activity-name\"," +
+            "\"targetActivityType\":\"target-activity-type\"," +
+            "\"processDefinitionId\":\"proc-def-id\"," +
+            "\"processInstanceId\":\"proc-inst-id\"}";
 
         //when
-        BPMNSequenceFlow sequenceFlow = converter.convertToEntityAttribute(jsonRepresentation);
+        BPMNSequenceFlow sequenceFlow = converter.convertToEntityAttribute(
+            jsonRepresentation
+        );
 
         //then
         assertThat(sequenceFlow)
-                .isNotNull()
-                .hasSourceActivityElementId("source-element-id")
-                .hasSourceActivityName("source-activity-name")
-                .hasSourceActivityType("source-activity-type")
-                .hasTargetActivityElementId("target-element-id")
-                .hasTargetActivityName("target-activity-name")
-                .hasTargetActivityType("target-activity-type");
+            .isNotNull()
+            .hasSourceActivityElementId("source-element-id")
+            .hasSourceActivityName("source-activity-name")
+            .hasSourceActivityType("source-activity-type")
+            .hasTargetActivityElementId("target-element-id")
+            .hasTargetActivityName("target-activity-name")
+            .hasTargetActivityType("target-activity-type");
 
         assertThat((BPMNElement) sequenceFlow)
-                .hasProcessDefinitionId("proc-def-id")
-                .hasProcessInstanceId("proc-inst-id")
-                .hasElementId("sequence-flow-element-id");
+            .hasProcessDefinitionId("proc-def-id")
+            .hasProcessInstanceId("proc-inst-id")
+            .hasElementId("sequence-flow-element-id");
     }
 }

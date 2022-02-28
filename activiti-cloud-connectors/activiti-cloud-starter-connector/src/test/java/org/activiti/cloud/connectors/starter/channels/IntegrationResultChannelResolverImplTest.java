@@ -51,19 +51,24 @@ public class IntegrationResultChannelResolverImplTest {
         initMocks(this);
 
         when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
-        when(resolver.resolveDestination(anyString())).thenReturn(messageChannel);
+        when(resolver.resolveDestination(anyString()))
+            .thenReturn(messageChannel);
 
-        builder = spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
+        builder =
+            spy(
+                new IntegrationResultDestinationBuilderImpl(connectorProperties)
+            );
 
-        subject = new IntegrationResultChannelResolverImpl(resolver,
-                                                     builder);
+        subject = new IntegrationResultChannelResolverImpl(resolver, builder);
     }
 
     @Test
     public void shouldResolveDestination() {
         // given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(
+            integrationContext
+        );
         integrationRequest.setServiceFullName("myApp");
         integrationRequest.setAppName("myAppName");
         integrationRequest.setAppVersion("1.0");
@@ -78,5 +83,4 @@ public class IntegrationResultChannelResolverImplTest {
 
         verify(builder).buildDestination(integrationRequest);
     }
-
 }

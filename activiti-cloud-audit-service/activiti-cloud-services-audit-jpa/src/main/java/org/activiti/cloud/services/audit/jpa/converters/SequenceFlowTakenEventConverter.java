@@ -23,28 +23,39 @@ import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEv
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.SequenceFlowAuditEventEntity;
 
-public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter {
-    
-    public SequenceFlowTakenEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+public class SequenceFlowTakenEventConverter
+    extends BaseEventToEntityConverter {
+
+    public SequenceFlowTakenEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name();
     }
 
     @Override
-    protected SequenceFlowAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new SequenceFlowAuditEventEntity((CloudSequenceFlowTakenEvent) cloudRuntimeEvent);
+    protected SequenceFlowAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new SequenceFlowAuditEventEntity(
+            (CloudSequenceFlowTakenEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         SequenceFlowAuditEventEntity sequenceFlowTakenAuditEventEntity = (SequenceFlowAuditEventEntity) auditEventEntity;
 
-        return new CloudSequenceFlowTakenEventImpl(sequenceFlowTakenAuditEventEntity.getEventId(),
-                                                   sequenceFlowTakenAuditEventEntity.getTimestamp(),
-                                                   sequenceFlowTakenAuditEventEntity.getSequenceFlow());
+        return new CloudSequenceFlowTakenEventImpl(
+            sequenceFlowTakenAuditEventEntity.getEventId(),
+            sequenceFlowTakenAuditEventEntity.getTimestamp(),
+            sequenceFlowTakenAuditEventEntity.getSequenceFlow()
+        );
     }
 }

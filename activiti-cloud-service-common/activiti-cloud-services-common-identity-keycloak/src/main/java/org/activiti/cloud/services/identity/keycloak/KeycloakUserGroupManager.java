@@ -18,7 +18,6 @@ package org.activiti.cloud.services.identity.keycloak;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -27,10 +26,11 @@ import org.keycloak.representations.idm.UserRepresentation;
 
 public class KeycloakUserGroupManager implements UserGroupManager {
 
-
     private KeycloakInstanceWrapper keycloakInstanceWrapper;
 
-    public KeycloakUserGroupManager(KeycloakInstanceWrapper keycloakInstanceWrapper) {
+    public KeycloakUserGroupManager(
+        KeycloakInstanceWrapper keycloakInstanceWrapper
+    ) {
         this.keycloakInstanceWrapper = keycloakInstanceWrapper;
     }
 
@@ -38,7 +38,8 @@ public class KeycloakUserGroupManager implements UserGroupManager {
     public List<String> getUserGroups(String username) {
         UserRepresentation user = loadRepresentation(username);
 
-        List<GroupRepresentation> groupRepresentations = loadUser(user).groups();
+        List<GroupRepresentation> groupRepresentations = loadUser(user)
+            .groups();
 
         List<String> groups = null;
         if (groupRepresentations != null && groupRepresentations.size() > 0) {
@@ -55,7 +56,10 @@ public class KeycloakUserGroupManager implements UserGroupManager {
     public List<String> getUserRoles(String username) {
         UserRepresentation user = loadRepresentation(username);
 
-        List<RoleRepresentation> rolesRepresentations = loadUser(user).roles().realmLevel().listEffective();
+        List<RoleRepresentation> rolesRepresentations = loadUser(user)
+            .roles()
+            .realmLevel()
+            .listEffective();
 
         List<String> roles = null;
         if (rolesRepresentations != null && rolesRepresentations.size() > 0) {
@@ -71,15 +75,23 @@ public class KeycloakUserGroupManager implements UserGroupManager {
     @Override
     public List<String> getGroups() {
         return keycloakInstanceWrapper
-                .getRealm().groups().groups()
-                .stream().map(GroupRepresentation::getName).collect(Collectors.toList());
+            .getRealm()
+            .groups()
+            .groups()
+            .stream()
+            .map(GroupRepresentation::getName)
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<String> getUsers() {
         return keycloakInstanceWrapper
-                .getRealm().users().list()
-                .stream().map(UserRepresentation::getUsername).collect(Collectors.toList());
+            .getRealm()
+            .users()
+            .list()
+            .stream()
+            .map(UserRepresentation::getUsername)
+            .collect(Collectors.toList());
     }
 
     private UserResource loadUser(UserRepresentation user) {
@@ -87,15 +99,20 @@ public class KeycloakUserGroupManager implements UserGroupManager {
     }
 
     private UserRepresentation loadRepresentation(String username) {
-        List<UserRepresentation> users = keycloakInstanceWrapper.getRealm().users().search(username,
-                0,
-                2);
+        List<UserRepresentation> users = keycloakInstanceWrapper
+            .getRealm()
+            .users()
+            .search(username, 0, 2);
 
         if (users.size() > 1) {
-            throw new UnsupportedOperationException("User id " + username + " is not unique");
+            throw new UnsupportedOperationException(
+                "User id " + username + " is not unique"
+            );
         }
         if (users.size() == 0) {
-            throw new UnsupportedOperationException("User id " + username + " not found");
+            throw new UnsupportedOperationException(
+                "User id " + username + " not found"
+            );
         }
         return users.get(0);
     }

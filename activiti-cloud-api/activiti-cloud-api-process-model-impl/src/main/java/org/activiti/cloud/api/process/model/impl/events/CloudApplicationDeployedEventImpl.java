@@ -20,19 +20,19 @@ import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 
-public class CloudApplicationDeployedEventImpl extends CloudRuntimeEventImpl<Deployment, ApplicationEvent.ApplicationEvents> implements CloudApplicationDeployedEvent {
-    
-    public CloudApplicationDeployedEventImpl() {
-    }
+public class CloudApplicationDeployedEventImpl
+    extends CloudRuntimeEventImpl<Deployment, ApplicationEvent.ApplicationEvents>
+    implements CloudApplicationDeployedEvent {
+
+    public CloudApplicationDeployedEventImpl() {}
 
     public CloudApplicationDeployedEventImpl(Deployment entity) {
         super(entity);
         setEntityId(entity.getId());
     }
-    
+
     @Override
     public ApplicationEvents getEventType() {
         return ApplicationEvents.APPLICATION_DEPLOYED;
     }
-
 }

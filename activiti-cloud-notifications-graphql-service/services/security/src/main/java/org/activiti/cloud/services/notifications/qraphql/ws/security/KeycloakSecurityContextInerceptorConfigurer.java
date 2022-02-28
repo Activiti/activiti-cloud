@@ -18,7 +18,6 @@ package org.activiti.cloud.services.notifications.qraphql.ws.security;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.slf4j.Logger;
@@ -35,56 +34,88 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
-public class KeycloakSecurityContextInerceptorConfigurer implements WebSocketMessageBrokerConfigurer {
+public class KeycloakSecurityContextInerceptorConfigurer
+    implements WebSocketMessageBrokerConfigurer {
 
-    private static final Logger logger = LoggerFactory.getLogger(KeycloakSecurityContextInerceptorConfigurer.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        KeycloakSecurityContextInerceptorConfigurer.class
+    );
     private static final String GRAPHQL_MESSAGE_TYPE = "graphQLMessageType";
 
     private final KeycloakAccessTokenVerifier tokenVerifier;
-    private List<String> headerValues = Arrays.asList("connection_init", "start");
+    private List<String> headerValues = Arrays.asList(
+        "connection_init",
+        "start"
+    );
     private String headerName = GRAPHQL_MESSAGE_TYPE;
 
-    public KeycloakSecurityContextInerceptorConfigurer(KeycloakAccessTokenVerifier tokenVerifier) {
+    public KeycloakSecurityContextInerceptorConfigurer(
+        KeycloakAccessTokenVerifier tokenVerifier
+    ) {
         this.tokenVerifier = tokenVerifier;
     }
-    
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new ChannelInterceptor() {
 
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message,
-                                                                                       SimpMessageHeaderAccessor.class);
-                if (accessor != null) {
-                    if(headerValues.contains(accessor.getHeader(headerName))) {
-                        Optional.ofNullable(accessor.getUser())
-                                .filter(KeycloakAuthenticationToken.class::isInstance)
+    @Override
+    public void configureClientInboundChannel(
+        ChannelRegistration registration
+    ) {
+        registration.interceptors(
+            new ChannelInterceptor() {
+                @Override
+                public Message<?> preSend(
+                    Message<?> message,
+                    MessageChannel channel
+                ) {
+                    SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(
+                        message,
+                        SimpMessageHeaderAccessor.class
+                    );
+                    if (accessor != null) {
+                        if (
+                            headerValues.contains(
+                                accessor.getHeader(headerName)
+                            )
+                        ) {
+                            Optional
+                                .ofNullable(accessor.getUser())
+                                .filter(
+                                    KeycloakAuthenticationToken.class::isInstance
+                                )
                                 .map(KeycloakAuthenticationToken.class::cast)
-                                .map(KeycloakAuthenticationToken::getCredentials)
+                                .map(
+                                    KeycloakAuthenticationToken::getCredentials
+                                )
                                 .map(KeycloakSecurityContext.class::cast)
                                 .ifPresent(keycloakSecurityContext -> {
                                     try {
-                                        logger.info("Verifying Access Token for {}", accessor.getHeader(GRAPHQL_MESSAGE_TYPE));
-                                        tokenVerifier.verifyToken(keycloakSecurityContext.getTokenString());
-                                        
+                                        logger.info(
+                                            "Verifying Access Token for {}",
+                                            accessor.getHeader(
+                                                GRAPHQL_MESSAGE_TYPE
+                                            )
+                                        );
+                                        tokenVerifier.verifyToken(
+                                            keycloakSecurityContext.getTokenString()
+                                        );
                                     } catch (Exception e) {
-                                        throw new BadCredentialsException("Invalid token", e);
+                                        throw new BadCredentialsException(
+                                            "Invalid token",
+                                            e
+                                        );
                                     }
                                 });
+                        }
                     }
+                    return message;
                 }
-                return message;
             }
-        });
+        );
     }
 
-    
     public void setHeaderValues(List<String> headerValues) {
         this.headerValues = headerValues;
     }
 
-    
     public void setHeaderName(String headerName) {
         this.headerName = headerName;
     }

@@ -25,28 +25,36 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 public interface ProcessDefinitionController {
-
     @GetMapping("/v1/process-definitions")
-    PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable);
-
+    PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(
+        Pageable pageable
+    );
 
     @GetMapping(value = "/v1/process-definitions/{id}")
-    EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable(value = "id") String id);
+    EntityModel<CloudProcessDefinition> getProcessDefinition(
+        @PathVariable(value = "id") String id
+    );
 
-    @GetMapping(value = "/v1/process-definitions/{id}/model",
-            produces = "application/xml")
+    @GetMapping(
+        value = "/v1/process-definitions/{id}/model",
+        produces = "application/xml"
+    )
     @ResponseBody
     @Operation(summary = "getProcessModel")
     String getProcessModel(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/v1/process-definitions/{id}/model",
-            produces = "application/json")
+    @GetMapping(
+        value = "/v1/process-definitions/{id}/model",
+        produces = "application/json"
+    )
     @ResponseBody
     @Operation(summary = "getProcessModel")
     String getBpmnModel(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/v1/process-definitions/{id}/model",
-            produces = "image/svg+xml")
+    @GetMapping(
+        value = "/v1/process-definitions/{id}/model",
+        produces = "image/svg+xml"
+    )
     @ResponseBody
     @Operation(summary = "getProcessModel")
     String getProcessDiagram(@PathVariable(value = "id") String id);

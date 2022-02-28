@@ -16,12 +16,13 @@
 package org.activiti.cloud.api.process.model.impl;
 
 import java.util.Date;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 
-public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements CloudProcessInstance {
+public class CloudProcessInstanceImpl
+    extends CloudRuntimeEntityImpl
+    implements CloudProcessInstance {
 
     private String id;
     private String name;
@@ -37,8 +38,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     private Date completedDate;
     private Date suspendedDate;
 
-    public CloudProcessInstanceImpl() {
-    }
+    public CloudProcessInstanceImpl() {}
 
     public CloudProcessInstanceImpl(ProcessInstance processInstance) {
         super(processInstance);
@@ -51,7 +51,8 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         processDefinitionId = processInstance.getProcessDefinitionId();
         processDefinitionKey = processInstance.getProcessDefinitionKey();
         parentId = processInstance.getParentId();
-        processDefinitionVersion = processInstance.getProcessDefinitionVersion();
+        processDefinitionVersion =
+            processInstance.getProcessDefinitionVersion();
         processDefinitionName = processInstance.getProcessDefinitionName();
     }
 

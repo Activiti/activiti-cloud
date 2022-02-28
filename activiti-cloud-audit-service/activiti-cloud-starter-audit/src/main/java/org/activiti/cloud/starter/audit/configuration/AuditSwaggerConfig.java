@@ -31,15 +31,22 @@ public class AuditSwaggerConfig {
 
     @Bean(name = "auditApiDocket")
     @ConditionalOnMissingBean(name = "auditApiDocket")
-    public Docket auditApiDocket(SwaggerDocketBuilder docketBuilder,
-        @Value("${activiti.cloud.swagger.audit-base-path:}") String auditSwaggerBasePath) {
-        return docketBuilder.buildApiDocket("Audit Service ReST API", "Audit",
-            auditSwaggerBasePath, "org.activiti.cloud.services.audit");
+    public Docket auditApiDocket(
+        SwaggerDocketBuilder docketBuilder,
+        @Value(
+            "${activiti.cloud.swagger.audit-base-path:}"
+        ) String auditSwaggerBasePath
+    ) {
+        return docketBuilder.buildApiDocket(
+            "Audit Service ReST API",
+            "Audit",
+            auditSwaggerBasePath,
+            "org.activiti.cloud.services.audit"
+        );
     }
 
     @Bean
     public DocketCustomizer payloadsDocketCustomizer() {
         return new PayloadsDocketCustomizer();
     }
-
 }

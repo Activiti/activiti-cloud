@@ -15,6 +15,17 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -26,18 +37,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessSuspendedEventHandlerTest {
 
@@ -57,15 +56,24 @@ public class ProcessSuspendedEventHandlerTest {
         //given
         CloudProcessSuspendedEvent event = buildProcessSuspendedEvent();
 
-        ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId())).willReturn(currentProcessInstanceEntity);
+        ProcessInstanceEntity currentProcessInstanceEntity = mock(
+            ProcessInstanceEntity.class
+        );
+        given(
+            entityManager.find(
+                ProcessInstanceEntity.class,
+                event.getEntity().getId()
+            )
+        )
+            .willReturn(currentProcessInstanceEntity);
 
         //when
         handler.handle(event);
 
         //then
         verify(entityManager).persist(currentProcessInstanceEntity);
-        verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
+        verify(currentProcessInstanceEntity)
+            .setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
         verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     }
 
@@ -80,14 +88,16 @@ public class ProcessSuspendedEventHandlerTest {
         //given
         CloudProcessSuspendedEvent event = buildProcessSuspendedEvent();
 
-        given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(null);
-
+        given(entityManager.find(ProcessInstanceEntity.class, "200"))
+            .willReturn(null);
 
         //then
         //when
         assertThatExceptionOfType(QueryException.class)
             .isThrownBy(() -> handler.handle(event))
-            .withMessageContaining("Unable to find process instance with the given id: ");
+            .withMessageContaining(
+                "Unable to find process instance with the given id: "
+            );
     }
 
     @Test
@@ -96,6 +106,9 @@ public class ProcessSuspendedEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name());
+        assertThat(handledEvent)
+            .isEqualTo(
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name()
+            );
     }
 }

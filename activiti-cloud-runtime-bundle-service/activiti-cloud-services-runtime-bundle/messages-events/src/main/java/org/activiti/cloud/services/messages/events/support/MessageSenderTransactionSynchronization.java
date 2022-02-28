@@ -22,32 +22,44 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.support.TransactionSynchronization;
 
-public class MessageSenderTransactionSynchronization implements TransactionSynchronization {
+public class MessageSenderTransactionSynchronization
+    implements TransactionSynchronization {
 
-    private static final Logger logger = LoggerFactory.getLogger(MessageSenderTransactionSynchronization.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        MessageSenderTransactionSynchronization.class
+    );
 
     private final Message<?> message;
     private final MessageChannel messageChannel;
 
-    public MessageSenderTransactionSynchronization(Message<?> message,
-                                                  MessageChannel messageChannel) {
+    public MessageSenderTransactionSynchronization(
+        Message<?> message,
+        MessageChannel messageChannel
+    ) {
         this.message = message;
         this.messageChannel = messageChannel;
     }
 
     @Override
     public void afterCommit() {
-        logger.debug("Sending bpmn message '{}' via message channel: {}", message, messageChannel);
-        
-        try { 
+        logger.debug(
+            "Sending bpmn message '{}' via message channel: {}",
+            message,
+            messageChannel
+        );
+
+        try {
             boolean sent = messageChannel.send(message);
-            
-            if(!sent) {
+
+            if (!sent) {
                 throw new MessageDispatchingException(message);
             }
-            
-        } catch(Exception cause) {
-            logger.error("Sending bpmn message {} failed due to error: {}", message, cause.getMessage());
+        } catch (Exception cause) {
+            logger.error(
+                "Sending bpmn message {} failed due to error: {}",
+                message,
+                cause.getMessage()
+            );
         }
     }
 }

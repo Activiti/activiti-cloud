@@ -25,7 +25,9 @@ import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEnti
 
 public class SignalReceivedEventConverter extends BaseEventToEntityConverter {
 
-    public SignalReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public SignalReceivedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
 
@@ -35,18 +37,26 @@ public class SignalReceivedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected SignalReceivedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new SignalReceivedAuditEventEntity((CloudBPMNSignalReceivedEvent) cloudRuntimeEvent);
+    protected SignalReceivedAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new SignalReceivedAuditEventEntity(
+            (CloudBPMNSignalReceivedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         SignalReceivedAuditEventEntity signalReceivedAuditEventEntity = (SignalReceivedAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNSignalReceivedEventImpl(signalReceivedAuditEventEntity.getEventId(),
-                                                    signalReceivedAuditEventEntity.getTimestamp(),
-                                                    signalReceivedAuditEventEntity.getSignal(),
-                                                    signalReceivedAuditEventEntity.getProcessDefinitionId(),
-                                                    signalReceivedAuditEventEntity.getProcessInstanceId());
+        return new CloudBPMNSignalReceivedEventImpl(
+            signalReceivedAuditEventEntity.getEventId(),
+            signalReceivedAuditEventEntity.getTimestamp(),
+            signalReceivedAuditEventEntity.getSignal(),
+            signalReceivedAuditEventEntity.getProcessDefinitionId(),
+            signalReceivedAuditEventEntity.getProcessInstanceId()
+        );
     }
 }

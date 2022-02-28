@@ -25,7 +25,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-public class VariableSearchArgumentResolver implements HandlerMethodArgumentResolver {
+public class VariableSearchArgumentResolver
+    implements HandlerMethodArgumentResolver {
 
     private static final String VARIABLE_NAME_KEY = "variables.name";
     private static final String VARIABLE_VALUE_KEY = "variables.value";
@@ -43,20 +44,31 @@ public class VariableSearchArgumentResolver implements HandlerMethodArgumentReso
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter,
+    public Object resolveArgument(
+        MethodParameter parameter,
         ModelAndViewContainer mavContainer,
         NativeWebRequest webRequest,
-        WebDataBinderFactory binderFactory) {
-
+        WebDataBinderFactory binderFactory
+    ) {
         String variableType = webRequest.getParameter(VARIABLE_TYPE_KEY);
-        Class<?> type = ProcessVariablesMapTypeRegistry.forType(variableType, String.class);
+        Class<?> type = ProcessVariablesMapTypeRegistry.forType(
+            variableType,
+            String.class
+        );
 
-        Object variableValueParameter = webRequest.getParameter(VARIABLE_VALUE_KEY);
+        Object variableValueParameter = webRequest.getParameter(
+            VARIABLE_VALUE_KEY
+        );
         if (!String.class.equals(type)) {
-            variableValueParameter = conversionService.convert(variableValueParameter, type);
+            variableValueParameter =
+                conversionService.convert(variableValueParameter, type);
         }
 
         String variableName = webRequest.getParameter(VARIABLE_NAME_KEY);
-        return new VariableSearch(variableName, new VariableValue<>(variableValueParameter), variableType);
+        return new VariableSearch(
+            variableName,
+            new VariableValue<>(variableValueParameter),
+            variableType
+        );
     }
 }

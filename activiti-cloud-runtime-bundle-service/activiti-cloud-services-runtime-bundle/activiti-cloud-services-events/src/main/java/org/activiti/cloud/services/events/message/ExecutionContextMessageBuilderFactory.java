@@ -20,22 +20,27 @@ import org.activiti.engine.impl.context.ExecutionContext;
 import org.springframework.util.Assert;
 
 public class ExecutionContextMessageBuilderFactory
-        implements MessageBuilderChainFactory<ExecutionContext> {
+    implements MessageBuilderChainFactory<ExecutionContext> {
 
     private final RuntimeBundleProperties properties;
 
-    public ExecutionContextMessageBuilderFactory(RuntimeBundleProperties properties) {
+    public ExecutionContextMessageBuilderFactory(
+        RuntimeBundleProperties properties
+    ) {
         Assert.notNull(properties, "properties must not be null");
 
         this.properties = properties;
     }
 
     @Override
-    public MessageBuilderAppenderChain create(ExecutionContext executionContext) {
+    public MessageBuilderAppenderChain create(
+        ExecutionContext executionContext
+    ) {
         return new MessageBuilderAppenderChain()
-                .routingKeyResolver(new AuditProducerRoutingKeyResolver())
-                .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                .chain(new ExecutionContextMessageBuilderAppender(executionContext));
+            .routingKeyResolver(new AuditProducerRoutingKeyResolver())
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+            .chain(
+                new ExecutionContextMessageBuilderAppender(executionContext)
+            );
     }
-
 }

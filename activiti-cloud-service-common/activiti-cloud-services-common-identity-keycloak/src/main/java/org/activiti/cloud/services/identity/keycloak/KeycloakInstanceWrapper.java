@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -30,17 +29,19 @@ public class KeycloakInstanceWrapper {
     private KeycloakProperties keycloakProperties;
 
     private Keycloak getKeycloakInstance() {
-        KeycloakBuilder client = KeycloakBuilder.builder()
-                                                .serverUrl(keycloakProperties.getAuthServerUrl())
-                                                .realm(keycloakProperties.getRealm())
-                                                .clientId(activitiKeycloakProperties.getClientId())
-                                                .clientSecret(activitiKeycloakProperties.getClientSecret())
-                                                .grantType(activitiKeycloakProperties.getGrantType()
-                                                                                     .name());
+        KeycloakBuilder client = KeycloakBuilder
+            .builder()
+            .serverUrl(keycloakProperties.getAuthServerUrl())
+            .realm(keycloakProperties.getRealm())
+            .clientId(activitiKeycloakProperties.getClientId())
+            .clientSecret(activitiKeycloakProperties.getClientSecret())
+            .grantType(activitiKeycloakProperties.getGrantType().name());
         return client.build();
     }
 
     public RealmResource getRealm() {
-        return getKeycloakInstance().realms().realm(keycloakProperties.getRealm());
+        return getKeycloakInstance()
+            .realms()
+            .realm(keycloakProperties.getRealm());
     }
 }

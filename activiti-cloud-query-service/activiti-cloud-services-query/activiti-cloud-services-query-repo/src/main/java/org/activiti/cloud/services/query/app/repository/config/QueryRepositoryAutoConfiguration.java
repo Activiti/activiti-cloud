@@ -28,11 +28,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories(basePackageClasses = ProcessInstanceRepository.class)
 @EntityScan(basePackageClasses = ProcessInstanceEntity.class)
 public class QueryRepositoryAutoConfiguration {
-    
+
     @Bean
     @ConditionalOnMissingBean
     public EntityFinder entityFinder() {
-        return new EntityFinder(); 
+        return new EntityFinder();
     }
-
 }

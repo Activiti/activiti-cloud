@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.hateoas.IanaLinkRelations.SELF;
+
 import java.util.Optional;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -22,14 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.springframework.hateoas.IanaLinkRelations.SELF;
+import org.springframework.hateoas.Link;
 
 public class ProcessInstanceRepresentationModelAssemblerTest {
 
@@ -51,10 +51,13 @@ public class ProcessInstanceRepresentationModelAssemblerTest {
         given(cloudModel.getId()).willReturn("my-identifier");
 
         ProcessInstance model = mock(ProcessInstance.class);
-        given(toCloudProcessInstanceConverter.from(model)).willReturn(cloudModel);
+        given(toCloudProcessInstanceConverter.from(model))
+            .willReturn(cloudModel);
 
         //when
-        EntityModel<CloudProcessInstance> resource = representationModelAssembler.toModel(model);
+        EntityModel<CloudProcessInstance> resource = representationModelAssembler.toModel(
+            model
+        );
 
         //then
         Optional<Link> selfResourceLink = resource.getLink(SELF);

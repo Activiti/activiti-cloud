@@ -24,10 +24,11 @@ import org.springframework.context.annotation.Configuration;
 public class QueryModelAutoConfiguration {
 
     @Bean
-    public VariableValueJsonConverter variableValueJsonConverter(ObjectMapper objectMapper) {
+    public VariableValueJsonConverter variableValueJsonConverter(
+        ObjectMapper objectMapper
+    ) {
         //this bean is not directly used as it's instantiated by Hibernate as a converter.
         //it's only here as a workaround to be able to inject the object mapper
         return new VariableValueJsonConverter(objectMapper);
     }
-
 }

@@ -21,6 +21,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExt
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
 import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -71,7 +72,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional
 public class ProjectServiceImpl implements ProjectService {
 
-    private final static Pattern EXPRESSION_REGEX = Pattern.compile("^\\$\\{[\\p{Graph}]+\\}+$");
+    private static final Pattern EXPRESSION_REGEX = Pattern.compile(
+        "^\\$\\{[\\p{Graph}]+\\}+$"
+    );
 
     private final ProjectRepository projectRepository;
 
@@ -88,13 +91,15 @@ public class ProjectServiceImpl implements ProjectService {
     private final Set<ProjectValidator> projectValidators;
 
     @Autowired
-    public ProjectServiceImpl(ProjectRepository projectRepository,
-                              ModelService modelService,
-                              ModelTypeService modelTypeService,
-                              JsonConverter<ProjectDescriptor> descriptorJsonConverter,
-                              JsonConverter<Project> jsonConverter,
-                              JsonConverter<Map> jsonMetadataConverter,
-                              Set<ProjectValidator> projectValidators) {
+    public ProjectServiceImpl(
+        ProjectRepository projectRepository,
+        ModelService modelService,
+        ModelTypeService modelTypeService,
+        JsonConverter<ProjectDescriptor> descriptorJsonConverter,
+        JsonConverter<Project> jsonConverter,
+        JsonConverter<Map> jsonMetadataConverter,
+        Set<ProjectValidator> projectValidators
+    ) {
         this.projectRepository = projectRepository;
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
@@ -111,11 +116,9 @@ public class ProjectServiceImpl implements ProjectService {
      * @return the page
      */
     @Override
-    public Page<Project> getProjects(Pageable pageable,
-                                     String name) {
+    public Page<Project> getProjects(Pageable pageable, String name) {
         String projectName = name != null ? name.toLowerCase() : null;
-        return projectRepository.getProjects(pageable,
-                projectName);
+        return projectRepository.getProjects(pageable, projectName);
     }
 
     /**
@@ -127,10 +130,14 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project createProject(Project project) {
         project.setId(null);
-        List<ModelValidationError> nameValidationErrors = validateProjectName(project);
+        List<ModelValidationError> nameValidationErrors = validateProjectName(
+            project
+        );
         if (!nameValidationErrors.isEmpty()) {
-            throw new SemanticModelValidationException("Validation errors found in project's models",
-                nameValidationErrors);
+            throw new SemanticModelValidationException(
+                "Validation errors found in project's models",
+                nameValidationErrors
+            );
         }
         return projectRepository.createProject(project);
     }
@@ -143,10 +150,13 @@ public class ProjectServiceImpl implements ProjectService {
      * @return the the updated project
      */
     @Override
-    public Project updateProject(Project projectToUpdate,
-                                 Project newProject) {
-        Optional.ofNullable(newProject.getDescription()).ifPresent(projectToUpdate::setDescription);
-        Optional.ofNullable(newProject.getName()).ifPresent(projectToUpdate::setName);
+    public Project updateProject(Project projectToUpdate, Project newProject) {
+        Optional
+            .ofNullable(newProject.getDescription())
+            .ifPresent(projectToUpdate::setDescription);
+        Optional
+            .ofNullable(newProject.getName())
+            .ifPresent(projectToUpdate::setName);
         return projectRepository.updateProject(projectToUpdate);
     }
 
@@ -162,7 +172,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void deleteAllModelsInProject(Project project) {
-        modelService.getAllModels(project).stream().filter(model -> ModelScope.PROJECT.equals(model.getScope())).forEach(modelService::deleteModel);
+        modelService
+            .getAllModels(project)
+            .stream()
+            .filter(model -> ModelScope.PROJECT.equals(model.getScope()))
+            .forEach(modelService::deleteModel);
     }
 
     /**
@@ -185,37 +199,66 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Override
     public FileContent exportProject(Project project) throws IOException {
-
         ProjectDescriptor projectDescriptor = buildDescriptor(project);
 
         ZipBuilder zipBuilder = new ZipBuilder(project.getName())
-                .appendFile(descriptorJsonConverter.convertToJsonBytes(projectDescriptor), toJsonFilename(project.getName()));
+            .appendFile(
+                descriptorJsonConverter.convertToJsonBytes(projectDescriptor),
+                toJsonFilename(project.getName())
+            );
 
-        modelService.getAllModels(project).forEach(model -> modelTypeService.findModelTypeByName(model.getType()).map(ModelType::getFolderName).ifPresent(folderName -> {
-            zipBuilder.appendFolder(folderName)
-                    .appendFile(modelService.exportModel(model), folderName);
-            modelService.getModelExtensionsFileContent(model)
-                    .map(extensionFileContent -> zipBuilder.appendFile(extensionFileContent, folderName));
-        }));
+        modelService
+            .getAllModels(project)
+            .forEach(model ->
+                modelTypeService
+                    .findModelTypeByName(model.getType())
+                    .map(ModelType::getFolderName)
+                    .ifPresent(folderName -> {
+                        zipBuilder
+                            .appendFolder(folderName)
+                            .appendFile(
+                                modelService.exportModel(model),
+                                folderName
+                            );
+                        modelService
+                            .getModelExtensionsFileContent(model)
+                            .map(extensionFileContent ->
+                                zipBuilder.appendFile(
+                                    extensionFileContent,
+                                    folderName
+                                )
+                            );
+                    })
+            );
         return zipBuilder.toZipFileContent();
     }
 
     @Override
     public Project copyProject(Project projectToCopy, String newProjectName) {
-        Project copiedProject = projectRepository.copyProject(projectToCopy, newProjectName);
+        Project copiedProject = projectRepository.copyProject(
+            projectToCopy,
+            newProjectName
+        );
         List<Model> models = modelService.getAllModels(projectToCopy);
 
-        models.stream().sorted(MODEL_TYPE_COMPARATOR).forEach(model -> {
-            modelService.copyModel(model, copiedProject);
-        });
+        models
+            .stream()
+            .sorted(MODEL_TYPE_COMPARATOR)
+            .forEach(model -> {
+                modelService.copyModel(model, copiedProject);
+            });
 
         modelService.cleanModelIdList();
         return copiedProject;
     }
 
     @Override
-    public ProjectAccessControl getProjectAccessControl(Project project){
-        List<UserTask> userTasks = modelService.getTasksBy(project, new ProcessModelType(), UserTask.class);
+    public ProjectAccessControl getProjectAccessControl(Project project) {
+        List<UserTask> userTasks = modelService.getTasksBy(
+            project,
+            new ProcessModelType(),
+            UserTask.class
+        );
 
         Set<String> users = extractFromTasks(this::selectUsers, userTasks);
         Set<String> groups = extractFromTasks(this::selectGroups, userTasks);
@@ -223,31 +266,41 @@ public class ProjectServiceImpl implements ProjectService {
         return new ProjectAccessControl(users, groups);
     }
 
-    private Set<String> extractFromTasks(Function<UserTask, Set<String>> extractor, List<UserTask> userTasks) {
+    private Set<String> extractFromTasks(
+        Function<UserTask, Set<String>> extractor,
+        List<UserTask> userTasks
+    ) {
         return userTasks
-                                    .stream()
-                                    .map(extractor)
-                                    .flatMap(Set::stream)
-                                    .collect(Collectors.toSet());
+            .stream()
+            .map(extractor)
+            .flatMap(Set::stream)
+            .collect(Collectors.toSet());
     }
 
     private Set<String> selectGroups(UserTask userTask) {
-        return selectCandidatesThatAreNotAnExpression(userTask.getCandidateGroups());
+        return selectCandidatesThatAreNotAnExpression(
+            userTask.getCandidateGroups()
+        );
     }
 
     private Set<String> selectUsers(UserTask userTask) {
-        Set<String> users = selectCandidatesThatAreNotAnExpression(userTask.getCandidateUsers());
+        Set<String> users = selectCandidatesThatAreNotAnExpression(
+            userTask.getCandidateUsers()
+        );
         String assignee = userTask.getAssignee();
-        if(assignee != null && isNotAnExpression(assignee)){
+        if (assignee != null && isNotAnExpression(assignee)) {
             users.add(assignee);
         }
         return users;
     }
 
-    private Set<String> selectCandidatesThatAreNotAnExpression(List<String> candidates) {
+    private Set<String> selectCandidatesThatAreNotAnExpression(
+        List<String> candidates
+    ) {
         Set<String> result = Collections.emptySet();
-        if(candidates != null) {
-            result = candidates
+        if (candidates != null) {
+            result =
+                candidates
                     .stream()
                     .filter(this::isNotAnExpression)
                     .collect(Collectors.toSet());
@@ -267,27 +320,48 @@ public class ProjectServiceImpl implements ProjectService {
         return projectDescriptor;
     }
 
-    private Optional<FileContent> createFileContentFromZipEntry(ZipStream.ZipStreamEntry zipEntry) {
-        return zipEntry.getContent()
-                .map(bytes -> getContentTypeByPath(zipEntry.getFileName())
-                        .map(contentType -> new FileContent(zipEntry.getFileName(), contentType, bytes))
-                )
-                .orElse(Optional.empty());
+    private Optional<FileContent> createFileContentFromZipEntry(
+        ZipStream.ZipStreamEntry zipEntry
+    ) {
+        return zipEntry
+            .getContent()
+            .map(bytes ->
+                getContentTypeByPath(zipEntry.getFileName())
+                    .map(contentType ->
+                        new FileContent(
+                            zipEntry.getFileName(),
+                            contentType,
+                            bytes
+                        )
+                    )
+            )
+            .orElse(Optional.empty());
     }
 
-
-    private void convertZipElementToModelObject(ZipStream.ZipStreamEntry zipEntry, @Nullable String name, FileContent fileContent, ProjectHolder projectHolder) {
+    private void convertZipElementToModelObject(
+        ZipStream.ZipStreamEntry zipEntry,
+        @Nullable String name,
+        FileContent fileContent,
+        ProjectHolder projectHolder
+    ) {
         Optional<String> folderName = zipEntry.getFolderName(0);
 
         if (folderName.isPresent()) {
-            folderName.flatMap(modelTypeService::findModelTypeByFolderName)
-                    .ifPresent(modelType -> processZipEntryFile(projectHolder, fileContent, modelType)
-                    );
+            folderName
+                .flatMap(modelTypeService::findModelTypeByFolderName)
+                .ifPresent(modelType ->
+                    processZipEntryFile(projectHolder, fileContent, modelType)
+                );
         } else if (fileContent.isJson()) {
-            zipEntry.getContent().ifPresent(
-                    bytes -> jsonConverter.tryConvertToEntity(bytes)
-                            .ifPresent(project -> projectHolder.setProject(project, name))
-            );
+            zipEntry
+                .getContent()
+                .ifPresent(bytes ->
+                    jsonConverter
+                        .tryConvertToEntity(bytes)
+                        .ifPresent(project ->
+                            projectHolder.setProject(project, name)
+                        )
+                );
         }
     }
 
@@ -300,9 +374,12 @@ public class ProjectServiceImpl implements ProjectService {
      * @throws IOException in case of multipart file input stream access error
      */
     @Override
-    public Project importProject(MultipartFile file, @Nullable String name) throws IOException {
+    public Project importProject(MultipartFile file, @Nullable String name)
+        throws IOException {
         try (InputStream inputStream = file.getInputStream()) {
-            return importModelsFromProjectHolder(getProjectHolderFromZipStream(ZipStream.of(inputStream), name));
+            return importModelsFromProjectHolder(
+                getProjectHolderFromZipStream(ZipStream.of(inputStream), name)
+            );
         }
     }
 
@@ -315,140 +392,255 @@ public class ProjectServiceImpl implements ProjectService {
      * @throws IOException in case of InputStream access error
      */
     @Override
-    public Project importProject(InputStream file, String name) throws IOException {
-        return importModelsFromProjectHolder(getProjectHolderFromZipStream(ZipStream.of(file), name));
+    public Project importProject(InputStream file, String name)
+        throws IOException {
+        return importModelsFromProjectHolder(
+            getProjectHolderFromZipStream(ZipStream.of(file), name)
+        );
     }
 
-    private void importJSONModelFiles(ProjectHolder projectHolder,
-                                      Project createdProject,
-                                      ProjectHolder.ModelJsonFile modelJsonFile) {
-        Model createdModel = modelService.importModel(createdProject,
-                modelJsonFile.getModelType(),
-                modelJsonFile.getFileContent());
+    private void importJSONModelFiles(
+        ProjectHolder projectHolder,
+        Project createdProject,
+        ProjectHolder.ModelJsonFile modelJsonFile
+    ) {
+        Model createdModel = modelService.importModel(
+            createdProject,
+            modelJsonFile.getModelType(),
+            modelJsonFile.getFileContent()
+        );
 
-        modelService.updateModelContent(createdModel, modelJsonFile.getFileContent());
+        modelService.updateModelContent(
+            createdModel,
+            modelJsonFile.getFileContent()
+        );
 
-        projectHolder.getModelExtension(createdModel)
-                .ifPresent(fileMetadata -> {
-                    jsonMetadataConverter.tryConvertToEntity(fileMetadata.getFileContent())
-                            .ifPresent(extensions -> createdModel.setExtensions(getExtensionsValueMapFromJson(extensions)));
-                    modelService.updateModel(createdModel, createdModel);
-                });
+        projectHolder
+            .getModelExtension(createdModel)
+            .ifPresent(fileMetadata -> {
+                jsonMetadataConverter
+                    .tryConvertToEntity(fileMetadata.getFileContent())
+                    .ifPresent(extensions ->
+                        createdModel.setExtensions(
+                            getExtensionsValueMapFromJson(extensions)
+                        )
+                    );
+                modelService.updateModel(createdModel, createdModel);
+            });
     }
 
-    private Map<Model, FileContent> createXMLModelFiles(ProjectHolder projectHolder, Project createdProject) {
+    private Map<Model, FileContent> createXMLModelFiles(
+        ProjectHolder projectHolder,
+        Project createdProject
+    ) {
         Map<Model, FileContent> createdModels = new HashMap<>();
-        projectHolder.getProcessFiles().forEach(modelProcessFile -> {
-            Model createdModel = modelService.importModel(createdProject, modelProcessFile.getModelType(), modelProcessFile.getFileContent());
-            createdModels.put(createdModel, modelProcessFile.getFileContent());
-        });
+        projectHolder
+            .getProcessFiles()
+            .forEach(modelProcessFile -> {
+                Model createdModel = modelService.importModel(
+                    createdProject,
+                    modelProcessFile.getModelType(),
+                    modelProcessFile.getFileContent()
+                );
+                createdModels.put(
+                    createdModel,
+                    modelProcessFile.getFileContent()
+                );
+            });
         return createdModels;
     }
 
-    private void importXMLModelFiles(ProjectHolder projectHolder,
-                                     Project createdProject,
-                                     ModelType modelType,
-                                     FileContent fileContent) {
-        Model createdModel = modelService.importModel(createdProject,
-                modelType,
-                fileContent);
+    private void importXMLModelFiles(
+        ProjectHolder projectHolder,
+        Project createdProject,
+        ModelType modelType,
+        FileContent fileContent
+    ) {
+        Model createdModel = modelService.importModel(
+            createdProject,
+            modelType,
+            fileContent
+        );
         updateModelProcessImported(projectHolder, createdModel, fileContent);
     }
 
-    private void updateModelProcessImported(ProjectHolder projectHolder, Model createdModel, FileContent fileContent) {
+    private void updateModelProcessImported(
+        ProjectHolder projectHolder,
+        Model createdModel,
+        FileContent fileContent
+    ) {
         modelService.updateModelContent(createdModel, fileContent);
 
-        projectHolder.getModelExtension(createdModel)
-                .ifPresent(fileMetadata -> {
-                    jsonMetadataConverter.tryConvertToEntity(fileMetadata.getFileContent())
-                            .ifPresent(extensions -> createdModel.setExtensions(getExtensionsValueMapFromJson(extensions)));
-                    modelService.updateModel(createdModel, createdModel);
-                });
+        projectHolder
+            .getModelExtension(createdModel)
+            .ifPresent(fileMetadata -> {
+                jsonMetadataConverter
+                    .tryConvertToEntity(fileMetadata.getFileContent())
+                    .ifPresent(extensions ->
+                        createdModel.setExtensions(
+                            getExtensionsValueMapFromJson(extensions)
+                        )
+                    );
+                modelService.updateModel(createdModel, createdModel);
+            });
     }
 
-    private Map<String, Object> getExtensionsValueMapFromJson(Map<String, Object> extensions) {
+    private Map<String, Object> getExtensionsValueMapFromJson(
+        Map<String, Object> extensions
+    ) {
         return ((Map<String, Object>) extensions.get("extensions"));
     }
 
-    private void processZipEntryFile(ProjectHolder projectHolder,
-                                     FileContent fileContent,
-                                     ModelType modelType) {
+    private void processZipEntryFile(
+        ProjectHolder projectHolder,
+        FileContent fileContent,
+        ModelType modelType
+    ) {
         String modelName = removeExtension(fileContent.getFilename(), JSON);
         if (isProjectExtension(modelName, modelType, fileContent)) {
-            modelName = StringUtils.removeEnd(modelName, modelType.getExtensionsFileSuffix());
+            modelName =
+                StringUtils.removeEnd(
+                    modelName,
+                    modelType.getExtensionsFileSuffix()
+                );
             projectHolder.addModelExtension(modelName, modelType, fileContent);
         } else if (isProcessContent(modelName, modelType, fileContent)) {
-            modelService.contentFilenameToModelName(modelName, modelType)
-                    .ifPresent(fixedModelName -> projectHolder.addProcess(fixedModelName, modelType, fileContent));
+            modelService
+                .contentFilenameToModelName(modelName, modelType)
+                .ifPresent(fixedModelName ->
+                    projectHolder.addProcess(
+                        fixedModelName,
+                        modelType,
+                        fileContent
+                    )
+                );
         } else if (isModelContent(modelName, modelType, fileContent)) {
-            modelService.contentFilenameToModelName(modelName, modelType)
-                    .ifPresent(fixedModelName -> projectHolder.addModelContent(fixedModelName, modelType, fileContent));
+            modelService
+                .contentFilenameToModelName(modelName, modelType)
+                .ifPresent(fixedModelName ->
+                    projectHolder.addModelContent(
+                        fixedModelName,
+                        modelType,
+                        fileContent
+                    )
+                );
         } else {
             if (modelName.endsWith(modelType.getExtensionsFileSuffix())) {
-                modelName = StringUtils.removeEnd(modelName, modelType.getExtensionsFileSuffix());
+                modelName =
+                    StringUtils.removeEnd(
+                        modelName,
+                        modelType.getExtensionsFileSuffix()
+                    );
             }
             projectHolder.addModelJsonFile(modelName, modelType, fileContent);
         }
     }
 
-    private boolean isProjectExtension(String modelName,
-                                       ModelType modelType,
-                                       FileContent fileContent) {
-        return fileContent.isJson() && (modelName.endsWith(modelType.getExtensionsFileSuffix()));
+    private boolean isProjectExtension(
+        String modelName,
+        ModelType modelType,
+        FileContent fileContent
+    ) {
+        return (
+            fileContent.isJson() &&
+            (modelName.endsWith(modelType.getExtensionsFileSuffix()))
+        );
     }
 
-    private boolean isProcessContent(String modelName,
-                                     ModelType modelType,
-                                     FileContent fileContent) {
-        return !fileContent.isJson() || (!modelName.endsWith(modelType.getExtensionsFileSuffix())
-                && modelTypeService.isProcessContnent(modelType));
+    private boolean isProcessContent(
+        String modelName,
+        ModelType modelType,
+        FileContent fileContent
+    ) {
+        return (
+            !fileContent.isJson() ||
+            (
+                !modelName.endsWith(modelType.getExtensionsFileSuffix()) &&
+                modelTypeService.isProcessContnent(modelType)
+            )
+        );
     }
 
-    private boolean isModelContent(String modelName,
-                                   ModelType modelType,
-                                   FileContent fileContent) {
-        return !fileContent.isJson() || (!modelName.endsWith(modelType.getExtensionsFileSuffix())
-                && modelTypeService.isContentXML(modelType));
+    private boolean isModelContent(
+        String modelName,
+        ModelType modelType,
+        FileContent fileContent
+    ) {
+        return (
+            !fileContent.isJson() ||
+            (
+                !modelName.endsWith(modelType.getExtensionsFileSuffix()) &&
+                modelTypeService.isContentXML(modelType)
+            )
+        );
     }
 
     public List<ModelValidationError> validateProjectName(Project project) {
-        Optional<ProjectValidator> projectNameValidator = projectValidators.stream()
-            .filter(projectValidator -> projectValidator instanceof ProjectNameValidator).findFirst();
-        return projectNameValidator.isPresent() ? projectNameValidator.get()
-            .validate(project, null).collect(Collectors.toList()) : Collections.emptyList();
+        Optional<ProjectValidator> projectNameValidator = projectValidators
+            .stream()
+            .filter(projectValidator ->
+                projectValidator instanceof ProjectNameValidator
+            )
+            .findFirst();
+        return projectNameValidator.isPresent()
+            ? projectNameValidator
+                .get()
+                .validate(project, null)
+                .collect(Collectors.toList())
+            : Collections.emptyList();
     }
 
     @Override
     public void validateProject(Project project) {
         List<Model> availableModels = modelService.getAllModels(project);
-        ValidationContext validationContext = new ProjectValidationContext(availableModels);
+        ValidationContext validationContext = new ProjectValidationContext(
+            availableModels
+        );
 
-        List<ModelValidationError> validationErrors = Stream.concat(projectValidators.stream().flatMap(validator -> validator.validate(project,
-                validationContext)),
-                availableModels.stream().flatMap(model -> getModelValidationErrors(model,
-                        validationContext)))
-                .collect(Collectors.toList());
+        List<ModelValidationError> validationErrors = Stream
+            .concat(
+                projectValidators
+                    .stream()
+                    .flatMap(validator ->
+                        validator.validate(project, validationContext)
+                    ),
+                availableModels
+                    .stream()
+                    .flatMap(model ->
+                        getModelValidationErrors(model, validationContext)
+                    )
+            )
+            .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
-            throw new SemanticModelValidationException("Validation errors found in project's models",
-                    validationErrors);
+            throw new SemanticModelValidationException(
+                "Validation errors found in project's models",
+                validationErrors
+            );
         }
     }
 
-    private Stream<ModelValidationError> getModelValidationErrors(Model model,
-                                                                  ValidationContext validationContext) {
+    private Stream<ModelValidationError> getModelValidationErrors(
+        Model model,
+        ValidationContext validationContext
+    ) {
         List<ModelValidationError> validationErrors = new ArrayList<>();
         try {
-            modelService.validateModelContent(model,
-                    validationContext);
+            modelService.validateModelContent(model, validationContext);
         } catch (SemanticModelValidationException validationException) {
             validationErrors.addAll(validationException.getValidationErrors());
         }
 
         try {
-            modelService.getModelExtensionsFileContent(model).ifPresent(extensionsFileContent -> modelService.validateModelExtensions(model,
-                    extensionsFileContent,
-                    validationContext));
+            modelService
+                .getModelExtensionsFileContent(model)
+                .ifPresent(extensionsFileContent ->
+                    modelService.validateModelExtensions(
+                        model,
+                        extensionsFileContent,
+                        validationContext
+                    )
+                );
         } catch (SemanticModelValidationException validationException) {
             validationErrors.addAll(validationException.getValidationErrors());
         }
@@ -457,43 +649,94 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private Project importModelsFromProjectHolder(ProjectHolder projectHolder) {
-        Project project = projectHolder.getProjectMetadata().map(this::createProject)
-                .orElseThrow(() ->
-                        new ImportProjectException("No valid project entry found to import"));
+        Project project = projectHolder
+            .getProjectMetadata()
+            .map(this::createProject)
+            .orElseThrow(() ->
+                new ImportProjectException(
+                    "No valid project entry found to import"
+                )
+            );
 
         importModelsInProjectHolderToProject(projectHolder, project);
         return project;
     }
 
-    private void importModelsInProjectHolderToProject(ProjectHolder projectHolder, Project project) {
-        projectHolder.getModelJsonFiles().stream().sorted(MODEL_JSON_FILE_TYPE_COMPARATOR).forEach(modelJsonFile -> {
-            importJSONModelFiles(projectHolder, project, modelJsonFile);
-        });
+    private void importModelsInProjectHolderToProject(
+        ProjectHolder projectHolder,
+        Project project
+    ) {
+        projectHolder
+            .getModelJsonFiles()
+            .stream()
+            .sorted(MODEL_JSON_FILE_TYPE_COMPARATOR)
+            .forEach(modelJsonFile -> {
+                importJSONModelFiles(projectHolder, project, modelJsonFile);
+            });
 
-        projectHolder.getModelContentFiles().forEach(modelXmlFile ->
-                importXMLModelFiles(projectHolder, project, modelXmlFile.getModelType(), modelXmlFile.getFileContent()));
+        projectHolder
+            .getModelContentFiles()
+            .forEach(modelXmlFile ->
+                importXMLModelFiles(
+                    projectHolder,
+                    project,
+                    modelXmlFile.getModelType(),
+                    modelXmlFile.getFileContent()
+                )
+            );
 
-        Map<Model, FileContent> createdProcesses = createXMLModelFiles(projectHolder, project);
-        createdProcesses.keySet().forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
+        Map<Model, FileContent> createdProcesses = createXMLModelFiles(
+            projectHolder,
+            project
+        );
+        createdProcesses
+            .keySet()
+            .forEach(model ->
+                updateModelProcessImported(
+                    projectHolder,
+                    model,
+                    createdProcesses.get(model)
+                )
+            );
 
         modelService.cleanModelIdList();
     }
 
-    private ProjectHolder getProjectHolderFromZipStream(ZipStream stream, String name) throws IOException {
+    private ProjectHolder getProjectHolderFromZipStream(
+        ZipStream stream,
+        String name
+    ) throws IOException {
         ProjectHolder projectHolder = new ProjectHolder();
 
-        stream.forEach(zipEntry -> createFileContentFromZipEntry(zipEntry)
-                .ifPresent(fileContent -> convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
+        stream.forEach(zipEntry ->
+            createFileContentFromZipEntry(zipEntry)
+                .ifPresent(fileContent ->
+                    convertZipElementToModelObject(
+                        zipEntry,
+                        name,
+                        fileContent,
+                        projectHolder
+                    )
+                )
+        );
 
         return projectHolder;
     }
 
     @Override
-    public Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException {
-        ProjectHolder projectHolder = getProjectHolderFromZipStream(ZipStream.of(inputStream), project.getName());
+    public Project replaceProjectContentWithProvidedModelsInFile(
+        Project project,
+        InputStream inputStream
+    ) throws IOException {
+        ProjectHolder projectHolder = getProjectHolderFromZipStream(
+            ZipStream.of(inputStream),
+            project.getName()
+        );
 
-        if(projectHolder.getProjectMetadata().isEmpty()) {
-            throw new ImportProjectException("No valid project entry found to import");
+        if (projectHolder.getProjectMetadata().isEmpty()) {
+            throw new ImportProjectException(
+                "No valid project entry found to import"
+            );
         }
 
         deleteAllModelsInProject(project);

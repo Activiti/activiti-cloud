@@ -20,7 +20,8 @@ import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.results.TaskResult;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 
-public class CompleteTaskCmdExecutor extends AbstractCommandExecutor<CompleteTaskPayload> {
+public class CompleteTaskCmdExecutor
+    extends AbstractCommandExecutor<CompleteTaskPayload> {
 
     private TaskAdminRuntime taskAdminRuntime;
 

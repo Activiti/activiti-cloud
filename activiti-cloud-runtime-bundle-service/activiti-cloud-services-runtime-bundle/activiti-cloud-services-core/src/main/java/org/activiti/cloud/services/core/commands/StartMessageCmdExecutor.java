@@ -20,20 +20,19 @@ import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.results.ProcessInstanceResult;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 
-public class StartMessageCmdExecutor extends AbstractCommandExecutor<StartMessagePayload> {
-    
+public class StartMessageCmdExecutor
+    extends AbstractCommandExecutor<StartMessagePayload> {
+
     private final ProcessAdminRuntime processAdminRuntime;
-    
+
     public StartMessageCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
         this.processAdminRuntime = processAdminRuntime;
     }
-    
+
     @Override
     public ProcessInstanceResult execute(StartMessagePayload command) {
         ProcessInstance result = processAdminRuntime.start(command);
-        
-        return new ProcessInstanceResult(command, 
-                                         result);
-    }
 
+        return new ProcessInstanceResult(command, result);
+    }
 }

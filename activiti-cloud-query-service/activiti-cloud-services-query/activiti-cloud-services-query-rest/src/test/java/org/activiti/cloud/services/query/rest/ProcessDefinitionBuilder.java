@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.rest;
 
 import java.util.UUID;
-
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 
 public class ProcessDefinitionBuilder {
@@ -27,8 +26,9 @@ public class ProcessDefinitionBuilder {
         processDefinitionEntity.setName("My Process");
         processDefinitionEntity.setKey("myProcess");
         processDefinitionEntity.setVersion(1);
-        processDefinitionEntity.setDescription("This is my process description");
+        processDefinitionEntity.setDescription(
+            "This is my process description"
+        );
         return processDefinitionEntity;
     }
-
 }

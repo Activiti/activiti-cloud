@@ -15,65 +15,82 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import java.util.Date;
+import java.util.Objects;
+import javax.persistence.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.*;
-import java.util.Date;
-import java.util.Objects;
-
-@Entity(name="ProcessVariable")
-@Table(name = "PROCESS_VARIABLE",
-        indexes = {
-                @Index(name = "proc_var_processInstanceId_idx", columnList = "processInstanceId", unique = false),
-                @Index(name = "proc_var_name_idx", columnList = "name", unique = false),
-                @Index(name = "proc_var_executionId_idx", columnList = "executionId", unique = false)
-        })
+@Entity(name = "ProcessVariable")
+@Table(
+    name = "PROCESS_VARIABLE",
+    indexes = {
+        @Index(
+            name = "proc_var_processInstanceId_idx",
+            columnList = "processInstanceId",
+            unique = false
+        ),
+        @Index(name = "proc_var_name_idx", columnList = "name", unique = false),
+        @Index(
+            name = "proc_var_executionId_idx",
+            columnList = "executionId",
+            unique = false
+        ),
+    }
+)
 @DynamicInsert
 @DynamicUpdate
 public class ProcessVariableEntity extends AbstractVariableEntity {
 
     @Id
-    @GeneratedValue(generator = "process_variable_sequence", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="process_variable_sequence", sequenceName = "process_variable_sequence", allocationSize=50)
+    @GeneratedValue(
+        generator = "process_variable_sequence",
+        strategy = GenerationType.SEQUENCE
+    )
+    @SequenceGenerator(
+        name = "process_variable_sequence",
+        sequenceName = "process_variable_sequence",
+        allocationSize = 50
+    )
     private Long id;
 
+    public ProcessVariableEntity() {}
 
-    public ProcessVariableEntity() {
-    }
-
-    public ProcessVariableEntity(Long id,
-                          String type,
-                          String name,
-                          String processInstanceId,
-                          String serviceName,
-                          String serviceFullName,
-                          String serviceVersion,
-                          String appName,
-                          String appVersion,
-                          Date createTime,
-                          Date lastUpdatedTime,
-                          String executionId) {
-        super(type,
-              name,
-              processInstanceId,
-              serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion,
-              createTime,
-              lastUpdatedTime,
-              executionId);
-
+    public ProcessVariableEntity(
+        Long id,
+        String type,
+        String name,
+        String processInstanceId,
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion,
+        Date createTime,
+        Date lastUpdatedTime,
+        String executionId
+    ) {
+        super(
+            type,
+            name,
+            processInstanceId,
+            serviceName,
+            serviceFullName,
+            serviceVersion,
+            appName,
+            appVersion,
+            createTime,
+            lastUpdatedTime,
+            executionId
+        );
         this.id = id;
-
     }
 
     @Override
     public Long getId() {
         return id;
     }
+
     @Override
     public String getTaskId() {
         return null;
@@ -102,7 +119,8 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
         }
         ProcessVariableEntity other = (ProcessVariableEntity) obj;
 
-        return this.getId() != null && Objects.equals(this.getId(), other.getId());
+        return (
+            this.getId() != null && Objects.equals(this.getId(), other.getId())
+        );
     }
-
 }

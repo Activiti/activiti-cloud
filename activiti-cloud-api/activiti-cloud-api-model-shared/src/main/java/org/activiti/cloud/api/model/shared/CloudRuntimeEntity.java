@@ -18,7 +18,6 @@ package org.activiti.cloud.api.model.shared;
 import org.activiti.api.model.shared.model.ApplicationElement;
 
 public interface CloudRuntimeEntity extends ApplicationElement {
-
     /**
      * Application name, for a runtime-bundle it is the value of the <i>activiti.cloud.application.name</i> spring property.
      */
@@ -43,5 +42,4 @@ public interface CloudRuntimeEntity extends ApplicationElement {
      * Service version, for a runtime-bundle it is the value of the <i>activiti.cloud.service.version</i> spring property.
      */
     String getServiceVersion();
-
 }

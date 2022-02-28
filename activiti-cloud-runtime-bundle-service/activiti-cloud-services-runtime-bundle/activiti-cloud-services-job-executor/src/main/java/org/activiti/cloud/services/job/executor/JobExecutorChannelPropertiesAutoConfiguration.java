@@ -20,6 +20,4 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource("classpath:config/job-executor-channel.properties")
-public class JobExecutorChannelPropertiesAutoConfiguration {
-
-}
+public class JobExecutorChannelPropertiesAutoConfiguration {}

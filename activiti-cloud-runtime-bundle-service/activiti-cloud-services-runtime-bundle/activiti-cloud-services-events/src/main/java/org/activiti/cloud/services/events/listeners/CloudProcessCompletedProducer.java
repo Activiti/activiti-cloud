@@ -19,13 +19,16 @@ import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.process.runtime.events.listener.ProcessEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 
-public class CloudProcessCompletedProducer implements ProcessEventListener<ProcessCompletedEvent> {
+public class CloudProcessCompletedProducer
+    implements ProcessEventListener<ProcessCompletedEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudProcessCompletedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                         ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudProcessCompletedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }
@@ -34,5 +37,4 @@ public class CloudProcessCompletedProducer implements ProcessEventListener<Proce
     public void onEvent(ProcessCompletedEvent event) {
         eventsAggregator.add(eventConverter.from(event));
     }
-
 }

@@ -29,9 +29,9 @@ import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.AlternateTypeBuilder;
 import springfox.documentation.builders.AlternateTypePropertyBuilder;
@@ -61,51 +61,70 @@ public class SwaggerDocketBuilder {
     @Value("${keycloak.realm:activiti}")
     private String realm;
 
-    public SwaggerDocketBuilder(BaseAPIInfoBuilder baseAPIInfoBuilder, TypeResolver typeResolver,
-        List<DocketCustomizer> docketCustomizers) {
+    public SwaggerDocketBuilder(
+        BaseAPIInfoBuilder baseAPIInfoBuilder,
+        TypeResolver typeResolver,
+        List<DocketCustomizer> docketCustomizers
+    ) {
         this.typeResolver = typeResolver;
         this.docketCustomizers = docketCustomizers;
         this.baseAPIInfoBuilder = baseAPIInfoBuilder;
     }
 
-    private Docket baseDocket(String title, String groupName, String serviceURLPrefix, Predicate<RequestHandler> apiSelector) {
+    private Docket baseDocket(
+        String title,
+        String groupName,
+        String serviceURLPrefix,
+        Predicate<RequestHandler> apiSelector
+    ) {
         Docket baseDocket = new Docket(DocumentationType.OAS_30)
             .groupName(groupName)
-            .apiInfo(baseAPIInfoBuilder.baseApiInfoBuilder(title)
-                .build())
+            .apiInfo(baseAPIInfoBuilder.baseApiInfoBuilder(title).build())
             .extensions(
-                Collections.singletonList(new StringVendorExtension(SERVICE_URL_PREFIX, serviceURLPrefix)))
+                Collections.singletonList(
+                    new StringVendorExtension(
+                        SERVICE_URL_PREFIX,
+                        serviceURLPrefix
+                    )
+                )
+            )
             .select()
             .apis(apiSelector)
             .paths(PathSelectors.any())
             .build();
 
-        baseDocket.forCodeGeneration(true)
-                .securitySchemes(Arrays.asList(securitySchema()))
-                .securityContexts(Arrays.asList(securityContext()));
+        baseDocket
+            .forCodeGeneration(true)
+            .securitySchemes(Arrays.asList(securitySchema()))
+            .securityContexts(Arrays.asList(securityContext()));
         return applyCustomizations(baseDocket);
     }
 
     private SecurityScheme securitySchema() {
         return new OAuth2Scheme(
-                OAUTH_NAME,
-                "implicit",
-                "Authorizing with SSO",
-                authServer + "/realms/" + realm + "/protocol/openid-connect/auth",
-                null,
-                null,
-                Arrays.asList(),
-                Arrays.asList()
+            OAUTH_NAME,
+            "implicit",
+            "Authorizing with SSO",
+            authServer + "/realms/" + realm + "/protocol/openid-connect/auth",
+            null,
+            null,
+            Arrays.asList(),
+            Arrays.asList()
         );
     }
 
     private SecurityContext securityContext() {
-        return SecurityContext.builder()
-                .securityReferences(Arrays.asList(
-                        new SecurityReference(
-                                OAUTH_NAME,
-                                new AuthorizationScope[]{})))
-                .build();
+        return SecurityContext
+            .builder()
+            .securityReferences(
+                Arrays.asList(
+                    new SecurityReference(
+                        OAUTH_NAME,
+                        new AuthorizationScope[] {}
+                    )
+                )
+            )
+            .build();
     }
 
     private Docket applyCustomizations(Docket docket) {
@@ -118,53 +137,97 @@ public class SwaggerDocketBuilder {
         return customizedDocket;
     }
 
-    public Docket buildApiDocket(String title, String groupName, String serviceURLPrefix, Predicate<RequestHandler> apiSelector) {
-        ResolvedType resourceTypeWithWildCard = typeResolver.resolve(EntityModel.class,
-                                                                     WildcardType.class);
+    public Docket buildApiDocket(
+        String title,
+        String groupName,
+        String serviceURLPrefix,
+        Predicate<RequestHandler> apiSelector
+    ) {
+        ResolvedType resourceTypeWithWildCard = typeResolver.resolve(
+            EntityModel.class,
+            WildcardType.class
+        );
         return baseDocket(title, groupName, serviceURLPrefix, apiSelector)
-                .alternateTypeRules(newRule(typeResolver.resolve(CollectionModel.class,
-                                                                 resourceTypeWithWildCard),
-                                            typeResolver.resolve(ListResponseContent.class,
-                                                                 WildcardType.class)))
-                .alternateTypeRules(newRule(typeResolver.resolve(PagedModel.class,
-                                                                 resourceTypeWithWildCard),
-                                            typeResolver.resolve(ListResponseContent.class,
-                                                                 WildcardType.class)))
-                .alternateTypeRules(newRule(resourceTypeWithWildCard,
-                                            typeResolver.resolve(EntryResponseContent.class,
-                                                                 WildcardType.class)))
-                .alternateTypeRules(newRule(typeResolver.resolve(Pageable.class),
-                                            pageableMixin(),
-                                            Ordered.HIGHEST_PRECEDENCE));
+            .alternateTypeRules(
+                newRule(
+                    typeResolver.resolve(
+                        CollectionModel.class,
+                        resourceTypeWithWildCard
+                    ),
+                    typeResolver.resolve(
+                        ListResponseContent.class,
+                        WildcardType.class
+                    )
+                )
+            )
+            .alternateTypeRules(
+                newRule(
+                    typeResolver.resolve(
+                        PagedModel.class,
+                        resourceTypeWithWildCard
+                    ),
+                    typeResolver.resolve(
+                        ListResponseContent.class,
+                        WildcardType.class
+                    )
+                )
+            )
+            .alternateTypeRules(
+                newRule(
+                    resourceTypeWithWildCard,
+                    typeResolver.resolve(
+                        EntryResponseContent.class,
+                        WildcardType.class
+                    )
+                )
+            )
+            .alternateTypeRules(
+                newRule(
+                    typeResolver.resolve(Pageable.class),
+                    pageableMixin(),
+                    Ordered.HIGHEST_PRECEDENCE
+                )
+            );
     }
 
-    public Docket buildApiDocket(String title, String groupName, String serviceURLPrefix, String basePackage) {
-        return buildApiDocket(title, groupName, serviceURLPrefix, RequestHandlerSelectors.basePackage(basePackage));
+    public Docket buildApiDocket(
+        String title,
+        String groupName,
+        String serviceURLPrefix,
+        String basePackage
+    ) {
+        return buildApiDocket(
+            title,
+            groupName,
+            serviceURLPrefix,
+            RequestHandlerSelectors.basePackage(basePackage)
+        );
     }
 
-        private Type pageableMixin() {
+    private Type pageableMixin() {
         return new AlternateTypeBuilder()
-                .fullyQualifiedClassName(
-                        String.format("%s.generated.%s",
-                                      Pageable.class.getPackage().getName(),
-                                      Pageable.class.getSimpleName()))
-                .withProperties(Arrays.asList(
-                        property(Integer.class,
-                                 "skipCount"),
-                        property(Integer.class,
-                                 "maxItems"),
-                        property(String.class,
-                                 "sort")
-                ))
-                .build();
+            .fullyQualifiedClassName(
+                String.format(
+                    "%s.generated.%s",
+                    Pageable.class.getPackage().getName(),
+                    Pageable.class.getSimpleName()
+                )
+            )
+            .withProperties(
+                Arrays.asList(
+                    property(Integer.class, "skipCount"),
+                    property(Integer.class, "maxItems"),
+                    property(String.class, "sort")
+                )
+            )
+            .build();
     }
 
-    private AlternateTypePropertyBuilder property(Class<?> type,
-                                                  String name) {
+    private AlternateTypePropertyBuilder property(Class<?> type, String name) {
         return new AlternateTypePropertyBuilder()
-                .withName(name)
-                .withType(type)
-                .withCanRead(true)
-                .withCanWrite(true);
+            .withName(name)
+            .withType(type)
+            .withCanRead(true)
+            .withCanWrite(true);
     }
 }

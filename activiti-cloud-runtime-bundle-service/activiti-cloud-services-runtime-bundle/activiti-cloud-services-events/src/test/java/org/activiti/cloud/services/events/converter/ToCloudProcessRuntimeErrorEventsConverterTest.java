@@ -48,7 +48,9 @@ public class ToCloudProcessRuntimeErrorEventsConverterTest {
     public void shouldConvertBPMNErrorReceivedEventToCloudBPMNErrorReceivedEvent() {
         BPMNError entity = bpmnErrorEntity("entityId");
 
-        BPMNErrorReceivedEvent runtimeEvent = new BPMNErrorReceivedEventImpl(entity);
+        BPMNErrorReceivedEvent runtimeEvent = new BPMNErrorReceivedEventImpl(
+            entity
+        );
 
         CloudBPMNErrorReceivedEvent cloudEvent = converter.from(runtimeEvent);
 
@@ -56,7 +58,8 @@ public class ToCloudProcessRuntimeErrorEventsConverterTest {
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender)
+            .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     private BPMNError bpmnErrorEntity(String entityId) {

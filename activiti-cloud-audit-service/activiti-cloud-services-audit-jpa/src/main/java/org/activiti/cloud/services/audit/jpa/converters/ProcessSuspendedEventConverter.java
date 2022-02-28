@@ -25,26 +25,36 @@ import org.activiti.cloud.services.audit.jpa.events.ProcessSuspendedAuditEventEn
 
 public class ProcessSuspendedEventConverter extends BaseEventToEntityConverter {
 
-    public ProcessSuspendedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessSuspendedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name();
     }
 
     @Override
-    protected ProcessSuspendedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {      
-        return new ProcessSuspendedAuditEventEntity((CloudProcessSuspendedEvent) cloudRuntimeEvent); 
+    protected ProcessSuspendedAuditEventEntity createEventEntity(
+        CloudRuntimeEvent cloudRuntimeEvent
+    ) {
+        return new ProcessSuspendedAuditEventEntity(
+            (CloudProcessSuspendedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
-    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(
+        AuditEventEntity auditEventEntity
+    ) {
         ProcessSuspendedAuditEventEntity processSuspendedAuditEventEntity = (ProcessSuspendedAuditEventEntity) auditEventEntity;
 
-        return new CloudProcessSuspendedEventImpl(processSuspendedAuditEventEntity.getEventId(),
-                                                  processSuspendedAuditEventEntity.getTimestamp(),
-                                                  processSuspendedAuditEventEntity.getProcessInstance());
+        return new CloudProcessSuspendedEventImpl(
+            processSuspendedAuditEventEntity.getEventId(),
+            processSuspendedAuditEventEntity.getTimestamp(),
+            processSuspendedAuditEventEntity.getProcessInstance()
+        );
     }
 }

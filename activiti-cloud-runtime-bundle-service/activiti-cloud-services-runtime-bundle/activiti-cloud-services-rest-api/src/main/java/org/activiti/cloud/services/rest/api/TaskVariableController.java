@@ -28,17 +28,30 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 public interface TaskVariableController {
+    @GetMapping(
+        path = "/v1/tasks/{taskId}/variables",
+        headers = "Content-type=application/json"
+    )
+    CollectionModel<EntityModel<CloudVariableInstance>> getVariables(
+        @PathVariable(value = "taskId") String taskId
+    );
 
-    @GetMapping(path = "/v1/tasks/{taskId}/variables", headers = "Content-type=application/json")
-    CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable(value = "taskId") String taskId);
+    @PostMapping(
+        path = "/v1/tasks/{taskId}/variables",
+        headers = "Content-type=application/json"
+    )
+    ResponseEntity<Void> createVariable(
+        @PathVariable(value = "taskId") String taskId,
+        @RequestBody CreateTaskVariablePayload createTaskVariablePayload
+    );
 
-    @PostMapping(path = "/v1/tasks/{taskId}/variables", headers = "Content-type=application/json")
-    ResponseEntity<Void> createVariable(@PathVariable(value = "taskId") String taskId,
-        @RequestBody CreateTaskVariablePayload createTaskVariablePayload);
-
-    @PutMapping(value = "/v1/tasks/{taskId}/variables/{variableName}",
-        headers = "Content-type=application/json")
-    ResponseEntity<Void> updateVariable(@PathVariable(value = "taskId") String taskId,
+    @PutMapping(
+        value = "/v1/tasks/{taskId}/variables/{variableName}",
+        headers = "Content-type=application/json"
+    )
+    ResponseEntity<Void> updateVariable(
+        @PathVariable(value = "taskId") String taskId,
         @PathVariable(value = "variableName") String variableName,
-        @RequestBody UpdateTaskVariablePayload updateTaskVariablePayload);
+        @RequestBody UpdateTaskVariablePayload updateTaskVariablePayload
+    );
 }

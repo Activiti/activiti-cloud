@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
@@ -22,21 +23,21 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Optional;
-
 /**
  * Keycloak implementation for {@link SecurityContextTokenProvider}
  */
-public class KeycloakSecurityContextTokenProvider implements SecurityContextTokenProvider {
+public class KeycloakSecurityContextTokenProvider
+    implements SecurityContextTokenProvider {
 
     @Override
     public Optional<String> getCurrentToken() {
-        return Optional.ofNullable(SecurityContextHolder.getContext())
-                .map(SecurityContext::getAuthentication)
-                .map(Authentication::getPrincipal)
-                .filter(KeycloakPrincipal.class::isInstance)
-                .map(KeycloakPrincipal.class::cast)
-                .map(KeycloakPrincipal::getKeycloakSecurityContext)
-                .map(KeycloakSecurityContext::getTokenString);
+        return Optional
+            .ofNullable(SecurityContextHolder.getContext())
+            .map(SecurityContext::getAuthentication)
+            .map(Authentication::getPrincipal)
+            .filter(KeycloakPrincipal.class::isInstance)
+            .map(KeycloakPrincipal.class::cast)
+            .map(KeycloakPrincipal::getKeycloakSecurityContext)
+            .map(KeycloakSecurityContext::getTokenString);
     }
 }

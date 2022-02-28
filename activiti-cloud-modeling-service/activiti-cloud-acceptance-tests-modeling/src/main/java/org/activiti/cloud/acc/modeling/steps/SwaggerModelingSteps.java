@@ -27,8 +27,7 @@ public class SwaggerModelingSteps {
     private SwaggerService modelingSwaggerService;
 
     @Step
-    public String getSwaggerSpecification(){
+    public String getSwaggerSpecification() {
         return modelingSwaggerService.getSwaggerSpecification("Modeling");
     }
-
 }

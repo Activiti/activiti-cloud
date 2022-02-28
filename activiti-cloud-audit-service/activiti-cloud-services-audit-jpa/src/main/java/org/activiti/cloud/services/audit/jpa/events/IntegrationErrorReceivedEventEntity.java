@@ -15,24 +15,29 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
-import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
-import org.hibernate.annotations.DynamicInsert;
-
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import java.util.List;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
+import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
+import org.hibernate.annotations.DynamicInsert;
 
-@Entity(name = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
-@DiscriminatorValue(value = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
+@Entity(
+    name = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT
+)
+@DiscriminatorValue(
+    value = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT
+)
 @DynamicInsert
-public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity {
+public class IntegrationErrorReceivedEventEntity
+    extends IntegrationEventEntity {
 
     private static final int ERROR_MESSAGE_LENGTH = 255;
 
-    protected static final String INTEGRATION_ERROR_RECEIVED_EVENT = "IntegrationErrorReceivedEvent";
+    protected static final String INTEGRATION_ERROR_RECEIVED_EVENT =
+        "IntegrationErrorReceivedEvent";
 
     private String errorCode;
 
@@ -47,11 +52,13 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
 
     IntegrationErrorReceivedEventEntity() {}
 
-    public IntegrationErrorReceivedEventEntity(CloudIntegrationErrorReceivedEvent event) {
+    public IntegrationErrorReceivedEventEntity(
+        CloudIntegrationErrorReceivedEvent event
+    ) {
         super(event);
-
         this.errorCode = event.getErrorCode();
-        this.errorMessage = StringUtils.truncate(event.getErrorMessage(), ERROR_MESSAGE_LENGTH);
+        this.errorMessage =
+            StringUtils.truncate(event.getErrorMessage(), ERROR_MESSAGE_LENGTH);
         this.errorClassName = event.getErrorClassName();
         this.stackTraceElements = event.getStackTraceElements();
     }
@@ -67,8 +74,10 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
     public String getErrorMessage() {
         return errorMessage;
     }
+
     public void setErrorMessage(String errorMessage) {
-        this.errorMessage = StringUtils.truncate(errorMessage, ERROR_MESSAGE_LENGTH);
+        this.errorMessage =
+            StringUtils.truncate(errorMessage, ERROR_MESSAGE_LENGTH);
     }
 
     public String getErrorClassName() {
@@ -79,7 +88,9 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
         return stackTraceElements;
     }
 
-    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
+    public void setStackTraceElements(
+        List<StackTraceElement> stackTraceElements
+    ) {
         this.stackTraceElements = stackTraceElements;
     }
 
@@ -87,20 +98,25 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
     public String toString() {
         final int maxLen = 10;
         StringBuilder builder = new StringBuilder();
-        builder.append("IntegrationErrorReceivedEventEntity [errorMessage=")
-               .append(errorCode)
-               .append(", errorCode=")
-               .append(errorMessage)
-               .append(", errorClassName=")
-               .append(errorClassName)
-               .append(", stackTraceElements=")
-               .append(stackTraceElements != null ? stackTraceElements.subList(0,
-                                                                               Math.min(stackTraceElements.size(),
-                                                                                        maxLen)) : null)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("IntegrationErrorReceivedEventEntity [errorMessage=")
+            .append(errorCode)
+            .append(", errorCode=")
+            .append(errorMessage)
+            .append(", errorClassName=")
+            .append(errorClassName)
+            .append(", stackTraceElements=")
+            .append(
+                stackTraceElements != null
+                    ? stackTraceElements.subList(
+                        0,
+                        Math.min(stackTraceElements.size(), maxLen)
+                    )
+                    : null
+            )
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
-
 }

@@ -15,8 +15,11 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.UUID;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.UUID;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
@@ -24,10 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class VariableEntityDeletedEventHandlerTest {
 
@@ -48,7 +47,9 @@ public class VariableEntityDeletedEventHandlerTest {
     @Test
     public void handleShouldUseProcessVariableDeleteHandlerWhenNoTaskId() {
         //given
-        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(buildVariable());
+        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(
+            buildVariable()
+        );
 
         //when
         handler.handle(event);
@@ -58,16 +59,21 @@ public class VariableEntityDeletedEventHandlerTest {
     }
 
     private static VariableInstanceImpl<String> buildVariable() {
-        return new VariableInstanceImpl<>("var",
-                                          "v1",
-                                          "string",
-                                          "procInstId", null);
+        return new VariableInstanceImpl<>(
+            "var",
+            "v1",
+            "string",
+            "procInstId",
+            null
+        );
     }
 
     @Test
     public void handleShouldUseProcessVariableDeleteHandlerWhenTaskIdIsPresent() {
         //given
-        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(buildVariableWithTaskId());
+        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(
+            buildVariableWithTaskId()
+        );
 
         //when
         handler.handle(event);
@@ -77,7 +83,13 @@ public class VariableEntityDeletedEventHandlerTest {
     }
 
     private static VariableInstanceImpl<String> buildVariableWithTaskId() {
-        return new VariableInstanceImpl<>("var", "v1", "string", "procInstId", "taskId");
+        return new VariableInstanceImpl<>(
+            "var",
+            "v1",
+            "string",
+            "procInstId",
+            "taskId"
+        );
     }
 
     @Test
@@ -86,6 +98,7 @@ public class VariableEntityDeletedEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(VariableEvent.VariableEvents.VARIABLE_DELETED.name());
+        assertThat(handledEvent)
+            .isEqualTo(VariableEvent.VariableEvents.VARIABLE_DELETED.name());
     }
 }

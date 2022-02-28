@@ -17,7 +17,9 @@ package org.activiti.cloud.api.process.model.impl;
 
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 
-public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements CloudServiceTask {
+public class CloudServiceTaskImpl
+    extends CloudBPMNActivityImpl
+    implements CloudServiceTask {
 
     @Override
     public int hashCode() {
@@ -41,8 +43,10 @@ public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements Cloud
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudServiceTaskImpl [toString()=").append(super.toString()).append("]");
+        builder
+            .append("CloudServiceTaskImpl [toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
-
 }

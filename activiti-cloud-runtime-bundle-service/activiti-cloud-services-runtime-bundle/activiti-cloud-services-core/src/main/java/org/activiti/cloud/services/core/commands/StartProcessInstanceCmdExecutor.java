@@ -20,19 +20,29 @@ import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.results.ProcessInstanceResult;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 
-public class StartProcessInstanceCmdExecutor extends AbstractCommandExecutor<StartProcessPayload> {
+public class StartProcessInstanceCmdExecutor
+    extends AbstractCommandExecutor<StartProcessPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;
 
-    public StartProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public StartProcessInstanceCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         this.processAdminRuntime = processAdminRuntime;
     }
 
     @Override
-    public ProcessInstanceResult execute(StartProcessPayload startProcessPayload) {
-        ProcessInstance processInstance = processAdminRuntime.start(startProcessPayload);
+    public ProcessInstanceResult execute(
+        StartProcessPayload startProcessPayload
+    ) {
+        ProcessInstance processInstance = processAdminRuntime.start(
+            startProcessPayload
+        );
         if (processInstance != null) {
-            return new ProcessInstanceResult(startProcessPayload, processInstance);
+            return new ProcessInstanceResult(
+                startProcessPayload,
+                processInstance
+            );
         } else {
             throw new IllegalStateException("Failed to start processInstance");
         }

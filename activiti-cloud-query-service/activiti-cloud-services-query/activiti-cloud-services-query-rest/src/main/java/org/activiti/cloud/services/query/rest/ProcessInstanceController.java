@@ -15,8 +15,10 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import java.util.Optional;
-
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -34,26 +36,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
-
 @RestController
 @RequestMapping(
-        value = "/v1/process-instances",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/v1/process-instances",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ProcessInstanceController {
 
     private final ProcessInstanceRepository processInstanceRepository;
@@ -68,85 +64,141 @@ public class ProcessInstanceController {
 
     private SecurityManager securityManager;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+        ProcessInstanceController.class
+    );
 
     private EntityFinder entityFinder;
 
     @Autowired
-    public ProcessInstanceController(ProcessInstanceRepository processInstanceRepository,
-                                     ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
-                                     AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
-                                     ProcessInstanceRestrictionService processInstanceRestrictionService,
-                                     EntityFinder entityFinder,
-                                     SecurityPoliciesManager securityPoliciesApplicationService,
-                                     SecurityManager securityManager) {
+    public ProcessInstanceController(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
+        ProcessInstanceRestrictionService processInstanceRestrictionService,
+        EntityFinder entityFinder,
+        SecurityPoliciesManager securityPoliciesApplicationService,
+        SecurityManager securityManager
+    ) {
         this.processInstanceRepository = processInstanceRepository;
-        this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
+        this.processInstanceRepresentationModelAssembler =
+            processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
-        this.processInstanceRestrictionService = processInstanceRestrictionService;
+        this.processInstanceRestrictionService =
+            processInstanceRestrictionService;
         this.entityFinder = entityFinder;
-        this.securityPoliciesApplicationService = securityPoliciesApplicationService;
+        this.securityPoliciesApplicationService =
+            securityPoliciesApplicationService;
         this.securityManager = securityManager;
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                  Pageable pageable) {
+    public PagedModel<EntityModel<CloudProcessInstance>> findAll(
+        @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        predicate =
+            processInstanceRestrictionService.restrictProcessInstanceQuery(
+                Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new),
+                SecurityPolicyAccess.READ
+            );
 
-        predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(Optional.ofNullable(predicate)
-                                                                                           .orElseGet(BooleanBuilder::new),
-                                                                                    SecurityPolicyAccess.READ);
-
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  processInstanceRepository.findAll(predicate,
-                                                                                    pageable),
-                                                  processInstanceRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            processInstanceRepository.findAll(predicate, pageable),
+            processInstanceRepresentationModelAssembler
+        );
     }
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
+    public EntityModel<CloudProcessInstance> findById(
+        @PathVariable String processInstanceId
+    ) {
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
+            processInstanceRepository,
+            processInstanceId,
+            "Unable to find process instance for the given id:'" +
+            processInstanceId +
+            "'"
+        );
 
-        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
-                                                                            processInstanceId,
-                                                                            "Unable to find process instance for the given id:'" + processInstanceId + "'");
-
-        if (!securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
-                                                        processInstanceEntity.getServiceName())) {
-            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey());
-            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey());
+        if (
+            !securityPoliciesApplicationService.canRead(
+                processInstanceEntity.getProcessDefinitionKey(),
+                processInstanceEntity.getServiceName()
+            )
+        ) {
+            LOGGER.debug(
+                "User " +
+                securityManager.getAuthenticatedUserId() +
+                " not permitted to access definition " +
+                processInstanceEntity.getProcessDefinitionKey()
+            );
+            throw new ActivitiForbiddenException(
+                "Operation not permitted for " +
+                processInstanceEntity.getProcessDefinitionKey()
+            );
         }
 
-        return processInstanceRepresentationModelAssembler.toModel(processInstanceEntity);
+        return processInstanceRepresentationModelAssembler.toModel(
+            processInstanceEntity
+        );
     }
 
+    @RequestMapping(
+        value = "/{processInstanceId}/subprocesses",
+        method = RequestMethod.GET
+    )
+    public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(
+        @PathVariable String processInstanceId,
+        @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        predicate =
+            Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
 
-    @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
-                                                                @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                Pageable pageable) {
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
+            processInstanceRepository,
+            processInstanceId,
+            "Unable to find process for the given id:'" +
+            processInstanceId +
+            "'"
+        );
 
-        predicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
-
-        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
-                                                                            processInstanceId,
-                                                                            "Unable to find process for the given id:'" + processInstanceId + "'");
-
-        if (!securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
-                                                        processInstanceEntity.getServiceName())) {
-            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey());
-            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey());
+        if (
+            !securityPoliciesApplicationService.canRead(
+                processInstanceEntity.getProcessDefinitionKey(),
+                processInstanceEntity.getServiceName()
+            )
+        ) {
+            LOGGER.debug(
+                "User " +
+                securityManager.getAuthenticatedUserId() +
+                " not permitted to access definition " +
+                processInstanceEntity.getProcessDefinitionKey()
+            );
+            throw new ActivitiForbiddenException(
+                "Operation not permitted for " +
+                processInstanceEntity.getProcessDefinitionKey()
+            );
         }
 
-        QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
+        QProcessInstanceEntity process =
+            QProcessInstanceEntity.processInstanceEntity;
         BooleanExpression expression = process.parentId.eq(processInstanceId);
         Predicate extendedPredicate = expression;
         if (predicate != null) {
             extendedPredicate = expression.and(predicate);
         }
 
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  processInstanceRepository.findAll(extendedPredicate,
-                                                                                    pageable),
-                                                  processInstanceRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            processInstanceRepository.findAll(extendedPredicate, pageable),
+            processInstanceRepresentationModelAssembler
+        );
     }
 }

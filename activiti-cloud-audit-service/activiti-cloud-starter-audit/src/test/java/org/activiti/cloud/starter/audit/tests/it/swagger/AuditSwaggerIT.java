@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.starter.audit.tests.it.swagger;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
@@ -26,38 +34,52 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.startsWith;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext
-@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    initializers = {
+        RabbitMQContainerApplicationInitializer.class,
+        KeycloakContainerApplicationInitializer.class,
+    }
+)
 public class AuditSwaggerIT {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
-        mockMvc.perform(get("/v3/api-docs?group=Audit").accept(MediaType.APPLICATION_JSON))
+    public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo()
+        throws Exception {
+        mockMvc
+            .perform(
+                get("/v3/api-docs?group=Audit")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.servers").isNotEmpty())
             .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").isNotEmpty())
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
-            .andExpect(jsonPath("$.components.schemas").value(hasKey("CloudRuntimeEventModel")))
-            .andExpect(jsonPath("$.info.title").value("Audit Service ReST API"));
-
+            .andExpect(
+                jsonPath("$.components.schemas")
+                    .value(hasKey(startsWith("ListResponseContent")))
+            )
+            .andExpect(
+                jsonPath("$.components.schemas")
+                    .value(hasKey(startsWith("EntriesResponseContent")))
+            )
+            .andExpect(
+                jsonPath("$.components.schemas")
+                    .value(hasKey(startsWith("EntryResponseContent")))
+            )
+            .andExpect(
+                jsonPath("$.components.schemas")
+                    .value(hasKey("CloudRuntimeEventModel"))
+            )
+            .andExpect(
+                jsonPath("$.info.title").value("Audit Service ReST API")
+            );
     }
-
 }

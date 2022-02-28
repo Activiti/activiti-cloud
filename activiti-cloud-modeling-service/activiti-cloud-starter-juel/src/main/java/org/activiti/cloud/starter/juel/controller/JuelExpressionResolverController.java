@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.juel.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import java.util.Map;
 import org.activiti.cloud.starter.juel.service.JuelExpressionResolverService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,12 +28,20 @@ public class JuelExpressionResolverController {
 
     private final JuelExpressionResolverService juelExpressionResolverService;
 
-    public JuelExpressionResolverController(JuelExpressionResolverService juelExpressionResolverService) {
+    public JuelExpressionResolverController(
+        JuelExpressionResolverService juelExpressionResolverService
+    ) {
         this.juelExpressionResolverService = juelExpressionResolverService;
     }
 
-    @PostMapping(value = "/v1/juel", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    public Map<String, Object> resolveExpression(@RequestBody Map<String, Object> inputVariables) {
+    @PostMapping(
+        value = "/v1/juel",
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    public Map<String, Object> resolveExpression(
+        @RequestBody Map<String, Object> inputVariables
+    ) {
         return juelExpressionResolverService.resolveExpression(inputVariables);
     }
 }

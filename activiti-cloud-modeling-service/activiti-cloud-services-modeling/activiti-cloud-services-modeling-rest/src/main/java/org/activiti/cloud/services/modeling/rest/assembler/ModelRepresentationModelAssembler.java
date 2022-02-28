@@ -15,23 +15,26 @@
  */
 package org.activiti.cloud.services.modeling.rest.assembler;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.services.modeling.rest.controller.ModelController;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 /**
  * Assembler for {@link Model} resource
  */
-public class ModelRepresentationModelAssembler implements RepresentationModelAssembler<Model, EntityModel<Model>> {
+public class ModelRepresentationModelAssembler
+    implements RepresentationModelAssembler<Model, EntityModel<Model>> {
 
     @Override
     public EntityModel<Model> toModel(Model model) {
-        return EntityModel.of(model,
-                              linkTo(methodOn(ModelController.class).getModel(model.getId())).withSelfRel());
+        return EntityModel.of(
+            model,
+            linkTo(methodOn(ModelController.class).getModel(model.getId()))
+                .withSelfRel()
+        );
     }
-
 }

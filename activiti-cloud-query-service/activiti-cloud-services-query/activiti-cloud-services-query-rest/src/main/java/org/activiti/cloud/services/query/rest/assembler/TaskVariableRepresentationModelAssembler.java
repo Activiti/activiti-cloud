@@ -20,11 +20,14 @@ import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-public class TaskVariableRepresentationModelAssembler implements RepresentationModelAssembler<TaskVariableEntity, EntityModel<CloudVariableInstance>> {
+public class TaskVariableRepresentationModelAssembler
+    implements
+        RepresentationModelAssembler<TaskVariableEntity, EntityModel<CloudVariableInstance>> {
 
     @Override
-    public EntityModel<CloudVariableInstance> toModel(TaskVariableEntity entity) {
-       return EntityModel.of(entity);
+    public EntityModel<CloudVariableInstance> toModel(
+        TaskVariableEntity entity
+    ) {
+        return EntityModel.of(entity);
     }
-
 }

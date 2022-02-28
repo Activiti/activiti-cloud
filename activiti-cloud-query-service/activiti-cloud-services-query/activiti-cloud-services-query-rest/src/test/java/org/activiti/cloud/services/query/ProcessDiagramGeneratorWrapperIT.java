@@ -47,7 +47,9 @@ public class ProcessDiagramGeneratorWrapperIT {
     @Value("classpath:/processes/SimpleProcess.bpmn20.xml")
     private Resource simpleProcess;
 
-    @Value("classpath:/processes/SubProcessTest.fixSystemFailureProcess.bpmn20.xml")
+    @Value(
+        "classpath:/processes/SubProcessTest.fixSystemFailureProcess.bpmn20.xml"
+    )
     private Resource subProcessTest;
 
     /**
@@ -60,7 +62,9 @@ public class ProcessDiagramGeneratorWrapperIT {
     @Test
     public void testGenerateProcessDiagram() throws Exception {
         //GIVEN
-        BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(simpleProcess.getInputStream());
+        BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(
+            simpleProcess.getInputStream()
+        );
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
         //WHEN
@@ -78,9 +82,12 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 3. Expected: the diagram is not empty
      */
     @Test
-    public void testGenerateDiagramForProcessWithNoGraphicInfo() throws Exception {
+    public void testGenerateDiagramForProcessWithNoGraphicInfo()
+        throws Exception {
         //GIVEN
-        BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(subProcessTest.getInputStream());
+        BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(
+            subProcessTest.getInputStream()
+        );
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
         //WHEN
@@ -98,15 +105,18 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 3. Expected: the diagram is not empty
      */
     @Test
-    public void testGenerateDiagramForProcessWithNoGraphicInfoAndNoDefaultImage() throws Exception {
+    public void testGenerateDiagramForProcessWithNoGraphicInfoAndNoDefaultImage()
+        throws Exception {
         //GIVEN
-        BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(subProcessTest.getInputStream());
+        BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(
+            subProcessTest.getInputStream()
+        );
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
         when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
+            .thenReturn(true);
         when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("");
+            .thenReturn("");
 
         //WHEN
         byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
@@ -124,21 +134,27 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 4. Expected: ActivitiException is thrown while generating diagram
      */
     @Test
-    public void testGenerateDiagramForProcessWithNoGraphicInfoAndInvalidDefaultImage() throws Exception {
+    public void testGenerateDiagramForProcessWithNoGraphicInfoAndInvalidDefaultImage()
+        throws Exception {
         //GIVEN
-        BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(subProcessTest.getInputStream());
+        BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(
+            subProcessTest.getInputStream()
+        );
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
         when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
+            .thenReturn(true);
         when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("invalid-file-name");
+            .thenReturn("invalid-file-name");
 
         //THEN
         //WHEN
         assertThatExceptionOfType(ActivitiImageException.class)
-            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel))
-            .withMessageContaining("Error occurred while getting default diagram image from file");
+            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel)
+            )
+            .withMessageContaining(
+                "Error occurred while getting default diagram image from file"
+            );
     }
 
     /**
@@ -148,18 +164,21 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 2. Expected: ActivitiException is thrown while generating diagram
      */
     @Test
-    public void testGenerateDiagramForProcessWithInvalidGraphicInfo() throws Exception {
+    public void testGenerateDiagramForProcessWithInvalidGraphicInfo()
+        throws Exception {
         //GIVEN
         BpmnModel bpmnModel = new BpmnModel();
-        bpmnModel.addGraphicInfo("key",
-                                 null);
+        bpmnModel.addGraphicInfo("key", null);
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
         //THEN
         //WHEN
         assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel))
-            .withMessageContaining("Error occurred while getting process diagram");
+            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel)
+            )
+            .withMessageContaining(
+                "Error occurred while getting process diagram"
+            );
     }
 
     /**
@@ -180,7 +199,7 @@ public class ProcessDiagramGeneratorWrapperIT {
         //activiti.engine.diagram.activity.font=Lucida
         //activiti.engine.diagram.label.font=InvalidFont
         when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{"Lucida", "Serif"});
+            .thenReturn(new String[] { "Lucida", "Serif" });
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();
@@ -202,7 +221,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     public void testProcessDiagramFontsWhenWithAvailableFonts() {
         //GIVEN
         when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{DEFAULT_DIAGRAM_FONT_NAME});
+            .thenReturn(new String[] { DEFAULT_DIAGRAM_FONT_NAME });
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();

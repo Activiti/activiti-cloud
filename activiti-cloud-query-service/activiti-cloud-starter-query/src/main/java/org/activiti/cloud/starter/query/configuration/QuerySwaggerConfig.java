@@ -31,15 +31,25 @@ public class QuerySwaggerConfig {
 
     @Bean(name = "queryApiDocket")
     @ConditionalOnMissingBean(name = "queryApiDocket")
-    public Docket queryApiDocket(SwaggerDocketBuilder docketBuilder,
-        @Value("${activiti.cloud.swagger.query-base-path:}") String querySwaggerBasePath) {
-        return docketBuilder.buildApiDocket("Query Service ReST API", "Query",
-            querySwaggerBasePath, "org.activiti.cloud.services.query.rest");
+    public Docket queryApiDocket(
+        SwaggerDocketBuilder docketBuilder,
+        @Value(
+            "${activiti.cloud.swagger.query-base-path:}"
+        ) String querySwaggerBasePath
+    ) {
+        return docketBuilder.buildApiDocket(
+            "Query Service ReST API",
+            "Query",
+            querySwaggerBasePath,
+            "org.activiti.cloud.services.query.rest"
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableSearchDocketCustomizer variableSearchDocketCustomizer(TypeResolver typeResolver) {
+    public VariableSearchDocketCustomizer variableSearchDocketCustomizer(
+        TypeResolver typeResolver
+    ) {
         return new VariableSearchDocketCustomizer(typeResolver);
     }
 }

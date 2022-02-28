@@ -20,9 +20,11 @@ import feign.Param;
 import feign.RequestLine;
 
 public interface ProcessModelQueryAdminService {
-
-    @RequestLine("GET /admin/v1/process-definitions/{processDefinitionId}/model")
+    @RequestLine(
+        "GET /admin/v1/process-definitions/{processDefinitionId}/model"
+    )
     @Headers("Accept: application/xml")
-    String getProcessModel(@Param("processDefinitionId") String processDefinitionId);
-
+    String getProcessModel(
+        @Param("processDefinitionId") String processDefinitionId
+    );
 }

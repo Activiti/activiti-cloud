@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.services.audit.api.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.server.LinkRelationProvider;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class EventsLinkRelationProviderTest {
 
@@ -30,7 +30,9 @@ public class EventsLinkRelationProviderTest {
     @Test
     public void shouldSupportCloudRuntimeEvent() throws Exception {
         //given
-        LinkRelationProvider.LookupContext lookupContext = LinkRelationProvider.LookupContext.forType(CloudRuntimeEvent.class);
+        LinkRelationProvider.LookupContext lookupContext = LinkRelationProvider.LookupContext.forType(
+            CloudRuntimeEvent.class
+        );
 
         //when
         boolean supports = relProvider.supports(lookupContext);
@@ -42,8 +44,9 @@ public class EventsLinkRelationProviderTest {
     @Test
     public void shouldSupportCloudRuntimeEventSubClasses() throws Exception {
         //given
-        LinkRelationProvider.LookupContext lookupContext = LinkRelationProvider.LookupContext.forType(CloudProcessStartedEvent.class);
-
+        LinkRelationProvider.LookupContext lookupContext = LinkRelationProvider.LookupContext.forType(
+            CloudProcessStartedEvent.class
+        );
 
         //when
         boolean supports = relProvider.supports(lookupContext);
@@ -53,9 +56,12 @@ public class EventsLinkRelationProviderTest {
     }
 
     @Test
-    public void shouldNotSupportClassesOtherThanCloudRuntimeEventAndSubClasses() throws Exception {
+    public void shouldNotSupportClassesOtherThanCloudRuntimeEventAndSubClasses()
+        throws Exception {
         //given
-        LinkRelationProvider.LookupContext lookupContext = LinkRelationProvider.LookupContext.forType(String.class);
+        LinkRelationProvider.LookupContext lookupContext = LinkRelationProvider.LookupContext.forType(
+            String.class
+        );
 
         //when
         boolean supports = relProvider.supports(lookupContext);
@@ -65,19 +71,23 @@ public class EventsLinkRelationProviderTest {
     }
 
     @Test
-    public void getCollectionResourceRelForShouldReturnLiteralEvents() throws Exception {
+    public void getCollectionResourceRelForShouldReturnLiteralEvents()
+        throws Exception {
         //given
         Class<CloudRuntimeEvent> aClass = CloudRuntimeEvent.class;
 
         //when
-        String collectionRel = relProvider.getCollectionResourceRelFor(aClass).value();
+        String collectionRel = relProvider
+            .getCollectionResourceRelFor(aClass)
+            .value();
 
         //then
         assertThat(collectionRel).isEqualTo("events");
     }
 
     @Test
-    public void getItemResourceRelForShouldReturnLiteralEvent() throws Exception {
+    public void getItemResourceRelForShouldReturnLiteralEvent()
+        throws Exception {
         //given
         Class<CloudRuntimeEvent> aClass = CloudRuntimeEvent.class;
 

@@ -28,26 +28,38 @@ public class MessageEventsDispatcher {
     private final MessageChannel messageEvents;
     private final BindingServiceProperties bindingServiceProperties;
 
-    public MessageEventsDispatcher(MessageChannel messageEvents,
-                                   BindingServiceProperties bindingServiceProperties) {
+    public MessageEventsDispatcher(
+        MessageChannel messageEvents,
+        BindingServiceProperties bindingServiceProperties
+    ) {
         this.messageEvents = messageEvents;
         this.bindingServiceProperties = bindingServiceProperties;
     }
 
     public void dispatch(Message<?> message) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            throw new IllegalStateException("requires active transaction synchronization");
+            throw new IllegalStateException(
+                "requires active transaction synchronization"
+            );
         }
 
-        String messageEventOutputDestination =  bindingServiceProperties.getBindingDestination(ProcessEngineChannels.COMMAND_CONSUMER);
+        String messageEventOutputDestination = bindingServiceProperties.getBindingDestination(
+            ProcessEngineChannels.COMMAND_CONSUMER
+        );
 
-        Message<?> dispatchMessage = MessageBuilder.fromMessage(message)
-                                                   .setHeader(MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION,
-                                                              messageEventOutputDestination)
-                                                   .build();
+        Message<?> dispatchMessage = MessageBuilder
+            .fromMessage(message)
+            .setHeader(
+                MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION,
+                messageEventOutputDestination
+            )
+            .build();
 
-        TransactionSynchronizationManager.registerSynchronization(new MessageSenderTransactionSynchronization(dispatchMessage,
-                                                                                                              messageEvents));
+        TransactionSynchronizationManager.registerSynchronization(
+            new MessageSenderTransactionSynchronization(
+                dispatchMessage,
+                messageEvents
+            )
+        );
     }
-
 }

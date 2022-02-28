@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.when;
+
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.core.utils.TestProcessEngine;
 import org.activiti.cloud.services.core.utils.TestProcessEngineConfiguration;
@@ -28,23 +32,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.when;
-
 /**
  * Integration tests for ProcessDiagramGeneratorWrapper
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestProcessEngineConfiguration.class)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.NONE,
+    classes = TestProcessEngineConfiguration.class
+)
 @TestPropertySource("classpath:application-test-process-diagram.properties")
 public class ProcessDiagramGeneratorWrapperIT {
 
     private static final String DEFAULT_DIAGRAM_FONT_NAME = "Arial";
 
     @SpringBootApplication
-    static class Application {
-
-    }
+    static class Application {}
 
     @SpyBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
@@ -64,8 +65,12 @@ public class ProcessDiagramGeneratorWrapperIT {
     public void testGenerateProcessDiagram() throws Exception {
         //GIVEN
         processEngine.deploy("processes/SimpleProcess");
-        ProcessInstance processInstance = processEngine.startProcessInstanceByKey("SimpleProcess");
-        BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
+        ProcessInstance processInstance = processEngine.startProcessInstanceByKey(
+            "SimpleProcess"
+        );
+        BpmnModel bpmnModel = processEngine.getBpmnModel(
+            processInstance.getProcessDefinitionId()
+        );
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
         //WHEN
@@ -84,11 +89,18 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 4. Expected: the diagram is empty
      */
     @Test
-    public void testGenerateDiagramForProcessWithNoGraphicInfo() throws Exception {
+    public void testGenerateDiagramForProcessWithNoGraphicInfo()
+        throws Exception {
         //GIVEN
-        processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
-        ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
-        BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
+        processEngine.deploy(
+            "processes/SubProcessTest.fixSystemFailureProcess"
+        );
+        ProcessInstance processInstance = processEngine.startProcessInstanceByKey(
+            "fixSystemFailure"
+        );
+        BpmnModel bpmnModel = processEngine.getBpmnModel(
+            processInstance.getProcessDefinitionId()
+        );
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
         //WHEN
@@ -107,17 +119,24 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 4. Expected: ActivitiException is thrown while generating diagram
      */
     @Test
-    public void testGenerateDiagramForProcessWithNoGraphicInfoAndNoDefaultImage() throws Exception {
+    public void testGenerateDiagramForProcessWithNoGraphicInfoAndNoDefaultImage()
+        throws Exception {
         //GIVEN
-        processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
-        ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
-        BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
+        processEngine.deploy(
+            "processes/SubProcessTest.fixSystemFailureProcess"
+        );
+        ProcessInstance processInstance = processEngine.startProcessInstanceByKey(
+            "fixSystemFailure"
+        );
+        BpmnModel bpmnModel = processEngine.getBpmnModel(
+            processInstance.getProcessDefinitionId()
+        );
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
         when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
+            .thenReturn(true);
         when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("");
+            .thenReturn("");
 
         //WHEN
         byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
@@ -135,23 +154,33 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 4. Expected: ActivitiException is thrown while generating diagram
      */
     @Test
-    public void testGenerateDiagramForProcessWithNoGraphicInfoAndInvalidDefaultImage() throws Exception {
+    public void testGenerateDiagramForProcessWithNoGraphicInfoAndInvalidDefaultImage()
+        throws Exception {
         //GIVEN
-        processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
-        ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
-        BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
+        processEngine.deploy(
+            "processes/SubProcessTest.fixSystemFailureProcess"
+        );
+        ProcessInstance processInstance = processEngine.startProcessInstanceByKey(
+            "fixSystemFailure"
+        );
+        BpmnModel bpmnModel = processEngine.getBpmnModel(
+            processInstance.getProcessDefinitionId()
+        );
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
         when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
+            .thenReturn(true);
         when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("invalid-file-name");
+            .thenReturn("invalid-file-name");
 
         //THEN
         //WHEN
         assertThatExceptionOfType(ActivitiImageException.class)
-            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel))
-            .withMessageContaining("Error occurred while getting default diagram image from file");
+            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel)
+            )
+            .withMessageContaining(
+                "Error occurred while getting default diagram image from file"
+            );
     }
 
     /**
@@ -161,18 +190,21 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 2. Expected: ActivitiException is thrown while generating diagram
      */
     @Test
-    public void testGenerateDiagramForProcessWithInvalidGraphicInfo() throws Exception {
+    public void testGenerateDiagramForProcessWithInvalidGraphicInfo()
+        throws Exception {
         //GIVEN
         BpmnModel bpmnModel = new BpmnModel();
-        bpmnModel.addGraphicInfo("key",
-                                 null);
+        bpmnModel.addGraphicInfo("key", null);
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
         //THEN
         //WHEN
         assertThatExceptionOfType(ActivitiException.class)
-            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel))
-            .withMessageContaining("Error occurred while getting process diagram");
+            .isThrownBy(() -> processDiagramGenerator.generateDiagram(bpmnModel)
+            )
+            .withMessageContaining(
+                "Error occurred while getting process diagram"
+            );
     }
 
     /**
@@ -190,7 +222,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     public void testProcessDiagramFonts() {
         //GIVEN
         when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{"Lucida"});
+            .thenReturn(new String[] { "Lucida" });
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();
@@ -212,7 +244,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     public void testProcessDiagramFontsWhenWithAvailableFonts() {
         //GIVEN
         when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{DEFAULT_DIAGRAM_FONT_NAME});
+            .thenReturn(new String[] { DEFAULT_DIAGRAM_FONT_NAME });
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();

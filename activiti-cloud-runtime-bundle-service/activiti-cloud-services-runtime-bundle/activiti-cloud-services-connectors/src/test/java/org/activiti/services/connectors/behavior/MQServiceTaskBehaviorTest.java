@@ -15,6 +15,12 @@
  */
 package org.activiti.services.connectors.behavior;
 
+import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
+import static org.activiti.test.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
@@ -36,12 +42,6 @@ import org.mockito.Mock;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
-
-import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
-import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class MQServiceTaskBehaviorTest {
 
@@ -88,23 +88,34 @@ public class MQServiceTaskBehaviorTest {
     @BeforeEach
     public void setUp() {
         initMocks(this);
-        when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
+        when(
+            runtimeBundleProperties
+                .getEventsProperties()
+                .isIntegrationAuditEventsEnabled()
+        )
+            .thenReturn(true);
 
-        behavior = spy(new MQServiceTaskBehavior(integrationContextManager,
-                                                 eventPublisher,
-                                                 integrationContextBuilder,
-                                                 runtimeBundleInfoAppender,
-                                                 defaultServiceTaskBehavior,
-                                                 processEngineEventsAggregator,
-                                                 runtimeBundleProperties,
-                                                 bindingServiceProperties));
+        behavior =
+            spy(
+                new MQServiceTaskBehavior(
+                    integrationContextManager,
+                    eventPublisher,
+                    integrationContextBuilder,
+                    runtimeBundleInfoAppender,
+                    defaultServiceTaskBehavior,
+                    processEngineEventsAggregator,
+                    runtimeBundleProperties,
+                    bindingServiceProperties
+                )
+            );
     }
 
     @Test
     public void executeShouldDelegateToDefaultBehaviourWhenBeanIsAvailable() {
         //given
         DelegateExecution execution = mock(DelegateExecution.class);
-        given(defaultServiceTaskBehavior.hasConnectorBean(execution)).willReturn(true);
+        given(defaultServiceTaskBehavior.hasConnectorBean(execution))
+            .willReturn(true);
 
         //when
         behavior.execute(execution);
@@ -120,39 +131,44 @@ public class MQServiceTaskBehaviorTest {
         serviceTask.setImplementation(CONNECTOR_TYPE);
 
         DelegateExecution execution = anExecution()
-                .withId(EXECUTION_ID)
-                .withProcessInstanceId(PROC_INST_ID)
-                .withProcessDefinitionId(PROC_DEF_ID)
-                .withServiceTask(serviceTask)
-                .withFlowNodeId(FLOW_NODE_ID)
-                .build();
-        given(runtimeBundleProperties.getServiceFullName()).willReturn(APP_NAME);
+            .withId(EXECUTION_ID)
+            .withProcessInstanceId(PROC_INST_ID)
+            .withProcessDefinitionId(PROC_DEF_ID)
+            .withServiceTask(serviceTask)
+            .withFlowNodeId(FLOW_NODE_ID)
+            .build();
+        given(runtimeBundleProperties.getServiceFullName())
+            .willReturn(APP_NAME);
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
         given(integrationContextManager.create()).willReturn(entity);
 
-        given(applicationContext.containsBean(CONNECTOR_TYPE)).willReturn(false);
+        given(applicationContext.containsBean(CONNECTOR_TYPE))
+            .willReturn(false);
 
         IntegrationContext integrationContext = mock(IntegrationContext.class);
-        given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+        given(integrationContextBuilder.from(entity, execution))
+            .willReturn(integrationContext);
 
         //when
         behavior.execute(execution);
 
         //then
         assertThat(entity)
-                .hasExecutionId(EXECUTION_ID)
-                .hasProcessDefinitionId(PROC_DEF_ID)
-                .hasProcessInstanceId(PROC_INST_ID);
+            .hasExecutionId(EXECUTION_ID)
+            .hasProcessDefinitionId(PROC_DEF_ID)
+            .hasProcessInstanceId(PROC_INST_ID);
 
         verify(eventPublisher).publishEvent(integrationRequestCaptor.capture());
         IntegrationRequestImpl integrationRequest = integrationRequestCaptor.getValue();
         assertThat(integrationRequest.getIntegrationContext())
-                .isEqualTo(integrationContext);
+            .isEqualTo(integrationContext);
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequest);
+        verify(runtimeBundleInfoAppender)
+            .appendRuntimeBundleInfoTo(integrationRequest);
 
-        verify(processEngineEventsAggregator).add(any(CloudIntegrationRequestedEvent.class));
+        verify(processEngineEventsAggregator)
+            .add(any(CloudIntegrationRequestedEvent.class));
     }
 
     @Test

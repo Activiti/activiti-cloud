@@ -23,10 +23,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
+import com.introproventures.graphql.jpa.query.web.GraphQLController;
+import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
+import graphql.ExecutionResultImpl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -39,17 +44,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
-import com.introproventures.graphql.jpa.query.web.GraphQLController;
-import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
-import graphql.ExecutionResultImpl;
-
 @WebMvcTest(GraphQLController.class)
 public class ActivitiGraphQLControllerTest {
 
-    public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql";
+    public static final String APPLICATION_GRAPHQL_VALUE =
+        "application/graphql";
 
     @Autowired
     private MockMvc mockmvc;
@@ -62,8 +61,7 @@ public class ActivitiGraphQLControllerTest {
 
     @Configuration
     @Import(GraphQLController.class)
-    static class Config {
-    }
+    static class Config {}
 
     /**
      * Mock executor responses to be non-null in order for Mock MVC
@@ -72,77 +70,121 @@ public class ActivitiGraphQLControllerTest {
      */
     @BeforeEach
     public void setUp() {
-
         when(executor.execute(Mockito.anyString()))
-            .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
+            .thenReturn(
+                new ExecutionResultImpl(new HashMap<>(), new ArrayList<>())
+            );
 
-        when(executor.execute(Mockito.anyString(),Mockito.nullable(Map.class)))
-            .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
+        when(executor.execute(Mockito.anyString(), Mockito.nullable(Map.class)))
+            .thenReturn(
+                new ExecutionResultImpl(new HashMap<>(), new ArrayList<>())
+            );
 
-        when(executor.execute(Mockito.anyString(),Mockito.nullable(String.class),Mockito.nullable(Map.class)))
-            .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
+        when(
+            executor.execute(
+                Mockito.anyString(),
+                Mockito.nullable(String.class),
+                Mockito.nullable(Map.class)
+            )
+        )
+            .thenReturn(
+                new ExecutionResultImpl(new HashMap<>(), new ArrayList<>())
+            );
     }
 
-    private void ok(final GraphQLQueryRequest query) throws Exception, JsonProcessingException {
+    private void ok(final GraphQLQueryRequest query)
+        throws Exception, JsonProcessingException {
         ok(mapper.writeValueAsString(query));
     }
 
-    private void ok(final String json) throws Exception, JsonProcessingException {
+    private void ok(final String json)
+        throws Exception, JsonProcessingException {
         perform(json)
             .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            ;
+            .andExpect(
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            );
     }
 
     private ResultActions perform(final String json) throws Exception {
-        return mockmvc.perform(post("/graphql")
-           .content(json)
-           .contentType(MediaType.APPLICATION_JSON)
-           .accept(MediaType.APPLICATION_JSON));
+        return mockmvc.perform(
+            post("/graphql")
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        );
     }
 
     @Test
     public void testGraphqlGetQueryNoVariables() throws Exception {
-        mockmvc.perform(get("/graphql")
-               .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
-               .contentType(APPLICATION_GRAPHQL_VALUE)
-               .accept(MediaType.APPLICATION_JSON))
+        mockmvc
+            .perform(
+                get("/graphql")
+                    .param(
+                        "query",
+                        "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}"
+                    )
+                    .contentType(APPLICATION_GRAPHQL_VALUE)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
             .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            ;
+            .andExpect(
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            );
 
         verify(executor)
-            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", null);
+            .execute(
+                "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}",
+                null
+            );
     }
 
     @Test
     public void testGraphqlPostQuery() throws Exception {
-        mockmvc.perform(post("/graphql")
-               .content("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
-               .contentType(APPLICATION_GRAPHQL_VALUE)
-               .accept(MediaType.APPLICATION_JSON))
+        mockmvc
+            .perform(
+                post("/graphql")
+                    .content(
+                        "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}"
+                    )
+                    .contentType(APPLICATION_GRAPHQL_VALUE)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
             .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            ;
+            .andExpect(
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            );
 
         verify(executor)
-            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", null);
+            .execute(
+                "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}",
+                null
+            );
     }
-
 
     @Test
     public void testGraphqlQueryGetWithNullVariables() throws Exception {
-        mockmvc.perform(get("/graphql")
-                .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
-                .param("variables", (String) null)
-                .contentType(APPLICATION_GRAPHQL_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-             .andExpect(status().isOk())
-             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-             ;
+        mockmvc
+            .perform(
+                get("/graphql")
+                    .param(
+                        "query",
+                        "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}"
+                    )
+                    .param("variables", (String) null)
+                    .contentType(APPLICATION_GRAPHQL_VALUE)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            );
 
         verify(executor)
-            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", null);
+            .execute(
+                "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}",
+                null
+            );
     }
 
     @Test
@@ -151,63 +193,100 @@ public class ActivitiGraphQLControllerTest {
         args.put("title", "value");
         String variablesStr = mapper.writeValueAsString(args);
 
-        mockmvc.perform(get("/graphql")
-                .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
-                .param("variables", variablesStr)
-                .contentType(APPLICATION_GRAPHQL_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-             .andExpect(status().isOk())
-             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-             ;
+        mockmvc
+            .perform(
+                get("/graphql")
+                    .param(
+                        "query",
+                        "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}"
+                    )
+                    .param("variables", variablesStr)
+                    .contentType(APPLICATION_GRAPHQL_VALUE)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            );
 
         verify(executor)
-            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", args);
+            .execute(
+                "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}",
+                args
+            );
     }
 
     @Test
     public void testGraphqlQueryGetWithEmptyVariables() throws Exception {
-        mockmvc.perform(get("/graphql")
-                .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
-                .param("variables", "")
-                .contentType(APPLICATION_GRAPHQL_VALUE))
-             .andExpect(status().isOk())
-             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-             ;
+        mockmvc
+            .perform(
+                get("/graphql")
+                    .param(
+                        "query",
+                        "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}"
+                    )
+                    .param("variables", "")
+                    .contentType(APPLICATION_GRAPHQL_VALUE)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            );
 
         verify(executor)
-            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", null);
+            .execute(
+                "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}",
+                null
+            );
     }
 
     @Test
     public void testGraphqlQueryGetUnsupportedMediaType() throws Exception {
-        mockmvc.perform(get("/graphql")
-               .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
-               .contentType(MediaType.TEXT_HTML))
-            .andExpect(status().is(415))
-            ;
+        mockmvc
+            .perform(
+                get("/graphql")
+                    .param(
+                        "query",
+                        "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}"
+                    )
+                    .contentType(MediaType.TEXT_HTML)
+            )
+            .andExpect(status().is(415));
 
         verify(executor, never())
-            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", null);
+            .execute(
+                "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}",
+                null
+            );
     }
 
     @Test
     public void testGraphqlQueryPostUnsupportedMediaType() throws Exception {
-        mockmvc.perform(post("/graphql")
-               .contentType(MediaType.TEXT_HTML))
-            .andExpect(status().is(415))
-            ;
+        mockmvc
+            .perform(post("/graphql").contentType(MediaType.TEXT_HTML))
+            .andExpect(status().is(415));
 
         verify(executor, never())
-            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", null);
+            .execute(
+                "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}",
+                null
+            );
     }
-
 
     @Test
     public void testGraphqlQuery() throws Exception {
-        ok(new GraphQLQueryRequest("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}"));
+        ok(
+            new GraphQLQueryRequest(
+                "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}"
+            )
+        );
 
         verify(executor)
-            .execute("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}", null, null);
+            .execute(
+                "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}",
+                null,
+                null
+            );
     }
 
     @Test
@@ -219,7 +298,9 @@ public class ActivitiGraphQLControllerTest {
     @SuppressWarnings("serial")
     @Test
     public void testGraphqlArguments() throws Exception {
-        GraphQLQueryRequest query = new GraphQLQueryRequest("query TasksQuery($title: String!){Tasks(where:{name: {EQ: $title}}){select{id name}}}");
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            "query TasksQuery($title: String!){Tasks(where:{name: {EQ: $title}}){select{id name}}}"
+        );
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("title", "value");
@@ -227,45 +308,68 @@ public class ActivitiGraphQLControllerTest {
 
         ok(query);
 
-        verify(executor)
-            .execute(query.getQuery(), null, variables);
+        verify(executor).execute(query.getQuery(), null, variables);
     }
 
     // Json directly
     @Test
     public void testGraphqlArgumentsJson() throws Exception {
-        String json = "{\"query\": \"{Tasks(where:{name:{EQ: \\\"title\\\"}}){select{ title genre }}\", \"arguments\": {\"title\": \"title\"}}";
+        String json =
+            "{\"query\": \"{Tasks(where:{name:{EQ: \\\"title\\\"}}){select{ title genre }}\", \"arguments\": {\"title\": \"title\"}}";
 
         ok(json);
 
-        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{ title genre }}", null, null);
+        verify(executor)
+            .execute(
+                "{Tasks(where:{name:{EQ: \"title\"}}){select{ title genre }}",
+                null,
+                null
+            );
     }
 
     @Test
     public void testGraphqlArgumentsEmptyString() throws Exception {
-        String json = "{\"query\": \"{Tasks(where:{name:{EQ: \\\"title\\\"}}){select{id name}}\", \"arguments\": \"\"}";
+        String json =
+            "{\"query\": \"{Tasks(where:{name:{EQ: \\\"title\\\"}}){select{id name}}\", \"arguments\": \"\"}";
 
         ok(json);
 
-        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}", null, null);
+        verify(executor)
+            .execute(
+                "{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}",
+                null,
+                null
+            );
     }
 
     @Test
     public void testGraphqlArgumentsNull() throws Exception {
-        String json = "{\"query\": \"{Tasks(where:{name:{EQ: \\\"title\\\"}}){select{id name}}\", \"arguments\": null}";
+        String json =
+            "{\"query\": \"{Tasks(where:{name:{EQ: \\\"title\\\"}}){select{id name}}\", \"arguments\": null}";
 
         ok(json);
 
-        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}", null, null);
+        verify(executor)
+            .execute(
+                "{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}",
+                null,
+                null
+            );
     }
 
     @Test
     public void testGraphqlNoArguments() throws Exception {
-        String json = "{\"query\": \"{Tasks(where:{name:{EQ: \\\"title\\\"}}){select{id name}}\"}";
+        String json =
+            "{\"query\": \"{Tasks(where:{name:{EQ: \\\"title\\\"}}){select{id name}}\"}";
 
         ok(json);
 
-        verify(executor).execute("{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}", null, null);
+        verify(executor)
+            .execute(
+                "{Tasks(where:{name:{EQ: \"title\"}}){select{id name}}",
+                null,
+                null
+            );
     }
 
     // Form submitted data
@@ -273,25 +377,32 @@ public class ActivitiGraphQLControllerTest {
     public void testGraphqlArgumentsParams() throws Exception {
         String query = "{Tasks(title: \"title\"){title genre}}";
 
-        mockmvc.perform(post("/graphql")
-               .param("query", query)
-               .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-               .andExpect(status().isOk());
+        mockmvc
+            .perform(
+                post("/graphql")
+                    .param("query", query)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            )
+            .andExpect(status().isOk());
 
         verify(executor).execute(query, null);
     }
 
     @Test
     public void testGraphqlArgumentsParamsVariables() throws Exception {
-        String query = "query TasksQuery($title: String!){Tasks(name: $title){id name}}";
+        String query =
+            "query TasksQuery($title: String!){Tasks(name: $title){id name}}";
         Map<String, Object> args = new HashMap<>();
         args.put("title", "value");
         String argsStr = mapper.writeValueAsString(args);
 
-        mockmvc.perform(post("/graphql")
-            .param("query", query)
-            .param("variables", argsStr)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        mockmvc
+            .perform(
+                post("/graphql")
+                    .param("query", query)
+                    .param("variables", argsStr)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            )
             .andExpect(status().isOk());
 
         verify(executor).execute(query, args);
@@ -301,10 +412,13 @@ public class ActivitiGraphQLControllerTest {
     public void testGraphqlArgumentsParamsVariablesEmpty() throws Exception {
         String query = "{Tasks(name: \"title\"){id name}}";
 
-        mockmvc.perform(post("/graphql")
-            .param("query", query)
-            .param("variables", "")
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        mockmvc
+            .perform(
+                post("/graphql")
+                    .param("query", query)
+                    .param("variables", "")
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            )
             .andExpect(status().isOk());
 
         verify(executor).execute(query, null);

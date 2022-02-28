@@ -16,13 +16,14 @@
 package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
 import java.util.Collection;
-
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-public class JWSAuthentication extends AbstractAuthenticationToken implements Authentication {
+public class JWSAuthentication
+    extends AbstractAuthenticationToken
+    implements Authentication {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,15 +32,18 @@ public class JWSAuthentication extends AbstractAuthenticationToken implements Au
 
     public JWSAuthentication(String token) {
         this(token, null, null);
-        
         setAuthenticated(false);
     }
 
-    public JWSAuthentication(String token, User principal, Collection<? extends GrantedAuthority> authorities) {
+    public JWSAuthentication(
+        String token,
+        User principal,
+        Collection<? extends GrantedAuthority> authorities
+    ) {
         super(authorities);
         this.token = token;
         this.principal = principal;
-        
+
         setAuthenticated(true);
     }
 
@@ -52,5 +56,4 @@ public class JWSAuthentication extends AbstractAuthenticationToken implements Au
     public Object getPrincipal() {
         return principal;
     }
-
 }

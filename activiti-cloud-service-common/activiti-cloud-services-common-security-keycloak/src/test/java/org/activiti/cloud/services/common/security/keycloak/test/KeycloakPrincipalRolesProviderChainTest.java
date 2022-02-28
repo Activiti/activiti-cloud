@@ -23,6 +23,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.Principal;
+import java.util.Arrays;
+import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,11 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.KeycloakPrincipal;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.List;
-
 
 public class KeycloakPrincipalRolesProviderChainTest {
 
@@ -50,7 +48,10 @@ public class KeycloakPrincipalRolesProviderChainTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        subject = new KeycloakPrincipalRolesProviderChain(Arrays.asList(provider1, provider2));
+        subject =
+            new KeycloakPrincipalRolesProviderChain(
+                Arrays.asList(provider1, provider2)
+            );
     }
 
     @Test
@@ -58,20 +59,17 @@ public class KeycloakPrincipalRolesProviderChainTest {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
         when(provider1.getRoles(any())).thenReturn(null);
-        when(provider2.getRoles(any())).thenReturn(Arrays.asList("role1",
-                                                                         "role2"));
+        when(provider2.getRoles(any()))
+            .thenReturn(Arrays.asList("role1", "role2"));
 
         // when
         List<String> result = subject.getRoles(principal);
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("role1",
-                                           "role2");
+        assertThat(result).isNotEmpty().containsExactly("role1", "role2");
 
         verify(provider1).getRoles(eq(principal));
         verify(provider2).getRoles(eq(principal));
-
     }
 
     @Test
@@ -82,7 +80,9 @@ public class KeycloakPrincipalRolesProviderChainTest {
         when(provider2.getRoles(any())).thenReturn(null);
 
         // when
-        Throwable thrown = catchThrowable(() -> { subject.getRoles(principal); });
+        Throwable thrown = catchThrowable(() -> {
+            subject.getRoles(principal);
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
@@ -90,5 +90,4 @@ public class KeycloakPrincipalRolesProviderChainTest {
         verify(provider1).getRoles(eq(principal));
         verify(provider2).getRoles(eq(principal));
     }
-
 }

@@ -29,11 +29,16 @@ public class BroadcastSignalEventHandler {
 
     @StreamListener(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
     public void receive(SignalPayload signalPayload) {
-        if ((signalPayload.getVariables() == null) || (signalPayload.getVariables().isEmpty())) {
+        if (
+            (signalPayload.getVariables() == null) ||
+            (signalPayload.getVariables().isEmpty())
+        ) {
             runtimeService.signalEventReceived(signalPayload.getName());
         } else {
-            runtimeService.signalEventReceived(signalPayload.getName(),
-                                               signalPayload.getVariables());
+            runtimeService.signalEventReceived(
+                signalPayload.getName(),
+                signalPayload.getVariables()
+            );
         }
     }
 }

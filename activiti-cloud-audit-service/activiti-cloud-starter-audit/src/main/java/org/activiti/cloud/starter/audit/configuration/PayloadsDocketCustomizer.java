@@ -30,18 +30,22 @@ import springfox.documentation.spring.web.plugins.Docket;
  * Swagger Api Models
  */
 public class PayloadsDocketCustomizer implements DocketCustomizer {
-    
+
     @Autowired
     private TypeResolver typeResolver;
-    
 
     public Docket customize(final Docket docket) {
-        ResolvedType resourceTypeWithWildCard = typeResolver.resolve(CloudRuntimeEvent.class,
-                                                                     WildcardType.class,
-                                                                     CloudRuntimeEventType.class);
-        
-        return docket.alternateTypeRules(AlternateTypeRules.newRule(resourceTypeWithWildCard,
-                                                                    CloudRuntimeEventModel.class)
-                                         );            
-   }
+        ResolvedType resourceTypeWithWildCard = typeResolver.resolve(
+            CloudRuntimeEvent.class,
+            WildcardType.class,
+            CloudRuntimeEventType.class
+        );
+
+        return docket.alternateTypeRules(
+            AlternateTypeRules.newRule(
+                resourceTypeWithWildCard,
+                CloudRuntimeEventModel.class
+            )
+        );
+    }
 }

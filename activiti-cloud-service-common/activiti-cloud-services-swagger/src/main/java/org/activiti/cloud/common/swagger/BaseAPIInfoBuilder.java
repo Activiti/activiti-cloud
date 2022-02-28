@@ -31,11 +31,14 @@ public class BaseAPIInfoBuilder {
         return new ApiInfoBuilder()
             .title(title)
             .version(buildProperties.getVersion())
-            .license(String.format("© %s-%s %s. All rights reserved",
-                buildProperties.get("inceptionYear"),
-                buildProperties.get("year"),
-                buildProperties.get("organization.name")))
+            .license(
+                String.format(
+                    "© %s-%s %s. All rights reserved",
+                    buildProperties.get("inceptionYear"),
+                    buildProperties.get("year"),
+                    buildProperties.get("organization.name")
+                )
+            )
             .termsOfServiceUrl(buildProperties.get("organization.url"));
     }
-
 }

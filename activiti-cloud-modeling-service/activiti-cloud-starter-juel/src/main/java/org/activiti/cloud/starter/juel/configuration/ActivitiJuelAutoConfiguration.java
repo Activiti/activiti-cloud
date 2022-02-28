@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({JuelRestConfiguration.class, JuelSwaggerConfig.class})
+@Import({ JuelRestConfiguration.class, JuelSwaggerConfig.class })
 public class ActivitiJuelAutoConfiguration {
 
     @Bean

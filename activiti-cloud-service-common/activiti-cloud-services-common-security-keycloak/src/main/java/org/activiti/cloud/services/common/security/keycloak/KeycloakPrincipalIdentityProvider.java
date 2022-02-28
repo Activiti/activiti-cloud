@@ -15,39 +15,43 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
+import java.security.Principal;
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.keycloak.representations.AccessToken;
 import org.springframework.lang.NonNull;
 
-import java.security.Principal;
-import java.util.Optional;
+public class KeycloakPrincipalIdentityProvider
+    implements PrincipalIdentityProvider {
 
-public class KeycloakPrincipalIdentityProvider implements PrincipalIdentityProvider {
-    
     private final KeycloakAccessTokenProvider keycloakAccessTokenProvider;
-    private final KeycloakAccessTokenValidator keycloakAccessTokenValidator; 
-    
-    public KeycloakPrincipalIdentityProvider(@NonNull KeycloakAccessTokenProvider keycloakAccessTokenProvider,
-                                             @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+    private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
+
+    public KeycloakPrincipalIdentityProvider(
+        @NonNull KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+        @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator
+    ) {
         this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
         this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
     }
 
     @Override
     public String getUserId(@NonNull Principal principal) {
-        return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
-                                          .map(this::getUserId)
-                                          .orElseThrow(this::securityException);
+        return keycloakAccessTokenProvider
+            .accessToken(principal)
+            .filter(keycloakAccessTokenValidator::isValid)
+            .map(this::getUserId)
+            .orElseThrow(this::securityException);
     }
-    
+
     protected String getUserId(AccessToken accessToken) {
-        return Optional.ofNullable(accessToken)
-                       .map(AccessToken::getPreferredUsername)
-                       .orElseThrow(this::securityException);
+        return Optional
+            .ofNullable(accessToken)
+            .map(AccessToken::getPreferredUsername)
+            .orElseThrow(this::securityException);
     }
-    
+
     protected SecurityException securityException() {
         return new SecurityException("Invalid accessToken object instance");
-    }    
+    }
 }

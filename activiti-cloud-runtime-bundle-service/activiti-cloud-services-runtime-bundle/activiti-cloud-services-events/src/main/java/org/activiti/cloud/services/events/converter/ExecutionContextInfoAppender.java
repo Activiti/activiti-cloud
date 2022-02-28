@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.events.converter;
 
 import java.util.Optional;
-
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.engine.impl.context.ExecutionContext;
@@ -30,33 +29,40 @@ public class ExecutionContextInfoAppender {
     public ExecutionContextInfoAppender(ExecutionContext executionContext) {
         this.executionContext = executionContext;
     }
-    
-    public CloudRuntimeEvent<?, ?> appendExecutionContextInfoTo(CloudRuntimeEventImpl<?, ?> event) {
+
+    public CloudRuntimeEvent<?, ?> appendExecutionContextInfoTo(
+        CloudRuntimeEventImpl<?, ?> event
+    ) {
         // inject execution context info
-        if(executionContext != null) {
+        if (executionContext != null) {
             ExecutionEntity processInstance = executionContext.getProcessInstance();
             ProcessDefinition processDefinition = executionContext.getProcessDefinition();
 
-            if(processInstance != null) { 
+            if (processInstance != null) {
                 event.setProcessInstanceId(processInstance.getId());
                 event.setBusinessKey(processInstance.getBusinessKey());
-                
+
                 // Let's try extract parent info from super execution if exists
-                if(processInstance.getSuperExecutionId() != null) {
-                    Optional.ofNullable(processInstance.getSuperExecution())
-                        .ifPresent(superExecution -> event.setParentProcessInstanceId(superExecution.getProcessInstanceId()));
+                if (processInstance.getSuperExecutionId() != null) {
+                    Optional
+                        .ofNullable(processInstance.getSuperExecution())
+                        .ifPresent(superExecution ->
+                            event.setParentProcessInstanceId(
+                                superExecution.getProcessInstanceId()
+                            )
+                        );
                 }
             }
 
-            if(processDefinition != null) {
+            if (processDefinition != null) {
                 event.setProcessDefinitionId(processDefinition.getId());
                 event.setProcessDefinitionKey(processDefinition.getKey());
-                event.setProcessDefinitionVersion(processDefinition.getVersion());
+                event.setProcessDefinitionVersion(
+                    processDefinition.getVersion()
+                );
             }
         }
-        
+
         return event;
-    }    
-    
-    
+    }
 }

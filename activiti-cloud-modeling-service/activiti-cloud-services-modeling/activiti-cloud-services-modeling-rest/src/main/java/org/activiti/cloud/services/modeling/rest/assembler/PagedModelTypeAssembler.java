@@ -25,13 +25,14 @@ import org.springframework.web.util.UriComponents;
 /**
  * Paged assembler for {@link ModelType} resources with Alfresco format support
  */
-public class PagedModelTypeAssembler extends AlfrescoPagedModelAssembler<ModelType> {
+public class PagedModelTypeAssembler
+    extends AlfrescoPagedModelAssembler<ModelType> {
 
-    public PagedModelTypeAssembler(@Nullable HateoasPageableHandlerMethodArgumentResolver resolver,
-                                   @Nullable UriComponents baseUri,
-                                   ExtendedPageMetadataConverter extendedPageMetadataConverter) {
-        super(resolver,
-              baseUri,
-              extendedPageMetadataConverter);
+    public PagedModelTypeAssembler(
+        @Nullable HateoasPageableHandlerMethodArgumentResolver resolver,
+        @Nullable UriComponents baseUri,
+        ExtendedPageMetadataConverter extendedPageMetadataConverter
+    ) {
+        super(resolver, baseUri, extendedPageMetadataConverter);
     }
 }

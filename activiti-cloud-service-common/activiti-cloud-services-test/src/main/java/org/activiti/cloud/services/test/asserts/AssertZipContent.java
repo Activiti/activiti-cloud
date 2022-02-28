@@ -47,13 +47,21 @@ public class AssertZipContent {
     public AssertZipContent(FileContent fileContent) throws IOException {
         this.name = fileContent.getFilename();
         this.contentType = fileContent.getContentType();
-        try (InputStream inputStream = new ByteArrayInputStream(fileContent.getFileContent())) {
-            ZipStream.of(inputStream).forEach(zipEntry -> {
-                entries.add(zipEntry.getName());
-                zipEntry.getContent()
-                        .ifPresent(bytes -> contentMap.put(zipEntry.getName(),
-                                                           bytes));
-            });
+        try (
+            InputStream inputStream = new ByteArrayInputStream(
+                fileContent.getFileContent()
+            )
+        ) {
+            ZipStream
+                .of(inputStream)
+                .forEach(zipEntry -> {
+                    entries.add(zipEntry.getName());
+                    zipEntry
+                        .getContent()
+                        .ifPresent(bytes ->
+                            contentMap.put(zipEntry.getName(), bytes)
+                        );
+                });
         }
     }
 
@@ -83,44 +91,46 @@ public class AssertZipContent {
         return this;
     }
 
-    public AssertZipContent hasContent(String entry,
-                                       byte[] expectedContent) {
-        hasContent(entry,
-                   new String(expectedContent));
+    public AssertZipContent hasContent(String entry, byte[] expectedContent) {
+        hasContent(entry, new String(expectedContent));
         return this;
     }
 
-    public AssertZipContent hasContent(String entry,
-                                       String expectedContent) {
-        hasContentSatisfying(entry,
-                             actualContent -> {
-                                 assertThat(actualContent).isEqualTo(expectedContent);
-                             });
+    public AssertZipContent hasContent(String entry, String expectedContent) {
+        hasContentSatisfying(
+            entry,
+            actualContent -> {
+                assertThat(actualContent).isEqualTo(expectedContent);
+            }
+        );
         return this;
     }
 
-    public AssertZipContent hasContentSatisfying(String entry,
-                                                 Consumer<String> requirement) {
+    public AssertZipContent hasContentSatisfying(
+        String entry,
+        Consumer<String> requirement
+    ) {
         assertThat(zipContent(entry)).hasValueSatisfying(requirement);
         return this;
     }
 
     public AssertZipContent hasJsonContent(String entry) {
-        assertThat(zipContent(entry)).hasValueSatisfying(JsonFluentAssert::assertThatJson);
+        assertThat(zipContent(entry))
+            .hasValueSatisfying(JsonFluentAssert::assertThatJson);
         return this;
     }
 
-    public AssertZipContent hasJsonContentSatisfying(String entry,
-                                                     Consumer<ConfigurableJsonFluentAssert> requirement) {
+    public AssertZipContent hasJsonContentSatisfying(
+        String entry,
+        Consumer<ConfigurableJsonFluentAssert> requirement
+    ) {
         assertThat(zipContent(entry))
-                .map(JsonFluentAssert::assertThatJson)
-                .hasValueSatisfying(requirement);
+            .map(JsonFluentAssert::assertThatJson)
+            .hasValueSatisfying(requirement);
         return this;
     }
 
     private Optional<String> zipContent(String entry) {
-        return Optional.ofNullable(entry)
-                .map(contentMap::get)
-                .map(String::new);
+        return Optional.ofNullable(entry).map(contentMap::get).map(String::new);
     }
 }

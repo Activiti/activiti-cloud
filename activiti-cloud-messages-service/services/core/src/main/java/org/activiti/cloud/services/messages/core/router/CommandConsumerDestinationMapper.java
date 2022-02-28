@@ -18,7 +18,8 @@ package org.activiti.cloud.services.messages.core.router;
 
 import java.util.function.Function;
 
-public class CommandConsumerDestinationMapper implements Function<String, String> {
+public class CommandConsumerDestinationMapper
+    implements Function<String, String> {
 
     private final String separator;
 
@@ -28,8 +29,9 @@ public class CommandConsumerDestinationMapper implements Function<String, String
 
     @Override
     public String apply(String appName) {
-        return new StringBuilder("commandConsumer").append(separator)
-                                                   .append(appName)
-                                                   .toString();
+        return new StringBuilder("commandConsumer")
+            .append(separator)
+            .append(appName)
+            .toString();
     }
 }

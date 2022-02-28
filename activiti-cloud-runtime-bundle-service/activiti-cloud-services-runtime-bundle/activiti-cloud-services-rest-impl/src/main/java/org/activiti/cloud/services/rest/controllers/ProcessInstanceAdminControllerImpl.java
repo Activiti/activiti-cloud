@@ -45,8 +45,8 @@ import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceAdminController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceRepresentationModelAssembler;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,7 +54,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminController {
+public class ProcessInstanceAdminControllerImpl
+    implements ProcessInstanceAdminController {
 
     private final ProcessInstanceRepresentationModelAssembler representationModelAssembler;
 
@@ -66,11 +67,13 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     private final ProcessVariablesPayloadConverter variablesPayloadConverter;
 
-    public ProcessInstanceAdminControllerImpl(ProcessInstanceRepresentationModelAssembler representationModelAssembler,
-                                              AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
-                                              ProcessAdminRuntime processAdminRuntime,
-                                              SpringPageConverter pageConverter,
-                                              ProcessVariablesPayloadConverter variablesPayloadConverter) {
+    public ProcessInstanceAdminControllerImpl(
+        ProcessInstanceRepresentationModelAssembler representationModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
+        ProcessAdminRuntime processAdminRuntime,
+        SpringPageConverter pageConverter,
+        ProcessVariablesPayloadConverter variablesPayloadConverter
+    ) {
         this.representationModelAssembler = representationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.processAdminRuntime = processAdminRuntime;
@@ -79,75 +82,124 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
     }
 
     @Override
-    public PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(Pageable pageable) {
-        Page<ProcessInstance> processInstancePage = processAdminRuntime.processInstances(pageConverter.toAPIPageable(pageable));
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  pageConverter.toSpringPage(pageable, processInstancePage),
-                                                  representationModelAssembler);
+    public PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(
+        Pageable pageable
+    ) {
+        Page<ProcessInstance> processInstancePage = processAdminRuntime.processInstances(
+            pageConverter.toAPIPageable(pageable)
+        );
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            pageConverter.toSpringPage(pageable, processInstancePage),
+            representationModelAssembler
+        );
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+    public EntityModel<CloudProcessInstance> startProcess(
+        @RequestBody StartProcessPayload startProcessPayload
+    ) {
+        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(
+            startProcessPayload
+        );
 
-        return representationModelAssembler.toModel(processAdminRuntime.start(convertedStartProcessPayload));
+        return representationModelAssembler.toModel(
+            processAdminRuntime.start(convertedStartProcessPayload)
+        );
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId) {
-        return representationModelAssembler.toModel(processAdminRuntime.processInstance(processInstanceId));
+    public EntityModel<CloudProcessInstance> getProcessInstanceById(
+        @PathVariable String processInstanceId
+    ) {
+        return representationModelAssembler.toModel(
+            processAdminRuntime.processInstance(processInstanceId)
+        );
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> resume(@PathVariable String processInstanceId) {
-        return representationModelAssembler.toModel(processAdminRuntime.resume(ProcessPayloadBuilder.resume(processInstanceId)));
-    }
-
-	@Override
-	public EntityModel<CloudProcessInstance> suspend(@PathVariable String processInstanceId) {
-		return representationModelAssembler.toModel(processAdminRuntime.suspend(ProcessPayloadBuilder.suspend(processInstanceId)));
-	}
-
-    @Override
-    public EntityModel<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId) {
-        return representationModelAssembler.toModel(processAdminRuntime.delete(ProcessPayloadBuilder.delete(processInstanceId)));
+    public EntityModel<CloudProcessInstance> resume(
+        @PathVariable String processInstanceId
+    ) {
+        return representationModelAssembler.toModel(
+            processAdminRuntime.resume(
+                ProcessPayloadBuilder.resume(processInstanceId)
+            )
+        );
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> updateProcess(@PathVariable String processInstanceId,
-                                                        @RequestBody UpdateProcessPayload payload) {
-        if (payload!=null) {
+    public EntityModel<CloudProcessInstance> suspend(
+        @PathVariable String processInstanceId
+    ) {
+        return representationModelAssembler.toModel(
+            processAdminRuntime.suspend(
+                ProcessPayloadBuilder.suspend(processInstanceId)
+            )
+        );
+    }
+
+    @Override
+    public EntityModel<CloudProcessInstance> deleteProcessInstance(
+        @PathVariable String processInstanceId
+    ) {
+        return representationModelAssembler.toModel(
+            processAdminRuntime.delete(
+                ProcessPayloadBuilder.delete(processInstanceId)
+            )
+        );
+    }
+
+    @Override
+    public EntityModel<CloudProcessInstance> updateProcess(
+        @PathVariable String processInstanceId,
+        @RequestBody UpdateProcessPayload payload
+    ) {
+        if (payload != null) {
             payload.setProcessInstanceId(processInstanceId);
-
         }
-        return representationModelAssembler.toModel(processAdminRuntime.update(payload));
+        return representationModelAssembler.toModel(
+            processAdminRuntime.update(payload)
+        );
     }
 
     @Override
-    public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
-                                                                       Pageable pageable) {
-        Page<ProcessInstance> processInstancePage = processAdminRuntime.processInstances(pageConverter.toAPIPageable(pageable),
-                                                                                         ProcessPayloadBuilder.subprocesses(processInstanceId));
+    public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(
+        @PathVariable String processInstanceId,
+        Pageable pageable
+    ) {
+        Page<ProcessInstance> processInstancePage = processAdminRuntime.processInstances(
+            pageConverter.toAPIPageable(pageable),
+            ProcessPayloadBuilder.subprocesses(processInstanceId)
+        );
 
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  pageConverter.toSpringPage(pageable, processInstancePage),
-                                                  representationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            pageConverter.toSpringPage(pageable, processInstancePage),
+            representationModelAssembler
+        );
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
-        startMessagePayload = variablesPayloadConverter.convert(startMessagePayload);
+    public EntityModel<CloudProcessInstance> start(
+        @RequestBody StartMessagePayload startMessagePayload
+    ) {
+        startMessagePayload =
+            variablesPayloadConverter.convert(startMessagePayload);
 
-        ProcessInstance processInstance = processAdminRuntime.start(startMessagePayload);
+        ProcessInstance processInstance = processAdminRuntime.start(
+            startMessagePayload
+        );
 
         return representationModelAssembler.toModel(processInstance);
     }
 
     @Override
-    public ResponseEntity<Void> receive(@RequestBody ReceiveMessagePayload receiveMessagePayload) {
+    public ResponseEntity<Void> receive(
+        @RequestBody ReceiveMessagePayload receiveMessagePayload
+    ) {
         processAdminRuntime.receive(receiveMessagePayload);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

@@ -51,17 +51,20 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @WebMvcTest(TaskDeleteController.class)
-@Import({
+@Import(
+    {
         QueryRestWebMvcAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser("admin")
 public class TaskEntityDeleteControllerIT {
 
-    private static final String TASK_ADMIN_ALFRESCO_IDENTIFIER = "task-admin-alfresco";
+    private static final String TASK_ADMIN_ALFRESCO_IDENTIFIER =
+        "task-admin-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -88,19 +91,24 @@ public class TaskEntityDeleteControllerIT {
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @Test
-    public void deleteTasksShouldReturnAllTasksAndDeleteThem() throws Exception{
-
+    public void deleteTasksShouldReturnAllTasksAndDeleteThem()
+        throws Exception {
         //given
-        List<TaskEntity> taskEntities = Collections.singletonList(buildDefaultTask());
+        List<TaskEntity> taskEntities = Collections.singletonList(
+            buildDefaultTask()
+        );
         given(taskRepository.findAll(any(Predicate.class)))
-                .willReturn(taskEntities);
+            .willReturn(taskEntities);
 
         //when
-        mockMvc.perform(delete("/admin/v1/tasks")
-                .with(csrf())
-                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                delete("/admin/v1/tasks")
+                    .with(csrf())
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk());
 
         verify(taskRepository).deleteAll(taskEntities);
     }

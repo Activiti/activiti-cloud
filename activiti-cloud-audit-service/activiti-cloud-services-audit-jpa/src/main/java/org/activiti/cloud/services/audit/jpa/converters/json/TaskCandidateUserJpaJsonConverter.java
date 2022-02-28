@@ -17,7 +17,8 @@ package org.activiti.cloud.services.audit.jpa.converters.json;
 
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 
-public class TaskCandidateUserJpaJsonConverter extends JpaJsonConverter<TaskCandidateUserImpl> {
+public class TaskCandidateUserJpaJsonConverter
+    extends JpaJsonConverter<TaskCandidateUserImpl> {
 
     public TaskCandidateUserJpaJsonConverter() {
         super(TaskCandidateUserImpl.class);

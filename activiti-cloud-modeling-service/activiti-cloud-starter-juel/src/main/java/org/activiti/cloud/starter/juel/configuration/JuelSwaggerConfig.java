@@ -27,10 +27,17 @@ public class JuelSwaggerConfig {
 
     @Bean(name = "juelApiDocket")
     @ConditionalOnMissingBean(name = "juelApiDocket")
-    public Docket juelApiDocket(SwaggerDocketBuilder swaggerDocketBuilder,
-                                @Value("${activiti.cloud.swagger.juel-base-path:}") String swaggerBasePath) {
-        return swaggerDocketBuilder.buildApiDocket("Juel ReST API", "Juel", swaggerBasePath,
-                "org.activiti.cloud.starter.juel");
+    public Docket juelApiDocket(
+        SwaggerDocketBuilder swaggerDocketBuilder,
+        @Value(
+            "${activiti.cloud.swagger.juel-base-path:}"
+        ) String swaggerBasePath
+    ) {
+        return swaggerDocketBuilder.buildApiDocket(
+            "Juel ReST API",
+            "Juel",
+            swaggerBasePath,
+            "org.activiti.cloud.starter.juel"
+        );
     }
-
 }
