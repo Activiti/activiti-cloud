@@ -24,8 +24,8 @@ import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QTaskEntity;
-import org.activiti.cloud.services.query.model.TaskCandidateGroup;
-import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
@@ -101,8 +101,8 @@ public class TaskController {
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         //do restricted query and check if still able to see it
-        Iterable<TaskEntity> taskIterable = taskRepository.findAll(taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq(taskId)));
-        if (!taskIterable.iterator().hasNext()) {
+        boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
+        if (!canUserViewTask) {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
@@ -116,13 +116,13 @@ public class TaskController {
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         //do restricted query and check if still able to see it
-        Iterable<TaskEntity> taskIterable = taskRepository.findAll(taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq(taskId)));
-        if (!taskIterable.iterator().hasNext()) {
+        boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
+        if (!canUserViewTask) {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
         return taskEntity.getTaskCandidateUsers() != null ?
-                                      taskEntity.getTaskCandidateUsers().stream().map(TaskCandidateUser::getUserId).collect(Collectors.toList()) :
+                                      taskEntity.getTaskCandidateUsers().stream().map(TaskCandidateUserEntity::getUserId).collect(Collectors.toList()) :
                                       null;
     }
 
@@ -133,13 +133,13 @@ public class TaskController {
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         //do restricted query and check if still able to see it
-        Iterable<TaskEntity> taskIterable = taskRepository.findAll(taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq(taskId)));
-        if (!taskIterable.iterator().hasNext()) {
+        boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
+        if (!canUserViewTask) {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
         return taskEntity.getTaskCandidateGroups() != null ?
-                                       taskEntity.getTaskCandidateGroups().stream().map(TaskCandidateGroup::getGroupId).collect(Collectors.toList()) :
+                                       taskEntity.getTaskCandidateGroups().stream().map(TaskCandidateGroupEntity::getGroupId).collect(Collectors.toList()) :
                                        null;
     }
 

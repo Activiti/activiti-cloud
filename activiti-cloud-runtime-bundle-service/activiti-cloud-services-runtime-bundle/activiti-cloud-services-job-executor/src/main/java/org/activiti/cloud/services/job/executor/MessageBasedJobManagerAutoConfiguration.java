@@ -15,12 +15,12 @@
  */
 package org.activiti.cloud.services.job.executor;
 
+import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.binding.SubscribableChannelBindingTargetFactory;
@@ -31,36 +31,30 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConditionalOnProperty(name = "spring.activiti.asyncExecutorActivate", havingValue = "true", matchIfMissing = true)
+@AutoConfigureAfter(ActivitiMessagingDestinationsAutoConfiguration.class)
 public class MessageBasedJobManagerAutoConfiguration {
-    
-    @Bean
-    @ConditionalOnMissingBean(name = "messageJobConsumerProperties")
-    @ConfigurationProperties(prefix = "spring.activiti.cloud.rb.job-executor.message-job-consumer")
-    public ConsumerProperties messageJobConsumerProperties() {
-        return new ConsumerProperties();
-    }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public JobMessageBuilderFactory jobMessageBuilderFactory(RuntimeBundleProperties properties) {
         return new JobMessageBuilderFactory(properties);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public JobMessageInputChannelFactory jobMessageInputChannelFactory(SubscribableChannelBindingTargetFactory bindingTargetFactory,
                                                                        BindingServiceProperties bindingServiceProperties,
                                                                        ConfigurableListableBeanFactory beanFactory) {
         return new JobMessageInputChannelFactory(bindingTargetFactory, bindingServiceProperties, beanFactory);
-    }    
-    
+    }
+
     @Bean
     @ConditionalOnMissingBean
-    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(RuntimeBundleProperties runtimeBundleProperties,
+    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(BindingServiceProperties bindingServiceProperties,
                                                                        JobMessageProducer jobMessageProducer) {
-        return new DefaultMessageBasedJobManagerFactory(runtimeBundleProperties, jobMessageProducer);
+        return new DefaultMessageBasedJobManagerFactory(bindingServiceProperties, jobMessageProducer);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public JobMessageProducer jobMessageProducer(BinderAwareChannelResolver resolver,
@@ -76,21 +70,20 @@ public class MessageBasedJobManagerAutoConfiguration {
     public JobMessageHandlerFactory jobMessageHandlerFactory() {
         return new DefaultJobMessageHandlerFactory();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public MessageBasedJobManagerConfigurator messageBasedJobManagerConfigurator(ConfigurableListableBeanFactory beanFactory,
                                                                                  BindingService bindingService,
                                                                                  JobMessageInputChannelFactory jobMessageInputChannelFactory,
                                                                                  MessageBasedJobManagerFactory messageBasedJobManagerFactory,
-                                                                                 JobMessageHandlerFactory jobMessageHandlerFactory,
-                                                                                 ConsumerProperties messageJobConsumerProperties) {
+                                                                                 JobMessageHandlerFactory jobMessageHandlerFactory) {
+
         return new MessageBasedJobManagerConfigurator(beanFactory,
                                                       bindingService,
                                                       jobMessageInputChannelFactory,
                                                       messageBasedJobManagerFactory,
-                                                      jobMessageHandlerFactory,
-                                                      messageJobConsumerProperties);
+                                                      jobMessageHandlerFactory);
     }
 
 }

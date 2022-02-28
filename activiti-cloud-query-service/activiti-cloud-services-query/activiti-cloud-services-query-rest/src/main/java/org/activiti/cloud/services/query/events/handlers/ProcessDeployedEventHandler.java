@@ -19,49 +19,47 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
-import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.EntityManager;
+
 public class ProcessDeployedEventHandler implements QueryEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessDeployedEventHandler.class);
 
-    private ProcessDefinitionRepository processDefinitionRepository;
-    private ProcessModelRepository processModelRepository;
+    private EntityManager entityManager;
 
-    public ProcessDeployedEventHandler(ProcessDefinitionRepository processDefinitionRepository,
-                                       ProcessModelRepository processModelRepository) {
-        this.processDefinitionRepository = processDefinitionRepository;
-        this.processModelRepository = processModelRepository;
+    public ProcessDeployedEventHandler(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessDeployedEvent processDeployedEvent = (CloudProcessDeployedEvent) event;
-        ProcessDefinition eventProcessDefinition = processDeployedEvent.getEntity();
-        LOGGER.debug("Handling process deployed event for " + eventProcessDefinition.getKey());
-        ProcessDefinitionEntity processDefinition = new ProcessDefinitionEntity(processDeployedEvent.getServiceName(),
+        CloudProcessDeployedEvent processDeployedEvent = CloudProcessDeployedEvent.class.cast(event);
+        ProcessDefinition processDefinition = processDeployedEvent.getEntity();
+        LOGGER.debug("Handling process deployed event for " + processDefinition.getKey());
+        ProcessDefinitionEntity processDefinitionEntity = new ProcessDefinitionEntity(processDeployedEvent.getServiceName(),
                                                                                       processDeployedEvent.getServiceFullName(),
                                                                                       processDeployedEvent.getServiceVersion(),
                                                                                       processDeployedEvent.getAppName(),
                                                                                       processDeployedEvent.getAppVersion());
-        processDefinition.setId(eventProcessDefinition.getId());
-        processDefinition.setDescription(eventProcessDefinition.getDescription());
-        processDefinition.setFormKey(eventProcessDefinition.getFormKey());
-        processDefinition.setKey(eventProcessDefinition.getKey());
-        processDefinition.setName(eventProcessDefinition.getName());
-        processDefinition.setVersion(eventProcessDefinition.getVersion());
-        processDefinition.setServiceType(processDeployedEvent.getServiceType());
-        processDefinitionRepository.save(processDefinition);
+        processDefinitionEntity.setId(processDefinition.getId());
+        processDefinitionEntity.setDescription(processDefinition.getDescription());
+        processDefinitionEntity.setFormKey(processDefinition.getFormKey());
+        processDefinitionEntity.setKey(processDefinition.getKey());
+        processDefinitionEntity.setName(processDefinition.getName());
+        processDefinitionEntity.setVersion(processDefinition.getVersion());
+        processDefinitionEntity.setCategory(processDefinition.getCategory());
+        processDefinitionEntity.setServiceType(processDeployedEvent.getServiceType());
+        entityManager.merge(processDefinitionEntity);
 
-        ProcessModelEntity processModelEntity = new ProcessModelEntity(processDefinition,
+        ProcessModelEntity processModelEntity = new ProcessModelEntity(processDefinitionEntity,
                                                                        processDeployedEvent.getProcessModelContent());
-        processModelEntity.setId(processDefinition.getId());
-        processModelRepository.save(processModelEntity);
+        processModelEntity.setId(processDefinitionEntity.getId());
+        entityManager.merge(processModelEntity);
     }
 
     @Override

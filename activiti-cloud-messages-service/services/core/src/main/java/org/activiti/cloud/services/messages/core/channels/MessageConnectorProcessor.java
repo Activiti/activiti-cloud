@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.services.messages.core.channels;
 
-import org.springframework.cloud.stream.messaging.Sink;
-import org.springframework.cloud.stream.messaging.Source;
-
-public interface MessageConnectorProcessor extends Source, Sink {
+public interface MessageConnectorProcessor extends MessageConnectorSource, MessageConnectorSink {
 
 }

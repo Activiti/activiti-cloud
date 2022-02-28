@@ -15,67 +15,62 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.util.UUID;
-
-import javax.persistence.EntityManager;
-
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.test.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import javax.persistence.EntityManager;
+import java.util.Optional;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 public class VariableEntityCreatedEventHandlerTest {
 
     @InjectMocks
     private VariableCreatedEventHandler handler;
 
-    @Mock
-    private VariableRepository variableRepository;
+    @InjectMocks
+    private ProcessVariableCreatedEventHandler processVariableCreatedEventHandler;
 
-    @Mock
-    private TaskVariableRepository taskVariableRepository;
+    @InjectMocks
+    private TaskVariableCreatedEventHandler taskVariableCreatedEventHandler;
 
     @Mock
     private EntityManager entityManager;
 
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
+    @Mock
+    private EntityManagerFinder entityManagerFinder;
 
     @Test
     public void handleShouldCreateAndStoreProcessInstanceVariable() {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
-        ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
-        when(entityManager.getReference(ProcessInstanceEntity.class,
-                                        event.getEntity().getProcessInstanceId()))
-                .thenReturn(processInstanceEntity);
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId()))
+                                .thenReturn(Optional.of(processInstanceEntity));
 
         //when
-        handler.handle(event);
+        processVariableCreatedEventHandler.handle(event);
 
         //then
         ArgumentCaptor<ProcessVariableEntity> captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
-        verify(variableRepository).save(captor.capture());
+        verify(entityManager).persist(captor.capture());
 
         ProcessVariableEntity variableEntity = captor.getValue();
 
@@ -97,22 +92,21 @@ public class VariableEntityCreatedEventHandlerTest {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariableWithTaskId());
 
-        ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+
         when(entityManager.getReference(ProcessInstanceEntity.class,
                                         event.getEntity().getProcessInstanceId()))
                 .thenReturn(processInstanceEntity);
 
         TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManager.getReference(TaskEntity.class,
-                                        event.getEntity().getTaskId()))
-                .thenReturn(taskEntity);
-
+        when(entityManagerFinder.findTaskWithVariables("taskId"))
+                                .thenReturn(Optional.of(taskEntity));
         //when
-        handler.handle(event);
+        taskVariableCreatedEventHandler.handle(event);
 
         //then
         ArgumentCaptor<TaskVariableEntity> captor = ArgumentCaptor.forClass(TaskVariableEntity.class);
-        verify(taskVariableRepository).save(captor.capture());
+        verify(entityManager).persist(captor.capture());
 
         TaskVariableEntity variableEntity = captor.getValue();
 

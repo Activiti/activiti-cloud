@@ -51,9 +51,9 @@ public class AlfrescoPagedModelAssembler<T> extends PagedResourcesAssembler<T> {
         PagedModel<R> pagedModel = toModel(page, assembler);
         ExtendedPageMetadata extendedPageMetadata = extendedPageMetadataConverter.toExtendedPageMetadata(pageable.getOffset(),
                                                                                                          pagedModel.getMetadata());
-        pagedModel = new PagedModel<>(pagedModel.getContent(),
-                                              extendedPageMetadata,
-                                              pagedModel.getLinks());
+        pagedModel = PagedModel.of(pagedModel.getContent(),
+                                   extendedPageMetadata,
+                                   pagedModel.getLinks());
 
         return pagedModel;
     }

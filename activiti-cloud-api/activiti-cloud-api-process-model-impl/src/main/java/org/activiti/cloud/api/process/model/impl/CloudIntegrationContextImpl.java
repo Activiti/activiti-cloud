@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 
 public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implements CloudIntegrationContext {
 
     private String id;
+    private String rootProcessInstanceId;
     private String processInstanceId;
     private String parentProcessInstanceId;
     private String executionId;
@@ -79,6 +79,15 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
 
     public void setOutBoundVariables(Map<String, Object> outBoundVariables) {
         this.outBoundVariables = outBoundVariables;
+    }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return this.rootProcessInstanceId;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     @Override
@@ -312,6 +321,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                                                inBoundVariables,
                                                outBoundVariables,
                                                parentProcessInstanceId,
+                                               rootProcessInstanceId,
                                                processDefinitionId,
                                                processDefinitionKey,
                                                processDefinitionVersion,
@@ -352,6 +362,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                Objects.equals(processDefinitionId, other.processDefinitionId) &&
                Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
+               Objects.equals(rootProcessInstanceId, other.rootProcessInstanceId) &&
                Objects.equals(processInstanceId, other.processInstanceId) &&
                Objects.equals(requestDate, other.requestDate) &&
                Objects.equals(resultDate, other.resultDate) &&
@@ -365,6 +376,8 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
         StringBuilder builder = new StringBuilder();
         builder.append("CloudIntegrationContextImpl [id=")
                .append(id)
+               .append(", rootProcessInstanceId=")
+               .append(rootProcessInstanceId)
                .append(", processInstanceId=")
                .append(processInstanceId)
                .append(", parentProcessInstanceId=")

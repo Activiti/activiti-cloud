@@ -67,7 +67,7 @@ public class ProcessInstanceDeleteController {
 
         processInstanceRepository.deleteAll(iterable);
 
-        return new CollectionModel<>(result);
+        return CollectionModel.of(result);
     }
 
 

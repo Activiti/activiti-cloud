@@ -35,7 +35,7 @@ import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 
-public class BpmnModelCallActivityValidator implements BpmnModelValidator {
+public class BpmnModelCallActivityValidator implements BpmnCommonModelValidator {
 
     private ProcessModelType processModelType;
     private ProcessModelContentConverter processModelContentConverter;

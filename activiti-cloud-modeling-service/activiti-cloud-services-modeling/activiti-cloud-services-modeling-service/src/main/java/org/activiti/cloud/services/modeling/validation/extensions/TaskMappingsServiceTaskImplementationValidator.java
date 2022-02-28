@@ -38,6 +38,8 @@ import org.activiti.cloud.modeling.api.process.VariableMappingType;
 import org.activiti.cloud.services.modeling.converter.ConnectorActionParameter;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
+import org.activiti.cloud.services.modeling.validation.process.ServiceTaskImplementationType;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Implementation of {@link TaskMappingsValidator} for {@link ServiceTask} implementation
@@ -110,8 +112,8 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
 
     private boolean isConnector(Optional<String> implementationTask) {
         return implementationTask.isPresent()
-            && !implementationTask.get().equals("dmn-connector.EXECUTE_TABLE")
-            && !implementationTask.get().equals("script.EXECUTE");
+                && !Arrays.stream(ServiceTaskImplementationType.values())
+                .anyMatch(serviceImplementation -> implementationTask.get().startsWith(serviceImplementation.getPrefix()));
     }
 
     private Optional<ModelValidationError> validateTaskMappings(String processId,
@@ -162,10 +164,9 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                 .map(connectorModelContentConverter::convertToModelContent)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .filter(connectorModelContent -> !CollectionUtils.isEmpty(connectorModelContent.getActions()))
                 .forEach(connectorModelContent -> connectorModelContent.getActions().values()
-                        .forEach(action -> availableConnectorActions.put(getImplementationKey(connectorModelContent.getName(),
-                                                                                              action),
-                                                                         action)));
+                        .forEach(action -> availableConnectorActions.put(getImplementationKey(connectorModelContent.getName(), action), action)));
 
         return availableConnectorActions;
     }

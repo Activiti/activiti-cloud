@@ -15,61 +15,51 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Optional;
-
-import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.persistence.EntityManager;
+import java.util.Optional;
 
 public class ProcessVariableDeletedEventHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ProcessVariableDeletedEventHandler.class);
-    
-    private final VariableRepository variableRepository;
 
-    private final EntityFinder entityFinder;
-    
-    private final ProcessInstanceRepository processRepository;
+    private final EntityManager entityManager;
+    private final EntityManagerFinder entityManagerFinder;
 
-    public ProcessVariableDeletedEventHandler(ProcessInstanceRepository processRepository,
-                                              VariableRepository variableRepository,
-                                              EntityFinder entityFinder) {
-        this.processRepository = processRepository;
-        this.variableRepository = variableRepository;
-        this.entityFinder = entityFinder;
+    public ProcessVariableDeletedEventHandler(EntityManager entityManager,
+                                              EntityManagerFinder entityManagerFinder) {
+        this.entityManager = entityManager;
+        this.entityManagerFinder = entityManagerFinder;
     }
 
     public void handle(CloudVariableDeletedEvent event) {
         String variableName = event.getEntity().getName();
         String processInstanceId = event.getEntity().getProcessInstanceId();
-        Optional<ProcessInstanceEntity> findResult = processRepository.findById(processInstanceId);
-        
+        Optional<ProcessInstanceEntity> findResult = entityManagerFinder.findProcessInstanceWithVariables(processInstanceId);
         // if a task was cancelled / completed do not handle this event
-        if(findResult.isPresent() && !findResult.get().isInFinalState()) {
-        
-            BooleanExpression predicate = QProcessVariableEntity.processVariableEntity.processInstanceId.eq(processInstanceId)
-                    .and(
-                            QProcessVariableEntity.processVariableEntity.name.eq(variableName)
-                    );
-            ProcessVariableEntity variableEntity = entityFinder.findOne(variableRepository,
-                                                                 predicate,
-                                                                 "Unable to find variableEntity with name '" + variableName + "' for process instance '" + processInstanceId + "'");
-            
-            // Persist into database
+        if (findResult.isPresent() && !findResult.get().isInFinalState()) {
             try {
-                variableRepository.delete(variableEntity);
+                ProcessInstanceEntity processInstanceEntity = findResult.get();
+
+                processInstanceEntity.getVariable(variableName)
+                         .ifPresentOrElse(variableEntity -> {
+                             // Persist into database
+                             processInstanceEntity.getVariables()
+                                                  .remove(variableEntity);
+
+                             entityManager.remove(variableEntity);
+                         },() -> {
+                             LOGGER.warn("Unable to find variableEntity with name '" + variableName + "' for process instance '" + processInstanceId + "'");
+                         });
             } catch (Exception cause) {
-                LOGGER.debug("Error handling ProcessVariableDeletedEvent[" + event + "]",
+                LOGGER.error("Error handling ProcessVariableDeletedEvent[" + event + "]",
                              cause);
-            }   
+            }
         }
-        
+
     }
 }

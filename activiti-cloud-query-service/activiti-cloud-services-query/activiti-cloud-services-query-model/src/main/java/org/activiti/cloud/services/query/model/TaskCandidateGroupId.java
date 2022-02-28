@@ -41,12 +41,7 @@ public class TaskCandidateGroupId implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((taskId == null) ? 0 : taskId.hashCode());
-        result = prime * result + groupId.hashCode();
-        return result;
+        return getClass().hashCode();
     }
 
     @Override

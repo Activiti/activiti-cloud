@@ -15,11 +15,15 @@
  */
 package org.activiti.cloud.acc.shared.service;
 
+import feign.Param;
 import feign.RequestLine;
 
 public interface SwaggerService {
 
-    @RequestLine("GET /v2/api-docs")
+    @RequestLine("GET /v3/api-docs")
     String getSwaggerSpecification();
+
+    @RequestLine("GET /v3/api-docs?group={group}")
+    String getSwaggerSpecification(@Param("group") String group);
 
 }

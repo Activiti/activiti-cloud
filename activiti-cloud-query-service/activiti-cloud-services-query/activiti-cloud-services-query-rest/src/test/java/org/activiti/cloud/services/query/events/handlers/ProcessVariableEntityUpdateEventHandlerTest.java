@@ -15,17 +15,15 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessVariableEntityUpdateEventHandlerTest {
@@ -53,6 +51,6 @@ public class ProcessVariableEntityUpdateEventHandlerTest {
         handler.handle(variableEntity);
 
         //then
-        verify(variableUpdater).update(eq(variableEntity), any(Predicate.class), anyString());
+        verify(variableUpdater).update(eq(variableEntity), anyString());
     }
 }

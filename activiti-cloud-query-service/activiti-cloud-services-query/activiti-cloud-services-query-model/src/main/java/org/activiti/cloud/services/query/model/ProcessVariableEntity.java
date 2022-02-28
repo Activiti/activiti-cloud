@@ -15,11 +15,12 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Date;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.Objects;
 
 @Entity(name="ProcessVariable")
 @Table(name = "PROCESS_VARIABLE",
@@ -28,7 +29,15 @@ import javax.persistence.Table;
                 @Index(name = "proc_var_name_idx", columnList = "name", unique = false),
                 @Index(name = "proc_var_executionId_idx", columnList = "executionId", unique = false)
         })
+@DynamicInsert
+@DynamicUpdate
 public class ProcessVariableEntity extends AbstractVariableEntity {
+
+    @Id
+    @GeneratedValue(generator = "process_variable_sequence", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name="process_variable_sequence", sequenceName = "process_variable_sequence", allocationSize=50)
+    private Long id;
+
 
     public ProcessVariableEntity() {
     }
@@ -45,8 +54,7 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
                           Date createTime,
                           Date lastUpdatedTime,
                           String executionId) {
-        super(id,
-              type,
+        super(type,
               name,
               processInstanceId,
               serviceName,
@@ -57,14 +65,20 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
               createTime,
               lastUpdatedTime,
               executionId);
-        
+
+        this.id = id;
+
     }
 
+    @Override
+    public Long getId() {
+        return id;
+    }
     @Override
     public String getTaskId() {
         return null;
     }
-    
+
     @Override
     public boolean isTaskVariable() {
         return false;
@@ -72,18 +86,23 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return getClass().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        return true;
+        }
+        ProcessVariableEntity other = (ProcessVariableEntity) obj;
+
+        return this.getId() != null && Objects.equals(this.getId(), other.getId());
     }
 
 }

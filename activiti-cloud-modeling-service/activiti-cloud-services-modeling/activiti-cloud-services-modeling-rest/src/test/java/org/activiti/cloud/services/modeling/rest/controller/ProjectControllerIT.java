@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
@@ -191,6 +192,12 @@ public class ProjectControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
                                     is("existing-project")));
+    }
+
+    @Test
+    public void should_returnNotFound_when_gettingNotExistingProject() throws Exception {
+        mockMvc.perform(get("/v1/projects/{projectId}", "wrongId"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -466,8 +473,58 @@ public class ProjectControllerIT {
                             ModelValidationError::getDescription,
                             ModelValidationError::getValidatorSetName)
                 .containsOnly(tuple("No assignee for user task",
-                                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task",
+                                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
+                                            + "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77' and name: 'x'",
                                     "BPMN user task assignee validator"));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeOnTaskInSubProcess() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
+        modelService.importSingleModel(project,
+                                 processModelType,
+                                 processFileContent("process-model",
+                                                    resourceAsByteArray("process/no-assignee-subprocess.bpmn20.xml")));
+
+        MvcResult response = mockMvc.perform(
+                get("/v1/projects/{projectId}/validate",
+                    project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription,
+                            ModelValidationError::getValidatorSetName)
+                .containsExactly(tuple("No assignee for user task",
+                                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
+                                            + "with id: 'Task_06l44lk' and name: 'My task'",
+                                    "BPMN user task assignee validator"));
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeAndTaskNoNameShouldReturnErrors() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
+        modelService.importSingleModel(project,
+                processModelType,
+                processFileContent("process-model",
+                        resourceAsByteArray("process/no-assignee-task-no-name.bpmn20.xml")));
+
+        MvcResult response = mockMvc.perform(
+                get("/v1/projects/{projectId}/validate",
+                        project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
+                .hasSize(1)
+                .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription,
+                        ModelValidationError::getValidatorSetName)
+                .containsOnly(tuple("No assignee for user task",
+                        "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
+                                + "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77' and empty name",
+                        "BPMN user task assignee validator"));
     }
 
     @Test
@@ -884,8 +941,34 @@ public class ProjectControllerIT {
         String projectName = "existing-project";
 
         mockMvc.perform(
-            post("/v1/projects/{projectId}/copy?name=" + projectName,
-                project.getId()))
-            .andExpect(status().isConflict());
+                post("/v1/projects/{projectId}/copy?name=" + projectName,
+                        project.getId()))
+                .andExpect(status().isConflict());
     }
+
+    @Test
+    public void should_ValidateCorrectly_when_importingProjectWithUnusedConnector() throws Exception {
+
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                "unused-connector.zip",
+                "project/zip",
+                resourceAsByteArray("project/unused-connector.zip"));
+
+        MvcResult response = mockMvc.perform(multipart("/v1/projects/import")
+                .file(zipFile)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.entry.name",
+                        is("unused-connector")))
+                .andReturn();
+
+        String projectId = JsonPath.parse(response.getResponse().getContentAsString()).read("$.entry.id");
+
+        mockMvc.perform(
+                get("/v1/projects/{projectId}/validate",
+                        projectId))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
 }

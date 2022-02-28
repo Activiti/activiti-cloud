@@ -15,32 +15,39 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.QueryException;
+
+import javax.persistence.EntityManager;
 
 public class ProcessVariableUpdater {
 
-    private final EntityFinder entityFinder;
+    private final EntityManager entityManager;
+    private final EntityManagerFinder entityManagerFinder;
 
-    private VariableRepository variableRepository;
-
-    public ProcessVariableUpdater(EntityFinder entityFinder,
-                           VariableRepository variableRepository) {
-        this.entityFinder = entityFinder;
-        this.variableRepository = variableRepository;
+    public ProcessVariableUpdater(EntityManager entityManager,
+                                  EntityManagerFinder entityManagerFinder) {
+        this.entityManager = entityManager;
+        this.entityManagerFinder = entityManagerFinder;
     }
 
-    public void update(ProcessVariableEntity updatedVariableEntity, Predicate predicate, String notFoundMessage) {
-        ProcessVariableEntity variableEntity = entityFinder.findOne(variableRepository,
-                                                             predicate,
-                                                             notFoundMessage);
-        variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
-        variableEntity.setType(updatedVariableEntity.getType());
-        variableEntity.setValue(updatedVariableEntity.getValue());
+    public void update(ProcessVariableEntity updatedVariableEntity, String notFoundMessage) {
+        String processInstanceId = updatedVariableEntity.getProcessInstanceId();
+        ProcessInstanceEntity processInstanceEntity = entityManagerFinder.findProcessInstanceWithVariables(processInstanceId)
+                                                                         .orElseThrow(() -> new QueryException("Process instance id " + processInstanceId + " not found!"));
+        processInstanceEntity.getVariable(updatedVariableEntity.getName())
+                             .ifPresentOrElse(variableEntity -> {
+                                                  variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
+                                                  variableEntity.setType(updatedVariableEntity.getType());
+                                                  variableEntity.setValue(updatedVariableEntity.getValue());
 
-        variableRepository.save(variableEntity);
+                                                  entityManager.persist(variableEntity);
+                                              },
+                                              () -> {
+                                                  throw new QueryException(notFoundMessage);
+                                              });
+
     }
 
 }

@@ -41,7 +41,7 @@ public class ProcessInstanceVariableRepresentationModelAssembler implements Repr
         Link processVariables = linkTo(methodOn(ProcessInstanceVariableControllerImpl.class).getVariables(cloudVariableInstance.getProcessInstanceId())).withRel("processVariables");
         Link processInstance = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(cloudVariableInstance.getProcessInstanceId())).withRel("processInstance");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return new EntityModel<>(cloudVariableInstance,
+        return EntityModel.of(cloudVariableInstance,
                               processVariables,
                               processInstance,
                               homeLink);

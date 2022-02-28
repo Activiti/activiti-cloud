@@ -56,7 +56,7 @@ public class ProcessDefinitionRepresentationModelAssembler implements Representa
         Link selfRel = linkTo(methodOn(ProcessDefinitionControllerImpl.class).getProcessDefinition(cloudProcessDefinition.getId())).withSelfRel();
         Link startProcessLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).startProcess(null)).withRel("startProcess");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return new EntityModel<>(cloudProcessDefinition,
+        return EntityModel.of(cloudProcessDefinition,
                                              selfRel,
                                              startProcessLink,
                                              homeLink);

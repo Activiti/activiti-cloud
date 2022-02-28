@@ -16,16 +16,18 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFailedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = TimerFailedAuditEventEntity.TIMER_FAILED_EVENT)
 @DiscriminatorValue(value = TimerFailedAuditEventEntity.TIMER_FAILED_EVENT)
+@DynamicInsert
 public class TimerFailedAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_FAILED_EVENT = "TimerFailedEvent";
-    
+
     public TimerFailedAuditEventEntity() {
     }
 
@@ -34,28 +36,9 @@ public class TimerFailedAuditEventEntity extends TimerAuditEventEntity {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("TimerFailedAuditEventEntity [toString()=").append(super.toString()).append("]");
         return builder.toString();
-    }   
+    }
 }

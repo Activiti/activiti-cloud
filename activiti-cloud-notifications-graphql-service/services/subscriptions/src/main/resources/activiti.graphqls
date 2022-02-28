@@ -14,13 +14,13 @@ type Query {
 
 type Subscription {
     engineEvents(
-    	serviceName : [String!], 
-    	appName : [String!], 
+    	serviceName : [String!],
+    	appName : [String!],
 		eventType: [EngineEventType!],
     	processDefinitionKey : [String!],
-		processInstanceId : [String!], 
+		processInstanceId : [String!],
 		businessKey : [String!]
-    ) : [EngineEvent]    
+    ) : [EngineEvent]
 }
 
 enum EngineEventType {
@@ -31,6 +31,7 @@ enum EngineEventType {
 	PROCESS_RESUMED
 	PROCESS_SUSPENDED
 	PROCESS_DEPLOYED
+	PROCESS_UPDATED
 	ACTIVITY_STARTED
 	ACTIVITY_CANCELLED
 	ACTIVITY_COMPLETED
@@ -81,7 +82,7 @@ type EngineEvent {
     processDefinitionKey : String
     processDefinitionVersion : Long
     businessKey : String
-    
+
     entityId : String
     entity : ObjectScalar
     eventType : EngineEventType

@@ -16,23 +16,20 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.hibernate.annotations.Immutable;
 
+import javax.persistence.*;
 import java.util.Objects;
-
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "TYPE")
 @Entity(name = "AuditEvent")
+@Immutable
 public abstract class AuditEventEntity {
 
     @Id
-    @GeneratedValue(generator = "audit_sequence")
+    @GeneratedValue(generator = "audit_sequence", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name="audit_sequence", sequenceName = "audit_sequence", allocationSize=50)
     private Long id;
     private String eventId;
     private Long timestamp;
@@ -225,24 +222,7 @@ public abstract class AuditEventEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(appName,
-                            appVersion,
-                            businessKey,
-                            entityId,
-                            eventId,
-                            eventType,
-                            id,
-                            messageId,
-                            parentProcessInstanceId,
-                            processDefinitionId,
-                            processDefinitionKey,
-                            processInstanceId,
-                            sequenceNumber,
-                            serviceFullName,
-                            serviceName,
-                            serviceType,
-                            serviceVersion,
-                            timestamp);
+        return getClass().hashCode();
     }
 
     @Override
@@ -257,24 +237,7 @@ public abstract class AuditEventEntity {
             return false;
         }
         AuditEventEntity other = (AuditEventEntity) obj;
-        return Objects.equals(appName, other.appName)
-                && Objects.equals(appVersion, other.appVersion)
-                && Objects.equals(businessKey, other.businessKey)
-                && Objects.equals(entityId, other.entityId)
-                && Objects.equals(eventId, other.eventId)
-                && Objects.equals(eventType, other.eventType)
-                && Objects.equals(id, other.id)
-                && Objects.equals(messageId, other.messageId)
-                && Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId)
-                && Objects.equals(processDefinitionId, other.processDefinitionId)
-                && Objects.equals(processDefinitionKey, other.processDefinitionKey)
-                && Objects.equals(processInstanceId, other.processInstanceId)
-                && sequenceNumber == other.sequenceNumber
-                && Objects.equals(serviceFullName, other.serviceFullName)
-                && Objects.equals(serviceName, other.serviceName)
-                && Objects.equals(serviceType, other.serviceType)
-                && Objects.equals(serviceVersion, other.serviceVersion)
-                && Objects.equals(timestamp, other.timestamp);
+        return this.id != null && Objects.equals(id, other.id);
     }
 
     @Override

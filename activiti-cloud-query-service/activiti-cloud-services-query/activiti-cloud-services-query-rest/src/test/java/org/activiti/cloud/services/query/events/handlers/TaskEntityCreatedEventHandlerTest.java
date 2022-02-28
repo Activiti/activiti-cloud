@@ -15,28 +15,26 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityCreatedEventHandlerTest {
@@ -46,6 +44,9 @@ public class TaskEntityCreatedEventHandlerTest {
 
     @Mock
     private TaskRepository taskRepository;
+
+    @Mock
+    private EntityManager entityManager;
 
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
@@ -75,15 +76,17 @@ public class TaskEntityCreatedEventHandlerTest {
         event.setServiceName("runtime-bundle-a");
         event.setProcessDefinitionVersion(10);
         event.setBusinessKey("businessKey");
-        
-        when(processInstanceRepository.findById(task.getProcessInstanceId()))
-                .thenReturn(Optional.of(processInstanceEntity));
+
+        when(entityManager.getReference(ProcessInstanceEntity.class,
+                                        task.getProcessInstanceId()))
+                          .thenReturn(processInstanceEntity);
+
         //when
         handler.handle(event);
 
         //then
         ArgumentCaptor<TaskEntity> captor = ArgumentCaptor.forClass(TaskEntity.class);
-        verify(taskRepository).save(captor.capture());
+        verify(entityManager).persist(captor.capture());
         assertThat(captor.getValue().getStatus()).isEqualTo(Task.TaskStatus.CREATED);
         assertThat(captor.getValue().getLastModified()).isNotNull();
         assertThat(captor.getValue().getProcessInstance()).isEqualTo(processInstanceEntity);

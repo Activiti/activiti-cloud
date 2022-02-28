@@ -16,20 +16,20 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
-
-import java.util.Objects;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = TaskCancelledEventEntity.TASK_CANCELLED_EVENT)
 @DiscriminatorValue(value = TaskCancelledEventEntity.TASK_CANCELLED_EVENT)
+@DynamicInsert
 public class TaskCancelledEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_CANCELLED_EVENT = "TaskCancelledEvent";
 
     private String cause;
-    
+
     public TaskCancelledEventEntity() {
     }
 
@@ -44,29 +44,6 @@ public class TaskCancelledEventEntity extends TaskAuditEventEntity {
 
     public void setCause(String cause) {
         this.cause = cause;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(cause);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        TaskCancelledEventEntity other = (TaskCancelledEventEntity) obj;
-        return Objects.equals(cause, other.cause);
     }
 
     @Override

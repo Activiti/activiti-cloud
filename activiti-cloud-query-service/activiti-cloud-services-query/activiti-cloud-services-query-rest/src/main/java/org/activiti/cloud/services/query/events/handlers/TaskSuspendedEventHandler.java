@@ -15,22 +15,23 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.Optional;
+
 public class TaskSuspendedEventHandler implements QueryEventHandler {
 
-    private final TaskRepository taskRepository;
+    private final EntityManager entityManager;
 
-    public TaskSuspendedEventHandler(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+    public TaskSuspendedEventHandler(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -38,11 +39,13 @@ public class TaskSuspendedEventHandler implements QueryEventHandler {
         CloudTaskSuspendedEvent taskSuspendedEvent = (CloudTaskSuspendedEvent) event;
         Task eventTask = taskSuspendedEvent.getEntity();
 
-        TaskEntity taskEntity = taskRepository.findById(eventTask.getId())
-                .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
+        TaskEntity taskEntity = Optional.ofNullable(entityManager.find(TaskEntity.class,
+                                                            eventTask.getId()))
+                                        .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
+
         taskEntity.setStatus(Task.TaskStatus.SUSPENDED);
         taskEntity.setLastModified(new Date(taskSuspendedEvent.getTimestamp()));
-        taskRepository.save(taskEntity);
+        entityManager.persist(taskEntity);
     }
 
     @Override

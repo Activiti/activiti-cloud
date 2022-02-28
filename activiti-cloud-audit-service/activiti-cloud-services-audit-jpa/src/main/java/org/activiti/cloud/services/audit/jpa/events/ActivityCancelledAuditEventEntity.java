@@ -16,15 +16,14 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
-
-import java.util.Objects;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import java.util.Objects;
 
 @Entity(name = ActivityCancelledAuditEventEntity.ACTIVITY_CANCELLED_EVENT)
 @DiscriminatorValue(value = ActivityCancelledAuditEventEntity.ACTIVITY_CANCELLED_EVENT)
+@DynamicInsert
 public class ActivityCancelledAuditEventEntity extends BPMNActivityAuditEventEntity {
 
     protected static final String ACTIVITY_CANCELLED_EVENT = "ActivityCancelledEvent";
@@ -38,32 +37,9 @@ public class ActivityCancelledAuditEventEntity extends BPMNActivityAuditEventEnt
         super(cloudEvent);
         this.cause = cloudEvent.getCause();
     }
-    
+
     public String getCause() {
         return cause;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(cause);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ActivityCancelledAuditEventEntity other = (ActivityCancelledAuditEventEntity) obj;
-        return Objects.equals(cause, other.cause);
     }
 
     @Override

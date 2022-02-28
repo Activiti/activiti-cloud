@@ -15,28 +15,32 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
-
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.modeling.api.ModelValidationError;
-import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.ValidationContext;
 
-/**
- * Interface for validating {@link BpmnModel} objects
- */
-public interface BpmnModelValidator extends ModelValidationErrorProducer {
+public class BpmnModelValidator implements BpmnCommonModelValidator {
 
-    Stream<ModelValidationError> validate(BpmnModel bpmnModel,
-                                          ValidationContext validationContext);
+    public final String ERROR_TYPE = "Missing process category";
 
-    default <T extends FlowElement> Stream<T> getFlowElements(BpmnModel bpmnModel,
-                                                       Class<T> taskType) {
-        return bpmnModel.getProcesses()
-                .stream()
-                .flatMap(process -> process.getFlowElements().stream())
-                .filter(element -> taskType.isAssignableFrom(element.getClass()))
-                .map(taskType::cast);
+    public final String ERROR_DESCRIPTION = "The process category needs to be set";
+
+    @Override
+    public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
+        ValidationContext validationContext) {
+        return validateTargetNamespace(bpmnModel);
     }
+
+    public Stream<ModelValidationError> validateTargetNamespace(BpmnModel bpmnModel) {
+        List<ModelValidationError> aggregatedErrors = new ArrayList();
+        if(bpmnModel.getTargetNamespace() == null){
+            aggregatedErrors.add(new ModelValidationError(ERROR_TYPE,
+                ERROR_DESCRIPTION));
+        }
+        return aggregatedErrors.stream();
+    }
+
 }

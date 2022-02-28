@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPQLQuery;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -24,9 +28,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.util.Assert;
-
-import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.JPQLQuery;
 
 public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport implements CustomizedTaskRepository {
 
@@ -48,7 +49,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
         QTaskVariableEntity variableEntity = QTaskVariableEntity.taskVariableEntity;
 
         Predicate condition = variableEntity.name.eq(name)
-                .and(variableEntity.value.eq(value));
+                .and(Expressions.booleanTemplate("{0} like {1}", variableEntity.value, value));
 
         JPQLQuery<TaskEntity> from = from(taskEntity).innerJoin(taskEntity.variables, variableEntity).on(condition)
                                                      .where(predicate);
@@ -59,5 +60,47 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
 
         return PageableExecutionUtils.getPage(tasks.fetch(), pageable, countQuery::fetchCount);
    }
+    
+   @Override
+    public Iterable<TaskEntity> findInProcessInstanceScope(Predicate predicate) {
+
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+
+        JPQLQuery<TaskEntity> from = buildLeftJoin(taskEntity, predicate);
+        JPQLQuery<TaskEntity> tasks = from.select(taskEntity);
+
+        return tasks.fetch();
+    }
+
+    @Override
+    public Page<TaskEntity> findInProcessInstanceScope(Predicate predicate, Pageable pageable) {
+        
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+        
+        JPQLQuery<TaskEntity> from = buildLeftJoin(taskEntity, predicate);
+        final JPQLQuery<?> countQuery = from.select(taskEntity.count());
+        JPQLQuery<TaskEntity> tasks = from.select(taskEntity);
+
+        return PageableExecutionUtils.getPage(tasks.fetch(), pageable, countQuery::fetchCount);
+        
+    }
+
+    @Override
+    public boolean existsInProcessInstanceScope(Predicate predicate) {
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+        JPQLQuery<TaskEntity> from = buildLeftJoin(taskEntity, predicate);
+        JPQLQuery<?> countQuery = from.select(taskEntity.count());
+        return countQuery.fetchCount() > 0;
+    }
+    
+    private JPQLQuery<TaskEntity> buildLeftJoin(QTaskEntity taskEntity, Predicate predicate) {
+        Assert.notNull(predicate, "Predicate must not be null!");
+
+        QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
+        Predicate condition = processInstanceEntity.id.eq(taskEntity.processInstanceId);
+        
+        return from(taskEntity).leftJoin(processInstanceEntity).on(condition)
+                .where(predicate);
+    }
 
 }

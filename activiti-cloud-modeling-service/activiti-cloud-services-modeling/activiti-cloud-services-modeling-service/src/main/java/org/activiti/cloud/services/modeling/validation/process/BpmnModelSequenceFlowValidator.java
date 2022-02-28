@@ -28,9 +28,9 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 
 /**
- * Implementation of {@link BpmnModelValidator} for validating Sequence flow when empty source or target references are provided
+ * Implementation of {@link BpmnCommonModelValidator} for validating Sequence flow when empty source or target references are provided
  */
-public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
+public class BpmnModelSequenceFlowValidator implements BpmnCommonModelValidator {
 
     public static final String NO_SOURCE_REF_PROBLEM = "Sequence flow has no source reference";
     public static final String NO_SOURCE_REF_PROBLEM_DESCRIPTION = "Sequence flow [name: '%s', id: '%s'] has to have a source reference";
@@ -38,18 +38,21 @@ public class BpmnModelSequenceFlowValidator implements BpmnModelValidator {
     public static final String NO_TARGET_REF_PROBLEM_DESCRIPTION = "Sequence flow [name: '%s', id: '%s'] has to have a target reference";
     public static final String SEQUENCE_FLOW_VALIDATOR_NAME = "BPMN sequence flow validator";
 
+    private final FlowElementsExtractor flowElementsExtractor;
+
+    public BpmnModelSequenceFlowValidator(FlowElementsExtractor flowElementsExtractor) {
+        this.flowElementsExtractor = flowElementsExtractor;
+    }
+
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
         List<ModelValidationError> errors = new ArrayList<>();
-        getFlowElements(bpmnModel,
-            SequenceFlow.class).forEach(sequenceFlow -> {
-            errors.addAll(validateSequenceFlow(sequenceFlow));
-        });
-
+        flowElementsExtractor.extractFlowElements(bpmnModel, SequenceFlow.class)
+            .forEach(sequenceFlow -> errors.addAll(validateSequenceFlow(sequenceFlow)));
         return errors.stream();
     }
 
-    private List<ModelValidationError> validateSequenceFlow(SequenceFlow sequenceFlow){
+    private List<ModelValidationError> validateSequenceFlow(SequenceFlow sequenceFlow) {
 
         List<ModelValidationError> errors = new ArrayList<>();
         if (StringUtils.isEmpty(sequenceFlow.getSourceRef())) {

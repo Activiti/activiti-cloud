@@ -17,55 +17,51 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import static java.lang.String.format;
 import static org.springframework.util.StringUtils.isEmpty;
-
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContent;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 
 /**
- * Implementation of {@link BpmnModelValidator} vor validating service task implementation
+ * Implementation of {@link BpmnCommonModelValidator} vor validating service task implementation
  */
-public class BpmnModelServiceTaskImplementationValidator implements BpmnModelValidator {
+public class BpmnModelServiceTaskImplementationValidator implements BpmnCommonModelValidator {
 
-    public final String INVALID_SERVICE_IMPLEMENTATION_PROBLEM = "Invalid service implementation";
-    public final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "Invalid service implementation on service '%s'";
-    public final String SERVICE_USER_TASK_VALIDATOR_NAME = "BPMN service task validator";
+    public static final String INVALID_SERVICE_IMPLEMENTATION_PROBLEM = "Invalid service implementation";
+    public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "Invalid service implementation on service '%s'";
+    public static final String SERVICE_USER_TASK_VALIDATOR_NAME = "BPMN service task validator";
 
     private final ConnectorModelType connectorModelType;
 
     private final ConnectorModelContentConverter connectorModelContentConverter;
+    private final FlowElementsExtractor flowElementsExtractor;
 
     public BpmnModelServiceTaskImplementationValidator(ConnectorModelType connectorModelType,
-                                                       ConnectorModelContentConverter connectorModelContentConverter) {
+        ConnectorModelContentConverter connectorModelContentConverter,
+        FlowElementsExtractor flowElementsExtractor) {
         this.connectorModelType = connectorModelType;
         this.connectorModelContentConverter = connectorModelContentConverter;
+        this.flowElementsExtractor = flowElementsExtractor;
     }
 
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
                                                  ValidationContext validationContext) {
         List<String> availableImplementations = getAvailableImplementations(validationContext);
-        //TODO: hardcoded decision table added -> fix this after implementation for decision table will change
-        availableImplementations.add("dmn-connector.EXECUTE_TABLE");
 
-        availableImplementations.add("script.EXECUTE");
-
-        return getFlowElements(bpmnModel,
-                        ServiceTask.class)
+        return flowElementsExtractor.extractFlowElements(bpmnModel, ServiceTask.class).stream()
                 .filter(serviceTask -> serviceTask.getImplementation() != null)
-                .map(serviceTask -> validateServiceTaskImplementation(serviceTask,
-                                                                      availableImplementations))
+                .map(serviceTask -> validateServiceTaskImplementation(serviceTask, availableImplementations))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
     }
@@ -102,16 +98,18 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
     }
 
     private Optional<ModelValidationError> validateServiceTaskImplementation(ServiceTask serviceTask,
-                                                                             List<String> availableImplementations) {
-
-        return availableImplementations
-                .stream()
-                .filter(implementation -> implementation.equals(serviceTask.getImplementation()))
-                .findFirst()
-                .map(implementation -> Optional.<ModelValidationError>empty())
-                .orElseGet(() -> Optional.of(
-                    new ModelValidationError(INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
+            List<String> availableImplementations) {
+        if (isValidImplementation(serviceTask.getImplementation(), availableImplementations)) {
+            return Optional.<ModelValidationError>empty();
+        }
+        return Optional.of(
+                new ModelValidationError(INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
                         format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
-                            serviceTask.getId()), SERVICE_USER_TASK_VALIDATOR_NAME)));
+                                serviceTask.getId()), SERVICE_USER_TASK_VALIDATOR_NAME));
+    }
+
+    private boolean isValidImplementation(String implementation, List<String> availableImplementations) {
+        return availableImplementations.contains(implementation) || Arrays.stream(ServiceTaskImplementationType.values())
+                .anyMatch(serviceImplementation -> implementation.startsWith(serviceImplementation.getPrefix()));
     }
 }

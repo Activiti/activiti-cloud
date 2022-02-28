@@ -17,17 +17,13 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -35,6 +31,13 @@ import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.support.MessageBuilder;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -62,6 +65,7 @@ public class ServiceTaskConsumerHandler {
     private final BinderAwareChannelResolver resolver;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ObjectMapper objectMapper;
+    private final String destinationSeparator;
 
     private final AtomicInteger currentMealIndex = new AtomicInteger(0);
     private List<String> meals = Arrays.asList("pizza", "pasta");
@@ -70,10 +74,12 @@ public class ServiceTaskConsumerHandler {
     @Autowired
     public ServiceTaskConsumerHandler(BinderAwareChannelResolver resolver,
         RuntimeBundleProperties runtimeBundleProperties,
-        ObjectMapper objectMapper) {
+        ObjectMapper objectMapper,
+        @Value("${activiti.cloud.messaging.destination-separator}") String destinationSeparator) {
         this.resolver = resolver;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.objectMapper = objectMapper;
+        this.destinationSeparator = destinationSeparator;
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
@@ -110,8 +116,11 @@ public class ServiceTaskConsumerHandler {
             integrationContext);
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult)
             .build();
+
+        String destination = integrationRequest.getResultDestination();
+
         resolver
-            .resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName())
+            .resolveDestination(destination)
             .send(message);
     }
 
@@ -242,6 +251,13 @@ public class ServiceTaskConsumerHandler {
         integrationContext.addOutBoundVariable("meal", meals.get(remainder));
         integrationContext.addOutBoundVariable("size", sizes.get(remainder));
 
+        sendIntegrationResult(integrationRequest, integrationContext);
+    }
+
+    @StreamListener(value = ConnectorIntegrationChannels.VALUE_PROCESSOR_CONSUMER)
+    public void valueProcessorConnector(IntegrationRequest integrationRequest) {
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        integrationContext.addOutBoundVariable("providedValue", integrationContext.getInBoundVariable("input"));
         sendIntegrationResult(integrationRequest, integrationContext);
     }
 }

@@ -15,33 +15,22 @@
  */
 package org.activiti.cloud.services.modeling.validation;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.activiti.cloud.modeling.api.ModelValidationError;
-import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static java.lang.String.format;
 
 /**
  * DNS label validator
  */
-public interface DNSNameValidator extends ModelValidationErrorProducer {
+public interface DNSNameValidator extends NameValidator {
 
-    int NAME_MAX_LENGTH = 26;
     String DNS_LABEL_REGEX = "^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$";
 
     String DNS_NAME_VALIDATOR = "DNS name validator";
-    String INVALID_REQUIRED_NAME_PROBLEM = "The name is required";
-    String INVALID_EMPTY_NAME_PROBLEM = "The name cannot be empty";
-    String INVALID_NAME_LENGTH_PROBLEM = "The name length cannot be greater than " + NAME_MAX_LENGTH;
     String INVALID_DNS_NAME_PROBLEM = "The name is not a valid DNS name";
 
-    String INVALID_REQUIRED_NAME_DESCRIPTION = "The %s name is required";
-    String INVALID_EMPTY_NAME_DESCRIPTION = "The %s name cannot be empty";
-    String INVALID_NAME_LENGTH_DESCRIPTION = "The %s name length cannot be greater than " + NAME_MAX_LENGTH + ": '%s'";
     String INVALID_DNS_NAME_DESCRIPTION =
             "The %s name should follow DNS-1035 conventions: " +
                     "it must consist of lower case alphanumeric characters or '-', " +
@@ -49,39 +38,16 @@ public interface DNSNameValidator extends ModelValidationErrorProducer {
 
     default Stream<ModelValidationError> validateDNSName(String name,
                                                          String type) {
-        List<ModelValidationError> validationErrors = new ArrayList<>();
-        if (name == null) {
-            validationErrors.add(createModelValidationError(INVALID_REQUIRED_NAME_PROBLEM,
-                                                            format(INVALID_REQUIRED_NAME_DESCRIPTION,
-                                                                   type),
-                                                            DNS_NAME_VALIDATOR,
-                                                            "field.required"));
-        } else {
-            if (isEmpty(name)) {
-                validationErrors.add(createModelValidationError(INVALID_EMPTY_NAME_PROBLEM,
-                                                                format(INVALID_EMPTY_NAME_DESCRIPTION,
-                                                                       type),
-                                                                DNS_NAME_VALIDATOR,
-                                                                "field.empty"));
-            }
-            if (name.length() > NAME_MAX_LENGTH) {
-                validationErrors.add(createModelValidationError(INVALID_NAME_LENGTH_PROBLEM,
-                                                                format(INVALID_NAME_LENGTH_DESCRIPTION,
-                                                                       type,
-                                                                       name),
-                                                                DNS_NAME_VALIDATOR,
-                                                                "length.greater"));
-            }
-            if (!name.matches(DNS_LABEL_REGEX)) {
-                validationErrors.add(createModelValidationError(INVALID_DNS_NAME_PROBLEM,
-                                                                format(INVALID_DNS_NAME_DESCRIPTION,
-                                                                       type,
-                                                                       name),
-                                                                DNS_NAME_VALIDATOR,
-                                                                "regex.mismatch"));
-            }
+        Stream<ModelValidationError> validationErrors = validateName(name, type);
+        if (name != null && !name.matches(DNS_LABEL_REGEX)) {
+            ModelValidationError dnsNameValidatorError = createModelValidationError(INVALID_DNS_NAME_PROBLEM,
+                                                                                   format(INVALID_DNS_NAME_DESCRIPTION,
+                                                                                          type,
+                                                                                          name),
+                                                                                   DNS_NAME_VALIDATOR,
+                                                                                   "regex.mismatch");
+            validationErrors = Stream.concat(validationErrors, Stream.of(dnsNameValidatorError));
         }
-
-        return validationErrors.stream();
+        return validationErrors;
     }
 }

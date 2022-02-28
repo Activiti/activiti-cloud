@@ -29,22 +29,19 @@ public class VariableValue<T> {
 	public T getValue() {
         return value;
     }
-    
-    
+
+
     /**
-     * Encountered Java type [class org.activiti.cloud.services.query.model.VariableValue] for which we could not locate a JavaTypeDescriptor 
-     * and which does not appear to implement equals and/or hashCode.  This can lead to significant performance problems when performing 
-     * equality/dirty checking involving this Java type.  
-     * 
-     * Consider registering a custom JavaTypeDescriptor or at least implementing equals/hashCode. 
-     * 
+     * Encountered Java type [class org.activiti.cloud.services.query.model.VariableValue] for which we could not locate a JavaTypeDescriptor
+     * and which does not appear to implement equals and/or hashCode.  This can lead to significant performance problems when performing
+     * equality/dirty checking involving this Java type.
+     *
+     * Consider registering a custom JavaTypeDescriptor or at least implementing equals/hashCode.
+     *
      */
     @Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		return result;
+		return getClass().hashCode();
 	}
 
 	@Override
@@ -68,5 +65,5 @@ public class VariableValue<T> {
 	public String toString() {
 		return "VariableValue [value=" + value + "]";
 	}
-	
+
 }

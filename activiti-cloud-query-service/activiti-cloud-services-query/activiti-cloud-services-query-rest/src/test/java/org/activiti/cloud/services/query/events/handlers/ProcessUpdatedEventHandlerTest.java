@@ -15,24 +15,10 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,13 +26,24 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 public class ProcessUpdatedEventHandlerTest {
 
     @InjectMocks
     private ProcessUpdatedEventHandler handler;
 
     @Mock
-    private ProcessInstanceRepository processInstanceRepository;
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -59,13 +56,13 @@ public class ProcessUpdatedEventHandlerTest {
         CloudProcessUpdatedEvent event = buildProcessUpdatedEvent();
 
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
+        given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId())).willReturn(currentProcessInstanceEntity);
 
         //when
         handler.handle(event);
 
         //then
-        verify(processInstanceRepository).save(currentProcessInstanceEntity);
+        verify(entityManager).persist(currentProcessInstanceEntity);
         verify(currentProcessInstanceEntity).setBusinessKey(event.getEntity().getBusinessKey());
         verify(currentProcessInstanceEntity).setName(event.getEntity().getName());
         verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
@@ -86,7 +83,7 @@ public class ProcessUpdatedEventHandlerTest {
         CloudProcessUpdatedEvent event = buildProcessUpdatedEvent();
         String id = event.getEntity().getId();
 
-        given(processInstanceRepository.findById(id)).willReturn(Optional.empty());
+        given(entityManager.find(ProcessInstanceEntity.class, id)).willReturn(null);
 
         //then
         //when

@@ -16,12 +16,14 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.task.model.events.CloudTaskUpdatedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = TaskUpdatedEventEntity.TASK_UPDATED_EVENT)
 @DiscriminatorValue(value = TaskUpdatedEventEntity.TASK_UPDATED_EVENT)
+@DynamicInsert
 public class TaskUpdatedEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_UPDATED_EVENT = "TaskUpdatedEvent";
@@ -31,25 +33,6 @@ public class TaskUpdatedEventEntity extends TaskAuditEventEntity {
 
     public TaskUpdatedEventEntity(CloudTaskUpdatedEvent cloudEvent) {
         super(cloudEvent);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
 
     @Override

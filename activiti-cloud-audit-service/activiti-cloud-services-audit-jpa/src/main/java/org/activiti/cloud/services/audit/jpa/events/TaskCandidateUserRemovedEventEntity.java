@@ -19,8 +19,7 @@ import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
-
-import java.util.Objects;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -29,6 +28,7 @@ import javax.persistence.Entity;
 
 @Entity(name = TaskCandidateUserRemovedEventEntity.TASK_CANDIDATE_USER_REMOVED_EVENT)
 @DiscriminatorValue(value = TaskCandidateUserRemovedEventEntity.TASK_CANDIDATE_USER_REMOVED_EVENT)
+@DynamicInsert
 public class TaskCandidateUserRemovedEventEntity extends AuditEventEntity {
 
     protected static final String TASK_CANDIDATE_USER_REMOVED_EVENT = "TaskCandidateUserRemovedEvent";
@@ -36,7 +36,7 @@ public class TaskCandidateUserRemovedEventEntity extends AuditEventEntity {
     @Convert(converter = TaskCandidateUserJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private TaskCandidateUserImpl candidateUser;
-    
+
     public TaskCandidateUserRemovedEventEntity() {
     }
 
@@ -44,36 +44,13 @@ public class TaskCandidateUserRemovedEventEntity extends AuditEventEntity {
         super(cloudEvent);
         setCandidateUser(cloudEvent.getEntity());
     }
-    
+
     public TaskCandidateUser getCandidateUser() {
         return candidateUser;
     }
-    
+
     public void setCandidateUser(TaskCandidateUser candidateUser) {
         this.candidateUser = new TaskCandidateUserImpl(candidateUser.getUserId(),candidateUser.getTaskId());
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(candidateUser);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        TaskCandidateUserRemovedEventEntity other = (TaskCandidateUserRemovedEventEntity) obj;
-        return Objects.equals(candidateUser, other.candidateUser);
     }
 
     @Override

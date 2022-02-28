@@ -15,20 +15,16 @@
  */
 package org.activiti.cloud.services.test.containers;
 
-import java.util.stream.Stream;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.lifecycle.Startables;
 
 public class RabbitMQContainerApplicationInitializer implements
-    ApplicationContextInitializer<ConfigurableApplicationContext> {
+        ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management")
-        .withReuse(true);
+    private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.8.9-management-alpine")
+            .withReuse(true);
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
@@ -37,10 +33,17 @@ public class RabbitMQContainerApplicationInitializer implements
             rabbitMQContainer.start();
         }
 
-        TestPropertyValues.of(
-            "spring.rabbitmq.host=" + rabbitMQContainer.getContainerIpAddress(),
-            "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort()
-        ).applyTo(context.getEnvironment());
+        TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
 
+    }
+
+    public static RabbitMQContainer getContainer() {
+        return rabbitMQContainer;
+    }
+
+    public static String[] getContainerProperties() {
+        return new String[] {
+            "spring.rabbitmq.host=" + rabbitMQContainer.getContainerIpAddress(),
+            "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort()};
     }
 }

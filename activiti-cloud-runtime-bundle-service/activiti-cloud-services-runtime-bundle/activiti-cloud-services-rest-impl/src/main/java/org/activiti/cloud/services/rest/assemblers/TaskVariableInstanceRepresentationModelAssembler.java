@@ -41,7 +41,7 @@ public class TaskVariableInstanceRepresentationModelAssembler implements Represe
         Link globalVariables = linkTo(methodOn(TaskVariableControllerImpl.class).getVariables(cloudVariableInstance.getTaskId())).withRel("variables");
         Link taskRel = linkTo(methodOn(TaskControllerImpl.class).getTaskById(cloudVariableInstance.getTaskId())).withRel("task");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return new EntityModel<>(cloudVariableInstance,
+        return EntityModel.of(cloudVariableInstance,
                               globalVariables,
                               taskRel,
                               homeLink);

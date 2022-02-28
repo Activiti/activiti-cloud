@@ -15,22 +15,21 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.UUID;
 
 import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +48,7 @@ public class TaskEntityCancelledEventHandlerTest {
     private TaskCancelledEventHandler handler;
 
     @Mock
-    private TaskRepository taskRepository;
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -62,13 +61,13 @@ public class TaskEntityCancelledEventHandlerTest {
         CloudTaskCancelledEvent event = buildTaskCancelledEvent();
         String taskId = event.getEntity().getId();
         TaskEntity taskEntity = aTask().withId(taskId).build();
-        given(taskRepository.findById(taskId)).willReturn(Optional.of(taskEntity));
+        given(entityManager.find(TaskEntity.class, taskId)).willReturn(taskEntity);
 
         //when
         handler.handle(event);
 
         //then
-        verify(taskRepository).save(taskEntity);
+        verify(entityManager).persist(taskEntity);
         verify(taskEntity).setStatus(Task.TaskStatus.CANCELLED);
         verify(taskEntity).setLastModified(any(Date.class));
     }
@@ -85,7 +84,7 @@ public class TaskEntityCancelledEventHandlerTest {
         //given
         CloudTaskCancelledEvent event = buildTaskCancelledEvent();
         String taskId = event.getEntity().getId();
-        given(taskRepository.findById(taskId)).willReturn(Optional.empty());
+        given(entityManager.find(TaskEntity.class, taskId)).willReturn(null);
 
         //then
         //when

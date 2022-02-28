@@ -16,40 +16,23 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageReceivedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = MessageReceivedAuditEventEntity.MESSAGE_RECEIVED_EVENT)
 @DiscriminatorValue(value = MessageReceivedAuditEventEntity.MESSAGE_RECEIVED_EVENT)
+@DynamicInsert
 public class MessageReceivedAuditEventEntity extends MessageAuditEventEntity {
 
     protected static final String MESSAGE_RECEIVED_EVENT = "MessageReceivedEvent";
-    
+
     public MessageReceivedAuditEventEntity() {
     }
-    
+
     public MessageReceivedAuditEventEntity(CloudBPMNMessageReceivedEvent cloudEvent) {
         super(cloudEvent);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -57,5 +40,5 @@ public class MessageReceivedAuditEventEntity extends MessageAuditEventEntity {
         StringBuilder builder = new StringBuilder();
         builder.append("MessageReceivedAuditEventEntity [toString()=").append(super.toString()).append("]");
         return builder.toString();
-    }    
+    }
 }

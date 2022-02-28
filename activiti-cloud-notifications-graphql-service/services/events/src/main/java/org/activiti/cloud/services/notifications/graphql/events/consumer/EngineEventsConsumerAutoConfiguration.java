@@ -15,36 +15,35 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.activiti.cloud.services.notifications.graphql.events.transformer.EngineEventsTransformer;
 import org.activiti.cloud.services.notifications.graphql.events.transformer.Transformer;
-import org.reactivestreams.Subscriber;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
-
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.extra.processor.TopicProcessor;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Notification Gateway configuration that enables messaging channel bindings
  * and scans for MessagingGateway on interfaces to create GatewayProxyFactoryBeans.
- *
  */
 @Configuration
 @EnableBinding(EngineEventsConsumerChannels.class)
@@ -59,6 +58,7 @@ public class EngineEventsConsumerAutoConfiguration {
     @Configuration
     public static class DefaultEngineEventsConsumerConfiguration {
 
+        public static final String ENGINE_EVENTS_FLUX_SCHEDULER = "engineEventsScheduler";
         private final EngineEventsConsumerProperties properties;
 
         @Autowired
@@ -82,65 +82,34 @@ public class EngineEventsConsumerAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public EngineEventsConsumerMessageHandler engineEventsMessageHandler(Transformer engineEventsTransformer,
-                                                                             FluxSink<Message<List<EngineEvent>>> engineEventsSink) {
-            return new EngineEventsConsumerMessageHandler(engineEventsTransformer, engineEventsSink);
-        }
-
-    }
-
-    @Configuration
-    public static class EngineEventsFluxProcessorConfiguration implements SmartLifecycle {
-
-        private final List<Subscriber<Message<List<EngineEvent>>>> subscribers = new ArrayList<>();
-        private boolean running;
-
-        private TopicProcessor<Message<List<EngineEvent>>> engineEventsProcessor = TopicProcessor.<Message<List<EngineEvent>>>builder()
-                                                                                                 .autoCancel(false)
-                                                                                                 .share(true)
-                                                                                                 .bufferSize(1024)
-                                                                                                 .build();
-        @Autowired
-        public EngineEventsFluxProcessorConfiguration() {
-        }
-
-        @Autowired(required = false)
-        public void setSubscribers(List<Subscriber<Message<List<EngineEvent>>>> subscribers) {
-            this.subscribers.addAll(subscribers);
+        public EngineEventsConsumerMessageHandler engineEventsMessageHandler(Transformer engineEventsTransformer) {
+            return new EngineEventsConsumerMessageHandler(engineEventsTransformer);
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public Flux<Message<List<EngineEvent>>> engineEventsFlux() {
-            return engineEventsProcessor.publish()
-                                        .autoConnect(0);
+        public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(EngineEventsConsumerMessageHandler engineEventsMessageHandler) {
+            return IntegrationFlows.from(EngineEventsConsumerChannels.SOURCE)
+                                   .log(LoggingHandler.Level.DEBUG)
+                                   .transform(engineEventsMessageHandler)
+                                   .toReactivePublisher();
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public FluxSink<Message<List<EngineEvent>>> engineEventsSink() {
-            return engineEventsProcessor.sink();
+        public Flux<Message<List<EngineEvent>>> engineEventsFlux(Publisher<Message<List<EngineEvent>>> engineEventsPublisher,
+                                                                 Scheduler engineEventsScheduler) {
+            return Flux.from(engineEventsPublisher)
+                       .publish()
+                       .autoConnect(0)
+                       .share()
+                       .publishOn(engineEventsScheduler);
         }
 
-        @Override
-        public void start() {
-            subscribers.forEach(s -> engineEventsProcessor.subscribe(s));
-            running = true;
-        }
-
-        @Override
-        public void stop() {
-            try {
-                engineEventsProcessor.onComplete();
-            } finally {
-                running = false;
-            }
-        }
-
-        @Override
-        public boolean isRunning() {
-            return running;
+        @Bean
+        @ConditionalOnMissingBean(name = ENGINE_EVENTS_FLUX_SCHEDULER)
+        public Scheduler engineEventsScheduler() {
+            return Schedulers.boundedElastic();
         }
     }
-
 }

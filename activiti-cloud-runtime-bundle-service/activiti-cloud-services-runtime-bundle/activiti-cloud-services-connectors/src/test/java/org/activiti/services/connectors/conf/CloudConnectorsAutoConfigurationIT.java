@@ -15,9 +15,6 @@
  */
 package org.activiti.services.connectors.conf;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -31,6 +28,7 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -40,6 +38,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
+
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
@@ -74,6 +78,13 @@ public class CloudConnectorsAutoConfigurationIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private ConnectorImplementationsProvider connectorImplementationsProvider;
+
+    @BeforeEach
+    public void beforeEach() {
+        when(connectorImplementationsProvider.getImplementations()).thenReturn(Collections.emptyList());
+    }
 
     @Test
     public void shouldProvideMQServiceTaskBehaviorBean() {

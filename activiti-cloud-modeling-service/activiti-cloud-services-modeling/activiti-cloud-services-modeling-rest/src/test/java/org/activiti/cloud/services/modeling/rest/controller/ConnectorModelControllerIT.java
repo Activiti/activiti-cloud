@@ -109,9 +109,8 @@ public class ConnectorModelControllerIT {
                 .content(objectMapper.writeValueAsString(connectorModel(""))));
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.empty", "regex.mismatch")
-            .hasValidationErrorMessages("The model name cannot be empty",
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: ''");
+        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.empty")
+            .hasValidationErrorMessages("The model name cannot be empty");
     }
 
     @Test
@@ -124,39 +123,30 @@ public class ConnectorModelControllerIT {
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn()).isValidationException()
-            .hasValidationErrorCodes("length.greater", "regex.mismatch")
-            .hasValidationErrorMessages("The model name length cannot be greater than 26: '123456789_123456789_1234567'",
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: '123456789_123456789_1234567'");
+            .hasValidationErrorCodes("length.greater")
+            .hasValidationErrorMessages("The model name length cannot be greater than 26: '123456789_123456789_1234567'");
     }
 
     @Test
-    public void should_throwBadNameException_when_creatingConnectorModelWithNameWithUnderscore() throws Exception {
+    public void should_create_when_creatingConnectorModelWithNameWithUnderscore() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         ResultActions resultActions = mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(connectorModel("name_with_underscore"))));
 
-        resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException()
-            .hasValidationErrorCodes("regex.mismatch")
-            .hasValidationErrorMessages(
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'name_with_underscore'");
+        resultActions.andExpect(status().isCreated());
     }
 
     @Test
-    public void should_throwBadNameException_when_creatingConnectorModelWithNameWithUppercase() throws Exception {
+    public void should_create_when_creatingConnectorModelWithNameWithUppercase() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         ResultActions resultActions = mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(connectorModel("NameWithUppercase"))));
 
-        resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException()
-            .hasValidationErrorCodes("regex.mismatch")
-            .hasValidationErrorMessages(
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'NameWithUppercase'");
+        resultActions.andExpect(status().isCreated());
     }
 
 
@@ -192,9 +182,8 @@ public class ConnectorModelControllerIT {
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn()).isValidationException()
-            .hasValidationErrorCodes("field.empty", "regex.mismatch")
-            .hasValidationErrorMessages("The model name cannot be empty",
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: ''");
+            .hasValidationErrorCodes("field.empty")
+            .hasValidationErrorMessages("The model name cannot be empty");
     }
 
     @Test
@@ -207,38 +196,30 @@ public class ConnectorModelControllerIT {
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn()).isValidationException()
-            .hasValidationErrorCodes("regex.mismatch")
+            .hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: '123456789_123456789_1234567'");
+                "The model name length cannot be greater than 26: '123456789_123456789_1234567'");
     }
 
     @Test
-    public void should_throwBadNameException_when_updatingConnectorModelWithNameWithUnderscore() throws Exception {
+    public void should_update_when_updatingConnectorModelWithNameWithUnderscore() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         ResultActions resultActions = mockMvc
             .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(connectorModel("name_with_underscore"))));
 
-        resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException()
-            .hasValidationErrorCodes("regex.mismatch")
-            .hasValidationErrorMessages(
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'name_with_underscore'");
+        resultActions.andExpect(status().isOk());
     }
 
     @Test
-    public void should_throwBadNameException_when_updatingConnectorModelWithNameWithUppercase() throws Exception {
+    public void should_update_when_updatingConnectorModelWithNameWithUppercase() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         ResultActions resultActions = mockMvc
             .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(connectorModel("NameWithUppercase"))));
 
-        resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException()
-            .hasValidationErrorCodes("regex.mismatch")
-            .hasValidationErrorMessages(
-                "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'NameWithUppercase'");
+        resultActions.andExpect(status().isOk());
     }
 }

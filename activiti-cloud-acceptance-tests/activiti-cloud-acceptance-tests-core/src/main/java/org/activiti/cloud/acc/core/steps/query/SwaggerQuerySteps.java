@@ -28,7 +28,7 @@ public class SwaggerQuerySteps {
 
     @Step
     public String getSwaggerSpecification(){
-        return querySwaggerService.getSwaggerSpecification();
+        return querySwaggerService.getSwaggerSpecification("Query");
     }
 
 }

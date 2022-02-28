@@ -59,8 +59,7 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
     @Column
     private byte[] content;
 
-    @Lob
-    @Column
+    @Column(columnDefinition = "TEXT")
     @Convert(converter = ExtensionsJsonConverter.class)
     private Map<String,Object> extensions;
 

@@ -15,21 +15,6 @@
  */
 package org.activiti.cloud.starter.tests;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.Task.TaskStatus;
@@ -73,6 +58,21 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
@@ -81,7 +81,9 @@ public class QueryTasksIT {
 
     private static final String TASKS_URL = "/v1/tasks";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks";
-
+    private static final String HRUSER = "hruser";
+    private static final String TESTUSER = "testuser";
+    
     private static final ParameterizedTypeReference<PagedModel<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<Task>>() {
     };
 
@@ -129,7 +131,9 @@ public class QueryTasksIT {
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
         taskEventContainedBuilder = new TaskEventContainedBuilder(eventsAggregator);
         variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
-        runningProcessInstance = processInstanceBuilder.aRunningProcessInstance("My running instance");
+        runningProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator",
+                                                                                             TESTUSER);
+        keycloakTokenProducer.setKeycloakTestUser(TESTUSER);
     }
 
     @AfterEach
@@ -741,14 +745,18 @@ public class QueryTasksIT {
         keycloakTokenProducer.setKeycloakTestUser("testuser");
 
         //when
-        ResponseEntity<List<String>> responseEntity = getCandidateUsers(createdTask.getId());
+        await().untilAsserted(() -> {
+              ResponseEntity<List<String>> responseEntity = getCandidateUsers(createdTask.getId());
 
-        //then
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().size()).isEqualTo(1);
-        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+              //then
+              assertThat(responseEntity).isNotNull();
+              assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+              assertThat(responseEntity.getBody()).isNotNull();
+              assertThat(responseEntity.getBody()
+                                       .size()).isEqualTo(1);
+              assertThat(responseEntity.getBody()
+                                       .get(0)).isEqualTo("testuser");
+        });
 
         //Check adding user candidate
         //when
@@ -757,14 +765,21 @@ public class QueryTasksIT {
         producer.send(new CloudTaskCandidateUserAddedEventImpl(addCandidateUser));
 
         //then
-        responseEntity = getCandidateUsers(createdTask.getId());
+        await().untilAsserted(() -> {
+              ResponseEntity<List<String>> responseEntity = getCandidateUsers(createdTask.getId());
 
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().size()).isEqualTo(2);
-        assertThat(responseEntity.getBody().get(0)).isIn("hruser","testuser");
-        assertThat(responseEntity.getBody().get(1)).isIn("hruser","testuser");
+              assertThat(responseEntity).isNotNull();
+              assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+              assertThat(responseEntity.getBody()).isNotNull();
+              assertThat(responseEntity.getBody()
+                                       .size()).isEqualTo(2);
+              assertThat(responseEntity.getBody()
+                                       .get(0)).isIn("hruser",
+                                                     "testuser");
+              assertThat(responseEntity.getBody()
+                                       .get(1)).isIn("hruser",
+                                                     "testuser");
+        });
 
         //Check deleting user candidate
         //when
@@ -773,13 +788,17 @@ public class QueryTasksIT {
         producer.send(new CloudTaskCandidateUserRemovedEventImpl(deleteCandidateUser));
 
         //then
-        responseEntity = getCandidateUsers(createdTask.getId());
+        await().untilAsserted(() -> {
+            ResponseEntity<List<String>> responseEntity = getCandidateUsers(createdTask.getId());
 
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().size()).isEqualTo(1);
-        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody()
+                                     .size()).isEqualTo(1);
+            assertThat(responseEntity.getBody()
+                                     .get(0)).isEqualTo("testuser");
+        });
 
     }
 
@@ -794,16 +813,20 @@ public class QueryTasksIT {
         keycloakTokenProducer.setKeycloakTestUser("testuser");
 
         //when
-        ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
-        ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
+        await().untilAsserted(() -> {
+              ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
+              ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
 
-        //then
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().size()).isEqualTo(1);
-        assertThat(responseEntity.getBody()).containsExactly("testgroup");
-        assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
+              //then
+              assertThat(responseEntity).isNotNull();
+              assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+              assertThat(responseEntity.getBody()).isNotNull();
+              assertThat(responseEntity.getBody()
+                                       .size()).isEqualTo(1);
+              assertThat(responseEntity.getBody()).containsExactly("testgroup");
+              assertThat(taskResponseEntity.getBody()
+                                           .getCandidateGroups()).containsExactly("testgroup");
+        });
 
         //Check adding group candidate
         //when
@@ -812,15 +835,21 @@ public class QueryTasksIT {
         producer.send(new CloudTaskCandidateGroupAddedEventImpl(addCandidateGroup));
 
         //then
-        responseEntity = getCandidateGroups(createdTask.getId());
-        taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
+        await().untilAsserted(() -> {
+              ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
+              ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
 
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().size()).isEqualTo(2);
-        assertThat(responseEntity.getBody()).containsExactlyInAnyOrder("hrgroup","testgroup");
-        assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactlyInAnyOrder("hrgroup","testgroup");
+              assertThat(responseEntity).isNotNull();
+              assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+              assertThat(responseEntity.getBody()).isNotNull();
+              assertThat(responseEntity.getBody()
+                                       .size()).isEqualTo(2);
+              assertThat(responseEntity.getBody()).containsExactlyInAnyOrder("hrgroup",
+                                                                             "testgroup");
+              assertThat(taskResponseEntity.getBody()
+                                           .getCandidateGroups()).containsExactlyInAnyOrder("hrgroup",
+                                                                                            "testgroup");
+        });
 
         //Check deleting group candidate
         //when
@@ -829,21 +858,24 @@ public class QueryTasksIT {
         producer.send(new CloudTaskCandidateGroupRemovedEventImpl(deleteCandidateGroup));
 
         //then
-        responseEntity = getCandidateGroups(createdTask.getId());
-        taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
+        await().untilAsserted(() -> {
+            ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
+            ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
 
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().size()).isEqualTo(1);
-        assertThat(responseEntity.getBody()).containsExactly("testgroup");
-        assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody()
+                                     .size()).isEqualTo(1);
+            assertThat(responseEntity.getBody()).containsExactly("testgroup");
+            assertThat(taskResponseEntity.getBody()
+                                         .getCandidateGroups()).containsExactly("testgroup");
+        });
     }
 
     @Test
     public void adminShouldAssignTask() {
         //given
-              //given
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task",
                                                                   runningProcessInstance);
         eventsAggregator.sendAll();
@@ -1419,17 +1451,21 @@ public class QueryTasksIT {
         keycloakTokenProducer.setKeycloakTestUser("testuser");
 
         //when
-        ResponseEntity<List<String>> responseEntity = getCandidateUsers(task.getId());
-        ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
+        await().untilAsserted(() -> {
+              ResponseEntity<List<String>> responseEntity = getCandidateUsers(task.getId());
+              ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
-        //then
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody()).hasSize(1);
-        assertThat(responseEntity.getBody()).containsExactly("testuser");
-        assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
-        assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
+              //then
+              assertThat(responseEntity).isNotNull();
+              assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+              assertThat(responseEntity.getBody()).isNotNull();
+              assertThat(responseEntity.getBody()).hasSize(1);
+              assertThat(responseEntity.getBody()).containsExactly("testuser");
+              assertThat(taskResponseEntity.getBody()
+                                           .getCandidateUsers()).hasSize(1);
+              assertThat(taskResponseEntity.getBody()
+                                           .getCandidateUsers()).containsExactly("testuser");
+          });
 
         //when
         ((TaskImpl)task).setAssignee("testuser");
@@ -1437,17 +1473,21 @@ public class QueryTasksIT {
         eventsAggregator.addEvents(new CloudTaskAssignedEventImpl(task));
         eventsAggregator.sendAll();
 
-        responseEntity = getCandidateUsers(task.getId());
-        taskResponseEntity = executeRequestGetTasksById(task.getId());
+        await().untilAsserted(() -> {
+            ResponseEntity<List<String>> responseEntity = getCandidateUsers(task.getId());
+            ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
-        //then
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody()).hasSize(1);
-        assertThat(responseEntity.getBody()).containsExactly("testuser");
-        assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
-        assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody()).hasSize(1);
+            assertThat(responseEntity.getBody()).containsExactly("testuser");
+            assertThat(taskResponseEntity.getBody()
+                                         .getCandidateUsers()).hasSize(1);
+            assertThat(taskResponseEntity.getBody()
+                                         .getCandidateUsers()).containsExactly("testuser");
+        });
 
 
         ((TaskImpl)task).setStatus(Task.TaskStatus.COMPLETED);
@@ -1459,17 +1499,21 @@ public class QueryTasksIT {
         producer.send(new CloudTaskCandidateUserRemovedEventImpl(candidateUser));
 
         //then
-        responseEntity = getCandidateUsers(task.getId());
-        taskResponseEntity = executeRequestGetTasksById(task.getId());
+        await().untilAsserted(() -> {
+            ResponseEntity<List<String>> responseEntity = getCandidateUsers(task.getId());
+            ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
-        //then
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody()).hasSize(1);
-        assertThat(responseEntity.getBody()).containsExactly("testuser");
-        assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
-        assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody()).hasSize(1);
+            assertThat(responseEntity.getBody()).containsExactly("testuser");
+            assertThat(taskResponseEntity.getBody()
+                                         .getCandidateUsers()).hasSize(1);
+            assertThat(taskResponseEntity.getBody()
+                                         .getCandidateUsers()).containsExactly("testuser");
+        });
 
     }
 
@@ -1595,7 +1639,165 @@ public class QueryTasksIT {
                 .extracting(Task::getId)
                 .containsExactly(task1.getId());
         });
+    }
 
+    @Test
+    public void should_notGetTasks_by_ProcessInstance_userIsNotInvolved() {
+        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                         "fakeUser", 
+                                                         runningProcessInstance);
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks).isEmpty();
+        });
+    }
+    
+    @Test
+    public void should_getTasks_by_ProcessInstance_when_userIsCandidate() {
+        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                                      TESTUSER, 
+                                                                      runningProcessInstance);
+
+        Task task2 = taskEventContainedBuilder.aTaskWithUserCandidate("Task2", 
+                                                                      HRUSER, 
+                                                                      runningProcessInstance);
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
+        });
+
+        assertCanRetrieveTaskById(task1.getId());
+        assertCanRetrieveTaskById(task2.getId());
+    }
+
+    @Test
+    public void should_getTasks_by_ProcessInstance_when_userIsAssignee() {
+        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                                      TESTUSER, 
+                                                                      runningProcessInstance);
+
+        Task task2 = taskEventContainedBuilder.anAssignedTask("Task2", 
+                                                              HRUSER, 
+                                                              runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
+        });
+
+        assertCanRetrieveTaskById(task1.getId());
+        assertCanRetrieveTaskById(task2.getId());
+    }
+
+    @Test
+    public void should_getTasks_by_ProcessInstance_when_userIsInGroupCandidate() {
+        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                                      TESTUSER, 
+                                                                      runningProcessInstance);
+
+        Task task2 = taskEventContainedBuilder.aTaskWithGroupCandidate("Task2", 
+                                                                       "hr", 
+                                                                       runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
+        });
+        assertCanRetrieveTaskById(task1.getId());
+        assertCanRetrieveTaskById(task2.getId());
+    }
+
+    @Test
+    public void should_getTasks_by_ProcessInstance_when_userIsInitiator() {
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                                      HRUSER, 
+                                                                      runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.size()).isEqualTo(1);
+            assertThat(tasks).contains(task1);
+        });
+        assertCanRetrieveTaskById(task1.getId());
+    }
+
+
+    private void assertCanRetrieveTaskById(String taskId) {
+        await().untilAsserted(() -> {
+
+            ResponseEntity<Task> responseEntity = executeRequestGetTasksById(taskId);
+
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Task task = responseEntity.getBody();
+            assertThat(task.getId()).isEqualTo(taskId);
+        });
     }
 
     @Test

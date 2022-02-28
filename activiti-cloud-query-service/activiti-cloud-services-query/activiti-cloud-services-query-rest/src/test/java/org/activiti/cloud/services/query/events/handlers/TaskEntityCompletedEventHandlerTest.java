@@ -15,21 +15,20 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.UUID;
 
 import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +44,7 @@ public class TaskEntityCompletedEventHandlerTest {
     private TaskCompletedEventHandler handler;
 
     @Mock
-    private TaskRepository taskRepository;
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -63,13 +62,13 @@ public class TaskEntityCompletedEventHandlerTest {
                                     .withCompletedDate(new Date())
                                     .build();
 
-        given(taskRepository.findById(taskId)).willReturn(Optional.of(eventTaskEntity));
+        given(entityManager.find(TaskEntity.class, taskId)).willReturn(eventTaskEntity);
 
         //when
         handler.handle(event);
 
         //then
-        verify(taskRepository).save(eventTaskEntity);
+        verify(entityManager).persist(eventTaskEntity);
         verify(eventTaskEntity).setStatus(Task.TaskStatus.COMPLETED);
         verify(eventTaskEntity).setLastModified(any(Date.class));
     }
@@ -85,7 +84,7 @@ public class TaskEntityCompletedEventHandlerTest {
         //given
         CloudTaskCompletedEventImpl event = buildTaskCompletedEvent();
         String taskId = event.getEntity().getId();
-        given(taskRepository.findById(taskId)).willReturn(Optional.empty());
+        given(entityManager.find(TaskEntity.class, taskId)).willReturn(null);
 
         //then
         //when

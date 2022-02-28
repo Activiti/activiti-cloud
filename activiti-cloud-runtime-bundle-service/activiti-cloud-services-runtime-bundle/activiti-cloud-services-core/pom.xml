@@ -39,6 +39,10 @@
       <artifactId>activiti-cloud-services-events</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-config</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-api-model-shared</artifactId>
     </dependency>
@@ -139,6 +143,11 @@
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-api-task-runtime-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-stream-test-support</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

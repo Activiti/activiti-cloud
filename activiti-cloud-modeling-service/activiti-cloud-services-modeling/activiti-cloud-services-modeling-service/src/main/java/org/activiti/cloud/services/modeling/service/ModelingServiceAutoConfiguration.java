@@ -15,8 +15,10 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
@@ -35,6 +37,7 @@ import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -109,4 +112,21 @@ public class ModelingServiceAutoConfiguration {
 
     }
 
+    @Bean
+    public SchemaProvider processExtensionModelSchemaProvider(
+        @Value("${activiti.validation.process-extensions-schema:schema/process-extensions-schema.json}") String processExtensionSchemaFileName) {
+        return new SchemaProvider(SchemaService.PROCESS_EXTENSION, processExtensionSchemaFileName);
+    }
+
+    @Bean
+    public SchemaProvider connectorModelSchemaProvider(
+        @Value("${activiti.validation.connector-schema:schema/connector-schema.json}") String connectorSchemaFileName) {
+        return new SchemaProvider(ConnectorModelType.NAME, connectorSchemaFileName);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SchemaService schemaService(List<SchemaProvider> schemaProviders) {
+        return new SchemaService(schemaProviders);
+    }
 }

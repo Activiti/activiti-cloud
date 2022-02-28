@@ -15,13 +15,9 @@
  */
 package org.activiti.cloud.starter.tests.swagger;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import java.io.File;
-import java.nio.file.Files;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
@@ -29,10 +25,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.File;
+import java.nio.file.Files;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 @SpringBootTest
+@DirtiesContext
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class QuerySwaggerITSupport {
@@ -48,7 +51,7 @@ public class QuerySwaggerITSupport {
      */
     @Test
     public void generateSwagger() throws Exception {
-        mockMvc.perform(get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v3/api-docs?group=Query").accept(MediaType.APPLICATION_JSON))
             .andDo((result) -> {
                 JsonNode jsonNodeTree = objectMapper.readTree(result.getResponse().getContentAsByteArray());
                 Files.write(new File("target/swagger.json").toPath(),

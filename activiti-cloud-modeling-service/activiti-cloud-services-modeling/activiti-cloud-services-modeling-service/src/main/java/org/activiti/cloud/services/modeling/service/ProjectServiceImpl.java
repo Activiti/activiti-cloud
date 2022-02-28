@@ -19,6 +19,8 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -155,8 +157,12 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Override
     public void deleteProject(Project project) {
-        modelService.getAllModels(project).stream().filter(model -> ModelScope.PROJECT.equals(model.getScope())).forEach(modelService::deleteModel);
+        deleteAllModelsInProject(project);
         projectRepository.deleteProject(project);
+    }
+
+    private void deleteAllModelsInProject(Project project) {
+        modelService.getAllModels(project).stream().filter(model -> ModelScope.PROJECT.equals(model.getScope())).forEach(modelService::deleteModel);
     }
 
     /**
@@ -199,10 +205,11 @@ public class ProjectServiceImpl implements ProjectService {
         Project copiedProject = projectRepository.copyProject(projectToCopy, newProjectName);
         List<Model> models = modelService.getAllModels(projectToCopy);
 
-        models.forEach(model -> {
+        models.stream().sorted(MODEL_TYPE_COMPARATOR).forEach(model -> {
             modelService.copyModel(model, copiedProject);
         });
 
+        modelService.cleanModelIdList();
         return copiedProject;
     }
 
@@ -454,7 +461,12 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() ->
                         new ImportProjectException("No valid project entry found to import"));
 
-        projectHolder.getModelJsonFiles().forEach(modelJsonFile -> {
+        importModelsInProjectHolderToProject(projectHolder, project);
+        return project;
+    }
+
+    private void importModelsInProjectHolderToProject(ProjectHolder projectHolder, Project project) {
+        projectHolder.getModelJsonFiles().stream().sorted(MODEL_JSON_FILE_TYPE_COMPARATOR).forEach(modelJsonFile -> {
             importJSONModelFiles(projectHolder, project, modelJsonFile);
         });
 
@@ -465,7 +477,6 @@ public class ProjectServiceImpl implements ProjectService {
         createdProcesses.keySet().forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
 
         modelService.cleanModelIdList();
-        return project;
     }
 
     private ProjectHolder getProjectHolderFromZipStream(ZipStream stream, String name) throws IOException {
@@ -475,5 +486,20 @@ public class ProjectServiceImpl implements ProjectService {
                 .ifPresent(fileContent -> convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
 
         return projectHolder;
+    }
+
+    @Override
+    public Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException {
+        ProjectHolder projectHolder = getProjectHolderFromZipStream(ZipStream.of(inputStream), project.getName());
+
+        if(projectHolder.getProjectMetadata().isEmpty()) {
+            throw new ImportProjectException("No valid project entry found to import");
+        }
+
+        deleteAllModelsInProject(project);
+
+        importModelsInProjectHolderToProject(projectHolder, project);
+
+        return project;
     }
 }

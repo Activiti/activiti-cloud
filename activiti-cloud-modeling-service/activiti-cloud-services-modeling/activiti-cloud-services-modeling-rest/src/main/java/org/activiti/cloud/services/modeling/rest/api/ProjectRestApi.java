@@ -15,27 +15,19 @@
  */
 package org.activiti.cloud.services.modeling.rest.api;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.modeling.api.Project;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
 import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.PROJECTS;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
@@ -48,7 +40,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
  * Controller for {@link Project} resources.
  */
 @RestController
-@Api(tags = PROJECTS, description = "Retrieve and manage project definitions")
+@Tag(name = PROJECTS, description = "Retrieve and manage project definitions")
 @RequestMapping(path = "/v1", produces = {HAL_JSON_VALUE, APPLICATION_JSON_VALUE})
 public interface ProjectRestApi {
 
@@ -83,107 +75,110 @@ public interface ProjectRestApi {
 
     String PROJECT_NAME_COPY_DESCR = "The name of the project that will replace the original name of the project";
 
+    String PROJECT_FILTERS_PARAM_DESCR = "The filter name to filter the returned projects";
+
     String UPLOAD_FILE_PARAM_NAME = "file";
 
     String EXPORT_AS_ATTACHMENT_PARAM_NAME = "attachment";
 
     String PROJECT_NAME_PARAM_NAME = "name";
 
-    @ApiOperation(
+    String PROJECT_FILTERS_PARAM_NAME = "filters";
+
+    @Operation(
             tags = PROJECTS,
-            value = "List projects",
-            notes = "Get the list of available projects. " +
-                    "Minimal information for each project is returned.",
-            produces = APPLICATION_JSON_VALUE)
+            summary = "List projects",
+            description = "Get the list of available projects. " +
+                    "Minimal information for each project is returned.")
     @GetMapping(path = "/projects")
     PagedModel<EntityModel<Project>> getProjects(Pageable pageable,
-                                                  @ApiParam(PROJECT_NAME_PARAM_DESCR)
-                                                  @RequestParam(
-                                                          name = PROJECT_NAME_PARAM_NAME,
-                                                          required = false) String name);
+                                                 @Parameter(description = PROJECT_NAME_PARAM_DESCR)
+                                                 @RequestParam(name = PROJECT_NAME_PARAM_NAME, required = false) String name,
+                                                 @Parameter(description = PROJECT_FILTERS_PARAM_DESCR)
+                                                 @RequestParam(name = PROJECT_FILTERS_PARAM_NAME, required = false) List<String> filters);
 
-    @ApiOperation(
+    @Operation(
             tags = PROJECTS,
-            value = "Create new project")
+            summary = "Create new project")
     @PostMapping(path = "/projects")
     @ResponseStatus(CREATED)
     EntityModel<Project> createProject(
-            @ApiParam(CREATE_PROJECT_PARAM_DESCR)
+            @Parameter(description = CREATE_PROJECT_PARAM_DESCR)
             @RequestBody Project project);
 
-    @ApiOperation(
+    @Operation(
             tags = PROJECTS,
-            value = "Get project")
+            summary = "Get project")
     @GetMapping(path = "/projects/{projectId}")
     EntityModel<Project> getProject(
-            @ApiParam(value = GET_PROJECT_ID_PARAM_DESCR, required = true)
+            @Parameter(description = GET_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId);
 
-    @ApiOperation(
+    @Operation(
             tags = PROJECTS,
-            value = "Update project details")
+            summary = "Update project details")
     @PutMapping(path = "/projects/{projectId}")
     EntityModel<Project> updateProject(
-            @ApiParam(value = UPDATE_PROJECT_ID_PARAM_DESCR, required = true)
+            @Parameter(description = UPDATE_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
-            @ApiParam(UPDATE_PROJECT_PARAM_DESCR)
+            @Parameter(description = UPDATE_PROJECT_PARAM_DESCR)
             @RequestBody Project project);
 
-    @ApiOperation(
+    @Operation(
             tags = PROJECTS,
-            value = "Delete project")
+            summary = "Delete project")
     @DeleteMapping(path = "/projects/{projectId}")
     @ResponseStatus(NO_CONTENT)
     void deleteProject(
-            @ApiParam(value = DELETE_PROJECT_ID_PARAM_DESCR, required = true)
+            @Parameter(description = DELETE_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId);
 
-    @ApiOperation(
+    @Operation(
             tags = PROJECTS,
-            value = "Import an project as zip file",
-            notes = "Allows a zip file to be uploaded containing an project definition and any number of included models.")
+            summary = "Import an project as zip file",
+            description = "Allows a zip file to be uploaded containing an project definition and any number of included models.")
     @PostMapping(path = "/projects/import", consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(CREATED)
     EntityModel<Project> importProject(
-            @ApiParam(IMPORT_PROJECT_FILE_PARAM_DESCR)
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
-            @ApiParam(PROJECT_NAME_OVERRIDE_DESCR)
+            @Parameter(description = IMPORT_PROJECT_FILE_PARAM_DESCR)
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @Parameter(description = PROJECT_NAME_OVERRIDE_DESCR)
             @RequestParam(
                     name = PROJECT_NAME_PARAM_NAME,
                     required = false) String name) throws IOException;
 
-    @ApiOperation(
+    @Operation(
             tags = PROJECTS,
-            value = "Export an project as zip file",
-            notes = "This will create and download the zip " +
+            summary = "Export an project as zip file",
+            description = "This will create and download the zip " +
                     "containing the project folder and all related models.<br>")
     @GetMapping(path = "/projects/{projectId}/export")
     void exportProject(
             HttpServletResponse response,
-            @ApiParam(value = EXPORT_PROJECT_ID_PARAM_DESCR, required = true)
+            @Parameter(description = EXPORT_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
-            @ApiParam(ATTACHMENT_API_PARAM_DESCR)
+            @Parameter(description = ATTACHMENT_API_PARAM_DESCR)
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;
 
-    @ApiOperation(
+    @Operation(
             tags = PROJECTS,
-            value = "Copy an project as a new project with chosen name",
-            notes = "This will create a new project with chosen name " +
+            summary = "Copy an project as a new project with chosen name",
+            description = "This will create a new project with chosen name " +
                     "containing the project folder and all related models.<br>")
     @PostMapping(path = "/projects/{projectId}/copy")
     EntityModel<Project> copyProject(
-            @ApiParam(value = COPY_PROJECT_ID_PARAM_DESCR, required = true)
+            @Parameter(description = COPY_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
-            @ApiParam(value = PROJECT_NAME_COPY_DESCR)
+            @Parameter(description = PROJECT_NAME_COPY_DESCR)
             @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name);
 
-    @ApiOperation(
+    @Operation(
             tags = PROJECTS,
-            value = "Validate an project by id")
+            summary = "Validate an project by id")
     @GetMapping(path = "/projects/{projectId}/validate")
     void validateProject(
-            @ApiParam(VALIDATE_PROJECT_ID_PARAM_DESCR)
+            @Parameter(description = VALIDATE_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId) throws IOException;
 }

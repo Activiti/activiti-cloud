@@ -15,15 +15,12 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
-
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.persistence.*;
+import java.util.Objects;
 
 @Entity(name = "ProcessDefinition")
 @Table(name = "PROCESS_DEFINITION",
@@ -31,6 +28,8 @@ import org.activiti.cloud.api.process.model.CloudProcessDefinition;
                 @Index(name = "pd_name_idx", columnList = "name"),
                 @Index(name = "pd_key_idx", columnList = "processDefinitionKey")
         })
+@DynamicInsert
+@DynamicUpdate
 public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements CloudProcessDefinition {
 
     @Id
@@ -41,6 +40,7 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
     private String description;
     private int version;
     private String formKey;
+    private String category;
 
     public ProcessDefinitionEntity() {
     }
@@ -112,11 +112,17 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
     }
 
     @Override
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(id);
-        return result;
+        return getClass().hashCode();
     }
 
     @Override
@@ -128,6 +134,6 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
         if (getClass() != obj.getClass())
             return false;
         ProcessDefinitionEntity other = (ProcessDefinitionEntity) obj;
-        return Objects.equals(id, other.id);
+        return id != null && Objects.equals(id, other.id);
     }
 }

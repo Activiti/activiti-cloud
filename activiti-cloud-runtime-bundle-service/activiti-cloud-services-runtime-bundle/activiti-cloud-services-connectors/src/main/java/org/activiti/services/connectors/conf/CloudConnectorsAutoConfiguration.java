@@ -16,18 +16,18 @@
 
 package org.activiti.services.connectors.conf;
 
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.runtime.api.conf.ConnectorsAutoConfiguration;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
-import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
@@ -38,6 +38,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -57,50 +58,35 @@ public class CloudConnectorsAutoConfiguration {
     public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        ProcessEngineChannels processEngineChannels,
         RuntimeBundleProperties runtimeBundleProperties,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        IntegrationContextMessageBuilderFactory messageBuilderFactory) {
-        return new ServiceTaskIntegrationResultEventHandler(runtimeService,
-                                                            integrationContextService,
-                                                            processEngineChannels.auditProducer(),
-                                                            runtimeBundleProperties,
-                                                            runtimeBundleInfoAppender,
-            messageBuilderFactory);
+        ManagementService managementService,
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        VariablesPropagator variablesPropagator) {
+        return new ServiceTaskIntegrationResultEventHandler(runtimeService, integrationContextService,
+            runtimeBundleProperties, managementService, processEngineEventsAggregator, variablesPropagator);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
                                                                                            IntegrationContextService integrationContextService,
-                                                                                           ProcessEngineChannels processEngineChannels,
                                                                                            ManagementService managementService,
                                                                                            RuntimeBundleProperties runtimeBundleProperties,
-                                                                                           RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                                                           IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+                                                                                           ProcessEngineEventsAggregator processEngineEventsAggregator) {
         return new ServiceTaskIntegrationErrorEventHandler(runtimeService,
                                                            integrationContextService,
-                                                           processEngineChannels.auditProducer(),
                                                            managementService,
                                                            runtimeBundleProperties,
-                                                           runtimeBundleInfoAppender,
-                                                           messageBuilderFactory);
+                                                           processEngineEventsAggregator);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationRequestSender integrationRequestSender(RuntimeBundleProperties runtimeBundleProperties,
-                                                             ProcessEngineChannels processEngineChannels,
-                                                             BinderAwareChannelResolver resolver,
-                                                             RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+    public IntegrationRequestSender integrationRequestSender(BinderAwareChannelResolver resolver,
                                                              IntegrationContextMessageBuilderFactory messageBuilderFactory) {
-        return new IntegrationRequestSender(runtimeBundleProperties,
-                                            processEngineChannels.auditProducer(),
-                                            resolver,
-                                            runtimeBundleInfoAppender,
+        return new IntegrationRequestSender(resolver,
                                             messageBuilderFactory);
     }
-
 
     @Bean
     @ConditionalOnMissingBean
@@ -111,8 +97,7 @@ public class CloudConnectorsAutoConfiguration {
     @Bean(name = LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME)
     @ConditionalOnMissingBean(name = LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME)
     public DefaultServiceTaskBehavior localServiceTaskBehavior(ApplicationContext applicationContext,
-                                                               IntegrationContextBuilder integrationContextBuilder,
-                                                               ExtensionsVariablesMappingProvider outboundVariablesProvider) {
+        IntegrationContextBuilder integrationContextBuilder, VariablesPropagator variablesPropagator) {
         // this bean is exposed under two different names (LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME and
         // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME) to allow MQServiceTaskBehavior
         // to use composition instead of inheritance, this will make maintenance easier as changes in constructor
@@ -120,26 +105,22 @@ public class CloudConnectorsAutoConfiguration {
         // LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME will be injected in MQServiceTaskBehavior;
         // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME will be available only in non-cloud environment:
         // MQServiceTaskBehavior will replace it for cloud environment.
-        return new DefaultServiceTaskBehavior(applicationContext,
-                                              integrationContextBuilder,
-                                              outboundVariablesProvider);
+        return new DefaultServiceTaskBehavior(applicationContext, integrationContextBuilder, variablesPropagator);
     }
 
     @Bean(name = DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
     @ConditionalOnMissingBean(name = DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
-    public MQServiceTaskBehavior mqServiceTaskBehavior(IntegrationContextManager integrationContextManager,
-                                                       ApplicationEventPublisher eventPublisher,
-                                                       IntegrationContextBuilder integrationContextBuilder,
-                                                       RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                       DefaultServiceTaskBehavior defaultServiceTaskBehavior,
-        ExtensionsVariablesMappingProvider variablesMappingProvider) {
-        MQServiceTaskBehavior taskBehavior = new MQServiceTaskBehavior(
-            integrationContextManager,
-            eventPublisher,
-            integrationContextBuilder,
-            runtimeBundleInfoAppender,
-            defaultServiceTaskBehavior);
-        taskBehavior.setVariablesCalculator(variablesMappingProvider);
-        return taskBehavior;
+    public MQServiceTaskBehavior mqServiceTaskBehavior(
+        IntegrationContextManager integrationContextManager,
+        ApplicationEventPublisher eventPublisher,
+        IntegrationContextBuilder integrationContextBuilder,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        DefaultServiceTaskBehavior defaultServiceTaskBehavior,
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        RuntimeBundleProperties runtimeBundleProperties,
+        BindingServiceProperties bindingServiceProperties) {
+        return new MQServiceTaskBehavior(integrationContextManager, eventPublisher, integrationContextBuilder,
+            runtimeBundleInfoAppender, defaultServiceTaskBehavior, processEngineEventsAggregator, runtimeBundleProperties,
+            bindingServiceProperties);
     }
 }

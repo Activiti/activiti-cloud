@@ -20,7 +20,6 @@ import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.context.SmartLifecycle;
@@ -29,90 +28,78 @@ import org.springframework.messaging.SubscribableChannel;
 
 public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigurator, SmartLifecycle {
     private static final Logger logger = LoggerFactory.getLogger(MessageBasedJobManagerConfigurator.class);
-    
+
     private static final String MESSAGE_BASED_JOB_MANAGER = "messageBasedJobManager";
     public static final String JOB_MESSAGE_HANDLER = "jobMessageHandler";
 
-    private String contentType = "application/json";
-
     private final BindingService bindingService;
     private final JobMessageInputChannelFactory inputChannelFactory;
-    private final ConsumerProperties consumerProperties;
     private final MessageBasedJobManagerFactory messageBasedJobManagerFactory;
     private final JobMessageHandlerFactory jobMessageHandlerFactory;
     private final ConfigurableListableBeanFactory beanFactory;
-    
+
     private MessageBasedJobManager messageBasedJobManager;
     private MessageHandler jobMessageHandler;
     private SubscribableChannel inputChannel;
     private ProcessEngineConfigurationImpl configuration;
-    
-    private boolean running = false;    
-    
+
+    private boolean running = false;
+
     public MessageBasedJobManagerConfigurator(ConfigurableListableBeanFactory beanFactory,
                                               BindingService bindingService,
                                               JobMessageInputChannelFactory inputChannelFactory,
                                               MessageBasedJobManagerFactory messageBasedJobManagerFactory,
-                                              JobMessageHandlerFactory jobMessageHandlerFactory,
-                                              ConsumerProperties consumerProperties) {
+                                              JobMessageHandlerFactory jobMessageHandlerFactory) {
         this.bindingService = bindingService;
         this.inputChannelFactory = inputChannelFactory;
-        this.consumerProperties = consumerProperties;
         this.messageBasedJobManagerFactory = messageBasedJobManagerFactory;
         this.jobMessageHandlerFactory = jobMessageHandlerFactory;
         this.beanFactory = beanFactory;
     }
-    
+
     protected MessageHandler createJobMessageHandler(ProcessEngineConfigurationImpl configuration) {
         MessageHandler messageHandler = jobMessageHandlerFactory.create(configuration);
-        
+
         return registerBean(JOB_MESSAGE_HANDLER, messageHandler);
     }
 
     protected MessageBasedJobManager createMessageBasedJobManager(ProcessEngineConfigurationImpl configuration) {
         MessageBasedJobManager instance = messageBasedJobManagerFactory.create(configuration);
-        
+
         return registerBean(MESSAGE_BASED_JOB_MANAGER, instance);
     }
-    
+
     /**
-     * Configures MessageBasedJobManager 
+     * Configures MessageBasedJobManager
      */
     @Override
     public void beforeInit(ProcessEngineConfigurationImpl configuration) {
         this.messageBasedJobManager = createMessageBasedJobManager(configuration);
-        
+
         // Let's manage async executor lifecycle manually on start/stop
         configuration.setAsyncExecutorActivate(false);
         configuration.setAsyncExecutorMessageQueueMode(true);
         configuration.setJobManager(messageBasedJobManager);
-        
+
         logger.info("Configured message based job manager class: {}", this.messageBasedJobManager.getClass());
-        
+
     }
 
     /**
-     * Configures input channel 
+     * Configures input channel
      */
     @Override
     public void configure(ProcessEngineConfigurationImpl configuration) {
         this.configuration = configuration;
-        
+
         String channelName = messageBasedJobManager.getInputChannelName();
-        String destination = messageBasedJobManager.getDestination();
+        BindingProperties bindingProperties = messageBasedJobManager.getBindingProperties();
 
-        BindingProperties bindingProperties = new BindingProperties();
-        bindingProperties.setConsumer(consumerProperties);
-        bindingProperties.setContentType(contentType);
-        bindingProperties.setGroup(JOB_MESSAGE_HANDLER);
-        // Let's use message job producer destination scope
-        bindingProperties.setDestination(destination);
-
-        // Let's create input channel 
+        // Let's create input channel
         inputChannel = inputChannelFactory.createInputChannel(channelName, bindingProperties);
 
         logger.info("Configured message job input channel '{}' with bindings: {}", channelName, bindingProperties);
-        
+
     }
 
     @Override
@@ -125,24 +112,24 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
         logger.info("Subscribing job message handler to input channel {}", messageBasedJobManager.getInputChannelName());
 
         jobMessageHandler = createJobMessageHandler(configuration);
-        
-        // Let's subscribe and bind consumer channel   
+
+        // Let's subscribe and bind consumer channel
         inputChannel.subscribe(jobMessageHandler);
         bindingService.bindConsumer(inputChannel, messageBasedJobManager.getInputChannelName());
 
         // Now start async executor
         if (!configuration.getAsyncExecutor().isActive()) {
             configuration.getAsyncExecutor()
-                         .start();            
+                         .start();
         }
-        
+
         running = true;
     }
 
     @Override
     public void stop() {
         logger.info("Unsubscribing job message handler to input channel {}", messageBasedJobManager.getInputChannelName());
-        
+
         try {
             // Let's unbind consumer from input channel
             bindingService.unbindConsumers(messageBasedJobManager.getInputChannelName());
@@ -151,9 +138,9 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
             // Let's gracefully shutdown executor
             if (configuration.getAsyncExecutor().isActive()) {
                 configuration.getAsyncExecutor()
-                             .shutdown();            
+                             .shutdown();
             }
-            
+
         } finally {
             running = false;
         }
@@ -164,11 +151,6 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
         return running;
     }
 
-    
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-    
     @SuppressWarnings("unchecked")
     protected <T> T registerBean(String name, T bean) {
         beanFactory.registerSingleton(name, bean);

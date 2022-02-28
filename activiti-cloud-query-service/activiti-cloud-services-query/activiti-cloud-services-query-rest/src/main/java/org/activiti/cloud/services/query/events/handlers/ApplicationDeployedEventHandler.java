@@ -15,24 +15,27 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
-import org.activiti.cloud.services.query.model.QApplicationEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.EntityManager;
+
 public class ApplicationDeployedEventHandler implements QueryEventHandler {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationDeployedEventHandler.class);
 
-    private ApplicationRepository applicationRepository;
+    private final EntityManager entityManager;
+    private final ApplicationRepository applicationRepository;
 
-    public ApplicationDeployedEventHandler(ApplicationRepository applicationRepository) {
+    public ApplicationDeployedEventHandler(EntityManager entityManager,
+                                           ApplicationRepository applicationRepository) {
+        this.entityManager = entityManager;
         this.applicationRepository = applicationRepository;
     }
 
@@ -46,27 +49,21 @@ public class ApplicationDeployedEventHandler implements QueryEventHandler {
                 applicationDeployedEvent.getAppName(),
                 deployment.getVersion().toString()
         );
-        
-        if(checkApplicationExist(application)) {
+
+        if(applicationRepository.existsByNameAndVersion(application.getName(),
+                                                        application.getVersion())) {
             LOGGER.debug("Application {} with version {} already exists!",
-                    application.getName(), application.getVersion());
+                         application.getName(),
+                         application.getVersion());
             return;
         }
-     
-        applicationRepository.save(application);
+
+        entityManager.persist(application);
     }
 
     @Override
     public String getHandledEvent() {
         return ApplicationEvents.APPLICATION_DEPLOYED.name();
     }
-    
-    private boolean checkApplicationExist (ApplicationEntity application){ 
-        BooleanExpression predicate = QApplicationEntity.applicationEntity.name.eq(application.getName())
-                .and(
-                        QApplicationEntity.applicationEntity.version.eq(application.getVersion())
-                );
 
-        return applicationRepository.exists(predicate);
-    }
 }

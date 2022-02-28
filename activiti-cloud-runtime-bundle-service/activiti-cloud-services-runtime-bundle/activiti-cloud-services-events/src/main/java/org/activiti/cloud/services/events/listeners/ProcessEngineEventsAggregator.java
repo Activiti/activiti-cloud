@@ -156,6 +156,8 @@ public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggre
             return ((CloudBPMNErrorReceivedEvent) element).getEntity().getProcessInstanceId();
         } else if(element instanceof CloudMessageSubscriptionCancelledEvent) {
             return ((CloudMessageSubscriptionCancelledEvent) element).getEntity().getProcessInstanceId();
+        } else if(element instanceof CloudIntegrationEvent) {
+            return ((CloudIntegrationEvent) element).getEntity().getProcessInstanceId();
         }
         return null;
     }

@@ -17,6 +17,10 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
+import org.springframework.util.ObjectUtils;
+
+import java.util.Optional;
+import java.util.function.Predicate;
 
 public class IntegrationResultDestinationBuilderImpl implements IntegrationResultDestinationBuilder {
 
@@ -28,12 +32,21 @@ public class IntegrationResultDestinationBuilderImpl implements IntegrationResul
 
     @Override
     public String buildDestination(IntegrationRequest event) {
-        String resultDestinationOverride = connectorProperties.getErrorDestinationOverride();
+        String resultDestinationOverride = connectorProperties.getResultDestinationOverride();
 
-        String destination = (resultDestinationOverride == null || resultDestinationOverride.isEmpty())
-                ? "integrationResult" + connectorProperties.getMqDestinationSeparator() + event.getServiceFullName() : resultDestinationOverride;
+        String destination = ObjectUtils.isEmpty(resultDestinationOverride)
+                ? Optional.of(event)
+                          .map(IntegrationRequest::getResultDestination)
+                          .filter(Predicate.not(ObjectUtils::isEmpty))
+                          .orElseGet(() -> getServiceDestination(event))
+                : resultDestinationOverride;
 
         return destination;
     }
 
+    protected String getServiceDestination(IntegrationRequest event) {
+        return new StringBuilder("integrationResult").append(connectorProperties.getMqDestinationSeparator())
+                                                     .append(event.getServiceFullName())
+                                                     .toString();
+    }
 }

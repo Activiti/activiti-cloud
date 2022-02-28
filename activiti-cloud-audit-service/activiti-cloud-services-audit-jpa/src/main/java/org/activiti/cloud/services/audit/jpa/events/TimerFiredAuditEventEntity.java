@@ -16,19 +16,21 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFiredEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity(name = TimerFiredAuditEventEntity.TIMER_FIRED_EVENT)
 @DiscriminatorValue(value = TimerFiredAuditEventEntity.TIMER_FIRED_EVENT)
+@DynamicInsert
 public class TimerFiredAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_FIRED_EVENT = "TimerFiredEvent";
-    
+
     public TimerFiredAuditEventEntity() {
     }
-    
+
     public TimerFiredAuditEventEntity(CloudBPMNTimerFiredEvent cloudEvent) {
         super(cloudEvent);
     }
@@ -40,22 +42,4 @@ public class TimerFiredAuditEventEntity extends TimerAuditEventEntity {
         return builder.toString();
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
-    }    
 }

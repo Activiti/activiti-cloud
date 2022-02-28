@@ -28,7 +28,7 @@ import graphql.schema.GraphQLSchema;
 
 @SpringBootTest(properties = "spring.data.jpa.repositories.bootstrap-mode=default")
 @TestPropertySource("classpath:application-test.properties")
-public class ActivitiGraphQLSchemaAutoConfigurationTest {
+class ActivitiGraphQLSchemaAutoConfigurationTest {
 
     @Autowired(required=false)
     private GraphQLSchema schema;
@@ -38,12 +38,12 @@ public class ActivitiGraphQLSchemaAutoConfigurationTest {
     }
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
         assertThat(schema).isNotNull();
     }
 
     @Test
-    public void correctlyDerivesSchemaFromGivenEntities() {
+    void correctlyDerivesSchemaFromGivenEntities() {
         //when
 
         // then
@@ -88,7 +88,7 @@ public class ActivitiGraphQLSchemaAutoConfigurationTest {
     }
 
     @Test
-    public void correctlyDerivesPageableSchemaFromGivenEntities() {
+    void correctlyDerivesPageableSchemaFromGivenEntities() {
         //when
 
         // then

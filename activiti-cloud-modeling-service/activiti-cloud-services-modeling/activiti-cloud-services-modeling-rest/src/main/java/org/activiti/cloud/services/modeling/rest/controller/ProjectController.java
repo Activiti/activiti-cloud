@@ -15,11 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -29,13 +25,19 @@ import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 
 import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
 
@@ -61,22 +63,17 @@ public class ProjectController implements ProjectRestApi {
     }
 
     @Override
-    public PagedModel<EntityModel<Project>> getProjects(
-            Pageable pageable,
-            @RequestParam(
-                    name = PROJECT_NAME_PARAM_NAME,
-                    required = false) String name) {
-        return pagedCollectionModelAssembler.toModel(
-                pageable,
-                projectService.getProjects(pageable,
-                                           name),
-                representationModelAssembler);
+    public PagedModel<EntityModel<Project>> getProjects(Pageable pageable,
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME, required = false) String name,
+            @RequestParam(name = PROJECT_FILTERS_PARAM_NAME, required = false) List<String> filters) {
+        return pagedCollectionModelAssembler.toModel(pageable, projectService.getProjects(pageable, name, filters),
+            representationModelAssembler);
     }
 
     @Override
     public EntityModel<Project> getProject(
             @PathVariable String projectId) {
-        return representationModelAssembler.toModel(findProjectById(projectId));
+        return representationModelAssembler.toModel(findProjectRepresentationById(projectId));
     }
 
     @Override
@@ -102,7 +99,7 @@ public class ProjectController implements ProjectRestApi {
 
     @Override
     public EntityModel<Project> importProject(
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
             @RequestParam(name = PROJECT_NAME_PARAM_NAME,
                           required = false) String name) throws IOException {
         return representationModelAssembler.toModel(projectService.importProject(file, name));
@@ -132,7 +129,7 @@ public class ProjectController implements ProjectRestApi {
 
     @Override
     public void validateProject(
-            @ApiParam(VALIDATE_PROJECT_ID_PARAM_DESCR)
+            @Parameter(description = VALIDATE_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId) throws IOException {
         Project project = findProjectById(projectId);
         projectService.validateProject(project);
@@ -140,6 +137,11 @@ public class ProjectController implements ProjectRestApi {
 
     public Project findProjectById(String projectId) {
         return projectService.findProjectById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
+    }
+
+    public Project findProjectRepresentationById(String projectId) {
+        return projectService.findProjectRepresentationById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
     }
 }

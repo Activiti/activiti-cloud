@@ -82,6 +82,8 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
 
     private String template;
 
+    private String category;
+
     @Enumerated(EnumType.ORDINAL)
     private ModelScope scope = ModelScope.PROJECT;
 
@@ -231,6 +233,16 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     @Override
     public void setScope(ModelScope scope) {
         this.scope = scope;
+    }
+
+    @Override
+    public String getCategory() {
+        return this.category;
+    }
+
+    @Override
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     @Override

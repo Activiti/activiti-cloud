@@ -15,13 +15,15 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
+import org.hibernate.annotations.DynamicInsert;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
-
 @Entity(name = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
 @DiscriminatorValue(value = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
+@DynamicInsert
 public class IntegrationRequestSentEventEntity extends IntegrationEventEntity {
 
     protected static final String INTEGRATION_REQUEST_SENT_EVENT = "IntegrationRequestSentEvent";
@@ -30,25 +32,6 @@ public class IntegrationRequestSentEventEntity extends IntegrationEventEntity {
 
     public IntegrationRequestSentEventEntity(CloudIntegrationRequestedEvent event) {
         super(event);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return true;
     }
 
     @Override
