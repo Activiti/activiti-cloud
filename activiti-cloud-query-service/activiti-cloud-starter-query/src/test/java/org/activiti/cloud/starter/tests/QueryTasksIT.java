@@ -81,7 +81,9 @@ public class QueryTasksIT {
 
     private static final String TASKS_URL = "/v1/tasks";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks";
-
+    private static final String HRUSER = "hruser";
+    private static final String TESTUSER = "testuser";
+    
     private static final ParameterizedTypeReference<PagedModel<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<Task>>() {
     };
 
@@ -129,7 +131,9 @@ public class QueryTasksIT {
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
         taskEventContainedBuilder = new TaskEventContainedBuilder(eventsAggregator);
         variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
-        runningProcessInstance = processInstanceBuilder.aRunningProcessInstance("My running instance");
+        runningProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator",
+                                                                                             TESTUSER);
+        keycloakTokenProducer.setKeycloakTestUser(TESTUSER);
     }
 
     @AfterEach
@@ -1635,7 +1639,165 @@ public class QueryTasksIT {
                 .extracting(Task::getId)
                 .containsExactly(task1.getId());
         });
+    }
 
+    @Test
+    public void should_notGetTasks_by_ProcessInstance_userIsNotInvolved() {
+        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                         "fakeUser", 
+                                                         runningProcessInstance);
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks).isEmpty();
+        });
+    }
+    
+    @Test
+    public void should_getTasks_by_ProcessInstance_when_userIsCandidate() {
+        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                                      TESTUSER, 
+                                                                      runningProcessInstance);
+
+        Task task2 = taskEventContainedBuilder.aTaskWithUserCandidate("Task2", 
+                                                                      HRUSER, 
+                                                                      runningProcessInstance);
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
+        });
+
+        assertCanRetrieveTaskById(task1.getId());
+        assertCanRetrieveTaskById(task2.getId());
+    }
+
+    @Test
+    public void should_getTasks_by_ProcessInstance_when_userIsAssignee() {
+        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                                      TESTUSER, 
+                                                                      runningProcessInstance);
+
+        Task task2 = taskEventContainedBuilder.anAssignedTask("Task2", 
+                                                              HRUSER, 
+                                                              runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
+        });
+
+        assertCanRetrieveTaskById(task1.getId());
+        assertCanRetrieveTaskById(task2.getId());
+    }
+
+    @Test
+    public void should_getTasks_by_ProcessInstance_when_userIsInGroupCandidate() {
+        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                                      TESTUSER, 
+                                                                      runningProcessInstance);
+
+        Task task2 = taskEventContainedBuilder.aTaskWithGroupCandidate("Task2", 
+                                                                       "hr", 
+                                                                       runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
+        });
+        assertCanRetrieveTaskById(task1.getId());
+        assertCanRetrieveTaskById(task2.getId());
+    }
+
+    @Test
+    public void should_getTasks_by_ProcessInstance_when_userIsInitiator() {
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
+                                                                      HRUSER, 
+                                                                      runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.size()).isEqualTo(1);
+            assertThat(tasks).contains(task1);
+        });
+        assertCanRetrieveTaskById(task1.getId());
+    }
+
+
+    private void assertCanRetrieveTaskById(String taskId) {
+        await().untilAsserted(() -> {
+
+            ResponseEntity<Task> responseEntity = executeRequestGetTasksById(taskId);
+
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Task task = responseEntity.getBody();
+            assertThat(task.getId()).isEqualTo(taskId);
+        });
     }
 
     @Test

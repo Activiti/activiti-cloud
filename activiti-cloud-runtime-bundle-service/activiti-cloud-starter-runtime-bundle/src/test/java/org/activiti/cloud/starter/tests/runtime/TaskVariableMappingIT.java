@@ -67,7 +67,7 @@ public class TaskVariableMappingIT {
     @Autowired
     private VariablesUtil variablesUtil;
 
-    @Value("${activiti.keycloak.test-user:hruser}")
+    @Value("${activiti.identity.test-user:hruser}")
     protected String keycloakTestUser;
 
     @BeforeEach

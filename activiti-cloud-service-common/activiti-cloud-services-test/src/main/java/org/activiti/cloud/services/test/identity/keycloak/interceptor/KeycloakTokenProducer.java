@@ -38,10 +38,10 @@ public class KeycloakTokenProducer implements ClientHttpRequestInterceptor {
     @Value("${keycloak.resource:}")
     protected String resource;
 
-    @Value("${activiti.keycloak.test-user:}")
+    @Value("${activiti.identity.test-user:}")
     protected String keycloakTestUser;
 
-    @Value("${activiti.keycloak.test-password:}")
+    @Value("${activiti.identity.test-password:}")
     protected String keycloakTestPassword;
 
     public KeycloakTokenProducer(KeycloakProperties keycloakProperties) {

@@ -25,6 +25,7 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
+import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -36,16 +37,19 @@ public class TaskControllerHelper {
     private final AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
     private final QueryDslPredicateAggregator predicateAggregator;
     private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
+    private final TaskLookupRestrictionService taskLookupRestrictionService;
 
     public TaskControllerHelper(
         TaskRepository taskRepository,
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         QueryDslPredicateAggregator predicateAggregator,
-        TaskRepresentationModelAssembler taskRepresentationModelAssembler) {
+        TaskRepresentationModelAssembler taskRepresentationModelAssembler,
+        TaskLookupRestrictionService taskLookupRestrictionService) {
         this.taskRepository = taskRepository;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.predicateAggregator = predicateAggregator;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
+        this.taskLookupRestrictionService = taskLookupRestrictionService;
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAll(Predicate predicate,
@@ -65,6 +69,22 @@ public class TaskControllerHelper {
         return pagedCollectionModelAssembler.toModel(pageable,
             page,
             taskRepresentationModelAssembler);
+    }
+
+    public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate, 
+                                                                     Pageable pageable) {
+
+        Predicate conditions = taskLookupRestrictionService.restrictToInvolvedUsersQuery(predicate);
+        Page<TaskEntity> page = taskRepository.findInProcessInstanceScope(conditions, pageable);
+        
+        return pagedCollectionModelAssembler.toModel(pageable, 
+                                                     page, 
+                                                     taskRepresentationModelAssembler);
+    }
+
+    public boolean canUserViewTask(Predicate predicate) {
+        Predicate conditions = taskLookupRestrictionService.restrictToInvolvedUsersQuery(predicate);
+        return taskRepository.existsInProcessInstanceScope(conditions);
     }
 
 }
