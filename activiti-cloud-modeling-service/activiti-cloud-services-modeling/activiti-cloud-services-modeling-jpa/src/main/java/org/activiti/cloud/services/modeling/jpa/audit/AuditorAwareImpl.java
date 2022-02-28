@@ -20,10 +20,7 @@ import org.springframework.data.domain.AuditorAware;
 
 import java.util.Optional;
 
-/**
- * Auditor implementation.
- */
-
+/** Auditor implementation. */
 public class AuditorAwareImpl implements AuditorAware<String> {
 
     private final SecurityManager securityManager;

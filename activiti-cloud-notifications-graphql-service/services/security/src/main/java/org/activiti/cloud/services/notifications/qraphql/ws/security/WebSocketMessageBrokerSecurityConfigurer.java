@@ -21,7 +21,8 @@ import org.springframework.security.config.annotation.web.messaging.MessageSecur
 import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
 
 @Configuration
-public class WebSocketMessageBrokerSecurityConfigurer extends AbstractSecurityWebSocketMessageBrokerConfigurer {
+public class WebSocketMessageBrokerSecurityConfigurer
+        extends AbstractSecurityWebSocketMessageBrokerConfigurer {
 
     @Value("${spring.activiti.cloud.services.notifications.graphql.ws.endpoint}")
     private String endpoint;

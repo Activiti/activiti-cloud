@@ -34,24 +34,24 @@ public class KeycloakPrincipalIdentityProviderTest {
 
     private KeycloakPrincipalIdentityProvider subject;
 
-    @Mock
-    private KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
+    @Mock private KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
 
-    @Mock
-    private RefreshableKeycloakSecurityContext keycloakSecurityContext;
+    @Mock private RefreshableKeycloakSecurityContext keycloakSecurityContext;
 
-    @Mock
-    private AccessToken accessToken;
+    @Mock private AccessToken accessToken;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        KeycloakAccessTokenProvider keycloakAccessTokenProvider = new KeycloakAccessTokenProvider() { };
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator = new KeycloakAccessTokenValidator() { };
+        KeycloakAccessTokenProvider keycloakAccessTokenProvider =
+                new KeycloakAccessTokenProvider() {};
+        KeycloakAccessTokenValidator keycloakAccessTokenValidator =
+                new KeycloakAccessTokenValidator() {};
 
-        subject = new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider,
-                                                        keycloakAccessTokenValidator);
+        subject =
+                new KeycloakPrincipalIdentityProvider(
+                        keycloakAccessTokenProvider, keycloakAccessTokenValidator);
 
         when(principal.getKeycloakSecurityContext()).thenReturn(keycloakSecurityContext);
         when(keycloakSecurityContext.getToken()).thenReturn(accessToken);
@@ -76,11 +76,13 @@ public class KeycloakPrincipalIdentityProviderTest {
         when(accessToken.isActive()).thenReturn(false);
 
         // when
-        Throwable thrown = catchThrowable(() -> { subject.getUserId(principal); });
+        Throwable thrown =
+                catchThrowable(
+                        () -> {
+                            subject.getUserId(principal);
+                        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
     }
-
-
 }

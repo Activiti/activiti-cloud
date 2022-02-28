@@ -42,5 +42,4 @@ public class TaskSortApplier extends BaseSortApplier<TaskQuery> {
     protected QueryProperty getOrderByProperty(Sort.Order order) {
         return orderByProperties.get(order.getProperty());
     }
-
 }

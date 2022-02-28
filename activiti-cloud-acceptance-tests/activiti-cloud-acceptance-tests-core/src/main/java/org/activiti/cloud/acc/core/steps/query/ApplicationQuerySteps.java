@@ -17,6 +17,7 @@ package org.activiti.cloud.acc.core.steps.query;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import net.thucydides.core.annotations.Step;
+
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.ApplicationQueryService;
 import org.activiti.cloud.acc.shared.service.BaseService;
@@ -27,8 +28,7 @@ import org.springframework.hateoas.PagedModel;
 
 @EnableRuntimeFeignContext
 public class ApplicationQuerySteps {
-    @Autowired
-    private ApplicationQueryService applicationQueryService;
+    @Autowired private ApplicationQueryService applicationQueryService;
 
     @Autowired
     @Qualifier("queryBaseService")
@@ -40,8 +40,7 @@ public class ApplicationQuerySteps {
     }
 
     @Step
-    public PagedModel<CloudApplication> getAllApplications(){
+    public PagedModel<CloudApplication> getAllApplications() {
         return applicationQueryService.getApplications();
     }
-
 }

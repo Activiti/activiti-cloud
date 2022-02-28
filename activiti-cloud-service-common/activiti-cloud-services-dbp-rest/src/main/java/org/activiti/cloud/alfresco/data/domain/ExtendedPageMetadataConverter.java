@@ -19,24 +19,30 @@ import org.springframework.hateoas.PagedModel;
 
 public class ExtendedPageMetadataConverter {
 
-    public ExtendedPageMetadata toExtendedPageMetadata(long skipCount, PagedModel.PageMetadata basePageMetadata) {
+    public ExtendedPageMetadata toExtendedPageMetadata(
+            long skipCount, PagedModel.PageMetadata basePageMetadata) {
         long totalPages = basePageMetadata.getTotalPages();
         int skipCountRemainder = Math.toIntExact(skipCount % basePageMetadata.getSize());
         if (skipCountRemainder != 0) {
             // exclude the first page, which has a different size than other pages
             int firstPageSize = skipCountRemainder;
-            long totalElementsNotInTheFirstPage = basePageMetadata.getTotalElements() - firstPageSize;
-            // then calculate the number of pages other than the first one and increment it by one (the first page)
-            totalPages = new PagedModel.PageMetadata(basePageMetadata.getSize(),
-                                                         basePageMetadata.getNumber(),
-                                                         totalElementsNotInTheFirstPage).getTotalPages() + 1;
+            long totalElementsNotInTheFirstPage =
+                    basePageMetadata.getTotalElements() - firstPageSize;
+            // then calculate the number of pages other than the first one and increment it by one
+            // (the first page)
+            totalPages =
+                    new PagedModel.PageMetadata(
+                                            basePageMetadata.getSize(),
+                                            basePageMetadata.getNumber(),
+                                            totalElementsNotInTheFirstPage)
+                                    .getTotalPages()
+                            + 1;
         }
-        return new ExtendedPageMetadata(skipCount,
-                                        basePageMetadata.getSize(),
-                                        basePageMetadata.getNumber(),
-                                        basePageMetadata.getTotalElements(),
-                                        totalPages
-        );
+        return new ExtendedPageMetadata(
+                skipCount,
+                basePageMetadata.getSize(),
+                basePageMetadata.getNumber(),
+                basePageMetadata.getTotalElements(),
+                totalPages);
     }
-
 }

@@ -17,12 +17,14 @@ package org.activiti.cloud.starter.juel.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.activiti.cloud.starter.juel.exception.JuelRuntimeException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootTest
 public class JuelExpressionResolverServiceTest {
@@ -32,8 +34,7 @@ public class JuelExpressionResolverServiceTest {
     private static final String VARIABLES = "variables";
     private static final String RESULT_TEST = "10 + 20";
 
-    @Autowired
-    JuelExpressionResolverService juelExpressionResolverService;
+    @Autowired JuelExpressionResolverService juelExpressionResolverService;
 
     @Test
     public void should_outputIsCorrect_when_resolveExpression() {
@@ -50,7 +51,8 @@ public class JuelExpressionResolverServiceTest {
         final String expression = "${var1} + ${var2}";
         final Map<String, Object> variables = new HashMap<>();
         final Map<String, Object> input = Map.of(EXPRESSION, expression, VARIABLES, variables);
-        Throwable thrown = catchThrowable(() -> juelExpressionResolverService.resolveExpression(input));
+        Throwable thrown =
+                catchThrowable(() -> juelExpressionResolverService.resolveExpression(input));
         assertThat(thrown).isInstanceOf(JuelRuntimeException.class);
     }
 }

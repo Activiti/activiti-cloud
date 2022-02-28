@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.validation;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
@@ -26,6 +23,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class JsonSchemaModelValidatorConfiguration {
@@ -55,16 +55,15 @@ public class JsonSchemaModelValidatorConfiguration {
     }
 
     private SchemaLoader buildSchemaLoaderFromClasspath(String schemaFileName) throws IOException {
-        try (InputStream schemaInputStream = new ClassPathResource(schemaFileName).getInputStream()) {
+        try (InputStream schemaInputStream =
+                new ClassPathResource(schemaFileName).getInputStream()) {
             JSONObject jsonSchema = new JSONObject(new JSONTokener(schemaInputStream));
 
-            return SchemaLoader
-                    .builder()
+            return SchemaLoader.builder()
                     .schemaClient(SchemaClient.classPathAwareClient())
                     .schemaJson(new JsonSchemaFlattener().flatten(jsonSchema))
                     .draftV7Support()
                     .build();
         }
     }
-
 }

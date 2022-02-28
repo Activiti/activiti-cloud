@@ -51,9 +51,6 @@ import org.hibernate.jpa.QueryHints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.AttributeNode;
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +59,10 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.persistence.AttributeNode;
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+
 public class QueryEventHandlerContextOptimizer {
     public static final String VARIABLES = "variables";
     public static final String TASKS = "tasks";
@@ -69,33 +70,34 @@ public class QueryEventHandlerContextOptimizer {
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContextOptimizer.class);
 
     private Map<Class<? extends CloudRuntimeEvent>, Integer> order =
-         Map.ofEntries(Map.entry(CloudRuntimeEvent.class, 0),
-                       Map.entry(CloudProcessCreatedEventImpl.class, 0),
-                       Map.entry(CloudProcessStartedEventImpl.class, 1),
-                       Map.entry(CloudProcessUpdatedEventImpl.class, 1),
-                       Map.entry(CloudSequenceFlowTakenEventImpl.class, 1),
-                       Map.entry(CloudBPMNActivityStartedEventImpl.class, 1),
-                       Map.entry(CloudBPMNActivityCompletedEventImpl.class, 1),
-                       Map.entry(CloudBPMNActivityCancelledEventImpl.class, 1),
-                       Map.entry(CloudIntegrationRequestedEventImpl.class, 1),
-                       Map.entry(CloudIntegrationResultReceivedEventImpl.class, 1),
-                       Map.entry(CloudIntegrationErrorReceivedEventImpl.class, 1),
-                       Map.entry(CloudTaskCreatedEventImpl.class, 2),
-                       Map.entry(CloudTaskCandidateUserAddedEventImpl.class, 3),
-                       Map.entry(CloudTaskCandidateGroupAddedEventImpl.class, 3),
-                       Map.entry(CloudVariableCreatedEventImpl.class, 3),
-                       Map.entry(CloudVariableUpdatedEventImpl.class, 4),
-                       Map.entry(CloudVariableDeletedEventImpl.class, 5),
-                       Map.entry(CloudTaskActivatedEventImpl.class, 6),
-                       Map.entry(CloudTaskSuspendedEventImpl.class, 6),
-                       Map.entry(CloudTaskAssignedEventImpl.class, 6),
-                       Map.entry(CloudTaskUpdatedEventImpl.class, 6),
-                       Map.entry(CloudTaskCompletedEventImpl.class, 6),
-                       Map.entry(CloudTaskCancelledEventImpl.class, 6),
-                       Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 7),
-                       Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 7),
-                       Map.entry(CloudProcessCompletedEventImpl.class, 8),
-                       Map.entry(CloudProcessCancelledEventImpl.class, 8));
+            Map.ofEntries(
+                    Map.entry(CloudRuntimeEvent.class, 0),
+                    Map.entry(CloudProcessCreatedEventImpl.class, 0),
+                    Map.entry(CloudProcessStartedEventImpl.class, 1),
+                    Map.entry(CloudProcessUpdatedEventImpl.class, 1),
+                    Map.entry(CloudSequenceFlowTakenEventImpl.class, 1),
+                    Map.entry(CloudBPMNActivityStartedEventImpl.class, 1),
+                    Map.entry(CloudBPMNActivityCompletedEventImpl.class, 1),
+                    Map.entry(CloudBPMNActivityCancelledEventImpl.class, 1),
+                    Map.entry(CloudIntegrationRequestedEventImpl.class, 1),
+                    Map.entry(CloudIntegrationResultReceivedEventImpl.class, 1),
+                    Map.entry(CloudIntegrationErrorReceivedEventImpl.class, 1),
+                    Map.entry(CloudTaskCreatedEventImpl.class, 2),
+                    Map.entry(CloudTaskCandidateUserAddedEventImpl.class, 3),
+                    Map.entry(CloudTaskCandidateGroupAddedEventImpl.class, 3),
+                    Map.entry(CloudVariableCreatedEventImpl.class, 3),
+                    Map.entry(CloudVariableUpdatedEventImpl.class, 4),
+                    Map.entry(CloudVariableDeletedEventImpl.class, 5),
+                    Map.entry(CloudTaskActivatedEventImpl.class, 6),
+                    Map.entry(CloudTaskSuspendedEventImpl.class, 6),
+                    Map.entry(CloudTaskAssignedEventImpl.class, 6),
+                    Map.entry(CloudTaskUpdatedEventImpl.class, 6),
+                    Map.entry(CloudTaskCompletedEventImpl.class, 6),
+                    Map.entry(CloudTaskCancelledEventImpl.class, 6),
+                    Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 7),
+                    Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 7),
+                    Map.entry(CloudProcessCompletedEventImpl.class, 8),
+                    Map.entry(CloudProcessCancelledEventImpl.class, 8));
 
     private final EntityManager entityManager;
 
@@ -103,69 +105,80 @@ public class QueryEventHandlerContextOptimizer {
         this.entityManager = entityManager;
     }
 
-    public List<CloudRuntimeEvent<?,?>> optimize(List<CloudRuntimeEvent<?, ?>> events) {
+    public List<CloudRuntimeEvent<?, ?>> optimize(List<CloudRuntimeEvent<?, ?>> events) {
         resolveProcessInstanceId(events)
-            .ifPresent(processInstanceId -> {
-                LOGGER.debug("Building entity fetch graph for root process instance: {}",
-                             processInstanceId);
-                EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
+                .ifPresent(
+                        processInstanceId -> {
+                            LOGGER.debug(
+                                    "Building entity fetch graph for root process instance: {}",
+                                    processInstanceId);
+                            EntityGraph<ProcessInstanceEntity> entityGraph =
+                                    entityManager.createEntityGraph(ProcessInstanceEntity.class);
 
-                findRuntimeEvent(events,
-                                 CloudVariableEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes(VARIABLES));
-                findRuntimeEvent(events,
-                                 CloudTaskRuntimeEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes(TASKS));
-                findRuntimeEvent(events,
-                                 CloudBPMNActivityEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes(ACTIVITIES));
+                            findRuntimeEvent(events, CloudVariableEvent.class)
+                                    .ifPresent(e -> entityGraph.addAttributeNodes(VARIABLES));
+                            findRuntimeEvent(events, CloudTaskRuntimeEvent.class)
+                                    .ifPresent(e -> entityGraph.addAttributeNodes(TASKS));
+                            findRuntimeEvent(events, CloudBPMNActivityEvent.class)
+                                    .ifPresent(e -> entityGraph.addAttributeNodes(ACTIVITIES));
 
-                Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                       processInstanceId,
-                                                       Map.of(QueryHints.HINT_LOADGRAPH,
-                                                              entityGraph)))
-                        .ifPresent(rootProcessInstance -> {
-                            if (LOGGER.isDebugEnabled()) {
-                                LOGGER.debug("Fetched entity graph attributes {} for process instance: {}",
-                                             entityGraph.getAttributeNodes().stream().map(AttributeNode::getAttributeName).collect(Collectors.toList()),
-                                             processInstanceId);
-                            }
+                            Optional.ofNullable(
+                                            entityManager.find(
+                                                    ProcessInstanceEntity.class,
+                                                    processInstanceId,
+                                                    Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)))
+                                    .ifPresent(
+                                            rootProcessInstance -> {
+                                                if (LOGGER.isDebugEnabled()) {
+                                                    LOGGER.debug(
+                                                            "Fetched entity graph attributes {} for"
+                                                                    + " process instance: {}",
+                                                            entityGraph.getAttributeNodes().stream()
+                                                                    .map(
+                                                                            AttributeNode
+                                                                                    ::getAttributeName)
+                                                                    .collect(Collectors.toList()),
+                                                            processInstanceId);
+                                                }
+                                            });
                         });
-            });
 
         return events.stream()
-                     .sorted(Comparator.comparing(event -> Optional.ofNullable(order.get(event.getClass()))
-                                                                   .orElseGet(() -> order.get(CloudRuntimeEvent.class))))
-                     .collect(Collectors.toList());
+                .sorted(
+                        Comparator.comparing(
+                                event ->
+                                        Optional.ofNullable(order.get(event.getClass()))
+                                                .orElseGet(
+                                                        () -> order.get(CloudRuntimeEvent.class))))
+                .collect(Collectors.toList());
     }
 
     protected Optional<String> resolveProcessInstanceId(List<CloudRuntimeEvent<?, ?>> events) {
-        if (events.stream()
-                  .anyMatch(CloudProcessCreatedEvent.class::isInstance)) {
+        if (events.stream().anyMatch(CloudProcessCreatedEvent.class::isInstance)) {
             return Optional.empty();
         }
 
         return events.stream()
-                     .map(CloudRuntimeEvent::getProcessInstanceId)
-                     .filter(Objects::nonNull)
-                     .findFirst();
+                .map(CloudRuntimeEvent::getProcessInstanceId)
+                .filter(Objects::nonNull)
+                .findFirst();
     }
 
-    protected Optional<CloudRuntimeEvent<?, ?>> findRuntimeEvent(List<CloudRuntimeEvent<?, ?>> events,
-                                                                 Class<? extends CloudRuntimeEvent<?, ?>> runtimeEventClass) {
-        return events.stream()
-                     .filter(runtimeEventClass::isInstance)
-                     .findFirst();
+    protected Optional<CloudRuntimeEvent<?, ?>> findRuntimeEvent(
+            List<CloudRuntimeEvent<?, ?>> events,
+            Class<? extends CloudRuntimeEvent<?, ?>> runtimeEventClass) {
+        return events.stream().filter(runtimeEventClass::isInstance).findFirst();
     }
 
-    protected <T> Optional<T> findRuntimeEvent(List<CloudRuntimeEvent<?, ?>> events,
-                                               Class<? extends CloudRuntimeEvent<T, ?>> runtimeEventClass,
-                                               Predicate<T> predicate) {
+    protected <T> Optional<T> findRuntimeEvent(
+            List<CloudRuntimeEvent<?, ?>> events,
+            Class<? extends CloudRuntimeEvent<T, ?>> runtimeEventClass,
+            Predicate<T> predicate) {
         return events.stream()
-                     .filter(runtimeEventClass::isInstance)
-                     .map(runtimeEventClass::cast)
-                     .map(CloudRuntimeEvent::getEntity)
-                     .filter(predicate)
-                     .findFirst();
+                .filter(runtimeEventClass::isInstance)
+                .map(runtimeEventClass::cast)
+                .map(CloudRuntimeEvent::getEntity)
+                .filter(predicate)
+                .findFirst();
     }
 }

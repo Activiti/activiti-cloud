@@ -21,12 +21,10 @@ import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 
 import java.util.List;
 
-/**
- * Interface for validating {@link FlowNode} objects
- */
+/** Interface for validating {@link FlowNode} objects */
 public interface FlowNodeFlowsValidator extends ModelValidationErrorProducer {
 
-    List<ModelValidationError> validate (FlowNode flowNode);
+    List<ModelValidationError> validate(FlowNode flowNode);
 
     boolean canValidate(FlowNode flowNode);
 }

@@ -16,27 +16,20 @@
 package org.activiti.cloud.acc.shared.story;
 
 import net.thucydides.core.annotations.Steps;
+
 import org.activiti.cloud.acc.shared.steps.AuthenticationSteps;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
 
-/**
- * Authentication actions
- */
+/** Authentication actions */
 public class AuthenticationActions {
 
-    @Steps
-    private AuthenticationSteps authenticationSteps;
+    @Steps private AuthenticationSteps authenticationSteps;
 
     @Given("the user is authenticated as $authUsername")
     @When("another user is authenticated as $authUsername")
-    public void authenticateUser(String authUsername) throws Exception{
+    public void authenticateUser(String authUsername) throws Exception {
         authenticationSteps.authenticateUser(authUsername);
         authenticationSteps.ensureUserIsAuthenticated();
     }
-
-
-
-
-
 }

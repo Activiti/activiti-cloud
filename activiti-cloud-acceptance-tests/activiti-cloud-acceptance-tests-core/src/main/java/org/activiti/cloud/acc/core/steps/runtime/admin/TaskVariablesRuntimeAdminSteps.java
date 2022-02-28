@@ -16,6 +16,7 @@
 package org.activiti.cloud.acc.core.steps.runtime.admin;
 
 import net.thucydides.core.annotations.Step;
+
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskVariablesRuntimeAdminService;
@@ -26,33 +27,33 @@ import org.springframework.hateoas.CollectionModel;
 @EnableRuntimeFeignContext
 public class TaskVariablesRuntimeAdminSteps {
 
-    @Autowired
-    private TaskVariablesRuntimeAdminService taskRuntimeService;
+    @Autowired private TaskVariablesRuntimeAdminService taskRuntimeService;
 
     @Step
-    public void updateVariable(String taskId, String name, Object value){
+    public void updateVariable(String taskId, String name, Object value) {
 
-        taskRuntimeService.updateTaskVariable(taskId, name, TaskPayloadBuilder.updateVariable().withTaskId(taskId)
-                .withVariable(name, value).build());
+        taskRuntimeService.updateTaskVariable(
+                taskId,
+                name,
+                TaskPayloadBuilder.updateVariable()
+                        .withTaskId(taskId)
+                        .withVariable(name, value)
+                        .build());
     }
 
     @Step
-    public void createVariable(String taskId,
-                               String name,
-                               Object value) {
+    public void createVariable(String taskId, String name, Object value) {
 
-        taskRuntimeService.createTaskVariable(taskId,
-                                              TaskPayloadBuilder
-                                                      .createVariable()
-                                                      .withTaskId(taskId)
-                                                      .withVariable(name,
-                                                                    value)
-                                                      .build());
+        taskRuntimeService.createTaskVariable(
+                taskId,
+                TaskPayloadBuilder.createVariable()
+                        .withTaskId(taskId)
+                        .withVariable(name, value)
+                        .build());
     }
 
     @Step
     public CollectionModel<CloudVariableInstance> getVariables(String taskId) {
         return taskRuntimeService.getVariables(taskId);
     }
-
 }

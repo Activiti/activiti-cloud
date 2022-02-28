@@ -18,9 +18,7 @@ package org.activiti.cloud.acc.shared.rest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Dirty context configuration
- */
+/** Dirty context configuration */
 @Configuration
 public class DirtyContextConfiguration {
 

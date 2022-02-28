@@ -38,82 +38,98 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,
-    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+        classes = RuntimeITConfiguration.class,
+        initializers = {
+            RabbitMQContainerApplicationInitializer.class,
+            KeycloakContainerApplicationInitializer.class
+        })
 public class MessageIT {
 
-    @Autowired
-    private RuntimeService runtimeService;
+    @Autowired private RuntimeService runtimeService;
 
-    @Autowired
-    private MessageRestTemplate messageRestTemplate;
+    @Autowired private MessageRestTemplate messageRestTemplate;
 
     @Test
     public void shouldDeliverMessagesViaRestApi() {
-        //given
-        StartMessagePayload startMessage = MessagePayloadBuilder.start("startMessage")
-            .withBusinessKey("businessId")
-            .withVariable("correlationKey", "correlationId")
-            .build();
-        //when
-        ResponseEntity<CloudProcessInstance> startResponse = messageRestTemplate.message(startMessage);
+        // given
+        StartMessagePayload startMessage =
+                MessagePayloadBuilder.start("startMessage")
+                        .withBusinessKey("businessId")
+                        .withVariable("correlationKey", "correlationId")
+                        .build();
+        // when
+        ResponseEntity<CloudProcessInstance> startResponse =
+                messageRestTemplate.message(startMessage);
 
-        //then
+        // then
         assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(startResponse.getBody()).isNotNull();
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .includeProcessVariables()
-            .processDefinitionKey("shouldDeliverMessagesViaRestApi")
-            .list()).hasSize(1)
-            .extracting(ProcessInstance::getProcessVariables)
-            .extracting("correlationKey")
-            .contains("correlationId");
+        assertThat(
+                        runtimeService
+                                .createProcessInstanceQuery()
+                                .includeProcessVariables()
+                                .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+                                .list())
+                .hasSize(1)
+                .extracting(ProcessInstance::getProcessVariables)
+                .extracting("correlationKey")
+                .contains("correlationId");
 
-        //given
-        ReceiveMessagePayload boundaryMessage = MessagePayloadBuilder.receive("boundaryMessage")
-            .withCorrelationKey("correlationId")
-            .withVariable("customerKey", "customerId")
-            .build();
+        // given
+        ReceiveMessagePayload boundaryMessage =
+                MessagePayloadBuilder.receive("boundaryMessage")
+                        .withCorrelationKey("correlationId")
+                        .withVariable("customerKey", "customerId")
+                        .build();
 
-        //when
+        // when
         ResponseEntity<Void> boundaryResponse = messageRestTemplate.message(boundaryMessage);
 
-        //then
+        // then
         assertThat(boundaryResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .includeProcessVariables()
-            .processDefinitionKey("shouldDeliverMessagesViaRestApi")
-            .list()).hasSize(1)
-            .extracting(ProcessInstance::getProcessVariables)
-            .extracting("customerKey")
-            .contains("customerId");
-        //given
-        ReceiveMessagePayload catchMessage = MessagePayloadBuilder.receive("catchMessage")
-            .withCorrelationKey("customerId")
-            .build();
+        assertThat(
+                        runtimeService
+                                .createProcessInstanceQuery()
+                                .includeProcessVariables()
+                                .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+                                .list())
+                .hasSize(1)
+                .extracting(ProcessInstance::getProcessVariables)
+                .extracting("customerKey")
+                .contains("customerId");
+        // given
+        ReceiveMessagePayload catchMessage =
+                MessagePayloadBuilder.receive("catchMessage")
+                        .withCorrelationKey("customerId")
+                        .build();
 
         // when
         ResponseEntity<Void> catchResponse = messageRestTemplate.message(catchMessage);
 
         // then
         assertThat(catchResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .processDefinitionKey("shouldDeliverMessagesViaRestApi")
-            .list()).isEmpty();
+        assertThat(
+                        runtimeService
+                                .createProcessInstanceQuery()
+                                .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+                                .list())
+                .isEmpty();
     }
 
     @Test
     public void shouldReceive404NotFoundIfWrongMessageName() {
-        //given
-        StartMessagePayload startMessage = MessagePayloadBuilder.start("notFound")
-            .withBusinessKey("businessId")
-            .withVariable("correlationKey", "correlationId")
-            .build();
-        //when
-        ResponseEntity<CloudProcessInstance> startResponse = messageRestTemplate.message(startMessage);
+        // given
+        StartMessagePayload startMessage =
+                MessagePayloadBuilder.start("notFound")
+                        .withBusinessKey("businessId")
+                        .withVariable("correlationKey", "correlationId")
+                        .build();
+        // when
+        ResponseEntity<CloudProcessInstance> startResponse =
+                messageRestTemplate.message(startMessage);
 
-        //then
+        // then
         assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
-
 }

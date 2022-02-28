@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -29,6 +26,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class QueryLinkRelationProvider implements LinkRelationProvider {
 
@@ -36,24 +36,22 @@ public class QueryLinkRelationProvider implements LinkRelationProvider {
 
     public QueryLinkRelationProvider() {
         resourceRelationDescriptors = new HashMap<>();
-        resourceRelationDescriptors.put(ProcessDefinitionEntity.class,
-                                        new ResourceRelationDescriptor("processDefinition",
-                                                                       "processDefinitions"));
-        resourceRelationDescriptors.put(ProcessInstanceEntity.class,
-                                        new ResourceRelationDescriptor("processInstance",
-                                                                       "processInstances"));
-        resourceRelationDescriptors.put(TaskEntity.class,
-                                        new ResourceRelationDescriptor("task",
-                                                                       "tasks"));
-        resourceRelationDescriptors.put(ProcessVariableEntity.class,
-                                        new ResourceRelationDescriptor("variable",
-                                                                       "variables"));
-        resourceRelationDescriptors.put(TaskVariableEntity.class,
-                                        new ResourceRelationDescriptor("variable",
-                                                                       "variables"));
-        resourceRelationDescriptors.put(ApplicationEntity.class,
-                                        new ResourceRelationDescriptor("application",
-                                                                        "applications"));
+        resourceRelationDescriptors.put(
+                ProcessDefinitionEntity.class,
+                new ResourceRelationDescriptor("processDefinition", "processDefinitions"));
+        resourceRelationDescriptors.put(
+                ProcessInstanceEntity.class,
+                new ResourceRelationDescriptor("processInstance", "processInstances"));
+        resourceRelationDescriptors.put(
+                TaskEntity.class, new ResourceRelationDescriptor("task", "tasks"));
+        resourceRelationDescriptors.put(
+                ProcessVariableEntity.class,
+                new ResourceRelationDescriptor("variable", "variables"));
+        resourceRelationDescriptors.put(
+                TaskVariableEntity.class, new ResourceRelationDescriptor("variable", "variables"));
+        resourceRelationDescriptors.put(
+                ApplicationEntity.class,
+                new ResourceRelationDescriptor("application", "applications"));
     }
 
     @Override
@@ -77,8 +75,7 @@ public class QueryLinkRelationProvider implements LinkRelationProvider {
 
         private LinkRelation collectionResourceRel;
 
-        public ResourceRelationDescriptor(String itemResourceRel,
-                                          String collectionResourceRel) {
+        public ResourceRelationDescriptor(String itemResourceRel, String collectionResourceRel) {
             this.itemResourceRel = LinkRelation.of(itemResourceRel);
             this.collectionResourceRel = LinkRelation.of(collectionResourceRel);
         }

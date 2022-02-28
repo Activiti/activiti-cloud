@@ -28,8 +28,7 @@ public class TimerCancelledAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_CANCELLED_EVENT = "TimerCancelledEvent";
 
-    public TimerCancelledAuditEventEntity() {
-    }
+    public TimerCancelledAuditEventEntity() {}
 
     public TimerCancelledAuditEventEntity(CloudBPMNTimerCancelledEvent cloudEvent) {
         super(cloudEvent);
@@ -38,8 +37,9 @@ public class TimerCancelledAuditEventEntity extends TimerAuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TimerCancelledAuditEventEntity [toString()=").append(super.toString()).append("]");
+        builder.append("TimerCancelledAuditEventEntity [toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
-
 }

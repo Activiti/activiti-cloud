@@ -16,43 +16,44 @@
 package org.activiti.cloud.acc.core.rest;
 
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
+import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
-
-import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * DirtyContextHandler for runtime bundle
- */
+/** DirtyContextHandler for runtime bundle */
 public class RuntimeDirtyContextHandler {
 
     private final String TASKS_PATH = "/v1/tasks/";
     private final String PROCESS_INSTANCES_PATH = "/v1/process-instances/";
 
-    @Autowired
-    private DirtyContextHandler dirtyContextHandler;
+    @Autowired private DirtyContextHandler dirtyContextHandler;
 
-    @Autowired
-    private RuntimeTestsConfigurationProperties configurationProperties;
+    @Autowired private RuntimeTestsConfigurationProperties configurationProperties;
 
     /**
      * Set a process instance as dirty.
+     *
      * @param processInstance the process instance
      * @return the dirty process instance
      */
     public CloudProcessInstance dirty(final CloudProcessInstance processInstance) {
-        dirtyContextHandler.dirty(configurationProperties.getRuntimeBundleUrl() + PROCESS_INSTANCES_PATH + processInstance.getId());
+        dirtyContextHandler.dirty(
+                configurationProperties.getRuntimeBundleUrl()
+                        + PROCESS_INSTANCES_PATH
+                        + processInstance.getId());
         return processInstance;
     }
 
     /**
      * Set a task as dirty.
+     *
      * @param task the task
      * @return the dirty task
      */
     public CloudTask dirty(final CloudTask task) {
-        dirtyContextHandler.dirty(configurationProperties.getRuntimeBundleUrl() + TASKS_PATH + task.getId());
+        dirtyContextHandler.dirty(
+                configurationProperties.getRuntimeBundleUrl() + TASKS_PATH + task.getId());
         return task;
     }
 }

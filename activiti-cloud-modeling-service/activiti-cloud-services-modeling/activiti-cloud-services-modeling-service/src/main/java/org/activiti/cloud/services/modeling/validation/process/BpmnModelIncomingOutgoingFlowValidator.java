@@ -24,26 +24,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-/**
- * Implementation of {@link BpmnCommonModelValidator} for validating Incoming and Outgoing flows
- */
+/** Implementation of {@link BpmnCommonModelValidator} for validating Incoming and Outgoing flows */
 public class BpmnModelIncomingOutgoingFlowValidator implements BpmnCommonModelValidator {
 
     private final List<FlowNodeFlowsValidator> flowNodeFlowsValidators;
     private final FlowElementsExtractor flowElementsExtractor;
 
     public BpmnModelIncomingOutgoingFlowValidator(
-        List<FlowNodeFlowsValidator> flowNodeFlowsValidators,
-        FlowElementsExtractor flowElementsExtractor) {
+            List<FlowNodeFlowsValidator> flowNodeFlowsValidators,
+            FlowElementsExtractor flowElementsExtractor) {
         this.flowNodeFlowsValidators = flowNodeFlowsValidators;
         this.flowElementsExtractor = flowElementsExtractor;
     }
 
     @Override
-    public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
+    public Stream<ModelValidationError> validate(
+            BpmnModel bpmnModel, ValidationContext validationContext) {
         List<ModelValidationError> errors = new ArrayList<>();
-        flowElementsExtractor.extractFlowElements(bpmnModel, FlowNode.class)
-            .forEach(flowNode -> errors.addAll(validateFlowNode(flowNode)));
+        flowElementsExtractor
+                .extractFlowElements(bpmnModel, FlowNode.class)
+                .forEach(flowNode -> errors.addAll(validateFlowNode(flowNode)));
         return errors.stream();
     }
 
@@ -51,7 +51,7 @@ public class BpmnModelIncomingOutgoingFlowValidator implements BpmnCommonModelVa
 
         List<ModelValidationError> errors = new ArrayList<>();
 
-        for (FlowNodeFlowsValidator validator: flowNodeFlowsValidators) {
+        for (FlowNodeFlowsValidator validator : flowNodeFlowsValidators) {
             if (validator.canValidate(flowNode)) {
                 errors.addAll(validator.validate(flowNode));
             }

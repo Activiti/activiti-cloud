@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -23,9 +24,8 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collections;
-
 import com.querydsl.core.types.Predicate;
+
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -52,6 +52,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.Collections;
+
 @WebMvcTest(ProcessInstanceTasksController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
@@ -63,53 +65,56 @@ import org.springframework.test.web.servlet.MvcResult;
 @WithMockUser
 public class ProcessInstanceEntityTasksControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private TaskRepository taskRepository;
+    @MockBean private TaskRepository taskRepository;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
+    @MockBean private UserGroupManager userGroupManager;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;
+    @MockBean private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;
+    @MockBean private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
-    private TaskLookupRestrictionService taskLookupRestrictionService;
+    @MockBean private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @Test
-    public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
-        //given
+    public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+            throws Exception {
+        // given
         TaskEntity taskEntity = buildDefaultTask();
         Predicate restrictionPredicate = mock(Predicate.class);
-        given(taskLookupRestrictionService.restrictTaskQuery(any())).willReturn(restrictionPredicate);
-        given(taskRepository.findInProcessInstanceScope(any(),
-                                     any(Pageable.class)))
-                .willReturn(new PageImpl<>(Collections.singletonList(taskEntity),
-                                           new AlfrescoPageRequest(11, 10, PageRequest.of(0,
-                                                          10)),
-                                           12));
+        given(taskLookupRestrictionService.restrictTaskQuery(any()))
+                .willReturn(restrictionPredicate);
+        given(taskRepository.findInProcessInstanceScope(any(), any(Pageable.class)))
+                .willReturn(
+                        new PageImpl<>(
+                                Collections.singletonList(taskEntity),
+                                new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)),
+                                12));
 
-        //when
-        MvcResult result = mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
-                                               taskEntity.getProcessInstanceId())
-                                                      .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk())
-                .andReturn();
+        // when
+        MvcResult result =
+                mockMvc.perform(
+                                get(
+                                                "/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
+                                                taskEntity.getProcessInstanceId())
+                                        .accept(MediaType.APPLICATION_JSON))
+                        // then
+                        .andExpect(status().isOk())
+                        .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+                .node("list.pagination.skipCount")
+                .isEqualTo(11)
+                .node("list.pagination.maxItems")
+                .isEqualTo(10)
+                .node("list.pagination.count")
+                .isEqualTo(1)
+                .node("list.pagination.hasMoreItems")
+                .isEqualTo(false)
+                .node("list.pagination.totalItems")
+                .isEqualTo(12);
     }
 }

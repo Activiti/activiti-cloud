@@ -28,8 +28,7 @@ public class TaskSuspendedEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_SUSPENDED_EVENT = "TaskSuspendedEvent";
 
-    public TaskSuspendedEventEntity() {
-    }
+    public TaskSuspendedEventEntity() {}
 
     public TaskSuspendedEventEntity(CloudTaskSuspendedEvent cloudEvent) {
         super(cloudEvent);
@@ -38,7 +37,9 @@ public class TaskSuspendedEventEntity extends TaskAuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TaskSuspendedEventEntity [toString()=").append(super.toString()).append("]");
+        builder.append("TaskSuspendedEventEntity [toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

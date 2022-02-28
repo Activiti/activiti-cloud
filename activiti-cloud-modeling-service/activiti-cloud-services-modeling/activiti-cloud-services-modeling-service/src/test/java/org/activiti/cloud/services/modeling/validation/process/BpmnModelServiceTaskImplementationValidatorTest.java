@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
-import static java.lang.String.format;
-import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 
-import java.util.UUID;
-import java.util.stream.Stream;
+import static java.lang.String.format;
+import static java.util.Collections.singleton;
+
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -36,37 +35,46 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+import java.util.stream.Stream;
+
 @ExtendWith(MockitoExtension.class)
 public class BpmnModelServiceTaskImplementationValidatorTest {
 
-    @InjectMocks
-    private BpmnModelServiceTaskImplementationValidator validator;
+    @InjectMocks private BpmnModelServiceTaskImplementationValidator validator;
 
-    @Mock
-    private ValidationContext validationContext;
+    @Mock private ValidationContext validationContext;
 
-    @Mock
-    private FlowElementsExtractor flowElementsExtractor;
+    @Mock private FlowElementsExtractor flowElementsExtractor;
 
     @Test
     public void should_returnError_when_validatingInvalidImplementation() {
-        //given
+        // given
         ServiceTask serviceTask = buildServiceTask("invalid-implementation");
         BpmnModel model = new BpmnModel();
 
-        //when
+        // when
         given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+                .willReturn(singleton(serviceTask));
 
-        //then
+        // then
         assertThat(validator.validate(model, validationContext))
-                .extracting(ModelValidationError::getProblem,
+                .extracting(
+                        ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
                         ModelValidationError::getValidatorSetName,
                         ModelValidationError::getReferenceId)
-                .contains(tuple(BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
-                        format(BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION, serviceTask.getId()),
-                        BpmnModelServiceTaskImplementationValidator.SERVICE_USER_TASK_VALIDATOR_NAME, null));
+                .contains(
+                        tuple(
+                                BpmnModelServiceTaskImplementationValidator
+                                        .INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
+                                format(
+                                        BpmnModelServiceTaskImplementationValidator
+                                                .INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
+                                        serviceTask.getId()),
+                                BpmnModelServiceTaskImplementationValidator
+                                        .SERVICE_USER_TASK_VALIDATOR_NAME,
+                                null));
     }
 
     private ServiceTask buildServiceTask(String implementation) {
@@ -79,52 +87,60 @@ public class BpmnModelServiceTaskImplementationValidatorTest {
 
     @Test
     public void should_returnError_when_validatingIncompleteServiceImplementation() {
-        //given
+        // given
         ServiceTask serviceTask = buildServiceTask("invalid-implementation");
         BpmnModel model = new BpmnModel();
 
         given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+                .willReturn(singleton(serviceTask));
 
-        //when
-        final Stream<ModelValidationError> validationResult = validator.validate(model, validationContext);
+        // when
+        final Stream<ModelValidationError> validationResult =
+                validator.validate(model, validationContext);
 
-        //then
+        // then
         assertThat(validationResult)
-                .extracting(ModelValidationError::getProblem,
+                .extracting(
+                        ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
                         ModelValidationError::getValidatorSetName,
                         ModelValidationError::getReferenceId)
-                .contains(tuple(BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
-                        format(BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION, serviceTask.getId()),
-                        BpmnModelServiceTaskImplementationValidator.SERVICE_USER_TASK_VALIDATOR_NAME, null));
+                .contains(
+                        tuple(
+                                BpmnModelServiceTaskImplementationValidator
+                                        .INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
+                                format(
+                                        BpmnModelServiceTaskImplementationValidator
+                                                .INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
+                                        serviceTask.getId()),
+                                BpmnModelServiceTaskImplementationValidator
+                                        .SERVICE_USER_TASK_VALIDATOR_NAME,
+                                null));
     }
-
 
     private static Stream<Arguments> provideValidServiceTaskImplementations() {
         return Stream.of(
-            Arguments.of("script.EXECUTE"),
-            Arguments.of("email-service.SEND"),
-            Arguments.of("docgen-service.GENERATE"),
-            Arguments.of("content-service.MOVE_FOLDER")
-        );
+                Arguments.of("script.EXECUTE"),
+                Arguments.of("email-service.SEND"),
+                Arguments.of("docgen-service.GENERATE"),
+                Arguments.of("content-service.MOVE_FOLDER"));
     }
 
     @ParameterizedTest
     @MethodSource("provideValidServiceTaskImplementations")
     public void should_returnEmpty_when_validImplementation(String implementation) {
-        //given
+        // given
         ServiceTask serviceTask = buildServiceTask(implementation);
         BpmnModel model = new BpmnModel();
 
         given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+                .willReturn(singleton(serviceTask));
 
-        //when
-        final Stream<ModelValidationError> validationResult = validator.validate(model, validationContext);
+        // when
+        final Stream<ModelValidationError> validationResult =
+                validator.validate(model, validationContext);
 
-        //then
+        // then
         assertThat(validationResult).isEmpty();
     }
-
 }

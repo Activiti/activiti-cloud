@@ -34,5 +34,4 @@ public interface RuntimeMockStreams {
 
     @Input(INTEGRATION_ERROR_CONSUMER)
     SubscribableChannel integrationErrorConsumer();
-
 }

@@ -28,11 +28,9 @@ import org.mockito.Mock;
 
 public class ActivateProcessInstanceCmdExecutorTest {
 
-    @InjectMocks
-    private ResumeProcessInstanceCmdExecutor activateProcessInstanceCmdExecutor;
+    @InjectMocks private ResumeProcessInstanceCmdExecutor activateProcessInstanceCmdExecutor;
 
-    @Mock
-    private ProcessAdminRuntime processAdminRuntime;
+    @Mock private ProcessAdminRuntime processAdminRuntime;
 
     @BeforeEach
     public void setUp() {
@@ -43,11 +41,11 @@ public class ActivateProcessInstanceCmdExecutorTest {
     public void resumeProcessInstanceCmdExecutorTest() {
         ResumeProcessPayload resumeProcessPayload = new ResumeProcessPayload("x");
 
-        assertThat(activateProcessInstanceCmdExecutor.getHandledType()).isEqualTo(ResumeProcessPayload.class.getName());
+        assertThat(activateProcessInstanceCmdExecutor.getHandledType())
+                .isEqualTo(ResumeProcessPayload.class.getName());
 
         activateProcessInstanceCmdExecutor.execute(resumeProcessPayload);
 
         verify(processAdminRuntime).resume(resumeProcessPayload);
-
     }
 }

@@ -23,12 +23,12 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEve
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
 
-public class ProcessCompletedEventConverter  extends BaseEventToEntityConverter {
-    
+public class ProcessCompletedEventConverter extends BaseEventToEntityConverter {
+
     public ProcessCompletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name();
@@ -41,10 +41,12 @@ public class ProcessCompletedEventConverter  extends BaseEventToEntityConverter 
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ProcessCompletedEventEntity processCompletedEventEntity = (ProcessCompletedEventEntity) auditEventEntity;
-        
-        return new CloudProcessCompletedEventImpl(processCompletedEventEntity.getEventId(),
-                                                  processCompletedEventEntity.getTimestamp(),
-                                                  processCompletedEventEntity.getProcessInstance());
+        ProcessCompletedEventEntity processCompletedEventEntity =
+                (ProcessCompletedEventEntity) auditEventEntity;
+
+        return new CloudProcessCompletedEventImpl(
+                processCompletedEventEntity.getEventId(),
+                processCompletedEventEntity.getTimestamp(),
+                processCompletedEventEntity.getProcessInstance());
     }
 }

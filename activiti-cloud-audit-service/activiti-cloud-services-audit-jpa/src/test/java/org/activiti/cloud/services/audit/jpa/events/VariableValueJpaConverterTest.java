@@ -18,9 +18,10 @@ package org.activiti.cloud.services.audit.jpa.events;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-import java.math.BigDecimal;
 import org.activiti.cloud.services.audit.api.AuditException;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 class VariableValueJpaConverterTest {
 
@@ -85,28 +86,32 @@ class VariableValueJpaConverterTest {
 
     @Test
     void should_convertToEntityAttribute_when_stringEntity() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute("{\"value\":\"stringValue\"}");
+        VariableValue<?> result =
+                variableValueJpaConverter.convertToEntityAttribute("{\"value\":\"stringValue\"}");
 
         assertThat(result.getValue()).isEqualTo("stringValue");
     }
 
     @Test
     void should_convertToEntityAttribute_when_booleanEntity() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute("{\"value\":true}");
+        VariableValue<?> result =
+                variableValueJpaConverter.convertToEntityAttribute("{\"value\":true}");
 
         assertThat(result.getValue()).isEqualTo(true);
     }
 
     @Test
     void should_convertToEntityAttribute_when_integerEntity() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute("{\"value\":123}");
+        VariableValue<?> result =
+                variableValueJpaConverter.convertToEntityAttribute("{\"value\":123}");
 
         assertThat(result.getValue()).isEqualTo(123);
     }
 
     @Test
     void should_convertToEntityAttribute_when_doubleEntity() {
-        VariableValue<?> result = variableValueJpaConverter.convertToEntityAttribute("{\"value\":1234.5678}");
+        VariableValue<?> result =
+                variableValueJpaConverter.convertToEntityAttribute("{\"value\":1234.5678}");
 
         assertThat(result.getValue()).isEqualTo(1234.5678);
     }
@@ -127,13 +132,12 @@ class VariableValueJpaConverterTest {
 
     @Test
     void should_throwExceptionConvertToEntityAttribute() {
-        Throwable exception = catchThrowable( () -> variableValueJpaConverter.convertToEntityAttribute("{..invalidJson"));
+        Throwable exception =
+                catchThrowable(
+                        () -> variableValueJpaConverter.convertToEntityAttribute("{..invalidJson"));
 
         assertThat(exception)
-            .isInstanceOf(AuditException.class)
-            .hasMessage("Unable to deserialize object.");
+                .isInstanceOf(AuditException.class)
+                .hasMessage("Unable to deserialize object.");
     }
-
-
-
 }

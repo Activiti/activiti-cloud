@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.messages.core.router;
 
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION;
+
 import org.springframework.integration.mapping.MessageMappingException;
 import org.springframework.integration.router.AbstractMessageRouter;
 import org.springframework.messaging.Message;
@@ -25,8 +27,6 @@ import org.springframework.messaging.core.DestinationResolver;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
-
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION;
 
 public class CommandConsumerMessageRouter extends AbstractMessageRouter {
 
@@ -40,14 +40,18 @@ public class CommandConsumerMessageRouter extends AbstractMessageRouter {
     protected Collection<MessageChannel> determineTargetChannels(Message<?> message) {
         Optional<String> destination = getHeader(message, MESSAGE_EVENT_OUTPUT_DESTINATION);
 
-        MessageChannel messageChannel = destination.map(destinationResolver::resolveDestination)
-                                                   .orElseThrow(() -> new MessageMappingException(message,
-                                                                                                  "Unable to determine target channel for message"));
+        MessageChannel messageChannel =
+                destination
+                        .map(destinationResolver::resolveDestination)
+                        .orElseThrow(
+                                () ->
+                                        new MessageMappingException(
+                                                message,
+                                                "Unable to determine target channel for message"));
         return Arrays.asList(messageChannel);
     }
 
     private Optional<String> getHeader(Message<?> message, String key) {
-        return Optional.ofNullable(message.getHeaders()
-                                          .get(key, String.class));
+        return Optional.ofNullable(message.getHeaders().get(key, String.class));
     }
 }

@@ -15,14 +15,15 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
-import java.util.List;
-
 import graphql.schema.DataFetchingEnvironment;
+
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
+
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 public interface EngineEventsPublisherFactory {
 
     public Flux<List<EngineEvent>> getPublisher(DataFetchingEnvironment environment);
-
 }

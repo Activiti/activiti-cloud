@@ -15,17 +15,16 @@
  */
 package org.activiti.cloud.acc.modeling.modeling;
 
-import java.util.Collection;
-import java.util.Optional;
-
 import net.serenitybdd.core.Serenity;
+
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.hateoas.EntityModel;
 
-/**
- * ModelingContext handler
- */
+import java.util.Collection;
+import java.util.Optional;
+
+/** ModelingContext handler */
 public class ModelingContextHandler {
 
     private static final String MODELING_CURRENT_CONTEXT = "modelingCurrentContext";
@@ -39,8 +38,7 @@ public class ModelingContextHandler {
     }
 
     public void setCurrentModelingObject(EntityModel<?> currentModelingObject) {
-        Serenity.setSessionVariable(MODELING_CURRENT_CONTEXT)
-                .to(currentModelingObject);
+        Serenity.setSessionVariable(MODELING_CURRENT_CONTEXT).to(currentModelingObject);
     }
 
     public Optional<FileContent> getCurrentModelingFile() {
@@ -48,8 +46,7 @@ public class ModelingContextHandler {
     }
 
     public void setCurrentModelingFile(FileContent fileContent) {
-        Serenity.setSessionVariable(MODELING_CURRENT_FILE)
-                .to(fileContent);
+        Serenity.setSessionVariable(MODELING_CURRENT_FILE).to(fileContent);
     }
 
     public void setCurrentProjects(Collection<EntityModel<Project>> projects) {

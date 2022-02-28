@@ -26,22 +26,24 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity
-@DiscriminatorValue(value = MessageSubscriptionCancelledAuditEventEntity.MESSAGE_SUBSCRIPTION_CANCELLED_EVENT)
+@DiscriminatorValue(
+        value = MessageSubscriptionCancelledAuditEventEntity.MESSAGE_SUBSCRIPTION_CANCELLED_EVENT)
 @DynamicInsert
 public class MessageSubscriptionCancelledAuditEventEntity extends AuditEventEntity {
 
-    protected static final String MESSAGE_SUBSCRIPTION_CANCELLED_EVENT = "MsgSubscriptionCancelledEvent";
+    protected static final String MESSAGE_SUBSCRIPTION_CANCELLED_EVENT =
+            "MsgSubscriptionCancelledEvent";
 
     @Convert(converter = MessageSubscriptionJpaJsonConverter.class)
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private MessageSubscription messageSubscription;
 
-    public MessageSubscriptionCancelledAuditEventEntity() {
-    }
+    public MessageSubscriptionCancelledAuditEventEntity() {}
 
-    public MessageSubscriptionCancelledAuditEventEntity(CloudMessageSubscriptionCancelledEvent cloudEvent) {
+    public MessageSubscriptionCancelledAuditEventEntity(
+            CloudMessageSubscriptionCancelledEvent cloudEvent) {
         super(cloudEvent);
-        setMessageSubscription(cloudEvent.getEntity()) ;
+        setMessageSubscription(cloudEvent.getEntity());
         if (messageSubscription != null) {
             setProcessDefinitionId(messageSubscription.getProcessDefinitionId());
             setProcessInstanceId(messageSubscription.getProcessInstanceId());

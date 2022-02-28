@@ -17,6 +17,12 @@ package org.activiti.cloud.services.test.asserts;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import net.javacrumbs.jsonunit.fluent.JsonFluentAssert;
+import net.javacrumbs.jsonunit.fluent.JsonFluentAssert.ConfigurableJsonFluentAssert;
+
+import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.common.zip.ZipStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,14 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import net.javacrumbs.jsonunit.fluent.JsonFluentAssert;
-import net.javacrumbs.jsonunit.fluent.JsonFluentAssert.ConfigurableJsonFluentAssert;
-import org.activiti.cloud.services.common.file.FileContent;
-import org.activiti.cloud.services.common.zip.ZipStream;
 
-/**
- * Asserts for zip content
- */
+/** Asserts for zip content */
 public class AssertZipContent {
 
     private final String name;
@@ -48,12 +48,14 @@ public class AssertZipContent {
         this.name = fileContent.getFilename();
         this.contentType = fileContent.getContentType();
         try (InputStream inputStream = new ByteArrayInputStream(fileContent.getFileContent())) {
-            ZipStream.of(inputStream).forEach(zipEntry -> {
-                entries.add(zipEntry.getName());
-                zipEntry.getContent()
-                        .ifPresent(bytes -> contentMap.put(zipEntry.getName(),
-                                                           bytes));
-            });
+            ZipStream.of(inputStream)
+                    .forEach(
+                            zipEntry -> {
+                                entries.add(zipEntry.getName());
+                                zipEntry.getContent()
+                                        .ifPresent(
+                                                bytes -> contentMap.put(zipEntry.getName(), bytes));
+                            });
         }
     }
 
@@ -83,24 +85,21 @@ public class AssertZipContent {
         return this;
     }
 
-    public AssertZipContent hasContent(String entry,
-                                       byte[] expectedContent) {
-        hasContent(entry,
-                   new String(expectedContent));
+    public AssertZipContent hasContent(String entry, byte[] expectedContent) {
+        hasContent(entry, new String(expectedContent));
         return this;
     }
 
-    public AssertZipContent hasContent(String entry,
-                                       String expectedContent) {
-        hasContentSatisfying(entry,
-                             actualContent -> {
-                                 assertThat(actualContent).isEqualTo(expectedContent);
-                             });
+    public AssertZipContent hasContent(String entry, String expectedContent) {
+        hasContentSatisfying(
+                entry,
+                actualContent -> {
+                    assertThat(actualContent).isEqualTo(expectedContent);
+                });
         return this;
     }
 
-    public AssertZipContent hasContentSatisfying(String entry,
-                                                 Consumer<String> requirement) {
+    public AssertZipContent hasContentSatisfying(String entry, Consumer<String> requirement) {
         assertThat(zipContent(entry)).hasValueSatisfying(requirement);
         return this;
     }
@@ -110,8 +109,8 @@ public class AssertZipContent {
         return this;
     }
 
-    public AssertZipContent hasJsonContentSatisfying(String entry,
-                                                     Consumer<ConfigurableJsonFluentAssert> requirement) {
+    public AssertZipContent hasJsonContentSatisfying(
+            String entry, Consumer<ConfigurableJsonFluentAssert> requirement) {
         assertThat(zipContent(entry))
                 .map(JsonFluentAssert::assertThatJson)
                 .hasValueSatisfying(requirement);
@@ -119,8 +118,6 @@ public class AssertZipContent {
     }
 
     private Optional<String> zipContent(String entry) {
-        return Optional.ofNullable(entry)
-                .map(contentMap::get)
-                .map(String::new);
+        return Optional.ofNullable(entry).map(contentMap::get).map(String::new);
     }
 }

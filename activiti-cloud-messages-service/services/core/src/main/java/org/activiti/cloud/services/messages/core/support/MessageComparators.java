@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.services.messages.core.support;
 
-import java.util.Comparator;
-
 import org.springframework.integration.aggregator.MessageSequenceComparator;
 import org.springframework.messaging.Message;
 
+import java.util.Comparator;
+
 public class MessageComparators {
-    
+
     public static final Comparator<Message<?>> TIMESTAMP = new MessageTimestampComparator();
 
     public static final Comparator<Message<?>> SEQUENCE = new MessageSequenceComparator();
-    
 }

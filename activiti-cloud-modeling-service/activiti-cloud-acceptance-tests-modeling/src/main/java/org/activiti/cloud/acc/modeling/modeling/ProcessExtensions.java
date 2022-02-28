@@ -15,7 +15,16 @@
  */
 package org.activiti.cloud.acc.modeling.modeling;
 
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
+
+import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
+
 import com.google.common.collect.ImmutableMap;
+
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.api.process.ProcessVariable;
 import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
@@ -27,16 +36,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toMap;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
-import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
-import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
-
-/**
- * Modeling utils
- */
+/** Modeling utils */
 public class ProcessExtensions {
 
     public static final String EXTENSIONS_TASK_NAME = "ServiceTask";
@@ -54,25 +54,32 @@ public class ProcessExtensions {
         return extensions;
     }
 
-    public static Map<String, ProcessVariable> processVariables(Collection<String> processVariables) {
-        return processVariables
-                .stream()
-                .collect(Collectors.toMap(Function.identity(),
-                                          ProcessExtensions::toProcessVariable));
+    public static Map<String, ProcessVariable> processVariables(
+            Collection<String> processVariables) {
+        return processVariables.stream()
+                .collect(
+                        Collectors.toMap(
+                                Function.identity(), ProcessExtensions::toProcessVariable));
     }
 
-    public static Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>> variableMappings(Collection<String> processVariables) {
-        return singletonMap(EXTENSIONS_TASK_NAME,
-                            ImmutableMap.of(INPUTS,
-                                            processVariables
-                                                    .stream()
-                                                    .collect(toMap(Function.identity(),
-                                                                   ProcessExtensions::toFixedProcessVariableMapping)),
-                                            OUTPUTS,
-                                            processVariables
-                                                    .stream()
-                                                    .collect(toMap(Function.identity(),
-                                                                   ProcessExtensions::toVariableProcessVariableMapping))));
+    public static Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>>
+            variableMappings(Collection<String> processVariables) {
+        return singletonMap(
+                EXTENSIONS_TASK_NAME,
+                ImmutableMap.of(
+                        INPUTS,
+                        processVariables.stream()
+                                .collect(
+                                        toMap(
+                                                Function.identity(),
+                                                ProcessExtensions::toFixedProcessVariableMapping)),
+                        OUTPUTS,
+                        processVariables.stream()
+                                .collect(
+                                        toMap(
+                                                Function.identity(),
+                                                ProcessExtensions
+                                                        ::toVariableProcessVariableMapping))));
     }
 
     public static ProcessVariable toProcessVariable(String name) {

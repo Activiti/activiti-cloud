@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -48,6 +47,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 @WebMvcTest(ProcessModelController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
@@ -59,33 +60,25 @@ import org.springframework.test.web.servlet.MockMvc;
 @WithMockUser
 public class ProcessModelControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private ProcessModelRepository processModelRepository;
+    @MockBean private ProcessModelRepository processModelRepository;
 
-    @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;
+    @MockBean private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
+    @MockBean private UserGroupManager userGroupManager;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;
+    @MockBean private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
-    private EntityFinder entityFinder;
+    @MockBean private EntityFinder entityFinder;
 
-    @MockBean
-    private TaskRepository taskRepository;
+    @MockBean private TaskRepository taskRepository;
 
     @Test
     public void shouldReturnProcessModelById() throws Exception {
-        //given
+        // given
         given(securityPoliciesManager.arePoliciesDefined()).willReturn(true);
 
         String processDefinitionId = UUID.randomUUID().toString();
@@ -93,24 +86,30 @@ public class ProcessModelControllerIT {
         processDefinition.setKey("processKey");
         processDefinition.setServiceName("serviceName");
 
-        given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
+        given(
+                        securityPoliciesManager.canRead(
+                                processDefinition.getKey(), processDefinition.getServiceName()))
                 .willReturn(true);
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-        .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
+        given(
+                        entityFinder.findById(
+                                eq(processModelRepository), eq(processDefinitionId), anyString()))
+                .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
 
-        //when
-       mockMvc.perform(get("/v1/process-definitions/{processDefinitionId}/model",
-                                                  processDefinitionId)
-                                                      .accept(MediaType.APPLICATION_XML_VALUE))
-                //then
+        // when
+        mockMvc.perform(
+                        get(
+                                        "/v1/process-definitions/{processDefinitionId}/model",
+                                        processDefinitionId)
+                                .accept(MediaType.APPLICATION_XML_VALUE))
+                // then
                 .andExpect(status().isOk())
                 .andExpect(content().xml("<model/>"));
     }
 
     @Test
     public void shouldThrowExceptionWhenUserCannotReadGivenProcess() throws Exception {
-        //given
+        // given
         given(securityPoliciesManager.arePoliciesDefined()).willReturn(true);
 
         String processDefinitionId = UUID.randomUUID().toString();
@@ -118,19 +117,27 @@ public class ProcessModelControllerIT {
         processDefinition.setKey("processKey");
         processDefinition.setServiceName("serviceName");
 
-        given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
+        given(
+                        securityPoliciesManager.canRead(
+                                processDefinition.getKey(), processDefinition.getServiceName()))
                 .willReturn(false);
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
+        given(
+                        entityFinder.findById(
+                                eq(processModelRepository), eq(processDefinitionId), anyString()))
                 .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
 
-        //when
-        mockMvc.perform(get("/v1/process-definitions/{processDefinitionId}/model",
-                            processDefinitionId)
+        // when
+        mockMvc.perform(
+                        get(
+                                        "/v1/process-definitions/{processDefinitionId}/model",
+                                        processDefinitionId)
                                 .accept(MediaType.APPLICATION_XML_VALUE))
-                //then
+                // then
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("entry.message", is("Operation not permitted for " + processDefinition.getKey())));
+                .andExpect(
+                        jsonPath(
+                                "entry.message",
+                                is("Operation not permitted for " + processDefinition.getKey())));
     }
-
 }

@@ -30,14 +30,18 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 public class HomeControllerImplIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
     @Test
     public void getHomeInfo() throws Exception {
-        this.mockMvc.perform(get("/v1/"))
+        this.mockMvc
+                .perform(get("/v1/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Welcome to an instance of the Activiti Process Engine")));
+                .andExpect(
+                        content()
+                                .string(
+                                        containsString(
+                                                "Welcome to an instance of the Activiti Process"
+                                                        + " Engine")));
     }
-
 }

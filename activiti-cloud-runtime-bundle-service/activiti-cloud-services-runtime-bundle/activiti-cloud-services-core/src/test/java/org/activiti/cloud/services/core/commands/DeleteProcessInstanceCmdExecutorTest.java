@@ -32,11 +32,9 @@ import org.mockito.Mock;
 
 public class DeleteProcessInstanceCmdExecutorTest {
 
-    @InjectMocks
-    private DeleteProcessInstanceCmdExecutor subject;
+    @InjectMocks private DeleteProcessInstanceCmdExecutor subject;
 
-    @Mock
-    private ProcessAdminRuntime processAdminRuntime;
+    @Mock private ProcessAdminRuntime processAdminRuntime;
 
     @BeforeEach
     public void setUp() {
@@ -45,9 +43,8 @@ public class DeleteProcessInstanceCmdExecutorTest {
 
     @Test
     public void startProcessInstanceCmdExecutorTest() {
-        DeleteProcessPayload payload = ProcessPayloadBuilder.delete()
-                                                            .withProcessInstanceId("def key")
-                                                            .build();
+        DeleteProcessPayload payload =
+                ProcessPayloadBuilder.delete().withProcessInstanceId("def key").build();
 
         ProcessInstance fakeProcessInstance = mock(ProcessInstance.class);
 
@@ -58,6 +55,5 @@ public class DeleteProcessInstanceCmdExecutorTest {
         subject.execute(payload);
 
         verify(processAdminRuntime).delete(payload);
-
     }
 }

@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.JsonModelType;
 import org.activiti.cloud.modeling.api.Model;
@@ -43,27 +44,21 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-/**
- * Integration tests for models rest api dealing with Json models
- */
-@ActiveProfiles(profiles = { "test", "generic" })
+/** Integration tests for models rest api dealing with Json models */
+@ActiveProfiles(profiles = {"test", "generic"})
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @WithMockModelerUser
 public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
-    @Autowired
-    private WebApplicationContext context;
+    @Autowired private WebApplicationContext context;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private ModelRepository modelRepository;
+    @Autowired private ModelRepository modelRepository;
 
-    @Autowired
-    JsonModelType genericJsonModelType;
+    @Autowired JsonModelType genericJsonModelType;
 
     @SpyBean(name = "genericJsonContentUpdateListener")
     ContentUpdateListener genericJsonContentUpdateListener;
@@ -82,41 +77,47 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
     @Test
     public void should_callJsonContentUpdateListener_when_updatingModelContent() throws Exception {
-        Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+        Model genericJsonModel =
+                modelRepository.createModel(
+                        new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
 
         String stringModel = objectMapper.writeValueAsString(genericJsonModel);
 
-        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
-                                     genericJsonModel.getId()).file("file",
-                                                                    "simple-model.json",
-                                                                    "application/json",
-                                                                    stringModel.getBytes()))
+        mockMvc.perform(
+                        putMultipart("/v1/models/{modelId}/content", genericJsonModel.getId())
+                                .file(
+                                        "file",
+                                        "simple-model.json",
+                                        "application/json",
+                                        stringModel.getBytes()))
                 .andExpect(status().isNoContent());
 
-        verify(genericJsonContentUpdateListener,
-                       times(1))
-                .execute(argThat(model -> model.getId().equals(genericJsonModel.getId())),
-                         argThat(content -> new String(content.getFileContent()).equals(stringModel)));
+        verify(genericJsonContentUpdateListener, times(1))
+                .execute(
+                        argThat(model -> model.getId().equals(genericJsonModel.getId())),
+                        argThat(
+                                content ->
+                                        new String(content.getFileContent()).equals(stringModel)));
     }
 
     @Test
-    public void should_notCallNonJsonContentUpdateListener_when_updatingModelContent() throws Exception {
-        Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+    public void should_notCallNonJsonContentUpdateListener_when_updatingModelContent()
+            throws Exception {
+        Model genericJsonModel =
+                modelRepository.createModel(
+                        new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
 
         String stringModel = objectMapper.writeValueAsString(genericJsonModel);
 
-        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
-                                     genericJsonModel.getId()).file("file",
-                                                                    "simple-model.json",
-                                                                    "application/json",
-                                                                    stringModel.getBytes()))
+        mockMvc.perform(
+                        putMultipart("/v1/models/{modelId}/content", genericJsonModel.getId())
+                                .file(
+                                        "file",
+                                        "simple-model.json",
+                                        "application/json",
+                                        stringModel.getBytes()))
                 .andExpect(status().isNoContent());
 
-        verify(genericNonJsonContentUpdateListener,
-                       times(0))
-                .execute(any(),
-                         any());
+        verify(genericNonJsonContentUpdateListener, times(0)).execute(any(), any());
     }
 }

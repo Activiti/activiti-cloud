@@ -19,6 +19,5 @@ import org.activiti.engine.runtime.Job;
 
 public interface JobMessageProducer {
 
-   void sendMessage(String destination, Job job);
-
+    void sendMessage(String destination, Job job);
 }

@@ -45,11 +45,9 @@ import org.mockito.Mock;
 
 public class ToCloudProcessRuntimeMessageEventsConverterTest {
 
-    @InjectMocks
-    private ToCloudProcessRuntimeEventConverter converter;
+    @InjectMocks private ToCloudProcessRuntimeEventConverter converter;
 
-    @Mock
-    private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    @Mock private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @BeforeEach
     public void setUp() {
@@ -58,108 +56,114 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
 
     @Test
     public void shouldConvertBPMNMessageSentEventToCloudBPMNMessageSentEvent() {
-        //given
+        // given
         BPMNMessage entity = bpmnMessageEntity("entityId");
 
         BPMNMessageSentEvent runtimeEvent = new BPMNMessageSentEventImpl(entity);
 
-        //when
+        // when
         CloudBPMNMessageSentEvent cloudEvent = converter.from(runtimeEvent);
 
-        //then
-        CloudBPMNMessageEventAssert.assertThat(cloudEvent)
-                                   .hasEntity(entity);
+        // then
+        CloudBPMNMessageEventAssert.assertThat(cloudEvent).hasEntity(entity);
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
     public void shouldConvertBPMNMessageWaitingEventToCloudBPMNMessageWaitingEvent() {
-        //given
+        // given
         BPMNMessage entity = bpmnMessageEntity("entityId");
 
         BPMNMessageSentEvent runtimeEvent = new BPMNMessageSentEventImpl(entity);
 
-        //when
+        // when
         CloudBPMNMessageSentEvent cloudEvent = converter.from(runtimeEvent);
 
-        //then
-        CloudBPMNMessageEventAssert.assertThat(cloudEvent)
-                                   .hasEntity(entity);
+        // then
+        CloudBPMNMessageEventAssert.assertThat(cloudEvent).hasEntity(entity);
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
     public void shouldConvertBPMNMessageReceivedEventToCloudBPMNMessageReceivedEvent() {
-        //given
+        // given
         BPMNMessage entity = bpmnMessageEntity("entityId");
 
         BPMNMessageReceivedEvent runtimeEvent = new BPMNMessageReceivedEventImpl(entity);
 
-        //when
+        // when
         CloudBPMNMessageReceivedEvent cloudEvent = converter.from(runtimeEvent);
 
-        //then
-        CloudBPMNMessageEventAssert.assertThat(cloudEvent)
-                                   .hasEntity(entity);
+        // then
+        CloudBPMNMessageEventAssert.assertThat(cloudEvent).hasEntity(entity);
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
-    public void shouldConvertMessageSubscriptionCancelledEventToCloudMessageSubscriptionCancelledEvent() {
-        //given
-        MessageSubscription entity = MessageSubscriptionImpl.builder()
-                                .withId("entityId")
-                                .withEventName("messageName")
-                                .withConfiguration("correlationKey")
-                                .withProcessDefinitionId("procDefId")
-                                .withProcessInstanceId("procInstId")
-                                .withBusinessKey("businessKey")
-                                .build();
+    public void
+            shouldConvertMessageSubscriptionCancelledEventToCloudMessageSubscriptionCancelledEvent() {
+        // given
+        MessageSubscription entity =
+                MessageSubscriptionImpl.builder()
+                        .withId("entityId")
+                        .withEventName("messageName")
+                        .withConfiguration("correlationKey")
+                        .withProcessDefinitionId("procDefId")
+                        .withProcessInstanceId("procInstId")
+                        .withBusinessKey("businessKey")
+                        .build();
 
-        MessageSubscriptionCancelledEvent runtimeEvent = new MessageSubscriptionCancelledEventImpl(entity);
+        MessageSubscriptionCancelledEvent runtimeEvent =
+                new MessageSubscriptionCancelledEventImpl(entity);
 
-
-        //when
+        // when
         CloudMessageSubscriptionCancelledEvent cloudEvent = converter.from(runtimeEvent);
 
-        //then
+        // then
         Assertions.assertThat(cloudEvent.getEntity())
-        .isNotNull()
-        .isEqualTo(entity)
-        .extracting(MessageSubscription::getEventName,
-                    MessageSubscription::getConfiguration,
-                    MessageSubscription::getProcessDefinitionId,
-                    MessageSubscription::getProcessInstanceId,
-                    MessageSubscription::getBusinessKey)
-        .contains(entity.getEventName(),
-                  entity.getConfiguration(),
-                  entity.getProcessDefinitionId(),
-                  entity.getProcessInstanceId(),
-                  entity.getBusinessKey());
+                .isNotNull()
+                .isEqualTo(entity)
+                .extracting(
+                        MessageSubscription::getEventName,
+                        MessageSubscription::getConfiguration,
+                        MessageSubscription::getProcessDefinitionId,
+                        MessageSubscription::getProcessInstanceId,
+                        MessageSubscription::getBusinessKey)
+                .contains(
+                        entity.getEventName(),
+                        entity.getConfiguration(),
+                        entity.getProcessDefinitionId(),
+                        entity.getProcessInstanceId(),
+                        entity.getBusinessKey());
 
-         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
-
 
     private BPMNMessage bpmnMessageEntity(String entityId) {
         BPMNMessageImpl entity = new BPMNMessageImpl("entityId");
         entity.setProcessInstanceId("procInstId");
         entity.setProcessDefinitionId("procDefId");
 
-        MessageEventPayload payload = MessagePayloadBuilder.event("message")
-                                                           .withBusinessKey("businessId")
-                                                           .withCorrelationKey("correlationId")
-                                                           .withVariable("name", "value")
-                                                           .build();
+        MessageEventPayload payload =
+                MessagePayloadBuilder.event("message")
+                        .withBusinessKey("businessId")
+                        .withCorrelationKey("correlationId")
+                        .withVariable("name", "value")
+                        .build();
         entity.setMessagePayload(payload);
 
         return entity;
     }
 
-    static class CloudBPMNMessageEventAssert extends AbstractAssert<CloudBPMNMessageEventAssert, CloudBPMNMessageEvent> {
+    static class CloudBPMNMessageEventAssert
+            extends AbstractAssert<CloudBPMNMessageEventAssert, CloudBPMNMessageEvent> {
 
         public CloudBPMNMessageEventAssert(CloudBPMNMessageEvent actual, Class<?> selfType) {
             super(actual, selfType);
@@ -170,14 +174,15 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
         }
 
         public CloudBPMNMessageEventAssert hasEntity(BPMNMessage entity) {
-          isNotNull();
+            isNotNull();
 
-          Assertions.assertThat(actual.getEntity()).isEqualTo(entity);
-          Assertions.assertThat(actual.getEntity().getProcessDefinitionId()).isEqualTo(entity.getProcessDefinitionId());
-          Assertions.assertThat(actual.getEntity().getProcessInstanceId()).isEqualTo(entity.getProcessInstanceId());
+            Assertions.assertThat(actual.getEntity()).isEqualTo(entity);
+            Assertions.assertThat(actual.getEntity().getProcessDefinitionId())
+                    .isEqualTo(entity.getProcessDefinitionId());
+            Assertions.assertThat(actual.getEntity().getProcessInstanceId())
+                    .isEqualTo(entity.getProcessInstanceId());
 
-          return this;
+            return this;
         }
     }
-
 }

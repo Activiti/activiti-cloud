@@ -24,8 +24,9 @@ public class CloudTaskCancelledProducer implements TaskEventListener<TaskCancell
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTaskCancelledProducer(ToCloudTaskRuntimeEventConverter converter,
-                                      ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTaskCancelledProducer(
+            ToCloudTaskRuntimeEventConverter converter,
+            ProcessEngineEventsAggregator eventsAggregator) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }

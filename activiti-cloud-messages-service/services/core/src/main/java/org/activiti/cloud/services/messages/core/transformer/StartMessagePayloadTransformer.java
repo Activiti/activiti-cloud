@@ -22,9 +22,11 @@ import org.springframework.integration.transformer.AbstractPayloadTransformer;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 
-public class StartMessagePayloadTransformer extends AbstractPayloadTransformer<MessageEventPayload, StartMessagePayload> {
+public class StartMessagePayloadTransformer
+        extends AbstractPayloadTransformer<MessageEventPayload, StartMessagePayload> {
 
-    private static final StartMessagePayloadTransformer INSTANCE = new StartMessagePayloadTransformer();
+    private static final StartMessagePayloadTransformer INSTANCE =
+            new StartMessagePayloadTransformer();
 
     public static StartMessagePayload from(Message<?> message) {
         try {
@@ -33,11 +35,12 @@ public class StartMessagePayloadTransformer extends AbstractPayloadTransformer<M
             throw new MessageConversionException(message, cause.getMessage());
         }
     }
+
     @Override
     protected StartMessagePayload transformPayload(MessageEventPayload eventPayload) {
         return MessagePayloadBuilder.start(eventPayload.getName())
-                                    .withBusinessKey(eventPayload.getBusinessKey())
-                                    .withVariables(eventPayload.getVariables())
-                                    .build();
+                .withBusinessKey(eventPayload.getBusinessKey())
+                .withVariables(eventPayload.getVariables())
+                .build();
     }
 }

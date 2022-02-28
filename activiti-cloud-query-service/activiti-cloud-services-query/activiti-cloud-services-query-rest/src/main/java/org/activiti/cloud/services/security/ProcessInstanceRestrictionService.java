@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
+
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 
@@ -27,24 +28,22 @@ public class ProcessInstanceRestrictionService {
 
     private ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder;
 
-    public ProcessInstanceRestrictionService(SecurityPoliciesManager securityPoliciesManager,
-                                             ProcessInstanceFilter processInstanceFilter,
-                                             ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
+    public ProcessInstanceRestrictionService(
+            SecurityPoliciesManager securityPoliciesManager,
+            ProcessInstanceFilter processInstanceFilter,
+            ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
         this.securityPoliciesManager = securityPoliciesManager;
         this.processInstanceFilter = processInstanceFilter;
         this.restrictionBuilder = restrictionBuilder;
     }
 
-    public Predicate restrictProcessInstanceQuery(Predicate predicate,
-                                                  SecurityPolicyAccess securityPolicyAccess) {
+    public Predicate restrictProcessInstanceQuery(
+            Predicate predicate, SecurityPolicyAccess securityPolicyAccess) {
         if (!securityPoliciesManager.arePoliciesDefined()) {
             return predicate;
         }
 
-        return restrictionBuilder.applyProcessDefinitionKeyFilter(predicate,
-                                                 securityPolicyAccess,
-                                                 processInstanceFilter);
+        return restrictionBuilder.applyProcessDefinitionKeyFilter(
+                predicate, securityPolicyAccess, processInstanceFilter);
     }
-
-
 }

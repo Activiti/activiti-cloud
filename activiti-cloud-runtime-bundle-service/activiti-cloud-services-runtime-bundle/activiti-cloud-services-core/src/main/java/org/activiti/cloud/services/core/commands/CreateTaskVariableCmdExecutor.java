@@ -19,7 +19,8 @@ import org.activiti.api.model.shared.EmptyResult;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 
-public class CreateTaskVariableCmdExecutor extends AbstractCommandExecutor<CreateTaskVariablePayload> {
+public class CreateTaskVariableCmdExecutor
+        extends AbstractCommandExecutor<CreateTaskVariablePayload> {
 
     private TaskAdminRuntime taskAdminRuntime;
 
@@ -30,7 +31,7 @@ public class CreateTaskVariableCmdExecutor extends AbstractCommandExecutor<Creat
     @Override
     public EmptyResult execute(CreateTaskVariablePayload createTaskVariablePayload) {
         taskAdminRuntime.createVariable(createTaskVariablePayload);
-        
+
         return new EmptyResult(createTaskVariablePayload);
     }
 }

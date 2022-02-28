@@ -30,11 +30,15 @@
 
 package org.activiti.cloud.services.core.pageable;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
+import org.activiti.cloud.services.core.utils.MockUtils;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.impl.ProcessInstanceQueryProperty;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
-import org.activiti.cloud.services.core.utils.MockUtils;
-import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -42,14 +46,9 @@ import org.mockito.InjectMocks;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class ProcessInstanceSortApplierTest {
 
-    @InjectMocks
-    private ProcessInstanceSortApplier sortApplier;
+    @InjectMocks private ProcessInstanceSortApplier sortApplier;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -58,38 +57,32 @@ public class ProcessInstanceSortApplierTest {
 
     @Test
     public void applySort_should_oder_by_process_instance_id_asc_by_default() throws Exception {
-        //given
+        // given
         ProcessInstanceQuery query = MockUtils.selfReturningMock(ProcessInstanceQuery.class);
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10);
+        PageRequest pageRequest = PageRequest.of(0, 10);
 
-        //when
-        sortApplier.applySort(query,
-                              pageRequest);
+        // when
+        sortApplier.applySort(query, pageRequest);
 
-        //then
+        // then
         verify(query).orderByProcessInstanceId();
         verify(query).asc();
     }
 
     @Test
     public void applySort_should_use_the_criteria_defined_by_pageable_object() throws Exception {
-        //given
+        // given
         ProcessInstanceQuery query = MockUtils.selfReturningMock(ProcessInstanceQuery.class);
-        Sort.Order processDefinitionOrder = new Sort.Order(Sort.Direction.ASC,
-                                                           "processDefinitionId");
-        Sort.Order processInstanceOrder = new Sort.Order(Sort.Direction.DESC,
-                                                         "id");
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10,
-                                                 Sort.by(processDefinitionOrder,
-                                                         processInstanceOrder));
+        Sort.Order processDefinitionOrder =
+                new Sort.Order(Sort.Direction.ASC, "processDefinitionId");
+        Sort.Order processInstanceOrder = new Sort.Order(Sort.Direction.DESC, "id");
+        PageRequest pageRequest =
+                PageRequest.of(0, 10, Sort.by(processDefinitionOrder, processInstanceOrder));
 
-        //when
-        sortApplier.applySort(query,
-                              pageRequest);
+        // when
+        sortApplier.applySort(query, pageRequest);
 
-        //then
+        // then
         InOrder inOrder = inOrder(query);
         inOrder.verify(query).orderBy(ProcessInstanceQueryProperty.PROCESS_DEFINITION_ID);
         inOrder.verify(query).asc();
@@ -98,19 +91,17 @@ public class ProcessInstanceSortApplierTest {
     }
 
     @Test
-    public void applySort_should_throw_exception_when_using_invalid_property_to_sort() throws Exception {
-        //given
+    public void applySort_should_throw_exception_when_using_invalid_property_to_sort()
+            throws Exception {
+        // given
         ProcessInstanceQuery query = MockUtils.selfReturningMock(ProcessInstanceQuery.class);
-        Sort.Order invalidProperty = new Sort.Order(Sort.Direction.ASC,
-                                                    "invalidProperty");
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10,
-                                                 Sort.by(invalidProperty));
+        Sort.Order invalidProperty = new Sort.Order(Sort.Direction.ASC, "invalidProperty");
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(invalidProperty));
 
-        //then
-        //when
+        // then
+        // when
         assertThatExceptionOfType(ActivitiIllegalArgumentException.class)
-            .isThrownBy(() -> sortApplier.applySort(query, pageRequest))
-            .withMessageContaining("invalidProperty");
+                .isThrownBy(() -> sortApplier.applySort(query, pageRequest))
+                .withMessageContaining("invalidProperty");
     }
 }

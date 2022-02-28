@@ -34,6 +34,4 @@ import org.springframework.context.annotation.Import;
     ModelingRestExceptionHandler.class,
     ValidationControllerAdvice.class
 })
-public class RestControllerAutoConfiguration {
-
-}
+public class RestControllerAutoConfiguration {}

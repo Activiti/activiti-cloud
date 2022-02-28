@@ -36,12 +36,11 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private BPMNSequenceFlow sequenceFlow;
 
-    public SequenceFlowAuditEventEntity() {
-    }
+    public SequenceFlowAuditEventEntity() {}
 
     public SequenceFlowAuditEventEntity(CloudSequenceFlowTakenEvent cloudEvent) {
         super(cloudEvent);
-        setSequenceFlow(cloudEvent.getEntity()) ;
+        setSequenceFlow(cloudEvent.getEntity());
     }
 
     public BPMNSequenceFlow getSequenceFlow() {
@@ -56,10 +55,10 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("SequenceFlowAuditEventEntity [sequenceFlow=")
-               .append(sequenceFlow)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(sequenceFlow)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

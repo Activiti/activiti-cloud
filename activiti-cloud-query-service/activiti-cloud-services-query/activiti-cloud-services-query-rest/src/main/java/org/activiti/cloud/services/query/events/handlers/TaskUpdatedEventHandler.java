@@ -22,9 +22,10 @@ import org.activiti.cloud.api.task.model.events.CloudTaskUpdatedEvent;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
+
+import javax.persistence.EntityManager;
 
 public class TaskUpdatedEventHandler implements QueryEventHandler {
 
@@ -39,9 +40,13 @@ public class TaskUpdatedEventHandler implements QueryEventHandler {
         CloudTaskUpdatedEvent taskUpdatedEvent = (CloudTaskUpdatedEvent) event;
         Task eventTask = taskUpdatedEvent.getEntity();
 
-        TaskEntity queryTaskEntity = Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                                           eventTask.getId()))
-                                            .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
+        TaskEntity queryTaskEntity =
+                Optional.ofNullable(entityManager.find(TaskEntity.class, eventTask.getId()))
+                        .orElseThrow(
+                                () ->
+                                        new QueryException(
+                                                "Unable to find task with id: "
+                                                        + eventTask.getId()));
 
         queryTaskEntity.setName(eventTask.getName());
         queryTaskEntity.setDescription(eventTask.getDescription());

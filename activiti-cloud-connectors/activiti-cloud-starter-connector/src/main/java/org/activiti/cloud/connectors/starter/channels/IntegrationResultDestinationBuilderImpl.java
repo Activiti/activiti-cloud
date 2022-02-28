@@ -22,7 +22,8 @@ import org.springframework.util.ObjectUtils;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class IntegrationResultDestinationBuilderImpl implements IntegrationResultDestinationBuilder {
+public class IntegrationResultDestinationBuilderImpl
+        implements IntegrationResultDestinationBuilder {
 
     private final ConnectorProperties connectorProperties;
 
@@ -34,19 +35,21 @@ public class IntegrationResultDestinationBuilderImpl implements IntegrationResul
     public String buildDestination(IntegrationRequest event) {
         String resultDestinationOverride = connectorProperties.getResultDestinationOverride();
 
-        String destination = ObjectUtils.isEmpty(resultDestinationOverride)
-                ? Optional.of(event)
-                          .map(IntegrationRequest::getResultDestination)
-                          .filter(Predicate.not(ObjectUtils::isEmpty))
-                          .orElseGet(() -> getServiceDestination(event))
-                : resultDestinationOverride;
+        String destination =
+                ObjectUtils.isEmpty(resultDestinationOverride)
+                        ? Optional.of(event)
+                                .map(IntegrationRequest::getResultDestination)
+                                .filter(Predicate.not(ObjectUtils::isEmpty))
+                                .orElseGet(() -> getServiceDestination(event))
+                        : resultDestinationOverride;
 
         return destination;
     }
 
     protected String getServiceDestination(IntegrationRequest event) {
-        return new StringBuilder("integrationResult").append(connectorProperties.getMqDestinationSeparator())
-                                                     .append(event.getServiceFullName())
-                                                     .toString();
+        return new StringBuilder("integrationResult")
+                .append(connectorProperties.getMqDestinationSeparator())
+                .append(event.getServiceFullName())
+                .toString();
     }
 }

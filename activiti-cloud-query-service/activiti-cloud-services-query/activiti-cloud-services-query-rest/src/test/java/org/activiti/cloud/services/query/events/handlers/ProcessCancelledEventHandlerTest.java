@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -27,24 +35,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import javax.persistence.EntityManager;
 
 public class ProcessCancelledEventHandlerTest {
 
-    @InjectMocks
-    private ProcessCancelledEventHandler handler;
+    @InjectMocks private ProcessCancelledEventHandler handler;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -52,21 +51,20 @@ public class ProcessCancelledEventHandlerTest {
     }
 
     /**
-     * Test that ProcessCancelledEventHandler updates the existing process instance as following:
-     * - status to CANCELLED
-     * - lastModified to the event time
+     * Test that ProcessCancelledEventHandler updates the existing process instance as following: -
+     * status to CANCELLED - lastModified to the event time
      */
     @Test
     public void testUpdateExistingProcessInstanceWhenCancelled() {
-        //given
+        // given
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(processInstanceEntity);
+        given(entityManager.find(ProcessInstanceEntity.class, "200"))
+                .willReturn(processInstanceEntity);
 
-        //when
-        handler.handle(createProcessCancelledEvent("200"
-        ));
+        // when
+        handler.handle(createProcessCancelledEvent("200"));
 
-        //then
+        // then
         verify(entityManager).persist(processInstanceEntity);
         verify(processInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.CANCELLED);
         verify(processInstanceEntity).setLastModified(any(Date.class));
@@ -79,29 +77,29 @@ public class ProcessCancelledEventHandlerTest {
     }
 
     /**
-     * Test that ProcessCancelledEventHandler throws QueryException when the related process instance is not found
+     * Test that ProcessCancelledEventHandler throws QueryException when the related process
+     * instance is not found
      */
     @Test
     public void testThrowExceptionWhenProcessInstanceNotFound() {
-        //given
+        // given
         given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(null);
 
-        //then
-        //when
+        // then
+        // when
         assertThatExceptionOfType(QueryException.class)
-            .isThrownBy(() -> handler.handle(createProcessCancelledEvent("200")))
-            .withMessageContaining("Unable to find process instance with the given id: ");
+                .isThrownBy(() -> handler.handle(createProcessCancelledEvent("200")))
+                .withMessageContaining("Unable to find process instance with the given id: ");
     }
 
-    /**
-     * Test that ProcessCancelledEventHandler is handling ProcessCancelledEvent events
-     */
+    /** Test that ProcessCancelledEventHandler is handling ProcessCancelledEvent events */
     @Test
     public void getHandledEventShouldReturnProcessCancelledEvent() {
-        //when
+        // when
         String handledEvent = handler.getHandledEvent();
 
-        //then
-        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name());
+        // then
+        assertThat(handledEvent)
+                .isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name());
     }
 }

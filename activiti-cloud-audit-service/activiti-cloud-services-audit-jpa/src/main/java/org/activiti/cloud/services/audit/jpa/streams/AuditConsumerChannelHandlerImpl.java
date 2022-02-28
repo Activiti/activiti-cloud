@@ -46,8 +46,8 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
 
     private final APIEventToEntityConverters eventConverters;
 
-    public AuditConsumerChannelHandlerImpl(EventsRepository eventsRepository,
-                                           APIEventToEntityConverters eventConverters) {
+    public AuditConsumerChannelHandlerImpl(
+            EventsRepository eventsRepository, APIEventToEntityConverters eventConverters) {
         this.eventsRepository = eventsRepository;
         this.eventConverters = eventConverters;
     }
@@ -55,21 +55,22 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
     @SuppressWarnings("unchecked")
     @Override
     @StreamListener(AuditConsumerChannels.AUDIT_CONSUMER)
-    public void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
+    public void receiveCloudRuntimeEvent(
+            @Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
         if (events != null) {
             AtomicInteger counter = new AtomicInteger(0);
             List<AuditEventEntity> entities = new ArrayList<>();
             for (CloudRuntimeEvent event : events) {
-                EventToEntityConverter converter = eventConverters.getConverterByEventTypeName(event.getEventType()
-                                                                                                    .name());
+                EventToEntityConverter converter =
+                        eventConverters.getConverterByEventTypeName(event.getEventType().name());
                 if (converter != null) {
-                    ((CloudRuntimeEventImpl) event).setMessageId((headers.get(MessageHeaders.ID)
-                                                                         .toString()));
+                    ((CloudRuntimeEventImpl) event)
+                            .setMessageId((headers.get(MessageHeaders.ID).toString()));
                     ((CloudRuntimeEventImpl) event).setSequenceNumber(counter.getAndIncrement());
                     entities.add((AuditEventEntity) converter.convertToEntity(event));
                 } else {
-                    LOGGER.warn(">>> Ignoring CloudRuntimeEvents type: " + event.getEventType()
-                                                                                .name());
+                    LOGGER.warn(
+                            ">>> Ignoring CloudRuntimeEvents type: " + event.getEventType().name());
                 }
             }
             eventsRepository.saveAll(entities);

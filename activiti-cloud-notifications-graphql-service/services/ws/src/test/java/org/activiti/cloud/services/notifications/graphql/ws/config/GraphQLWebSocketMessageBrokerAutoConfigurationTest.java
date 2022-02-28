@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.notifications.graphql.ws.config;
 
 import graphql.schema.GraphQLSchema;
+
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubProtocolHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,24 +31,18 @@ import org.springframework.messaging.MessageHandler;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class GraphQLWebSocketMessageBrokerAutoConfigurationTest {
 
-    @MockBean
-    private GraphQLSchema graphQLSchema;
+    @MockBean private GraphQLSchema graphQLSchema;
 
-    @Autowired
-    private MessageHandler graphQLBrokerMessageHandler;
+    @Autowired private MessageHandler graphQLBrokerMessageHandler;
 
-    @Autowired
-    private GraphQLBrokerSubProtocolHandler graphQLBrokerSubProtocolHandler;
+    @Autowired private GraphQLBrokerSubProtocolHandler graphQLBrokerSubProtocolHandler;
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
-    static class GraphQLWebSocketMessageBrokerAutoConfigurationTestApplication {
-
-    }
+    static class GraphQLWebSocketMessageBrokerAutoConfigurationTestApplication {}
 
     @Test
     public void testContextLoads() {
         // success
     }
-
 }

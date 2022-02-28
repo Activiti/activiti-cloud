@@ -16,19 +16,22 @@
 package org.activiti.cloud.services.test.containers;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-public class KeycloakContainerApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class KeycloakContainerApplicationInitializer
+        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:15.0.2")
-        .withAdminUsername("admin")
-        .withAdminPassword("admin")
-        .withRealmImportFile("activiti-realm.json")
-        .waitingFor(Wait.defaultWaitStrategy())
-        .withReuse(true);
+    private static KeycloakContainer keycloakContainer =
+            new KeycloakContainer("quay.io/keycloak/keycloak:15.0.2")
+                    .withAdminUsername("admin")
+                    .withAdminPassword("admin")
+                    .withRealmImportFile("activiti-realm.json")
+                    .waitingFor(Wait.defaultWaitStrategy())
+                    .withReuse(true);
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
@@ -49,6 +52,7 @@ public class KeycloakContainerApplicationInitializer implements ApplicationConte
             "keycloak.auth-server-url=" + keycloakContainer.getAuthServerUrl(),
             "activiti.keycloak.client-id=activiti-keycloak",
             "activiti.keycloak.client-secret=545bc187-f10f-41f9-8d5f-cfca3dbada9c",
-            "activiti.keycloak.grant-type=client_credentials"};
+            "activiti.keycloak.grant-type=client_credentials"
+        };
     }
 }

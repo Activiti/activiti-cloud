@@ -19,7 +19,6 @@ import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.query.rest.ApplicationAdminController;
 import org.activiti.cloud.services.query.rest.ApplicationController;
 import org.activiti.cloud.services.query.rest.CommonExceptionHandlerQuery;
-import org.activiti.cloud.services.query.rest.ServiceTaskIntegrationContextAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminController;
@@ -34,6 +33,7 @@ import org.activiti.cloud.services.query.rest.ProcessInstanceVariableController;
 import org.activiti.cloud.services.query.rest.ProcessModelAdminController;
 import org.activiti.cloud.services.query.rest.ProcessModelController;
 import org.activiti.cloud.services.query.rest.ServiceTaskAdminController;
+import org.activiti.cloud.services.query.rest.ServiceTaskIntegrationContextAdminController;
 import org.activiti.cloud.services.query.rest.TaskAdminController;
 import org.activiti.cloud.services.query.rest.TaskController;
 import org.activiti.cloud.services.query.rest.TaskDeleteController;
@@ -82,8 +82,8 @@ public class QueryRestControllersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(ProcessDiagramGenerator processDiagramGenerator) {
+    public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(
+            ProcessDiagramGenerator processDiagramGenerator) {
         return new ProcessDiagramGeneratorWrapper(processDiagramGenerator);
     }
-
 }

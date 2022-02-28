@@ -17,7 +17,4 @@ package org.activiti.cloud.api.process.model.events;
 
 import org.activiti.api.process.runtime.events.ProcessCreatedEvent;
 
-public interface CloudProcessCreatedEvent extends CloudProcessRuntimeEvent,
-                                                  ProcessCreatedEvent {
-
-}
+public interface CloudProcessCreatedEvent extends CloudProcessRuntimeEvent, ProcessCreatedEvent {}

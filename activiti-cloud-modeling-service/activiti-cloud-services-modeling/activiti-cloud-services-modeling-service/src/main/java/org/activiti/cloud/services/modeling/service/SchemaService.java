@@ -15,9 +15,10 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.Optional;
-import org.json.JSONObject;
 
 public class SchemaService {
 
@@ -30,7 +31,9 @@ public class SchemaService {
     }
 
     public Optional<JSONObject> getJsonSchemaFromType(String schemaType) {
-        return schemaProviders.stream().filter(schema -> schema.getModelType().equalsIgnoreCase(schemaType)).findFirst()
-            .map(SchemaProvider::getJsonSchemaForType);
+        return schemaProviders.stream()
+                .filter(schema -> schema.getModelType().equalsIgnoreCase(schemaType))
+                .findFirst()
+                .map(SchemaProvider::getJsonSchemaForType);
     }
 }

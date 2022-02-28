@@ -15,27 +15,29 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
-import java.util.List;
-
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.reactivestreams.Publisher;
+
 import reactor.util.context.Context;
 
-public class EngineEventsPublisherDataFetcher implements DataFetcher<Publisher<List<EngineEvent>>>{
+import java.util.List;
 
-	private final EngineEventsPublisherFactory publisherFactory;
+public class EngineEventsPublisherDataFetcher implements DataFetcher<Publisher<List<EngineEvent>>> {
 
-	public EngineEventsPublisherDataFetcher(EngineEventsPublisherFactory publisherFactory) {
-		 this.publisherFactory = publisherFactory;
-	}
+    private final EngineEventsPublisherFactory publisherFactory;
 
-	@Override
-	public Publisher<List<EngineEvent>> get(DataFetchingEnvironment environment) {
-
-        return publisherFactory.getPublisher(environment)
-                               .subscriberContext(Context.of(DataFetchingEnvironment.class, environment));
+    public EngineEventsPublisherDataFetcher(EngineEventsPublisherFactory publisherFactory) {
+        this.publisherFactory = publisherFactory;
     }
 
+    @Override
+    public Publisher<List<EngineEvent>> get(DataFetchingEnvironment environment) {
+
+        return publisherFactory
+                .getPublisher(environment)
+                .subscriberContext(Context.of(DataFetchingEnvironment.class, environment));
+    }
 }

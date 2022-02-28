@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.querydsl.core.types.Predicate;
+
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -44,23 +45,17 @@ import java.util.UUID;
 @EnableAutoConfiguration
 public class RestrictTaskEntityQueryIT {
 
-    @Autowired
-    private TaskRepository taskRepository;
+    @Autowired private TaskRepository taskRepository;
 
-    @Autowired
-    private TaskCandidateUserRepository taskCandidateUserRepository;
+    @Autowired private TaskCandidateUserRepository taskCandidateUserRepository;
 
-    @Autowired
-    private TaskCandidateGroupRepository taskCandidateGroupRepository;
+    @Autowired private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
-    @Autowired
-    private TaskLookupRestrictionService taskLookupRestrictionService;
+    @Autowired private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
+    @MockBean private UserGroupManager userGroupManager;
 
     @BeforeEach
     public void setUp() {
@@ -78,7 +73,8 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId(taskId);
         taskRepository.save(taskEntity);
 
-        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity(taskEntity.getId(), "testuser");
+        TaskCandidateUserEntity taskCandidateUser =
+                new TaskCandidateUserEntity(taskEntity.getId(), "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
@@ -86,7 +82,7 @@ public class RestrictTaskEntityQueryIT {
         shouldGetTasksWhenCandidateRestrictTaskQuery();
         shouldGetTasksWhenCandidateRestrictToInvolvedUser();
     }
-    
+
     private void shouldGetTasksWhenCandidateRestrictTaskQuery() {
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -130,10 +126,10 @@ public class RestrictTaskEntityQueryIT {
         Iterable<TaskEntity> iterable = taskRepository.findInProcessInstanceScope(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
-    
+
     @Test
     public void shouldNotGetTasksAssignedToSomeOneElseWhenCandidate() {
-        //given
+        // given
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("2");
         taskEntity.setAssignee("someOneElse");
@@ -143,11 +139,10 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
-        
+
         shouldNotGetTasksAssignedToSomeOneElseWhenCandidate_RestrictTaskQuery();
         shouldNotGetTasksAssignedToSomeOneElseWhenCandidate_RestrictToInvolvedUser();
     }
-
 
     private void shouldNotGetTasksAssignedToSomeOneElseWhenCandidate_RestrictTaskQuery() {
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
@@ -163,7 +158,7 @@ public class RestrictTaskEntityQueryIT {
 
     @Test
     public void shouldGetTasksAssignedToSomeOneElseWhenOwner() {
-        //given
+        // given
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("2");
         taskEntity.setAssignee("someOneElse");
@@ -185,7 +180,8 @@ public class RestrictTaskEntityQueryIT {
         assertThat(iterable).extracting(TaskEntity::getId).containsOnly(taskId);
     }
 
-    private void shouldGetTasksAssignedToSomeOneElseWhenOwner_RestrictToInvolvedUser(String taskId) {
+    private void shouldGetTasksAssignedToSomeOneElseWhenOwner_RestrictToInvolvedUser(
+            String taskId) {
         Predicate predicate = taskLookupRestrictionService.restrictToInvolvedUsersQuery(null);
         Iterable<TaskEntity> iterable = taskRepository.findInProcessInstanceScope(predicate);
         assertThat(iterable).extracting(TaskEntity::getId).containsOnly(taskId);
@@ -280,7 +276,7 @@ public class RestrictTaskEntityQueryIT {
 
     @Test
     public void shouldNotGetTasksAssignedToSomeOneElseWhenInCandidateGroup() {
-        //given
+        // given
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("3");
         taskEntity.setAssignee("someOneElse");
@@ -302,7 +298,8 @@ public class RestrictTaskEntityQueryIT {
         assertThat(iterable).isEmpty();
     }
 
-    private void shouldNotGetTasksAssignedToSomeOneElseWhenInCandidateGroup_RestrictToInvolvedUser() {
+    private void
+            shouldNotGetTasksAssignedToSomeOneElseWhenInCandidateGroup_RestrictToInvolvedUser() {
         Predicate predicate = taskLookupRestrictionService.restrictToInvolvedUsersQuery(null);
         Iterable<TaskEntity> iterable = taskRepository.findInProcessInstanceScope(predicate);
         assertThat(iterable).isEmpty();
@@ -337,13 +334,14 @@ public class RestrictTaskEntityQueryIT {
 
     @Test
     public void shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured() {
-        //given
+        // given
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("5");
         taskEntity.setAssignee("someOneElse");
         taskRepository.save(taskEntity);
 
-        // no candidates or groups - just a taskEntity without any permissions so anyone could see if not assigned
+        // no candidates or groups - just a taskEntity without any permissions so anyone could see
+        // if not assigned
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
@@ -351,13 +349,15 @@ public class RestrictTaskEntityQueryIT {
         shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured_RestrictToInvolvedUser();
     }
 
-    private void shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured_RestrictTaskQuery() {
+    private void
+            shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured_RestrictTaskQuery() {
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
         assertThat(iterable).isEmpty();
     }
 
-    private void shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured_RestrictToInvolvedUser() {
+    private void
+            shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured_RestrictToInvolvedUser() {
         Predicate predicate = taskLookupRestrictionService.restrictToInvolvedUsersQuery(null);
         Iterable<TaskEntity> iterable = taskRepository.findInProcessInstanceScope(predicate);
         assertThat(iterable).isEmpty();
@@ -379,18 +379,29 @@ public class RestrictTaskEntityQueryIT {
         shouldGetTasksWhenNoCandidatesConfiguredAndExistingQueryMatches_RestrictToInvolvedUser();
     }
 
-    private void shouldGetTasksWhenNoCandidatesConfiguredAndExistingQueryMatches_RestrictTaskQuery() {
-        Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq("5").and(QTaskEntity.taskEntity.owner.eq("bob")));
+    private void
+            shouldGetTasksWhenNoCandidatesConfiguredAndExistingQueryMatches_RestrictTaskQuery() {
+        Predicate predicate =
+                taskLookupRestrictionService.restrictTaskQuery(
+                        QTaskEntity.taskEntity
+                                .id
+                                .eq("5")
+                                .and(QTaskEntity.taskEntity.owner.eq("bob")));
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
 
-    private void shouldGetTasksWhenNoCandidatesConfiguredAndExistingQueryMatches_RestrictToInvolvedUser() {
-        Predicate predicate = taskLookupRestrictionService.restrictToInvolvedUsersQuery(QTaskEntity.taskEntity.id.eq("5").and(QTaskEntity.taskEntity.owner.eq("bob")));
+    private void
+            shouldGetTasksWhenNoCandidatesConfiguredAndExistingQueryMatches_RestrictToInvolvedUser() {
+        Predicate predicate =
+                taskLookupRestrictionService.restrictToInvolvedUsersQuery(
+                        QTaskEntity.taskEntity
+                                .id
+                                .eq("5")
+                                .and(QTaskEntity.taskEntity.owner.eq("bob")));
         Iterable<TaskEntity> iterable = taskRepository.findInProcessInstanceScope(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
-
 
     @Test
     public void shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch() {
@@ -408,18 +419,29 @@ public class RestrictTaskEntityQueryIT {
         shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch_RestrictToInvolvedUser();
     }
 
-    private void shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch_RestrictTaskQuery() {
-        Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq("7").and(QTaskEntity.taskEntity.owner.eq("fred")));
+    private void
+            shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch_RestrictTaskQuery() {
+        Predicate predicate =
+                taskLookupRestrictionService.restrictTaskQuery(
+                        QTaskEntity.taskEntity
+                                .id
+                                .eq("7")
+                                .and(QTaskEntity.taskEntity.owner.eq("fred")));
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
 
-    private void shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch_RestrictToInvolvedUser() {
-        Predicate predicate = taskLookupRestrictionService.restrictToInvolvedUsersQuery(QTaskEntity.taskEntity.id.eq("7").and(QTaskEntity.taskEntity.owner.eq("fred")));
+    private void
+            shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch_RestrictToInvolvedUser() {
+        Predicate predicate =
+                taskLookupRestrictionService.restrictToInvolvedUsersQuery(
+                        QTaskEntity.taskEntity
+                                .id
+                                .eq("7")
+                                .and(QTaskEntity.taskEntity.owner.eq("fred")));
         Iterable<TaskEntity> iterable = taskRepository.findInProcessInstanceScope(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
-
 
     @Test
     public void shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch() {
@@ -438,16 +460,20 @@ public class RestrictTaskEntityQueryIT {
         shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch_RestrictToInvolvedUser();
     }
 
-    private void shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch_RestrictTaskQuery() {
-        Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq("7"));
+    private void
+            shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch_RestrictTaskQuery() {
+        Predicate predicate =
+                taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq("7"));
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
 
-    private void shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch_RestrictToInvolvedUser() {
-        Predicate predicate = taskLookupRestrictionService.restrictToInvolvedUsersQuery(QTaskEntity.taskEntity.id.eq("7"));
+    private void
+            shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch_RestrictToInvolvedUser() {
+        Predicate predicate =
+                taskLookupRestrictionService.restrictToInvolvedUsersQuery(
+                        QTaskEntity.taskEntity.id.eq("7"));
         Iterable<TaskEntity> iterable = taskRepository.findInProcessInstanceScope(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
-
 }

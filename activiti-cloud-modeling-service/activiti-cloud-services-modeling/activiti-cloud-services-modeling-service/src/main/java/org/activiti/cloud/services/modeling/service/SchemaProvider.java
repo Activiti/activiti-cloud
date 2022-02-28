@@ -15,14 +15,15 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
-import java.io.IOException;
-import java.io.InputStream;
 import org.activiti.cloud.services.modeling.validation.JsonSchemaFlattener;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class SchemaProvider {
 
@@ -48,9 +49,15 @@ public class SchemaProvider {
         JSONObject schema = null;
         if (schemaFileName != null) {
             try (InputStream inputStream = new ClassPathResource(schemaFileName).getInputStream()) {
-                schema = new JsonSchemaFlattener().flatten(new JSONObject(new JSONTokener(inputStream)));
+                schema =
+                        new JsonSchemaFlattener()
+                                .flatten(new JSONObject(new JSONTokener(inputStream)));
             } catch (IOException e) {
-                logger.error("Unable to read schema for model type {} in file {}: {}", modelType, schemaFileName, e);
+                logger.error(
+                        "Unable to read schema for model type {} in file {}: {}",
+                        modelType,
+                        schemaFileName,
+                        e);
             }
         }
         return schema;

@@ -26,34 +26,44 @@ import org.springframework.core.Ordered;
 import java.util.Optional;
 
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
-    private static final Logger log = LoggerFactory.getLogger(ActivitiMessagingDestinationsBeanPostProcessor.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(ActivitiMessagingDestinationsBeanPostProcessor.class);
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
 
-    public ActivitiMessagingDestinationsBeanPostProcessor(ActivitiMessagingDestinationTransformer destinationTransformer) {
+    public ActivitiMessagingDestinationsBeanPostProcessor(
+            ActivitiMessagingDestinationTransformer destinationTransformer) {
         this.destinationTransformer = destinationTransformer;
     }
 
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(Object bean, String beanName)
+            throws BeansException {
         if (BindingServiceProperties.class.isInstance(bean)) {
-            BindingServiceProperties bindingServiceProperties = BindingServiceProperties.class.cast(bean);
+            BindingServiceProperties bindingServiceProperties =
+                    BindingServiceProperties.class.cast(bean);
 
-            log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
+            log.info(
+                    "Post-processing messaging destinations for bean {} with name {}",
+                    bean,
+                    beanName);
 
-            bindingServiceProperties.getBindings()
-                                    .forEach((bindingName, bindingProperties) -> {
-                                        String source = Optional.ofNullable(bindingProperties.getDestination())
-                                                                .orElse(bindingName);
+            bindingServiceProperties
+                    .getBindings()
+                    .forEach(
+                            (bindingName, bindingProperties) -> {
+                                String source =
+                                        Optional.ofNullable(bindingProperties.getDestination())
+                                                .orElse(bindingName);
 
-                                        String destination = destinationTransformer.apply(source);
+                                String destination = destinationTransformer.apply(source);
 
-                                        bindingProperties.setDestination(destination);
+                                bindingProperties.setDestination(destination);
 
-                                        log.warn("Configured destination '{}' for binding '{}'",
-                                                 destination,
-                                                 bindingName);
-                                    });
-
+                                log.warn(
+                                        "Configured destination '{}' for binding '{}'",
+                                        destination,
+                                        bindingName);
+                            });
         }
 
         return bean;

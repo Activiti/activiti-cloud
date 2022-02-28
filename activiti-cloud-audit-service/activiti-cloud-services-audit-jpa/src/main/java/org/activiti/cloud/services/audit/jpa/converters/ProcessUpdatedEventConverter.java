@@ -24,27 +24,30 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessUpdatedAuditEventEntity;
 
 public class ProcessUpdatedEventConverter extends BaseEventToEntityConverter {
-    
+
     public ProcessUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name();
     }
 
     @Override
-    protected ProcessUpdatedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-         return new ProcessUpdatedAuditEventEntity((CloudProcessUpdatedEvent) cloudRuntimeEvent);
+    protected ProcessUpdatedAuditEventEntity createEventEntity(
+            CloudRuntimeEvent cloudRuntimeEvent) {
+        return new ProcessUpdatedAuditEventEntity((CloudProcessUpdatedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ProcessUpdatedAuditEventEntity processUpdatedAuditEventEntity = (ProcessUpdatedAuditEventEntity) auditEventEntity;
+        ProcessUpdatedAuditEventEntity processUpdatedAuditEventEntity =
+                (ProcessUpdatedAuditEventEntity) auditEventEntity;
 
-        return new CloudProcessUpdatedEventImpl(processUpdatedAuditEventEntity.getEventId(),
-                                                processUpdatedAuditEventEntity.getTimestamp(),
-                                                processUpdatedAuditEventEntity.getProcessInstance());
+        return new CloudProcessUpdatedEventImpl(
+                processUpdatedAuditEventEntity.getEventId(),
+                processUpdatedAuditEventEntity.getTimestamp(),
+                processUpdatedAuditEventEntity.getProcessInstance());
     }
 }

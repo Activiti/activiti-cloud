@@ -57,5 +57,4 @@ public class ProcessDefinitionSortApplier extends BaseSortApplier<ProcessDefinit
     protected QueryProperty getOrderByProperty(Sort.Order order) {
         return orderByProperties.get(order.getProperty());
     }
-
 }

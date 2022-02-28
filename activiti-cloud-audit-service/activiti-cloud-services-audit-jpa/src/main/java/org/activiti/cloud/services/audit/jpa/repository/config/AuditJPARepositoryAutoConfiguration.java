@@ -24,6 +24,4 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @Configuration
 @EnableJpaRepositories(basePackageClasses = EventsRepository.class)
 @EntityScan(basePackageClasses = AuditEventEntity.class)
-public class AuditJPARepositoryAutoConfiguration {
-
-}
+public class AuditJPARepositoryAutoConfiguration {}

@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
@@ -27,19 +32,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class ProcessStartedEventConverterTest {
 
-    @Spy
-    @InjectMocks
-    private ProcessStartedEventConverter eventConverter;
+    @Spy @InjectMocks private ProcessStartedEventConverter eventConverter;
 
-    @Mock
-    private EventContextInfoAppender eventContextInfoAppender;
+    @Mock private EventContextInfoAppender eventContextInfoAppender;
 
     @BeforeEach
     public void setUp() {
@@ -48,13 +45,13 @@ public class ProcessStartedEventConverterTest {
 
     @Test
     public void createEventEntityShouldSetAllNonProcessContextRelatedFields() {
-        //given
+        // given
         CloudProcessStartedEventImpl event = buildProcessStartedEvent();
 
-        //when
+        // when
         ProcessStartedAuditEventEntity auditEventEntity = eventConverter.createEventEntity(event);
 
-        //then
+        // then
         assertThat(auditEventEntity).isNotNull();
         assertThat(auditEventEntity.getEventId()).isEqualTo(event.getId());
         assertThat(auditEventEntity.getTimestamp()).isEqualTo(event.getTimestamp());
@@ -70,9 +67,11 @@ public class ProcessStartedEventConverterTest {
     }
 
     private CloudProcessStartedEventImpl buildProcessStartedEvent() {
-        CloudProcessStartedEventImpl cloudAuditEventEntity = new CloudProcessStartedEventImpl("ProcessStartedEventId",
-                                                                                              System.currentTimeMillis(),
-                                                                                              new ProcessInstanceImpl());
+        CloudProcessStartedEventImpl cloudAuditEventEntity =
+                new CloudProcessStartedEventImpl(
+                        "ProcessStartedEventId",
+                        System.currentTimeMillis(),
+                        new ProcessInstanceImpl());
         cloudAuditEventEntity.setAppName("app");
         cloudAuditEventEntity.setAppVersion("v2");
         cloudAuditEventEntity.setServiceName("service");
@@ -86,32 +85,33 @@ public class ProcessStartedEventConverterTest {
 
     @Test
     public void convertToEntityShouldReturnCreatedEntity() {
-        //given
+        // given
         ProcessStartedAuditEventEntity auditEventEntity = new ProcessStartedAuditEventEntity();
         CloudProcessStartedEventImpl cloudRuntimeEvent = new CloudProcessStartedEventImpl();
         doReturn(auditEventEntity).when(eventConverter).createEventEntity(cloudRuntimeEvent);
 
-        //when
+        // when
         AuditEventEntity convertedEntity = eventConverter.convertToEntity(cloudRuntimeEvent);
 
-        //then
+        // then
         assertThat(convertedEntity).isEqualTo(auditEventEntity);
     }
 
     @Test
     public void createAPIEventShouldSetAllNonProcessContextRelatedFields() {
-        //given
+        // given
         CloudProcessStartedEventImpl cloudAuditEventEntity = buildProcessStartedEvent();
 
-        ProcessStartedAuditEventEntity auditEventEntity = new ProcessStartedAuditEventEntity(cloudAuditEventEntity);
+        ProcessStartedAuditEventEntity auditEventEntity =
+                new ProcessStartedAuditEventEntity(cloudAuditEventEntity);
 
-        //when
-        ProcessStartedEventConverter converter = new ProcessStartedEventConverter(new EventContextInfoAppender());
+        // when
+        ProcessStartedEventConverter converter =
+                new ProcessStartedEventConverter(new EventContextInfoAppender());
 
-        CloudProcessStartedEventImpl apiEvent = (CloudProcessStartedEventImpl)converter.convertToAPI(auditEventEntity);
-        assertThat(apiEvent)
-                .isNotNull()
-                .isInstanceOf(CloudProcessStartedEvent.class);
+        CloudProcessStartedEventImpl apiEvent =
+                (CloudProcessStartedEventImpl) converter.convertToAPI(auditEventEntity);
+        assertThat(apiEvent).isNotNull().isInstanceOf(CloudProcessStartedEvent.class);
         assertThat(apiEvent.getId()).isEqualTo(auditEventEntity.getEventId());
         assertThat(apiEvent.getTimestamp()).isEqualTo(auditEventEntity.getTimestamp());
         assertThat(apiEvent.getEntity()).isEqualTo(auditEventEntity.getProcessInstance());
@@ -127,20 +127,21 @@ public class ProcessStartedEventConverterTest {
 
     @Test
     public void convertToAPIShouldCreateAPIEventAndCallEventContextInfoAppender() {
-        //given
+        // given
         ProcessStartedAuditEventEntity auditEventEntity = new ProcessStartedAuditEventEntity();
         CloudProcessStartedEventImpl apiEvent = new CloudProcessStartedEventImpl();
         doReturn(apiEvent).when(eventConverter).createAPIEvent(auditEventEntity);
 
         CloudProcessStartedEventImpl updatedApiEvent = new CloudProcessStartedEventImpl();
-        given(eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity)).willReturn(updatedApiEvent);
+        given(eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity))
+                .willReturn(updatedApiEvent);
 
-
-        //when
+        // when
         CloudRuntimeEvent convertedEvent = eventConverter.convertToAPI(auditEventEntity);
 
-        //then
+        // then
         assertThat(convertedEvent).isEqualTo(updatedApiEvent);
-        verify(eventContextInfoAppender).addProcessContextInfoToApiEvent(apiEvent, auditEventEntity);
+        verify(eventContextInfoAppender)
+                .addProcessContextInfoToApiEvent(apiEvent, auditEventEntity);
     }
 }

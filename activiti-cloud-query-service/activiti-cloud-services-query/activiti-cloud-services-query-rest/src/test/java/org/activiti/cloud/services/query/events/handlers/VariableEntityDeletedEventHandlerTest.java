@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.UUID;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
@@ -25,20 +27,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class VariableEntityDeletedEventHandlerTest {
 
-    @InjectMocks
-    private VariableDeletedEventHandler handler;
+    @InjectMocks private VariableDeletedEventHandler handler;
 
-    @Mock
-    private ProcessVariableDeletedEventHandler processVariableDeletedHandler;
+    @Mock private ProcessVariableDeletedEventHandler processVariableDeletedHandler;
 
-    @Mock
-    private TaskVariableDeletedEventHandler taskVariableDeletedEventHandler;
+    @Mock private TaskVariableDeletedEventHandler taskVariableDeletedEventHandler;
 
     @BeforeEach
     public void setUp() {
@@ -47,32 +42,30 @@ public class VariableEntityDeletedEventHandlerTest {
 
     @Test
     public void handleShouldUseProcessVariableDeleteHandlerWhenNoTaskId() {
-        //given
+        // given
         CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(buildVariable());
 
-        //when
+        // when
         handler.handle(event);
 
-        //then
+        // then
         verify(processVariableDeletedHandler).handle(event);
     }
 
     private static VariableInstanceImpl<String> buildVariable() {
-        return new VariableInstanceImpl<>("var",
-                                          "v1",
-                                          "string",
-                                          "procInstId", null);
+        return new VariableInstanceImpl<>("var", "v1", "string", "procInstId", null);
     }
 
     @Test
     public void handleShouldUseProcessVariableDeleteHandlerWhenTaskIdIsPresent() {
-        //given
-        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(buildVariableWithTaskId());
+        // given
+        CloudVariableDeletedEventImpl event =
+                new CloudVariableDeletedEventImpl(buildVariableWithTaskId());
 
-        //when
+        // when
         handler.handle(event);
 
-        //then
+        // then
         verify(taskVariableDeletedEventHandler).handle(event);
     }
 
@@ -82,10 +75,10 @@ public class VariableEntityDeletedEventHandlerTest {
 
     @Test
     public void getHandledEventShouldReturnVariableDeletedEvent() {
-        //when
+        // when
         String handledEvent = handler.getHandledEvent();
 
-        //then
+        // then
         assertThat(handledEvent).isEqualTo(VariableEvent.VariableEvents.VARIABLE_DELETED.name());
     }
 }

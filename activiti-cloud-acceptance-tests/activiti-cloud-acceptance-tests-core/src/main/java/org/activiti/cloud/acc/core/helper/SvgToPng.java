@@ -26,12 +26,10 @@ import java.io.IOException;
 
 public class SvgToPng {
 
-    public static byte[] svgToPng(byte[] streamBytes)
-            throws TranscoderException, IOException {
+    public static byte[] svgToPng(byte[] streamBytes) throws TranscoderException, IOException {
         try (ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);
-             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            new PNGTranscoder().transcode(new TranscoderInput(input),
-                    new TranscoderOutput(output));
+                ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            new PNGTranscoder().transcode(new TranscoderInput(input), new TranscoderOutput(output));
             output.flush();
             return output.toByteArray();
         }

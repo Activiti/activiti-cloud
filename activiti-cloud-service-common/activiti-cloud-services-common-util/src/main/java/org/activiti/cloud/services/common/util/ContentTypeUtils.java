@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.services.common.util;
 
-import static java.util.Collections.singletonMap;
 import static org.springframework.boot.web.server.MimeMappings.DEFAULT;
+
+import static java.util.Collections.singletonMap;
 
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Utils for handling content type
- */
+/** Utils for handling content type */
 public final class ContentTypeUtils {
 
     public static final String JSON = "json";
@@ -60,8 +59,8 @@ public final class ContentTypeUtils {
      */
     public static Optional<String> getContentTypeByExtension(String extension) {
         return Optional.ofNullable(
-            Optional.ofNullable(DEFAULT.get(extension))
-                .orElseGet(() -> CONTENT_TYPES.get(extension)));
+                Optional.ofNullable(DEFAULT.get(extension))
+                        .orElseGet(() -> CONTENT_TYPES.get(extension)));
     }
 
     /**
@@ -85,37 +84,31 @@ public final class ContentTypeUtils {
     }
 
     public static String toJsonFilename(String filename) {
-        return setExtension(filename,
-            JSON);
+        return setExtension(filename, JSON);
     }
 
-    public static String setExtension(String filename,
-        String extension) {
+    public static String setExtension(String filename, String extension) {
         return Optional.ofNullable(extension)
-            .map(ContentTypeUtils::fullExtension)
-            .filter(ext -> !filename.endsWith(ext))
-            .map(fullExtension -> removeExtension(filename) + fullExtension)
-            .orElse(filename);
+                .map(ContentTypeUtils::fullExtension)
+                .filter(ext -> !filename.endsWith(ext))
+                .map(fullExtension -> removeExtension(filename) + fullExtension)
+                .orElse(filename);
     }
 
-    public static String removeExtension(String filename,
-        String extension) {
+    public static String removeExtension(String filename, String extension) {
         return Optional.ofNullable(extension)
-            .map(ContentTypeUtils::fullExtension)
-            .filter(filename::endsWith)
-            .map(filename::lastIndexOf)
-            .map(extensionIndex -> filename.substring(0,
-                extensionIndex))
-            .orElse(filename);
+                .map(ContentTypeUtils::fullExtension)
+                .filter(filename::endsWith)
+                .map(filename::lastIndexOf)
+                .map(extensionIndex -> filename.substring(0, extensionIndex))
+                .orElse(filename);
     }
 
     public static String fullExtension(String extension) {
         return EXTENSION_SEPARATOR + extension;
     }
 
-    private ContentTypeUtils() {
-
-    }
+    private ContentTypeUtils() {}
 
     static String getExtension(String fileName) {
         if (fileName == null) {
@@ -150,7 +143,5 @@ public final class ContentTypeUtils {
         }
 
         return fileName.substring(0, index);
-
     }
-
 }

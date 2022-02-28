@@ -29,7 +29,12 @@ public class ProcessVariableUpdateEventHandler {
         String variableName = updatedVariableEntity.getName();
         String processInstanceId = updatedVariableEntity.getProcessInstanceId();
 
-        variableUpdater.update(updatedVariableEntity,
-                               "Unable to find variable named '" + variableName + "' for process instance '" + processInstanceId + "'");
+        variableUpdater.update(
+                updatedVariableEntity,
+                "Unable to find variable named '"
+                        + variableName
+                        + "' for process instance '"
+                        + processInstanceId
+                        + "'");
     }
 }

@@ -28,7 +28,7 @@ public class TaskSuspendedEventConverter extends BaseEventToEntityConverter {
     public TaskSuspendedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name();
@@ -41,10 +41,12 @@ public class TaskSuspendedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        TaskSuspendedEventEntity taskSuspendedEventEntity = (TaskSuspendedEventEntity) auditEventEntity;
+        TaskSuspendedEventEntity taskSuspendedEventEntity =
+                (TaskSuspendedEventEntity) auditEventEntity;
 
-        return new CloudTaskSuspendedEventImpl(taskSuspendedEventEntity.getEventId(),
-                                               taskSuspendedEventEntity.getTimestamp(),
-                                               taskSuspendedEventEntity.getTask());
+        return new CloudTaskSuspendedEventImpl(
+                taskSuspendedEventEntity.getEventId(),
+                taskSuspendedEventEntity.getTimestamp(),
+                taskSuspendedEventEntity.getTask());
     }
 }

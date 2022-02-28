@@ -19,29 +19,23 @@ import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageReceivedEvent;
 
-public class CloudBPMNMessageReceivedEventImpl extends CloudBPMNMessageEventImpl implements CloudBPMNMessageReceivedEvent {
+public class CloudBPMNMessageReceivedEventImpl extends CloudBPMNMessageEventImpl
+        implements CloudBPMNMessageReceivedEvent {
 
-    public CloudBPMNMessageReceivedEventImpl() {
+    public CloudBPMNMessageReceivedEventImpl() {}
+
+    public CloudBPMNMessageReceivedEventImpl(
+            BPMNMessage entity, String processDefinitionId, String processInstanceId) {
+        super(entity, processDefinitionId, processInstanceId);
     }
 
-    public CloudBPMNMessageReceivedEventImpl(BPMNMessage entity,
-                                             String processDefinitionId,
-                                             String processInstanceId) {
-        super(entity,
-              processDefinitionId,
-              processInstanceId);
-    }
-
-    public CloudBPMNMessageReceivedEventImpl(String id,
-                                             Long timestamp,
-                                             BPMNMessage entity,
-                                             String processDefinitionId,
-                                             String processInstanceId) {
-        super(id,
-              timestamp,
-              entity,
-              processDefinitionId,
-              processInstanceId);
+    public CloudBPMNMessageReceivedEventImpl(
+            String id,
+            Long timestamp,
+            BPMNMessage entity,
+            String processDefinitionId,
+            String processInstanceId) {
+        super(id, timestamp, entity, processDefinitionId, processInstanceId);
     }
 
     @Override
@@ -53,10 +47,10 @@ public class CloudBPMNMessageReceivedEventImpl extends CloudBPMNMessageEventImpl
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("CloudBPMNMessageReceivedEventImpl [getEventType()=")
-               .append(getEventType())
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(getEventType())
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

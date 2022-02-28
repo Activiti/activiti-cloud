@@ -23,9 +23,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -45,6 +42,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 @ExtendWith(MockitoExtension.class)
 public class ServiceTaskIntegrationResultEventHandlerTest {
 
@@ -56,41 +57,45 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private static final String CLIENT_NAME = "serviceTaskName";
     private static final String CLIENT_TYPE = ServiceTask.class.getSimpleName();
 
-    @InjectMocks
-    private ServiceTaskIntegrationResultEventHandler handler;
+    @InjectMocks private ServiceTaskIntegrationResultEventHandler handler;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RuntimeService runtimeService;
 
-    @Mock
-    private IntegrationContextService integrationContextService;
+    @Mock private IntegrationContextService integrationContextService;
 
-    @Mock
-    private ManagementService managementService;
+    @Mock private ManagementService managementService;
 
     @Test
     public void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
-        //given
-        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
+        // given
+        IntegrationContextImpl integrationContext =
+                buildIntegrationContext(Collections.singletonMap("var1", "v"));
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
-        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+        given(integrationContextService.findById(integrationContext.getId()))
+                .willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list()).thenReturn(executions);
+        when(runtimeService
+                        .createExecutionQuery()
+                        .executionId(integrationContext.getExecutionId())
+                        .list())
+                .thenReturn(executions);
 
+        // when
+        handler.receive(
+                new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
-        //when
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
-
-        //then
+        // then
         verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
-        final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(
-            CompositeCommand.class);
+        final ArgumentCaptor<CompositeCommand> captor =
+                ArgumentCaptor.forClass(CompositeCommand.class);
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();
         assertThat(command.getCommands()).hasSize(2);
         assertThat(command.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
-        assertThat(command.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+        assertThat(command.getCommands().get(1))
+                .isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
     }
 
     private ExecutionEntity buildExecutionEntity() {
@@ -110,14 +115,16 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Test
     public void receiveShouldDoNothingWhenIntegrationContextsIsNull() {
-        //given
-        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
+        // given
+        IntegrationContextImpl integrationContext =
+                buildIntegrationContext(Collections.singletonMap("var1", "v"));
         given(integrationContextService.findById(integrationContext.getId())).willReturn(null);
 
-        //when
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        // when
+        handler.receive(
+                new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
-        //then
+        // then
         verify(integrationContextService, never()).deleteIntegrationContext(any());
     }
 
@@ -133,5 +140,4 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setClientType(CLIENT_TYPE);
         return integrationContext;
     }
-
 }

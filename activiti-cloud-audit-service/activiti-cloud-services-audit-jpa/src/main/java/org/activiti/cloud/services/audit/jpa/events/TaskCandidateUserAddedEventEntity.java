@@ -37,8 +37,7 @@ public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private TaskCandidateUserImpl candidateUser;
 
-    public TaskCandidateUserAddedEventEntity() {
-    }
+    public TaskCandidateUserAddedEventEntity() {}
 
     public TaskCandidateUserAddedEventEntity(CloudTaskCandidateUserAddedEvent cloudEvent) {
         super(cloudEvent);
@@ -50,18 +49,18 @@ public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {
     }
 
     public void setCandidateUser(TaskCandidateUser candidateUser) {
-        this.candidateUser = new TaskCandidateUserImpl(candidateUser.getUserId(),candidateUser.getTaskId());
+        this.candidateUser =
+                new TaskCandidateUserImpl(candidateUser.getUserId(), candidateUser.getTaskId());
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("TaskCandidateUserAddedEventEntity [candidateUser=")
-               .append(candidateUser)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(candidateUser)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
-
 }

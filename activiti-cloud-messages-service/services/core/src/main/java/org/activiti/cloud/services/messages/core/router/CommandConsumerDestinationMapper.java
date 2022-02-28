@@ -28,8 +28,6 @@ public class CommandConsumerDestinationMapper implements Function<String, String
 
     @Override
     public String apply(String appName) {
-        return new StringBuilder("commandConsumer").append(separator)
-                                                   .append(appName)
-                                                   .toString();
+        return new StringBuilder("commandConsumer").append(separator).append(appName).toString();
     }
 }

@@ -15,7 +15,14 @@
  */
 package org.activiti.cloud.services.graphql.autoconfigure;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Value;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
+import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
+
+import graphql.GraphQL;
+import graphql.schema.GraphQLSchema;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -24,38 +31,28 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonInclude.Value;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
-import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
-import graphql.GraphQL;
-import graphql.schema.GraphQLSchema;
+import java.util.Map;
 
-/**
- * Spring Boot auto configuration of Activiti GraphQL Query Service components
- */
+/** Spring Boot auto configuration of Activiti GraphQL Query Service components */
 @Configuration
 @ConditionalOnClass({GraphQL.class})
-@ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
+@ConditionalOnProperty(
+        name = "spring.activiti.cloud.services.query.graphql.enabled",
+        matchIfMissing = true)
 public class ActivitiGraphQLAutoConfiguration {
 
-    /**
-     * Provides default configuration of Activiti GraphQL JPA Query Components
-     */
+    /** Provides default configuration of Activiti GraphQL JPA Query Components */
     @Configuration
     public static class DefaultActivitiGraphQLJpaConfiguration {
 
-        /**
-         * This is needed because the graphql spec says that null values should be present
-         */
+        /** This is needed because the graphql spec says that null values should be present */
         @Autowired
         public void configureObjectMapper(ObjectMapper objectMapper) {
-            objectMapper.configOverride(Map.class)
-                        .setInclude(Value.construct(JsonInclude.Include.ALWAYS,
-                                                    JsonInclude.Include.ALWAYS));
+            objectMapper
+                    .configOverride(Map.class)
+                    .setInclude(
+                            Value.construct(
+                                    JsonInclude.Include.ALWAYS, JsonInclude.Include.ALWAYS));
         }
 
         @Bean

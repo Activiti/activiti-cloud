@@ -15,17 +15,16 @@
  */
 package org.activiti.cloud.services.test.asserts;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+
 import io.restassured.module.mockmvc.response.MockMvcResponse;
+
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
-
-/**
- * Asserts for response content
- */
+/** Asserts for response content */
 public class AssertResponseContent {
 
     private static final String ATTACHMENT_CONTENT_DISPOSITION = "attachment;filename=";
@@ -44,12 +43,13 @@ public class AssertResponseContent {
                 .isNotEmpty()
                 .startsWith(ATTACHMENT_CONTENT_DISPOSITION);
 
-        String filename = response.getHeader(CONTENT_DISPOSITION)
-                .substring(ATTACHMENT_CONTENT_DISPOSITION.length());
+        String filename =
+                response.getHeader(CONTENT_DISPOSITION)
+                        .substring(ATTACHMENT_CONTENT_DISPOSITION.length());
 
-        return new AssertFileContent(new FileContent(filename,
-                                                     response.getContentType(),
-                                                     response.getContentAsByteArray()));
+        return new AssertFileContent(
+                new FileContent(
+                        filename, response.getContentType(), response.getContentAsByteArray()));
     }
 
     public static AssertResponseContent assertThatResponseContent(MvcResult mvcResult) {
@@ -60,7 +60,8 @@ public class AssertResponseContent {
         return assertThatResponseContent(response.mockHttpServletResponse());
     }
 
-    public static AssertResponseContent assertThatResponseContent(MockHttpServletResponse response) {
+    public static AssertResponseContent assertThatResponseContent(
+            MockHttpServletResponse response) {
         return new AssertResponseContent(response);
     }
 }

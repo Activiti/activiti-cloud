@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
@@ -36,87 +38,94 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import javax.persistence.EntityManager;
 
 @ExtendWith(MockitoExtension.class)
 class QueryEventHandlerContextOptimizerTest {
 
-    @InjectMocks
-    private QueryEventHandlerContextOptimizer subject;
+    @InjectMocks private QueryEventHandlerContextOptimizer subject;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
     @BeforeEach
-    void setUp() {
-    }
+    void setUp() {}
 
     @Test
     void optimizeTaskVariableEvents() {
-        //given
-        CloudVariableCreatedEventImpl cloudVariableCreatedEvent = new CloudVariableCreatedEventImpl();
+        // given
+        CloudVariableCreatedEventImpl cloudVariableCreatedEvent =
+                new CloudVariableCreatedEventImpl();
         CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl();
-        CloudVariableDeletedEventImpl cloudVariableDeletedEvent = new CloudVariableDeletedEventImpl();
-        CloudVariableUpdatedEventImpl cloudVariableUpdatedEvent = new CloudVariableUpdatedEventImpl();
+        CloudVariableDeletedEventImpl cloudVariableDeletedEvent =
+                new CloudVariableDeletedEventImpl();
+        CloudVariableUpdatedEventImpl cloudVariableUpdatedEvent =
+                new CloudVariableUpdatedEventImpl();
 
-        List<CloudRuntimeEvent<?,?>> events = Arrays.asList(
-            cloudVariableCreatedEvent,
-            cloudTaskCreatedEvent,
-            cloudVariableDeletedEvent,
-            cloudVariableUpdatedEvent
-        );
+        List<CloudRuntimeEvent<?, ?>> events =
+                Arrays.asList(
+                        cloudVariableCreatedEvent,
+                        cloudTaskCreatedEvent,
+                        cloudVariableDeletedEvent,
+                        cloudVariableUpdatedEvent);
 
-        //when
-        List<CloudRuntimeEvent<?,?>> result = subject.optimize(events);
+        // when
+        List<CloudRuntimeEvent<?, ?>> result = subject.optimize(events);
 
-        //then
-        assertThat(result).containsExactly(cloudTaskCreatedEvent,
-                                           cloudVariableCreatedEvent,
-                                           cloudVariableUpdatedEvent,
-                                           cloudVariableDeletedEvent);
+        // then
+        assertThat(result)
+                .containsExactly(
+                        cloudTaskCreatedEvent,
+                        cloudVariableCreatedEvent,
+                        cloudVariableUpdatedEvent,
+                        cloudVariableDeletedEvent);
     }
 
     @Test
     void optimizeTaskCandidateGroupsEvents() {
-        //given
+        // given
         CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl();
         CloudTaskAssignedEventImpl cloudTaskAssignedEvent = new CloudTaskAssignedEventImpl();
         CloudTaskCompletedEventImpl cloudTaskCompletedEvent = new CloudTaskCompletedEventImpl();
         CloudTaskUpdatedEventImpl cloudTaskUpdatedEvent = new CloudTaskUpdatedEventImpl();
         CloudTaskCancelledEventImpl cloudTaskCancelledEvent = new CloudTaskCancelledEventImpl();
-        CloudTaskCandidateUserAddedEventImpl cloudTaskCandidateUserAddedEvent = new CloudTaskCandidateUserAddedEventImpl();
-        CloudTaskCandidateGroupAddedEventImpl cloudTaskCandidateGroupAddedEvent = new CloudTaskCandidateGroupAddedEventImpl();
-        CloudTaskCandidateUserRemovedEventImpl cloudTaskCandidateUserRemovedEvent = new CloudTaskCandidateUserRemovedEventImpl();
-        CloudTaskCandidateGroupRemovedEventImpl cloudTaskCandidateGroupRemovedEvent = new CloudTaskCandidateGroupRemovedEventImpl();
+        CloudTaskCandidateUserAddedEventImpl cloudTaskCandidateUserAddedEvent =
+                new CloudTaskCandidateUserAddedEventImpl();
+        CloudTaskCandidateGroupAddedEventImpl cloudTaskCandidateGroupAddedEvent =
+                new CloudTaskCandidateGroupAddedEventImpl();
+        CloudTaskCandidateUserRemovedEventImpl cloudTaskCandidateUserRemovedEvent =
+                new CloudTaskCandidateUserRemovedEventImpl();
+        CloudTaskCandidateGroupRemovedEventImpl cloudTaskCandidateGroupRemovedEvent =
+                new CloudTaskCandidateGroupRemovedEventImpl();
 
-        List<CloudRuntimeEvent<?,?>> events = Arrays.asList(
-            cloudTaskCandidateUserAddedEvent,
-            cloudTaskCandidateGroupAddedEvent,
-            cloudTaskCreatedEvent,
-            cloudTaskAssignedEvent,
-            cloudTaskUpdatedEvent,
-            cloudTaskCandidateUserRemovedEvent,
-            cloudTaskCandidateGroupRemovedEvent,
-            cloudTaskCompletedEvent,
-            cloudTaskCancelledEvent
-        );
+        List<CloudRuntimeEvent<?, ?>> events =
+                Arrays.asList(
+                        cloudTaskCandidateUserAddedEvent,
+                        cloudTaskCandidateGroupAddedEvent,
+                        cloudTaskCreatedEvent,
+                        cloudTaskAssignedEvent,
+                        cloudTaskUpdatedEvent,
+                        cloudTaskCandidateUserRemovedEvent,
+                        cloudTaskCandidateGroupRemovedEvent,
+                        cloudTaskCompletedEvent,
+                        cloudTaskCancelledEvent);
 
-        //when
-        List<CloudRuntimeEvent<?,?>> result = subject.optimize(events);
+        // when
+        List<CloudRuntimeEvent<?, ?>> result = subject.optimize(events);
 
-        //then
-        assertThat(result).containsExactly(cloudTaskCreatedEvent,
-                                           cloudTaskCandidateUserAddedEvent,
-                                           cloudTaskCandidateGroupAddedEvent,
-                                           cloudTaskAssignedEvent,
-                                           cloudTaskUpdatedEvent,
-                                           cloudTaskCompletedEvent,
-                                           cloudTaskCancelledEvent,
-                                           cloudTaskCandidateUserRemovedEvent,
-                                           cloudTaskCandidateGroupRemovedEvent);
+        // then
+        assertThat(result)
+                .containsExactly(
+                        cloudTaskCreatedEvent,
+                        cloudTaskCandidateUserAddedEvent,
+                        cloudTaskCandidateGroupAddedEvent,
+                        cloudTaskAssignedEvent,
+                        cloudTaskUpdatedEvent,
+                        cloudTaskCompletedEvent,
+                        cloudTaskCancelledEvent,
+                        cloudTaskCandidateUserRemovedEvent,
+                        cloudTaskCandidateGroupRemovedEvent);
     }
 }

@@ -17,12 +17,6 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.xml.stream.XMLStreamException;
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
@@ -37,9 +31,15 @@ import org.activiti.cloud.services.modeling.converter.ProcessModelContentConvert
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * {@link ModelValidator} implementation of process models
- */
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.xml.stream.XMLStreamException;
+
+/** {@link ModelValidator} implementation of process models */
 public class ProcessModelValidator implements ModelContentValidator {
 
     private final Logger log = LoggerFactory.getLogger(ProcessModelValidator.class);
@@ -50,31 +50,33 @@ public class ProcessModelValidator implements ModelContentValidator {
 
     private final ProcessModelContentConverter processModelContentConverter;
 
-    public ProcessModelValidator(ProcessModelType processModelType,
-                                 Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
-                                 ProcessModelContentConverter processModelContentConverter) {
+    public ProcessModelValidator(
+            ProcessModelType processModelType,
+            Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
+            ProcessModelContentConverter processModelContentConverter) {
         this.processModelType = processModelType;
         this.bpmnCommonModelValidators = bpmnCommonModelValidators;
         this.processModelContentConverter = processModelContentConverter;
     }
 
     @Override
-    public void validate(byte[] bytes,
-        ValidationContext validationContext) {
+    public void validate(byte[] bytes, ValidationContext validationContext) {
 
         BpmnModel bpmnModel = processContentToBpmnModel(bytes);
 
-        List<ModelValidationError> validationErrors = bpmnCommonModelValidators
-            .stream()
-            .flatMap(bpmnCommonModelValidator -> bpmnCommonModelValidator.validate(bpmnModel,
-                validationContext))
-            .collect(Collectors.toList());
+        List<ModelValidationError> validationErrors =
+                bpmnCommonModelValidators.stream()
+                        .flatMap(
+                                bpmnCommonModelValidator ->
+                                        bpmnCommonModelValidator.validate(
+                                                bpmnModel, validationContext))
+                        .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
-            String messageError = "Semantic process model validation errors encountered: " + validationErrors;
+            String messageError =
+                    "Semantic process model validation errors encountered: " + validationErrors;
             log.debug(messageError);
-            throw new SemanticModelValidationException(messageError,
-                                                       validationErrors);
+            throw new SemanticModelValidationException(messageError, validationErrors);
         }
     }
 
@@ -82,13 +84,14 @@ public class ProcessModelValidator implements ModelContentValidator {
         try {
             return processModelContentConverter.convertToBpmnModel(processContent);
         } catch (IOException | XMLStreamException | XMLException ex) {
-            Throwable errorCause = Optional.ofNullable(ex.getCause())
-                    .filter(XMLStreamException.class::isInstance)
-                    .orElse(ex);
-            String messageError = "Syntactic process model XML validation errors encountered: " + errorCause;
+            Throwable errorCause =
+                    Optional.ofNullable(ex.getCause())
+                            .filter(XMLStreamException.class::isInstance)
+                            .orElse(ex);
+            String messageError =
+                    "Syntactic process model XML validation errors encountered: " + errorCause;
             log.debug(messageError);
-            throw new SyntacticModelValidationException(messageError,
-                                                        errorCause);
+            throw new SyntacticModelValidationException(messageError, errorCause);
         }
     }
 

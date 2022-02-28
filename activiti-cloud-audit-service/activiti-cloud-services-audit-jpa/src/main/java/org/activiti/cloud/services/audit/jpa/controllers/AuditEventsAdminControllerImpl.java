@@ -40,22 +40,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(
+        value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
+        produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public class AuditEventsAdminControllerImpl implements AuditEventsAdminController {
 
     private final EventsRepository eventsRepository;
 
     private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
 
-    private final AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>>
+            pagedCollectionModelAssembler;
 
     private final APIEventToEntityConverters eventConverters;
 
     @Autowired
-    public AuditEventsAdminControllerImpl(EventsRepository eventsRepository,
-                                          EventRepresentationModelAssembler eventRepresentationModelAssembler,
-                                          APIEventToEntityConverters eventConverters,
-                                          AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler) {
+    public AuditEventsAdminControllerImpl(
+            EventsRepository eventsRepository,
+            EventRepresentationModelAssembler eventRepresentationModelAssembler,
+            APIEventToEntityConverters eventConverters,
+            AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>>
+                    pagedCollectionModelAssembler) {
         this.eventsRepository = eventsRepository;
         this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
         this.eventConverters = eventConverters;
@@ -63,19 +68,22 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(
+            Pageable pageable) {
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
 
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 
         for (AuditEventEntity aee : allAuditInPage.getContent()) {
-            events.add(eventConverters.getConverterByEventTypeName(aee.getEventType()).convertToAPI(aee));
+            events.add(
+                    eventConverters
+                            .getConverterByEventTypeName(aee.getEventType())
+                            .convertToAPI(aee));
         }
 
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  new PageImpl<>(events,
-                                                                 pageable,
-                                                                 allAuditInPage.getTotalElements()),
-                                                  eventRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+                pageable,
+                new PageImpl<>(events, pageable, allAuditInPage.getTotalElements()),
+                eventRepresentationModelAssembler);
     }
 }

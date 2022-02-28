@@ -21,8 +21,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import com.querydsl.core.types.Predicate;
-import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 public class QueryDslPredicateAggregatorTest {
 
@@ -30,7 +32,7 @@ public class QueryDslPredicateAggregatorTest {
 
     @Test
     public void should_addPredicatesFromAllFiltersToInitialPredicate() {
-        //given
+        // given
         Predicate initialPredicate = mock(Predicate.class);
         QueryDslPredicateFilter firstFilter = mock(QueryDslPredicateFilter.class);
 
@@ -40,14 +42,14 @@ public class QueryDslPredicateAggregatorTest {
         QueryDslPredicateFilter secondFilter = mock(QueryDslPredicateFilter.class);
         Predicate initialPredicatePlusFirstAndSecondFilters = mock(Predicate.class);
         given(secondFilter.extend(initialPredicatePlusFirstFilter))
-            .willReturn(initialPredicatePlusFirstAndSecondFilters);
+                .willReturn(initialPredicatePlusFirstAndSecondFilters);
 
-        //when
-        Predicate finalPredicate = predicateAggregator
-            .applyFilters(initialPredicate, Arrays.asList(firstFilter, secondFilter));
+        // when
+        Predicate finalPredicate =
+                predicateAggregator.applyFilters(
+                        initialPredicate, Arrays.asList(firstFilter, secondFilter));
 
-        //then
+        // then
         assertThat(finalPredicate).isEqualTo(initialPredicatePlusFirstAndSecondFilters);
     }
-
 }

@@ -15,9 +15,10 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import org.activiti.cloud.modeling.api.Project;
+
 import java.util.Date;
 import java.util.Set;
-import org.activiti.cloud.modeling.api.Project;
 
 public class ProjectDescriptor {
 
@@ -52,7 +53,7 @@ public class ProjectDescriptor {
     public String getName() {
         return project.getName();
     }
-    
+
     public String getVersion() {
         return project.getVersion();
     }
@@ -77,8 +78,7 @@ public class ProjectDescriptor {
         return project.getLastModifiedDate();
     }
 
-    public Project toProject(){
+    public Project toProject() {
         return this.project;
     }
-
 }

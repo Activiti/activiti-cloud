@@ -19,24 +19,22 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
+import org.activiti.cloud.services.modeling.validation.NameValidator;
 
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.activiti.cloud.services.modeling.validation.NameValidator;
 
-/**
- * Implementation of {@link BpmnCommonModelValidator} for validating process name
- */
-public class BpmnModelNameValidator implements BpmnCommonModelValidator,
-                                               NameValidator {
+/** Implementation of {@link BpmnCommonModelValidator} for validating process name */
+public class BpmnModelNameValidator implements BpmnCommonModelValidator, NameValidator {
 
     @Override
-    public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
-                                                 ValidationContext validationContext) {
-        return validateName(Optional.ofNullable(bpmnModel)
-                                       .map(BpmnModel::getMainProcess)
-                                       .map(Process::getName)
-                                       .orElse(null),
-                               "process");
+    public Stream<ModelValidationError> validate(
+            BpmnModel bpmnModel, ValidationContext validationContext) {
+        return validateName(
+                Optional.ofNullable(bpmnModel)
+                        .map(BpmnModel::getMainProcess)
+                        .map(Process::getName)
+                        .orElse(null),
+                "process");
     }
 }

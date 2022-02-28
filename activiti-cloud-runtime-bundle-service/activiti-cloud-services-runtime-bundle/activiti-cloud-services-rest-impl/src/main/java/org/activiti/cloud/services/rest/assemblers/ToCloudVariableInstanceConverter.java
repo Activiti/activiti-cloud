@@ -29,9 +29,9 @@ public class ToCloudVariableInstanceConverter {
     }
 
     public CloudVariableInstance from(VariableInstance variableInstance) {
-        CloudVariableInstanceImpl<Object> cloudVariableInstance = new CloudVariableInstanceImpl<>(variableInstance);
+        CloudVariableInstanceImpl<Object> cloudVariableInstance =
+                new CloudVariableInstanceImpl<>(variableInstance);
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudVariableInstance);
         return cloudVariableInstance;
     }
-
 }

@@ -19,21 +19,17 @@ import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 
-public class CloudVariableCreatedEventImpl extends CloudVariableEventImpl implements CloudVariableCreatedEvent {
+public class CloudVariableCreatedEventImpl extends CloudVariableEventImpl
+        implements CloudVariableCreatedEvent {
 
-    public CloudVariableCreatedEventImpl() {
-    }
+    public CloudVariableCreatedEventImpl() {}
 
     public CloudVariableCreatedEventImpl(VariableInstance entity) {
         super(entity);
     }
 
-    public CloudVariableCreatedEventImpl(String id,
-                                         Long timestamp,
-                                         VariableInstance entity) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudVariableCreatedEventImpl(String id, Long timestamp, VariableInstance entity) {
+        super(id, timestamp, entity);
     }
 
     @Override

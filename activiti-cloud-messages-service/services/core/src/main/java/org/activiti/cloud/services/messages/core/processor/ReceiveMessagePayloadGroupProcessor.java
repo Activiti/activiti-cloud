@@ -19,8 +19,6 @@ import static org.activiti.cloud.services.messages.core.integration.MessageEvent
 import static org.activiti.cloud.services.messages.core.support.Predicates.MESSAGE_SENT;
 import static org.activiti.cloud.services.messages.core.support.Predicates.MESSAGE_WAITING;
 
-import java.util.Collection;
-
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.cloud.services.messages.core.support.MessageComparators;
 import org.activiti.cloud.services.messages.core.transformer.ReceiveMessagePayloadTransformer;
@@ -29,42 +27,41 @@ import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 
+import java.util.Collection;
+
 public class ReceiveMessagePayloadGroupProcessor extends AbstractMessageGroupProcessorHandler {
-    
+
     private final MessageGroupStore messageGroupStore;
 
     public ReceiveMessagePayloadGroupProcessor(MessageGroupStore messageGroupStore) {
         this.messageGroupStore = messageGroupStore;
     }
-    
+
     @Override
     protected Message<?> process(MessageGroup group) {
-        Message<?> result = group.getMessages()
-                                 .stream()
-                                 .filter(MESSAGE_SENT)
-                                 .min(MessageComparators.TIMESTAMP)
-                                 .get();
+        Message<?> result =
+                group.getMessages().stream()
+                        .filter(MESSAGE_SENT)
+                        .min(MessageComparators.TIMESTAMP)
+                        .get();
 
-        messageGroupStore.removeMessagesFromGroup(group.getGroupId(),
-                                                  result);
-        return buildOutputMessage(result);     
+        messageGroupStore.removeMessagesFromGroup(group.getGroupId(), result);
+        return buildOutputMessage(result);
     }
-    
-    
+
     protected Message<?> buildOutputMessage(Message<?> message) {
         ReceiveMessagePayload payload = ReceiveMessagePayloadTransformer.from(message);
-        
+
         return MessageBuilder.withPayload(payload)
-                             .setHeader(MESSAGE_PAYLOAD_TYPE,
-                                        ReceiveMessagePayload.class.getSimpleName())
-                             .build();
+                .setHeader(MESSAGE_PAYLOAD_TYPE, ReceiveMessagePayload.class.getSimpleName())
+                .build();
     }
-    
+
     @Override
     protected boolean canProcess(MessageGroup group) {
         Collection<Message<?>> messages = group.getMessages();
-             
-        return messages.stream().anyMatch(MESSAGE_WAITING) 
+
+        return messages.stream().anyMatch(MESSAGE_WAITING)
                 && messages.stream().anyMatch(MESSAGE_SENT);
     }
 }

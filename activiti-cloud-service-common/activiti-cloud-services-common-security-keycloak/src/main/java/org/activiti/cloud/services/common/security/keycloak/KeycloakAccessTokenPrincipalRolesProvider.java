@@ -30,26 +30,27 @@ public class KeycloakAccessTokenPrincipalRolesProvider implements PrincipalRoles
 
     private final KeycloakAccessTokenProvider keycloakAccessTokenProvider;
     private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
-    
-    public KeycloakAccessTokenPrincipalRolesProvider(@NonNull KeycloakAccessTokenProvider keycloakSecurityContextProvider,
-                                                     @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+
+    public KeycloakAccessTokenPrincipalRolesProvider(
+            @NonNull KeycloakAccessTokenProvider keycloakSecurityContextProvider,
+            @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         this.keycloakAccessTokenProvider = keycloakSecurityContextProvider;
         this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
     }
-    
+
     @Override
     public List<String> getRoles(@NonNull Principal principal) {
-        return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
-                                          .map(AccessToken::getRealmAccess)
-                                          .map(Access::getRoles)
-                                          .map(ArrayList::new)
-                                          .map(Collections::unmodifiableList)
-                                          .orElseGet(this::empty);
+        return keycloakAccessTokenProvider
+                .accessToken(principal)
+                .filter(keycloakAccessTokenValidator::isValid)
+                .map(AccessToken::getRealmAccess)
+                .map(Access::getRoles)
+                .map(ArrayList::new)
+                .map(Collections::unmodifiableList)
+                .orElseGet(this::empty);
     }
-    
+
     protected @Nullable List<String> empty() {
         return null;
     }
-    
 }

@@ -15,17 +15,17 @@
  */
 package org.activiti.cloud.services.modeling.jpa.version;
 
-import java.io.Serializable;
-import javax.persistence.EntityManager;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Implementation for {@link VersionedJpaRepository}
- */
-public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Serializable, V extends VersionEntity>
-    extends SimpleJpaRepository<T, K>
-    implements VersionedJpaRepository<T, K, V> {
+import java.io.Serializable;
+
+import javax.persistence.EntityManager;
+
+/** Implementation for {@link VersionedJpaRepository} */
+public class VersionedJpaRepositoryImpl<
+                T extends VersionedEntity, K extends Serializable, V extends VersionEntity>
+        extends SimpleJpaRepository<T, K> implements VersionedJpaRepository<T, K, V> {
 
     private final VersionGenerationHelper<T, V> versionGenerationHelper;
 
@@ -33,27 +33,26 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
      * Creates a new {@link SimpleJpaRepository} to manage objects of the given domain type.
      *
      * @param versionedClass the class of the version entity.
-     * @param versionClass   the class of the version entity.
-     * @param entityManager  must not be {@literal null}.
+     * @param versionClass the class of the version entity.
+     * @param entityManager must not be {@literal null}.
      */
-    public VersionedJpaRepositoryImpl(final Class<T> versionedClass,
-        final Class<V> versionClass,
-        final EntityManager entityManager) {
-        super(versionedClass,
-            entityManager);
+    public VersionedJpaRepositoryImpl(
+            final Class<T> versionedClass,
+            final Class<V> versionClass,
+            final EntityManager entityManager) {
+        super(versionedClass, entityManager);
 
-        this.versionGenerationHelper = new VersionGenerationHelper<T, V>(versionedClass,
-            versionClass);
+        this.versionGenerationHelper =
+                new VersionGenerationHelper<T, V>(versionedClass, versionClass);
     }
 
     /**
      * Add a new version before any save.
      *
      * @param versionedEntity the entity to save
-     * @param <S>             the versionedEntity type
+     * @param <S> the versionedEntity type
      * @return the saved entity
      */
-
     @Override
     @Transactional
     public <S extends T> S save(S versionedEntity) {
@@ -62,6 +61,4 @@ public class VersionedJpaRepositoryImpl<T extends VersionedEntity, K extends Ser
 
         return super.save(versionedEntity);
     }
-
-
 }

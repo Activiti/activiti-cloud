@@ -15,6 +15,11 @@
  */
 package org.activiti.services.connectors;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -41,11 +46,6 @@ import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class IntegrationRequestSenderTest {
 
     private static final String MY_PARENT_PROC_ID = "my-parent-proc-id";
@@ -66,40 +66,34 @@ public class IntegrationRequestSenderTest {
 
     private IntegrationRequestSender integrationRequestSender;
 
-    @Mock
-    private BinderAwareChannelResolver resolver;
+    @Mock private BinderAwareChannelResolver resolver;
 
-    @Mock
-    private MessageChannel integrationProducer;
+    @Mock private MessageChannel integrationProducer;
 
     @Spy
-    private RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties() {
-        {
-            setAppName(APP_NAME);
-            setServiceType(SERVICE_TYPE);
-            setServiceVersion(SERVICE_VERSION);
-            setRbSpringAppName(SPRING_APP_NAME);
-        }
-    };
+    private RuntimeBundleProperties runtimeBundleProperties =
+            new RuntimeBundleProperties() {
+                {
+                    setAppName(APP_NAME);
+                    setServiceType(SERVICE_TYPE);
+                    setServiceVersion(SERVICE_VERSION);
+                    setRbSpringAppName(SPRING_APP_NAME);
+                }
+            };
 
-    @Mock
-    private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    @Mock private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    @Mock
-    private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
+    @Mock private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
 
     private IntegrationContextMessageBuilderFactory messageBuilderFactory;
 
-    @Mock
-    private IntegrationContextEntity integrationContextEntity;
+    @Mock private IntegrationContextEntity integrationContextEntity;
 
-    @Mock
-    private ExtensionsVariablesMappingProvider inboundVariablesProvider;
+    @Mock private ExtensionsVariablesMappingProvider inboundVariablesProvider;
 
     private DelegateExecution delegateExecution;
 
-    @Captor
-    private ArgumentCaptor<Message<IntegrationRequest>> integrationRequestMessageCaptor;
+    @Captor private ArgumentCaptor<Message<IntegrationRequest>> integrationRequestMessageCaptor;
 
     private IntegrationRequestImpl integrationRequest;
 
@@ -108,10 +102,10 @@ public class IntegrationRequestSenderTest {
         initMocks(this);
 
         configureDeploymentManager();
-        messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
+        messageBuilderFactory =
+                new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
 
-        integrationRequestSender = new IntegrationRequestSender(resolver,
-                                                                messageBuilderFactory);
+        integrationRequestSender = new IntegrationRequestSender(resolver, messageBuilderFactory);
 
         when(resolver.resolveDestination(CONNECTOR_TYPE)).thenReturn(integrationProducer);
 
@@ -124,20 +118,24 @@ public class IntegrationRequestSenderTest {
         IntegrationContextEntity contextEntity = mock(IntegrationContextEntity.class);
         given(contextEntity.getId()).willReturn(INTEGRATION_CONTEXT_ID);
 
-        IntegrationContext integrationContext = new IntegrationContextBuilder(inboundVariablesProvider).from(contextEntity, delegateExecution);
+        IntegrationContext integrationContext =
+                new IntegrationContextBuilder(inboundVariablesProvider)
+                        .from(contextEntity, delegateExecution);
         integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setServiceFullName(APP_NAME);
     }
 
     private void configureDeploymentManager() {
-        ProcessEngineConfigurationImpl processEngineConfiguration = mock(ProcessEngineConfigurationImpl.class);
+        ProcessEngineConfigurationImpl processEngineConfiguration =
+                mock(ProcessEngineConfigurationImpl.class);
         Context.setProcessEngineConfiguration(processEngineConfiguration);
 
         DeploymentManager deploymentManager = mock(DeploymentManager.class);
         ProcessDefinition processDefinition = mock(ProcessDefinition.class);
 
         given(processEngineConfiguration.getDeploymentManager()).willReturn(deploymentManager);
-        given(deploymentManager.findDeployedProcessDefinitionById(PROC_DEF_ID)).willReturn(processDefinition);
+        given(deploymentManager.findDeployedProcessDefinitionById(PROC_DEF_ID))
+                .willReturn(processDefinition);
 
         given(processDefinition.getId()).willReturn(PROC_DEF_ID);
         given(processDefinition.getKey()).willReturn(MY_PROC_DEF_KEY);
@@ -154,16 +152,17 @@ public class IntegrationRequestSenderTest {
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setImplementation(CONNECTOR_TYPE);
 
-        delegateExecution = DelegateExecutionBuilder.anExecution()
-                                                    .withServiceTask(serviceTask)
-                                                    .withProcessDefinitionId(PROC_DEF_ID)
-                                                    .withRootProcessInstanceId(ROOT_PROC_INST_ID)
-                                                    .withProcessInstanceId(PROC_INST_ID)
-                                                    .withBusinessKey(BUSINESS_KEY)
-                                                    .withProcessDefinitionKey(MY_PROC_DEF_KEY)
-                                                    .withProcessDefinitionVersion(PROC_DEF_VERSION)
-                                                    .withParentProcessInstanceId(MY_PARENT_PROC_ID)
-                                                    .build();
+        delegateExecution =
+                DelegateExecutionBuilder.anExecution()
+                        .withServiceTask(serviceTask)
+                        .withProcessDefinitionId(PROC_DEF_ID)
+                        .withRootProcessInstanceId(ROOT_PROC_INST_ID)
+                        .withProcessInstanceId(PROC_INST_ID)
+                        .withBusinessKey(BUSINESS_KEY)
+                        .withProcessDefinitionKey(MY_PROC_DEF_KEY)
+                        .withProcessDefinitionVersion(PROC_DEF_VERSION)
+                        .withParentProcessInstanceId(MY_PARENT_PROC_ID)
+                        .build();
     }
 
     private void configureProperties() {
@@ -173,16 +172,20 @@ public class IntegrationRequestSenderTest {
 
     @Test
     public void shouldSendIntegrationRequestMessage() {
-        //when
+        // when
         integrationRequestSender.sendIntegrationRequest(integrationRequest);
 
-        //then
+        // then
         verify(integrationProducer).send(integrationRequestMessageCaptor.capture());
-        Message<IntegrationRequest> integrationRequestMessage = integrationRequestMessageCaptor.getValue();
+        Message<IntegrationRequest> integrationRequestMessage =
+                integrationRequestMessageCaptor.getValue();
 
         IntegrationRequest sentIntegrationRequestEvent = integrationRequestMessage.getPayload();
         assertThat(sentIntegrationRequestEvent).isEqualTo(integrationRequest);
-        assertThat(integrationRequestMessage.getHeaders().get(IntegrationRequestSender.CONNECTOR_TYPE)).isEqualTo(CONNECTOR_TYPE);
+        assertThat(
+                        integrationRequestMessage
+                                .getHeaders()
+                                .get(IntegrationRequestSender.CONNECTOR_TYPE))
+                .isEqualTo(CONNECTOR_TYPE);
     }
-
 }

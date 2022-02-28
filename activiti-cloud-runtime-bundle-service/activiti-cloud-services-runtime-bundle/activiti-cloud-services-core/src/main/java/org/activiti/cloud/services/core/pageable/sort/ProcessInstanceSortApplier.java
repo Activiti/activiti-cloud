@@ -44,7 +44,8 @@ public class ProcessInstanceSortApplier extends BaseSortApplier<ProcessInstanceQ
 
     public ProcessInstanceSortApplier() {
         orderByProperties.put("id", ProcessInstanceQueryProperty.PROCESS_INSTANCE_ID);
-        orderByProperties.put("processDefinitionId", ProcessInstanceQueryProperty.PROCESS_DEFINITION_ID);
+        orderByProperties.put(
+                "processDefinitionId", ProcessInstanceQueryProperty.PROCESS_DEFINITION_ID);
     }
 
     @Override

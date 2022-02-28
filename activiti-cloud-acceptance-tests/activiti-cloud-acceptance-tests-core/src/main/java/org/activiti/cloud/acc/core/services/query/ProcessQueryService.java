@@ -18,6 +18,7 @@ package org.activiti.cloud.acc.core.services.query;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -35,16 +36,18 @@ public interface ProcessQueryService {
 
     @RequestLine("GET /v1/process-instances/{processInstanceId}/variables")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudVariableInstance> getProcessInstanceVariables(@Param("processInstanceId") String processInstanceId);
+    PagedModel<CloudVariableInstance> getProcessInstanceVariables(
+            @Param("processInstanceId") String processInstanceId);
 
     @RequestLine("GET /v1/process-definitions")
     @Headers("Content-Type: application/json")
     PagedModel<ProcessDefinition> getProcessDefinitions();
 
     @RequestLine("GET /v1/process-instances?name={processName}")
-    PagedModel<CloudProcessInstance> getProcessInstancesByName(@Param("processName") String processName);
+    PagedModel<CloudProcessInstance> getProcessInstancesByName(
+            @Param("processName") String processName);
 
     @RequestLine("GET /v1/process-instances?processDefinitionKey={processDefinitionKey}")
-    PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(@Param("processDefinitionKey") String processDefinitionKey);
-
+    PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(
+            @Param("processDefinitionKey") String processDefinitionKey);
 }

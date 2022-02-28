@@ -28,11 +28,9 @@ import org.mockito.Mock;
 
 public class ClaimTaskCmdExecutorTest {
 
-    @InjectMocks
-    private ClaimTaskCmdExecutor claimTaskCmdExecutor;
+    @InjectMocks private ClaimTaskCmdExecutor claimTaskCmdExecutor;
 
-    @Mock
-    private TaskAdminRuntime taskAdminRuntime;
+    @Mock private TaskAdminRuntime taskAdminRuntime;
 
     @BeforeEach
     public void setUp() {
@@ -41,16 +39,16 @@ public class ClaimTaskCmdExecutorTest {
 
     @Test
     public void claimTaskCmdExecutorTest() {
-        //given
-        ClaimTaskPayload claimTaskPayload = new ClaimTaskPayload("taskId",
-                                                                 "assignee");
+        // given
+        ClaimTaskPayload claimTaskPayload = new ClaimTaskPayload("taskId", "assignee");
 
-        assertThat(claimTaskCmdExecutor.getHandledType()).isEqualTo(ClaimTaskPayload.class.getName());
+        assertThat(claimTaskCmdExecutor.getHandledType())
+                .isEqualTo(ClaimTaskPayload.class.getName());
 
-        //when
+        // when
         claimTaskCmdExecutor.execute(claimTaskPayload);
 
-        //then
+        // then
         verify(taskAdminRuntime).claim(claimTaskPayload);
     }
 }

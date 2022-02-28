@@ -32,11 +32,9 @@ import org.mockito.Mock;
 
 public class StartProcessInstanceCmdExecutorTest {
 
-    @InjectMocks
-    private StartProcessInstanceCmdExecutor startProcessInstanceCmdExecutor;
+    @InjectMocks private StartProcessInstanceCmdExecutor startProcessInstanceCmdExecutor;
 
-    @Mock
-    private ProcessAdminRuntime processAdminRuntime;
+    @Mock private ProcessAdminRuntime processAdminRuntime;
 
     @BeforeEach
     public void setUp() {
@@ -45,21 +43,22 @@ public class StartProcessInstanceCmdExecutorTest {
 
     @Test
     public void startProcessInstanceCmdExecutorTest() {
-        StartProcessPayload startProcessInstanceCmd = ProcessPayloadBuilder.start()
-                .withProcessDefinitionKey("def key")
-                .withName("name")
-                .withBusinessKey("business key")
-        .build();
+        StartProcessPayload startProcessInstanceCmd =
+                ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey("def key")
+                        .withName("name")
+                        .withBusinessKey("business key")
+                        .build();
 
         ProcessInstance fakeProcessInstance = mock(ProcessInstance.class);
 
         given(processAdminRuntime.start(startProcessInstanceCmd)).willReturn(fakeProcessInstance);
 
-        assertThat(startProcessInstanceCmdExecutor.getHandledType()).isEqualTo(StartProcessPayload.class.getName());
+        assertThat(startProcessInstanceCmdExecutor.getHandledType())
+                .isEqualTo(StartProcessPayload.class.getName());
 
         startProcessInstanceCmdExecutor.execute(startProcessInstanceCmd);
 
         verify(processAdminRuntime).start(startProcessInstanceCmd);
-
     }
 }

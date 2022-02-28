@@ -28,8 +28,7 @@ public class TaskAssignedEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_ASSIGNED_EVENT = "TaskAssignedEvent";
 
-    public TaskAssignedEventEntity() {
-    }
+    public TaskAssignedEventEntity() {}
 
     public TaskAssignedEventEntity(CloudTaskAssignedEvent cloudEvent) {
         super(cloudEvent);

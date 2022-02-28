@@ -32,16 +32,12 @@ import org.mockito.Mock;
 
 public class CloudTimerProducerTest {
 
-    @InjectMocks
-    private CloudTimerFiredProducer cloudTimerFiredProducer;
+    @InjectMocks private CloudTimerFiredProducer cloudTimerFiredProducer;
 
-    @InjectMocks
-    private CloudTimerScheduledProducer cloudTimerScheduledProducer;
+    @InjectMocks private CloudTimerScheduledProducer cloudTimerScheduledProducer;
 
-    @Mock
-    private ToCloudProcessRuntimeEventConverter eventConverter;
-    @Mock
-    private ProcessEngineEventsAggregator eventsAggregator;
+    @Mock private ToCloudProcessRuntimeEventConverter eventConverter;
+    @Mock private ProcessEngineEventsAggregator eventsAggregator;
 
     @BeforeEach
     public void setUp() {
@@ -50,25 +46,26 @@ public class CloudTimerProducerTest {
 
     @Test
     public void onEventShouldConvertEventToCloudEventAndAddToAggregator() {
-        //given
+        // given
         BPMNTimerFiredEventImpl eventFired = new BPMNTimerFiredEventImpl(new BPMNTimerImpl());
         CloudBPMNTimerFiredEventImpl cloudEventFired = new CloudBPMNTimerFiredEventImpl();
         given(eventConverter.from(eventFired)).willReturn(cloudEventFired);
-        //when
+        // when
         cloudTimerFiredProducer.onEvent(eventFired);
 
-        //then
+        // then
         verify(eventsAggregator).add(cloudEventFired);
 
-        BPMNTimerScheduledEventImpl eventScheduled = new BPMNTimerScheduledEventImpl(new BPMNTimerImpl());
-        CloudBPMNTimerScheduledEventImpl cloudEventScheduled = new CloudBPMNTimerScheduledEventImpl();
+        BPMNTimerScheduledEventImpl eventScheduled =
+                new BPMNTimerScheduledEventImpl(new BPMNTimerImpl());
+        CloudBPMNTimerScheduledEventImpl cloudEventScheduled =
+                new CloudBPMNTimerScheduledEventImpl();
         given(eventConverter.from(eventScheduled)).willReturn(cloudEventScheduled);
 
-        //when
+        // when
         cloudTimerScheduledProducer.onEvent(eventScheduled);
 
-        //then
+        // then
         verify(eventsAggregator).add(cloudEventScheduled);
-
     }
 }

@@ -35,18 +35,21 @@ public class TimerCancelledEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected TimerCancelledAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
+    protected TimerCancelledAuditEventEntity createEventEntity(
+            CloudRuntimeEvent cloudRuntimeEvent) {
         return new TimerCancelledAuditEventEntity((CloudBPMNTimerCancelledEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        TimerCancelledAuditEventEntity timerEventEntity = (TimerCancelledAuditEventEntity) auditEventEntity;
+        TimerCancelledAuditEventEntity timerEventEntity =
+                (TimerCancelledAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNTimerCancelledEventImpl(timerEventEntity.getEventId(),
-                                                    timerEventEntity.getTimestamp(),
-                                                    timerEventEntity.getTimer(),
-                                                    timerEventEntity.getProcessDefinitionId(),
-                                                    timerEventEntity.getProcessInstanceId());
+        return new CloudBPMNTimerCancelledEventImpl(
+                timerEventEntity.getEventId(),
+                timerEventEntity.getTimestamp(),
+                timerEventEntity.getTimer(),
+                timerEventEntity.getProcessDefinitionId(),
+                timerEventEntity.getProcessInstanceId());
     }
 }

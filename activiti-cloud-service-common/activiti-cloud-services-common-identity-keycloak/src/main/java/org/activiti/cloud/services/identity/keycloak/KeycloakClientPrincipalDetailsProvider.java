@@ -27,49 +27,42 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class KeycloakClientPrincipalDetailsProvider implements PrincipalGroupsProvider, PrincipalRolesProvider {
-    
+public class KeycloakClientPrincipalDetailsProvider
+        implements PrincipalGroupsProvider, PrincipalRolesProvider {
+
     private final KeycloakInstanceWrapper keycloakInstanceWrapper;
-    
+
     public KeycloakClientPrincipalDetailsProvider(KeycloakInstanceWrapper keycloakInstanceWrapper) {
         this.keycloakInstanceWrapper = keycloakInstanceWrapper;
     }
-    
 
     @Override
     public List<String> getGroups(Principal principal) {
-        return userResource(principal).groups()
-                                      .stream()
-                                      .map(GroupRepresentation::getName)
-                                      .collect(Collectors.collectingAndThen(Collectors.toList(),
-                                                                            Collections::unmodifiableList));
+        return userResource(principal).groups().stream()
+                .map(GroupRepresentation::getName)
+                .collect(
+                        Collectors.collectingAndThen(
+                                Collectors.toList(), Collections::unmodifiableList));
     }
-    
+
     @Override
     public List<String> getRoles(Principal principal) {
-        return userResource(principal).roles()
-                                      .realmLevel()
-                                      .listEffective()
-                                      .stream()
-                                      .map(RoleRepresentation::getName)
-                                      .collect(Collectors.collectingAndThen(Collectors.toList(),
-                                                                            Collections::unmodifiableList));
+        return userResource(principal).roles().realmLevel().listEffective().stream()
+                .map(RoleRepresentation::getName)
+                .collect(
+                        Collectors.collectingAndThen(
+                                Collectors.toList(), Collections::unmodifiableList));
     }
-    
+
     protected UserResource userResource(Principal principal) {
-        return keycloakInstanceWrapper.getRealm()
-                                      .users()
-                                      .get(subjectId(principal));
+        return keycloakInstanceWrapper.getRealm().users().get(subjectId(principal));
     }
-    
+
     protected String subjectId(Principal principal) {
-        return Optional.of(principal)
-                       .map(Principal::getName)
-                       .orElseThrow(this::securityException);
+        return Optional.of(principal).map(Principal::getName).orElseThrow(this::securityException);
     }
-    
+
     protected SecurityException securityException() {
         return new SecurityException("Invalid Keycloak principal subject id");
     }
-
 }

@@ -22,9 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 
-/**
- * Config properties
- */
+/** Config properties */
 @Configuration
 @Import(BaseTestsConfigurationProperties.class)
 @Primary
@@ -72,5 +70,4 @@ public class RuntimeTestsConfigurationProperties {
     public String getRuntimeBundleServiceName() {
         return runtimeBundleServiceName;
     }
-
 }

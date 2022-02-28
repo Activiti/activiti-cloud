@@ -16,31 +16,46 @@
 
 package org.activiti.cloud.services.modeling.validation.process;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.FlowElementsContainer;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class FlowElementsExtractor {
 
-    public <T extends FlowElement> Set<T> extractFlowElements(BpmnModel bpmnModel,
-        Class<T> flowElementType) {
+    public <T extends FlowElement> Set<T> extractFlowElements(
+            BpmnModel bpmnModel, Class<T> flowElementType) {
         final Set<T> flowElements = new HashSet<>();
-        bpmnModel.getProcesses().forEach(process -> flowElements.addAll(extractFlowElements(process, flowElementType)));
+        bpmnModel
+                .getProcesses()
+                .forEach(
+                        process ->
+                                flowElements.addAll(extractFlowElements(process, flowElementType)));
         return flowElements;
     }
 
-    private <T extends FlowElement> Set<T> extractFlowElements(FlowElementsContainer container, Class<T> flowElementType) {
-        Set<T> flowElements = container.getFlowElements().stream()
-            .filter(flowElement -> flowElementType.isAssignableFrom(flowElement.getClass()))
-            .map(flowElementType::cast).collect(Collectors.toSet());
+    private <T extends FlowElement> Set<T> extractFlowElements(
+            FlowElementsContainer container, Class<T> flowElementType) {
+        Set<T> flowElements =
+                container.getFlowElements().stream()
+                        .filter(
+                                flowElement ->
+                                        flowElementType.isAssignableFrom(flowElement.getClass()))
+                        .map(flowElementType::cast)
+                        .collect(Collectors.toSet());
         container.getFlowElements().stream()
-            .filter(flowElement -> FlowElementsContainer.class.isAssignableFrom(flowElement.getClass()))
-            .map(FlowElementsContainer.class::cast)
-            .forEach(childContainer -> flowElements.addAll(extractFlowElements(childContainer, flowElementType)));
+                .filter(
+                        flowElement ->
+                                FlowElementsContainer.class.isAssignableFrom(
+                                        flowElement.getClass()))
+                .map(FlowElementsContainer.class::cast)
+                .forEach(
+                        childContainer ->
+                                flowElements.addAll(
+                                        extractFlowElements(childContainer, flowElementType)));
         return flowElements;
     }
-
 }

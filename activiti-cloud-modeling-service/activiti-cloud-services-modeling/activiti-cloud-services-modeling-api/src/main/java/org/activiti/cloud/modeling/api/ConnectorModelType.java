@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.modeling.api;
 
-/**
- * Connector model type
- */
+/** Connector model type */
 public class ConnectorModelType extends JsonModelType {
 
     public static final String NAME = "CONNECTOR";

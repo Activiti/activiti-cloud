@@ -38,23 +38,22 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
         TaskEntity queryTaskEntity = new TaskEntity(taskCreatedEvent);
 
         if (!queryTaskEntity.isStandalone()) {
-            ProcessInstanceEntity processInstanceEntity = entityManager.getReference(ProcessInstanceEntity.class,
-                                                                                     queryTaskEntity.getProcessInstanceId());
+            ProcessInstanceEntity processInstanceEntity =
+                    entityManager.getReference(
+                            ProcessInstanceEntity.class, queryTaskEntity.getProcessInstanceId());
             queryTaskEntity.setProcessInstance(processInstanceEntity);
-            queryTaskEntity.setProcessDefinitionName(processInstanceEntity.getProcessDefinitionName());
+            queryTaskEntity.setProcessDefinitionName(
+                    processInstanceEntity.getProcessDefinitionName());
         }
 
-        persistIntoDatabase(event,
-                            queryTaskEntity);
+        persistIntoDatabase(event, queryTaskEntity);
     }
 
-    private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                     TaskEntity queryTaskEntity) {
+    private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event, TaskEntity queryTaskEntity) {
         try {
             entityManager.persist(queryTaskEntity);
         } catch (Exception cause) {
-            throw new QueryException("Error handling TaskCreatedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException("Error handling TaskCreatedEvent[" + event + "]", cause);
         }
     }
 

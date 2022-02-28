@@ -15,13 +15,11 @@
  */
 package org.activiti.cloud.services.modeling.mock;
 
-import org.hamcrest.Matcher;
-
 import static org.hamcrest.core.IsEqual.equalTo;
 
-/**
- * Is the value equal to another value
- */
+import org.hamcrest.Matcher;
+
+/** Is the value equal to another value */
 public class IsObjectEquals {
 
     public static Matcher<Object> isIntegerEquals(int operand) {

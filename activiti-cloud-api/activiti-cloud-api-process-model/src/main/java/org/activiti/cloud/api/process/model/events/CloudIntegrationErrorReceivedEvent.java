@@ -26,5 +26,4 @@ public interface CloudIntegrationErrorReceivedEvent extends CloudIntegrationEven
     String getErrorClassName();
 
     List<StackTraceElement> getStackTraceElements();
-
 }

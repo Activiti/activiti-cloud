@@ -17,7 +17,14 @@ package org.activiti.cloud.notifications.graphql.schema;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
+import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaConfigurer;
+import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLShemaRegistration;
+
+import graphql.GraphQL;
+import graphql.Scalars;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,19 +33,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.stereotype.Component;
 
-import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaConfigurer;
-import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLShemaRegistration;
-import graphql.GraphQL;
-import graphql.Scalars;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLSchema;
+import java.util.Map;
 
-@SpringBootTest(webEnvironment=WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class GraphQLSchemaAutoConfigurationTest {
 
-    @Autowired
-    private GraphQLSchema graphQLSchema;
+    @Autowired private GraphQLSchema graphQLSchema;
 
     @SpringBootApplication
     static class Application {
@@ -48,19 +48,20 @@ public class GraphQLSchemaAutoConfigurationTest {
 
             @Override
             public void configure(GraphQLShemaRegistration registry) {
-                GraphQLObjectType query = GraphQLObjectType.newObject()
-                        .name("query")
-                        .field(GraphQLFieldDefinition.newFieldDefinition()
-                                .name("hello")
-                                .type(Scalars.GraphQLString)
-                                .dataFetcher(environment -> {
-                                    return "world";
-                                }))
-                        .build();
+                GraphQLObjectType query =
+                        GraphQLObjectType.newObject()
+                                .name("query")
+                                .field(
+                                        GraphQLFieldDefinition.newFieldDefinition()
+                                                .name("hello")
+                                                .type(Scalars.GraphQLString)
+                                                .dataFetcher(
+                                                        environment -> {
+                                                            return "world";
+                                                        }))
+                                .build();
 
-                GraphQLSchema graphQLSchema = GraphQLSchema.newSchema()
-                        .query(query)
-                        .build();
+                GraphQLSchema graphQLSchema = GraphQLSchema.newSchema().query(query).build();
 
                 registry.register(graphQLSchema);
             }
@@ -78,7 +79,4 @@ public class GraphQLSchemaAutoConfigurationTest {
         // then
         assertThat(result.toString()).isEqualTo("{hello=world}");
     }
-
-
-
 }

@@ -35,9 +35,10 @@ public class MessageBasedJobManager extends DefaultJobManager {
     private String inputChannelName = MessageBasedJobManagerChannelsConstants.INPUT;
     private String outputChannelName = MessageBasedJobManagerChannelsConstants.OUTPUT;
 
-    public MessageBasedJobManager(ProcessEngineConfigurationImpl processEngineConfiguration,
-                                  BindingServiceProperties bindingServiceProperties,
-                                  JobMessageProducer jobMessageProducer) {
+    public MessageBasedJobManager(
+            ProcessEngineConfigurationImpl processEngineConfiguration,
+            BindingServiceProperties bindingServiceProperties,
+            JobMessageProducer jobMessageProducer) {
         super(processEngineConfiguration);
 
         this.bindingServiceProperties = bindingServiceProperties;
@@ -58,18 +59,22 @@ public class MessageBasedJobManager extends DefaultJobManager {
         if (job instanceof JobEntity) {
             JobEntity jobEntity = (JobEntity) job;
 
-            // When unacquiring, we up the lock time again., so that it isn't cleared by the reset expired thread.
-            jobEntity.setLockExpirationTime(new Date(processEngineConfiguration.getClock()
-                                                                               .getCurrentTime()
-                                                                               .getTime() + processEngineConfiguration.getAsyncExecutor()
-                                                                                                                      .getAsyncJobLockTimeInMillis()));
+            // When unacquiring, we up the lock time again., so that it isn't cleared by the reset
+            // expired thread.
+            jobEntity.setLockExpirationTime(
+                    new Date(
+                            processEngineConfiguration.getClock().getCurrentTime().getTime()
+                                    + processEngineConfiguration
+                                            .getAsyncExecutor()
+                                            .getAsyncJobLockTimeInMillis()));
         }
 
         sendMessage(job);
     }
 
     public BindingProperties getBindingProperties() {
-        return bindingServiceProperties.getBindingProperties(MessageBasedJobManagerChannelsConstants.INPUT);
+        return bindingServiceProperties.getBindingProperties(
+                MessageBasedJobManagerChannelsConstants.INPUT);
     }
 
     public String getOutputChannelName() {

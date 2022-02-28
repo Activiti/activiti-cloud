@@ -48,41 +48,45 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+        initializers = {
+            RabbitMQContainerApplicationInitializer.class,
+            KeycloakContainerApplicationInitializer.class
+        })
 public class QueryProcessInstanceEntityVariablesIT {
 
-    private static final String VARIABLES_URL = "/v1/process-instances/{processInstanceId}/variables";
-    private static final ParameterizedTypeReference<PagedModel<ProcessVariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessVariableEntity>>() {
-    };
+    private static final String VARIABLES_URL =
+            "/v1/process-instances/{processInstanceId}/variables";
+    private static final ParameterizedTypeReference<PagedModel<ProcessVariableEntity>>
+            PAGED_VARIABLE_RESPONSE_TYPE =
+                    new ParameterizedTypeReference<PagedModel<ProcessVariableEntity>>() {};
 
-    @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    @Autowired private KeycloakTokenProducer keycloakTokenProducer;
 
-    @Autowired
-    private TestRestTemplate testRestTemplate;
+    @Autowired private TestRestTemplate testRestTemplate;
 
-    @Autowired
-    private ProcessInstanceRepository processInstanceRepository;
+    @Autowired private ProcessInstanceRepository processInstanceRepository;
 
-    @Autowired
-    private VariableRepository variableRepository;
+    @Autowired private VariableRepository variableRepository;
 
     private EventsAggregator eventsAggregator;
 
     private VariableEventContainedBuilder variableEventContainedBuilder;
 
-    @Autowired
-    private MyProducer myProducer;
+    @Autowired private MyProducer myProducer;
 
     private ProcessInstance runningProcessInstance;
 
     @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(myProducer);
-        ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
+        ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder =
+                new ProcessInstanceEventContainedBuilder(eventsAggregator);
         variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
 
-        runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance("process with variables");
+        runningProcessInstance =
+                processInstanceEventContainedBuilder.aRunningProcessInstance(
+                        "process with variables");
     }
 
     @AfterEach
@@ -93,127 +97,114 @@ public class QueryProcessInstanceEntityVariablesIT {
 
     @Test
     public void shouldRetrieveAllProcessVariable() {
-        //given
-        variableEventContainedBuilder.aCreatedVariable("varCreated",
-                                                       "v1",
-                                                       "string")
+        // given
+        variableEventContainedBuilder
+                .aCreatedVariable("varCreated", "v1", "string")
                 .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.anUpdatedVariable("varUpdated",
-                                                        "v2-up",
-            "beforeUpdateValue", "string")
+        variableEventContainedBuilder
+                .anUpdatedVariable("varUpdated", "v2-up", "beforeUpdateValue", "string")
                 .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aDeletedVariable("varDeleted",
-                                                       "v1",
-                                                       "string")
+        variableEventContainedBuilder
+                .aDeletedVariable("varDeleted", "v1", "string")
                 .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
-                                                                                                      HttpMethod.GET,
-                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                      runningProcessInstance.getId());
+                            // when
+                            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity =
+                                    testRestTemplate.exchange(
+                                            VARIABLES_URL,
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            PAGED_VARIABLE_RESPONSE_TYPE,
+                                            runningProcessInstance.getId());
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody().getContent())
-                    .extracting(
-                            ProcessVariableEntity::getName,
-                            ProcessVariableEntity::getValue,
-                            ProcessVariableEntity::getMarkedAsDeleted)
-                    .containsExactly(
-                            tuple(
-                                    "varCreated",
-                                    "v1",
-                                    false),
-                            tuple(
-                                    "varUpdated",
-                                    "v2-up",
-                                    false)
-                    );
-        });
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody().getContent())
+                                    .extracting(
+                                            ProcessVariableEntity::getName,
+                                            ProcessVariableEntity::getValue,
+                                            ProcessVariableEntity::getMarkedAsDeleted)
+                                    .containsExactly(
+                                            tuple("varCreated", "v1", false),
+                                            tuple("varUpdated", "v2-up", false));
+                        });
     }
 
     @Test
     public void shouldSupportIntegerVariables() {
-        //given
-        variableEventContainedBuilder.aCreatedVariable("intVar",
-                                                       10,
-                                                       "integer")
+        // given
+        variableEventContainedBuilder
+                .aCreatedVariable("intVar", 10, "integer")
                 .onProcessInstance(runningProcessInstance);
-
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
-                                                                                                      HttpMethod.GET,
-                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                      runningProcessInstance.getId());
+                            // when
+                            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity =
+                                    testRestTemplate.exchange(
+                                            VARIABLES_URL,
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            PAGED_VARIABLE_RESPONSE_TYPE,
+                                            runningProcessInstance.getId());
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody().getContent())
-                    .extracting(
-                            ProcessVariableEntity::getName,
-                            ProcessVariableEntity::getValue)
-                    .containsExactly(
-                            tuple(
-                                    "intVar",
-                                    10)
-                    );
-        });
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody().getContent())
+                                    .extracting(
+                                            ProcessVariableEntity::getName,
+                                            ProcessVariableEntity::getValue)
+                                    .containsExactly(tuple("intVar", 10));
+                        });
     }
 
     @Test
     public void shouldFilterOnVariableName() {
-        //given
-        variableEventContainedBuilder.aCreatedVariable("var1",
-                                                       "v1",
-                                                       "string")
+        // given
+        variableEventContainedBuilder
+                .aCreatedVariable("var1", "v1", "string")
                 .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariable("var2",
-                                                       "v2",
-                                                       "string")
+        variableEventContainedBuilder
+                .aCreatedVariable("var2", "v2", "string")
                 .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariable("var3",
-                                                       "v3",
-                                                       "string")
+        variableEventContainedBuilder
+                .aCreatedVariable("var3", "v3", "string")
                 .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
-                                                                                                      HttpMethod.GET,
-                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                      runningProcessInstance.getId(),
-                                                                                                      "var2");
+                            // when
+                            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity =
+                                    testRestTemplate.exchange(
+                                            VARIABLES_URL + "?name={varName}",
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            PAGED_VARIABLE_RESPONSE_TYPE,
+                                            runningProcessInstance.getId(),
+                                            "var2");
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody().getContent())
-                    .extracting(
-                            ProcessVariableEntity::getName,
-                            ProcessVariableEntity::getValue)
-                    .containsExactly(
-                            tuple("var2",
-                                  "v2")
-                    );
-        });
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody().getContent())
+                                    .extracting(
+                                            ProcessVariableEntity::getName,
+                                            ProcessVariableEntity::getValue)
+                                    .containsExactly(tuple("var2", "v2"));
+                        });
     }
 }

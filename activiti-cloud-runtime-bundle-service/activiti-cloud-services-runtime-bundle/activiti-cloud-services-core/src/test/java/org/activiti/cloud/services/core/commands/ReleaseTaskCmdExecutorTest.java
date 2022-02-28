@@ -28,11 +28,9 @@ import org.mockito.Mock;
 
 public class ReleaseTaskCmdExecutorTest {
 
-    @InjectMocks
-    private ReleaseTaskCmdExecutor releaseTaskCmdExecutor;
+    @InjectMocks private ReleaseTaskCmdExecutor releaseTaskCmdExecutor;
 
-    @Mock
-    private TaskAdminRuntime taskAdminRuntime;
+    @Mock private TaskAdminRuntime taskAdminRuntime;
 
     @BeforeEach
     public void setUp() {
@@ -41,14 +39,15 @@ public class ReleaseTaskCmdExecutorTest {
 
     @Test
     public void releaseTaskCmdExecutorTest() {
-        //given
+        // given
         ReleaseTaskPayload releaseTaskPayload = new ReleaseTaskPayload("taskId");
-        assertThat(releaseTaskCmdExecutor.getHandledType()).isEqualTo(ReleaseTaskPayload.class.getName());
+        assertThat(releaseTaskCmdExecutor.getHandledType())
+                .isEqualTo(ReleaseTaskPayload.class.getName());
 
-        //when
+        // when
         releaseTaskCmdExecutor.execute(releaseTaskPayload);
 
-        //then
+        // then
         verify(taskAdminRuntime).release(releaseTaskPayload);
     }
 }

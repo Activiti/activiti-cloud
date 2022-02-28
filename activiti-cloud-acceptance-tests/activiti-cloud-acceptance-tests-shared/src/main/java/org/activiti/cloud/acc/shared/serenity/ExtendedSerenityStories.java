@@ -16,18 +16,16 @@
 package org.activiti.cloud.acc.shared.serenity;
 
 import net.serenitybdd.jbehave.SerenityStories;
+
 import org.jbehave.core.steps.InjectableStepsFactory;
 
-/**
- * Custom SerenityStories
- */
+/** Custom SerenityStories */
 public class ExtendedSerenityStories extends SerenityStories {
 
     @Override
     public InjectableStepsFactory stepsFactory() {
-        return new ExtendedSerenityStepsFactory(configuration(),
-                                                getRootPackage(),
-                                                getClassLoader());
+        return new ExtendedSerenityStepsFactory(
+                configuration(), getRootPackage(), getClassLoader());
     }
 
     @Override

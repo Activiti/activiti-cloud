@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.modeling.core.error;
 
-/**
- * Exception thrown when syntactic errors are found during validating a model content
- */
+/** Exception thrown when syntactic errors are found during validating a model content */
 public class SyntacticModelValidationException extends ModelingException {
 
     public SyntacticModelValidationException(String message) {
@@ -28,9 +26,7 @@ public class SyntacticModelValidationException extends ModelingException {
         super(cause);
     }
 
-    public SyntacticModelValidationException(String message,
-                                             Throwable cause) {
-        super(message,
-              cause);
+    public SyntacticModelValidationException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

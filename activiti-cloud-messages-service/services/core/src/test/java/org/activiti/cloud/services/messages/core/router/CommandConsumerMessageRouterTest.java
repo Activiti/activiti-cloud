@@ -16,6 +16,12 @@
 
 package org.activiti.cloud.services.messages.core.router;
 
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,70 +35,61 @@ import org.springframework.messaging.core.DestinationResolver;
 
 import java.util.Collection;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 @ExtendWith(MockitoExtension.class)
 public class CommandConsumerMessageRouterTest {
 
-    @InjectMocks
-    private CommandConsumerMessageRouter messageRouter;
+    @InjectMocks private CommandConsumerMessageRouter messageRouter;
 
-    @Mock
-    private DestinationResolver<MessageChannel> destinationResolver;
+    @Mock private DestinationResolver<MessageChannel> destinationResolver;
 
     @Test
     public void should_returnResultOfDestinationResolver_when_headerHasServiceFullName() {
-        //given
+        // given
         final String outputDestination = "messageConnectorOutput";
-        final Message<String> message = MessageBuilder.withPayload("any")
-            .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, outputDestination)
-            .build();
+        final Message<String> message =
+                MessageBuilder.withPayload("any")
+                        .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, outputDestination)
+                        .build();
 
         final MessageChannel messageChannel = mock(MessageChannel.class);
-        given(destinationResolver.resolveDestination(outputDestination)).willReturn(
-            messageChannel);
+        given(destinationResolver.resolveDestination(outputDestination)).willReturn(messageChannel);
 
-        //when
-        final Collection<MessageChannel> channels = messageRouter
-            .determineTargetChannels(message);
+        // when
+        final Collection<MessageChannel> channels = messageRouter.determineTargetChannels(message);
 
-        //then
+        // then
         assertThat(channels).containsExactly(messageChannel);
     }
 
     @Test
     public void should_throwException_when_headerHasNotServiceFullName() {
-        //given
+        // given
         final Message<String> messageWithoutHeaders = MessageBuilder.withPayload("any").build();
 
-        //then
+        // then
         assertThatExceptionOfType(MessageMappingException.class)
-        .isThrownBy(
-            //when
-            () -> messageRouter.determineTargetChannels(messageWithoutHeaders))
-        .withMessage("Unable to determine target channel for message");
-
+                .isThrownBy(
+                        // when
+                        () -> messageRouter.determineTargetChannels(messageWithoutHeaders))
+                .withMessage("Unable to determine target channel for message");
     }
 
     @Test
     public void should_throwException_when_destinationResolverDoesNotFindADestination() {
-        //given
+        // given
         final String outputDestination = "messageConnectorOutput";
-        final Message<String> message = MessageBuilder.withPayload("any")
-            .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, outputDestination)
-            .build();
+        final Message<String> message =
+                MessageBuilder.withPayload("any")
+                        .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, outputDestination)
+                        .build();
 
         given(destinationResolver.resolveDestination(outputDestination)).willReturn(null);
 
-        //then
+        // then
         assertThatExceptionOfType(MessageMappingException.class)
-        .isThrownBy(
-            //when
-            () -> messageRouter.determineTargetChannels(message))
-        .withMessage("Unable to determine target channel for message");
+                .isThrownBy(
+                        // when
+                        () -> messageRouter.determineTargetChannels(message))
+                .withMessage("Unable to determine target channel for message");
     }
 }

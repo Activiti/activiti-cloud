@@ -28,7 +28,7 @@ public class IntegrationRequestSentEventEntity extends IntegrationEventEntity {
 
     protected static final String INTEGRATION_REQUEST_SENT_EVENT = "IntegrationRequestSentEvent";
 
-    IntegrationRequestSentEventEntity() { }
+    IntegrationRequestSentEventEntity() {}
 
     public IntegrationRequestSentEventEntity(CloudIntegrationRequestedEvent event) {
         super(event);
@@ -37,8 +37,9 @@ public class IntegrationRequestSentEventEntity extends IntegrationEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("IntegrationRequestSentEventEntity [toString()=").append(super.toString()).append("]");
+        builder.append("IntegrationRequestSentEventEntity [toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
-
 }

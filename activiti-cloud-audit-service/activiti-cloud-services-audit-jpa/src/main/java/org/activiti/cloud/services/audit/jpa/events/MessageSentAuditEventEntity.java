@@ -28,8 +28,7 @@ public class MessageSentAuditEventEntity extends MessageAuditEventEntity {
 
     protected static final String MESSAGE_SENT_EVENT = "MessageSentEvent";
 
-    public MessageSentAuditEventEntity() {
-    }
+    public MessageSentAuditEventEntity() {}
 
     public MessageSentAuditEventEntity(CloudBPMNMessageSentEvent cloudEvent) {
         super(cloudEvent);

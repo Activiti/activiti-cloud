@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
-
 import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;
 
@@ -25,5 +24,4 @@ public interface EngineEventsConsumerChannels {
 
     @Input(SOURCE)
     SubscribableChannel input();
-
 }

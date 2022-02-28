@@ -22,7 +22,7 @@ public class CloudBpmnError extends RuntimeException {
     private final String errorCode;
 
     public CloudBpmnError(String errorCode) {
-      this(errorCode, errorCode);
+        this(errorCode, errorCode);
     }
 
     public CloudBpmnError(String errorCode, String message) {
@@ -42,7 +42,7 @@ public class CloudBpmnError extends RuntimeException {
     }
 
     public String getErrorCode() {
-      return this.errorCode;
+        return this.errorCode;
     }
 
     protected void requireValidErrorCode(String errorCode) {
@@ -52,7 +52,5 @@ public class CloudBpmnError extends RuntimeException {
         if (errorCode.length() < 1) {
             throw new IllegalArgumentException("Error Code must not be empty.");
         }
-
     }
-
 }

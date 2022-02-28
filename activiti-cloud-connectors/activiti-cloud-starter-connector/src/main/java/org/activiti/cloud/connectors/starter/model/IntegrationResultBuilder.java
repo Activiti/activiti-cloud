@@ -30,11 +30,13 @@ public class IntegrationResultBuilder {
 
     private IntegrationResultImpl integrationResult;
 
-
-    private IntegrationResultBuilder(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
+    private IntegrationResultBuilder(
+            IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
         this.requestEvent = integrationRequest;
-        this.integrationResult = new IntegrationResultImpl(integrationRequest, integrationRequest.getIntegrationContext());
-        if(connectorProperties != null) {
+        this.integrationResult =
+                new IntegrationResultImpl(
+                        integrationRequest, integrationRequest.getIntegrationContext());
+        if (connectorProperties != null) {
             this.integrationResult.setAppName(connectorProperties.getAppName());
             this.integrationResult.setAppVersion(connectorProperties.getAppVersion());
             this.integrationResult.setServiceFullName(connectorProperties.getServiceFullName());
@@ -42,10 +44,10 @@ public class IntegrationResultBuilder {
             this.integrationResult.setServiceVersion(connectorProperties.getServiceVersion());
             this.integrationResult.setServiceName(connectorProperties.getServiceName());
         }
-
     }
 
-    public static IntegrationResultBuilder resultFor(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
+    public static IntegrationResultBuilder resultFor(
+            IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
         return new IntegrationResultBuilder(integrationRequest, connectorProperties);
     }
 
@@ -63,8 +65,8 @@ public class IntegrationResultBuilder {
     }
 
     public MessageBuilder<IntegrationResult> getMessageBuilder() {
-        return MessageBuilder.withPayload((IntegrationResult)integrationResult)
-                             .setHeader("targetAppName", requestEvent.getAppName())
-                             .setHeader("targetService", requestEvent.getServiceFullName());
+        return MessageBuilder.withPayload((IntegrationResult) integrationResult)
+                .setHeader("targetAppName", requestEvent.getAppName())
+                .setHeader("targetService", requestEvent.getServiceFullName());
     }
 }

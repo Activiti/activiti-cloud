@@ -15,7 +15,12 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
-import java.util.Optional;
+import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -24,22 +29,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 
-import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
-import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
+import java.util.Optional;
 
 public class TaskRepresentationModelAssemblerTest {
 
-    @InjectMocks
-    private TaskRepresentationModelAssembler representationModelAssembler;
+    @InjectMocks private TaskRepresentationModelAssembler representationModelAssembler;
 
-    @Mock
-    private ToCloudTaskConverter converter;
+    @Mock private ToCloudTaskConverter converter;
 
     @BeforeEach
     public void setUp() {
@@ -110,5 +109,4 @@ public class TaskRepresentationModelAssemblerTest {
 
         assertThat(resource.getLink("processInstance")).isPresent();
     }
-
 }

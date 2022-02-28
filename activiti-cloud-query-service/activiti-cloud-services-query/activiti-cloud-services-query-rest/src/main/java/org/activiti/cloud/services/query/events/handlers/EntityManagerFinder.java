@@ -19,10 +19,11 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.hibernate.jpa.QueryHints;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
 
 public class EntityManagerFinder {
 
@@ -40,9 +41,9 @@ public class EntityManagerFinder {
 
         entityGraph.addAttributeNodes(VARIABLES);
 
-        return Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                      taskId,
-                                                      Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+        return Optional.ofNullable(
+                entityManager.find(
+                        TaskEntity.class, taskId, Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
     }
 
     public Optional<TaskEntity> findTaskWithCandidateUsers(String taskId) {
@@ -50,9 +51,9 @@ public class EntityManagerFinder {
 
         entityGraph.addAttributeNodes(TASK_CANDIDATE_USERS);
 
-        return Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                      taskId,
-                                                      Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+        return Optional.ofNullable(
+                entityManager.find(
+                        TaskEntity.class, taskId, Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
     }
 
     public Optional<TaskEntity> findTaskWithCandidateGroups(String taskId) {
@@ -60,18 +61,22 @@ public class EntityManagerFinder {
 
         entityGraph.addAttributeNodes(TASK_CANDIDATE_GROUPS);
 
-        return Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                      taskId,
-                                                      Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+        return Optional.ofNullable(
+                entityManager.find(
+                        TaskEntity.class, taskId, Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
     }
 
-    public Optional<ProcessInstanceEntity> findProcessInstanceWithVariables(String processInstanceId) {
-        EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
+    public Optional<ProcessInstanceEntity> findProcessInstanceWithVariables(
+            String processInstanceId) {
+        EntityGraph<ProcessInstanceEntity> entityGraph =
+                entityManager.createEntityGraph(ProcessInstanceEntity.class);
 
         entityGraph.addAttributeNodes(VARIABLES);
 
-        return Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                      processInstanceId,
-                                                      Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+        return Optional.ofNullable(
+                entityManager.find(
+                        ProcessInstanceEntity.class,
+                        processInstanceId,
+                        Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
     }
 }

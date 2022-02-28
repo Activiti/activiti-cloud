@@ -31,33 +31,32 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
-
 public class KeycloakSecurityContextPrincipalProviderTest {
 
-    private KeycloakSecurityContextPrincipalProvider subject = new KeycloakSecurityContextPrincipalProvider();
+    private KeycloakSecurityContextPrincipalProvider subject =
+            new KeycloakSecurityContextPrincipalProvider();
 
     @Test
     public void testGetCurrentPrincipal() {
         // given
         String subjectId = UUID.randomUUID().toString();
-        KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal = new KeycloakPrincipal<>(subjectId,
-                                                                                                  new RefreshableKeycloakSecurityContext());
-        KeycloakAccount account = new SimpleKeycloakAccount(principal,
-                                                            Collections.emptySet(),
-                                                            principal.getKeycloakSecurityContext());
+        KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal =
+                new KeycloakPrincipal<>(subjectId, new RefreshableKeycloakSecurityContext());
+        KeycloakAccount account =
+                new SimpleKeycloakAccount(
+                        principal, Collections.emptySet(), principal.getKeycloakSecurityContext());
 
         SecurityContextHolder.getContext()
-                             .setAuthentication(new KeycloakAuthenticationToken(account,
-                                                                                false));
+                .setAuthentication(new KeycloakAuthenticationToken(account, false));
 
         // when
         Optional<Principal> result = subject.getCurrentPrincipal();
 
         // then
-        assertThat(result).isPresent()
-                          .containsInstanceOf(KeycloakPrincipal.class)
-                          .contains(principal);
-
+        assertThat(result)
+                .isPresent()
+                .containsInstanceOf(KeycloakPrincipal.class)
+                .contains(principal);
     }
 
     @Test
@@ -71,5 +70,4 @@ public class KeycloakSecurityContextPrincipalProviderTest {
         // then
         assertThat(result).isEmpty();
     }
-
 }

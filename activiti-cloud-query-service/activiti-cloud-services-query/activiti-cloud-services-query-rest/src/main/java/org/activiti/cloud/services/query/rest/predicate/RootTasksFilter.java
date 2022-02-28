@@ -18,8 +18,10 @@ package org.activiti.cloud.services.query.rest.predicate;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import javax.validation.constraints.NotNull;
+
 import org.activiti.cloud.services.query.model.QTaskEntity;
+
+import javax.validation.constraints.NotNull;
 
 public class RootTasksFilter implements QueryDslPredicateFilter {
 

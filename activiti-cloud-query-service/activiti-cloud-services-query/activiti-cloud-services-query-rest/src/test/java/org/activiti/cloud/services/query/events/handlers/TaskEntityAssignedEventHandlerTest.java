@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -27,25 +35,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import javax.persistence.EntityManager;
 
 public class TaskEntityAssignedEventHandlerTest {
 
-    @InjectMocks
-    private TaskAssignedEventHandler handler;
+    @InjectMocks private TaskAssignedEventHandler handler;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -54,21 +53,18 @@ public class TaskEntityAssignedEventHandlerTest {
 
     @Test
     public void handleShouldUpdateTaskStatusToAssigned() {
-        //given
+        // given
         CloudTaskAssignedEvent event = buildTaskAssignedEvent();
 
         String taskId = event.getEntity().getId();
-        TaskEntity taskEntity = aTask()
-                .withId(taskId)
-                .withAssignee("previousUser")
-                .build();
+        TaskEntity taskEntity = aTask().withId(taskId).withAssignee("previousUser").build();
 
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(taskEntity);
 
-        //when
+        // when
         handler.handle(event);
 
-        //then
+        // then
         verify(entityManager).persist(taskEntity);
         verify(taskEntity).setStatus(Task.TaskStatus.ASSIGNED);
         verify(taskEntity).setAssignee(event.getEntity().getAssignee());
@@ -76,35 +72,33 @@ public class TaskEntityAssignedEventHandlerTest {
     }
 
     private CloudTaskAssignedEvent buildTaskAssignedEvent() {
-        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
-                                     "task",
-                                     Task.TaskStatus.ASSIGNED);
+        TaskImpl task =
+                new TaskImpl(UUID.randomUUID().toString(), "task", Task.TaskStatus.ASSIGNED);
         task.setAssignee("user");
         return new CloudTaskAssignedEventImpl(task);
     }
 
     @Test
     public void handleShouldThrowExceptionWhenNoTaskIsFoundForTheGivenId() {
-        //given
+        // given
         CloudTaskAssignedEvent event = buildTaskAssignedEvent();
 
         String taskId = event.getEntity().getId();
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(null);
 
-
-        //then
-        //when
+        // then
+        // when
         assertThatExceptionOfType(QueryException.class)
-            .isThrownBy(() -> handler.handle(event))
-            .withMessageContaining("Unable to find task with id: " + taskId);
+                .isThrownBy(() -> handler.handle(event))
+                .withMessageContaining("Unable to find task with id: " + taskId);
     }
 
     @Test
     public void getHandledEventShouldReturnTaskAssignedEvent() {
-        //when
+        // when
         String handledEvent = handler.getHandledEvent();
 
-        //then
+        // then
         assertThat(handledEvent).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name());
     }
 }

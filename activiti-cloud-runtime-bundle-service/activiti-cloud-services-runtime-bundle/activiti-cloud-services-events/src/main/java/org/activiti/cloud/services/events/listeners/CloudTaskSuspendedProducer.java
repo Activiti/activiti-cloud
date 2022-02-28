@@ -24,8 +24,9 @@ public class CloudTaskSuspendedProducer implements TaskEventListener<TaskSuspend
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTaskSuspendedProducer(ToCloudTaskRuntimeEventConverter converter,
-                                      ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTaskSuspendedProducer(
+            ToCloudTaskRuntimeEventConverter converter,
+            ProcessEngineEventsAggregator eventsAggregator) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }

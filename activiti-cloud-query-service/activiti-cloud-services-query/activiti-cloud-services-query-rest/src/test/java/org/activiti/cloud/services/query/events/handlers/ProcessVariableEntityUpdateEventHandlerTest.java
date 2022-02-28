@@ -15,24 +15,22 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class ProcessVariableEntityUpdateEventHandlerTest {
 
-    @InjectMocks
-    private ProcessVariableUpdateEventHandler handler;
+    @InjectMocks private ProcessVariableUpdateEventHandler handler;
 
-    @Mock
-    private ProcessVariableUpdater variableUpdater;
+    @Mock private ProcessVariableUpdater variableUpdater;
 
     @BeforeEach
     public void setUp() {
@@ -41,16 +39,16 @@ public class ProcessVariableEntityUpdateEventHandlerTest {
 
     @Test
     public void handleShouldUpdateVariable() {
-        //given
+        // given
         ProcessVariableEntity variableEntity = new ProcessVariableEntity();
         variableEntity.setName("var");
         variableEntity.setValue("v1");
         variableEntity.setProcessInstanceId("10");
 
-        //when
+        // when
         handler.handle(variableEntity);
 
-        //then
+        // then
         verify(variableUpdater).update(eq(variableEntity), anyString());
     }
 }

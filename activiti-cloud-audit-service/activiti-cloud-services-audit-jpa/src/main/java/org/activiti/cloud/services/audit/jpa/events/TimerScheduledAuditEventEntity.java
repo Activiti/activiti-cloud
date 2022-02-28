@@ -28,8 +28,7 @@ public class TimerScheduledAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_SCHEDULED_EVENT = "TimerScheduledEvent";
 
-    public TimerScheduledAuditEventEntity() {
-    }
+    public TimerScheduledAuditEventEntity() {}
 
     public TimerScheduledAuditEventEntity(CloudBPMNTimerScheduledEvent cloudEvent) {
         super(cloudEvent);
@@ -39,5 +38,4 @@ public class TimerScheduledAuditEventEntity extends TimerAuditEventEntity {
     public int hashCode() {
         return super.hashCode();
     }
-
 }

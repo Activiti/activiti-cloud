@@ -15,12 +15,12 @@
  */
 package org.activiti.cloud.alfresco.converter.json;
 
+import static org.activiti.test.Assertions.assertThat;
+
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadata;
 import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.PagedModel;
-
-import static org.activiti.test.Assertions.assertThat;
 
 public class PageMetadataConverterTest {
 
@@ -28,16 +28,14 @@ public class PageMetadataConverterTest {
 
     @Test
     public void toAlfrescoPageMetadataShouldCalculateAlfrescoMetadataFromBaseMetadata() {
-        //given
-        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
-                                                                                       2,
-                                                                                       100);
+        // given
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 2, 100);
 
-        //when
-        PaginationMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(basePageMetadata,
-                                                                                   10);
+        // when
+        PaginationMetadata alfrescoPageMetadata =
+                converter.toAlfrescoPageMetadata(basePageMetadata, 10);
 
-        //then
+        // then
         assertThat(alfrescoPageMetadata)
                 .hasCount(10)
                 .hasMaxItems(10) // same as page size
@@ -48,35 +46,26 @@ public class PageMetadataConverterTest {
 
     @Test
     public void toAlfrescoPageMetadataShouldReturnMetadataWithNoMoreItemsWhenIsInTheLastPage() {
-        //given
-        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
-                                                                                       1,
-                                                                                       11);
+        // given
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 11);
 
-        //when
-        PaginationMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(basePageMetadata,
-                                                                                   10);
+        // when
+        PaginationMetadata alfrescoPageMetadata =
+                converter.toAlfrescoPageMetadata(basePageMetadata, 10);
 
-        //then
-        assertThat(alfrescoPageMetadata)
-                .isNotHasMoreItems();
+        // then
+        assertThat(alfrescoPageMetadata).isNotHasMoreItems();
     }
 
     @Test
     public void toAlfrescoPageMetadataShouldUseSkipCountFromExtendedPageMetadataWhenAvailable() {
-        //given
-        ExtendedPageMetadata baseMetadata = new ExtendedPageMetadata(3,
-                                                                     10,
-                                                                     1,
-                                                                     8,
-                                                                     2);
+        // given
+        ExtendedPageMetadata baseMetadata = new ExtendedPageMetadata(3, 10, 1, 8, 2);
 
-        //when
-        PaginationMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(baseMetadata,
-                                                                                   5);
+        // when
+        PaginationMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(baseMetadata, 5);
 
-        //then
+        // then
         assertThat(alfrescoPageMetadata).hasSkipCount(3);
     }
-
 }

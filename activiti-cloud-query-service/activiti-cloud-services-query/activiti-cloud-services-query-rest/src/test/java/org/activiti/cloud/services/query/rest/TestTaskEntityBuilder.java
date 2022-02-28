@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import java.util.Date;
-import java.util.UUID;
-
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.TaskEntity;
+
+import java.util.Date;
+import java.util.UUID;
 
 public class TestTaskEntityBuilder {
 
@@ -49,5 +49,4 @@ public class TestTaskEntityBuilder {
         taskEntity.setTaskDefinitionKey("taskDefinitionKey");
         return taskEntity;
     }
-
 }

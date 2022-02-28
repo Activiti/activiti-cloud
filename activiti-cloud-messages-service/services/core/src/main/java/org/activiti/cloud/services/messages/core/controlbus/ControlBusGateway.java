@@ -21,5 +21,4 @@ import org.springframework.integration.annotation.MessagingGateway;
 public interface ControlBusGateway {
 
     void send(String command);
-
 }

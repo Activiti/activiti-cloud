@@ -17,25 +17,24 @@ package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import graphql.Scalars;
+import graphql.schema.GraphQLSchema;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import graphql.Scalars;
-import graphql.schema.GraphQLSchema;
-
 @SpringBootTest(properties = "spring.data.jpa.repositories.bootstrap-mode=default")
 @TestPropertySource("classpath:application-test.properties")
 class ActivitiGraphQLSchemaAutoConfigurationTest {
 
-    @Autowired(required=false)
+    @Autowired(required = false)
     private GraphQLSchema schema;
 
     @SpringBootApplication
-    static class TestApplication {
-    }
+    static class TestApplication {}
 
     @Test
     void contextLoads() {
@@ -44,106 +43,92 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
 
     @Test
     void correctlyDerivesSchemaFromGivenEntities() {
-        //when
+        // when
 
         // then
-        assertThat(schema)
-            .describedAs("Ensure the result is returned")
-            .isNotNull();
+        assertThat(schema).describedAs("Ensure the result is returned").isNotNull();
 
-        //then
-        assertThat(schema.getQueryType().getFieldDefinition("Task")
-            .getArgument("id"))
-            .describedAs( "Ensure that identity can be queried on")
-            .isNotNull();
+        // then
+        assertThat(schema.getQueryType().getFieldDefinition("Task").getArgument("id"))
+                .describedAs("Ensure that identity can be queried on")
+                .isNotNull();
 
-        //then
-        assertThat(schema.getQueryType().getFieldDefinition("Task")
-            .getArguments())
-            .describedAs("Ensure query has correct number of arguments")
-            .hasSize(1);
+        // then
+        assertThat(schema.getQueryType().getFieldDefinition("Task").getArguments())
+                .describedAs("Ensure query has correct number of arguments")
+                .hasSize(1);
 
-        //then
-        assertThat(schema.getQueryType().getFieldDefinition("ProcessInstance")
-            .getArgument("id").getType())
-            .isEqualTo(Scalars.GraphQLString);
+        // then
+        assertThat(
+                        schema.getQueryType()
+                                .getFieldDefinition("ProcessInstance")
+                                .getArgument("id")
+                                .getType())
+                .isEqualTo(Scalars.GraphQLString);
 
-        //then
-        assertThat(schema.getQueryType().getFieldDefinition("ProcessInstance")
-            .getArguments())
-            .describedAs("Ensure query has correct number of arguments")
-            .hasSize(1);
+        // then
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessInstance").getArguments())
+                .describedAs("Ensure query has correct number of arguments")
+                .hasSize(1);
 
-        //then
-        assertThat(schema.getQueryType().getFieldDefinition("ProcessVariable")
-            .getArgument("id").getType())
-            .isEqualTo(Scalars.GraphQLLong);
+        // then
+        assertThat(
+                        schema.getQueryType()
+                                .getFieldDefinition("ProcessVariable")
+                                .getArgument("id")
+                                .getType())
+                .isEqualTo(Scalars.GraphQLLong);
 
-        //then
-        assertThat(schema.getQueryType().getFieldDefinition("ProcessVariable")
-            .getArguments())
-            .describedAs("Ensure query has correct number of arguments")
-            .hasSize(1);
-
+        // then
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessVariable").getArguments())
+                .describedAs("Ensure query has correct number of arguments")
+                .hasSize(1);
     }
 
     @Test
     void correctlyDerivesPageableSchemaFromGivenEntities() {
-        //when
+        // when
 
         // then
-        assertThat(schema)
-            .describedAs("Ensure the result is returned")
-            .isNotNull();
+        assertThat(schema).describedAs("Ensure the result is returned").isNotNull();
 
-        assertThat(schema.getQueryType().getFieldDefinition("ProcessInstances")
-            .getArgument("where"))
-            .describedAs( "Ensure that collections can be queried")
-            .isNotNull();
+        assertThat(
+                        schema.getQueryType()
+                                .getFieldDefinition("ProcessInstances")
+                                .getArgument("where"))
+                .describedAs("Ensure that collections can be queried")
+                .isNotNull();
 
-        assertThat(schema.getQueryType().getFieldDefinition("ProcessInstances")
-            .getArgument("page"))
-            .describedAs( "Ensure that collections can be paged")
-            .isNotNull();
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessInstances").getArgument("page"))
+                .describedAs("Ensure that collections can be paged")
+                .isNotNull();
 
-        assertThat(schema.getQueryType().getFieldDefinition("Tasks")
-            .getArgument("page"))
-            .describedAs( "Ensure that collections can be queried on by page")
-            .isNotNull();
+        assertThat(schema.getQueryType().getFieldDefinition("Tasks").getArgument("page"))
+                .describedAs("Ensure that collections can be queried on by page")
+                .isNotNull();
 
-        assertThat(schema.getQueryType().getFieldDefinition("Tasks")
-            .getArgument("page"))
-            .describedAs( "Ensure that collections can be queried on by page")
-            .isNotNull();
+        assertThat(schema.getQueryType().getFieldDefinition("Tasks").getArgument("page"))
+                .describedAs("Ensure that collections can be queried on by page")
+                .isNotNull();
 
-        assertThat(schema.getQueryType().getFieldDefinition("Tasks")
-            .getArguments())
-            .describedAs("Ensure query has correct number of arguments")
-            .hasSize(2);
+        assertThat(schema.getQueryType().getFieldDefinition("Tasks").getArguments())
+                .describedAs("Ensure query has correct number of arguments")
+                .hasSize(2);
 
-        assertThat(schema.getQueryType().getFieldDefinition("ProcessVariables")
-           .getArgument("page"))
-           .describedAs( "Ensure that collections can be queried on by page")
-           .isNotNull();
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessVariables").getArgument("page"))
+                .describedAs("Ensure that collections can be queried on by page")
+                .isNotNull();
 
-       assertThat(schema.getQueryType().getFieldDefinition("ProcessVariables")
-           .getArguments())
-           .describedAs("Ensure query has correct number of arguments")
-           .hasSize(2);
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessVariables").getArguments())
+                .describedAs("Ensure query has correct number of arguments")
+                .hasSize(2);
 
-        assertThat(schema.getQueryType()
-                         .getFieldDefinition("TaskVariables")
-                         .getArgument("page"))
-                                              .describedAs("Ensure that collections can be queried on by page")
-                                              .isNotNull();
+        assertThat(schema.getQueryType().getFieldDefinition("TaskVariables").getArgument("page"))
+                .describedAs("Ensure that collections can be queried on by page")
+                .isNotNull();
 
-        assertThat(schema.getQueryType()
-                         .getFieldDefinition("TaskVariables")
-                         .getArguments())
-                                         .describedAs("Ensure query has correct number of arguments")
-                                         .hasSize(2);
-
+        assertThat(schema.getQueryType().getFieldDefinition("TaskVariables").getArguments())
+                .describedAs("Ensure query has correct number of arguments")
+                .hasSize(2);
     }
-
-
 }

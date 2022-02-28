@@ -15,18 +15,15 @@
  */
 package org.activiti.cloud.services.modeling.validation.project;
 
-import java.util.stream.Stream;
-
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
 
-/**
- * Interface for project validators
- */
+import java.util.stream.Stream;
+
+/** Interface for project validators */
 public interface ProjectValidator extends ModelValidationErrorProducer {
 
-    Stream<ModelValidationError> validate(Project project,
-                                          ValidationContext validationContext);
+    Stream<ModelValidationError> validate(Project project, ValidationContext validationContext);
 }

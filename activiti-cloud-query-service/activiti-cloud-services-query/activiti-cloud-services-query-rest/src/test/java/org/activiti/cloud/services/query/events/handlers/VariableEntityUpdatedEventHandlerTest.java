@@ -22,8 +22,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
-import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.test.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,14 +33,11 @@ import org.mockito.Mock;
 
 public class VariableEntityUpdatedEventHandlerTest {
 
-    @InjectMocks
-    private VariableUpdatedEventHandler handler;
+    @InjectMocks private VariableUpdatedEventHandler handler;
 
-    @Mock
-    private ProcessVariableUpdateEventHandler processVariableUpdateEventHandler;
+    @Mock private ProcessVariableUpdateEventHandler processVariableUpdateEventHandler;
 
-    @Mock
-    private TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler;
+    @Mock private TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler;
 
     @BeforeEach
     public void setUp() {
@@ -49,15 +46,17 @@ public class VariableEntityUpdatedEventHandlerTest {
 
     @Test
     public void handleShouldUseProcessVariableUpdateHandlerWhenNoTaskId() {
-        //given
-        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(buildVariable(), "v0");
+        // given
+        CloudVariableUpdatedEventImpl<String> event =
+                new CloudVariableUpdatedEventImpl<>(buildVariable(), "v0");
         event.setServiceName("runtime-bundle-a");
 
-        //when
+        // when
         handler.handle(event);
 
-        //then
-        ArgumentCaptor<ProcessVariableEntity> captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
+        // then
+        ArgumentCaptor<ProcessVariableEntity> captor =
+                ArgumentCaptor.forClass(ProcessVariableEntity.class);
         verify(processVariableUpdateEventHandler).handle(captor.capture());
 
         ProcessVariableEntity variableEntity = captor.getValue();
@@ -70,23 +69,22 @@ public class VariableEntityUpdatedEventHandlerTest {
     }
 
     private static VariableInstanceImpl<String> buildVariable() {
-        return new VariableInstanceImpl<>("var",
-                                          "string",
-                                          "v1",
-                                          "10", null);
+        return new VariableInstanceImpl<>("var", "string", "v1", "10", null);
     }
 
     @Test
     public void handleShouldUseTaskVariableUpdateHandlerWhenTaskIdIsSet() {
-        //given
-        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(buildVariableWithTaskId(), "v0");
+        // given
+        CloudVariableUpdatedEventImpl<String> event =
+                new CloudVariableUpdatedEventImpl<>(buildVariableWithTaskId(), "v0");
         event.setServiceName("runtime-bundle-a");
 
-        //when
+        // when
         handler.handle(event);
 
-        //then
-        ArgumentCaptor<TaskVariableEntity> captor = ArgumentCaptor.forClass(TaskVariableEntity.class);
+        // then
+        ArgumentCaptor<TaskVariableEntity> captor =
+                ArgumentCaptor.forClass(TaskVariableEntity.class);
         verify(taskVariableUpdatedEventHandler).handle(captor.capture());
 
         TaskVariableEntity variableEntity = captor.getValue();
@@ -104,10 +102,10 @@ public class VariableEntityUpdatedEventHandlerTest {
 
     @Test
     public void getHandledEventClassShouldReturnVariableUpdatedEvent() {
-        //when
+        // when
         String handledEvent = handler.getHandledEvent();
 
-        //then
+        // then
         assertThat(handledEvent).isEqualTo(VariableEvent.VariableEvents.VARIABLE_UPDATED.name());
     }
 }

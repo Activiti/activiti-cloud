@@ -25,13 +25,15 @@ import java.util.stream.Collectors;
 
 public class CollectionModelAssembler {
 
-    public <T, D extends RepresentationModel<?>> CollectionModel<D> toCollectionModel(List<T> entities,
-                                                                   RepresentationModelAssembler<T, D> representationModelAssembler,
-                                                                   Link ... links) {
+    public <T, D extends RepresentationModel<?>> CollectionModel<D> toCollectionModel(
+            List<T> entities,
+            RepresentationModelAssembler<T, D> representationModelAssembler,
+            Link... links) {
 
-        return CollectionModel.of(entities.stream()
-                                          .map(representationModelAssembler::toModel)
-                                          .collect(Collectors.toList()),
-                                  links);
+        return CollectionModel.of(
+                entities.stream()
+                        .map(representationModelAssembler::toModel)
+                        .collect(Collectors.toList()),
+                links);
     }
 }

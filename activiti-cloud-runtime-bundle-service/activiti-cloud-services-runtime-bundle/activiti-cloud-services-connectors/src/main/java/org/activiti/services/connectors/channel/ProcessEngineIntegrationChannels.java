@@ -29,5 +29,4 @@ public interface ProcessEngineIntegrationChannels {
 
     @Input(INTEGRATION_ERRORS_CONSUMER)
     SubscribableChannel integrationErrorsConsumer();
-
 }

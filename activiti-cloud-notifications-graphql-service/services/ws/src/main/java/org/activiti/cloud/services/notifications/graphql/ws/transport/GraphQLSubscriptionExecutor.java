@@ -15,19 +15,19 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
-import java.util.Collections;
-import java.util.Map;
-
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
- * WebSockets specific GraphQLExecutor implementation with support to execute GraphQL subscription queries
- *
+ * WebSockets specific GraphQLExecutor implementation with support to execute GraphQL subscription
+ * queries
  */
-public class GraphQLSubscriptionExecutor  {
+public class GraphQLSubscriptionExecutor {
 
     private final GraphQL graphQL;
 
@@ -49,17 +49,15 @@ public class GraphQLSubscriptionExecutor  {
         // Need to inject variables in context to support parameter bindings in reverse queries
         Map<String, Object> context = Collections.singletonMap("variables", arguments);
 
-        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
-                .query(query)
-                .variables(arguments)
-                .root(context)
-                .context(context)
-                .build();
+        ExecutionInput executionInput =
+                ExecutionInput.newExecutionInput()
+                        .query(query)
+                        .variables(arguments)
+                        .root(context)
+                        .context(context)
+                        .build();
 
-        if (arguments == null)
-            return graphQL.execute(query);
-        else
-            return graphQL.execute(executionInput);
+        if (arguments == null) return graphQL.execute(query);
+        else return graphQL.execute(executionInput);
     }
-
 }

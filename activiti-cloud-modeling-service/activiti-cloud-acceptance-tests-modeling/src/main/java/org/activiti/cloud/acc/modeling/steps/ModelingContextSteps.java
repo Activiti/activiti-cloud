@@ -15,14 +15,15 @@
  */
 package org.activiti.cloud.acc.modeling.steps;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.services.common.util.HttpUtils.HEADER_ATTACHEMNT_FILENAME;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.IanaLinkRelations.SELF;
 
 import feign.Response;
+
 import net.thucydides.core.annotations.Step;
+
 import org.activiti.cloud.acc.modeling.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.acc.modeling.modeling.ModelingContextHandler;
 import org.activiti.cloud.acc.modeling.modeling.ModelingIdentifier;
@@ -33,37 +34,33 @@ import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.util.StreamUtils;
 
-import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.services.common.util.HttpUtils.HEADER_ATTACHEMNT_FILENAME;
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.IanaLinkRelations.SELF;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-/**
- * Modeling context steps
- */
+/** Modeling context steps */
 @EnableDirtyContext
 public abstract class ModelingContextSteps<M> {
 
-    @Autowired
-    protected ModelingContextHandler modelingContextHandler;
-    @Autowired
-    private DirtyContextHandler dirtyContextHandler;
-    @Autowired
-    private ModelingTestsConfigurationProperties config;
+    @Autowired protected ModelingContextHandler modelingContextHandler;
+    @Autowired private DirtyContextHandler dirtyContextHandler;
+    @Autowired private ModelingTestsConfigurationProperties config;
 
     protected EntityModel<M> create(M m) {
-        EntityModel<M> model = modelingContextHandler
-                .getCurrentModelingContext()
-                .flatMap(this::getRelUri)
-                .map(this::modelingUri)
-                .map(uri -> service().createByUri(uri,
-                                                  m))
-                .orElseGet(() -> service().create(m));
+        EntityModel<M> model =
+                modelingContextHandler
+                        .getCurrentModelingContext()
+                        .flatMap(this::getRelUri)
+                        .map(this::modelingUri)
+                        .map(uri -> service().createByUri(uri, m))
+                        .orElseGet(() -> service().create(m));
         return dirty(model);
     }
 
@@ -79,9 +76,7 @@ public abstract class ModelingContextSteps<M> {
 
     @Step
     public void deleteAll(ModelingIdentifier<M> identifier) {
-        service().findAll()
-                .getContent()
-                .stream()
+        service().findAll().getContent().stream()
                 .filter(resource -> identifier.test(resource.getContent()))
                 .map(resource -> resource.getLink(SELF).get())
                 .map(Link::getHref)
@@ -92,13 +87,11 @@ public abstract class ModelingContextSteps<M> {
 
     @Step
     public boolean exists(ModelingIdentifier<M> identifier) {
-        return existsInCollection(identifier,
-                                  service().findAll().getContent());
+        return existsInCollection(identifier, service().findAll().getContent());
     }
 
     protected Optional<String> getRelUri(EntityModel<?> entityModel) {
-        return getRel()
-                .map(entityModel::getLink)
+        return getRel().map(entityModel::getLink)
                 .map(Optional::get)
                 .map(Link::getHref)
                 .map(this::cutQueryParams);
@@ -109,8 +102,7 @@ public abstract class ModelingContextSteps<M> {
         if (index <= 0) {
             return uri;
         }
-        return uri.substring(0,
-                             index);
+        return uri.substring(0, index);
     }
 
     protected void updateCurrentModelingObject() {
@@ -124,24 +116,27 @@ public abstract class ModelingContextSteps<M> {
     }
 
     protected EntityModel<M> checkAndGetCurrentContext(Class<M> expectedCurrentContextClass) {
-        Optional<EntityModel<?>> optionalModelingContext = modelingContextHandler.getCurrentModelingContext();
-        assertThat(optionalModelingContext
-                           .map(EntityModel::getContent)
-                           .filter(expectedCurrentContextClass::isInstance)
-                           .map(expectedCurrentContextClass::cast)).isNotEmpty();
+        Optional<EntityModel<?>> optionalModelingContext =
+                modelingContextHandler.getCurrentModelingContext();
+        assertThat(
+                        optionalModelingContext
+                                .map(EntityModel::getContent)
+                                .filter(expectedCurrentContextClass::isInstance)
+                                .map(expectedCurrentContextClass::cast))
+                .isNotEmpty();
         return (EntityModel<M>) optionalModelingContext.get();
     }
 
     @Step
     public void openModelingObject(ModelingIdentifier<M> identifier) {
-        Optional<EntityModel<M>> currentModelingObject = getAvailableModelingObjects()
-                .stream()
-                .filter(modelingObject -> identifier.test(modelingObject.getContent()))
-                .findFirst()
-                .map(resource -> resource.getLink(SELF).get())
-                .map(Link::getHref)
-                .map(this::modelingUri)
-                .map(this::findByUri);
+        Optional<EntityModel<M>> currentModelingObject =
+                getAvailableModelingObjects().stream()
+                        .filter(modelingObject -> identifier.test(modelingObject.getContent()))
+                        .findFirst()
+                        .map(resource -> resource.getLink(SELF).get())
+                        .map(Link::getHref)
+                        .map(this::modelingUri)
+                        .map(this::findByUri);
         assertThat(currentModelingObject.isPresent()).isTrue();
 
         modelingContextHandler.setCurrentModelingObject(currentModelingObject.get());
@@ -163,15 +158,13 @@ public abstract class ModelingContextSteps<M> {
                 .flatMap(this::getRelUri)
                 .map(this::findAllByUri)
                 .map(PagedModel::getContent)
-                .map(resources -> existsInCollection(identifier,
-                                                     resources))
+                .map(resources -> existsInCollection(identifier, resources))
                 .orElse(false);
     }
 
-    protected boolean existsInCollection(ModelingIdentifier<M> identifier,
-                                         Collection<EntityModel<M>> modelingObjects) {
-        return modelingObjects
-                .stream()
+    protected boolean existsInCollection(
+            ModelingIdentifier<M> identifier, Collection<EntityModel<M>> modelingObjects) {
+        return modelingObjects.stream()
                 .map(EntityModel::getContent)
                 .filter(Objects::nonNull)
                 .filter(identifier)
@@ -197,33 +190,50 @@ public abstract class ModelingContextSteps<M> {
     }
 
     protected FileContent toFileContent(Response response) throws IOException {
-        String contentType = Optional.ofNullable(response.headers().get("Content-Type"))
-                .map(contentTypes -> contentTypes
-                        .stream()
-                        .map(Object::toString)
-                        .findFirst()
-                        .orElse(null))
-                .orElseThrow(() -> new RuntimeException("No Content-Type header in feign response"));
+        String contentType =
+                Optional.ofNullable(response.headers().get("Content-Type"))
+                        .map(
+                                contentTypes ->
+                                        contentTypes.stream()
+                                                .map(Object::toString)
+                                                .findFirst()
+                                                .orElse(null))
+                        .orElseThrow(
+                                () ->
+                                        new RuntimeException(
+                                                "No Content-Type header in feign response"));
 
-        String filename = Optional.ofNullable(response.headers().get("Content-Disposition"))
-                .map(contentTypes -> contentTypes
-                        .stream()
-                        .map(Object::toString)
-                        .findFirst()
-                        .filter(contentDisposition -> contentDisposition.startsWith(HEADER_ATTACHEMNT_FILENAME))
-                        .map(contentDisposition -> contentDisposition.substring(HEADER_ATTACHEMNT_FILENAME.length()))
-                        .orElse(null))
-                .orElseThrow(() -> new RuntimeException("No Content-Disposition header in feign response"));
-        return new FileContent(filename,
-                               contentType,
-                               StreamUtils.copyToByteArray(response.body().asInputStream()));
+        String filename =
+                Optional.ofNullable(response.headers().get("Content-Disposition"))
+                        .map(
+                                contentTypes ->
+                                        contentTypes.stream()
+                                                .map(Object::toString)
+                                                .findFirst()
+                                                .filter(
+                                                        contentDisposition ->
+                                                                contentDisposition.startsWith(
+                                                                        HEADER_ATTACHEMNT_FILENAME))
+                                                .map(
+                                                        contentDisposition ->
+                                                                contentDisposition.substring(
+                                                                        HEADER_ATTACHEMNT_FILENAME
+                                                                                .length()))
+                                                .orElse(null))
+                        .orElseThrow(
+                                () ->
+                                        new RuntimeException(
+                                                "No Content-Disposition header in feign response"));
+        return new FileContent(
+                filename,
+                contentType,
+                StreamUtils.copyToByteArray(response.body().asInputStream()));
     }
 
     protected String modelingUri(String uri) {
-        return uri.replace(String.format("%s://%s",
-                                         config.getGatewayProtocol(),
-                                         config.getModelingPath()),
-                           config.getModelingUrl());
+        return uri.replace(
+                String.format("%s://%s", config.getGatewayProtocol(), config.getModelingPath()),
+                config.getModelingUrl());
     }
 
     public ModelType getModelType(String modelType) {

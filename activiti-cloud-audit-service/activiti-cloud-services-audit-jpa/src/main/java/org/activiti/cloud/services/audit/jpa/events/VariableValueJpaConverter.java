@@ -17,13 +17,16 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import javax.persistence.AttributeConverter;
+
 import org.activiti.cloud.services.audit.api.AuditException;
+
+import java.io.IOException;
+
+import javax.persistence.AttributeConverter;
 
 public class VariableValueJpaConverter implements AttributeConverter<VariableValue<?>, String> {
 
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public String convertToDatabaseColumn(VariableValue<?> entity) {

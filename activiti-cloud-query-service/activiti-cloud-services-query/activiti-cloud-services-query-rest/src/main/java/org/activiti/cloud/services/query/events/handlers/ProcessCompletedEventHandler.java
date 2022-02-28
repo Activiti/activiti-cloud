@@ -22,9 +22,10 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
+
+import javax.persistence.EntityManager;
 
 public class ProcessCompletedEventHandler implements QueryEventHandler {
 
@@ -38,8 +39,9 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessCompletedEvent completedEvent = (CloudProcessCompletedEvent) event;
         String processInstanceId = completedEvent.getEntity().getId();
-        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                                                            processInstanceId));
+        Optional<ProcessInstanceEntity> findResult =
+                Optional.ofNullable(
+                        entityManager.find(ProcessInstanceEntity.class, processInstanceId));
         if (findResult.isPresent()) {
             ProcessInstanceEntity processInstanceEntity = findResult.get();
             processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
@@ -47,7 +49,8 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
             processInstanceEntity.setCompletedDate(new Date(completedEvent.getTimestamp()));
             entityManager.persist(processInstanceEntity);
         } else {
-            throw new QueryException("Unable to find process instance with the given id: " + processInstanceId);
+            throw new QueryException(
+                    "Unable to find process instance with the given id: " + processInstanceId);
         }
     }
 

@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.test.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
@@ -27,20 +31,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.persistence.EntityManager;
 import java.util.UUID;
 
-import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import javax.persistence.EntityManager;
 
 public class ProcessDeployedEventHandlerTest {
 
-    @InjectMocks
-    private ProcessDeployedEventHandler handler;
+    @InjectMocks private ProcessDeployedEventHandler handler;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -49,7 +48,7 @@ public class ProcessDeployedEventHandlerTest {
 
     @Test
     public void handleShouldStoreProcessDefinitionAndProcessModel() {
-        //given
+        // given
         ProcessDefinitionImpl eventProcess = new ProcessDefinitionImpl();
         eventProcess.setId(UUID.randomUUID().toString());
         eventProcess.setKey("myProcess");
@@ -58,7 +57,8 @@ public class ProcessDeployedEventHandlerTest {
         eventProcess.setFormKey("formKey");
         eventProcess.setVersion(2);
 
-        CloudProcessDeployedEventImpl processDeployedEvent = new CloudProcessDeployedEventImpl(eventProcess);
+        CloudProcessDeployedEventImpl processDeployedEvent =
+                new CloudProcessDeployedEventImpl(eventProcess);
         processDeployedEvent.setAppName("myApp");
         processDeployedEvent.setAppVersion("2.1");
         processDeployedEvent.setServiceFullName("my.full.service.name");
@@ -67,15 +67,16 @@ public class ProcessDeployedEventHandlerTest {
         processDeployedEvent.setServiceVersion("1.0");
         processDeployedEvent.setProcessModelContent("<model/>");
 
-        //when
+        // when
         handler.handle(processDeployedEvent);
 
-        //then
+        // then
         ArgumentCaptor<Object> argumentsCaptor = ArgumentCaptor.forClass(Object.class);
 
         verify(entityManager, times(2)).merge(argumentsCaptor.capture());
 
-        ProcessDefinitionEntity storedProcess = (ProcessDefinitionEntity) argumentsCaptor.getAllValues().get(0);
+        ProcessDefinitionEntity storedProcess =
+                (ProcessDefinitionEntity) argumentsCaptor.getAllValues().get(0);
         assertThat(storedProcess)
                 .hasId(eventProcess.getId())
                 .hasKey(eventProcess.getKey())
@@ -90,16 +91,18 @@ public class ProcessDeployedEventHandlerTest {
                 .hasServiceType(processDeployedEvent.getServiceType())
                 .hasServiceVersion(processDeployedEvent.getServiceVersion());
 
-        ProcessModelEntity processModel = (ProcessModelEntity) argumentsCaptor.getAllValues().get(1);
+        ProcessModelEntity processModel =
+                (ProcessModelEntity) argumentsCaptor.getAllValues().get(1);
         assertThat(processModel).hasProcessModelContent("<model/>");
     }
 
     @Test
     public void getHandledEventShouldReturnProcessDeployedEvent() {
-        //when
+        // when
         String handledEvent = handler.getHandledEvent();
 
-        //then
-        Assertions.assertThat(handledEvent).isEqualTo(ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name());
+        // then
+        Assertions.assertThat(handledEvent)
+                .isEqualTo(ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name());
     }
 }

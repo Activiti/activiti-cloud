@@ -18,12 +18,14 @@ package org.activiti.cloud.acc.core.rest.encoders;
 import feign.RequestTemplate;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 public class PageableQueryEncoder implements Encoder {
 
@@ -34,7 +36,8 @@ public class PageableQueryEncoder implements Encoder {
     }
 
     @Override
-    public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
+    public void encode(Object object, Type bodyType, RequestTemplate template)
+            throws EncodeException {
 
         if (object instanceof Pageable) {
             Pageable pageable = (Pageable) object;
@@ -43,7 +46,8 @@ public class PageableQueryEncoder implements Encoder {
 
             if (pageable.getSort() != null) {
                 Collection<String> existingSorts = template.queries().get("sort");
-                List<String> sortQueries = existingSorts != null ? new ArrayList<>(existingSorts) : new ArrayList<>();
+                List<String> sortQueries =
+                        existingSorts != null ? new ArrayList<>(existingSorts) : new ArrayList<>();
                 for (Sort.Order order : pageable.getSort()) {
                     sortQueries.add(order.getProperty() + "," + order.getDirection());
                 }

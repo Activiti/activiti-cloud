@@ -28,7 +28,7 @@ public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
     public VariableDeletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return VariableEvent.VariableEvents.VARIABLE_DELETED.name();
@@ -36,15 +36,17 @@ public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected VariableDeletedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new VariableDeletedEventEntity((CloudVariableDeletedEvent) cloudRuntimeEvent);       
+        return new VariableDeletedEventEntity((CloudVariableDeletedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        VariableDeletedEventEntity variableDeletedEventEntity = (VariableDeletedEventEntity) auditEventEntity;
+        VariableDeletedEventEntity variableDeletedEventEntity =
+                (VariableDeletedEventEntity) auditEventEntity;
 
-        return new CloudVariableDeletedEventImpl(variableDeletedEventEntity.getEventId(),
-                                                 variableDeletedEventEntity.getTimestamp(),
-                                                 variableDeletedEventEntity.getVariableInstance());
+        return new CloudVariableDeletedEventImpl(
+                variableDeletedEventEntity.getEventId(),
+                variableDeletedEventEntity.getTimestamp(),
+                variableDeletedEventEntity.getVariableInstance());
     }
 }

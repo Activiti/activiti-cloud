@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+
 import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.task.model.TaskCandidateGroup;
@@ -27,65 +28,62 @@ import org.junit.jupiter.api.Test;
 
 public class TaskCandidatesJpaJsonConverterTest {
 
-    private TaskCandidateUserJpaJsonConverter converterCandidateUser = new TaskCandidateUserJpaJsonConverter();
-    private TaskCandidateGroupJpaJsonConverter converterCandidateGroup = new TaskCandidateGroupJpaJsonConverter();
+    private TaskCandidateUserJpaJsonConverter converterCandidateUser =
+            new TaskCandidateUserJpaJsonConverter();
+    private TaskCandidateGroupJpaJsonConverter converterCandidateGroup =
+            new TaskCandidateGroupJpaJsonConverter();
 
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
-        //given
-        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl("user-id","task-id");
+        // given
+        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl("user-id", "task-id");
 
-        //when
+        // when
         String jsonRepresentation = converterCandidateUser.convertToDatabaseColumn(candidateUser);
 
-        //then
+        // then
         assertThatJson(jsonRepresentation)
-                .node("userId").isEqualTo("user-id")
-                .node("taskId").isEqualTo("task-id");
+                .node("userId")
+                .isEqualTo("user-id")
+                .node("taskId")
+                .isEqualTo("task-id");
 
-        //given
-        TaskCandidateGroupImpl candidateGroup = new TaskCandidateGroupImpl("group-id","task-id");
+        // given
+        TaskCandidateGroupImpl candidateGroup = new TaskCandidateGroupImpl("group-id", "task-id");
 
-        //when
+        // when
         jsonRepresentation = converterCandidateGroup.convertToDatabaseColumn(candidateGroup);
 
-        //then
+        // then
         assertThatJson(jsonRepresentation)
-                .node("groupId").isEqualTo("group-id")
-                .node("taskId").isEqualTo("task-id");
-
+                .node("groupId")
+                .isEqualTo("group-id")
+                .node("taskId")
+                .isEqualTo("task-id");
     }
 
     @Test
     public void convertToEntityAttributeShouldCreateTaskCandidate() throws Exception {
-        //given
-        String jsonRepresentation =
-                "{\"taskId\":\"task-id\"," +
-                        "\"userId\":\"user-id\"}";
+        // given
+        String jsonRepresentation = "{\"taskId\":\"task-id\"," + "\"userId\":\"user-id\"}";
 
-        //when
-        TaskCandidateUserImpl candidateUser = (TaskCandidateUserImpl)converterCandidateUser.convertToEntityAttribute(jsonRepresentation);
+        // when
+        TaskCandidateUserImpl candidateUser =
+                (TaskCandidateUserImpl)
+                        converterCandidateUser.convertToEntityAttribute(jsonRepresentation);
 
-        //then
-        assertThat(candidateUser)
-                .isNotNull()
-                .hasUserId("user-id");
+        // then
+        assertThat(candidateUser).isNotNull().hasUserId("user-id");
 
-        jsonRepresentation =
-                "{\"taskId\":\"task-id\"," +
-                        "\"groupId\":\"group-id\"}";
+        jsonRepresentation = "{\"taskId\":\"task-id\"," + "\"groupId\":\"group-id\"}";
 
-        jsonRepresentation =
-                "{\"groupId\":\"group-id\"}";
+        jsonRepresentation = "{\"groupId\":\"group-id\"}";
 
-        //when
-        TaskCandidateGroup candidateGroup = converterCandidateGroup.convertToEntityAttribute(jsonRepresentation);
+        // when
+        TaskCandidateGroup candidateGroup =
+                converterCandidateGroup.convertToEntityAttribute(jsonRepresentation);
 
-        //then
-        assertThat(candidateGroup)
-                .isNotNull()
-                .hasGroupId("group-id");
+        // then
+        assertThat(candidateGroup).isNotNull().hasGroupId("group-id");
     }
-
-
 }

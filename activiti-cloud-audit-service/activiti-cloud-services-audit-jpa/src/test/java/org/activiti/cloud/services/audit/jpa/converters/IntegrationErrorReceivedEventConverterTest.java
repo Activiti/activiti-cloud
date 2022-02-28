@@ -19,7 +19,6 @@ package org.activiti.cloud.services.audit.jpa.converters;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationErrorReceivedEventEntity;
@@ -27,10 +26,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 
+import java.util.Collections;
+
 public class IntegrationErrorReceivedEventConverterTest {
 
-    @InjectMocks
-    private IntegrationErrorReceivedEventConverter converter;
+    @InjectMocks private IntegrationErrorReceivedEventConverter converter;
 
     @BeforeEach
     void setUp() {
@@ -39,27 +39,30 @@ public class IntegrationErrorReceivedEventConverterTest {
 
     @Test
     public void createEventEntity_should_setErrorRelatedProperties() {
-        //given
-        CloudIntegrationErrorReceivedEventImpl errorReceivedEvent = new CloudIntegrationErrorReceivedEventImpl(
-            new IntegrationContextImpl(), "errorCode", "Something went wrong",
-            RuntimeException.class.getName(),
-            Collections.singletonList(new StackTraceElement("any", "any", "any", 1)));
+        // given
+        CloudIntegrationErrorReceivedEventImpl errorReceivedEvent =
+                new CloudIntegrationErrorReceivedEventImpl(
+                        new IntegrationContextImpl(),
+                        "errorCode",
+                        "Something went wrong",
+                        RuntimeException.class.getName(),
+                        Collections.singletonList(new StackTraceElement("any", "any", "any", 1)));
         errorReceivedEvent.setSequenceNumber(1);
 
-        //when
-        IntegrationErrorReceivedEventEntity errorReceivedEventEntity = converter
-            .createEventEntity(errorReceivedEvent);
+        // when
+        IntegrationErrorReceivedEventEntity errorReceivedEventEntity =
+                converter.createEventEntity(errorReceivedEvent);
 
-        //then
+        // then
         assertThat(errorReceivedEventEntity.getIntegrationContext())
-            .isEqualTo(errorReceivedEvent.getEntity());
+                .isEqualTo(errorReceivedEvent.getEntity());
         assertThat(errorReceivedEventEntity.getErrorCode())
-            .isEqualTo(errorReceivedEvent.getErrorCode());
+                .isEqualTo(errorReceivedEvent.getErrorCode());
         assertThat(errorReceivedEventEntity.getErrorMessage())
-            .isEqualTo(errorReceivedEventEntity.getErrorMessage());
+                .isEqualTo(errorReceivedEventEntity.getErrorMessage());
         assertThat(errorReceivedEventEntity.getErrorClassName())
-            .isEqualTo(errorReceivedEventEntity.getErrorClassName());
+                .isEqualTo(errorReceivedEventEntity.getErrorClassName());
         assertThat(errorReceivedEventEntity.getStackTraceElements())
-            .isEqualTo(errorReceivedEventEntity.getStackTraceElements());
+                .isEqualTo(errorReceivedEventEntity.getStackTraceElements());
     }
 }

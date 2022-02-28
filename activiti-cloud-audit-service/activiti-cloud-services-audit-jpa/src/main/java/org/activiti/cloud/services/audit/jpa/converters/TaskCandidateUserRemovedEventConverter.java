@@ -25,26 +25,31 @@ import org.activiti.cloud.services.audit.jpa.events.TaskCandidateUserRemovedEven
 
 public class TaskCandidateUserRemovedEventConverter extends BaseEventToEntityConverter {
 
-    public TaskCandidateUserRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TaskCandidateUserRemovedEventConverter(
+            EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name();
     }
 
     @Override
-    public TaskCandidateUserRemovedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new TaskCandidateUserRemovedEventEntity((CloudTaskCandidateUserRemovedEvent) cloudRuntimeEvent);
+    public TaskCandidateUserRemovedEventEntity createEventEntity(
+            CloudRuntimeEvent cloudRuntimeEvent) {
+        return new TaskCandidateUserRemovedEventEntity(
+                (CloudTaskCandidateUserRemovedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        TaskCandidateUserRemovedEventEntity eventEntity = (TaskCandidateUserRemovedEventEntity) auditEventEntity;
+        TaskCandidateUserRemovedEventEntity eventEntity =
+                (TaskCandidateUserRemovedEventEntity) auditEventEntity;
 
-        return new CloudTaskCandidateUserRemovedEventImpl(eventEntity.getEventId(),
-                                                          eventEntity.getTimestamp(),
-                                                          eventEntity.getCandidateUser());
+        return new CloudTaskCandidateUserRemovedEventImpl(
+                eventEntity.getEventId(),
+                eventEntity.getTimestamp(),
+                eventEntity.getCandidateUser());
     }
 }

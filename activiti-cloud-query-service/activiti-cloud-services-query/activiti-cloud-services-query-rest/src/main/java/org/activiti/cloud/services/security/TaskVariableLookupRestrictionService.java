@@ -18,18 +18,19 @@ package org.activiti.cloud.services.security;
 import com.querydsl.core.types.Predicate;
 
 /**
- * This is present in case of a future scenario where we need to filter task or process instance variables more generally rather than per task or per proc.
+ * This is present in case of a future scenario where we need to filter task or process instance
+ * variables more generally rather than per task or per proc.
  */
 public class TaskVariableLookupRestrictionService {
 
     private final TaskLookupRestrictionService taskLookupRestrictionService;
 
-    public TaskVariableLookupRestrictionService(TaskLookupRestrictionService taskLookupRestrictionService) {
+    public TaskVariableLookupRestrictionService(
+            TaskLookupRestrictionService taskLookupRestrictionService) {
         this.taskLookupRestrictionService = taskLookupRestrictionService;
     }
 
-    public Predicate restrictTaskVariableQuery(Predicate predicate){
+    public Predicate restrictTaskVariableQuery(Predicate predicate) {
         return taskLookupRestrictionService.restrictTaskVariableQuery(predicate);
     }
-
 }

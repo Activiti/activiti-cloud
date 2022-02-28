@@ -21,19 +21,14 @@ import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
 public class CloudTaskSuspendedEventImpl extends CloudTaskEventImpl
         implements CloudTaskSuspendedEvent {
 
-    public CloudTaskSuspendedEventImpl() {
-    }
+    public CloudTaskSuspendedEventImpl() {}
 
     public CloudTaskSuspendedEventImpl(Task task) {
         super(task);
     }
 
-    public CloudTaskSuspendedEventImpl(String id,
-                                       Long timestamp,
-                                       Task task) {
-        super(id,
-              timestamp,
-              task);
+    public CloudTaskSuspendedEventImpl(String id, Long timestamp, Task task) {
+        super(id, timestamp, task);
     }
 
     @Override

@@ -18,8 +18,9 @@ package org.activiti.cloud.services.query.model;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.*;
 import java.util.Objects;
+
+import javax.persistence.*;
 
 @Entity(name = "ProcessModel")
 @Table(name = "PROCESS_MODEL")
@@ -27,22 +28,20 @@ import java.util.Objects;
 @DynamicUpdate
 public class ProcessModelEntity {
 
-    @Id
-    private String id;
+    @Id private String id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     private ProcessDefinitionEntity processDefinition;
 
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private String processModelContent;
 
-    //used by persistence framework
-    public ProcessModelEntity() {
-    }
+    // used by persistence framework
+    public ProcessModelEntity() {}
 
-    public ProcessModelEntity(ProcessDefinitionEntity processDefinition,
-                              String processModelContent) {
+    public ProcessModelEntity(
+            ProcessDefinitionEntity processDefinition, String processModelContent) {
         this.processDefinition = processDefinition;
         this.processModelContent = processModelContent;
     }

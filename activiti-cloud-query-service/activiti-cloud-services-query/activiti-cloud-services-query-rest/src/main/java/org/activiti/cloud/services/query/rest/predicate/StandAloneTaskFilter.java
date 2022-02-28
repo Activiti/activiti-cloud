@@ -18,8 +18,10 @@ package org.activiti.cloud.services.query.rest.predicate;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import javax.validation.constraints.NotNull;
+
 import org.activiti.cloud.services.query.model.QTaskEntity;
+
+import javax.validation.constraints.NotNull;
 
 public class StandAloneTaskFilter implements QueryDslPredicateFilter {
 
@@ -33,10 +35,10 @@ public class StandAloneTaskFilter implements QueryDslPredicateFilter {
     public Predicate extend(@NotNull Predicate currentPredicate) {
         Predicate extendedPredicate = currentPredicate;
         if (standalone) {
-            BooleanExpression processInstanceIdNull = QTaskEntity.taskEntity.processInstanceId.isNull();
+            BooleanExpression processInstanceIdNull =
+                    QTaskEntity.taskEntity.processInstanceId.isNull();
             extendedPredicate = processInstanceIdNull.and(currentPredicate);
         }
         return extendedPredicate;
     }
-
 }

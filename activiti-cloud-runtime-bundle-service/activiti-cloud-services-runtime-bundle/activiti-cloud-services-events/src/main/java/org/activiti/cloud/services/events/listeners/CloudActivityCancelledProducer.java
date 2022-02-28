@@ -19,13 +19,15 @@ import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
 import org.activiti.api.process.runtime.events.listener.BPMNElementEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 
-public class CloudActivityCancelledProducer implements BPMNElementEventListener<BPMNActivityCancelledEvent> {
+public class CloudActivityCancelledProducer
+        implements BPMNElementEventListener<BPMNActivityCancelledEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudActivityCancelledProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                          ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudActivityCancelledProducer(
+            ToCloudProcessRuntimeEventConverter eventConverter,
+            ProcessEngineEventsAggregator eventsAggregator) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

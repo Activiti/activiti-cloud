@@ -19,9 +19,7 @@ import org.activiti.cloud.modeling.api.ModelType;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 
-/**
- * Rel provider for {@link ModelType}
- */
+/** Rel provider for {@link ModelType} */
 public class ModelTypeLinkRelationProvider implements LinkRelationProvider {
 
     public static final String COLLECTION_RESOURCE_REL = "model-types";
@@ -46,5 +44,4 @@ public class ModelTypeLinkRelationProvider implements LinkRelationProvider {
     public boolean supports(LookupContext delimiter) {
         return ModelType.class.isAssignableFrom(delimiter.getType());
     }
-
 }

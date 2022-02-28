@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
+import org.keycloak.TokenVerifier;
+import org.keycloak.common.VerificationException;
+import org.keycloak.jose.jws.JWSHeader;
+import org.keycloak.representations.AccessToken;
+
 import java.math.BigInteger;
 import java.net.URL;
 import java.security.KeyFactory;
@@ -26,18 +34,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
-import org.keycloak.TokenVerifier;
-import org.keycloak.common.VerificationException;
-import org.keycloak.jose.jws.JWSHeader;
-import org.keycloak.representations.AccessToken;
-
 public class KeycloakAccessTokenVerifier {
 
     private final KeycloakProperties config;
     private final ConcurrentHashMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public KeycloakAccessTokenVerifier(KeycloakProperties config) {
         this.config = config;
@@ -45,6 +46,7 @@ public class KeycloakAccessTokenVerifier {
 
     /**
      * Verifies a token against a keycloak instance
+     *
      * @param tokenString the string representation of the jws token
      * @return a validated keycloak AccessToken
      * @throws VerificationException when the token is not valid
@@ -52,26 +54,30 @@ public class KeycloakAccessTokenVerifier {
     @SuppressWarnings("deprecation")
     public AccessToken verifyToken(String tokenString) throws VerificationException {
 
-        TokenVerifier<AccessToken> tokenVerifier = TokenVerifier.create(tokenString, AccessToken.class);
+        TokenVerifier<AccessToken> tokenVerifier =
+                TokenVerifier.create(tokenString, AccessToken.class);
 
         PublicKey pk = getPublicKey(tokenVerifier.getHeader());
 
-        return tokenVerifier.withDefaultChecks()
-                            .realmUrl(getRealmUrl())
-                            .publicKey(pk)
-                            .verify()
-                            .getToken();
+        return tokenVerifier
+                .withDefaultChecks()
+                .realmUrl(getRealmUrl())
+                .publicKey(pk)
+                .verify()
+                .getToken();
     }
-    
+
     protected PublicKey getPublicKey(JWSHeader jwsHeader) {
-        return publicKeys.computeIfAbsent(getRealmCertsUrl(),
-                                          (url) -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader));
+        return publicKeys.computeIfAbsent(
+                getRealmCertsUrl(), (url) -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader));
     }
 
     @SuppressWarnings("unchecked")
-    protected PublicKey retrievePublicKeyFromCertsEndpoint(String realmCertsUrl, JWSHeader jwsHeader) {
+    protected PublicKey retrievePublicKeyFromCertsEndpoint(
+            String realmCertsUrl, JWSHeader jwsHeader) {
         try {
-            Map<String, Object> certInfos = objectMapper.readValue(new URL(realmCertsUrl).openStream(), Map.class);
+            Map<String, Object> certInfos =
+                    objectMapper.readValue(new URL(realmCertsUrl).openStream(), Map.class);
             List<Map<String, Object>> keys = (List<Map<String, Object>>) certInfos.get("keys");
 
             Map<String, Object> keyInfo = null;
@@ -109,5 +115,4 @@ public class KeycloakAccessTokenVerifier {
     public String getRealmCertsUrl() {
         return getRealmUrl() + "/protocol/openid-connect/certs";
     }
-
 }

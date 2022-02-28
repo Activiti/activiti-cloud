@@ -29,9 +29,9 @@ public class ToCloudProcessDefinitionConverter {
     }
 
     public CloudProcessDefinition from(ProcessDefinition processDefinition) {
-        CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
+        CloudProcessDefinitionImpl cloudProcessDefinition =
+                new CloudProcessDefinitionImpl(processDefinition);
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDefinition);
         return cloudProcessDefinition;
     }
-
 }

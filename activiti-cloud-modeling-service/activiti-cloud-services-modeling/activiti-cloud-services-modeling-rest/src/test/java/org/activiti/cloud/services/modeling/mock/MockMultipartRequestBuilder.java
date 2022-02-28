@@ -15,15 +15,12 @@
  */
 package org.activiti.cloud.services.modeling.mock;
 
+import static org.springframework.http.HttpMethod.PUT;
+
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 
-import static org.springframework.http.HttpMethod.PUT;
-
-/**
- * Builder for multipart MockMvc requests.
- * It can be used for making PUT with multipart calls.
- */
+/** Builder for multipart MockMvc requests. It can be used for making PUT with multipart calls. */
 public class MockMultipartRequestBuilder {
 
     private MockMultipartHttpServletRequestBuilder multipartRequestBuilder;
@@ -32,25 +29,22 @@ public class MockMultipartRequestBuilder {
         this.multipartRequestBuilder = multipartRequestBuilder;
     }
 
-    public static MockMultipartRequestBuilder putMultipart(String urlTemplate,
-                                                           Object... uriVars) {
-        return multipart(urlTemplate,
-                         uriVars)
-                .put();
+    public static MockMultipartRequestBuilder putMultipart(String urlTemplate, Object... uriVars) {
+        return multipart(urlTemplate, uriVars).put();
     }
 
-    public static MockMultipartRequestBuilder multipart(String urlTemplate,
-                                                        Object... uriVars) {
+    public static MockMultipartRequestBuilder multipart(String urlTemplate, Object... uriVars) {
         return new MockMultipartRequestBuilder(
-                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart(urlTemplate,
-                                                                                              uriVars));
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart(
+                        urlTemplate, uriVars));
     }
 
     public MockMultipartRequestBuilder put() {
-        multipartRequestBuilder.with(request -> {
-            request.setMethod(PUT.name());
-            return request;
-        });
+        multipartRequestBuilder.with(
+                request -> {
+                    request.setMethod(PUT.name());
+                    return request;
+                });
         return this;
     }
 
@@ -59,13 +53,8 @@ public class MockMultipartRequestBuilder {
         return multipartRequestBuilder;
     }
 
-    public MockMultipartHttpServletRequestBuilder file(String controlName,
-                                                       String fileName,
-                                                       String contentType,
-                                                       byte[] bytes) {
-        return file(new MockMultipartFile(controlName,
-                                          fileName,
-                                          contentType,
-                                          bytes));
+    public MockMultipartHttpServletRequestBuilder file(
+            String controlName, String fileName, String contentType, byte[] bytes) {
+        return file(new MockMultipartFile(controlName, fileName, contentType, bytes));
     }
 }

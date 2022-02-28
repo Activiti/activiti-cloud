@@ -23,17 +23,16 @@ import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.everit.json.schema.loader.SchemaLoader;
 
-/**
- * {@link ModelValidator} implementation of connector models
- */
-public class ConnectorModelValidator extends JsonSchemaModelValidator implements ModelContentValidator {
+/** {@link ModelValidator} implementation of connector models */
+public class ConnectorModelValidator extends JsonSchemaModelValidator
+        implements ModelContentValidator {
 
     private final SchemaLoader connectorSchemaLoader;
 
     private final ConnectorModelType connectorModelType;
 
-    public ConnectorModelValidator(SchemaLoader connectorSchemaLoader,
-                                   ConnectorModelType connectorModelType) {
+    public ConnectorModelValidator(
+            SchemaLoader connectorSchemaLoader, ConnectorModelType connectorModelType) {
         this.connectorSchemaLoader = connectorSchemaLoader;
         this.connectorModelType = connectorModelType;
     }

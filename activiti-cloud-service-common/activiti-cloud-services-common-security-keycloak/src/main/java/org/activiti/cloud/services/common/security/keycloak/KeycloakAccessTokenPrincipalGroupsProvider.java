@@ -30,28 +30,29 @@ public class KeycloakAccessTokenPrincipalGroupsProvider implements PrincipalGrou
 
     private final KeycloakAccessTokenProvider keycloakAccessTokenProvider;
     private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
-    
-    public KeycloakAccessTokenPrincipalGroupsProvider(@NonNull KeycloakAccessTokenProvider keycloakAccessTokenProvider,
-                                                      @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+
+    public KeycloakAccessTokenPrincipalGroupsProvider(
+            @NonNull KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+            @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
         this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
     }
-    
+
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
-        return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
-                                          .map(AccessToken::getOtherClaims)
-                                          .map(otherClaims -> otherClaims.get("groups"))
-                                          .filter(Collection.class::isInstance)
-                                          .map(c -> (Collection<String>) c)
-                                          .map(ArrayList::new)
-                                          .map(Collections::unmodifiableList)
-                                          .orElseGet(this::empty);
+        return keycloakAccessTokenProvider
+                .accessToken(principal)
+                .filter(keycloakAccessTokenValidator::isValid)
+                .map(AccessToken::getOtherClaims)
+                .map(otherClaims -> otherClaims.get("groups"))
+                .filter(Collection.class::isInstance)
+                .map(c -> (Collection<String>) c)
+                .map(ArrayList::new)
+                .map(Collections::unmodifiableList)
+                .orElseGet(this::empty);
     }
 
     protected @Nullable List<String> empty() {
         return null;
     }
-    
 }

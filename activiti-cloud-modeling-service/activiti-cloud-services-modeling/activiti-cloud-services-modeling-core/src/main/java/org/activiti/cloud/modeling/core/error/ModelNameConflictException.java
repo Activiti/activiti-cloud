@@ -16,12 +16,12 @@
 package org.activiti.cloud.modeling.core.error;
 
 /**
- * Exception thrown when a model cannot be created because there is another model with the same type within the project
+ * Exception thrown when a model cannot be created because there is another model with the same type
+ * within the project
  */
 public class ModelNameConflictException extends ModelingException {
 
-    public ModelNameConflictException() {
-    }
+    public ModelNameConflictException() {}
 
     public ModelNameConflictException(Throwable cause) {
         super(cause);
@@ -31,9 +31,7 @@ public class ModelNameConflictException extends ModelingException {
         super(message);
     }
 
-    public ModelNameConflictException(String message,
-                                Throwable cause) {
-        super(message,
-              cause);
+    public ModelNameConflictException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

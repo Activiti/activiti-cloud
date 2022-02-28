@@ -17,9 +17,7 @@ package org.activiti.cloud.modeling.api;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 
-/**
- * Json based model type
- */
+/** Json based model type */
 public abstract class JsonModelType implements ModelType {
 
     @Override
@@ -29,6 +27,6 @@ public abstract class JsonModelType implements ModelType {
 
     @Override
     public String[] getAllowedContentFileExtension() {
-        return new String[]{JSON};
+        return new String[] {JSON};
     }
 }

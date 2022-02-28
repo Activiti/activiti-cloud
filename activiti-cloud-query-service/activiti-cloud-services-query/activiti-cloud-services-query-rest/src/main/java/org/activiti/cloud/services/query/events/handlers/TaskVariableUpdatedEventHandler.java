@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
-import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 
 public class TaskVariableUpdatedEventHandler {
@@ -31,7 +29,8 @@ public class TaskVariableUpdatedEventHandler {
         String variableName = updatedVariableEntity.getName();
         String taskId = updatedVariableEntity.getTaskId();
 
-        variableUpdater.update(updatedVariableEntity,
-                               "Unable to find variable named '" + variableName + "' for task '" + taskId + "'");
+        variableUpdater.update(
+                updatedVariableEntity,
+                "Unable to find variable named '" + variableName + "' for task '" + taskId + "'");
     }
 }

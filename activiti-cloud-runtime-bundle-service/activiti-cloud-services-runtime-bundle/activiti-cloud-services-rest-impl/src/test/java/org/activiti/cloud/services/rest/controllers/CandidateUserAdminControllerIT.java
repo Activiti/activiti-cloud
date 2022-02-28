@@ -15,8 +15,12 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.Arrays;
-import java.util.List;
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -43,41 +47,34 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Arrays;
+import java.util.List;
 
 @WebMvcTest(CandidateUserAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({RuntimeBundleProperties.class,
-        CloudEventsAutoConfiguration.class,
-        TaskSamples.class,
-        ActivitiCoreCommonUtilAutoConfiguration.class,
-        ProcessExtensionsAutoConfiguration.class,
-        ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
+@Import({
+    RuntimeBundleProperties.class,
+    CloudEventsAutoConfiguration.class,
+    TaskSamples.class,
+    ActivitiCoreCommonUtilAutoConfiguration.class,
+    ProcessExtensionsAutoConfiguration.class,
+    ServicesRestWebMvcAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class
+})
 public class CandidateUserAdminControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private TaskAdminRuntime taskAdminRuntime;
+    @MockBean private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
-    private RepositoryService repositoryService;
+    @MockBean private RepositoryService repositoryService;
 
-    @SpyBean
-    private SpringPageConverter pageConverter;
+    @SpyBean private SpringPageConverter pageConverter;
 
-    @MockBean
-    private ProcessEngineChannels processEngineChannels;
+    @MockBean private ProcessEngineChannels processEngineChannels;
 
-    @MockBean
-    private CloudProcessDeployedProducer processDeployedProducer;
+    @MockBean private CloudProcessDeployedProducer processDeployedProducer;
 
     @BeforeEach
     public void setUp() {
@@ -87,16 +84,19 @@ public class CandidateUserAdminControllerIT {
     }
 
     @Test
-    public void getUserCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getUserCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson()
+            throws Exception {
 
-        List<String> stringList = Arrays.asList("hruser",
-                                                "testuser");
+        List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users",
-                                                    1).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result =
+                this.mockMvc
+                        .perform(
+                                get("/admin/v1/tasks/{taskId}/candidate-users", 1)
+                                        .accept(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
                 .node("list.entries[0].entry.user")
@@ -109,14 +109,16 @@ public class CandidateUserAdminControllerIT {
     @Test
     public void getUserCandidatesShouldHaveProperHALFormat() throws Exception {
 
-        List<String> stringList = Arrays.asList("hruser",
-                                                "testuser");
+        List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users",
-                                                    1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result =
+                this.mockMvc
+                        .perform(
+                                get("/admin/v1/tasks/{taskId}/candidate-users", 1)
+                                        .accept(MediaTypes.HAL_JSON_VALUE))
+                        .andExpect(status().isOk())
+                        .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
                 .node("_embedded.candidateUsers[0].user")
@@ -125,5 +127,4 @@ public class CandidateUserAdminControllerIT {
                 .node("_embedded.candidateUsers[1].user")
                 .isEqualTo("testuser");
     }
-
 }

@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Set;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.ServiceTask;
@@ -27,13 +26,15 @@ import org.activiti.bpmn.model.SubProcess;
 import org.activiti.bpmn.model.UserTask;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 public class FlowElementsExtractorTest {
 
     private final FlowElementsExtractor flowElementsExtractor = new FlowElementsExtractor();
 
     @Test
     public void should_extractElements_when_modelHasASimpleProcess() {
-        //given
+        // given
         final Process process = new Process();
         process.addFlowElement(new StartEvent());
         process.addFlowElement(buildUserTask("Task 1"));
@@ -42,18 +43,19 @@ public class FlowElementsExtractorTest {
         final BpmnModel model = new BpmnModel();
         model.addProcess(process);
 
-        //when
-        final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(model, UserTask.class);
+        // when
+        final Set<UserTask> userTasks =
+                flowElementsExtractor.extractFlowElements(model, UserTask.class);
 
-        //then
+        // then
         assertThat(userTasks)
-            .extracting(UserTask::getName)
-            .containsExactlyInAnyOrder("Task 1", "Task 2");
+                .extracting(UserTask::getName)
+                .containsExactlyInAnyOrder("Task 1", "Task 2");
     }
 
     @Test
     public void should_extractElements_when_modelHasSubProcess() {
-        //given
+        // given
         final Process process = new Process();
         process.addFlowElement(new StartEvent());
         process.addFlowElement(buildUserTask("Task from main process"));
@@ -64,18 +66,19 @@ public class FlowElementsExtractorTest {
         final BpmnModel model = new BpmnModel();
         model.addProcess(process);
 
-        //when
-        final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(model, UserTask.class);
+        // when
+        final Set<UserTask> userTasks =
+                flowElementsExtractor.extractFlowElements(model, UserTask.class);
 
-        //then
+        // then
         assertThat(userTasks)
-            .extracting(UserTask::getName)
-            .containsExactlyInAnyOrder("Task from main process", "Task from sub-process");
+                .extracting(UserTask::getName)
+                .containsExactlyInAnyOrder("Task from main process", "Task from sub-process");
     }
 
     @Test
     public void should_extractElements_when_modelHasMoreThanOneProcess() {
-        //given
+        // given
         final Process process1 = new Process();
         process1.addFlowElement(new StartEvent());
         process1.addFlowElement(buildUserTask("Task from process 1"));
@@ -90,13 +93,14 @@ public class FlowElementsExtractorTest {
         model.addProcess(process1);
         model.addProcess(process2);
 
-        //when
-        final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(model, UserTask.class);
+        // when
+        final Set<UserTask> userTasks =
+                flowElementsExtractor.extractFlowElements(model, UserTask.class);
 
-        //then
+        // then
         assertThat(userTasks)
-            .extracting(UserTask::getName)
-            .containsExactlyInAnyOrder("Task from process 1", "Task from process 2");
+                .extracting(UserTask::getName)
+                .containsExactlyInAnyOrder("Task from process 1", "Task from process 2");
     }
 
     private UserTask buildUserTask(String name) {

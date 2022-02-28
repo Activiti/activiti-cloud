@@ -22,16 +22,12 @@ import org.activiti.cloud.services.modeling.validation.DNSNameValidator;
 
 import java.util.stream.Stream;
 
-/**
- * Implementation of {@link ProjectValidator} for validating the project name
- */
-public class ProjectNameValidator implements ProjectValidator,
-                                             DNSNameValidator {
+/** Implementation of {@link ProjectValidator} for validating the project name */
+public class ProjectNameValidator implements ProjectValidator, DNSNameValidator {
 
     @Override
-    public Stream<ModelValidationError> validate(Project project,
-                                                 ValidationContext validationContext) {
-        return validateDNSName(project.getName(),
-                               "project");
+    public Stream<ModelValidationError> validate(
+            Project project, ValidationContext validationContext) {
+        return validateDNSName(project.getName(), "project");
     }
 }

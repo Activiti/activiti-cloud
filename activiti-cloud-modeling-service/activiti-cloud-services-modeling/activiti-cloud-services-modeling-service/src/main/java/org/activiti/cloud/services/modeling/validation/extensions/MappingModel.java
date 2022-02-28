@@ -15,15 +15,13 @@
  */
 package org.activiti.cloud.services.modeling.validation.extensions;
 
-import java.util.Map;
-
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 
-/**
- * Object that encapsulate FlowNode mappings information
- */
+import java.util.Map;
+
+/** Object that encapsulate FlowNode mappings information */
 public class MappingModel {
 
     private String processId;
@@ -34,10 +32,11 @@ public class MappingModel {
 
     private Map<String, ProcessVariableMapping> processVariableMappings;
 
-    public MappingModel(String processId,
-                        FlowNode flowNode,
-                        ServiceTaskActionType action,
-                        Map<String, ProcessVariableMapping> processVariableMappings) {
+    public MappingModel(
+            String processId,
+            FlowNode flowNode,
+            ServiceTaskActionType action,
+            Map<String, ProcessVariableMapping> processVariableMappings) {
         this.processId = processId;
         this.flowNode = flowNode;
         this.action = action;

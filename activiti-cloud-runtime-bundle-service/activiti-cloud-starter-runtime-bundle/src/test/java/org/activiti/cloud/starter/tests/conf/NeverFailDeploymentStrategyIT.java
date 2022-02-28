@@ -33,25 +33,35 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(
-    properties = {"spring.activiti.process-definition-location-prefix=classpath*:/invalid-processes/"},
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
-@ContextConfiguration(classes = RuntimeITConfiguration.class,
-    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+        properties = {
+            "spring.activiti.process-definition-location-prefix=classpath*:/invalid-processes/"
+        },
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource({
+    "classpath:application-test.properties",
+    "classpath:access-control.properties"
+})
+@ContextConfiguration(
+        classes = RuntimeITConfiguration.class,
+        initializers = {
+            RabbitMQContainerApplicationInitializer.class,
+            KeycloakContainerApplicationInitializer.class
+        })
 @DirtiesContext
 public class NeverFailDeploymentStrategyIT {
 
-    @Autowired
-    private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
+    @Autowired private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
 
     @Test
     public void rb_should_startEven_when_itFailsToParseSomeProcessDefinition() {
-        //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        // when
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions =
+                processDefinitionRestTemplate.getProcessDefinitions();
 
-        //then
-        //spring.activiti.process-definition-location-prefix points to a folder containing only an invalid process definition
-        //so no process definitions are expected
+        // then
+        // spring.activiti.process-definition-location-prefix points to a folder containing only an
+        // invalid process definition
+        // so no process definitions are expected
         assertThat(processDefinitions.getBody()).isNotNull();
         assertThat(processDefinitions.getBody().getContent()).isEmpty();
     }

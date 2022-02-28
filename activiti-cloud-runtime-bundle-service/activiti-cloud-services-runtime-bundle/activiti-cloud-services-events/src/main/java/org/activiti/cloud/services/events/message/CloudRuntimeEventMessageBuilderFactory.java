@@ -39,5 +39,4 @@ public class CloudRuntimeEventMessageBuilderFactory
                 .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
                 .chain(new CloudRuntimeEventMessageBuilderAppender(event));
     }
-
 }

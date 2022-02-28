@@ -26,5 +26,4 @@ public class JuelExpressionApp {
     public static void main(String[] args) {
         SpringApplication.run(JuelExpressionApp.class, args);
     }
-
 }

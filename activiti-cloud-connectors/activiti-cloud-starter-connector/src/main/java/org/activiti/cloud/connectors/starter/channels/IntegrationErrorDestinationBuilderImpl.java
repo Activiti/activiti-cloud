@@ -34,19 +34,21 @@ public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorD
     public String buildDestination(IntegrationRequest event) {
         String errorDestinationOverride = connectorProperties.getErrorDestinationOverride();
 
-        String destination = ObjectUtils.isEmpty(errorDestinationOverride)
-            ? Optional.of(event)
-                      .map(IntegrationRequest::getErrorDestination)
-                      .filter(Predicate.not(ObjectUtils::isEmpty))
-                      .orElseGet(() -> this.getServiceDestination(event))
-            : errorDestinationOverride;
+        String destination =
+                ObjectUtils.isEmpty(errorDestinationOverride)
+                        ? Optional.of(event)
+                                .map(IntegrationRequest::getErrorDestination)
+                                .filter(Predicate.not(ObjectUtils::isEmpty))
+                                .orElseGet(() -> this.getServiceDestination(event))
+                        : errorDestinationOverride;
 
         return destination;
     }
 
     private String getServiceDestination(IntegrationRequest event) {
-        return  new StringBuilder("integrationError").append(connectorProperties.getMqDestinationSeparator())
-                                                     .append(event.getServiceFullName())
-                                                     .toString();
+        return new StringBuilder("integrationError")
+                .append(connectorProperties.getMqDestinationSeparator())
+                .append(event.getServiceFullName())
+                .toString();
     }
 }

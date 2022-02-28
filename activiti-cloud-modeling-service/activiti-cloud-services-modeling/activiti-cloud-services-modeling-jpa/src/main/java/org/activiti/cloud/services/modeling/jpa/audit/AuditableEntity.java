@@ -15,12 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.jpa.audit;
 
-import java.util.Date;
-import javax.persistence.EntityListeners;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.activiti.cloud.services.auditable.Auditable;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -28,22 +22,25 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-/**
- * Base class for auditable entities.
- */
+import java.util.Date;
+
+import javax.persistence.EntityListeners;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+/** Base class for auditable entities. */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AuditableEntity<U> implements Auditable<U> {
 
-    @CreatedBy
-    protected U createdBy;
+    @CreatedBy protected U createdBy;
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     protected Date creationDate;
 
-    @LastModifiedBy
-    protected U lastModifiedBy;
+    @LastModifiedBy protected U lastModifiedBy;
 
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
@@ -80,4 +77,4 @@ public abstract class AuditableEntity<U> implements Auditable<U> {
     public void setLastModifiedDate(Date lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
-    }
+}

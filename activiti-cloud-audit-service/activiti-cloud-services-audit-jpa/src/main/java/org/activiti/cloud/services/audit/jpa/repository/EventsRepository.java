@@ -23,8 +23,8 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import java.util.Optional;
 
 @RepositoryRestResource(exported = false)
-public interface EventsRepository<T extends AuditEventEntity> extends PagingAndSortingRepository<T, Long>,
-                                                            JpaSpecificationExecutor<T> {
+public interface EventsRepository<T extends AuditEventEntity>
+        extends PagingAndSortingRepository<T, Long>, JpaSpecificationExecutor<T> {
 
     Optional<T> findByEventId(String eventId);
 }

@@ -42,13 +42,17 @@ public class VariableUpdatedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        VariableUpdatedEventEntity variableUpdatedEventEntity = (VariableUpdatedEventEntity) auditEventEntity;
+        VariableUpdatedEventEntity variableUpdatedEventEntity =
+                (VariableUpdatedEventEntity) auditEventEntity;
 
         String eventId = variableUpdatedEventEntity.getEventId();
         Long timestamp = variableUpdatedEventEntity.getTimestamp();
         VariableInstance variableInstance = variableUpdatedEventEntity.getVariableInstance();
-        Object previousValue = variableUpdatedEventEntity.getPreviousValue() != null ?
-            variableUpdatedEventEntity.getPreviousValue().getValue() : null;
-        return new CloudVariableUpdatedEventImpl<>(eventId, timestamp, variableInstance, previousValue);
+        Object previousValue =
+                variableUpdatedEventEntity.getPreviousValue() != null
+                        ? variableUpdatedEventEntity.getPreviousValue().getValue()
+                        : null;
+        return new CloudVariableUpdatedEventImpl<>(
+                eventId, timestamp, variableInstance, previousValue);
     }
 }

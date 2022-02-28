@@ -34,8 +34,7 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private VariableInstance variableInstance;
 
-    public VariableAuditEventEntity() {
-    }
+    public VariableAuditEventEntity() {}
 
     public VariableAuditEventEntity(CloudVariableEvent cloudEvent) {
         super(cloudEvent);
@@ -84,16 +83,16 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("VariableAuditEventEntity [variableName=")
-               .append(variableName)
-               .append(", variableType=")
-               .append(variableType)
-               .append(", taskId=")
-               .append(taskId)
-               .append(", variableInstance=")
-               .append(variableInstance)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(variableName)
+                .append(", variableType=")
+                .append(variableType)
+                .append(", taskId=")
+                .append(taskId)
+                .append(", variableInstance=")
+                .append(variableInstance)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

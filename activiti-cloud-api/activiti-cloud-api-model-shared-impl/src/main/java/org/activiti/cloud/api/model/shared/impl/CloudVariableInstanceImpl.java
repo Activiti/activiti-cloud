@@ -18,7 +18,8 @@ package org.activiti.cloud.api.model.shared.impl;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 
-public class CloudVariableInstanceImpl<T> extends CloudRuntimeEntityImpl implements CloudVariableInstance {
+public class CloudVariableInstanceImpl<T> extends CloudRuntimeEntityImpl
+        implements CloudVariableInstance {
 
     private String name;
     private String type;
@@ -26,8 +27,7 @@ public class CloudVariableInstanceImpl<T> extends CloudRuntimeEntityImpl impleme
     private String taskId;
     private T value;
 
-    public CloudVariableInstanceImpl() {
-    }
+    public CloudVariableInstanceImpl() {}
 
     public CloudVariableInstanceImpl(VariableInstance variableInstance) {
         name = variableInstance.getName();

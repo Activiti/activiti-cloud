@@ -21,8 +21,8 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 
 public class EventContextInfoAppender {
 
-    public CloudRuntimeEvent addProcessContextInfoToApiEvent(CloudRuntimeEventImpl<?,?> apiEvent,
-                                                             AuditEventEntity auditEventEntity) {
+    public CloudRuntimeEvent addProcessContextInfoToApiEvent(
+            CloudRuntimeEventImpl<?, ?> apiEvent, AuditEventEntity auditEventEntity) {
         apiEvent.setEntityId(auditEventEntity.getEntityId());
         apiEvent.setProcessInstanceId(auditEventEntity.getProcessInstanceId());
         apiEvent.setProcessDefinitionId(auditEventEntity.getProcessDefinitionId());
@@ -31,5 +31,4 @@ public class EventContextInfoAppender {
         apiEvent.setParentProcessInstanceId(auditEventEntity.getParentProcessInstanceId());
         return apiEvent;
     }
-
 }

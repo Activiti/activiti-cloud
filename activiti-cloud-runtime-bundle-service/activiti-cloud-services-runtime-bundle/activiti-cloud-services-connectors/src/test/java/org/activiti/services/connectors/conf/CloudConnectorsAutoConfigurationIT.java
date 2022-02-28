@@ -15,6 +15,10 @@
  */
 package org.activiti.services.connectors.conf;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -41,49 +45,36 @@ import org.springframework.messaging.MessageChannel;
 
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
 
-    @Autowired
-    private MQServiceTaskBehavior behavior;
+    @Autowired private MQServiceTaskBehavior behavior;
 
-    @MockBean
-    private IntegrationContextManager integrationContextManager;
+    @MockBean private IntegrationContextManager integrationContextManager;
 
-    @MockBean
-    private IntegrationContextService integrationContextService;
+    @MockBean private IntegrationContextService integrationContextService;
 
-    @MockBean
-    private RuntimeBundleProperties runtimeBundleProperties;
+    @MockBean private RuntimeBundleProperties runtimeBundleProperties;
 
     @MockBean(name = "auditProducer")
-    private  MessageChannel auditProducer;
+    private MessageChannel auditProducer;
 
-    @MockBean
-    private ApplicationEventPublisher eventPublisher;
+    @MockBean private ApplicationEventPublisher eventPublisher;
 
-    @MockBean
-    private ProcessEngineChannels processEngineChannels;
+    @MockBean private ProcessEngineChannels processEngineChannels;
 
-    @MockBean
-    private TaskService taskService;
+    @MockBean private TaskService taskService;
 
-    @MockBean
-    private ManagementService managementService;
+    @MockBean private ManagementService managementService;
 
-    @MockBean
-    private CloudProcessDeployedProducer processDeployedProducer;
+    @MockBean private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
-    private ConnectorImplementationsProvider connectorImplementationsProvider;
+    @MockBean private ConnectorImplementationsProvider connectorImplementationsProvider;
 
     @BeforeEach
     public void beforeEach() {
-        when(connectorImplementationsProvider.getImplementations()).thenReturn(Collections.emptyList());
+        when(connectorImplementationsProvider.getImplementations())
+                .thenReturn(Collections.emptyList());
     }
 
     @Test
@@ -119,6 +110,5 @@ public class CloudConnectorsAutoConfigurationIT {
         public ProcessSecurityPoliciesManager processSecurityPoliciesManager() {
             return mock(ProcessSecurityPoliciesManager.class);
         }
-
     }
 }

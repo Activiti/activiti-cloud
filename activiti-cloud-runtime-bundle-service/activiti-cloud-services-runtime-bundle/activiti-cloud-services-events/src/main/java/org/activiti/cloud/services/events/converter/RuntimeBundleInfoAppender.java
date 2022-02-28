@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.api.runtime.model.impl.ApplicationElementImpl;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -28,7 +27,8 @@ public class RuntimeBundleInfoAppender {
         this.properties = properties;
     }
 
-    public CloudRuntimeEventImpl<?,?> appendRuntimeBundleInfoTo(CloudRuntimeEventImpl<?,?> cloudRuntimeEvent) {
+    public CloudRuntimeEventImpl<?, ?> appendRuntimeBundleInfoTo(
+            CloudRuntimeEventImpl<?, ?> cloudRuntimeEvent) {
         cloudRuntimeEvent.setAppName(properties.getAppName());
         cloudRuntimeEvent.setServiceName(properties.getServiceName());
         cloudRuntimeEvent.setServiceFullName(properties.getServiceFullName());
@@ -38,14 +38,14 @@ public class RuntimeBundleInfoAppender {
         return cloudRuntimeEvent;
     }
 
-    public CloudRuntimeEntityImpl appendRuntimeBundleInfoTo(CloudRuntimeEntityImpl cloudRuntimeEntity) {
+    public CloudRuntimeEntityImpl appendRuntimeBundleInfoTo(
+            CloudRuntimeEntityImpl cloudRuntimeEntity) {
         cloudRuntimeEntity.setAppName(properties.getAppName());
         cloudRuntimeEntity.setServiceName(properties.getServiceName());
         cloudRuntimeEntity.setServiceFullName(properties.getServiceFullName());
         cloudRuntimeEntity.setServiceType(properties.getServiceType());
         cloudRuntimeEntity.setServiceVersion(properties.getServiceVersion());
-        
+
         return cloudRuntimeEntity;
     }
-
 }

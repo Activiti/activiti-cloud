@@ -23,7 +23,9 @@ import java.io.InputStream;
 public class TestResourceUtil {
 
     public static String getProcessXml(final String processDefinitionKey) throws IOException {
-        try (InputStream is = ClassLoader.getSystemResourceAsStream("processes/" + processDefinitionKey + ".bpmn20.xml")) {
+        try (InputStream is =
+                ClassLoader.getSystemResourceAsStream(
+                        "processes/" + processDefinitionKey + ".bpmn20.xml")) {
             return new String(IoUtil.readInputStream(is, null), "UTF-8");
         }
     }

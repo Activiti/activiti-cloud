@@ -32,24 +32,30 @@ public class QueryEventHandlerContext {
     private final Map<String, QueryEventHandler> handlers;
 
     public QueryEventHandlerContext(Set<QueryEventHandler> handlers) {
-        this.handlers = handlers.stream().collect(Collectors.toMap(QueryEventHandler::getHandledEvent,
-                                                                   Function.identity()));
+        this.handlers =
+                handlers.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        QueryEventHandler::getHandledEvent, Function.identity()));
     }
 
     public void handle(CloudRuntimeEvent<?, ?>... events) {
         if (events != null) {
             Stream.of(events)
-                  .forEach(event -> {
-                      QueryEventHandler handler = handlers.get(event.getEventType()
-                                                                    .name());
-                      if (handler != null) {
-                          LOGGER.debug("Handling event: " + handler.getHandledEvent());
-                          handler.handle(event);
-                      } else {
-                          LOGGER.debug("No handler found for event: " + event.getEventType()
-                                                                             .name() + ". Ignoring event");
-                      }
-                  });
+                    .forEach(
+                            event -> {
+                                QueryEventHandler handler =
+                                        handlers.get(event.getEventType().name());
+                                if (handler != null) {
+                                    LOGGER.debug("Handling event: " + handler.getHandledEvent());
+                                    handler.handle(event);
+                                } else {
+                                    LOGGER.debug(
+                                            "No handler found for event: "
+                                                    + event.getEventType().name()
+                                                    + ". Ignoring event");
+                                }
+                            });
         }
     }
 

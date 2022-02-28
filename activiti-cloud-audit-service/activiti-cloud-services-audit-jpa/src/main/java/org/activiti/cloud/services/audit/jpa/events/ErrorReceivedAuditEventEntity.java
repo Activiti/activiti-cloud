@@ -36,8 +36,7 @@ public class ErrorReceivedAuditEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private BPMNError error;
 
-    public ErrorReceivedAuditEventEntity() {
-    }
+    public ErrorReceivedAuditEventEntity() {}
 
     public ErrorReceivedAuditEventEntity(CloudBPMNErrorReceivedEvent cloudEvent) {
         super(cloudEvent);

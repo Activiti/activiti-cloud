@@ -16,14 +16,13 @@
 package org.activiti.cloud.starter.query.configuration;
 
 import com.fasterxml.classmate.TypeResolver;
-import java.util.List;
-import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
-import org.activiti.cloud.common.swagger.DocketCustomizer;
+
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
@@ -31,15 +30,20 @@ public class QuerySwaggerConfig {
 
     @Bean(name = "queryApiDocket")
     @ConditionalOnMissingBean(name = "queryApiDocket")
-    public Docket queryApiDocket(SwaggerDocketBuilder docketBuilder,
-        @Value("${activiti.cloud.swagger.query-base-path:}") String querySwaggerBasePath) {
-        return docketBuilder.buildApiDocket("Query Service ReST API", "Query",
-            querySwaggerBasePath, "org.activiti.cloud.services.query.rest");
+    public Docket queryApiDocket(
+            SwaggerDocketBuilder docketBuilder,
+            @Value("${activiti.cloud.swagger.query-base-path:}") String querySwaggerBasePath) {
+        return docketBuilder.buildApiDocket(
+                "Query Service ReST API",
+                "Query",
+                querySwaggerBasePath,
+                "org.activiti.cloud.services.query.rest");
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableSearchDocketCustomizer variableSearchDocketCustomizer(TypeResolver typeResolver) {
+    public VariableSearchDocketCustomizer variableSearchDocketCustomizer(
+            TypeResolver typeResolver) {
         return new VariableSearchDocketCustomizer(typeResolver);
     }
 }

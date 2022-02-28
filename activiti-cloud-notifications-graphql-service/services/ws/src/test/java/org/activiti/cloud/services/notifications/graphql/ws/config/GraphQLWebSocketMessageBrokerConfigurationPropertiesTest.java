@@ -17,7 +17,6 @@ package org.activiti.cloud.services.notifications.graphql.ws.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWebSocketMessageBrokerConfigurationProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -27,22 +26,21 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles({"graphql-ws"})
-@SpringBootTest(webEnvironment=WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class GraphQLWebSocketMessageBrokerConfigurationPropertiesTest {
 
-    @Autowired
-    private GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties;
+    @Autowired private GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties;
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
-    static class TestConfiguration {
-    }
+    static class TestConfiguration {}
 
     @Test
     public void testConfigurationProperties() {
         assertThat(configurationProperties.isEnabled()).isEqualTo(true);
         assertThat(configurationProperties.getRelayPort()).isEqualTo(61613);
-        assertThat(configurationProperties.getRelayHost()).isEqualTo("rabbitmq"); // overrides from application-graphql-ws.properties
+        assertThat(configurationProperties.getRelayHost())
+                .isEqualTo("rabbitmq"); // overrides from application-graphql-ws.properties
         assertThat(configurationProperties.getClientLogin()).isEqualTo("guest");
         assertThat(configurationProperties.getClientPasscode()).isEqualTo("guest");
         assertThat(configurationProperties.getSystemLogin()).isEqualTo("guest");
@@ -50,7 +48,7 @@ public class GraphQLWebSocketMessageBrokerConfigurationPropertiesTest {
         assertThat(configurationProperties.getAllowedOrigins()).isEqualTo("*");
         assertThat(configurationProperties.getEndpoint()).isEqualTo("/ws/graphql");
         assertThat(configurationProperties.getBufferCount()).isEqualTo(50);
-        assertThat(configurationProperties.getBufferTimeSpanMs()).isEqualTo(999); // overrides from graphql-ws.properties
+        assertThat(configurationProperties.getBufferTimeSpanMs())
+                .isEqualTo(999); // overrides from graphql-ws.properties
     }
-
 }

@@ -15,6 +15,4 @@
  */
 package org.activiti.cloud.api.process.model.events;
 
-public interface CloudBPMNMessageWaitingEvent extends CloudBPMNMessageEvent {
-
-}
+public interface CloudBPMNMessageWaitingEvent extends CloudBPMNMessageEvent {}

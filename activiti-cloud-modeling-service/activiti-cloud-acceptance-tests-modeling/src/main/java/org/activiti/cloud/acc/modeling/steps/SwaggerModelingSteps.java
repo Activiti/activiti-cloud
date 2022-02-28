@@ -16,6 +16,7 @@
 package org.activiti.cloud.acc.modeling.steps;
 
 import net.thucydides.core.annotations.Step;
+
 import org.activiti.cloud.acc.modeling.modeling.EnableModelingContext;
 import org.activiti.cloud.acc.shared.service.SwaggerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @EnableModelingContext
 public class SwaggerModelingSteps {
 
-    @Autowired
-    private SwaggerService modelingSwaggerService;
+    @Autowired private SwaggerService modelingSwaggerService;
 
     @Step
-    public String getSwaggerSpecification(){
+    public String getSwaggerSpecification() {
         return modelingSwaggerService.getSwaggerSpecification("Modeling");
     }
-
 }

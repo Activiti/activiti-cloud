@@ -15,7 +15,13 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
-import java.util.stream.Stream;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.BDDMockito.given;
+
+import static java.lang.String.format;
+import static java.util.Collections.singleton;
+
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.SequenceFlow;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -26,11 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.lang.String.format;
-import static java.util.Collections.singleton;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.BDDMockito.given;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 public class BpmnModelSequenceFlowValidatorTest {
@@ -38,66 +40,77 @@ public class BpmnModelSequenceFlowValidatorTest {
     private static final String TEST_SEQUENCE_ID = "testSequenceId";
     private static final String TEST_SEQUENCE_NAME = "testSequenceName";
 
-    @InjectMocks
-    private BpmnModelSequenceFlowValidator bpmnModelSequenceFlowValidator;
+    @InjectMocks private BpmnModelSequenceFlowValidator bpmnModelSequenceFlowValidator;
 
-    @Mock
-    private FlowElementsExtractor flowElementsExtractor;
+    @Mock private FlowElementsExtractor flowElementsExtractor;
 
-    @Mock
-    private ValidationContext validationContext;
+    @Mock private ValidationContext validationContext;
 
     @Test
     public void should_returnError_when_noSourceReferenceIsSpecified() {
-        //given
+        // given
         SequenceFlow sequenceFlow = new SequenceFlow(null, "theTask");
         sequenceFlow.setId(TEST_SEQUENCE_ID);
         sequenceFlow.setName(TEST_SEQUENCE_NAME);
 
         BpmnModel bpmnModel = new BpmnModel();
         given(flowElementsExtractor.extractFlowElements(bpmnModel, SequenceFlow.class))
-            .willReturn(singleton(sequenceFlow));
+                .willReturn(singleton(sequenceFlow));
 
-        //when
-        final Stream<ModelValidationError> validationResult = bpmnModelSequenceFlowValidator.validate(
-            bpmnModel, validationContext);
+        // when
+        final Stream<ModelValidationError> validationResult =
+                bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext);
 
-        //then
+        // then
         assertThat(validationResult)
-            .extracting(ModelValidationError::getProblem,
+                .extracting(
+                        ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
                         ModelValidationError::getValidatorSetName,
                         ModelValidationError::getReferenceId)
-            .contains(tuple(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM,
-                            format(BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM_DESCRIPTION, TEST_SEQUENCE_NAME, TEST_SEQUENCE_ID),
-                            BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME,
-                TEST_SEQUENCE_ID));
+                .contains(
+                        tuple(
+                                BpmnModelSequenceFlowValidator.NO_SOURCE_REF_PROBLEM,
+                                format(
+                                        BpmnModelSequenceFlowValidator
+                                                .NO_SOURCE_REF_PROBLEM_DESCRIPTION,
+                                        TEST_SEQUENCE_NAME,
+                                        TEST_SEQUENCE_ID),
+                                BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME,
+                                TEST_SEQUENCE_ID));
     }
 
     @Test
     public void should_returnError_when_noTargetReferenceIsSpecified() {
-        //given
+        // given
         SequenceFlow sequenceFlow = new SequenceFlow("start", null);
         sequenceFlow.setId(TEST_SEQUENCE_ID);
         sequenceFlow.setName(TEST_SEQUENCE_NAME);
 
         BpmnModel bpmnModel = new BpmnModel();
         given(flowElementsExtractor.extractFlowElements(bpmnModel, SequenceFlow.class))
-            .willReturn(singleton(sequenceFlow));
+                .willReturn(singleton(sequenceFlow));
 
-        //when
-        final Stream<ModelValidationError> validationResult = bpmnModelSequenceFlowValidator.validate(
-            bpmnModel, validationContext);
+        // when
+        final Stream<ModelValidationError> validationResult =
+                bpmnModelSequenceFlowValidator.validate(bpmnModel, validationContext);
 
-        //then
+        // then
         assertThat(validationResult)
-            .extracting(ModelValidationError::getProblem,
+                .extracting(
+                        ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
                         ModelValidationError::getValidatorSetName,
                         ModelValidationError::getReferenceId)
-            .contains(tuple(BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM,
-                            format(BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM_DESCRIPTION, TEST_SEQUENCE_NAME, TEST_SEQUENCE_ID),
-                            BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME,
-                TEST_SEQUENCE_ID));
+                .contains(
+                        tuple(
+                                BpmnModelSequenceFlowValidator.NO_TARGET_REF_PROBLEM,
+                                format(
+                                        BpmnModelSequenceFlowValidator
+                                                .NO_TARGET_REF_PROBLEM_DESCRIPTION,
+                                        TEST_SEQUENCE_NAME,
+                                        TEST_SEQUENCE_ID),
+                                BpmnModelSequenceFlowValidator.SEQUENCE_FLOW_VALIDATOR_NAME,
+                                TEST_SEQUENCE_ID));
     }
 }

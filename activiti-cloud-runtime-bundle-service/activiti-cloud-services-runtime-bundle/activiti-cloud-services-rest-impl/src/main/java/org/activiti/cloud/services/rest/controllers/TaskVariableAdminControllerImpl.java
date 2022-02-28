@@ -39,8 +39,8 @@ import org.activiti.cloud.services.rest.api.TaskVariableAdminController;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,14 +50,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TaskVariableAdminControllerImpl implements TaskVariableAdminController {
 
-    private final TaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler;
+    private final TaskVariableInstanceRepresentationModelAssembler
+            variableRepresentationModelAssembler;
     private final CollectionModelAssembler resourcesAssembler;
     private final TaskAdminRuntime taskRuntime;
 
     @Autowired
-    public TaskVariableAdminControllerImpl(TaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler,
-                                           CollectionModelAssembler resourcesAssembler,
-                                           TaskAdminRuntime taskRuntime) {
+    public TaskVariableAdminControllerImpl(
+            TaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler,
+            CollectionModelAssembler resourcesAssembler,
+            TaskAdminRuntime taskRuntime) {
 
         this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.resourcesAssembler = resourcesAssembler;
@@ -65,16 +67,17 @@ public class TaskVariableAdminControllerImpl implements TaskVariableAdminControl
     }
 
     @Override
-    public CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String taskId) {
-        return resourcesAssembler.toCollectionModel(taskRuntime.variables(TaskPayloadBuilder.variables()
-                                                                    .withTaskId(taskId)
-                                                                    .build()),
-                                              variableRepresentationModelAssembler);
+    public CollectionModel<EntityModel<CloudVariableInstance>> getVariables(
+            @PathVariable String taskId) {
+        return resourcesAssembler.toCollectionModel(
+                taskRuntime.variables(TaskPayloadBuilder.variables().withTaskId(taskId).build()),
+                variableRepresentationModelAssembler);
     }
 
     @Override
-    public ResponseEntity<Void> createVariable(@PathVariable String taskId,
-                                               @RequestBody CreateTaskVariablePayload createTaskVariablePayload) {
+    public ResponseEntity<Void> createVariable(
+            @PathVariable String taskId,
+            @RequestBody CreateTaskVariablePayload createTaskVariablePayload) {
 
         createTaskVariablePayload.setTaskId(taskId);
         taskRuntime.createVariable(createTaskVariablePayload);
@@ -83,9 +86,10 @@ public class TaskVariableAdminControllerImpl implements TaskVariableAdminControl
     }
 
     @Override
-    public ResponseEntity<Void> updateVariable(@PathVariable String taskId,
-                                               @PathVariable String variableName,
-                                               @RequestBody UpdateTaskVariablePayload updateTaskVariablePayload) {
+    public ResponseEntity<Void> updateVariable(
+            @PathVariable String taskId,
+            @PathVariable String variableName,
+            @RequestBody UpdateTaskVariablePayload updateTaskVariablePayload) {
 
         updateTaskVariablePayload.setTaskId(taskId);
         updateTaskVariablePayload.setName(variableName);
@@ -93,5 +97,4 @@ public class TaskVariableAdminControllerImpl implements TaskVariableAdminControl
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

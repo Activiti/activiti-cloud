@@ -27,5 +27,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Import(DynamicRegistrationConfiguration.class)
-public @interface EnableDynamicEurekaMetadataRegistration {
-}
+public @interface EnableDynamicEurekaMetadataRegistration {}

@@ -30,8 +30,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EnableJpaRepositories(basePackages = {"org.activiti.cloud.services.modeling.jpa"},
-                       repositoryFactoryBeanClass = ExtendedJpaRepositoryFactoryBean.class)
+@EnableJpaRepositories(
+        basePackages = {"org.activiti.cloud.services.modeling.jpa"},
+        repositoryFactoryBeanClass = ExtendedJpaRepositoryFactoryBean.class)
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @EntityScan("org.activiti.cloud.services.modeling.entity")
 public class ModelingJpaAutoConfiguration {
@@ -47,12 +48,8 @@ public class ModelingJpaAutoConfiguration {
     }
 
     @Bean
-    public ModelRepository modelRepository(ModelJpaRepository modelJpaRepository){
+    public ModelRepository modelRepository(ModelJpaRepository modelJpaRepository) {
 
         return new ModelRepositoryImpl(modelJpaRepository);
     }
-
-
-
-
 }

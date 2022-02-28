@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
-import java.util.Collection;
-
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,18 +27,22 @@ import org.springframework.security.core.authority.mapping.Attributes2GrantedAut
 import org.springframework.security.core.authority.mapping.SimpleAttributes2GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.User;
 
+import java.util.Collection;
+
 @Qualifier("websoket")
 public class JWSAuthenticationManager implements AuthenticationManager {
 
     private final KeycloakAccessTokenVerifier tokenVerifier;
-    private Attributes2GrantedAuthoritiesMapper authoritiesMapper = new SimpleAttributes2GrantedAuthoritiesMapper();
+    private Attributes2GrantedAuthoritiesMapper authoritiesMapper =
+            new SimpleAttributes2GrantedAuthoritiesMapper();
 
     public JWSAuthenticationManager(KeycloakAccessTokenVerifier tokenVerifier) {
         this.tokenVerifier = tokenVerifier;
     }
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication)
+            throws AuthenticationException {
         JWSAuthentication token = null;
         try {
             token = JWSAuthentication.class.cast(authentication);
@@ -49,8 +51,9 @@ public class JWSAuthenticationManager implements AuthenticationManager {
 
             AccessToken accessToken = tokenVerifier.verifyToken(credentials);
 
-            Collection<? extends GrantedAuthority> authorities = authoritiesMapper.getGrantedAuthorities(accessToken.getRealmAccess()
-                                                                                                                    .getRoles());
+            Collection<? extends GrantedAuthority> authorities =
+                    authoritiesMapper.getGrantedAuthorities(
+                            accessToken.getRealmAccess().getRoles());
             User user = new User(accessToken.getPreferredUsername(), credentials, authorities);
 
             token = new JWSAuthentication(credentials, user, authorities);
@@ -66,5 +69,4 @@ public class JWSAuthenticationManager implements AuthenticationManager {
     public void setAuthoritiesMapper(Attributes2GrantedAuthoritiesMapper authoritiesMapper) {
         this.authoritiesMapper = authoritiesMapper;
     }
-
 }

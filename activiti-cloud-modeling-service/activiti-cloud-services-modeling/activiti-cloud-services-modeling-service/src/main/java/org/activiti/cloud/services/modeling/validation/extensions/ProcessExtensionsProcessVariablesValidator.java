@@ -15,9 +15,10 @@
  */
 package org.activiti.cloud.services.modeling.validation.extensions;
 
-import static java.lang.String.format;
 import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
 import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
+
+import static java.lang.String.format;
 
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
@@ -33,64 +34,75 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Implementation of {@link ProcessExtensionsValidator} for validating process variables
- */
+/** Implementation of {@link ProcessExtensionsValidator} for validating process variables */
 public class ProcessExtensionsProcessVariablesValidator implements ProcessExtensionsValidator {
 
-    public static final String UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_PROBLEM = "Unknown process variable in process extensions: %s";
-    public static final String UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_DESCRIPTION = "The extensions for process '%s' contains mappings for an unknown process variable '%s'";
+    public static final String UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_PROBLEM =
+            "Unknown process variable in process extensions: %s";
+    public static final String UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_DESCRIPTION =
+            "The extensions for process '%s' contains mappings for an unknown process variable"
+                    + " '%s'";
 
     @Override
-    public Stream<ModelValidationError> validateExtensions(Extensions extensions,
-                                                 BpmnProcessModelContent bpmnModel,
-                                                 ValidationContext validationContext) {
+    public Stream<ModelValidationError> validateExtensions(
+            Extensions extensions,
+            BpmnProcessModelContent bpmnModel,
+            ValidationContext validationContext) {
         Set<String> availableProcessVariables = getAvailableProcessVariables(extensions);
 
-        return extensions.getVariablesMappings().values()
-                .stream()
+        return extensions.getVariablesMappings().values().stream()
                 .flatMap(actionMappings -> actionMappings.entrySet().stream())
-                .flatMap(taskMappingEntry -> this.validateProcessVariableMapping(taskMappingEntry.getKey(),
-                                                                            taskMappingEntry.getValue(),
-                                                                            bpmnModel.getId(),
-                                                                            availableProcessVariables));
+                .flatMap(
+                        taskMappingEntry ->
+                                this.validateProcessVariableMapping(
+                                        taskMappingEntry.getKey(),
+                                        taskMappingEntry.getValue(),
+                                        bpmnModel.getId(),
+                                        availableProcessVariables));
     }
 
-    private Stream<ModelValidationError> validateProcessVariableMapping(ServiceTaskActionType action,
-                                                                        Map<String, ProcessVariableMapping> processVariableMappings,
-                                                                        String processId,
-                                                                        Set<String> availableProcessVariables) {
+    private Stream<ModelValidationError> validateProcessVariableMapping(
+            ServiceTaskActionType action,
+            Map<String, ProcessVariableMapping> processVariableMappings,
+            String processId,
+            Set<String> availableProcessVariables) {
         return processVariableMappings.entrySet().stream()
-                .map(valiableMappingEntry -> validateProcessVariableMapping(action,
-                                                                            valiableMappingEntry.getKey(),
-                                                                            valiableMappingEntry.getValue(),
-                                                                            processId,
-                                                                            availableProcessVariables))
+                .map(
+                        valiableMappingEntry ->
+                                validateProcessVariableMapping(
+                                        action,
+                                        valiableMappingEntry.getKey(),
+                                        valiableMappingEntry.getValue(),
+                                        processId,
+                                        availableProcessVariables))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
     }
 
-    private Optional<ModelValidationError> validateProcessVariableMapping(ServiceTaskActionType action,
-                                                                          String processVariableMappingKey,
-                                                                          ProcessVariableMapping processVariableMapping,
-                                                                          String processId,
-                                                                          Set<String> availableProcessVariables) {
-        Object variableName = action == INPUTS ? processVariableMapping.getValue() : processVariableMappingKey;
-      return processVariableMapping.getType() == VARIABLE &&
-                !availableProcessVariables.contains(variableName) ?
-                Optional.of(new ModelValidationError(
-                    format(UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_PROBLEM,
-                        variableName), format(UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_DESCRIPTION,
-                    processId,
-                    variableName))) :
-                Optional.empty();
+    private Optional<ModelValidationError> validateProcessVariableMapping(
+            ServiceTaskActionType action,
+            String processVariableMappingKey,
+            ProcessVariableMapping processVariableMapping,
+            String processId,
+            Set<String> availableProcessVariables) {
+        Object variableName =
+                action == INPUTS ? processVariableMapping.getValue() : processVariableMappingKey;
+        return processVariableMapping.getType() == VARIABLE
+                        && !availableProcessVariables.contains(variableName)
+                ? Optional.of(
+                        new ModelValidationError(
+                                format(
+                                        UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_PROBLEM,
+                                        variableName),
+                                format(
+                                        UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_DESCRIPTION,
+                                        processId,
+                                        variableName)))
+                : Optional.empty();
     }
 
     private Set<String> getAvailableProcessVariables(Extensions extensions) {
-        return extensions
-                .getProcessVariables()
-                .values()
-                .stream()
+        return extensions.getProcessVariables().values().stream()
                 .map(ProcessVariable::getName)
                 .collect(Collectors.toSet());
     }

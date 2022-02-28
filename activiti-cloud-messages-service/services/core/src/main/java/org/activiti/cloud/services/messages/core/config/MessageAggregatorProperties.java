@@ -18,35 +18,26 @@ package org.activiti.cloud.services.messages.core.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.expression.Expression;
 
-/**
- * Configuration properties for the Messages Service.
- *
- */
+/** Configuration properties for the Messages Service. */
 @ConfigurationProperties(MessageAggregatorProperties.PREFIX)
 public class MessageAggregatorProperties {
 
     static final String PREFIX = "activiti.cloud.services.messages";
 
-    /**
-     * SpEL expression for timeout to expiring uncompleted groups
-     */
+    /** SpEL expression for timeout to expiring uncompleted groups */
     private Expression groupTimeout;
 
-    /**
-     * Persistence message store entity: table prefix in RDBMS, collection name in MongoDb, etc
-     */
+    /** Persistence message store entity: table prefix in RDBMS, collection name in MongoDb, etc */
     private String messageStoreEntity;
 
-    /**
-     * Comma separated list of input headers to be removed, i.e. kafka_consumer
-     */
+    /** Comma separated list of input headers to be removed, i.e. kafka_consumer */
     private String[] inputHeadersToRemove = new String[] {};
 
     /**
-     * HeaderChannelRegistry reaper delay so that the the channel mapping is retained for at least the specified time, i.e.
+     * HeaderChannelRegistry reaper delay so that the the channel mapping is retained for at least
+     * the specified time, i.e.
      */
     private String headerChannelsTimeToLiveExpression = null;
-
 
     public Expression getGroupTimeout() {
         return this.groupTimeout;
@@ -72,14 +63,11 @@ public class MessageAggregatorProperties {
         this.inputHeadersToRemove = headersToRemove;
     }
 
-
     public String getHeaderChannelsTimeToLiveExpression() {
         return headerChannelsTimeToLiveExpression;
     }
 
-
     public void setHeaderChannelsTimeToLiveExpression(String headerChannelsTimeToLiveExpression) {
         this.headerChannelsTimeToLiveExpression = headerChannelsTimeToLiveExpression;
     }
-
 }

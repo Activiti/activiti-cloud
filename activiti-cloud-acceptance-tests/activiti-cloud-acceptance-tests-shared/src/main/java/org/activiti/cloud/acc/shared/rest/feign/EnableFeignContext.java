@@ -15,20 +15,16 @@
  */
 package org.activiti.cloud.acc.shared.rest.feign;
 
+import org.activiti.cloud.acc.shared.config.BaseTestsConfigurationProperties;
+import org.springframework.test.context.ContextConfiguration;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.activiti.cloud.acc.shared.config.BaseTestsConfigurationProperties;
-import org.springframework.test.context.ContextConfiguration;
-
-/**
- * Allow Feign clients autowiring
- */
+/** Allow Feign clients autowiring */
 @ContextConfiguration(classes = {BaseTestsConfigurationProperties.class, FeignConfiguration.class})
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EnableFeignContext {
-
-}
+public @interface EnableFeignContext {}

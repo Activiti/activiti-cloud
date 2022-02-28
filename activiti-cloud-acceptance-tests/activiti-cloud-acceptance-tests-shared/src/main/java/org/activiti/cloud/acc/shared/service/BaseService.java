@@ -15,16 +15,17 @@
  */
 package org.activiti.cloud.acc.shared.service;
 
-
-import java.util.Map;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.Map;
+
 public interface BaseService {
 
-    @GetMapping(value = "/actuator/health",
-        produces = MediaType.APPLICATION_JSON_VALUE,
-        consumes = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(
+            value = "/actuator/health",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     Map<String, Object> health();
 
     default boolean isServiceUp() {
@@ -32,10 +33,9 @@ public interface BaseService {
         try {
             appInfo = health();
         } catch (Exception ex) {
-            //just retry once
+            // just retry once
             appInfo = health();
         }
         return appInfo != null && "UP".equals(appInfo.get("status"));
     }
 }
-

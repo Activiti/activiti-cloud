@@ -25,7 +25,7 @@ import java.util.Map;
 public class MetadataProperties implements InitializingBean {
 
     private Map<String, String> application = new HashMap<String, String>();
-    private Map<String, String> service = new HashMap<String,String>();
+    private Map<String, String> service = new HashMap<String, String>();
 
     public Map<String, String> getApplication() {
         return this.application;

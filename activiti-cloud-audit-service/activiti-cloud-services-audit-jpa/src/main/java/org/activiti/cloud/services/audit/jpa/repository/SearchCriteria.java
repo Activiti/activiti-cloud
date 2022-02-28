@@ -21,13 +21,9 @@ public class SearchCriteria {
     private String operation;
     private Object value;
 
-    public SearchCriteria() {
+    public SearchCriteria() {}
 
-    }
-
-    public SearchCriteria(final String key,
-                          final String operation,
-                          final Object value) {
+    public SearchCriteria(final String key, final String operation, final Object value) {
         super();
         this.key = key;
         this.operation = operation;

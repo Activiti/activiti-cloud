@@ -28,23 +28,27 @@ public class TaskCandidateUserAddedEventConverter extends BaseEventToEntityConve
     public TaskCandidateUserAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name();
     }
 
     @Override
-    public TaskCandidateUserAddedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {                
-        return new TaskCandidateUserAddedEventEntity((CloudTaskCandidateUserAddedEvent) cloudRuntimeEvent);
+    public TaskCandidateUserAddedEventEntity createEventEntity(
+            CloudRuntimeEvent cloudRuntimeEvent) {
+        return new TaskCandidateUserAddedEventEntity(
+                (CloudTaskCandidateUserAddedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        TaskCandidateUserAddedEventEntity eventEntity = (TaskCandidateUserAddedEventEntity) auditEventEntity;
+        TaskCandidateUserAddedEventEntity eventEntity =
+                (TaskCandidateUserAddedEventEntity) auditEventEntity;
 
-        return new CloudTaskCandidateUserAddedEventImpl(eventEntity.getEventId(),
-                                                        eventEntity.getTimestamp(),
-                                                        eventEntity.getCandidateUser());
+        return new CloudTaskCandidateUserAddedEventImpl(
+                eventEntity.getEventId(),
+                eventEntity.getTimestamp(),
+                eventEntity.getCandidateUser());
     }
 }

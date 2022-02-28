@@ -16,19 +16,25 @@
 package org.activiti.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
+
 import org.activiti.cloud.services.query.model.QProcessDefinitionEntity;
 
 public class ProcessDefinitionFilter implements ProcessDefinitionKeyBasedFilter {
 
     @Override
     public ProcessDefinitionRestrictionProperties getRestrictionProperties() {
-        QProcessDefinitionEntity qProcessDefinitionEntity = QProcessDefinitionEntity.processDefinitionEntity;
-        return new ProcessDefinitionRestrictionProperties(qProcessDefinitionEntity.serviceName, qProcessDefinitionEntity.serviceFullName, qProcessDefinitionEntity.key);
+        QProcessDefinitionEntity qProcessDefinitionEntity =
+                QProcessDefinitionEntity.processDefinitionEntity;
+        return new ProcessDefinitionRestrictionProperties(
+                qProcessDefinitionEntity.serviceName,
+                qProcessDefinitionEntity.serviceFullName,
+                qProcessDefinitionEntity.key);
     }
 
     @Override
     public Predicate buildImpossiblePredicate() {
-        QProcessDefinitionEntity qProcessDefinitionEntity = QProcessDefinitionEntity.processDefinitionEntity;
+        QProcessDefinitionEntity qProcessDefinitionEntity =
+                QProcessDefinitionEntity.processDefinitionEntity;
         return qProcessDefinitionEntity.id.eq("1").and(qProcessDefinitionEntity.id.eq("2"));
     }
 }

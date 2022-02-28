@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
+import static org.activiti.test.Assertions.assertThat;
+
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -25,8 +27,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
 import java.util.Collections;
-
-import static org.activiti.test.Assertions.assertThat;
 
 public class IntegrationErrorBuilderTest {
 
@@ -39,8 +39,9 @@ public class IntegrationErrorBuilderTest {
     private ConnectorProperties connectorProperties = new ConnectorProperties();
 
     @Test
-    public void shouldBuildIntegrationErrorBasedOnInformationFromIntegrationRequest() throws Exception {
-        //given
+    public void shouldBuildIntegrationErrorBasedOnInformationFromIntegrationRequest()
+            throws Exception {
+        // given
         Throwable error = new Error("Boom!");
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
@@ -49,16 +50,17 @@ public class IntegrationErrorBuilderTest {
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
-        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        IntegrationRequestImpl integrationRequestEvent =
+                new IntegrationRequestImpl(integrationContext);
         integrationRequestEvent.setAppName(APP_NAME);
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
-        //when
-        IntegrationError integrationError = IntegrationErrorBuilder.errorFor(integrationRequestEvent,
-                                                                             connectorProperties,
-                                                                             error)
-                                                                   .build();
-        //then
+        // when
+        IntegrationError integrationError =
+                IntegrationErrorBuilder.errorFor(
+                                integrationRequestEvent, connectorProperties, error)
+                        .build();
+        // then
         assertThat(integrationError)
                 .hasIntegrationContext(integrationContext)
                 .hasIntegrationRequest(integrationRequestEvent)
@@ -66,13 +68,12 @@ public class IntegrationErrorBuilderTest {
                 .hasErrorMessage("Boom!")
                 .hasStackTraceElements(error.getStackTrace());
 
-        assertThat(integrationContext)
-                .hasClientId(ACTIVITY_ELEMENT_ID);
+        assertThat(integrationContext).hasClientId(ACTIVITY_ELEMENT_ID);
     }
 
     @Test
     public void shouldBuildMessageWithRequiredHeader() throws Exception {
-        //given
+        // given
         Throwable error = new Error("Boom!");
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
@@ -81,20 +82,21 @@ public class IntegrationErrorBuilderTest {
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);
 
-        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        IntegrationRequestImpl integrationRequestEvent =
+                new IntegrationRequestImpl(integrationContext);
         integrationRequestEvent.setAppName(APP_NAME);
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
-        //when
-        Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequestEvent,
-                                                                             connectorProperties,
-                                                                             error)
-                                                                   .buildMessage();
+        // when
+        Message<IntegrationError> message =
+                IntegrationErrorBuilder.errorFor(
+                                integrationRequestEvent, connectorProperties, error)
+                        .buildMessage();
 
-        //then
+        // then
         Assertions.assertThat(message.getHeaders())
-                  .containsEntry(MessageHeaders.CONTENT_TYPE, "application/json")
-                  .containsEntry("targetService", RB_NAME)
-                  .containsEntry("targetAppName", APP_NAME);
+                .containsEntry(MessageHeaders.CONTENT_TYPE, "application/json")
+                .containsEntry("targetService", RB_NAME)
+                .containsEntry("targetAppName", APP_NAME);
     }
 }

@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.acc.shared.serenity;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.jbehave.core.annotations.ScenarioType;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.steps.BeforeOrAfterStep;
@@ -25,9 +22,10 @@ import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
 
-/**
- * Extended SerenityCandidateSteps
- */
+import java.util.List;
+import java.util.stream.Collectors;
+
+/** Extended SerenityCandidateSteps */
 public class ExtendedSerenityCandidateSteps implements CandidateSteps {
 
     private final CandidateSteps candidateSteps;
@@ -36,9 +34,10 @@ public class ExtendedSerenityCandidateSteps implements CandidateSteps {
 
     private final InjectableStepsFactory stepsFactory;
 
-    public ExtendedSerenityCandidateSteps(CandidateSteps candidateSteps,
-                                          Configuration configuration,
-                                          InjectableStepsFactory stepsFactory) {
+    public ExtendedSerenityCandidateSteps(
+            CandidateSteps candidateSteps,
+            Configuration configuration,
+            InjectableStepsFactory stepsFactory) {
         this.candidateSteps = candidateSteps;
         this.configuration = configuration;
         this.stepsFactory = stepsFactory;
@@ -46,12 +45,8 @@ public class ExtendedSerenityCandidateSteps implements CandidateSteps {
 
     @Override
     public List<StepCandidate> listCandidates() {
-        return candidateSteps
-                .listCandidates()
-                .parallelStream()
-                .map(step -> new ExtendedSerenityStepCandidate(step,
-                                                               configuration,
-                                                               stepsFactory))
+        return candidateSteps.listCandidates().parallelStream()
+                .map(step -> new ExtendedSerenityStepCandidate(step, configuration, stepsFactory))
                 .collect(Collectors.toList());
     }
 

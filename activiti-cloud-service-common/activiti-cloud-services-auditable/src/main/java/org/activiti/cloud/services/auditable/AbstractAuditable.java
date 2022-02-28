@@ -17,9 +17,7 @@ package org.activiti.cloud.services.auditable;
 
 import java.util.Date;
 
-/**
- * Auditable entity
- */
+/** Auditable entity */
 public abstract class AbstractAuditable<U> implements Auditable<U> {
 
     protected U createdBy;

@@ -19,19 +19,16 @@ import feign.Feign;
 import feign.Logger;
 import feign.form.FormEncoder;
 import feign.gson.GsonDecoder;
+
 import org.activiti.cloud.acc.shared.config.BaseTestsConfigurationProperties;
 import org.activiti.cloud.acc.shared.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
-/**
- * Feign Configuration
- */
-
+/** Feign Configuration */
 public class FeignConfiguration {
 
-    @Autowired
-    private BaseTestsConfigurationProperties baseTestsConfigurationProperties;
+    @Autowired private BaseTestsConfigurationProperties baseTestsConfigurationProperties;
 
     @Bean
     public AuthenticationService authenticationClient() {
@@ -40,10 +37,6 @@ public class FeignConfiguration {
                 .decoder(new GsonDecoder())
                 .logger(new Logger.ErrorLogger())
                 .logLevel(Logger.Level.BASIC)
-                .target(AuthenticationService.class,
-                        baseTestsConfigurationProperties.getAuthUrl());
+                .target(AuthenticationService.class, baseTestsConfigurationProperties.getAuthUrl());
     }
-
-
-
 }

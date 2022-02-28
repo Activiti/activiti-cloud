@@ -18,7 +18,7 @@ package org.activiti.cloud.connectors.starter.channels;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.UUID;
+
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,39 +28,44 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
+import java.util.UUID;
+
 public class IntegrationErrorHandlerImplTest {
 
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
 
     private IntegrationErrorHandlerImpl integrationErrorHandler;
 
-    @Mock
-    private IntegrationErrorSender integrationErrorSender;
+    @Mock private IntegrationErrorSender integrationErrorSender;
 
-    @Mock
-    private ConnectorProperties connectorProperties;
+    @Mock private ConnectorProperties connectorProperties;
 
     @BeforeEach
     public void setUp() {
         initMocks(this);
-        integrationErrorHandler = new IntegrationErrorHandlerImpl(integrationErrorSender,
-            connectorProperties, new ObjectMapper());
+        integrationErrorHandler =
+                new IntegrationErrorHandlerImpl(
+                        integrationErrorSender, connectorProperties, new ObjectMapper());
     }
 
-
     @Test
-    public void handleErrorMessage_should_notThrowExceptionWhenOriginalMessageIsNotIntegrationRequest() {
-        //given
-        ErrorMessage errorMessage = new ErrorMessage(new MessagingException(
-            MessageBuilder
-                .withPayload("This is not an integration request".getBytes())
-                .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
-                .build()));
+    public void
+            handleErrorMessage_should_notThrowExceptionWhenOriginalMessageIsNotIntegrationRequest() {
+        // given
+        ErrorMessage errorMessage =
+                new ErrorMessage(
+                        new MessagingException(
+                                MessageBuilder.withPayload(
+                                                "This is not an integration request".getBytes())
+                                        .setHeader(
+                                                INTEGRATION_CONTEXT_ID,
+                                                UUID.randomUUID().toString())
+                                        .build()));
 
-        //when
+        // when
         integrationErrorHandler.handleErrorMessage(errorMessage);
 
-        //then
+        // then
         Mockito.verifyNoInteractions(integrationErrorSender);
     }
 }

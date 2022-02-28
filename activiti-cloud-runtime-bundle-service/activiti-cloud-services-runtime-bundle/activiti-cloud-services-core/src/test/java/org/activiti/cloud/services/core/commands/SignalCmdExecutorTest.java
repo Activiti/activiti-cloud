@@ -28,11 +28,9 @@ import org.mockito.Mock;
 
 public class SignalCmdExecutorTest {
 
-    @InjectMocks
-    private SignalCmdExecutor signalCmdExecutor;
+    @InjectMocks private SignalCmdExecutor signalCmdExecutor;
 
-    @Mock
-    private ProcessAdminRuntime processAdminRuntime;
+    @Mock private ProcessAdminRuntime processAdminRuntime;
 
     @BeforeEach
     public void setUp() {
@@ -41,8 +39,7 @@ public class SignalCmdExecutorTest {
 
     @Test
     public void signalProcessInstancesCmdExecutorTest() {
-        SignalPayload signalPayload = new SignalPayload("x",
-                                                        null);
+        SignalPayload signalPayload = new SignalPayload("x", null);
 
         assertThat(signalCmdExecutor.getHandledType()).isEqualTo(SignalPayload.class.getName());
 

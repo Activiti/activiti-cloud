@@ -42,11 +42,9 @@ import org.mockito.Mock;
 
 public class ToCloudProcessRuntimeTimerEventsConverterTest {
 
-    @InjectMocks
-    private ToCloudProcessRuntimeEventConverter converter;
+    @InjectMocks private ToCloudProcessRuntimeEventConverter converter;
 
-    @Mock
-    private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    @Mock private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @BeforeEach
     public void setUp() {
@@ -55,7 +53,7 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
 
     @Test
     public void shouldConvertBPMNTimerFiredEventToCloudBPMNTimerFiredEvent() {
-        //given
+        // given
         BPMNTimerImpl timer = new BPMNTimerImpl("entityId");
         timer.setProcessInstanceId("procInstId");
         timer.setProcessDefinitionId("procDefId");
@@ -64,19 +62,20 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         timer.setTimerPayload(timerPayload);
         BPMNTimerFiredEventImpl timerFiredEvent = new BPMNTimerFiredEventImpl(timer);
 
-        //when
+        // when
         CloudBPMNTimerFiredEvent cloudEvent = converter.from(timerFiredEvent);
         assertThat(cloudEvent.getEntity()).isEqualTo(timer);
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
-        //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        // then
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
     public void shouldConvertBPMNTimerScheduledEventToCloudBPMNTimerScheduledEvent() {
-        //given
+        // given
         BPMNTimerImpl timer = new BPMNTimerImpl("entityId");
         timer.setProcessInstanceId("procInstId");
         timer.setProcessDefinitionId("procDefId");
@@ -85,19 +84,20 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         timer.setTimerPayload(timerPayload);
         BPMNTimerScheduledEventImpl timerFiredEvent = new BPMNTimerScheduledEventImpl(timer);
 
-        //when
+        // when
         CloudBPMNTimerScheduledEvent cloudEvent = converter.from(timerFiredEvent);
         assertThat(cloudEvent.getEntity()).isEqualTo(timer);
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
-        //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        // then
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
     public void shouldConvertBPMNTimerCancelledEventToCloudBPMNTimerCancelledEvent() {
-        //given
+        // given
         BPMNTimerImpl timer = new BPMNTimerImpl("entityId");
         timer.setProcessInstanceId("procInstId");
         timer.setProcessDefinitionId("procDefId");
@@ -106,19 +106,20 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         timer.setTimerPayload(timerPayload);
         BPMNTimerCancelledEventImpl timerFiredEvent = new BPMNTimerCancelledEventImpl(timer);
 
-        //when
+        // when
         CloudBPMNTimerCancelledEvent cloudEvent = converter.from(timerFiredEvent);
         assertThat(cloudEvent.getEntity()).isEqualTo(timer);
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
-        //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        // then
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
     public void shouldConvertBPMNTimerExecutedEventToCloudBPMNTimerExecutedEvent() {
-        //given
+        // given
         BPMNTimerImpl timer = new BPMNTimerImpl("entityId");
         timer.setProcessInstanceId("procInstId");
         timer.setProcessDefinitionId("procDefId");
@@ -127,19 +128,20 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         timer.setTimerPayload(timerPayload);
         BPMNTimerExecutedEventImpl timerFiredEvent = new BPMNTimerExecutedEventImpl(timer);
 
-        //when
+        // when
         CloudBPMNTimerExecutedEvent cloudEvent = converter.from(timerFiredEvent);
         assertThat(cloudEvent.getEntity()).isEqualTo(timer);
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
-        //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        // then
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
     public void shouldConvertBPMNTimerFailedEventToCloudBPMNTimerFailedEvent() {
-        //given
+        // given
         BPMNTimerImpl timer = new BPMNTimerImpl("entityId");
         timer.setProcessInstanceId("procInstId");
         timer.setProcessDefinitionId("procDefId");
@@ -148,34 +150,38 @@ public class ToCloudProcessRuntimeTimerEventsConverterTest {
         timer.setTimerPayload(timerPayload);
         BPMNTimerFailedEventImpl timerFiredEvent = new BPMNTimerFailedEventImpl(timer);
 
-        //when
+        // when
         CloudBPMNTimerFailedEvent cloudEvent = converter.from(timerFiredEvent);
         assertThat(cloudEvent.getEntity()).isEqualTo(timer);
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
-        //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        // then
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
-    public void shouldConvertBPMNTimerRetriesDecrementedEventToCloudBPMNTimerRetriesDecrementedEvent() {
-        //given
+    public void
+            shouldConvertBPMNTimerRetriesDecrementedEventToCloudBPMNTimerRetriesDecrementedEvent() {
+        // given
         BPMNTimerImpl timer = new BPMNTimerImpl("entityId");
         timer.setProcessInstanceId("procInstId");
         timer.setProcessDefinitionId("procDefId");
         TimerPayload timerPayload = new TimerPayload();
 
         timer.setTimerPayload(timerPayload);
-        BPMNTimerRetriesDecrementedEventImpl timerFiredEvent = new BPMNTimerRetriesDecrementedEventImpl(timer);
+        BPMNTimerRetriesDecrementedEventImpl timerFiredEvent =
+                new BPMNTimerRetriesDecrementedEventImpl(timer);
 
-        //when
+        // when
         CloudBPMNTimerRetriesDecrementedEvent cloudEvent = converter.from(timerFiredEvent);
         assertThat(cloudEvent.getEntity()).isEqualTo(timer);
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
-        //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        // then
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 }

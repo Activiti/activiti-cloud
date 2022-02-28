@@ -25,17 +25,24 @@ import org.springframework.security.core.AuthenticationException;
 public class KeycloakActivitiAuthenticationProvider extends KeycloakAuthenticationProvider {
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication)
+            throws AuthenticationException {
 
         KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) authentication;
 
-        String userId = authentication.getName(); //this will be keycloak id
+        String userId = authentication.getName(); // this will be keycloak id
 
         if (token.getPrincipal() instanceof KeycloakPrincipal) {
-            KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) token.getPrincipal();
-            //option to use username instead of id
-            if (kp.getKeycloakSecurityContext().getToken() != null && kp.getKeycloakSecurityContext().getToken().getPreferredUsername() != null) {
-                userId = kp.getKeycloakSecurityContext().getToken().getPreferredUsername(); //replace with username - could be changed to e.g. email if desired
+            KeycloakPrincipal<KeycloakSecurityContext> kp =
+                    (KeycloakPrincipal<KeycloakSecurityContext>) token.getPrincipal();
+            // option to use username instead of id
+            if (kp.getKeycloakSecurityContext().getToken() != null
+                    && kp.getKeycloakSecurityContext().getToken().getPreferredUsername() != null) {
+                userId =
+                        kp.getKeycloakSecurityContext()
+                                .getToken()
+                                .getPreferredUsername(); // replace with username - could be changed
+                // to e.g. email if desired
             }
         }
 

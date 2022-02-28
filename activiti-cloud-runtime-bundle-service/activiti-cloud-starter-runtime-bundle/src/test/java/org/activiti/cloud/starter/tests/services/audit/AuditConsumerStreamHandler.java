@@ -33,11 +33,11 @@ public class AuditConsumerStreamHandler {
 
     private volatile Map<String, Object> receivedHeaders = new HashMap<>();
 
-    private volatile List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
-    private volatile List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?, ?>> latestReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?, ?>> allReceivedEvents = new ArrayList<>();
 
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
-    public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?,?> ... events) {
+    public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
         latestReceivedEvents = new ArrayList<>(Arrays.asList(events));
         allReceivedEvents = new ArrayList<>(allReceivedEvents);
         allReceivedEvents.addAll(latestReceivedEvents);

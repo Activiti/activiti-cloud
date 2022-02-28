@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.mockito.InjectMocks;
 import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;
 
@@ -25,7 +24,7 @@ public interface ConnectorIntegrationChannels {
     String REST_CONNECTOR_CONSUMER = "restConnectorConsumer";
     String VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER = "varMappingIntegrationEventsConsumer";
     String CONSTANTS_INTEGRATION_EVENTS_CONSUMER = "constantsIntegrationEventsConsumer";
-    String MEALS_CONNECTOR_CONSUMER  = "mealsConnectorConsumer";
+    String MEALS_CONNECTOR_CONSUMER = "mealsConnectorConsumer";
     String VALUE_PROCESSOR_CONSUMER = "valueProcessorConsumer";
 
     @Input(INTEGRATION_EVENTS_CONSUMER)
@@ -45,5 +44,4 @@ public interface ConnectorIntegrationChannels {
 
     @Input(VALUE_PROCESSOR_CONSUMER)
     SubscribableChannel valueProcessorConsumer();
-
 }

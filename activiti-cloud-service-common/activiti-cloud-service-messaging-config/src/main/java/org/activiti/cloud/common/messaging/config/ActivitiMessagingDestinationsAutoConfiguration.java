@@ -33,12 +33,15 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ActivitiMessagingDestinationTransformer activitiMessagingDestinationTransformer(ActivitiCloudMessagingProperties messagingProperties) {
+    public ActivitiMessagingDestinationTransformer activitiMessagingDestinationTransformer(
+            ActivitiCloudMessagingProperties messagingProperties) {
         return new ActivitiMessagingDestinationTransformer(messagingProperties);
     }
 
     @Bean
-    public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(ActivitiMessagingDestinationTransformer destinationTransformer) {
+    public ActivitiMessagingDestinationsBeanPostProcessor
+            activitiMessagingDestinationsBeanPostProcessor(
+                    ActivitiMessagingDestinationTransformer destinationTransformer) {
         return new ActivitiMessagingDestinationsBeanPostProcessor(destinationTransformer);
     }
 
@@ -48,8 +51,11 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
     }
 
     @Bean
-    public InputConverterFunction escapeIllegalChars(@Lazy ActivitiCloudMessagingProperties messagingProperties) {
-        return (value) -> value.replaceAll(messagingProperties.getDestinationIllegalCharsRegex(),
-                                           messagingProperties.getDestinationIllegalCharsReplacement());
+    public InputConverterFunction escapeIllegalChars(
+            @Lazy ActivitiCloudMessagingProperties messagingProperties) {
+        return (value) ->
+                value.replaceAll(
+                        messagingProperties.getDestinationIllegalCharsRegex(),
+                        messagingProperties.getDestinationIllegalCharsReplacement());
     }
 }

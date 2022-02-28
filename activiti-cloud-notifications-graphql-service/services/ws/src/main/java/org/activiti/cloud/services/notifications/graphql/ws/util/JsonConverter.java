@@ -15,11 +15,6 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.util;
 
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,22 +23,27 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-/**
- * Json Converter class
- */
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+/** Json Converter class */
 public class JsonConverter {
     //
     // This is important because the graphql spec says that null values should be present
     //
-    static final ObjectMapper JSON = new ObjectMapper()
-    		.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, true)
-    		.setSerializationInclusion(Include.ALWAYS);
+    static final ObjectMapper JSON =
+            new ObjectMapper()
+                    .configure(SerializationFeature.WRITE_NULL_MAP_VALUES, true)
+                    .setSerializationInclusion(Include.ALWAYS);
 
-    public static Map<String, Object> toMap(String jsonStr) throws JsonParseException, JsonMappingException, IOException {
+    public static Map<String, Object> toMap(String jsonStr)
+            throws JsonParseException, JsonMappingException, IOException {
         if (jsonStr == null || jsonStr.trim().length() == 0) {
             return Collections.emptyMap();
         }
-        Map<String, Object> map = JSON.readValue(jsonStr, new TypeReference<Map<String,Object>>() {});
+        Map<String, Object> map =
+                JSON.readValue(jsonStr, new TypeReference<Map<String, Object>>() {});
 
         return map == null ? Collections.emptyMap() : map;
     }

@@ -15,16 +15,16 @@
  */
 package org.activiti.cloud.api.process.model.impl;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements IntegrationError {
 
@@ -36,19 +36,18 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     private List<StackTraceElement> stackTraceElements;
     private String errorClassName;
 
-    IntegrationErrorImpl() {
-    }
+    IntegrationErrorImpl() {}
 
-    public IntegrationErrorImpl(IntegrationRequest integrationRequest,
-                                Throwable error) {
+    public IntegrationErrorImpl(IntegrationRequest integrationRequest, Throwable error) {
         this.integrationRequest = integrationRequest;
         this.integrationContext = integrationRequest.getIntegrationContext();
         this.errorClassName = error.getClass().getName();
-        this.errorCode = Optional.of(error)
-                                 .filter(CloudBpmnError.class::isInstance)
-                                 .map(CloudBpmnError.class::cast)
-                                 .map(CloudBpmnError::getErrorCode)
-                                 .orElse(null);
+        this.errorCode =
+                Optional.of(error)
+                        .filter(CloudBpmnError.class::isInstance)
+                        .map(CloudBpmnError.class::cast)
+                        .map(CloudBpmnError::getErrorCode)
+                        .orElse(null);
 
         Throwable cause = findRootCause(error);
 
@@ -90,11 +89,14 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(errorClassName,
-                                               errorMessage,
-                                               integrationContext,
-                                               integrationRequest,
-                                               stackTraceElements);
+        result =
+                prime * result
+                        + Objects.hash(
+                                errorClassName,
+                                errorMessage,
+                                integrationContext,
+                                integrationRequest,
+                                stackTraceElements);
         return result;
     }
 
@@ -110,11 +112,11 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
             return false;
         }
         IntegrationErrorImpl other = (IntegrationErrorImpl) obj;
-        return Objects.equals(errorClassName, other.errorClassName) &&
-               Objects.equals(errorMessage, other.errorMessage) &&
-               Objects.equals(integrationContext, other.integrationContext) &&
-               Objects.equals(integrationRequest, other.integrationRequest) &&
-               Objects.equals(stackTraceElements, other.stackTraceElements);
+        return Objects.equals(errorClassName, other.errorClassName)
+                && Objects.equals(errorMessage, other.errorMessage)
+                && Objects.equals(integrationContext, other.integrationContext)
+                && Objects.equals(integrationRequest, other.integrationRequest)
+                && Objects.equals(stackTraceElements, other.stackTraceElements);
     }
 
     @Override
@@ -122,20 +124,22 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         final int maxLen = 10;
         StringBuilder builder = new StringBuilder();
         builder.append("IntegrationErrorImpl [integrationRequest=")
-               .append(integrationRequest)
-               .append(", integrationContext=")
-               .append(integrationContext)
-               .append(", errorMessage=")
-               .append(errorMessage)
-               .append(", stackTraceElements=")
-               .append(stackTraceElements != null ? stackTraceElements.subList(0,
-                                                                               Math.min(stackTraceElements.size(),
-                                                                                        maxLen)) : null)
-               .append(", errorClassName=")
-               .append(errorClassName)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(integrationRequest)
+                .append(", integrationContext=")
+                .append(integrationContext)
+                .append(", errorMessage=")
+                .append(errorMessage)
+                .append(", stackTraceElements=")
+                .append(
+                        stackTraceElements != null
+                                ? stackTraceElements.subList(
+                                        0, Math.min(stackTraceElements.size(), maxLen))
+                                : null)
+                .append(", errorClassName=")
+                .append(errorClassName)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 

@@ -16,15 +16,13 @@
 package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -50,6 +48,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
+
 @WebMvcTest(TaskVariableAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
@@ -61,69 +63,68 @@ import org.springframework.test.web.servlet.MvcResult;
 @WithMockUser
 public class VariableEntityAdminControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private TaskVariableRepository variableRepository;
+    @MockBean private TaskVariableRepository variableRepository;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
+    @MockBean private UserGroupManager userGroupManager;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;
+    @MockBean private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;
+    @MockBean private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
-    private TaskRepository taskRepository;
+    @MockBean private TaskRepository taskRepository;
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
-        //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+            throws Exception {
+        // given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        TaskVariableEntity variableEntity = new TaskVariableEntity(1L,
-                                                           String.class.getName(),
-                                                           "firstName",
-                                                           UUID.randomUUID().toString(),
-                                                           "My app",
-                                                           "My app",
-                                                           "1",
-                                                           null,
-                                                           null,
-                                                           UUID.randomUUID().toString(),
-                                                           new Date(),
-                                                           new Date(),
-                                                           UUID.randomUUID().toString());
+        TaskVariableEntity variableEntity =
+                new TaskVariableEntity(
+                        1L,
+                        String.class.getName(),
+                        "firstName",
+                        UUID.randomUUID().toString(),
+                        "My app",
+                        "My app",
+                        "1",
+                        null,
+                        null,
+                        UUID.randomUUID().toString(),
+                        new Date(),
+                        new Date(),
+                        UUID.randomUUID().toString());
         variableEntity.setValue("John");
 
-        given(variableRepository.findAll(any(),
-                                         eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(variableEntity),
-                                           pageRequest,
-                                           12));
+        given(variableRepository.findAll(any(), eq(pageRequest)))
+                .willReturn(
+                        new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
 
-        //when
-        MvcResult result = mockMvc.perform(get("/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10",
-                                               variableEntity.getTaskId())
-                                                   .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk())
-                .andReturn();
+        // when
+        MvcResult result =
+                mockMvc.perform(
+                                get(
+                                                "/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10",
+                                                variableEntity.getTaskId())
+                                        .accept(MediaType.APPLICATION_JSON))
+                        // then
+                        .andExpect(status().isOk())
+                        .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+                .node("list.pagination.skipCount")
+                .isEqualTo(11)
+                .node("list.pagination.maxItems")
+                .isEqualTo(10)
+                .node("list.pagination.count")
+                .isEqualTo(1)
+                .node("list.pagination.hasMoreItems")
+                .isEqualTo(false)
+                .node("list.pagination.totalItems")
+                .isEqualTo(12);
     }
 }

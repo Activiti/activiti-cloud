@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-
 import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
@@ -36,13 +35,16 @@ public class IntegrationRequestedEventConverter extends BaseEventToEntityConvert
     }
 
     @Override
-    protected IntegrationRequestSentEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new IntegrationRequestSentEventEntity(CloudIntegrationRequestedEvent.class.cast(cloudRuntimeEvent));
+    protected IntegrationRequestSentEventEntity createEventEntity(
+            CloudRuntimeEvent cloudRuntimeEvent) {
+        return new IntegrationRequestSentEventEntity(
+                CloudIntegrationRequestedEvent.class.cast(cloudRuntimeEvent));
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        IntegrationRequestSentEventEntity entity = (IntegrationRequestSentEventEntity) auditEventEntity;
+        IntegrationRequestSentEventEntity entity =
+                (IntegrationRequestSentEventEntity) auditEventEntity;
 
         return new CloudIntegrationRequestedEventImpl(entity.getIntegrationContext());
     }

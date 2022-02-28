@@ -35,7 +35,8 @@ import java.util.List;
 
 public class ServiceTaskIntegrationErrorEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskIntegrationErrorEventHandler.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ServiceTaskIntegrationErrorEventHandler.class);
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
@@ -43,11 +44,12 @@ public class ServiceTaskIntegrationErrorEventHandler {
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
 
-    public ServiceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
-                                                   IntegrationContextService integrationContextService,
-                                                   ManagementService managementService,
-                                                   RuntimeBundleProperties runtimeBundleProperties,
-                                                   ProcessEngineEventsAggregator processEngineEventsAggregator) {
+    public ServiceTaskIntegrationErrorEventHandler(
+            RuntimeService runtimeService,
+            IntegrationContextService integrationContextService,
+            ManagementService managementService,
+            RuntimeBundleProperties runtimeBundleProperties,
+            ProcessEngineEventsAggregator processEngineEventsAggregator) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.runtimeBundleProperties = runtimeBundleProperties;
@@ -58,21 +60,32 @@ public class ServiceTaskIntegrationErrorEventHandler {
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
     public void receive(IntegrationError integrationError) {
         IntegrationContext integrationContext = integrationError.getIntegrationContext();
-        IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());
+        IntegrationContextEntity integrationContextEntity =
+                integrationContextService.findById(integrationContext.getId());
 
         if (integrationContextEntity != null) {
             integrationContextService.deleteIntegrationContext(integrationContextEntity);
 
-            List<Execution> executions = runtimeService.createExecutionQuery().executionId(integrationContextEntity.getExecutionId()).list();
+            List<Execution> executions =
+                    runtimeService
+                            .createExecutionQuery()
+                            .executionId(integrationContextEntity.getExecutionId())
+                            .list();
             if (executions.size() > 0) {
                 ExecutionEntity execution = (ExecutionEntity) executions.get(0);
 
                 String clientId = integrationContext.getClientId();
                 String errorClassName = integrationError.getErrorClassName();
-                String message = "Received integration error '" + errorClassName + "' with execution id `" +
-                        integrationContextEntity.getExecutionId() +
-                        ", flow node id `" + clientId +
-                        "`. The integration error for the integration context `" + integrationContext.getId() + "` is {}";
+                String message =
+                        "Received integration error '"
+                                + errorClassName
+                                + "' with execution id `"
+                                + integrationContextEntity.getExecutionId()
+                                + ", flow node id `"
+                                + clientId
+                                + "`. The integration error for the integration context `"
+                                + integrationContext.getId()
+                                + "` is {}";
 
                 LOGGER.info(message, integrationError);
 
@@ -82,34 +95,48 @@ public class ServiceTaskIntegrationErrorEventHandler {
                             triggerIntegrationContextError(integrationError, execution);
                             return;
                         } catch (Throwable cause) {
-                            LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
+                            LOGGER.error(
+                                    "Error propagating CloudBpmnError: {}", cause.getMessage());
                         }
                     } else {
-                        LOGGER.warn("Could not find matching activityId '{}' for integration error '{}' with executionId '{}'",
-                                     clientId,
-                                     integrationError,
-                                     execution.getId());
+                        LOGGER.warn(
+                                "Could not find matching activityId '{}' for integration error '{}'"
+                                        + " with executionId '{}'",
+                                clientId,
+                                integrationError,
+                                execution.getId());
                     }
                 }
             } else {
-                String message = "No task is in this RB is waiting for integration result with execution id `" +
-                    integrationContextEntity.getExecutionId() +
-                    ", flow node id `" + integrationContext.getClientId() +
-                    "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
+                String message =
+                        "No task is in this RB is waiting for integration result with execution id"
+                                + " `"
+                                + integrationContextEntity.getExecutionId()
+                                + ", flow node id `"
+                                + integrationContext.getClientId()
+                                + "`. The integration result for the integration context `"
+                                + integrationContext.getId()
+                                + "` will be ignored.";
                 LOGGER.warn(message);
             }
 
-            managementService.executeCommand(new AggregateIntegrationErrorReceivedEventCmd(
-                integrationError, runtimeBundleProperties, processEngineEventsAggregator));
+            managementService.executeCommand(
+                    new AggregateIntegrationErrorReceivedEventCmd(
+                            integrationError,
+                            runtimeBundleProperties,
+                            processEngineEventsAggregator));
         }
     }
 
-    private void triggerIntegrationContextError(IntegrationError integrationError, ExecutionEntity execution) {
+    private void triggerIntegrationContextError(
+            IntegrationError integrationError, ExecutionEntity execution) {
         managementService.executeCommand(
-            CompositeCommand.of(
-                new PropagateCloudBpmnErrorCmd(integrationError, execution),
-                new AggregateIntegrationErrorReceivedClosingEventCmd(new AggregateIntegrationErrorReceivedEventCmd(
-                    integrationError, runtimeBundleProperties, processEngineEventsAggregator))));
+                CompositeCommand.of(
+                        new PropagateCloudBpmnErrorCmd(integrationError, execution),
+                        new AggregateIntegrationErrorReceivedClosingEventCmd(
+                                new AggregateIntegrationErrorReceivedEventCmd(
+                                        integrationError,
+                                        runtimeBundleProperties,
+                                        processEngineEventsAggregator))));
     }
-
 }

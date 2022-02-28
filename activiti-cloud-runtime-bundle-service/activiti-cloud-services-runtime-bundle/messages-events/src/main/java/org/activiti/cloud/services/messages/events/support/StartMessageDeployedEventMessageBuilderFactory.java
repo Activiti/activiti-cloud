@@ -29,7 +29,10 @@ public class StartMessageDeployedEventMessageBuilderFactory {
     }
 
     public MessageBuilderAppenderChain create(StartMessageDeployedEvent messageDeployedEvent) {
-        return new MessageBuilderAppenderChain().chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                                                .chain(new StartMessageDeploymentDefinitionMessageBuilderAppender(messageDeployedEvent.getEntity()));
+        return new MessageBuilderAppenderChain()
+                .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+                .chain(
+                        new StartMessageDeploymentDefinitionMessageBuilderAppender(
+                                messageDeployedEvent.getEntity()));
     }
 }

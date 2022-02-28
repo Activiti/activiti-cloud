@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class KeycloakPrincipalRolesProviderChain implements PrincipalRolesProvider {
-    
+
     private final List<PrincipalRolesProvider> providers;
-    
+
     public KeycloakPrincipalRolesProviderChain(@NonNull List<PrincipalRolesProvider> providers) {
         this.providers = Collections.unmodifiableList(providers);
     }
@@ -34,12 +34,12 @@ public class KeycloakPrincipalRolesProviderChain implements PrincipalRolesProvid
     @Override
     public List<String> getRoles(@NonNull Principal principal) {
         return providers.stream()
-                        .map(provider -> provider.getRoles(principal))
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElseThrow(this::securityException);
+                .map(provider -> provider.getRoles(principal))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(this::securityException);
     }
-    
+
     protected SecurityException securityException() {
         return new SecurityException("Invalid principal security access token roles");
     }

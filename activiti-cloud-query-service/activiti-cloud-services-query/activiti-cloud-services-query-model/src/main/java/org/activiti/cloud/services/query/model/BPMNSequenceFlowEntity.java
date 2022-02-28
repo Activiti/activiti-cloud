@@ -19,23 +19,34 @@ import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.hibernate.annotations.Immutable;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 
-@Entity(name="BPMNSequenceFlow")
-@Table(name="BPMN_SEQUENCE_FLOW", indexes={
-    @Index(name="bpmn_sequence_flow_processInstance_idx", columnList="processInstanceId", unique=false),
-    @Index(name="bpmn_sequence_flow_elementId_idx", columnList="elementId", unique=false),
-    @Index(name="bpmn_sequence_flow_processInstance_elementId_idx", columnList="processInstanceId,elementId", unique=false),
-    @Index(name="bpmn_sequence_flow_eventId_idx", columnList="eventId", unique=true)
-})
+import javax.persistence.*;
+
+@Entity(name = "BPMNSequenceFlow")
+@Table(
+        name = "BPMN_SEQUENCE_FLOW",
+        indexes = {
+            @Index(
+                    name = "bpmn_sequence_flow_processInstance_idx",
+                    columnList = "processInstanceId",
+                    unique = false),
+            @Index(
+                    name = "bpmn_sequence_flow_elementId_idx",
+                    columnList = "elementId",
+                    unique = false),
+            @Index(
+                    name = "bpmn_sequence_flow_processInstance_elementId_idx",
+                    columnList = "processInstanceId,elementId",
+                    unique = false),
+            @Index(name = "bpmn_sequence_flow_eventId_idx", columnList = "eventId", unique = true)
+        })
 @Immutable
 public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BPMNSequenceFlow {
 
     /** The unique identifier of this historic activity instance. */
-    @Id
-    private String id;
+    @Id private String id;
 
     /** The associated process instance id */
     private String processInstanceId;
@@ -44,7 +55,7 @@ public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BP
     private String processDefinitionId;
 
     /** The date/time of the sequence flow was taken */
-    @Column(name="taken_date")
+    @Column(name = "taken_date")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date date;
 
@@ -83,16 +94,13 @@ public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BP
 
     public BPMNSequenceFlowEntity() {}
 
-    public BPMNSequenceFlowEntity(String serviceName,
-                                   String serviceFullName,
-                                   String serviceVersion,
-                                   String appName,
-                                   String appVersion) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
+    public BPMNSequenceFlowEntity(
+            String serviceName,
+            String serviceFullName,
+            String serviceVersion,
+            String appName,
+            String appVersion) {
+        super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
     }
 
     public String getId() {
@@ -155,7 +163,6 @@ public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BP
     public void setProcessDefinitionId(String processDefinitionId) {
         this.processDefinitionId = processDefinitionId;
     }
-
 
     public void setSourceActivityElementId(String sourceActivityElementId) {
         this.sourceActivityElementId = sourceActivityElementId;

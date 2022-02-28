@@ -30,14 +30,13 @@ public abstract class IntegrationEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private IntegrationContext integrationContext;
 
-    IntegrationEventEntity() { }
+    IntegrationEventEntity() {}
 
     public IntegrationEventEntity(CloudIntegrationEvent event) {
         super(event);
 
         this.integrationContext = event.getEntity();
     }
-
 
     public IntegrationContext getIntegrationContext() {
         return integrationContext;
@@ -47,11 +46,10 @@ public abstract class IntegrationEventEntity extends AuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("IntegrationEventEntity [integrationContext=")
-               .append(integrationContext)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(integrationContext)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
-
 }

@@ -24,8 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
-import java.util.Collections;
-import java.util.List;
+
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -49,12 +48,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+import java.util.List;
+
 @TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @WebMvcTest(TaskDeleteController.class)
 @Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
@@ -63,43 +65,32 @@ public class TaskEntityDeleteControllerIT {
 
     private static final String TASK_ADMIN_ALFRESCO_IDENTIFIER = "task-admin-alfresco";
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private TaskRepository taskRepository;
+    @MockBean private TaskRepository taskRepository;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private EntityFinder entityFinder;
+    @MockBean private EntityFinder entityFinder;
 
-    @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;
+    @MockBean private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
-    private ProcessDefinitionRepository processDefinitionRepository;
+    @MockBean private ProcessDefinitionRepository processDefinitionRepository;
 
-    @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;
+    @MockBean private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
-    private TaskLookupRestrictionService taskLookupRestrictionService;
+    @MockBean private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @Test
-    public void deleteTasksShouldReturnAllTasksAndDeleteThem() throws Exception{
+    public void deleteTasksShouldReturnAllTasksAndDeleteThem() throws Exception {
 
-        //given
+        // given
         List<TaskEntity> taskEntities = Collections.singletonList(buildDefaultTask());
-        given(taskRepository.findAll(any(Predicate.class)))
-                .willReturn(taskEntities);
+        given(taskRepository.findAll(any(Predicate.class))).willReturn(taskEntities);
 
-        //when
-        mockMvc.perform(delete("/admin/v1/tasks")
-                .with(csrf())
-                .accept(MediaType.APPLICATION_JSON))
-                //then
+        // when
+        mockMvc.perform(delete("/admin/v1/tasks").with(csrf()).accept(MediaType.APPLICATION_JSON))
+                // then
                 .andExpect(status().isOk());
 
         verify(taskRepository).deleteAll(taskEntities);

@@ -17,6 +17,4 @@ package org.activiti.cloud.services.messages.core.advice;
 
 import org.springframework.integration.handler.advice.HandleMessageAdvice;
 
-public interface MessageConnectorHandlerAdvice extends HandleMessageAdvice {
-
-}
+public interface MessageConnectorHandlerAdvice extends HandleMessageAdvice {}

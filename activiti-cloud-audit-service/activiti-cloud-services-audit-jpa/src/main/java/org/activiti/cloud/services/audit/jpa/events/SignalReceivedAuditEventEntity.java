@@ -33,15 +33,14 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
     protected static final String SIGNAL_RECEIVED_EVENT = "SignalReceivedEvent";
 
     @Convert(converter = SignalJpaJsonConverter.class)
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private BPMNSignal signal;
 
-    public SignalReceivedAuditEventEntity() {
-    }
+    public SignalReceivedAuditEventEntity() {}
 
     public SignalReceivedAuditEventEntity(CloudBPMNSignalReceivedEvent cloudEvent) {
         super(cloudEvent);
-        setSignal(cloudEvent.getEntity()) ;
+        setSignal(cloudEvent.getEntity());
     }
 
     public BPMNSignal getSignal() {
@@ -56,10 +55,10 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("SignalReceivedAuditEventEntity [signal=")
-               .append(signal)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(signal)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

@@ -18,19 +18,19 @@ package org.activiti.cloud.services.query.model;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.Date;
+import java.util.Objects;
+
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import java.util.Date;
-import java.util.Objects;
 
 @MappedSuperclass
 public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
 
     /** The unique identifier of this historic activity instance. */
-    @Id
-    private String id;
+    @Id private String id;
 
     /** The unique identifier of the activity in the process */
     private String elementId;
@@ -72,18 +72,15 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
     /** The associated business key of the activity as in the process instance */
     private String businessKey;
 
-    public BaseBPMNActivityEntity() { }
+    public BaseBPMNActivityEntity() {}
 
-    public BaseBPMNActivityEntity(String serviceName,
-                              String serviceFullName,
-                              String serviceVersion,
-                              String appName,
-                              String appVersion) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
+    public BaseBPMNActivityEntity(
+            String serviceName,
+            String serviceFullName,
+            String serviceVersion,
+            String appName,
+            String appVersion) {
+        super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
     }
 
     public String getId() {
@@ -92,15 +89,18 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
 
     public String getElementId() {
         return elementId;
-    };
+    }
+    ;
 
     public String getActivityName() {
         return activityName;
-    };
+    }
+    ;
 
     public String getActivityType() {
         return activityType;
-    };
+    }
+    ;
 
     public String getProcessDefinitionId() {
         return processDefinitionId;

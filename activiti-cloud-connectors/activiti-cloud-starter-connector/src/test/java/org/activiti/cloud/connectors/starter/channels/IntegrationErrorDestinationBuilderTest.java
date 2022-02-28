@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
@@ -24,17 +27,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 public class IntegrationErrorDestinationBuilderTest {
 
-    @InjectMocks
-    private IntegrationErrorDestinationBuilderImpl subject;
+    @InjectMocks private IntegrationErrorDestinationBuilderImpl subject;
 
-    @Mock
-    private ConnectorProperties connectorProperties;
+    @Mock private ConnectorProperties connectorProperties;
 
     @Test
     public void shouldResolveDestination() {
@@ -54,7 +52,6 @@ public class IntegrationErrorDestinationBuilderTest {
 
         // then
         assertThat(result).isEqualTo("integrationError.myServiceName");
-
     }
 
     @Test
@@ -75,5 +72,4 @@ public class IntegrationErrorDestinationBuilderTest {
         // then
         assertThat(result).isEqualTo("integrationError.myErrorDestination");
     }
-
 }

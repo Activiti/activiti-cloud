@@ -20,39 +20,38 @@ import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 
-public class CloudBPMNErrorReceivedEventImpl  extends CloudRuntimeEventImpl<BPMNError, BPMNErrorReceivedEvent.ErrorEvents> implements CloudBPMNErrorReceivedEvent {
+public class CloudBPMNErrorReceivedEventImpl
+        extends CloudRuntimeEventImpl<BPMNError, BPMNErrorReceivedEvent.ErrorEvents>
+        implements CloudBPMNErrorReceivedEvent {
 
-    public CloudBPMNErrorReceivedEventImpl() {
-    }
+    public CloudBPMNErrorReceivedEventImpl() {}
 
-    public CloudBPMNErrorReceivedEventImpl(BPMNError entity,
-                                           String processDefinitionId,
-                                           String processInstanceId) {
-        super(entity);    
+    public CloudBPMNErrorReceivedEventImpl(
+            BPMNError entity, String processDefinitionId, String processInstanceId) {
+        super(entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
-        
-        if (entity!=null) {
+
+        if (entity != null) {
             setEntityId(entity.getElementId());
         }
     }
-    
-    public CloudBPMNErrorReceivedEventImpl(String id,
-                                           Long timestamp,
-                                           BPMNError entity,
-                                           String processDefinitionId,
-                                           String processInstanceId) {
-        super(id,
-              timestamp,
-              entity);
+
+    public CloudBPMNErrorReceivedEventImpl(
+            String id,
+            Long timestamp,
+            BPMNError entity,
+            String processDefinitionId,
+            String processInstanceId) {
+        super(id, timestamp, entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
-        
-        if (entity!=null) {
+
+        if (entity != null) {
             setEntityId(entity.getElementId());
         }
     }
-    
+
     @Override
     public BPMNErrorReceivedEvent.ErrorEvents getEventType() {
         return BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED;
@@ -62,10 +61,10 @@ public class CloudBPMNErrorReceivedEventImpl  extends CloudRuntimeEventImpl<BPMN
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("CloudBPMNErrorReceivedEventImpl [getEventType()=")
-               .append(getEventType())
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(getEventType())
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

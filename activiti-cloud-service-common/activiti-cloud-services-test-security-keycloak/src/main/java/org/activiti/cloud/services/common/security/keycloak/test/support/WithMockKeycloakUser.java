@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.common.security.keycloak.test.support;
 
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithSecurityContext;
+import org.springframework.test.context.TestContext;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -22,16 +28,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.test.context.support.TestExecutionEvent;
-import org.springframework.security.test.context.support.WithSecurityContext;
-import org.springframework.test.context.TestContext;
-
-/**
- * Annotation for testing with mock Keycloak user
- */
-@Target({ ElementType.METHOD, ElementType.TYPE })
+/** Annotation for testing with mock Keycloak user */
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
@@ -39,24 +37,25 @@ import org.springframework.test.context.TestContext;
 public @interface WithMockKeycloakUser {
 
     String username() default "testuser";
-    
+
     String[] roles() default {};
 
     String[] groups() default {};
-    
+
     boolean isActive() default true;
 
     boolean isInteractive() default false;
-    
+
     String rolePrefix() default "ROLE_";
-    
+
     /**
-     * Determines when the {@link SecurityContext} is setup. The default is before
-     * {@link TestExecutionEvent#TEST_METHOD} which occurs during
-     * {@link org.springframework.test.context.TestExecutionListener#beforeTestMethod(TestContext)}
+     * Determines when the {@link SecurityContext} is setup. The default is before {@link
+     * TestExecutionEvent#TEST_METHOD} which occurs during {@link
+     * org.springframework.test.context.TestExecutionListener#beforeTestMethod(TestContext)}
+     *
      * @return the {@link TestExecutionEvent} to initialize before
      * @since 5.1
      */
     @AliasFor(annotation = WithSecurityContext.class)
-    TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_METHOD;    
+    TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_METHOD;
 }

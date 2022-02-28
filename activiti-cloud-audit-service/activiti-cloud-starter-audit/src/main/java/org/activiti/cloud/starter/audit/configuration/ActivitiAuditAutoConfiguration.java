@@ -22,6 +22,4 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @Import(AuditSwaggerConfig.class)
 @PropertySource("classpath:audit-messaging.properties")
-public class ActivitiAuditAutoConfiguration {
-
-}
+public class ActivitiAuditAutoConfiguration {}

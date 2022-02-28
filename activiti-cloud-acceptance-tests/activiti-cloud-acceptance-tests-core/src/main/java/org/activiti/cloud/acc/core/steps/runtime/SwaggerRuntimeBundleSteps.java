@@ -16,6 +16,7 @@
 package org.activiti.cloud.acc.core.steps.runtime;
 
 import net.thucydides.core.annotations.Step;
+
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.shared.service.SwaggerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @EnableRuntimeFeignContext
 public class SwaggerRuntimeBundleSteps {
 
-    @Autowired
-    private SwaggerService runtimeBundleSwaggerService;
+    @Autowired private SwaggerService runtimeBundleSwaggerService;
 
     @Step
-    public String getSwaggerSpecification(){
+    public String getSwaggerSpecification() {
         return runtimeBundleSwaggerService.getSwaggerSpecification("Runtime Bundle");
     }
 }

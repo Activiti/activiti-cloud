@@ -21,11 +21,13 @@ import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationC
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
 
-public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
+import javax.persistence.EntityManager;
+
+public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler
+        implements QueryEventHandler {
 
     public IntegrationResultReceivedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -33,17 +35,20 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
+        CloudIntegrationResultReceivedEvent integrationEvent =
+                CloudIntegrationResultReceivedEvent.class.cast(event);
 
         Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
 
-        result.ifPresent(entity -> {
-            entity.setResultDate(new Date(integrationEvent.getTimestamp()));
-            entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
-            entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
+        result.ifPresent(
+                entity -> {
+                    entity.setResultDate(new Date(integrationEvent.getTimestamp()));
+                    entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+                    entity.setOutBoundVariables(
+                            integrationEvent.getEntity().getOutBoundVariables());
 
-            entityManager.persist(entity);
-        });
+                    entityManager.persist(entity);
+                });
     }
 
     @Override

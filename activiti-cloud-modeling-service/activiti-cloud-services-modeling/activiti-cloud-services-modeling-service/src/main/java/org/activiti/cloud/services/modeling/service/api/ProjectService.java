@@ -28,17 +28,13 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Business logic related to {@link Project} entities
- */
+/** Business logic related to {@link Project} entities */
 public interface ProjectService {
-    Page<Project> getProjects(Pageable pageable,
-                              String name);
+    Page<Project> getProjects(Pageable pageable, String name);
 
     Project createProject(Project project);
 
-    Project updateProject(Project projectToUpdate,
-                          Project newProject);
+    Project updateProject(Project projectToUpdate, Project newProject);
 
     void deleteProject(Project project);
 
@@ -46,8 +42,7 @@ public interface ProjectService {
 
     FileContent exportProject(Project project) throws IOException;
 
-    Project copyProject(Project projectToCopy,
-                        String newProjectName);
+    Project copyProject(Project projectToCopy, String newProjectName);
 
     ProjectAccessControl getProjectAccessControl(Project project);
 
@@ -57,13 +52,14 @@ public interface ProjectService {
 
     void validateProject(Project project);
 
-    Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException;
+    Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream)
+            throws IOException;
 
     default Page<Project> getProjects(Pageable pageable, String name, List<String> filters) {
         return getProjects(pageable, name);
     }
 
-    default Optional<Project> findProjectRepresentationById(String projectId){
+    default Optional<Project> findProjectRepresentationById(String projectId) {
         return findProjectById(projectId);
     }
 }

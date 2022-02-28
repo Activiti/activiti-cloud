@@ -18,6 +18,4 @@ package org.activiti.cloud.services.messages.core.release;
 import org.activiti.cloud.services.messages.core.support.Chain;
 import org.springframework.integration.store.MessageGroup;
 
-public interface MessageGroupReleaseChain extends Chain<MessageGroup, Boolean> {
-
-}
+public interface MessageGroupReleaseChain extends Chain<MessageGroup, Boolean> {}

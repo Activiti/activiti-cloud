@@ -19,10 +19,9 @@ import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.springframework.messaging.MessageHandler;
 
 public class DefaultJobMessageHandlerFactory implements JobMessageHandlerFactory {
-    
+
     @Override
     public MessageHandler create(ProcessEngineConfigurationImpl configuration) {
         return new JobMessageHandler(configuration);
     }
-    
 }

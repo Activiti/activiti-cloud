@@ -24,12 +24,16 @@ import org.activiti.cloud.services.events.message.MessageBuilderAppender;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-public class StartMessageDeploymentDefinitionMessageBuilderAppender implements MessageBuilderAppender {
+public class StartMessageDeploymentDefinitionMessageBuilderAppender
+        implements MessageBuilderAppender {
 
     private final StartMessageDeploymentDefinition startMessageDeploymentDefinition;
 
-    public StartMessageDeploymentDefinitionMessageBuilderAppender(StartMessageDeploymentDefinition startMessageDeploymentDefinition) {
-        Assert.notNull(startMessageDeploymentDefinition, "startMessageDeploymentDefinition must not be null");
+    public StartMessageDeploymentDefinitionMessageBuilderAppender(
+            StartMessageDeploymentDefinition startMessageDeploymentDefinition) {
+        Assert.notNull(
+                startMessageDeploymentDefinition,
+                "startMessageDeploymentDefinition must not be null");
 
         this.startMessageDeploymentDefinition = startMessageDeploymentDefinition;
     }
@@ -37,13 +41,12 @@ public class StartMessageDeploymentDefinitionMessageBuilderAppender implements M
     @Override
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
-        
-        StartMessageSubscription messageEventSubscription = startMessageDeploymentDefinition.getMessageSubscription();
-        
+
+        StartMessageSubscription messageEventSubscription =
+                startMessageDeploymentDefinition.getMessageSubscription();
+
         // TODO Add more headers
         return request.setHeader(MESSAGE_EVENT_NAME, messageEventSubscription.getEventName())
-                      .setHeader(MESSAGE_EVENT_ID, messageEventSubscription.getId())
-       ;
+                .setHeader(MESSAGE_EVENT_ID, messageEventSubscription.getId());
     }
-
 }

@@ -30,6 +30,8 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import static java.util.Collections.emptyList;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
@@ -64,8 +66,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
 
-import static java.util.Collections.emptyList;
-
 @RestController
 @RequestMapping(produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public class ProcessInstanceControllerImpl implements ProcessInstanceController {
@@ -85,13 +85,14 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     private final ProcessVariablesPayloadConverter variablesPayloadConverter;
 
     @Autowired
-    public ProcessInstanceControllerImpl(RepositoryService repositoryService,
-                                         ProcessDiagramGeneratorWrapper processDiagramGenerator,
-                                         ProcessInstanceRepresentationModelAssembler representationModelAssembler,
-                                         AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
-                                         ProcessRuntime processRuntime,
-                                         SpringPageConverter pageConverter,
-                                         ProcessVariablesPayloadConverter variablesPayloadConverter) {
+    public ProcessInstanceControllerImpl(
+            RepositoryService repositoryService,
+            ProcessDiagramGeneratorWrapper processDiagramGenerator,
+            ProcessInstanceRepresentationModelAssembler representationModelAssembler,
+            AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
+            ProcessRuntime processRuntime,
+            SpringPageConverter pageConverter,
+            ProcessVariablesPayloadConverter variablesPayloadConverter) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.representationModelAssembler = representationModelAssembler;
@@ -103,50 +104,63 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(Pageable pageable) {
-        Page<ProcessInstance> processInstancePage = processRuntime.processInstances(pageConverter.toAPIPageable(pageable));
-        return pagedCollectionModelAssembler.toModel(pageable,
+        Page<ProcessInstance> processInstancePage =
+                processRuntime.processInstances(pageConverter.toAPIPageable(pageable));
+        return pagedCollectionModelAssembler.toModel(
+                pageable,
                 pageConverter.toSpringPage(pageable, processInstancePage),
                 representationModelAssembler);
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
+    public EntityModel<CloudProcessInstance> startProcess(
+            @RequestBody StartProcessPayload startProcessPayload) {
         startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
 
         return representationModelAssembler.toModel(processRuntime.start(startProcessPayload));
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId,
-                                                                 @RequestBody(required = false) StartProcessPayload startProcessPayload) {
+    public EntityModel<CloudProcessInstance> startCreatedProcess(
+            @PathVariable String processInstanceId,
+            @RequestBody(required = false) StartProcessPayload startProcessPayload) {
         if (startProcessPayload == null) {
             startProcessPayload = ProcessPayloadBuilder.start().build();
         }
         startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
-        return representationModelAssembler.toModel(processRuntime.startCreatedProcess(processInstanceId, startProcessPayload));
+        return representationModelAssembler.toModel(
+                processRuntime.startCreatedProcess(processInstanceId, startProcessPayload));
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> createProcessInstance(@RequestBody CreateProcessInstancePayload createProcessInstancePayload) {
-        return representationModelAssembler.toModel(processRuntime.create(createProcessInstancePayload));
+    public EntityModel<CloudProcessInstance> createProcessInstance(
+            @RequestBody CreateProcessInstancePayload createProcessInstancePayload) {
+        return representationModelAssembler.toModel(
+                processRuntime.create(createProcessInstancePayload));
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId) {
-        return representationModelAssembler.toModel(processRuntime.processInstance(processInstanceId));
+    public EntityModel<CloudProcessInstance> getProcessInstanceById(
+            @PathVariable String processInstanceId) {
+        return representationModelAssembler.toModel(
+                processRuntime.processInstance(processInstanceId));
     }
 
     @Override
     public String getProcessDiagram(@PathVariable String processInstanceId) {
         ProcessInstance processInstance = processRuntime.processInstance(processInstanceId);
 
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
-        return new String(processDiagramGenerator.generateDiagram(bpmnModel,
-            processRuntime.processInstanceMeta(processInstance.getId())
-                .getActiveActivitiesIds(),
-            emptyList(),
-            emptyList()),
-            StandardCharsets.UTF_8);
+        BpmnModel bpmnModel =
+                repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
+        return new String(
+                processDiagramGenerator.generateDiagram(
+                        bpmnModel,
+                        processRuntime
+                                .processInstanceMeta(processInstance.getId())
+                                .getActiveActivitiesIds(),
+                        emptyList(),
+                        emptyList()),
+                StandardCharsets.UTF_8);
     }
 
     @Override
@@ -157,44 +171,50 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public EntityModel<CloudProcessInstance> suspend(@PathVariable String processInstanceId) {
-        return representationModelAssembler.toModel(processRuntime.suspend(ProcessPayloadBuilder.suspend(processInstanceId)));
-
+        return representationModelAssembler.toModel(
+                processRuntime.suspend(ProcessPayloadBuilder.suspend(processInstanceId)));
     }
 
     @Override
     public EntityModel<CloudProcessInstance> resume(@PathVariable String processInstanceId) {
-        return representationModelAssembler.toModel(processRuntime.resume(ProcessPayloadBuilder.resume(processInstanceId)));
+        return representationModelAssembler.toModel(
+                processRuntime.resume(ProcessPayloadBuilder.resume(processInstanceId)));
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId) {
-        return representationModelAssembler.toModel(processRuntime.delete(ProcessPayloadBuilder.delete(processInstanceId)));
+    public EntityModel<CloudProcessInstance> deleteProcessInstance(
+            @PathVariable String processInstanceId) {
+        return representationModelAssembler.toModel(
+                processRuntime.delete(ProcessPayloadBuilder.delete(processInstanceId)));
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> updateProcess(@PathVariable String processInstanceId,
-                                                        @RequestBody UpdateProcessPayload payload) {
+    public EntityModel<CloudProcessInstance> updateProcess(
+            @PathVariable String processInstanceId, @RequestBody UpdateProcessPayload payload) {
         if (payload != null) {
             payload.setProcessInstanceId(processInstanceId);
-
         }
 
         return representationModelAssembler.toModel(processRuntime.update(payload));
     }
 
     @Override
-    public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
-                                                                       Pageable pageable) {
-        Page<ProcessInstance> processInstancePage = processRuntime.processInstances(pageConverter.toAPIPageable(pageable),
-                ProcessPayloadBuilder.subprocesses(processInstanceId));
+    public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(
+            @PathVariable String processInstanceId, Pageable pageable) {
+        Page<ProcessInstance> processInstancePage =
+                processRuntime.processInstances(
+                        pageConverter.toAPIPageable(pageable),
+                        ProcessPayloadBuilder.subprocesses(processInstanceId));
 
-        return pagedCollectionModelAssembler.toModel(pageable,
+        return pagedCollectionModelAssembler.toModel(
+                pageable,
                 pageConverter.toSpringPage(pageable, processInstancePage),
                 representationModelAssembler);
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> sendStartMessage(@RequestBody StartMessagePayload startMessagePayload) {
+    public EntityModel<CloudProcessInstance> sendStartMessage(
+            @RequestBody StartMessagePayload startMessagePayload) {
         startMessagePayload = variablesPayloadConverter.convert(startMessagePayload);
 
         ProcessInstance processInstance = processRuntime.start(startMessagePayload);
@@ -208,5 +228,4 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

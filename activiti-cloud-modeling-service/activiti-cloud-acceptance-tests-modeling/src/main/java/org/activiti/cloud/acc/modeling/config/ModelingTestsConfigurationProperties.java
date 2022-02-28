@@ -21,9 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-/**
- * Config properties
- */
+/** Config properties */
 @Configuration
 @Import(BaseTestsConfigurationProperties.class)
 @PropertySource("classpath:config-${profile:env}.properties")

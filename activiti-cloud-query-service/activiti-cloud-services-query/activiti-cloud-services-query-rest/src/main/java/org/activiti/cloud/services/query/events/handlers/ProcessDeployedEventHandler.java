@@ -38,14 +38,17 @@ public class ProcessDeployedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessDeployedEvent processDeployedEvent = CloudProcessDeployedEvent.class.cast(event);
+        CloudProcessDeployedEvent processDeployedEvent =
+                CloudProcessDeployedEvent.class.cast(event);
         ProcessDefinition processDefinition = processDeployedEvent.getEntity();
         LOGGER.debug("Handling process deployed event for " + processDefinition.getKey());
-        ProcessDefinitionEntity processDefinitionEntity = new ProcessDefinitionEntity(processDeployedEvent.getServiceName(),
-                                                                                      processDeployedEvent.getServiceFullName(),
-                                                                                      processDeployedEvent.getServiceVersion(),
-                                                                                      processDeployedEvent.getAppName(),
-                                                                                      processDeployedEvent.getAppVersion());
+        ProcessDefinitionEntity processDefinitionEntity =
+                new ProcessDefinitionEntity(
+                        processDeployedEvent.getServiceName(),
+                        processDeployedEvent.getServiceFullName(),
+                        processDeployedEvent.getServiceVersion(),
+                        processDeployedEvent.getAppName(),
+                        processDeployedEvent.getAppVersion());
         processDefinitionEntity.setId(processDefinition.getId());
         processDefinitionEntity.setDescription(processDefinition.getDescription());
         processDefinitionEntity.setFormKey(processDefinition.getFormKey());
@@ -56,8 +59,9 @@ public class ProcessDeployedEventHandler implements QueryEventHandler {
         processDefinitionEntity.setServiceType(processDeployedEvent.getServiceType());
         entityManager.merge(processDefinitionEntity);
 
-        ProcessModelEntity processModelEntity = new ProcessModelEntity(processDefinitionEntity,
-                                                                       processDeployedEvent.getProcessModelContent());
+        ProcessModelEntity processModelEntity =
+                new ProcessModelEntity(
+                        processDefinitionEntity, processDeployedEvent.getProcessModelContent());
         processModelEntity.setId(processDefinitionEntity.getId());
         entityManager.merge(processModelEntity);
     }

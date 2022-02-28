@@ -19,8 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.util.Optional;
-import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
@@ -33,21 +31,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
+import javax.persistence.EntityManager;
+
 @ExtendWith(MockitoExtension.class)
 public class ProcessVariableEntityDeletedHandlerTest {
 
-    @InjectMocks
-    private ProcessVariableDeletedEventHandler handler;
+    @InjectMocks private ProcessVariableDeletedEventHandler handler;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
-    @Mock
-    private EntityManagerFinder entityManagerFinder;
+    @Mock private EntityManagerFinder entityManagerFinder;
 
     @Test
     public void handleRemoveVariableFromProcessAnDeleteIt() {
-        //given
+        // given
         CloudVariableDeletedEvent event = buildVariableDeletedEvent();
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
@@ -57,19 +56,18 @@ public class ProcessVariableEntityDeletedHandlerTest {
         processInstanceEntity.getVariables().add(variableEntity);
 
         given(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-                                 .willReturn(Optional.of(processInstanceEntity));
+                .willReturn(Optional.of(processInstanceEntity));
 
-        //when
+        // when
         handler.handle(event);
 
-        //then
+        // then
         verify(entityManager).remove(variableEntity);
         assertThat(processInstanceEntity.getVariables()).isEmpty();
-
     }
 
     private static CloudVariableDeletedEvent buildVariableDeletedEvent() {
-        return new CloudVariableDeletedEventImpl(new VariableInstanceImpl<>("var", "string", "test", "procInstId", null));
+        return new CloudVariableDeletedEventImpl(
+                new VariableInstanceImpl<>("var", "string", "test", "procInstId", null));
     }
-
 }

@@ -24,5 +24,4 @@ public interface MessageConnectorSink {
 
     @Input(MessageConnectorSink.INPUT)
     MessageChannel input();
-
 }

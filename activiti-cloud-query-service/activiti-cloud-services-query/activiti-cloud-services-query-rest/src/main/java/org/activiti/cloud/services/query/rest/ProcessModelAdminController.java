@@ -35,8 +35,8 @@ public class ProcessModelAdminController {
 
     private EntityFinder entityFinder;
 
-    public ProcessModelAdminController(ProcessModelRepository processModelRepository,
-                                       EntityFinder entityFinder) {
+    public ProcessModelAdminController(
+            ProcessModelRepository processModelRepository, EntityFinder entityFinder) {
         this.processModelRepository = processModelRepository;
         this.entityFinder = entityFinder;
     }
@@ -44,9 +44,13 @@ public class ProcessModelAdminController {
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseBody
     public String getProcessModel(@PathVariable("processDefinitionId") String processDefinitionId) {
-        return entityFinder.findById(processModelRepository,
-                                     processDefinitionId,
-                                     "Unable to find process model for the given id:'" + processDefinitionId + "`")
+        return entityFinder
+                .findById(
+                        processModelRepository,
+                        processDefinitionId,
+                        "Unable to find process model for the given id:'"
+                                + processDefinitionId
+                                + "`")
                 .getProcessModelContent();
     }
 }

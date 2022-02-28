@@ -22,9 +22,10 @@ import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
+
+import javax.persistence.EntityManager;
 
 public class TaskSuspendedEventHandler implements QueryEventHandler {
 
@@ -39,9 +40,13 @@ public class TaskSuspendedEventHandler implements QueryEventHandler {
         CloudTaskSuspendedEvent taskSuspendedEvent = (CloudTaskSuspendedEvent) event;
         Task eventTask = taskSuspendedEvent.getEntity();
 
-        TaskEntity taskEntity = Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                            eventTask.getId()))
-                                        .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
+        TaskEntity taskEntity =
+                Optional.ofNullable(entityManager.find(TaskEntity.class, eventTask.getId()))
+                        .orElseThrow(
+                                () ->
+                                        new QueryException(
+                                                "Unable to find task with id: "
+                                                        + eventTask.getId()));
 
         taskEntity.setStatus(Task.TaskStatus.SUSPENDED);
         taskEntity.setLastModified(new Date(taskSuspendedEvent.getTimestamp()));

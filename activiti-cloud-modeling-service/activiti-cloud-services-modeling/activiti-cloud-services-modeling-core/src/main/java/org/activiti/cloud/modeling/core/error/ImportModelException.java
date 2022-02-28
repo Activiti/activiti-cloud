@@ -15,13 +15,10 @@
  */
 package org.activiti.cloud.modeling.core.error;
 
-/**
- * Exception thrown when a model cannot be imported from a given zip file
- */
+/** Exception thrown when a model cannot be imported from a given zip file */
 public class ImportModelException extends ModelingException {
 
-    public ImportModelException() {
-    }
+    public ImportModelException() {}
 
     public ImportModelException(Throwable cause) {
         super(cause);
@@ -31,9 +28,7 @@ public class ImportModelException extends ModelingException {
         super(message);
     }
 
-    public ImportModelException(String message,
-                                Throwable cause) {
-        super(message,
-              cause);
+    public ImportModelException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

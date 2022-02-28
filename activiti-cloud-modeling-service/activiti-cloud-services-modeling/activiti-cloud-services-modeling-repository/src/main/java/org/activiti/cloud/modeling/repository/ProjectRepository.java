@@ -15,19 +15,16 @@
  */
 package org.activiti.cloud.modeling.repository;
 
-import java.util.Optional;
-
 import org.activiti.cloud.modeling.api.Project;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-/**
- * Interface for {@link Project} entities repository
- */
+import java.util.Optional;
+
+/** Interface for {@link Project} entities repository */
 public interface ProjectRepository<P extends Project> {
 
-    Page<P> getProjects(Pageable pageable,
-                        String nameToFilter);
+    Page<P> getProjects(Pageable pageable, String nameToFilter);
 
     Optional<P> findProjectById(String projectId);
 

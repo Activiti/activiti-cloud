@@ -17,9 +17,7 @@ package org.activiti.cloud.services.modeling.jpa.version;
 
 import java.util.List;
 
-/**
- * Versioned entity interface
- */
+/** Versioned entity interface */
 public interface VersionedEntity<V extends VersionEntity> {
 
     List<V> getVersions();

@@ -17,6 +17,7 @@ package org.activiti.cloud.acc.core.services.query;
 
 import feign.Headers;
 import feign.RequestLine;
+
 import org.activiti.cloud.api.process.model.CloudApplication;
 import org.springframework.hateoas.PagedModel;
 

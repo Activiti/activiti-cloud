@@ -18,21 +18,22 @@ package org.activiti.cloud.acc.core.services.runtime.admin;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import java.util.List;
+
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 public interface ProcessVariablesRuntimeAdminService {
 
     @RequestLine("PUT /admin/v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")
-    ResponseEntity<List<String>> updateVariables(@Param("id") String id,
-                                                 SetProcessVariablesPayload setProcessVariablesPayload);
-    
+    ResponseEntity<List<String>> updateVariables(
+            @Param("id") String id, SetProcessVariablesPayload setProcessVariablesPayload);
+
     @RequestLine("DELETE /admin/v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")
-    ResponseEntity<Void> removeVariables(@Param("id") String id,
-                                         RemoveProcessVariablesPayload removeProcessVariablesPayload);
-
+    ResponseEntity<Void> removeVariables(
+            @Param("id") String id, RemoveProcessVariablesPayload removeProcessVariablesPayload);
 }

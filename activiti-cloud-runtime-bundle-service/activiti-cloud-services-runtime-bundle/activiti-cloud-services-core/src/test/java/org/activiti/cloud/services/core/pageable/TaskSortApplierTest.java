@@ -15,11 +15,15 @@
  */
 package org.activiti.cloud.services.core.pageable;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import org.activiti.cloud.services.core.pageable.sort.TaskSortApplier;
+import org.activiti.cloud.services.core.utils.MockUtils;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.impl.TaskQueryProperty;
 import org.activiti.engine.task.TaskQuery;
-import org.activiti.cloud.services.core.utils.MockUtils;
-import org.activiti.cloud.services.core.pageable.sort.TaskSortApplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -27,14 +31,9 @@ import org.mockito.InjectMocks;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class TaskSortApplierTest {
 
-    @InjectMocks
-    private TaskSortApplier sortApplier;
+    @InjectMocks private TaskSortApplier sortApplier;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -43,38 +42,31 @@ public class TaskSortApplierTest {
 
     @Test
     public void applySort_should_oder_by_task_id_asc_by_default() throws Exception {
-        //given
+        // given
         TaskQuery query = MockUtils.selfReturningMock(TaskQuery.class);
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10);
+        PageRequest pageRequest = PageRequest.of(0, 10);
 
-        //when
-        sortApplier.applySort(query,
-                              pageRequest);
+        // when
+        sortApplier.applySort(query, pageRequest);
 
-        //then
+        // then
         verify(query).orderByTaskId();
         verify(query).asc();
     }
 
     @Test
     public void applySort_should_use_the_criteria_defined_by_pageable_object() throws Exception {
-        //given
+        // given
         TaskQuery query = MockUtils.selfReturningMock(TaskQuery.class);
-        Sort.Order processDefinitionOrder = new Sort.Order(Sort.Direction.ASC,
-                                                           "name");
-        Sort.Order processInstanceOrder = new Sort.Order(Sort.Direction.DESC,
-                                                         "id");
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10,
-                                                 Sort.by(processDefinitionOrder,
-                                                         processInstanceOrder));
+        Sort.Order processDefinitionOrder = new Sort.Order(Sort.Direction.ASC, "name");
+        Sort.Order processInstanceOrder = new Sort.Order(Sort.Direction.DESC, "id");
+        PageRequest pageRequest =
+                PageRequest.of(0, 10, Sort.by(processDefinitionOrder, processInstanceOrder));
 
-        //when
-        sortApplier.applySort(query,
-                              pageRequest);
+        // when
+        sortApplier.applySort(query, pageRequest);
 
-        //then
+        // then
         InOrder inOrder = inOrder(query);
         inOrder.verify(query).orderBy(TaskQueryProperty.NAME);
         inOrder.verify(query).asc();
@@ -83,19 +75,17 @@ public class TaskSortApplierTest {
     }
 
     @Test
-    public void applySort_should_throw_exception_when_using_invalid_property_to_sort() throws Exception {
-        //given
+    public void applySort_should_throw_exception_when_using_invalid_property_to_sort()
+            throws Exception {
+        // given
         TaskQuery query = MockUtils.selfReturningMock(TaskQuery.class);
-        Sort.Order invalidProperty = new Sort.Order(Sort.Direction.ASC,
-                                                    "invalidProperty");
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10,
-                                                 Sort.by(invalidProperty));
+        Sort.Order invalidProperty = new Sort.Order(Sort.Direction.ASC, "invalidProperty");
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(invalidProperty));
 
-        //then
-        //when
+        // then
+        // when
         assertThatExceptionOfType(ActivitiIllegalArgumentException.class)
-            .isThrownBy(() -> sortApplier.applySort(query, pageRequest))
-            .withMessageContaining("invalidProperty");
+                .isThrownBy(() -> sortApplier.applySort(query, pageRequest))
+                .withMessageContaining("invalidProperty");
     }
 }

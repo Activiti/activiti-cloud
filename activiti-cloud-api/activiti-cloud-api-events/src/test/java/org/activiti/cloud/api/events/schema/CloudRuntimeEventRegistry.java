@@ -15,12 +15,6 @@
  */
 package org.activiti.cloud.api.events.schema;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
@@ -65,6 +59,12 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CloudRuntimeEventRegistry {
 
@@ -113,17 +113,25 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudVariableUpdatedEventImpl());
         eventImplementations.add(new CloudVariableDeletedEventImpl());
         eventImplementations.add(new CloudApplicationDeployedEventImpl());
-        return eventImplementations
-                .stream()
-                .collect(Collectors.toMap(
-                        event -> event.getEventType().name(),
-                        this::findInterface));
+        return eventImplementations.stream()
+                .collect(
+                        Collectors.toMap(
+                                event -> event.getEventType().name(), this::findInterface));
     }
 
     private Class<?> findInterface(RuntimeEvent<?, ?> eventImplementationClass) {
         return Arrays.stream(eventImplementationClass.getClass().getInterfaces())
-                .filter(eventInterFace ->
-                                eventImplementationClass.getClass().getSimpleName().contains(eventInterFace.getSimpleName()))
-                .findFirst().orElseThrow(() -> new IllegalStateException("Unable to find interface for " + eventImplementationClass.getClass()));
+                .filter(
+                        eventInterFace ->
+                                eventImplementationClass
+                                        .getClass()
+                                        .getSimpleName()
+                                        .contains(eventInterFace.getSimpleName()))
+                .findFirst()
+                .orElseThrow(
+                        () ->
+                                new IllegalStateException(
+                                        "Unable to find interface for "
+                                                + eventImplementationClass.getClass()));
     }
 }

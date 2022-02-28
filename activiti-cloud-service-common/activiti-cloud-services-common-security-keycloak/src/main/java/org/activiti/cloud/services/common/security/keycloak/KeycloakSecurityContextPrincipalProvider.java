@@ -25,14 +25,13 @@ import java.security.Principal;
 import java.util.Optional;
 
 public class KeycloakSecurityContextPrincipalProvider implements SecurityContextPrincipalProvider {
-    
+
     @Override
     public Optional<Principal> getCurrentPrincipal() {
         return Optional.ofNullable(SecurityContextHolder.getContext())
-                       .map(SecurityContext::getAuthentication)
-                       .map(Authentication::getPrincipal)
-                       .filter(KeycloakPrincipal.class::isInstance)
-                       .map(KeycloakPrincipal.class::cast);
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getPrincipal)
+                .filter(KeycloakPrincipal.class::isInstance)
+                .map(KeycloakPrincipal.class::cast);
     }
-        
 }

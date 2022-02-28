@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.acc.modeling.service;
 
+import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingDecoder;
+import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingEncoder;
+
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -23,27 +26,18 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.form.FormData;
 import feign.form.FormEncoder;
+
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.modeling.api.Model;
 
-import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingDecoder;
-import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingEncoder;
-
-/**
- * Modeling groups service
- */
+/** Modeling groups service */
 public interface ModelingModelsService extends FeignRestDataClient<ModelingModelsService, Model> {
 
     String PATH = "/v1/models";
 
-    static ModelingModelsService build(Encoder encoder,
-                                       Decoder decoder,
-                                       String baseUrl) {
-        return FeignRestDataClient
-                .builder(encoder,
-                         decoder)
-                .target(ModelingModelsService.class,
-                        baseUrl + PATH);
+    static ModelingModelsService build(Encoder encoder, Decoder decoder, String baseUrl) {
+        return FeignRestDataClient.builder(encoder, decoder)
+                .target(ModelingModelsService.class, baseUrl + PATH);
     }
 
     @RequestLine("POST")
@@ -65,13 +59,9 @@ public interface ModelingModelsService extends FeignRestDataClient<ModelingModel
         return ModelingModelsService.class;
     }
 
-    default Response validateModelByUri(String uri,
-                                        FormData file) {
-        return FeignRestDataClient
-                .builder(new FormEncoder(encoder()),
-                         modelingDecoder)
-                .target(getType(),
-                        uri)
+    default Response validateModelByUri(String uri, FormData file) {
+        return FeignRestDataClient.builder(new FormEncoder(encoder()), modelingDecoder)
+                .target(getType(), uri)
                 .validateModel(file);
     }
 }

@@ -20,7 +20,8 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.payloads.DeleteProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 
-public class DeleteProcessInstanceCmdExecutor extends AbstractCommandExecutor<DeleteProcessPayload> {
+public class DeleteProcessInstanceCmdExecutor
+        extends AbstractCommandExecutor<DeleteProcessPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;
 

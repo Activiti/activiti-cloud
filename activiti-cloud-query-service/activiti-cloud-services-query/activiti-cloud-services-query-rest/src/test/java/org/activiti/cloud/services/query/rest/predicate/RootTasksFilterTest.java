@@ -19,37 +19,36 @@ package org.activiti.cloud.services.query.rest.predicate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.querydsl.core.types.Predicate;
+
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.junit.jupiter.api.Test;
 
 public class RootTasksFilterTest {
 
-
     @Test
     public void should_addPredicateParentTaskIdIsNull_when_isRootTaskOnly() {
-        //given
+        // given
         RootTasksFilter rootTasksFilter = new RootTasksFilter(true);
         Predicate initialPredicate = QTaskEntity.taskEntity.name.eq("Task1");
 
-
-        //when
+        // when
         Predicate extendedPredicate = rootTasksFilter.extend(initialPredicate);
 
-        //then
-        assertThat(extendedPredicate).isEqualTo(QTaskEntity.taskEntity.parentTaskId.isNull().and(initialPredicate));
+        // then
+        assertThat(extendedPredicate)
+                .isEqualTo(QTaskEntity.taskEntity.parentTaskId.isNull().and(initialPredicate));
     }
 
     @Test
     public void should_returnInitialPredicate_when_isNotRootTaskOnly() {
-        //given
+        // given
         RootTasksFilter rootTasksFilter = new RootTasksFilter(false);
         Predicate initialPredicate = QTaskEntity.taskEntity.name.eq("Task1");
 
-
-        //when
+        // when
         Predicate extendedPredicate = rootTasksFilter.extend(initialPredicate);
 
-        //then
+        // then
         assertThat(extendedPredicate).isEqualTo(initialPredicate);
     }
 }

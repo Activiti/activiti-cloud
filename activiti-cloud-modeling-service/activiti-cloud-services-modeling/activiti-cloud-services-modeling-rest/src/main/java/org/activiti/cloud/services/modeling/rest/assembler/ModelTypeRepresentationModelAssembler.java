@@ -19,10 +19,9 @@ import org.activiti.cloud.modeling.api.ModelType;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-/**
- * Model assembler for {@link ModelType}
- */
-public class ModelTypeRepresentationModelAssembler implements RepresentationModelAssembler<ModelType, EntityModel<ModelType>> {
+/** Model assembler for {@link ModelType} */
+public class ModelTypeRepresentationModelAssembler
+        implements RepresentationModelAssembler<ModelType, EntityModel<ModelType>> {
 
     @Override
     public EntityModel<ModelType> toModel(ModelType modelType) {

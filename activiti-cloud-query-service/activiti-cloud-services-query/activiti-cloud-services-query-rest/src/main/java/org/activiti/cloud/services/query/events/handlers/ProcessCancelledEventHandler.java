@@ -24,9 +24,10 @@ import org.activiti.cloud.services.query.model.QueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
+
+import javax.persistence.EntityManager;
 
 public class ProcessCancelledEventHandler implements QueryEventHandler {
 
@@ -43,9 +44,17 @@ public class ProcessCancelledEventHandler implements QueryEventHandler {
         CloudProcessCancelledEvent cancelledEvent = (CloudProcessCancelledEvent) event;
         LOGGER.debug("Handling cancel of process Instance " + cancelledEvent.getEntity().getId());
 
-        ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(entityManager
-                                                                              .find(ProcessInstanceEntity.class, cancelledEvent.getEntity().getId()))
-                                                              .orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + cancelledEvent.getEntity().getId()));
+        ProcessInstanceEntity processInstanceEntity =
+                Optional.ofNullable(
+                                entityManager.find(
+                                        ProcessInstanceEntity.class,
+                                        cancelledEvent.getEntity().getId()))
+                        .orElseThrow(
+                                () ->
+                                        new QueryException(
+                                                "Unable to find process instance with the given id:"
+                                                        + " "
+                                                        + cancelledEvent.getEntity().getId()));
 
         processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.CANCELLED);
         processInstanceEntity.setLastModified(new Date(cancelledEvent.getTimestamp()));

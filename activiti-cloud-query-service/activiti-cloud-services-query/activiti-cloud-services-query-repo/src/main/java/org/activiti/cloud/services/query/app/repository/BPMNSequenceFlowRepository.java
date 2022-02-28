@@ -15,9 +15,8 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
-import java.util.List;
-
 import com.querydsl.core.types.dsl.StringPath;
+
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
 import org.activiti.cloud.services.query.model.QBPMNSequenceFlowEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -26,24 +25,24 @@ import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+import java.util.List;
+
 @RepositoryRestResource(exported = false)
-public interface BPMNSequenceFlowRepository extends PagingAndSortingRepository<BPMNSequenceFlowEntity, String>,
-                                                QuerydslPredicateExecutor<BPMNSequenceFlowEntity>,
-                                                QuerydslBinderCustomizer<QBPMNSequenceFlowEntity> {
+public interface BPMNSequenceFlowRepository
+        extends PagingAndSortingRepository<BPMNSequenceFlowEntity, String>,
+                QuerydslPredicateExecutor<BPMNSequenceFlowEntity>,
+                QuerydslBinderCustomizer<QBPMNSequenceFlowEntity> {
 
     @Override
-    default void customize(QuerydslBindings bindings,
-                           QBPMNSequenceFlowEntity root) {
+    default void customize(QuerydslBindings bindings, QBPMNSequenceFlowEntity root) {
 
-        bindings.bind(String.class).first(
-                (StringPath path, String value) -> path.eq(value));
+        bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
-    
+
     List<BPMNSequenceFlowEntity> findByProcessInstanceId(String processInstanceId);
 
-    BPMNSequenceFlowEntity findByProcessInstanceIdAndElementId(String processInstanceId, 
-                                                               String elementId);
+    BPMNSequenceFlowEntity findByProcessInstanceIdAndElementId(
+            String processInstanceId, String elementId);
 
     BPMNSequenceFlowEntity findByEventId(String eventId);
-    
 }

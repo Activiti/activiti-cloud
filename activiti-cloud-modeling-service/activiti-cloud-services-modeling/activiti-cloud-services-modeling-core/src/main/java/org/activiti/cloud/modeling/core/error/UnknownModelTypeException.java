@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.modeling.core.error;
 
-/**
- * Exception thrown when an unknown model type is being processed
- */
+/** Exception thrown when an unknown model type is being processed */
 public class UnknownModelTypeException extends ModelingException {
 
     public UnknownModelTypeException(String message) {

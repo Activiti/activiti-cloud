@@ -23,21 +23,21 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 
 import java.util.ArrayList;
 
-public class ValidationErrorRepresentationModelAssembler extends RepresentationModelAssemblerSupport<ModelValidationError, ValidationErrorResource> {
+public class ValidationErrorRepresentationModelAssembler
+        extends RepresentationModelAssemblerSupport<ModelValidationError, ValidationErrorResource> {
 
     public ValidationErrorRepresentationModelAssembler() {
-        super(ModelController.class,
-              ValidationErrorResource.class);
+        super(ModelController.class, ValidationErrorResource.class);
     }
 
     @Override
     public ValidationErrorResource toModel(ModelValidationError validationError) {
-        return new ValidationErrorResource(validationError,
-                                           new ArrayList<>());
+        return new ValidationErrorResource(validationError, new ArrayList<>());
     }
 
     @Override
-    public CollectionModel<ValidationErrorResource> toCollectionModel(Iterable<? extends ModelValidationError> entities) {
+    public CollectionModel<ValidationErrorResource> toCollectionModel(
+            Iterable<? extends ModelValidationError> entities) {
         return super.toCollectionModel(entities);
     }
 }

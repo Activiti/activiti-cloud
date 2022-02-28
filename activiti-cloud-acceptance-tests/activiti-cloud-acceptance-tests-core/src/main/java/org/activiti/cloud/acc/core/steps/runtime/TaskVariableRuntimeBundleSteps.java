@@ -17,9 +17,8 @@ package org.activiti.cloud.acc.core.steps.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
 import net.thucydides.core.annotations.Step;
+
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.shared.service.BaseService;
@@ -29,11 +28,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.EntityModel;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 @EnableRuntimeFeignContext
 public class TaskVariableRuntimeBundleSteps {
 
-    @Autowired
-    private TaskVariableApiClient taskVariableApiClient;
+    @Autowired private TaskVariableApiClient taskVariableApiClient;
 
     @Autowired
     @Qualifier("runtimeBundleBaseService")
@@ -47,30 +48,30 @@ public class TaskVariableRuntimeBundleSteps {
     @Step
     public void updateVariable(String taskId, String name, Object value) {
 
-        taskVariableApiClient.updateVariable(taskId, name, TaskPayloadBuilder.updateVariable().withTaskId(taskId)
-            .withVariable(name, value).build());
+        taskVariableApiClient.updateVariable(
+                taskId,
+                name,
+                TaskPayloadBuilder.updateVariable()
+                        .withTaskId(taskId)
+                        .withVariable(name, value)
+                        .build());
     }
 
     @Step
-    public void createVariable(String taskId,
-        String name,
-        Object value) {
+    public void createVariable(String taskId, String name, Object value) {
 
-        taskVariableApiClient.createVariable(taskId,
-            TaskPayloadBuilder
-                .createVariable()
-                .withTaskId(taskId)
-                .withVariable(name,
-                    value)
-                .build());
+        taskVariableApiClient.createVariable(
+                taskId,
+                TaskPayloadBuilder.createVariable()
+                        .withTaskId(taskId)
+                        .withVariable(name, value)
+                        .build());
     }
 
     @Step
     public Collection<CloudVariableInstance> getVariables(String taskId) {
-        return taskVariableApiClient.getVariables(taskId)
-            .getContent()
-            .stream()
-            .map(EntityModel::getContent)
-            .collect(Collectors.toList());
+        return taskVariableApiClient.getVariables(taskId).getContent().stream()
+                .map(EntityModel::getContent)
+                .collect(Collectors.toList());
     }
 }

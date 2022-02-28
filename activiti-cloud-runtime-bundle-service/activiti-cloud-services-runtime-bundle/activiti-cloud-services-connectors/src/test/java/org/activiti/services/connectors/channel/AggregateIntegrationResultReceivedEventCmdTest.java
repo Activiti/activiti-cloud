@@ -37,46 +37,42 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class AggregateIntegrationResultReceivedEventCmdTest {
 
-    @InjectMocks
-    private AggregateIntegrationResultReceivedEventCmd command;
+    @InjectMocks private AggregateIntegrationResultReceivedEventCmd command;
 
-    @Mock
-    private IntegrationContext integrationContext;
+    @Mock private IntegrationContext integrationContext;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RuntimeBundleProperties runtimeBundleProperties;
 
-    @Mock
-    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+    @Mock private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
-    @Captor
-    private ArgumentCaptor<CloudIntegrationResultReceivedEventImpl> messageCaptor;
+    @Captor private ArgumentCaptor<CloudIntegrationResultReceivedEventImpl> messageCaptor;
 
     @Test
     public void receiveShouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() {
-        //given
-        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
+        // given
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled())
+                .willReturn(true);
 
-        //when
+        // when
         command.execute(null);
 
-        //then
+        // then
         verify(processEngineEventsAggregator).add(messageCaptor.capture());
         CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
         assertThat(event.getEntity()).isEqualTo(integrationContext);
-
     }
 
     @Test
     public void shouldNot_sentAuditEvent_when_integrationAuditEventsAreDisabled() {
-        //given
-        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
+        // given
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled())
+                .willReturn(false);
 
-        //when
+        // when
         command.execute(null);
 
-        //then
+        // then
         verifyNoInteractions(processEngineEventsAggregator);
     }
-
 }

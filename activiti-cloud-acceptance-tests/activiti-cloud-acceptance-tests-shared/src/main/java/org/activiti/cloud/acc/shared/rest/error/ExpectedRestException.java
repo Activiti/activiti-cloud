@@ -18,15 +18,12 @@ package org.activiti.cloud.acc.shared.rest.error;
 import org.activiti.cloud.acc.shared.serenity.exception.ExpectedException;
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * Expected rest exception
- */
+/** Expected rest exception */
 public class ExpectedRestException extends ExpectedException {
 
     private int statusCode;
 
-    public ExpectedRestException(int statusCode,
-                                 String errorMessage) {
+    public ExpectedRestException(int statusCode, String errorMessage) {
         super(errorMessage);
         this.statusCode = statusCode;
     }
@@ -37,10 +34,10 @@ public class ExpectedRestException extends ExpectedException {
 
     @Override
     public boolean isExpectedException(Throwable throwable) {
-        return throwable instanceof ExpectedRestException &&
-                getStatusCode() == ((ExpectedRestException) throwable).getStatusCode() &&
-                (StringUtils.isEmpty(throwable.getMessage()) ||
-                        throwable.getMessage().contains(getMessage()));
+        return throwable instanceof ExpectedRestException
+                && getStatusCode() == ((ExpectedRestException) throwable).getStatusCode()
+                && (StringUtils.isEmpty(throwable.getMessage())
+                        || throwable.getMessage().contains(getMessage()));
     }
 
     @Override

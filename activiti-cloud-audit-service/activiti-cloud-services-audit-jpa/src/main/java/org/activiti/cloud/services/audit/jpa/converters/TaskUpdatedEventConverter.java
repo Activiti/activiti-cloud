@@ -28,14 +28,14 @@ public class TaskUpdatedEventConverter extends BaseEventToEntityConverter {
     public TaskUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name();
     }
 
     @Override
-    public TaskUpdatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {            
+    public TaskUpdatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
         return new TaskUpdatedEventEntity((CloudTaskUpdatedEvent) cloudRuntimeEvent);
     }
 
@@ -43,8 +43,9 @@ public class TaskUpdatedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskUpdatedEventEntity taskUpdatedEventEntity = (TaskUpdatedEventEntity) auditEventEntity;
 
-        return new CloudTaskUpdatedEventImpl(taskUpdatedEventEntity.getEventId(),
-                                             taskUpdatedEventEntity.getTimestamp(),
-                                             taskUpdatedEventEntity.getTask());
+        return new CloudTaskUpdatedEventImpl(
+                taskUpdatedEventEntity.getEventId(),
+                taskUpdatedEventEntity.getTimestamp(),
+                taskUpdatedEventEntity.getTask());
     }
 }

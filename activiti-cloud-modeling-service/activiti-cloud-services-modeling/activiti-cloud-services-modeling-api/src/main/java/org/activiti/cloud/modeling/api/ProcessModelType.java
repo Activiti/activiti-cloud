@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.modeling.api;
 
-/**
- * Process model type
- */
+/** Process model type */
 public class ProcessModelType implements ModelType {
 
     public static final String PROCESS = "PROCESS";
@@ -30,7 +28,8 @@ public class ProcessModelType implements ModelType {
 
     public static final String BPMN = "bpmn";
 
-    public static final String[] ALLOWED_FILE_EXTENSIONS = new String[]{BPMN20_XML, BPMN_XML, BPMN};
+    public static final String[] ALLOWED_FILE_EXTENSIONS =
+            new String[] {BPMN20_XML, BPMN_XML, BPMN};
 
     @Override
     public String getName() {

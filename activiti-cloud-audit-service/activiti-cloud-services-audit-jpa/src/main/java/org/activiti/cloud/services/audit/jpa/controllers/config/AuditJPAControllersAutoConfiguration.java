@@ -27,6 +27,4 @@ import org.springframework.context.annotation.Import;
     AuditEventsControllerImpl.class,
     AuditEventsDeleteController.class
 })
-public class AuditJPAControllersAutoConfiguration {
-
-}
+public class AuditJPAControllersAutoConfiguration {}

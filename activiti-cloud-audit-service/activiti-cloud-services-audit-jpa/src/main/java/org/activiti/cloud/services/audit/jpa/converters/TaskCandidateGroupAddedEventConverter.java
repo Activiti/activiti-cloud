@@ -25,26 +25,31 @@ import org.activiti.cloud.services.audit.jpa.events.TaskCandidateGroupAddedEvent
 
 public class TaskCandidateGroupAddedEventConverter extends BaseEventToEntityConverter {
 
-    public TaskCandidateGroupAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TaskCandidateGroupAddedEventConverter(
+            EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name();
     }
 
     @Override
-    public TaskCandidateGroupAddedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {          
-        return new TaskCandidateGroupAddedEventEntity((CloudTaskCandidateGroupAddedEvent) cloudRuntimeEvent);
+    public TaskCandidateGroupAddedEventEntity createEventEntity(
+            CloudRuntimeEvent cloudRuntimeEvent) {
+        return new TaskCandidateGroupAddedEventEntity(
+                (CloudTaskCandidateGroupAddedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        TaskCandidateGroupAddedEventEntity eventEntity = (TaskCandidateGroupAddedEventEntity) auditEventEntity;
+        TaskCandidateGroupAddedEventEntity eventEntity =
+                (TaskCandidateGroupAddedEventEntity) auditEventEntity;
 
-        return new CloudTaskCandidateGroupAddedEventImpl(eventEntity.getEventId(),
-                                                         eventEntity.getTimestamp(),
-                                                         eventEntity.getCandidateGroup());
+        return new CloudTaskCandidateGroupAddedEventImpl(
+                eventEntity.getEventId(),
+                eventEntity.getTimestamp(),
+                eventEntity.getCandidateGroup());
     }
 }

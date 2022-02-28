@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.transformer;
 
+import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 
 /**
  * Transform flat list of engine events maps into linear structure with validation of eventType key
@@ -35,7 +35,7 @@ public class EngineEventsTransformer implements Transformer {
     }
 
     @Override
-    public List<EngineEvent> transform(List<Map<String,Object>> events) {
+    public List<EngineEvent> transform(List<Map<String, Object>> events) {
         return events.stream()
                 .filter(this::isValid)
                 .map(it -> new EngineEvent(it))

@@ -24,5 +24,6 @@ import java.util.Map;
 public interface AuditConsumerChannelHandler {
 
     @StreamListener(AuditConsumerChannels.AUDIT_CONSUMER)
-    void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events);
+    void receiveCloudRuntimeEvent(
+            @Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events);
 }

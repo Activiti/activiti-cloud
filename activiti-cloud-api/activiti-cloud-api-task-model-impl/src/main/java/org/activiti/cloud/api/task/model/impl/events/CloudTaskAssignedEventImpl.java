@@ -22,19 +22,14 @@ import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 public class CloudTaskAssignedEventImpl extends CloudTaskEventImpl
         implements CloudTaskAssignedEvent {
 
-    public CloudTaskAssignedEventImpl() {
-    }
+    public CloudTaskAssignedEventImpl() {}
 
     public CloudTaskAssignedEventImpl(Task task) {
         super(task);
     }
 
-    public CloudTaskAssignedEventImpl(String id,
-                                      Long timestamp,
-                                      Task task) {
-        super(id,
-              timestamp,
-              task);
+    public CloudTaskAssignedEventImpl(String id, Long timestamp, Task task) {
+        super(id, timestamp, task);
     }
 
     @Override

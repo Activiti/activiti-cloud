@@ -21,8 +21,8 @@ public class AlfrescoQueryParameters {
 
     private MaxItemsParameter maxItemsParameter;
 
-    public AlfrescoQueryParameters(SkipCountParameter skipCountParameter,
-                                   MaxItemsParameter maxItemsParameter) {
+    public AlfrescoQueryParameters(
+            SkipCountParameter skipCountParameter, MaxItemsParameter maxItemsParameter) {
         this.skipCountParameter = skipCountParameter;
         this.maxItemsParameter = maxItemsParameter;
     }

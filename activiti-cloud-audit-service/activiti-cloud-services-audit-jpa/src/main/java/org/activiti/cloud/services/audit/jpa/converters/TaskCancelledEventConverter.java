@@ -28,7 +28,7 @@ public class TaskCancelledEventConverter extends BaseEventToEntityConverter {
     public TaskCancelledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name();
@@ -41,10 +41,12 @@ public class TaskCancelledEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        TaskCancelledEventEntity taskCancelledEventEntity = (TaskCancelledEventEntity) auditEventEntity;
+        TaskCancelledEventEntity taskCancelledEventEntity =
+                (TaskCancelledEventEntity) auditEventEntity;
 
-        return new CloudTaskCancelledEventImpl(taskCancelledEventEntity.getEventId(),
-                                               taskCancelledEventEntity.getTimestamp(),
-                                               taskCancelledEventEntity.getTask());
+        return new CloudTaskCancelledEventImpl(
+                taskCancelledEventEntity.getEventId(),
+                taskCancelledEventEntity.getTimestamp(),
+                taskCancelledEventEntity.getTask());
     }
 }

@@ -25,10 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -55,45 +52,41 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
 @TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @TestPropertySource("classpath:application-test.properties")
 @WebMvcTest(ProcessInstanceDeleteController.class)
 @Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser("admin")
 public class ProcessInstanceEntityDeleteControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private ProcessInstanceRepository processInstanceRepository;
+    @MockBean private ProcessInstanceRepository processInstanceRepository;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private EntityFinder entityFinder;
+    @MockBean private EntityFinder entityFinder;
 
-    @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;
+    @MockBean private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
-    private ProcessDefinitionRepository processDefinitionRepository;
+    @MockBean private ProcessDefinitionRepository processDefinitionRepository;
 
-    @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;
+    @MockBean private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
-    private TaskLookupRestrictionService taskLookupRestrictionService;
+    @MockBean private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @MockBean
-    private TaskRepository taskRepository;
+    @MockBean private TaskRepository taskRepository;
 
     @BeforeEach
     public void setUp() {
@@ -107,26 +100,33 @@ public class ProcessInstanceEntityDeleteControllerIT {
     }
 
     @Test
-    public void deleteProcessInstancesShouldReturnAllProcessInstancesAndDeleteThem() throws Exception{
+    public void deleteProcessInstancesShouldReturnAllProcessInstancesAndDeleteThem()
+            throws Exception {
 
-        //given
-        List<ProcessInstanceEntity> processInstanceEntities = Collections.singletonList(buildDefaultProcessInstance());
+        // given
+        List<ProcessInstanceEntity> processInstanceEntities =
+                Collections.singletonList(buildDefaultProcessInstance());
         given(processInstanceRepository.findAll(any(Predicate.class)))
                 .willReturn(processInstanceEntities);
 
-        //when
-        mockMvc.perform(delete("/admin/v1/process-instances")
-                .with(csrf())
-                .accept(MediaType.APPLICATION_JSON))
-                //then
+        // when
+        mockMvc.perform(
+                        delete("/admin/v1/process-instances")
+                                .with(csrf())
+                                .accept(MediaType.APPLICATION_JSON))
+                // then
                 .andExpect(status().isOk());
 
         verify(processInstanceRepository).deleteAll(processInstanceEntities);
-
     }
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,
+        return new ProcessInstanceEntity(
+                "My-app",
+                "My-app",
+                "1",
+                null,
+                null,
                 UUID.randomUUID().toString(),
                 UUID.randomUUID().toString(),
                 ProcessInstance.ProcessInstanceStatus.RUNNING,

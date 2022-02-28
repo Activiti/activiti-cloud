@@ -15,15 +15,17 @@
  */
 package org.activiti.cloud.starter.juel.service;
 
-import java.util.Map;
 import org.activiti.cloud.starter.juel.exception.JuelRuntimeException;
 import org.activiti.core.el.JuelExpressionResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 public class JuelExpressionResolverService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JuelExpressionResolverService.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(JuelExpressionResolverService.class);
 
     private static final String RESULT = "result";
     private static final String EXPRESSION = "expression";
@@ -31,6 +33,7 @@ public class JuelExpressionResolverService {
 
     /**
      * Resolves the given expression with the provided variables.
+     *
      * @param inputVariables the input variables: expression and variables.
      * @return the resolved expression.
      */
@@ -38,8 +41,12 @@ public class JuelExpressionResolverService {
         LOGGER.debug("Calling Juel Expression Resolver with parameters {}", inputVariables);
         try {
             final String expression = (String) inputVariables.get(EXPRESSION);
-            final Map<String, Object> conditionVariables = (Map<String, Object>) inputVariables.get(VARIABLES);
-            return Map.of(RESULT, new JuelExpressionResolver().resolveExpression(expression, conditionVariables, Object.class));
+            final Map<String, Object> conditionVariables =
+                    (Map<String, Object>) inputVariables.get(VARIABLES);
+            return Map.of(
+                    RESULT,
+                    new JuelExpressionResolver()
+                            .resolveExpression(expression, conditionVariables, Object.class));
         } catch (Exception e) {
             throw new JuelRuntimeException(e.getMessage(), e);
         }

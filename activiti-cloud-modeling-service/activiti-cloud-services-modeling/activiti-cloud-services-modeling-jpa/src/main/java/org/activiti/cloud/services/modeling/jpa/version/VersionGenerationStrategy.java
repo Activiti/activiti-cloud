@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.modeling.jpa.version;
 
-/**
- * Interface for a version generation strategy
- */
+/** Interface for a version generation strategy */
 public interface VersionGenerationStrategy {
 
     /**
      * Generate the next version relative to the given version.
+     *
      * @param version the version to increment
      * @return the generated version
      */

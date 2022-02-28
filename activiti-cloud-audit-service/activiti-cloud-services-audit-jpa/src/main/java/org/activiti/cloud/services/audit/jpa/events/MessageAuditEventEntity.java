@@ -30,8 +30,7 @@ public abstract class MessageAuditEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private BPMNMessage message;
 
-    public MessageAuditEventEntity() {
-    }
+    public MessageAuditEventEntity() {}
 
     public MessageAuditEventEntity(CloudBPMNMessageEvent cloudEvent) {
         super(cloudEvent);
@@ -55,10 +54,10 @@ public abstract class MessageAuditEventEntity extends AuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("MessageAuditEventEntity [message=")
-               .append(message)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(message)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

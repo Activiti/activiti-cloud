@@ -17,6 +17,7 @@ package org.activiti.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -30,21 +31,23 @@ public class ProcessVariableRestrictionService {
 
     private ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder;
 
-    public ProcessVariableRestrictionService(SecurityPoliciesManager securityPoliciesManager,
-                                             ProcessInstanceVariableFilter processInstanceVariableFilter,
-                                             ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
+    public ProcessVariableRestrictionService(
+            SecurityPoliciesManager securityPoliciesManager,
+            ProcessInstanceVariableFilter processInstanceVariableFilter,
+            ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
         this.securityPoliciesManager = securityPoliciesManager;
         this.processInstanceVariableFilter = processInstanceVariableFilter;
         this.restrictionBuilder = restrictionBuilder;
     }
 
-    public Predicate restrictProcessInstanceVariableQuery(Predicate predicate,
-                                                          SecurityPolicyAccess securityPolicyAccess) {
+    public Predicate restrictProcessInstanceVariableQuery(
+            Predicate predicate, SecurityPolicyAccess securityPolicyAccess) {
         if (!securityPoliciesManager.arePoliciesDefined()) {
             return predicate;
         }
 
-        QProcessInstanceEntity processInstance = QProcessVariableEntity.processVariableEntity.processInstance;
+        QProcessInstanceEntity processInstance =
+                QProcessVariableEntity.processVariableEntity.processInstance;
 
         BooleanExpression varIsProcInstVar = processInstance.isNotNull();
 
@@ -53,9 +56,7 @@ public class ProcessVariableRestrictionService {
             extendedPredicate = varIsProcInstVar.and(predicate);
         }
 
-        return restrictionBuilder.applyProcessDefinitionKeyFilter(extendedPredicate,
-                                                 securityPolicyAccess,
-                                                                  processInstanceVariableFilter);
+        return restrictionBuilder.applyProcessDefinitionKeyFilter(
+                extendedPredicate, securityPolicyAccess, processInstanceVariableFilter);
     }
-
 }

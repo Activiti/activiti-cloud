@@ -32,19 +32,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import java.security.Principal;
 import java.util.Optional;
 
-
 public class KeycloakAccessTokenProviderTest {
 
-    private KeycloakAccessTokenProvider subject = new KeycloakAccessTokenProvider() { };
+    private KeycloakAccessTokenProvider subject = new KeycloakAccessTokenProvider() {};
 
-    @Mock
-    private KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
+    @Mock private KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
 
-    @Mock
-    private RefreshableKeycloakSecurityContext keycloakSecurityContext;
+    @Mock private RefreshableKeycloakSecurityContext keycloakSecurityContext;
 
-    @Mock
-    private AccessToken accessToken;
+    @Mock private AccessToken accessToken;
 
     @BeforeEach
     public void setUp() {
@@ -61,9 +57,7 @@ public class KeycloakAccessTokenProviderTest {
         Optional<AccessToken> result = subject.accessToken(principal);
 
         // then
-        assertThat(result).isPresent()
-                          .contains(accessToken);
-
+        assertThat(result).isPresent().contains(accessToken);
     }
 
     @Test
@@ -77,5 +71,4 @@ public class KeycloakAccessTokenProviderTest {
         // then
         assertThat(result).isEmpty();
     }
-
 }

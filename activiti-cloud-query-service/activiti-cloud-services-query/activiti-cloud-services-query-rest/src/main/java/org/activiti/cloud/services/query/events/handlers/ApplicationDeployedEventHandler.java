@@ -28,33 +28,36 @@ import javax.persistence.EntityManager;
 
 public class ApplicationDeployedEventHandler implements QueryEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationDeployedEventHandler.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ApplicationDeployedEventHandler.class);
 
     private final EntityManager entityManager;
     private final ApplicationRepository applicationRepository;
 
-    public ApplicationDeployedEventHandler(EntityManager entityManager,
-                                           ApplicationRepository applicationRepository) {
+    public ApplicationDeployedEventHandler(
+            EntityManager entityManager, ApplicationRepository applicationRepository) {
         this.entityManager = entityManager;
         this.applicationRepository = applicationRepository;
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudApplicationDeployedEvent applicationDeployedEvent = (CloudApplicationDeployedEvent) event;
+        CloudApplicationDeployedEvent applicationDeployedEvent =
+                (CloudApplicationDeployedEvent) event;
         Deployment deployment = applicationDeployedEvent.getEntity();
         LOGGER.debug("Handling application deployed event for " + deployment.getId());
-        ApplicationEntity application = new ApplicationEntity(
-                deployment.getId(),
-                applicationDeployedEvent.getAppName(),
-                deployment.getVersion().toString()
-        );
+        ApplicationEntity application =
+                new ApplicationEntity(
+                        deployment.getId(),
+                        applicationDeployedEvent.getAppName(),
+                        deployment.getVersion().toString());
 
-        if(applicationRepository.existsByNameAndVersion(application.getName(),
-                                                        application.getVersion())) {
-            LOGGER.debug("Application {} with version {} already exists!",
-                         application.getName(),
-                         application.getVersion());
+        if (applicationRepository.existsByNameAndVersion(
+                application.getName(), application.getVersion())) {
+            LOGGER.debug(
+                    "Application {} with version {} already exists!",
+                    application.getName(),
+                    application.getVersion());
             return;
         }
 
@@ -65,5 +68,4 @@ public class ApplicationDeployedEventHandler implements QueryEventHandler {
     public String getHandledEvent() {
         return ApplicationEvents.APPLICATION_DEPLOYED.name();
     }
-
 }

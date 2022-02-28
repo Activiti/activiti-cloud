@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.converter;
 
-/**
- * ConnectorActionParameter POJO
- */
+/** ConnectorActionParameter POJO */
 public class ConnectorActionParameter {
 
     private String id;

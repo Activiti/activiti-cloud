@@ -15,6 +15,13 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;
@@ -26,24 +33,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import javax.persistence.EntityManager;
 
 public class ProcessUpdatedEventHandlerTest {
 
-    @InjectMocks
-    private ProcessUpdatedEventHandler handler;
+    @InjectMocks private ProcessUpdatedEventHandler handler;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -52,16 +51,17 @@ public class ProcessUpdatedEventHandlerTest {
 
     @Test
     public void handleShouldUpdateCurrentProcessInstance() {
-        //given
+        // given
         CloudProcessUpdatedEvent event = buildProcessUpdatedEvent();
 
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId())).willReturn(currentProcessInstanceEntity);
+        given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId()))
+                .willReturn(currentProcessInstanceEntity);
 
-        //when
+        // when
         handler.handle(event);
 
-        //then
+        // then
         verify(entityManager).persist(currentProcessInstanceEntity);
         verify(currentProcessInstanceEntity).setBusinessKey(event.getEntity().getBusinessKey());
         verify(currentProcessInstanceEntity).setName(event.getEntity().getName());
@@ -79,25 +79,26 @@ public class ProcessUpdatedEventHandlerTest {
 
     @Test
     public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
-        //given
+        // given
         CloudProcessUpdatedEvent event = buildProcessUpdatedEvent();
         String id = event.getEntity().getId();
 
         given(entityManager.find(ProcessInstanceEntity.class, id)).willReturn(null);
 
-        //then
-        //when
+        // then
+        // when
         assertThatExceptionOfType(QueryException.class)
-            .isThrownBy(() -> handler.handle(event))
-            .withMessageContaining("Unable to find process instance with the given id: ");
+                .isThrownBy(() -> handler.handle(event))
+                .withMessageContaining("Unable to find process instance with the given id: ");
     }
 
     @Test
     public void getHandledEventShouldReturnProcessUpdatedEvent() {
-        //when
+        // when
         String handledEvent = handler.getHandledEvent();
 
-        //then
-        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name());
+        // then
+        assertThat(handledEvent)
+                .isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name());
     }
 }

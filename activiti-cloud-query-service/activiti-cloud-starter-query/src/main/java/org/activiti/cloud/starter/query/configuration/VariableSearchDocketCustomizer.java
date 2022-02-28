@@ -19,9 +19,11 @@ package org.activiti.cloud.starter.query.configuration;
 import static springfox.documentation.schema.AlternateTypeRules.newRule;
 
 import com.fasterxml.classmate.TypeResolver;
+
 import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.services.query.rest.VariableSearch;
 import org.springframework.core.Ordered;
+
 import springfox.documentation.spring.web.plugins.Docket;
 
 public class VariableSearchDocketCustomizer implements DocketCustomizer {
@@ -33,15 +35,16 @@ public class VariableSearchDocketCustomizer implements DocketCustomizer {
     }
 
     @Override
-    public Docket customize(
-        Docket docket) {
-        return docket.alternateTypeRules(newRule(typeResolver.resolve(VariableSearch.class),
-            typeResolver.resolve(VariableSearchWrapperMixin.class),
-            Ordered.HIGHEST_PRECEDENCE));
+    public Docket customize(Docket docket) {
+        return docket.alternateTypeRules(
+                newRule(
+                        typeResolver.resolve(VariableSearch.class),
+                        typeResolver.resolve(VariableSearchWrapperMixin.class),
+                        Ordered.HIGHEST_PRECEDENCE));
     }
 
-    //the only purpose of this class is customizing the name of the parameters in the
-    //swagger API in the places where  VariableSearch is used
+    // the only purpose of this class is customizing the name of the parameters in the
+    // swagger API in the places where  VariableSearch is used
     private static class VariableSearchWrapperMixin {
 
         private static class VariableSearchMixin {
@@ -69,5 +72,4 @@ public class VariableSearchDocketCustomizer implements DocketCustomizer {
             return variables;
         }
     }
-
 }

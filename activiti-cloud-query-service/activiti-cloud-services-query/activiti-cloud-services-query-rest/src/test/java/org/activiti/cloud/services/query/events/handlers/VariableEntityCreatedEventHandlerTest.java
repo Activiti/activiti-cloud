@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
@@ -28,48 +33,41 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import java.util.Optional;
+
+import javax.persistence.EntityManager;
 
 @ExtendWith(MockitoExtension.class)
 public class VariableEntityCreatedEventHandlerTest {
 
-    @InjectMocks
-    private VariableCreatedEventHandler handler;
+    @InjectMocks private VariableCreatedEventHandler handler;
 
-    @InjectMocks
-    private ProcessVariableCreatedEventHandler processVariableCreatedEventHandler;
+    @InjectMocks private ProcessVariableCreatedEventHandler processVariableCreatedEventHandler;
 
-    @InjectMocks
-    private TaskVariableCreatedEventHandler taskVariableCreatedEventHandler;
+    @InjectMocks private TaskVariableCreatedEventHandler taskVariableCreatedEventHandler;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
-    @Mock
-    private EntityManagerFinder entityManagerFinder;
+    @Mock private EntityManagerFinder entityManagerFinder;
 
     @Test
     public void handleShouldCreateAndStoreProcessInstanceVariable() {
-        //given
+        // given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId()))
-                                .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables(
+                        event.getEntity().getProcessInstanceId()))
+                .thenReturn(Optional.of(processInstanceEntity));
 
-        //when
+        // when
         processVariableCreatedEventHandler.handle(event);
 
-        //then
-        ArgumentCaptor<ProcessVariableEntity> captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
+        // then
+        ArgumentCaptor<ProcessVariableEntity> captor =
+                ArgumentCaptor.forClass(ProcessVariableEntity.class);
         verify(entityManager).persist(captor.capture());
 
         ProcessVariableEntity variableEntity = captor.getValue();
@@ -89,23 +87,25 @@ public class VariableEntityCreatedEventHandlerTest {
 
     @Test
     public void handleShouldCreateAndStoreTaskVariable() {
-        //given
-        CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariableWithTaskId());
+        // given
+        CloudVariableCreatedEventImpl event =
+                new CloudVariableCreatedEventImpl(buildVariableWithTaskId());
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
 
-        when(entityManager.getReference(ProcessInstanceEntity.class,
-                                        event.getEntity().getProcessInstanceId()))
+        when(entityManager.getReference(
+                        ProcessInstanceEntity.class, event.getEntity().getProcessInstanceId()))
                 .thenReturn(processInstanceEntity);
 
         TaskEntity taskEntity = mock(TaskEntity.class);
         when(entityManagerFinder.findTaskWithVariables("taskId"))
-                                .thenReturn(Optional.of(taskEntity));
-        //when
+                .thenReturn(Optional.of(taskEntity));
+        // when
         taskVariableCreatedEventHandler.handle(event);
 
-        //then
-        ArgumentCaptor<TaskVariableEntity> captor = ArgumentCaptor.forClass(TaskVariableEntity.class);
+        // then
+        ArgumentCaptor<TaskVariableEntity> captor =
+                ArgumentCaptor.forClass(TaskVariableEntity.class);
         verify(entityManager).persist(captor.capture());
 
         TaskVariableEntity variableEntity = captor.getValue();
@@ -125,10 +125,10 @@ public class VariableEntityCreatedEventHandlerTest {
 
     @Test
     public void getHandledEventShouldReturnVariableCreatedEvent() {
-        //when
+        // when
         String handledEvent = handler.getHandledEvent();
 
-        //then
+        // then
         assertThat(handledEvent).isEqualTo(VariableEvent.VariableEvents.VARIABLE_CREATED.name());
     }
 }

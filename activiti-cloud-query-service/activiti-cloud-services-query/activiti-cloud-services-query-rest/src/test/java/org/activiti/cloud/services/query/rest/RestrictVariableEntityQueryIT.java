@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.querydsl.core.types.Predicate;
+
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -46,39 +47,32 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.Arrays;
 
 /**
- * This is present in case of a future scenario where we need to filter task or process instance variables more generally rather than per task or per proc.
+ * This is present in case of a future scenario where we need to filter task or process instance
+ * variables more generally rather than per task or per proc.
  */
 @SpringBootTest
 @TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration
 public class RestrictVariableEntityQueryIT {
 
-    @Autowired
-    private TaskRepository taskRepository;
+    @Autowired private TaskRepository taskRepository;
 
-    @Autowired
-    private TaskCandidateUserRepository taskCandidateUserRepository;
+    @Autowired private TaskCandidateUserRepository taskCandidateUserRepository;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
+    @MockBean private UserGroupManager userGroupManager;
 
-    @Autowired
-    private ProcessInstanceRepository processInstanceRepository;
+    @Autowired private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
     private ProcessVariableLookupRestrictionService processVariableLookupRestrictionService;
 
-    @Autowired
-    private TaskVariableLookupRestrictionService taskVariableLookupRestrictionService;
+    @Autowired private TaskVariableLookupRestrictionService taskVariableLookupRestrictionService;
 
-    @Autowired
-    private VariableRepository variableRepository;
+    @Autowired private VariableRepository variableRepository;
 
-    @Autowired
-    private TaskVariableRepository taskVariableRepository;
+    @Autowired private TaskVariableRepository taskVariableRepository;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -107,8 +101,7 @@ public class RestrictVariableEntityQueryIT {
         variableEntity.setTask(taskEntity);
         taskVariableRepository.save(variableEntity);
 
-        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("1",
-                                                                                "testuser");
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("1", "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
@@ -140,16 +133,17 @@ public class RestrictVariableEntityQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
-        Predicate predicate = processVariableLookupRestrictionService.restrictProcessInstanceVariableQuery(null);
+        Predicate predicate =
+                processVariableLookupRestrictionService.restrictProcessInstanceVariableQuery(null);
         Iterable<ProcessVariableEntity> iterable = variableRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
 
-/* The DSL queries seem to be able to join from variable to task or procInst but not both.
-   Could probably do it using queryFactory approach http://www.querydsl.com/static/querydsl/latest/reference/html/ch02.html#jpa_integration
-   But would then have to handle the pagination to make consistent with using repository.
-   No immediate need and would be inefficient to do those joins.
-   Better solution would be to add application name and process definition to task and/or variable to avoid the joins.
-   Should now also be able to simplify mapping using ElementCollection
- */
+    /* The DSL queries seem to be able to join from variable to task or procInst but not both.
+      Could probably do it using queryFactory approach http://www.querydsl.com/static/querydsl/latest/reference/html/ch02.html#jpa_integration
+      But would then have to handle the pagination to make consistent with using repository.
+      No immediate need and would be inefficient to do those joins.
+      Better solution would be to add application name and process definition to task and/or variable to avoid the joins.
+      Should now also be able to simplify mapping using ElementCollection
+    */
 }

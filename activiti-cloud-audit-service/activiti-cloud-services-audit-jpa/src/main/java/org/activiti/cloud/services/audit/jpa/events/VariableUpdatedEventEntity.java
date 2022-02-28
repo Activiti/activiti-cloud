@@ -34,8 +34,7 @@ public class VariableUpdatedEventEntity extends VariableAuditEventEntity {
     @Column(name = "variable_previous_value", columnDefinition = "text")
     private VariableValue<?> previousValue;
 
-    public VariableUpdatedEventEntity() {
-    }
+    public VariableUpdatedEventEntity() {}
 
     public VariableUpdatedEventEntity(CloudVariableUpdatedEvent cloudEvent) {
         super(cloudEvent);
@@ -53,7 +52,9 @@ public class VariableUpdatedEventEntity extends VariableAuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("VariableUpdatedEventEntity [toString()=").append(super.toString()).append("]");
+        builder.append("VariableUpdatedEventEntity [toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

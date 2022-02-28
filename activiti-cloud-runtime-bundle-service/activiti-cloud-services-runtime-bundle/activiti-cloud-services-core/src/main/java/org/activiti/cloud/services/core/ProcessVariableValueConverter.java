@@ -16,17 +16,19 @@
 package org.activiti.cloud.services.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.activiti.engine.ActivitiException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 
-public class ProcessVariableValueConverter  {
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+public class ProcessVariableValueConverter {
 
     private static Map<String, Class<?>> typeRegistry = new HashMap<>();
 
@@ -52,7 +54,8 @@ public class ProcessVariableValueConverter  {
 
     @SuppressWarnings("unchecked")
     public <T> T convert(ProcessVariableValue variableValue) {
-        Class<?> type = typeRegistry.getOrDefault(variableValue.getType().toLowerCase(), Object.class);
+        Class<?> type =
+                typeRegistry.getOrDefault(variableValue.getType().toLowerCase(), Object.class);
         Object value = variableValue.getValue();
 
         try {
@@ -61,5 +64,4 @@ public class ProcessVariableValueConverter  {
             throw new ActivitiException("VariableValue conversion error", ex);
         }
     }
-
 }

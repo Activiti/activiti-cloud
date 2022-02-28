@@ -15,28 +15,27 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
-import java.util.Optional;
-
-import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import com.querydsl.core.types.Predicate;
+
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import java.util.Optional;
+
 public class EntityFinderTest {
 
-    @InjectMocks
-    private EntityFinder entityFinder;
+    @InjectMocks private EntityFinder entityFinder;
 
-    @Mock
-    private ProcessInstanceRepository repository;
+    @Mock private ProcessInstanceRepository repository;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -45,60 +44,58 @@ public class EntityFinderTest {
 
     @Test
     public void findByIdShouldReturnResultWhenIsPresent() throws Exception {
-        //given
+        // given
         String processInstanceId = "5";
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(repository.findById(processInstanceId)).willReturn(Optional.of(processInstanceEntity));
+        given(repository.findById(processInstanceId))
+                .willReturn(Optional.of(processInstanceEntity));
 
-        //when
-        ProcessInstanceEntity retrieveProcessInstanceEntity = entityFinder.findById(repository,
-                                                                                    processInstanceId,
-                                                                                    "error");
+        // when
+        ProcessInstanceEntity retrieveProcessInstanceEntity =
+                entityFinder.findById(repository, processInstanceId, "error");
 
-        //then
+        // then
         assertThat(retrieveProcessInstanceEntity).isEqualTo(processInstanceEntity);
     }
 
     @Test
     public void findByIdShouldThrowExceptionWhenNotPresent() throws Exception {
-        //given
+        // given
         String processInstanceId = "5";
         given(repository.findById(processInstanceId)).willReturn(Optional.empty());
 
-        //then
-        //when
+        // then
+        // when
         assertThatExceptionOfType(IllegalStateException.class)
-            .isThrownBy(() -> entityFinder.findById(repository, processInstanceId, "Error"))
-            .withMessageContaining("Error");
+                .isThrownBy(() -> entityFinder.findById(repository, processInstanceId, "Error"))
+                .withMessageContaining("Error");
     }
 
     @Test
     public void findOneShouldReturnResultWhenIsPresent() throws Exception {
-        //given
+        // given
         Predicate predicate = mock(Predicate.class);
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
         given(repository.findOne(predicate)).willReturn(Optional.of(processInstanceEntity));
 
-        //when
-        ProcessInstanceEntity retrievedProcessInstanceEntity = entityFinder.findOne(repository,
-                                                                                    predicate,
-                                                                                    "error");
+        // when
+        ProcessInstanceEntity retrievedProcessInstanceEntity =
+                entityFinder.findOne(repository, predicate, "error");
 
-        //then
+        // then
         assertThat(retrievedProcessInstanceEntity).isEqualTo(processInstanceEntity);
     }
 
     @Test
     public void findOneShouldThrowExceptionWhenNotPresent() throws Exception {
-        //given
+        // given
         Predicate predicate = mock(Predicate.class);
         given(repository.findOne(predicate)).willReturn(Optional.empty());
 
-        //then
-        //when
+        // then
+        // when
         assertThatExceptionOfType(IllegalStateException.class)
-            .isThrownBy(() -> entityFinder.findOne(repository, predicate, "Error"))
-            .withMessageContaining("Error");
+                .isThrownBy(() -> entityFinder.findOne(repository, predicate, "Error"))
+                .withMessageContaining("Error");
     }
-
 }

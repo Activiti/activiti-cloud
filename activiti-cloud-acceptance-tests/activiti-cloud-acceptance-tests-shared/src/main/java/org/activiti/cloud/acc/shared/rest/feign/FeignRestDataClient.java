@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.acc.shared.rest.feign;
 
-import java.util.List;
-
 import feign.Body;
 import feign.Feign;
 import feign.Headers;
@@ -26,12 +24,13 @@ import feign.RequestLine;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.gson.GsonEncoder;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 
-/**
- * Generic REST client operations
- */
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+
+import java.util.List;
+
+/** Generic REST client operations */
 public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
 
     @RequestLine("POST")
@@ -48,8 +47,7 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
 
     @RequestLine("PUT /{id}")
     @Headers("Content-Type: application/json")
-    void updateById(@Param("id") String id,
-                    R resource);
+    void updateById(@Param("id") String id, R resource);
 
     @RequestLine("PUT")
     @Headers("Content-Type: application/json")
@@ -83,13 +81,11 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
         return buildByUri(uri).get();
     }
 
-    default EntityModel<R> createByUri(String uri,
-                             R resource) {
+    default EntityModel<R> createByUri(String uri, R resource) {
         return buildByUri(uri).create(resource);
     }
 
-    default void updateByUri(String uri,
-                             R resource) {
+    default void updateByUri(String uri, R resource) {
         buildByUri(uri).update(resource);
     }
 
@@ -98,8 +94,7 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
     }
 
     default C buildByUri(String uri) {
-        return builder().target(getType(),
-                                uri);
+        return builder().target(getType(), uri);
     }
 
     default Encoder encoder() {
@@ -111,12 +106,10 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
     }
 
     default Feign.Builder builder() {
-        return builder(encoder(),
-                       decoder());
+        return builder(encoder(), decoder());
     }
 
-    static Feign.Builder builder(Encoder encoder,
-                                 Decoder decoder) {
+    static Feign.Builder builder(Encoder encoder, Decoder decoder) {
         return Feign.builder()
                 .encoder(encoder)
                 .decoder(decoder)

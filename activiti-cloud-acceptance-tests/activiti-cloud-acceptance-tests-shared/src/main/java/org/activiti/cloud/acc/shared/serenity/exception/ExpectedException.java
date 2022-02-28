@@ -17,22 +17,17 @@ package org.activiti.cloud.acc.shared.serenity.exception;
 
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * Expected exception
- */
+/** Expected exception */
 public class ExpectedException extends RuntimeException {
 
-    public ExpectedException() {
-    }
+    public ExpectedException() {}
 
     public ExpectedException(String message) {
         super(message);
     }
 
-    public ExpectedException(String message,
-                             Throwable cause) {
-        super(message,
-              cause);
+    public ExpectedException(String message, Throwable cause) {
+        super(message, cause);
     }
 
     public ExpectedException(Throwable cause) {
@@ -40,7 +35,7 @@ public class ExpectedException extends RuntimeException {
     }
 
     public boolean isExpectedException(Throwable throwable) {
-        return !StringUtils.isEmpty(throwable.getMessage()) &&
-                throwable.getMessage().contains(getMessage());
+        return !StringUtils.isEmpty(throwable.getMessage())
+                && throwable.getMessage().contains(getMessage());
     }
 }

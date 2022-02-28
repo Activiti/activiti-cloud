@@ -18,16 +18,6 @@ package org.activiti.cloud.services.query;
 import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
 import static java.util.Collections.emptyList;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
@@ -40,12 +30,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
-/**
- * Service logic for generating process diagrams
- */
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+/** Service logic for generating process diagrams */
 public class ProcessDiagramGeneratorWrapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessDiagramGeneratorWrapper.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ProcessDiagramGeneratorWrapper.class);
 
     private final ProcessDiagramGenerator processDiagramGenerator;
 
@@ -74,45 +73,46 @@ public class ProcessDiagramGeneratorWrapper {
 
     /**
      * Generate the diagram for a BPNM model
+     *
      * @param bpmnModel the BPNM model
      * @return the diagram for the given model
      */
     public byte[] generateDiagram(BpmnModel bpmnModel) {
-        return generateDiagram(bpmnModel,
-                               emptyList(),
-                               emptyList(),
-                               emptyList(),
-                               emptyList());
+        return generateDiagram(bpmnModel, emptyList(), emptyList(), emptyList(), emptyList());
     }
 
     /**
      * Generate the diagram for a BPNM model
+     *
      * @param bpmnModel the BPNM model
      * @param highLightedActivities the activity ids to highlight in diagram
      * @param highLightedFlows the flow ids to highlight in diagram
      * @return the diagram for the given model
      */
-    public byte[] generateDiagram(BpmnModel bpmnModel,
-                                  List<String> highLightedActivities,
-                                  List<String> highLightedFlows,
-                                  List<String> currentActivities,
-                                  List<String> erroredActivities) {
-        try (final InputStream imageStream = processDiagramGenerator.generateDiagram(bpmnModel,
-                                                                                     highLightedActivities,
-                                                                                     highLightedFlows,
-                                                                                     currentActivities,
-                                                                                     erroredActivities,
-                                                                                     getActivityFontName(),
-                                                                                     getLabelFontName(),
-                                                                                     getAnnotationFontName(),
-                                                                                     isGenerateDefaultDiagram(),
-                                                                                     getDiagramImageFileName())) {
+    public byte[] generateDiagram(
+            BpmnModel bpmnModel,
+            List<String> highLightedActivities,
+            List<String> highLightedFlows,
+            List<String> currentActivities,
+            List<String> erroredActivities) {
+        try (final InputStream imageStream =
+                processDiagramGenerator.generateDiagram(
+                        bpmnModel,
+                        highLightedActivities,
+                        highLightedFlows,
+                        currentActivities,
+                        erroredActivities,
+                        getActivityFontName(),
+                        getLabelFontName(),
+                        getAnnotationFontName(),
+                        isGenerateDefaultDiagram(),
+                        getDiagramImageFileName())) {
             return StreamUtils.copyToByteArray(imageStream);
         } catch (ActivitiImageException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Error occurred while getting process diagram for model: " + bpmnModel,
-                                        e);
+            throw new RuntimeException(
+                    "Error occurred while getting process diagram for model: " + bpmnModel, e);
         }
     }
 
@@ -126,46 +126,45 @@ public class ProcessDiagramGeneratorWrapper {
 
     /**
      * Get diagram file name to use when there is no diagram graphic info inside model.
+     *
      * @return the file name
      */
     public String getDiagramImageFileName() {
-        return !StringUtils.isEmpty(getDefaultDiagramImageFileName()) ?
-                getDefaultDiagramImageFileName() :
-                processDiagramGenerator.getDefaultDiagramImageFileName();
+        return !StringUtils.isEmpty(getDefaultDiagramImageFileName())
+                ? getDefaultDiagramImageFileName()
+                : processDiagramGenerator.getDefaultDiagramImageFileName();
     }
 
     /**
      * Get activity font name
+     *
      * @return the activity font name
      */
     public String getActivityFontName() {
-        return isFontAvailable(activityFontName) ?
-                activityFontName :
-                getDiagramDefaultFont();
+        return isFontAvailable(activityFontName) ? activityFontName : getDiagramDefaultFont();
     }
 
     /**
      * Get label font name
+     *
      * @return the label font name
      */
     public String getLabelFontName() {
-        return isFontAvailable(labelFontName) ?
-                labelFontName :
-                getDiagramDefaultFont();
+        return isFontAvailable(labelFontName) ? labelFontName : getDiagramDefaultFont();
     }
 
     /**
      * Get annotation font name
+     *
      * @return the annotation font name
      */
     public String getAnnotationFontName() {
-        return isFontAvailable(annotationFontName) ?
-                annotationFontName :
-                getDiagramDefaultFont();
+        return isFontAvailable(annotationFontName) ? annotationFontName : getDiagramDefaultFont();
     }
 
     /**
      * Check if a given font is available in the current system
+     *
      * @param fontName the font name to check
      * @return true if the specified font name exists
      */
@@ -174,9 +173,13 @@ public class ProcessDiagramGeneratorWrapper {
             return false;
         }
 
-        boolean available = Arrays
-                .stream(getAvailableFonts())
-                .anyMatch(availbleFontName -> availbleFontName.toLowerCase().startsWith(fontName.toLowerCase()));
+        boolean available =
+                Arrays.stream(getAvailableFonts())
+                        .anyMatch(
+                                availbleFontName ->
+                                        availbleFontName
+                                                .toLowerCase()
+                                                .startsWith(fontName.toLowerCase()));
 
         if (!available) {
             LOGGER.debug("Font not available while generating process diagram: " + fontName);
@@ -189,11 +192,9 @@ public class ProcessDiagramGeneratorWrapper {
         return getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
     }
 
-
     public String getDiagramDefaultFont() {
         return diagramDefaultFont;
     }
-
 
     public void setDiagramDefaultFont(String diagramDefaultFont) {
         this.diagramDefaultFont = diagramDefaultFont;
@@ -234,7 +235,5 @@ public class ProcessDiagramGeneratorWrapper {
                 }
             }
         }
-
     }
-
 }

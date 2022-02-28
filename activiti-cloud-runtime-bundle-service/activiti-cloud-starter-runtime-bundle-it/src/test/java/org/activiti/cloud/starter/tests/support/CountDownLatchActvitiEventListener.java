@@ -25,7 +25,8 @@ import java.util.concurrent.CountDownLatch;
 
 public class CountDownLatchActvitiEventListener implements ActivitiEventListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(CountDownLatchActvitiEventListener.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(CountDownLatchActvitiEventListener.class);
 
     private final CountDownLatch countDownLatch;
 
@@ -44,5 +45,4 @@ public class CountDownLatchActvitiEventListener implements ActivitiEventListener
     public boolean isFailOnException() {
         return false;
     }
-
 }

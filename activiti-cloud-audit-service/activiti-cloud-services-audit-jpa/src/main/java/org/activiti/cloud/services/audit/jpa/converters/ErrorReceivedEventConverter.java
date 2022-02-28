@@ -41,12 +41,14 @@ public class ErrorReceivedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ErrorReceivedAuditEventEntity errorReceivedAuditEventEntity = (ErrorReceivedAuditEventEntity) auditEventEntity;
+        ErrorReceivedAuditEventEntity errorReceivedAuditEventEntity =
+                (ErrorReceivedAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNErrorReceivedEventImpl(errorReceivedAuditEventEntity.getEventId(),
-                                                   errorReceivedAuditEventEntity.getTimestamp(),
-                                                   errorReceivedAuditEventEntity.getError(),
-                                                   errorReceivedAuditEventEntity.getProcessDefinitionId(),
-                                                   errorReceivedAuditEventEntity.getProcessInstanceId());
+        return new CloudBPMNErrorReceivedEventImpl(
+                errorReceivedAuditEventEntity.getEventId(),
+                errorReceivedAuditEventEntity.getTimestamp(),
+                errorReceivedAuditEventEntity.getError(),
+                errorReceivedAuditEventEntity.getProcessDefinitionId(),
+                errorReceivedAuditEventEntity.getProcessInstanceId());
     }
 }

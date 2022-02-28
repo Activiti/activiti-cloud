@@ -24,5 +24,4 @@ public interface ProcessModelQueryService {
     @RequestLine("GET /v1/process-definitions/{processDefinitionId}/model")
     @Headers("Accept: application/xml")
     String getProcessModel(@Param("processDefinitionId") String processDefinitionId);
-
 }

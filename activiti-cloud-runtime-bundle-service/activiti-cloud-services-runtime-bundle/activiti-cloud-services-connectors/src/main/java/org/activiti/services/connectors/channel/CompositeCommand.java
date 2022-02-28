@@ -28,7 +28,7 @@ class CompositeCommand implements Command<Void> {
     private final List<Command<?>> commands;
 
     public static CompositeCommand of(Command<?>... commands) {
-        return  new CompositeCommand(Arrays.asList(commands));
+        return new CompositeCommand(Arrays.asList(commands));
     }
 
     private CompositeCommand(List<Command<?>> commands) {

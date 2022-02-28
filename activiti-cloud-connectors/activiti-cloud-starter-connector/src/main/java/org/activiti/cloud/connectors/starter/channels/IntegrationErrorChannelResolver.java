@@ -21,5 +21,4 @@ import org.springframework.messaging.MessageChannel;
 public interface IntegrationErrorChannelResolver {
 
     MessageChannel resolveDestination(IntegrationRequest event);
-
 }

@@ -15,7 +15,10 @@
  */
 package org.activiti.cloud.acc.core.services.query.admin;
 
-import java.util.Map;
+import feign.Headers;
+import feign.Param;
+import feign.QueryMap;
+import feign.RequestLine;
 
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -25,10 +28,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
-import feign.Headers;
-import feign.Param;
-import feign.QueryMap;
-import feign.RequestLine;
+import java.util.Map;
 
 public interface ProcessQueryAdminService {
 
@@ -57,14 +57,17 @@ public interface ProcessQueryAdminService {
 
     @RequestLine("GET /admin/v1/process-instances/{processInstanceId}/service-tasks")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudServiceTask> getServiceTasks(@Param("processInstanceId") String processInstanceId);
+    PagedModel<CloudServiceTask> getServiceTasks(
+            @Param("processInstanceId") String processInstanceId);
 
-    @RequestLine("GET /admin/v1/process-instances/{processInstanceId}/service-tasks?status={status}")
+    @RequestLine(
+            "GET /admin/v1/process-instances/{processInstanceId}/service-tasks?status={status}")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudServiceTask> getServiceTasksByStatus(@Param("processInstanceId") String processInstanceId,
-                                                          @Param("status") String status);
+    PagedModel<CloudServiceTask> getServiceTasksByStatus(
+            @Param("processInstanceId") String processInstanceId, @Param("status") String status);
 
     @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}/integration-context")
     @Headers("Content-Type: application/json")
-    CloudIntegrationContext getCloudIntegrationContext(@Param("serviceTaskId") String serviceTaskId);
+    CloudIntegrationContext getCloudIntegrationContext(
+            @Param("serviceTaskId") String serviceTaskId);
 }

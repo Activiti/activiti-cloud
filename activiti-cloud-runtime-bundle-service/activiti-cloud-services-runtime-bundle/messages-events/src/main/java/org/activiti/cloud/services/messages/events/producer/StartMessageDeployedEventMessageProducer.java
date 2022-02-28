@@ -28,39 +28,41 @@ import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
 
-public class StartMessageDeployedEventMessageProducer implements ProcessRuntimeEventListener<StartMessageDeployedEvent> {
+public class StartMessageDeployedEventMessageProducer
+        implements ProcessRuntimeEventListener<StartMessageDeployedEvent> {
 
-    private static final Logger logger = LoggerFactory.getLogger(BpmnMessageSentEventMessageProducer.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(BpmnMessageSentEventMessageProducer.class);
 
     private final StartMessageDeployedEventMessageBuilderFactory messageBuilderFactory;
     private final MessageEventsDispatcher messageEventsDispatcher;
 
-    public StartMessageDeployedEventMessageProducer(@NonNull MessageEventsDispatcher messageEventsDispatcher,
-                                                    @NonNull StartMessageDeployedEventMessageBuilderFactory messageBuilderFactory) {
+    public StartMessageDeployedEventMessageProducer(
+            @NonNull MessageEventsDispatcher messageEventsDispatcher,
+            @NonNull StartMessageDeployedEventMessageBuilderFactory messageBuilderFactory) {
         this.messageEventsDispatcher = messageEventsDispatcher;
         this.messageBuilderFactory = messageBuilderFactory;
     }
-    
+
     @Override
     public void onEvent(StartMessageDeployedEvent event) {
         logger.debug("onEvent: {}", event);
 
-        StartMessageSubscription messageSubscription = event.getEntity()
-                                                            .getMessageSubscription();
+        StartMessageSubscription messageSubscription = event.getEntity().getMessageSubscription();
 
-        MessageEventPayload messageEventPayload = MessageEventPayloadBuilder.messageEvent(messageSubscription.getEventName())
-                                                                            .withCorrelationKey(messageSubscription.getConfiguration())
-                                                                            .build();
-        
-        
-        Message<MessageEventPayload> message = messageBuilderFactory.create(event)
-                                                                    .withPayload(messageEventPayload)
-                                                                    .setHeader(MessageEventHeaders.MESSAGE_EVENT_TYPE,
-                                                                               event.getEventType()
-                                                                                    .name())
-                                                                    .build();
+        MessageEventPayload messageEventPayload =
+                MessageEventPayloadBuilder.messageEvent(messageSubscription.getEventName())
+                        .withCorrelationKey(messageSubscription.getConfiguration())
+                        .build();
+
+        Message<MessageEventPayload> message =
+                messageBuilderFactory
+                        .create(event)
+                        .withPayload(messageEventPayload)
+                        .setHeader(
+                                MessageEventHeaders.MESSAGE_EVENT_TYPE, event.getEventType().name())
+                        .build();
 
         messageEventsDispatcher.dispatch(message);
     }
-
 }

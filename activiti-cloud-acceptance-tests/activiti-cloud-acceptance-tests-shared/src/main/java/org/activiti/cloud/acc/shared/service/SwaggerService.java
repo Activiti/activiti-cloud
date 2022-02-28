@@ -25,5 +25,4 @@ public interface SwaggerService {
 
     @RequestLine("GET /v3/api-docs?group={group}")
     String getSwaggerSpecification(@Param("group") String group);
-
 }

@@ -31,29 +31,27 @@ public class IntegrationErrorBuilder {
     private final ConnectorProperties connectorProperties;
     private final Throwable error;
 
-    private IntegrationErrorBuilder(IntegrationRequest integrationRequest,
-                                    ConnectorProperties connectorProperties,
-                                    Throwable error) {
+    private IntegrationErrorBuilder(
+            IntegrationRequest integrationRequest,
+            ConnectorProperties connectorProperties,
+            Throwable error) {
         this.integrationRequest = integrationRequest;
         this.connectorProperties = connectorProperties;
         this.error = error;
-
     }
 
-    public static IntegrationErrorBuilder errorFor(IntegrationRequest integrationRequest,
-                                                   ConnectorProperties connectorProperties,
-                                                   Throwable error) {
-        return new IntegrationErrorBuilder(integrationRequest,
-                                           connectorProperties,
-                                           error);
+    public static IntegrationErrorBuilder errorFor(
+            IntegrationRequest integrationRequest,
+            ConnectorProperties connectorProperties,
+            Throwable error) {
+        return new IntegrationErrorBuilder(integrationRequest, connectorProperties, error);
     }
 
     public IntegrationError build() {
         Objects.requireNonNull(integrationRequest);
         Objects.requireNonNull(error);
 
-        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest,
-                                                                         error);
+        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error);
         if (connectorProperties != null) {
             integrationError.setAppVersion(connectorProperties.getAppVersion());
             integrationError.setServiceFullName(connectorProperties.getServiceFullName());
@@ -73,8 +71,8 @@ public class IntegrationErrorBuilder {
         IntegrationError integrationError = build();
 
         return MessageBuilder.withPayload(integrationError)
-                             .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
-                             .setHeader("targetAppName", integrationRequest.getAppName())
-                             .setHeader("targetService", integrationRequest.getServiceFullName());
+                .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
+                .setHeader("targetAppName", integrationRequest.getAppName())
+                .setHeader("targetService", integrationRequest.getServiceFullName());
     }
 }

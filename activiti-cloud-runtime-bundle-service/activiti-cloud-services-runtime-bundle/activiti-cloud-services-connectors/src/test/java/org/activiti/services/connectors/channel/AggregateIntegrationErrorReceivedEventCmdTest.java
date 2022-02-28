@@ -21,8 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -37,40 +35,43 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 public class AggregateIntegrationErrorReceivedEventCmdTest {
 
     private final RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties();
 
-    @Mock
-    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+    @Mock private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
-    @Captor
-    private ArgumentCaptor<CloudRuntimeEvent<?, ?>> cloudRuntimeEventArgumentCaptor;
+    @Captor private ArgumentCaptor<CloudRuntimeEvent<?, ?>> cloudRuntimeEventArgumentCaptor;
 
     @Test
     public void should_aggregateIntegrationErrorReceivedEvent_when_auditEventAreEnabled() {
-        //given
+        // given
         final IntegrationError integrationError = mock(IntegrationError.class);
         final IntegrationContext integrationContext = mock(IntegrationContext.class);
         when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
         when(integrationError.getErrorCode()).thenReturn("myErrorCode");
         when(integrationError.getErrorMessage()).thenReturn("my error message");
         when(integrationError.getErrorClassName()).thenReturn("className");
-        final List<StackTraceElement> stackTraceElements = Collections.singletonList(mock(StackTraceElement.class));
-        when(integrationError.getStackTraceElements()).thenReturn(
-            stackTraceElements);
-        final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
-            integrationError, runtimeBundleProperties, processEngineEventsAggregator);
+        final List<StackTraceElement> stackTraceElements =
+                Collections.singletonList(mock(StackTraceElement.class));
+        when(integrationError.getStackTraceElements()).thenReturn(stackTraceElements);
+        final AggregateIntegrationErrorReceivedEventCmd command =
+                new AggregateIntegrationErrorReceivedEventCmd(
+                        integrationError, runtimeBundleProperties, processEngineEventsAggregator);
 
-        //when
+        // when
         command.execute(mock(CommandContext.class));
 
-        //then
+        // then
         verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
         final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
         assertThat(event).isInstanceOf(CloudIntegrationErrorReceivedEvent.class);
-        CloudIntegrationErrorReceivedEvent errorReceivedEvent = (CloudIntegrationErrorReceivedEvent) event;
+        CloudIntegrationErrorReceivedEvent errorReceivedEvent =
+                (CloudIntegrationErrorReceivedEvent) event;
         assertThat(errorReceivedEvent.getErrorCode()).isEqualTo("myErrorCode");
         assertThat(errorReceivedEvent.getErrorMessage()).isEqualTo("my error message");
         assertThat(errorReceivedEvent.getErrorClassName()).isEqualTo("className");

@@ -15,16 +15,14 @@
  */
 package org.activiti.cloud.modeling.api;
 
-/**
- * Business logic related with actions to be done when the Model metadata changes
- */
+/** Business logic related with actions to be done when the Model metadata changes */
 public interface ModelUpdateListener {
 
     /**
      * Perform an extra action over the model from the data received.
      *
      * @param modelToBeUpdated the model as it is before the update
-     * @param newModel         the model containing the changes to be performed
+     * @param newModel the model containing the changes to be performed
      */
     void execute(Model modelToBeUpdated, Model newModel);
 

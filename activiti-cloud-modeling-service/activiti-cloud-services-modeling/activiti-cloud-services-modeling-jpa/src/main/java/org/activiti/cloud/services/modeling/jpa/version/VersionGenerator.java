@@ -20,11 +20,12 @@ import java.util.Optional;
 /**
  * Version generator.
  *
- * TODO: To set VersionGenerationStrategy from application properties, if any.
+ * <p>TODO: To set VersionGenerationStrategy from application properties, if any.
  */
 public class VersionGenerator {
 
-    private VersionGenerationStrategy versionGenerationStrategy = IncrementPatchVersionGenerationStrategy.INSTANCE;
+    private VersionGenerationStrategy versionGenerationStrategy =
+            IncrementPatchVersionGenerationStrategy.INSTANCE;
 
     /**
      * Generate the next version relative to the given latest version.
@@ -34,8 +35,6 @@ public class VersionGenerator {
      */
     public String generateNextVersion(VersionEntity latestVersion) {
         return versionGenerationStrategy.generateNextVersion(
-                Optional.ofNullable(latestVersion)
-                        .map(VersionEntity::getVersion)
-                        .orElse(null));
+                Optional.ofNullable(latestVersion).map(VersionEntity::getVersion).orElse(null));
     }
 }

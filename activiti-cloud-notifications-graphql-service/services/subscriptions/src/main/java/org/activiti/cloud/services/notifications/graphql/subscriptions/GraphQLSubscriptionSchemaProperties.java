@@ -15,53 +15,48 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 @Validated
-@ConfigurationProperties(prefix="org.activiti.cloud.services.notifications.graphql.subscriptions")
+@ConfigurationProperties(prefix = "org.activiti.cloud.services.notifications.graphql.subscriptions")
 public class GraphQLSubscriptionSchemaProperties {
 
     /**
-     * The URL of GraphQL subscription schema file name with .graphqls extension. Defaults to classpath:activiti.graphqls
+     * The URL of GraphQL subscription schema file name with .graphqls extension. Defaults to
+     * classpath:activiti.graphqls
      */
-    @NotBlank
-    private String graphqls;
+    @NotBlank private String graphqls;
+
+    /** GraphQL subscription schema field name. Defaults to ProcessEngineNotification */
+    @NotBlank private String subscriptionFieldName;
 
     /**
-     * GraphQL subscription schema field name. Defaults to ProcessEngineNotification
+     * GraphQL subscription field comma-separated list of argument names to build hierarchical Stomp
+     * destination subscription topic. Defaults to
+     * serviceName,appName,processDefinitionId,processInstanceId
      */
-    @NotBlank
-    private String subscriptionFieldName;
+    @NotNull private String[] subscriptionArgumentNames;
 
-    /**
-     * GraphQL subscription field comma-separated list of argument names to build hierarchical Stomp destination subscription topic.
-     * Defaults to serviceName,appName,processDefinitionId,processInstanceId
-     */
-    @NotNull
-    private String[] subscriptionArgumentNames;
+    @NotBlank private String relayHost;
 
-    @NotBlank
-    private String relayHost;
+    @NotNull private Integer relayPort;
 
-    @NotNull
-    private Integer relayPort;
+    @NotBlank private String clientLogin;
 
-    @NotBlank
-    private String clientLogin;
-
-    @NotBlank
-    private String clientPasscode;
+    @NotBlank private String clientPasscode;
 
     @Configuration
     @PropertySource("classpath:META-INF/graphql-subscriptions.properties")
-    @PropertySource(value = "classpath:graphql-subscriptions.properties", ignoreResourceNotFound = true)
+    @PropertySource(
+            value = "classpath:graphql-subscriptions.properties",
+            ignoreResourceNotFound = true)
     @EnableConfigurationProperties(GraphQLSubscriptionSchemaProperties.class)
     public static class AutoConfiguration {
         // auto configures parent properties class using spring.factories
@@ -90,7 +85,7 @@ public class GraphQLSubscriptionSchemaProperties {
     public void setSubscriptionArgumentNames(String[] argumentNames) {
         this.subscriptionArgumentNames = argumentNames;
     }
-    
+
     public String getRelayHost() {
         return relayHost;
     }
@@ -122,6 +117,4 @@ public class GraphQLSubscriptionSchemaProperties {
     public void setClientPasscode(String relayPasscode) {
         this.clientPasscode = relayPasscode;
     }
-    
-
 }

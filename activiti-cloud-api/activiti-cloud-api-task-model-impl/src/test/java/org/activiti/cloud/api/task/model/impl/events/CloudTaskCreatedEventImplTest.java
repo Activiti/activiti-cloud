@@ -15,27 +15,27 @@
  */
 package org.activiti.cloud.api.task.model.impl.events;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class CloudTaskCreatedEventImplTest {
 
     @Test
     public void shouldSetFlattenInfoBasedOnEntity() {
-        //given
+        // given
         TaskImpl task = new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED);
         task.setProcessDefinitionId("procDefId");
         task.setProcessInstanceId("procInstId");
         task.setProcessDefinitionVersion(10);
         task.setBusinessKey("businessKey");
 
-        //when
+        // when
         CloudTaskCreatedEventImpl taskCreatedEvent = new CloudTaskCreatedEventImpl(task);
 
-        //then
+        // then
         assertThat(taskCreatedEvent.getEntityId()).isEqualTo("taskId");
         assertThat(taskCreatedEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(taskCreatedEvent.getProcessInstanceId()).isEqualTo("procInstId");

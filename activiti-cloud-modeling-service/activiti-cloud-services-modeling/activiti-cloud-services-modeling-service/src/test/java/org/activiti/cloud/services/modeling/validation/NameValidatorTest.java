@@ -17,10 +17,11 @@ package org.activiti.cloud.services.modeling.validation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.stream.Stream;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.stream.Stream;
 
 class NameValidatorTest {
 
@@ -33,7 +34,8 @@ class NameValidatorTest {
 
     @Test
     public void should_returnEmptyStream_when_theInputIsValid() {
-        Stream<ModelValidationError> errors = nameValidator.validateName("This is @ test with spaces", "myType");
+        Stream<ModelValidationError> errors =
+                nameValidator.validateName("This is @ test with spaces", "myType");
         assertThat(errors).isEmpty();
     }
 
@@ -41,32 +43,39 @@ class NameValidatorTest {
     public void should_returnFieldRequiredError_when_itIsNull() {
         Stream<ModelValidationError> errors = nameValidator.validateName(null, "myType");
         assertThat(errors)
-            .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("field.required", "The myType name is required");
+                .flatExtracting(
+                        ModelValidationError::getErrorCode, ModelValidationError::getDescription)
+                .containsOnly("field.required", "The myType name is required");
     }
 
     @Test
     public void should_returnFieldEmptyError_when_itIsAnEmptyString() {
         Stream<ModelValidationError> errors = nameValidator.validateName("", "myType");
         assertThat(errors)
-            .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("field.empty", "The myType name cannot be empty");
+                .flatExtracting(
+                        ModelValidationError::getErrorCode, ModelValidationError::getDescription)
+                .containsOnly("field.empty", "The myType name cannot be empty");
     }
 
     @Test
     public void should_returnFieldEmptyError_when_itContainsOnlyBlankSpaces() {
         Stream<ModelValidationError> errors = nameValidator.validateName("   ", "myType");
         assertThat(errors)
-            .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("field.empty", "The myType name cannot be empty");
+                .flatExtracting(
+                        ModelValidationError::getErrorCode, ModelValidationError::getDescription)
+                .containsOnly("field.empty", "The myType name cannot be empty");
     }
 
     @Test
     public void should_returnLengthGreaterError_when_textIsTooLong() {
-        Stream<ModelValidationError> errors = nameValidator.validateName("Abc 123 def 456 ghi 789 jkl", "myType");
+        Stream<ModelValidationError> errors =
+                nameValidator.validateName("Abc 123 def 456 ghi 789 jkl", "myType");
         assertThat(errors)
-            .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("length.greater", "The myType name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'");
+                .flatExtracting(
+                        ModelValidationError::getErrorCode, ModelValidationError::getDescription)
+                .containsOnly(
+                        "length.greater",
+                        "The myType name length cannot be greater than 26: 'Abc 123 def 456 ghi 789"
+                                + " jkl'");
     }
-
 }

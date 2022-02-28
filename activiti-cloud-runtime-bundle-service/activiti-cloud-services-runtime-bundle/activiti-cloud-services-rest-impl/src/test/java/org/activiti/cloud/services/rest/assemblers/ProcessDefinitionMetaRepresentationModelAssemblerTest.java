@@ -15,20 +15,22 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
-import java.util.Optional;
-import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
-import org.junit.jupiter.api.Test;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.EntityModel;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.hateoas.IanaLinkRelations.SELF;
 
+import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
+import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
+import java.util.Optional;
+
 public class ProcessDefinitionMetaRepresentationModelAssemblerTest {
 
-    private ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler = new ProcessDefinitionMetaRepresentationModelAssembler();
+    private ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler =
+            new ProcessDefinitionMetaRepresentationModelAssembler();
 
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {

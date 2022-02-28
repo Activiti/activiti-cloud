@@ -21,19 +21,14 @@ import org.activiti.cloud.api.task.model.events.CloudTaskActivatedEvent;
 public class CloudTaskActivatedEventImpl extends CloudTaskEventImpl
         implements CloudTaskActivatedEvent {
 
-    public CloudTaskActivatedEventImpl() {
-    }
+    public CloudTaskActivatedEventImpl() {}
 
     public CloudTaskActivatedEventImpl(Task task) {
         super(task);
     }
 
-    public CloudTaskActivatedEventImpl(String id,
-                                       Long timestamp,
-                                       Task task) {
-        super(id,
-              timestamp,
-              task);
+    public CloudTaskActivatedEventImpl(String id, Long timestamp, Task task) {
+        super(id, timestamp, task);
     }
 
     @Override

@@ -31,10 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(
         value = "/admin/v1/service-tasks",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+        produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public class ServiceTaskIntegrationContextAdminController {
 
     private final IntegrationContextRepository repository;
@@ -43,10 +40,10 @@ public class ServiceTaskIntegrationContextAdminController {
 
     private final EntityFinder entityFinder;
 
-
-    public ServiceTaskIntegrationContextAdminController(IntegrationContextRepository repository,
-                                             IntegrationContextRepresentationModelAssembler representationModelAssembler,
-                                             EntityFinder entityFinder) {
+    public ServiceTaskIntegrationContextAdminController(
+            IntegrationContextRepository repository,
+            IntegrationContextRepresentationModelAssembler representationModelAssembler,
+            EntityFinder entityFinder) {
         this.repository = repository;
         this.representationModelAssembler = representationModelAssembler;
         this.entityFinder = entityFinder;
@@ -55,9 +52,13 @@ public class ServiceTaskIntegrationContextAdminController {
     @RequestMapping(value = "/{serviceTaskId}/integration-context", method = RequestMethod.GET)
     public EntityModel<CloudIntegrationContext> findById(@PathVariable String serviceTaskId) {
 
-        IntegrationContextEntity entity = entityFinder.findById(repository,
-                                                                serviceTaskId,
-                                                                "Unable to find integration context entity for the given id:'" + serviceTaskId + "'");
+        IntegrationContextEntity entity =
+                entityFinder.findById(
+                        repository,
+                        serviceTaskId,
+                        "Unable to find integration context entity for the given id:'"
+                                + serviceTaskId
+                                + "'");
 
         return representationModelAssembler.toModel(entity);
     }

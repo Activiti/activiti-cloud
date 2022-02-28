@@ -31,6 +31,4 @@ import java.lang.annotation.Target;
 @EnableDiscoveryClient
 @EnableAutoConfiguration
 @EnableWebSecurity
-public @interface EnableActivitiAudit {
-
-}
+public @interface EnableActivitiAudit {}

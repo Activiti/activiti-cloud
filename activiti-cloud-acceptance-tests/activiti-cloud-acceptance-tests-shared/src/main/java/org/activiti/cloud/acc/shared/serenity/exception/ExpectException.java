@@ -20,13 +20,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Expect exception annotation
- */
+/** Expect exception annotation */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExpectException {
 
     String value() default "";
-
 }

@@ -20,5 +20,4 @@ import org.springframework.messaging.support.ErrorMessage;
 public interface IntegrationErrorHandler {
 
     void handleErrorMessage(ErrorMessage errorMessage);
-
-} 
+}

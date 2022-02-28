@@ -15,19 +15,15 @@
  */
 package org.activiti.cloud.acc.shared.rest;
 
+import org.springframework.test.context.ContextConfiguration;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.test.context.ContextConfiguration;
-
-/**
- * Allow Feign clients autowiring
- */
+/** Allow Feign clients autowiring */
 @ContextConfiguration(classes = {DirtyContextConfiguration.class})
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EnableDirtyContext {
-
-}
+public @interface EnableDirtyContext {}

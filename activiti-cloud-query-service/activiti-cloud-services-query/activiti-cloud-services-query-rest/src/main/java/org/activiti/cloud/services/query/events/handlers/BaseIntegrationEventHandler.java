@@ -21,12 +21,13 @@ import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
 import java.util.Optional;
+
+import javax.persistence.EntityManager;
 
 public abstract class BaseIntegrationEventHandler {
 
-    private final static Logger logger = LoggerFactory.getLogger(BaseIntegrationEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseIntegrationEventHandler.class);
 
     protected final EntityManager entityManager;
 
@@ -34,7 +35,8 @@ public abstract class BaseIntegrationEventHandler {
         this.entityManager = entityManager;
     }
 
-    protected Optional<IntegrationContextEntity> findIntegrationContextEntity(CloudIntegrationEvent event) {
+    protected Optional<IntegrationContextEntity> findIntegrationContextEntity(
+            CloudIntegrationEvent event) {
         IntegrationContext integrationContext = event.getEntity();
         String pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
@@ -42,5 +44,4 @@ public abstract class BaseIntegrationEventHandler {
 
         return Optional.ofNullable(entity);
     }
-
 }

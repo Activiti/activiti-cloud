@@ -20,9 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/**
- * Runtime dirty context configuration
- */
+/** Runtime dirty context configuration */
 @Configuration
 @Import(DirtyContextConfiguration.class)
 public class RuntimeDirtyContextConfiguration {

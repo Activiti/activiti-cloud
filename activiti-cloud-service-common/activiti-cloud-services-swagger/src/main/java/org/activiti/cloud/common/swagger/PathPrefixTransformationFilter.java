@@ -18,11 +18,14 @@ package org.activiti.cloud.common.swagger;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
-import java.util.ArrayList;
-import javax.servlet.http.HttpServletRequest;
+
 import springfox.documentation.oas.web.OpenApiTransformationContext;
 import springfox.documentation.oas.web.WebMvcOpenApiTransformationFilter;
 import springfox.documentation.spi.DocumentationType;
+
+import java.util.ArrayList;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class PathPrefixTransformationFilter implements WebMvcOpenApiTransformationFilter {
 
@@ -51,7 +54,8 @@ public class PathPrefixTransformationFilter implements WebMvcOpenApiTransformati
 
     private String getServicePrefix(OpenAPI openApi) {
         String servicePrefix = "";
-        final String configuredPrefix = (String) openApi.getExtensions().get(SwaggerDocketBuilder.SERVICE_URL_PREFIX);
+        final String configuredPrefix =
+                (String) openApi.getExtensions().get(SwaggerDocketBuilder.SERVICE_URL_PREFIX);
         if (configuredPrefix != null) {
             servicePrefix = configuredPrefix;
         }

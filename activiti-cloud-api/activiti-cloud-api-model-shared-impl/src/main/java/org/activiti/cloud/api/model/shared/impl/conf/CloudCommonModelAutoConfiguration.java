@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -36,37 +37,42 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CloudCommonModelAutoConfiguration {
 
-    //this bean will be automatically injected inside boot's ObjectMapper
+    // this bean will be automatically injected inside boot's ObjectMapper
     @Bean
     public Module customizeCloudCommonModelObjectMapper() {
-        SimpleModule module = new SimpleModule("mapMixCloudRuntimeEvents",
-                                               Version.unknownVersion());
+        SimpleModule module =
+                new SimpleModule("mapMixCloudRuntimeEvents", Version.unknownVersion());
 
-        module.registerSubtypes(new NamedType(CloudVariableCreatedEventImpl.class,
-                                              VariableEvent.VariableEvents.VARIABLE_CREATED.name()));
-        module.registerSubtypes(new NamedType(CloudVariableUpdatedEventImpl.class,
-                                              VariableEvent.VariableEvents.VARIABLE_UPDATED.name()));
-        module.registerSubtypes(new NamedType(CloudVariableDeletedEventImpl.class,
-                                              VariableEvent.VariableEvents.VARIABLE_DELETED.name()));
+        module.registerSubtypes(
+                new NamedType(
+                        CloudVariableCreatedEventImpl.class,
+                        VariableEvent.VariableEvents.VARIABLE_CREATED.name()));
+        module.registerSubtypes(
+                new NamedType(
+                        CloudVariableUpdatedEventImpl.class,
+                        VariableEvent.VariableEvents.VARIABLE_UPDATED.name()));
+        module.registerSubtypes(
+                new NamedType(
+                        CloudVariableDeletedEventImpl.class,
+                        VariableEvent.VariableEvents.VARIABLE_DELETED.name()));
 
-        SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
-            //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
-            //once version 2.9.6 is related we can remove this @override method
-            @Override
-            public JavaType resolveAbstractType(DeserializationConfig config,
-                                                BeanDescription typeDesc) {
-                return findTypeMapping(config,
-                                       typeDesc.getType());
-            }
-        };
+        SimpleAbstractTypeResolver resolver =
+                new SimpleAbstractTypeResolver() {
+                    // this is a workaround for
+                    // https://github.com/FasterXML/jackson-databind/issues/2019
+                    // once version 2.9.6 is related we can remove this @override method
+                    @Override
+                    public JavaType resolveAbstractType(
+                            DeserializationConfig config, BeanDescription typeDesc) {
+                        return findTypeMapping(config, typeDesc.getType());
+                    }
+                };
 
-        resolver.addMapping(CloudVariableInstance.class,
-                            CloudVariableInstanceImpl.class);
+        resolver.addMapping(CloudVariableInstance.class, CloudVariableInstanceImpl.class);
 
         module.setAbstractTypes(resolver);
 
         module.setMixInAnnotation(CloudRuntimeEvent.class, CloudRuntimeMixIn.class);
         return module;
     }
-
 }

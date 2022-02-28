@@ -20,6 +20,4 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import(ModelingSwaggerConfig.class)
-public class ActivitiModelingAutoConfiguration {
-
-}
+public class ActivitiModelingAutoConfiguration {}

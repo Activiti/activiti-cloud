@@ -20,9 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/**
- * Modeling configuration
- */
+/** Modeling configuration */
 @Import(ModelingFeignConfiguration.class)
 @Configuration
 public class ModelingConfiguration {

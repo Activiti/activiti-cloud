@@ -35,59 +35,61 @@ import org.springframework.core.env.MutablePropertySources;
 
 public class ActivitiMessagingEnvironmentPostProcessorTest {
 
-    private final ActivitiMessagingEnvironmentPostProcessor processor = new ActivitiMessagingEnvironmentPostProcessor();
+    private final ActivitiMessagingEnvironmentPostProcessor processor =
+            new ActivitiMessagingEnvironmentPostProcessor();
 
     @Test
     public void should_setDefaultBinderToRabbit_when_brokerIsRabbitmq() {
-        //given
+        // given
         final MutablePropertySources propertySources = mock(MutablePropertySources.class);
-        final ConfigurableEnvironment environment = buildEnvironment(
-            MessagingBroker.rabbitmq, propertySources);
-        final ArgumentCaptor<MapPropertySource> captor = ArgumentCaptor
-            .forClass(MapPropertySource.class);
+        final ConfigurableEnvironment environment =
+                buildEnvironment(MessagingBroker.rabbitmq, propertySources);
+        final ArgumentCaptor<MapPropertySource> captor =
+                ArgumentCaptor.forClass(MapPropertySource.class);
 
-        //when
+        // when
         processor.postProcessEnvironment(environment, mock(SpringApplication.class));
 
-        //then
-        verify(propertySources).addAfter(eq(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME),
-            captor.capture());
-        assertThat(captor.getValue().getProperty(
-            SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY))
-            .isEqualTo("rabbit");
+        // then
+        verify(propertySources)
+                .addAfter(eq(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME), captor.capture());
+        assertThat(captor.getValue().getProperty(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY))
+                .isEqualTo("rabbit");
     }
 
     @Test
     public void should_setDefaultBinderToKafkaAndDisableRabbitHelfCheck_when_brokerIsKafka() {
-        //given
+        // given
         final MutablePropertySources propertySources = mock(MutablePropertySources.class);
-        final ConfigurableEnvironment environment = buildEnvironment(
-            MessagingBroker.kafka, propertySources);
-        final ArgumentCaptor<MapPropertySource> captor = ArgumentCaptor
-            .forClass(MapPropertySource.class);
+        final ConfigurableEnvironment environment =
+                buildEnvironment(MessagingBroker.kafka, propertySources);
+        final ArgumentCaptor<MapPropertySource> captor =
+                ArgumentCaptor.forClass(MapPropertySource.class);
 
-        //when
+        // when
         processor.postProcessEnvironment(environment, mock(SpringApplication.class));
 
-        //then
-        verify(propertySources).addAfter(eq(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME),
-            captor.capture());
+        // then
+        verify(propertySources)
+                .addAfter(eq(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME), captor.capture());
         assertThat(captor.getValue().getProperty(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY))
-            .isEqualTo("kafka");
+                .isEqualTo("kafka");
 
         assertThat(captor.getValue().getProperty(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY))
-            .isEqualTo(false);
+                .isEqualTo(false);
     }
 
-    private ConfigurableEnvironment buildEnvironment(MessagingBroker broker,
-        MutablePropertySources propertySources) {
+    private ConfigurableEnvironment buildEnvironment(
+            MessagingBroker broker, MutablePropertySources propertySources) {
         final ConfigurableEnvironment environment = mock(ConfigurableEnvironment.class);
-        given(environment.getProperty(
-            ActivitiMessagingEnvironmentPostProcessor.ACTIVITI_CLOUD_MESSAGING_BROKER_KEY,
-            MessagingBroker.class, MessagingBroker.rabbitmq))
-            .willReturn(broker);
+        given(
+                        environment.getProperty(
+                                ActivitiMessagingEnvironmentPostProcessor
+                                        .ACTIVITI_CLOUD_MESSAGING_BROKER_KEY,
+                                MessagingBroker.class,
+                                MessagingBroker.rabbitmq))
+                .willReturn(broker);
         given(environment.getPropertySources()).willReturn(propertySources);
         return environment;
     }
-
 }

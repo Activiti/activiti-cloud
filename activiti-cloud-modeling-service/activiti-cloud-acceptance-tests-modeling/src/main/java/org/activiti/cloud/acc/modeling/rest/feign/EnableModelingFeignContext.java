@@ -24,12 +24,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Allow Feign modeling clients autowiring
- */
+/** Allow Feign modeling clients autowiring */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ContextConfiguration(classes = {ModelingTestsConfigurationProperties.class, ModelingFeignConfiguration.class})
-public @interface EnableModelingFeignContext {
-
-}
+@ContextConfiguration(
+        classes = {ModelingTestsConfigurationProperties.class, ModelingFeignConfiguration.class})
+public @interface EnableModelingFeignContext {}

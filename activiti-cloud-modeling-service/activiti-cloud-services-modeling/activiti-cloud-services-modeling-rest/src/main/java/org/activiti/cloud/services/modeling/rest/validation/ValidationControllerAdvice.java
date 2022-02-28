@@ -15,28 +15,24 @@
  */
 package org.activiti.cloud.services.modeling.rest.validation;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.InitBinder;
 
-/**
- * Controller advice for handling validators
- */
+import javax.servlet.http.HttpServletRequest;
+
+/** Controller advice for handling validators */
 @ControllerAdvice
 public class ValidationControllerAdvice {
 
     @InitBinder("model")
-    public void initModelBinder(final WebDataBinder binder,
-                                final HttpServletRequest request) {
+    public void initModelBinder(final WebDataBinder binder, final HttpServletRequest request) {
         binder.addValidators(new ModelPayloadValidator(isPost(request)));
     }
 
     @InitBinder("project")
-    public void initProjectBinder(final WebDataBinder binder,
-                                final HttpServletRequest request) {
+    public void initProjectBinder(final WebDataBinder binder, final HttpServletRequest request) {
         binder.addValidators(new ProjectPayloadValidator(isPost(request)));
     }
 

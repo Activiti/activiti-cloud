@@ -27,21 +27,17 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class WebSocketMessageBrokerSecurityConfigurerTest {
 
-    @Autowired
-    private WebSocketMessageBrokerSecurityConfigurer configuration;
+    @Autowired private WebSocketMessageBrokerSecurityConfigurer configuration;
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
-    static class GraphQLSecurityWebSocketMessageBrokerConfigurationTestApplication {
-
-    }
+    static class GraphQLSecurityWebSocketMessageBrokerConfigurationTestApplication {}
 
     @Test
     public void testContextLoads() {
         assertThat(configuration.getEndpoint()).isEqualTo("/ws/graphql");
-        assertThat(configuration.getAuthorities()).containsExactly("ACTIVITI_USER", "ACTIVITI_ADMIN");
+        assertThat(configuration.getAuthorities())
+                .containsExactly("ACTIVITI_USER", "ACTIVITI_ADMIN");
         assertThat(configuration.sameOriginDisabled()).isTrue();
     }
-
-
 }

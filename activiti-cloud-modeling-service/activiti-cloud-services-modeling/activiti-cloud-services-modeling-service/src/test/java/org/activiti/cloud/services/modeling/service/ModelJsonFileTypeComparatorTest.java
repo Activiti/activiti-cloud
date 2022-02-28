@@ -18,14 +18,17 @@ package org.activiti.cloud.services.modeling.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import java.util.Comparator;
+
 import org.activiti.cloud.modeling.api.ModelType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Comparator;
+
 public class ModelJsonFileTypeComparatorTest {
 
-    Comparator<ProjectHolder.ModelJsonFile> modelJsonFileTypeComparator = new ModelJsonFileTypeComparator();
+    Comparator<ProjectHolder.ModelJsonFile> modelJsonFileTypeComparator =
+            new ModelJsonFileTypeComparator();
 
     ModelType formModelType;
     ModelType testModelType;

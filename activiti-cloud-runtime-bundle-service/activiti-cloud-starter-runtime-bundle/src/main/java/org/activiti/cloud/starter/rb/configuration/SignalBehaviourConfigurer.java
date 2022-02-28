@@ -32,9 +32,12 @@ public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConf
     private EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider;
     private final VariablesPropagator variablesPropagator;
 
-    public SignalBehaviourConfigurer(ApplicationContext applicationContext, ExtensionsVariablesMappingProvider variablesMappingProvider,
-        ProcessVariablesInitiator processVariablesInitiator, EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider,
-        VariablesPropagator variablesPropagator) {
+    public SignalBehaviourConfigurer(
+            ApplicationContext applicationContext,
+            ExtensionsVariablesMappingProvider variablesMappingProvider,
+            ProcessVariablesInitiator processVariablesInitiator,
+            EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider,
+            VariablesPropagator variablesPropagator) {
         this.applicationContext = applicationContext;
         this.variablesMappingProvider = variablesMappingProvider;
         this.processVariablesInitiator = processVariablesInitiator;
@@ -44,9 +47,14 @@ public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConf
 
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
-        processEngineConfiguration.setEventSubscriptionPayloadMappingProvider(eventSubscriptionPayloadMappingProvider);
+        processEngineConfiguration.setEventSubscriptionPayloadMappingProvider(
+                eventSubscriptionPayloadMappingProvider);
 
-        processEngineConfiguration.setActivityBehaviorFactory(new CloudActivityBehaviorFactory(applicationContext, variablesMappingProvider,
-            processVariablesInitiator, variablesPropagator));
+        processEngineConfiguration.setActivityBehaviorFactory(
+                new CloudActivityBehaviorFactory(
+                        applicationContext,
+                        variablesMappingProvider,
+                        processVariablesInitiator,
+                        variablesPropagator));
     }
 }

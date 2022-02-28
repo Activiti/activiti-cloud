@@ -16,11 +16,24 @@
 package org.activiti.cloud.services.modeling.entity;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.process.ModelScope;
+import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
+import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -34,25 +47,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.modeling.api.process.ModelScope;
-import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
-import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
-import org.hibernate.annotations.GenericGenerator;
 
-/**
- * Model model entity
- */
+/** Model model entity */
 @Entity(name = "Model")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
 @Table(name = "Model")
-public class ModelEntity extends AuditableEntity<String> implements Model<ProjectEntity, String>,
-    VersionedEntity<ModelVersionEntity> {
+public class ModelEntity extends AuditableEntity<String>
+        implements Model<ProjectEntity, String>, VersionedEntity<ModelVersionEntity> {
 
     @Id
     @GeneratedValue(generator = "system-uuid")
@@ -62,10 +64,9 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     @JsonIgnore
     @ManyToMany
     @JoinTable(
-        name = "project_models",
-        joinColumns = {@JoinColumn(name = "models_id")},
-        inverseJoinColumns = {@JoinColumn(name = "project_id")}
-    )
+            name = "project_models",
+            joinColumns = {@JoinColumn(name = "models_id")},
+            inverseJoinColumns = {@JoinColumn(name = "project_id")})
     private Set<ProjectEntity> projects = new HashSet<>();
 
     @JsonIgnore
@@ -90,8 +91,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     public ModelEntity() { // for JPA
     }
 
-    public ModelEntity(String name,
-        String type) {
+    public ModelEntity(String name, String type) {
         this.name = name;
         this.type = type;
     }
@@ -137,11 +137,11 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
 
     @Override
     public void addProject(ProjectEntity project) {
-        if(project!=null) {
-            if(projects == null){
+        if (project != null) {
+            if (projects == null) {
                 projects = new HashSet<>();
             }
-            if(!projects.contains(project)){
+            if (!projects.contains(project)) {
                 projects.add(project);
                 project.addModel(this);
             }
@@ -150,14 +150,14 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
 
     @Override
     public void removeProject(ProjectEntity project) {
-        if(projects!=null && projects.contains(project)){
+        if (projects != null && projects.contains(project)) {
             projects.remove(project);
             project.removeModel(this);
         }
     }
 
     @Override
-    public void clearProjects(){
+    public void clearProjects() {
         projects.clear();
     }
 

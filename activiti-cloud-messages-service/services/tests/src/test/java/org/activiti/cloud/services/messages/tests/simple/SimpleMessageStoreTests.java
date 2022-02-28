@@ -29,6 +29,7 @@ public class SimpleMessageStoreTests extends AbstractMessagesCoreIntegrationTest
 
     @Test
     public void testMessageStore() throws Exception {
-        assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(SimpleMessageStore.class);
+        assertThat(this.aggregatingMessageHandler.getMessageStore())
+                .isInstanceOf(SimpleMessageStore.class);
     }
 }

@@ -35,17 +35,19 @@ public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
 
-        CloudTaskCandidateGroupAddedEvent taskCandidateGroupAddedEvent = (CloudTaskCandidateGroupAddedEvent) event;
+        CloudTaskCandidateGroupAddedEvent taskCandidateGroupAddedEvent =
+                (CloudTaskCandidateGroupAddedEvent) event;
         TaskCandidateGroup taskCandidateGroup = taskCandidateGroupAddedEvent.getEntity();
-        TaskCandidateGroupEntity taskCandidateGroupEntity = new TaskCandidateGroupEntity(taskCandidateGroup.getTaskId(),
-                                                                                         taskCandidateGroup.getGroupId());
+        TaskCandidateGroupEntity taskCandidateGroupEntity =
+                new TaskCandidateGroupEntity(
+                        taskCandidateGroup.getTaskId(), taskCandidateGroup.getGroupId());
         // not going to look up task as candidate can be created before task
         // Persist into database
         try {
             entityManager.persist(taskCandidateGroupEntity);
         } catch (Exception cause) {
-            throw new QueryException("Error handling TaskCandidateGroupAddedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException(
+                    "Error handling TaskCandidateGroupAddedEvent[" + event + "]", cause);
         }
     }
 

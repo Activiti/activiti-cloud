@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.services.messages.core.aggregator;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.aopalliance.aop.Advice;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.expression.Expression;
@@ -32,13 +29,15 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.scheduling.TaskScheduler;
 
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * {@link org.springframework.beans.factory.FactoryBean} to create an
- * {@link MessageConnectorAggregator}.
- *
+ * {@link org.springframework.beans.factory.FactoryBean} to create an {@link
+ * MessageConnectorAggregator}.
  */
-public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessageHandlerFactoryBean<MessageConnectorAggregator> {
+public class MessageConnectorAggregatorFactoryBean
+        extends AbstractSimpleMessageHandlerFactoryBean<MessageConnectorAggregator> {
 
     private MessageGroupProcessor processorBean;
 
@@ -83,18 +82,20 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
 
         // defaults
         this.popSequence(false)
-            .completeGroupsWhenEmpty(true)
-            .expireGroupsUponCompletion(true)
-            .sendPartialResultOnExpiry(true);
+                .completeGroupsWhenEmpty(true)
+                .expireGroupsUponCompletion(true)
+                .sendPartialResultOnExpiry(true);
     }
 
-    public MessageConnectorAggregatorFactoryBean processorBean(MessageGroupProcessor processorBean) {
+    public MessageConnectorAggregatorFactoryBean processorBean(
+            MessageGroupProcessor processorBean) {
         this.processorBean = processorBean;
 
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean expireGroupsUponCompletion(Boolean expireGroupsUponCompletion) {
+    public MessageConnectorAggregatorFactoryBean expireGroupsUponCompletion(
+            Boolean expireGroupsUponCompletion) {
         this.expireGroupsUponCompletion = expireGroupsUponCompletion;
 
         return this;
@@ -130,7 +131,8 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean correlationStrategy(CorrelationStrategy correlationStrategy) {
+    public MessageConnectorAggregatorFactoryBean correlationStrategy(
+            CorrelationStrategy correlationStrategy) {
         this.correlationStrategy = correlationStrategy;
 
         return this;
@@ -142,13 +144,15 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean groupTimeoutExpression(Expression groupTimeoutExpression) {
+    public MessageConnectorAggregatorFactoryBean groupTimeoutExpression(
+            Expression groupTimeoutExpression) {
         this.groupTimeoutExpression = groupTimeoutExpression;
 
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean forceReleaseAdviceChain(List<Advice> forceReleaseAdviceChain) {
+    public MessageConnectorAggregatorFactoryBean forceReleaseAdviceChain(
+            List<Advice> forceReleaseAdviceChain) {
         this.forceReleaseAdviceChain = forceReleaseAdviceChain;
 
         return this;
@@ -172,19 +176,22 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean sendPartialResultOnExpiry(Boolean sendPartialResultOnExpiry) {
+    public MessageConnectorAggregatorFactoryBean sendPartialResultOnExpiry(
+            Boolean sendPartialResultOnExpiry) {
         this.sendPartialResultOnExpiry = sendPartialResultOnExpiry;
 
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean minimumTimeoutForEmptyGroups(Long minimumTimeoutForEmptyGroups) {
+    public MessageConnectorAggregatorFactoryBean minimumTimeoutForEmptyGroups(
+            Long minimumTimeoutForEmptyGroups) {
         this.minimumTimeoutForEmptyGroups = minimumTimeoutForEmptyGroups;
 
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean expireGroupsUponTimeout(Boolean expireGroupsUponTimeout) {
+    public MessageConnectorAggregatorFactoryBean expireGroupsUponTimeout(
+            Boolean expireGroupsUponTimeout) {
         this.expireGroupsUponTimeout = expireGroupsUponTimeout;
 
         return this;
@@ -196,13 +203,15 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean releaseLockBeforeSend(Boolean releaseLockBeforeSend) {
+    public MessageConnectorAggregatorFactoryBean releaseLockBeforeSend(
+            Boolean releaseLockBeforeSend) {
         this.releaseLockBeforeSend = releaseLockBeforeSend;
 
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean completeGroupsWhenEmpty(Boolean completeGroupsWhenEmpty) {
+    public MessageConnectorAggregatorFactoryBean completeGroupsWhenEmpty(
+            Boolean completeGroupsWhenEmpty) {
         this.completeGroupsWhenEmpty = completeGroupsWhenEmpty;
 
         return this;
@@ -214,7 +223,8 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
         return this;
     }
 
-    public MessageConnectorAggregatorFactoryBean adviceChain(List<? extends HandleMessageAdvice> adviceChain) {
+    public MessageConnectorAggregatorFactoryBean adviceChain(
+            List<? extends HandleMessageAdvice> adviceChain) {
         this.setAdviceChain(Arrays.asList(adviceChain.toArray(new HandleMessageAdvice[] {})));
 
         return this;
@@ -303,5 +313,4 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
     protected Class<? extends MessageHandler> getPreCreationHandlerType() {
         return MessageConnectorAggregator.class;
     }
-
 }

@@ -15,22 +15,22 @@
  */
 package org.activiti.cloud.services.job.executor;
 
-import java.util.Objects;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.messaging.Message;
+
+import java.util.Objects;
 
 public class JobMessageFailedEvent extends ApplicationEvent {
     private static final long serialVersionUID = 1L;
     private final Message<?> message;
     private final Throwable exception;
-    
+
     public JobMessageFailedEvent(Message<?> message, Throwable exception, Object source) {
         super(source);
         this.message = message;
         this.exception = exception;
     }
-    
+
     public Throwable getException() {
         return exception;
     }
@@ -46,12 +46,9 @@ public class JobMessageFailedEvent extends ApplicationEvent {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         JobMessageFailedEvent other = (JobMessageFailedEvent) obj;
         return Objects.equals(exception, other.exception) && Objects.equals(message, other.message);
     }
@@ -68,5 +65,4 @@ public class JobMessageFailedEvent extends ApplicationEvent {
         builder.append("]");
         return builder.toString();
     }
-
 }

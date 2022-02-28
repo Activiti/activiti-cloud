@@ -23,8 +23,8 @@ import org.activiti.engine.runtime.ProcessInstance;
 import java.io.IOException;
 
 /**
- * Wrapper over ProcessEngine for testing purposes.
- * It helps to unify the calls to process engine services from tests.
+ * Wrapper over ProcessEngine for testing purposes. It helps to unify the calls to process engine
+ * services from tests.
  */
 public class TestProcessEngine {
 

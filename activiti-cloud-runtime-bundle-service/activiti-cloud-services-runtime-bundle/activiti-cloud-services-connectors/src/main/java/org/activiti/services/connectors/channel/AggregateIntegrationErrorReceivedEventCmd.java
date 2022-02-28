@@ -29,9 +29,10 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
 
-    AggregateIntegrationErrorReceivedEventCmd(IntegrationError integrationError,
-        RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator) {
+    AggregateIntegrationErrorReceivedEventCmd(
+            IntegrationError integrationError,
+            RuntimeBundleProperties runtimeBundleProperties,
+            ProcessEngineEventsAggregator processEngineEventsAggregator) {
         this.integrationError = integrationError;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
@@ -39,15 +40,15 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
 
     @Override
     public Void execute(CommandContext commandContext) {
-        if (runtimeBundleProperties.getEventsProperties()
-            .isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationErrorReceivedEventImpl integrationErrorReceived = new CloudIntegrationErrorReceivedEventImpl(
-                integrationError.getIntegrationContext(),
-                integrationError.getErrorCode(),
-                integrationError.getErrorMessage(),
-                integrationError.getErrorClassName(),
-                integrationError.getStackTraceElements());
-                processEngineEventsAggregator.add(integrationErrorReceived);
+        if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
+            CloudIntegrationErrorReceivedEventImpl integrationErrorReceived =
+                    new CloudIntegrationErrorReceivedEventImpl(
+                            integrationError.getIntegrationContext(),
+                            integrationError.getErrorCode(),
+                            integrationError.getErrorMessage(),
+                            integrationError.getErrorClassName(),
+                            integrationError.getStackTraceElements());
+            processEngineEventsAggregator.add(integrationErrorReceived);
         }
 
         return null;

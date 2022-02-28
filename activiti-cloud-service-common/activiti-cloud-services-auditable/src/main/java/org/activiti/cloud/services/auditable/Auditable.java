@@ -17,9 +17,7 @@ package org.activiti.cloud.services.auditable;
 
 import java.util.Date;
 
-/**
- * Auditable interface
- */
+/** Auditable interface */
 public interface Auditable<U> {
 
     U getCreatedBy();
@@ -52,5 +50,4 @@ public interface Auditable<U> {
             setLastModifiedDate(source.getLastModifiedDate());
         }
     }
-
 }

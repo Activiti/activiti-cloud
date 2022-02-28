@@ -20,7 +20,8 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 
-public abstract class BaseEventToEntityConverter implements EventToEntityConverter<AuditEventEntity> {
+public abstract class BaseEventToEntityConverter
+        implements EventToEntityConverter<AuditEventEntity> {
 
     private EventContextInfoAppender eventContextInfoAppender;
 
@@ -34,7 +35,6 @@ public abstract class BaseEventToEntityConverter implements EventToEntityConvert
     }
 
     protected abstract AuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent);
-    
 
     @Override
     public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
@@ -50,6 +50,6 @@ public abstract class BaseEventToEntityConverter implements EventToEntityConvert
         return eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity);
     }
 
-    protected abstract CloudRuntimeEventImpl<?,?> createAPIEvent(AuditEventEntity auditEventEntity);
-
+    protected abstract CloudRuntimeEventImpl<?, ?> createAPIEvent(
+            AuditEventEntity auditEventEntity);
 }

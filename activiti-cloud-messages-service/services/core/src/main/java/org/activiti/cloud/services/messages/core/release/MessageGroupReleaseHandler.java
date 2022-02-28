@@ -18,6 +18,4 @@ package org.activiti.cloud.services.messages.core.release;
 import org.activiti.cloud.services.messages.core.support.Handler;
 import org.springframework.integration.store.MessageGroup;
 
-public interface MessageGroupReleaseHandler extends Handler<MessageGroup, Boolean> {
-
-}
+public interface MessageGroupReleaseHandler extends Handler<MessageGroup, Boolean> {}

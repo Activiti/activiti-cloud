@@ -16,15 +16,18 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 
+import javax.persistence.*;
+
 @MappedSuperclass
-public abstract class AbstractVariableEntity extends ActivitiEntityMetadata implements CloudVariableInstance {
+public abstract class AbstractVariableEntity extends ActivitiEntityMetadata
+        implements CloudVariableInstance {
 
     private String type;
 
@@ -48,29 +51,32 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
 
     @JsonIgnore
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+            name = "processInstanceId",
+            referencedColumnName = "id",
+            insertable = false,
+            updatable = false,
+            foreignKey =
+                    @javax.persistence.ForeignKey(
+                            value = ConstraintMode.NO_CONSTRAINT,
+                            name = "none"))
     private ProcessInstanceEntity processInstance;
 
-    public AbstractVariableEntity() {
-    }
+    public AbstractVariableEntity() {}
 
-    public AbstractVariableEntity(String type,
-                          String name,
-                          String processInstanceId,
-                          String serviceName,
-                          String serviceFullName,
-                          String serviceVersion,
-                          String appName,
-                          String appVersion,
-                          Date createTime,
-                          Date lastUpdatedTime,
-                          String executionId) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
+    public AbstractVariableEntity(
+            String type,
+            String name,
+            String processInstanceId,
+            String serviceName,
+            String serviceFullName,
+            String serviceVersion,
+            String appName,
+            String appVersion,
+            Date createTime,
+            Date lastUpdatedTime,
+            String executionId) {
+        super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
         this.type = type;
         this.name = name;
         this.processInstanceId = processInstanceId;
@@ -176,5 +182,4 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         AbstractVariableEntity other = (AbstractVariableEntity) obj;
         return getId() != null && Objects.equals(getId(), other.getId());
     }
-
- }
+}

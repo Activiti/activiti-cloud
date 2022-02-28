@@ -35,19 +35,23 @@ public class ActivityCancelledEventConverter extends BaseEventToEntityConverter 
     }
 
     @Override
-    protected ActivityCancelledAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new ActivityCancelledAuditEventEntity((CloudBPMNActivityCancelledEvent) cloudRuntimeEvent);
+    protected ActivityCancelledAuditEventEntity createEventEntity(
+            CloudRuntimeEvent cloudRuntimeEvent) {
+        return new ActivityCancelledAuditEventEntity(
+                (CloudBPMNActivityCancelledEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ActivityCancelledAuditEventEntity activityCancelledAuditEventEntity = (ActivityCancelledAuditEventEntity) auditEventEntity;
+        ActivityCancelledAuditEventEntity activityCancelledAuditEventEntity =
+                (ActivityCancelledAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNActivityCancelledEventImpl(activityCancelledAuditEventEntity.getEventId(),
-                                                       activityCancelledAuditEventEntity.getTimestamp(),
-                                                       activityCancelledAuditEventEntity.getBpmnActivity(),
-                                                       activityCancelledAuditEventEntity.getProcessDefinitionId(),
-                                                       activityCancelledAuditEventEntity.getProcessInstanceId(),
-                                                       activityCancelledAuditEventEntity.getCause());
+        return new CloudBPMNActivityCancelledEventImpl(
+                activityCancelledAuditEventEntity.getEventId(),
+                activityCancelledAuditEventEntity.getTimestamp(),
+                activityCancelledAuditEventEntity.getBpmnActivity(),
+                activityCancelledAuditEventEntity.getProcessDefinitionId(),
+                activityCancelledAuditEventEntity.getProcessInstanceId(),
+                activityCancelledAuditEventEntity.getCause());
     }
 }

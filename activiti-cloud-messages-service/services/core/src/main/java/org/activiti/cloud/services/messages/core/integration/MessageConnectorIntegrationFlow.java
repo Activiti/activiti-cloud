@@ -17,6 +17,7 @@ package org.activiti.cloud.services.messages.core.integration;
 
 import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
 import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
+
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
@@ -55,16 +56,17 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     private final MessageAggregatorProperties properties;
     private final AbstractMessageRouter router;
 
-    public MessageConnectorIntegrationFlow(MessageConnectorProcessor processor,
-                                           MessageConnectorAggregator aggregator,
-                                           IdempotentReceiverInterceptor interceptor,
-                                           List<? extends HandleMessageAdvice> advices,
-                                           MessageAggregatorProperties properties,
-                                           AbstractMessageRouter router) {
+    public MessageConnectorIntegrationFlow(
+            MessageConnectorProcessor processor,
+            MessageConnectorAggregator aggregator,
+            IdempotentReceiverInterceptor interceptor,
+            List<? extends HandleMessageAdvice> advices,
+            MessageAggregatorProperties properties,
+            AbstractMessageRouter router) {
         this.processor = processor;
         this.aggregator = aggregator;
         this.interceptor = interceptor;
-        this.advices = advices.toArray(new HandleMessageAdvice[]{});
+        this.advices = advices.toArray(new HandleMessageAdvice[] {});
         this.properties = properties;
         this.router = router;
     }
@@ -72,27 +74,41 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
         return this.from(processor.input())
-                   .headerFilter(properties.getInputHeadersToRemove())
-                   .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
-                                        .enrichHeaders(enricher -> enricher.headerChannelsToString(properties.getHeaderChannelsTimeToLiveExpression()))
-                                        .filter(Message.class,
+                .headerFilter(properties.getInputHeadersToRemove())
+                .gateway(
+                        flow ->
+                                flow.log(LoggingHandler.Level.DEBUG)
+                                        .enrichHeaders(
+                                                enricher ->
+                                                        enricher.headerChannelsToString(
+                                                                properties
+                                                                        .getHeaderChannelsTimeToLiveExpression()))
+                                        .filter(
+                                                Message.class,
                                                 this::filterMessage,
-                                                filterSpec -> filterSpec.id(FILTER_MESSAGE)
-                                                                        .discardChannel(DISCARD_CHANNEL))
-                                        .enrichHeaders(enricher -> enricher.id(ENRICH_HEADERS)
-                                                                           .headerFunction(CORRELATION_ID,
-                                                                                           this::enrichHeaders))
+                                                filterSpec ->
+                                                        filterSpec
+                                                                .id(FILTER_MESSAGE)
+                                                                .discardChannel(DISCARD_CHANNEL))
+                                        .enrichHeaders(
+                                                enricher ->
+                                                        enricher.id(ENRICH_HEADERS)
+                                                                .headerFunction(
+                                                                        CORRELATION_ID,
+                                                                        this::enrichHeaders))
                                         .transform(Transformers.fromJson(MessageEventPayload.class))
-                                        .handle(this.aggregator(),
-                                                handlerSpec -> handlerSpec.id(AGGREGATOR)
-                                                                          .advice(advices))
+                                        .handle(
+                                                this.aggregator(),
+                                                handlerSpec ->
+                                                        handlerSpec.id(AGGREGATOR).advice(advices))
                                         .route(this.output()),
-                            flowSpec -> flowSpec.transactional()
-                                                .id(MESSAGE_GATEWAY)
-                                                .requiresReply(false)
-                                                .async(true)
-                                                .replyTimeout(0L)
-                                                .advice(interceptor));
+                        flowSpec ->
+                                flowSpec.transactional()
+                                        .id(MESSAGE_GATEWAY)
+                                        .requiresReply(false)
+                                        .async(true)
+                                        .replyTimeout(0L)
+                                        .advice(interceptor));
     }
 
     public AbstractMessageRouter output() {
@@ -110,13 +126,11 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
     @Filter
     public boolean filterMessage(Message<?> message) {
-        return Objects.nonNull(message.getHeaders()
-                                      .get(MESSAGE_EVENT_TYPE));
+        return Objects.nonNull(message.getHeaders().get(MESSAGE_EVENT_TYPE));
     }
 
     @Transformer
     public String enrichHeaders(Message<?> message) {
         return Correlations.getCorrelationId(message);
     }
-
 }

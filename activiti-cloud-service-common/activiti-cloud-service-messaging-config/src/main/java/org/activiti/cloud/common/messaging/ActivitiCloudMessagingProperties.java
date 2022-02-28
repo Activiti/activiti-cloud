@@ -23,9 +23,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.*;
 import java.util.*;
 import java.util.function.Function;
+
+import javax.validation.constraints.*;
 
 @ConfigurationProperties(prefix = ActivitiCloudMessagingProperties.ACTIVITI_CLOUD_MESSAGING_PREFIX)
 @Validated
@@ -33,59 +34,50 @@ public class ActivitiCloudMessagingProperties {
     public static final String ACTIVITI_CLOUD_MESSAGING_PREFIX = "activiti.cloud.messaging";
 
     public enum MessagingBroker {
-        rabbitmq, kafka
+        rabbitmq,
+        kafka
     }
 
-    /**
-     * Configure messaging broker type. Default is rabbitmq
-     */
-    @NotNull
-    private MessagingBroker broker = MessagingBroker.rabbitmq;
+    /** Configure messaging broker type. Default is rabbitmq */
+    @NotNull private MessagingBroker broker = MessagingBroker.rabbitmq;
 
-    /**
-     * Enable partitioned messaging configuration for engine events producer and consumers
-     */
-    @NotNull
-    private Boolean partitioned = false;
+    /** Enable partitioned messaging configuration for engine events producer and consumers */
+    @NotNull private Boolean partitioned = false;
 
-    /**
-     * Set partition count for partitioned mode. Default is 1
-     */
-    @NotNull
-    @Positive
-    private Integer partitionCount = 1;
+    /** Set partition count for partitioned mode. Default is 1 */
+    @NotNull @Positive private Integer partitionCount = 1;
 
-    /**
-     * Configure consumer instance index for partitioned messaging. Default is 0
-     */
+    /** Configure consumer instance index for partitioned messaging. Default is 0 */
     @NotNull
     @Min(0)
     private Integer instanceIndex = 0;
 
     /**
-     * Set destination separator to use to build full destinations, i.e. prefix_destination. Default is _
+     * Set destination separator to use to build full destinations, i.e. prefix_destination. Default
+     * is _
      */
     @NotEmpty
     @Size(min = 1, max = 1)
     private String destinationSeparator = "_";
 
     /**
-     * Set destination prefix to use to build destinations, i.e. prefix_destination. Default is empty string.
+     * Set destination prefix to use to build destinations, i.e. prefix_destination. Default is
+     * empty string.
      */
     private String destinationPrefix = "";
 
     /**
-     * Enable destination name transformers to apply conversion to all destination name for producers, consumers and connectors
+     * Enable destination name transformers to apply conversion to all destination name for
+     * producers, consumers and connectors
      */
     private boolean destinationTransformersEnabled = false;
 
-    /**
-     * Configure list of transformer functions for destination
-     */
+    /** Configure list of transformer functions for destination */
     private List<String> destinationTransformers = new ArrayList<>();
 
     /**
-     * Configure regex expression to use for replacement of illegal characters in the destination names. Default is [\t\s*#:]
+     * Configure regex expression to use for replacement of illegal characters in the destination
+     * names. Default is [\t\s*#:]
      */
     private String destinationIllegalCharsRegex = "[\\t\\s*#:]";
 
@@ -95,13 +87,14 @@ public class ActivitiCloudMessagingProperties {
     private String destinationIllegalCharsReplacement = "-";
 
     /**
-     * Configure destination properties to apply customization to producers and consumer channel bindings with matching destination key.
+     * Configure destination properties to apply customization to producers and consumer channel
+     * bindings with matching destination key.
      */
     private Map<String, DestinationProperties> destinations = new LinkedCaseInsensitiveMap<>();
 
     private Map<String, InputConverterFunction> inputConverters;
 
-    ActivitiCloudMessagingProperties() { }
+    ActivitiCloudMessagingProperties() {}
 
     public Boolean isPartitioned() {
         return partitioned;
@@ -179,9 +172,9 @@ public class ActivitiCloudMessagingProperties {
         return (input) -> {
             InputConverter<String> converter = new InputConverter<>(input);
 
-            for (String it: destinationTransformers) {
-                InputConverterFunction func = Optional.ofNullable(inputConverters.get(it))
-                                                      .orElseThrow();
+            for (String it : destinationTransformers) {
+                InputConverterFunction func =
+                        Optional.ofNullable(inputConverters.get(it)).orElseThrow();
                 converter = converter.convertBy(func);
             }
 
@@ -190,7 +183,8 @@ public class ActivitiCloudMessagingProperties {
     }
 
     @Autowired
-    public void configureInputConverters(@Lazy Map<String, InputConverterFunction> inputConverters) {
+    public void configureInputConverters(
+            @Lazy Map<String, InputConverterFunction> inputConverters) {
         this.inputConverters = new LinkedHashMap<>(inputConverters);
     }
 
@@ -208,61 +202,68 @@ public class ActivitiCloudMessagingProperties {
         if (o == null || getClass() != o.getClass()) return false;
         ActivitiCloudMessagingProperties that = (ActivitiCloudMessagingProperties) o;
         return broker == that.broker
-            && Objects.equals(partitioned, that.partitioned)
-            && Objects.equals(partitionCount, that.partitionCount)
-            && Objects.equals(instanceIndex, that.instanceIndex)
-            && Objects.equals(destinationSeparator, that.destinationSeparator)
-            && Objects.equals(destinationPrefix, that.destinationPrefix)
-            && Objects.equals(destinations, that.destinations);
+                && Objects.equals(partitioned, that.partitioned)
+                && Objects.equals(partitionCount, that.partitionCount)
+                && Objects.equals(instanceIndex, that.instanceIndex)
+                && Objects.equals(destinationSeparator, that.destinationSeparator)
+                && Objects.equals(destinationPrefix, that.destinationPrefix)
+                && Objects.equals(destinations, that.destinations);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(broker,
-                            partitioned,
-                            partitionCount,
-                            instanceIndex,
-                            destinationSeparator,
-                            destinationPrefix,
-                            destinations);
+        return Objects.hash(
+                broker,
+                partitioned,
+                partitionCount,
+                instanceIndex,
+                destinationSeparator,
+                destinationPrefix,
+                destinations);
     }
 
     @Override
     public String toString() {
-        return "ActivitiCloudMessagingProperties{" +
-            "broker=" + broker +
-            ", partitioned=" + partitioned +
-            ", partitionCount=" + partitionCount +
-            ", instanceIndex=" + instanceIndex +
-            ", destinationSeparator='" + destinationSeparator + '\'' +
-            ", destinationPrefix='" + destinationPrefix + '\'' +
-            ", destinations=" + destinations +
-            ", destinationIllegalCharsReplacement=" + destinationIllegalCharsReplacement +
-            ", destinationIllegalCharsRegex=" + destinationIllegalCharsRegex +
-            '}';
+        return "ActivitiCloudMessagingProperties{"
+                + "broker="
+                + broker
+                + ", partitioned="
+                + partitioned
+                + ", partitionCount="
+                + partitionCount
+                + ", instanceIndex="
+                + instanceIndex
+                + ", destinationSeparator='"
+                + destinationSeparator
+                + '\''
+                + ", destinationPrefix='"
+                + destinationPrefix
+                + '\''
+                + ", destinations="
+                + destinations
+                + ", destinationIllegalCharsReplacement="
+                + destinationIllegalCharsReplacement
+                + ", destinationIllegalCharsRegex="
+                + destinationIllegalCharsRegex
+                + '}';
     }
 
     @Validated
     public static class DestinationProperties {
 
         /**
-         * Destination name to apply for matching channel binding destinations. If empty the key is used as name. Default is empty string.
+         * Destination name to apply for matching channel binding destinations. If empty the key is
+         * used as name. Default is empty string.
          */
         private String name = "";
 
-        /**
-         * Destination scope to add to destination name, i.e. name.scope. Default is null
-         */
+        /** Destination scope to add to destination name, i.e. name.scope. Default is null */
         private String scope;
 
-        /**
-         * Destination prefix to override common destination prefix. Default is null
-         */
+        /** Destination prefix to override common destination prefix. Default is null */
         private String prefix;
 
-        /**
-         * Destination separator to override common destination separator. Default is null
-         */
+        /** Destination separator to override common destination separator. Default is null */
         private String separator;
 
         DestinationProperties() {}
@@ -301,12 +302,20 @@ public class ActivitiCloudMessagingProperties {
 
         @Override
         public String toString() {
-            return "DestinationProperties{" +
-                ", name='" + name + '\'' +
-                ", scope='" + scope + '\'' +
-                ", prefix='" + prefix + '\'' +
-                ", separator='" + separator + '\'' +
-                '}';
+            return "DestinationProperties{"
+                    + ", name='"
+                    + name
+                    + '\''
+                    + ", scope='"
+                    + scope
+                    + '\''
+                    + ", prefix='"
+                    + prefix
+                    + '\''
+                    + ", separator='"
+                    + separator
+                    + '\''
+                    + '}';
         }
     }
 
@@ -326,6 +335,4 @@ public class ActivitiCloudMessagingProperties {
             return data;
         }
     }
-
-
 }

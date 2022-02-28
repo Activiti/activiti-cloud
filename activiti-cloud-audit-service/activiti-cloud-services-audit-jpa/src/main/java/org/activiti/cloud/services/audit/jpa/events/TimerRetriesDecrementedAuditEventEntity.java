@@ -28,10 +28,10 @@ public class TimerRetriesDecrementedAuditEventEntity extends TimerAuditEventEnti
 
     protected static final String TIMER_RETRIES_DECREMENTED_EVENT = "TimerRetriesDecrementedEvent";
 
-    public TimerRetriesDecrementedAuditEventEntity() {
-    }
+    public TimerRetriesDecrementedAuditEventEntity() {}
 
-    public TimerRetriesDecrementedAuditEventEntity(CloudBPMNTimerRetriesDecrementedEvent cloudEvent) {
+    public TimerRetriesDecrementedAuditEventEntity(
+            CloudBPMNTimerRetriesDecrementedEvent cloudEvent) {
         super(cloudEvent);
     }
 
@@ -39,5 +39,4 @@ public class TimerRetriesDecrementedAuditEventEntity extends TimerAuditEventEnti
     public int hashCode() {
         return super.hashCode();
     }
-
 }

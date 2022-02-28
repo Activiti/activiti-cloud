@@ -15,7 +15,4 @@
  */
 package org.activiti.cloud.acc.core.services.notifications;
 
-public interface NotificationsService {
-
-
-}
+public interface NotificationsService {}

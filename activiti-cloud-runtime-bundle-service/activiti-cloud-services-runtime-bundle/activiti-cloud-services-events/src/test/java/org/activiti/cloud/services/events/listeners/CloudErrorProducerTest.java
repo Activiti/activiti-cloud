@@ -32,14 +32,11 @@ import org.mockito.Mock;
 
 public class CloudErrorProducerTest {
 
-    @InjectMocks
-    private CloudErrorReceivedProducer cloudErrorReceivedProducer;
+    @InjectMocks private CloudErrorReceivedProducer cloudErrorReceivedProducer;
 
-    @Mock
-    private ToCloudProcessRuntimeEventConverter eventConverter;
+    @Mock private ToCloudProcessRuntimeEventConverter eventConverter;
 
-    @Mock
-    private ProcessEngineEventsAggregator eventsAggregator;
+    @Mock private ProcessEngineEventsAggregator eventsAggregator;
 
     @BeforeEach
     public void setUp() {
@@ -58,5 +55,4 @@ public class CloudErrorProducerTest {
 
         verify(eventsAggregator).add(cloudEventFired);
     }
-
 }

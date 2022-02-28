@@ -15,19 +15,20 @@
  */
 package org.activiti.cloud.services.modeling.converter;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.core.error.ModelingException;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
- * Implementation of {@link ModelContent} corresponding to process model type based on a {@link BpmnModel}
+ * Implementation of {@link ModelContent} corresponding to process model type based on a {@link
+ * BpmnModel}
  */
 public class BpmnProcessModelContent implements ModelContent {
 
@@ -37,11 +38,13 @@ public class BpmnProcessModelContent implements ModelContent {
 
     public BpmnProcessModelContent(BpmnModel bpmnModel) {
         this.bpmnModel = bpmnModel;
-        this.process = bpmnModel
-                .getProcesses()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new ModelingException("Invalid BPMN model: no process found"));
+        this.process =
+                bpmnModel.getProcesses().stream()
+                        .findFirst()
+                        .orElseThrow(
+                                () ->
+                                        new ModelingException(
+                                                "Invalid BPMN model: no process found"));
     }
 
     public BpmnModel getBpmnModel() {
@@ -63,21 +66,19 @@ public class BpmnProcessModelContent implements ModelContent {
     }
 
     public Set<FlowNode> findAllNodes(Class<? extends FlowNode>... activityTypes) {
-        return bpmnModel.getProcesses()
-                .stream()
-                .flatMap(process -> Arrays.stream(activityTypes)
-                        .map(process::findFlowElementsOfType)
-                        .flatMap(List::stream)
-                )
+        return bpmnModel.getProcesses().stream()
+                .flatMap(
+                        process ->
+                                Arrays.stream(activityTypes)
+                                        .map(process::findFlowElementsOfType)
+                                        .flatMap(List::stream))
                 .collect(Collectors.toSet());
     }
 
     public <T extends FlowNode> Set<T> findAllNodes(Class<T> activityType) {
-        return bpmnModel.getProcesses()
-                .stream()
-                .map(process -> process.findFlowElementsOfType(activityType,
-                                                               true)
-                ).flatMap(List::stream)
+        return bpmnModel.getProcesses().stream()
+                .map(process -> process.findFlowElementsOfType(activityType, true))
+                .flatMap(List::stream)
                 .collect(Collectors.toSet());
     }
 }

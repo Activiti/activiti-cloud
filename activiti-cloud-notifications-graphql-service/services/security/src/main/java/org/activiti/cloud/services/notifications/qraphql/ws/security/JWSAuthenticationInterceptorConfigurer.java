@@ -15,12 +15,6 @@
  */
 package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -33,6 +27,12 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import java.security.Principal;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+
 @Order(Ordered.HIGHEST_PRECEDENCE + 98)
 public class JWSAuthenticationInterceptorConfigurer implements WebSocketMessageBrokerConfigurer {
 
@@ -43,56 +43,59 @@ public class JWSAuthenticationInterceptorConfigurer implements WebSocketMessageB
 
     private List<String> headerValues = Arrays.asList(CONNECTION_INIT);
     private Predicate<SimpMessageHeaderAccessor> messageSelector = new DefaultMessageSelector();
-    
+
     private final JWSAuthenticationManager authenticationManager;
-    
+
     @Autowired
     public JWSAuthenticationInterceptorConfigurer(JWSAuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
-    
+
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new ChannelInterceptor() {
+        registration.interceptors(
+                new ChannelInterceptor() {
 
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message,
-                                                                                       SimpMessageHeaderAccessor.class);
-                if (accessor != null && messageSelector.test(accessor)) {
-                    Optional.ofNullable(accessor.getHeader(X_AUTHORIZATION))
-                            .map(String.class::cast)
-                            .map(header -> header.replace(BEARER, "").trim())
-                            .ifPresent(bearer -> {
-                                Authentication jwsAuthToken = new JWSAuthentication(bearer);
+                    @Override
+                    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                        SimpMessageHeaderAccessor accessor =
+                                MessageHeaderAccessor.getAccessor(
+                                        message, SimpMessageHeaderAccessor.class);
+                        if (accessor != null && messageSelector.test(accessor)) {
+                            Optional.ofNullable(accessor.getHeader(X_AUTHORIZATION))
+                                    .map(String.class::cast)
+                                    .map(header -> header.replace(BEARER, "").trim())
+                                    .ifPresent(
+                                            bearer -> {
+                                                Authentication jwsAuthToken =
+                                                        new JWSAuthentication(bearer);
 
-                                Principal principal = authenticationManager.authenticate(jwsAuthToken);
-                                
-                                accessor.setUser(principal);
-                            });
-                }
-                return message;
-            }
-        });
+                                                Principal principal =
+                                                        authenticationManager.authenticate(
+                                                                jwsAuthToken);
+
+                                                accessor.setUser(principal);
+                                            });
+                        }
+                        return message;
+                    }
+                });
     }
 
-    
     public void setHeaderValues(List<String> headerValues) {
         this.headerValues = headerValues;
     }
 
-    
     public void setMessageSelector(Predicate<SimpMessageHeaderAccessor> messageSelector) {
         this.messageSelector = messageSelector;
     }
-    
+
     class DefaultMessageSelector implements Predicate<SimpMessageHeaderAccessor> {
-        
+
         @Override
         public boolean test(SimpMessageHeaderAccessor accessor) {
             Object value = accessor.getHeader(GRAPHQL_MESSAGE_TYPE);
             return headerValues.contains(value);
         }
     }
-    
 }

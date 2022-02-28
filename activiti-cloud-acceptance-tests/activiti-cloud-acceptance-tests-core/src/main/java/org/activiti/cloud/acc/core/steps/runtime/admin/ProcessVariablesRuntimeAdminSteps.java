@@ -17,9 +17,8 @@ package org.activiti.cloud.acc.core.steps.runtime.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
 import net.thucydides.core.annotations.Step;
+
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
@@ -29,11 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 @EnableRuntimeFeignContext
 public class ProcessVariablesRuntimeAdminSteps {
 
-    @Autowired
-    private ProcessVariablesRuntimeAdminService processVariablesRuntimeAdminService;
+    @Autowired private ProcessVariablesRuntimeAdminService processVariablesRuntimeAdminService;
 
     @Autowired
     @Qualifier("runtimeBundleBaseService")
@@ -43,18 +43,17 @@ public class ProcessVariablesRuntimeAdminSteps {
     public void checkServicesHealth() {
         assertThat(baseService.isServiceUp()).isTrue();
     }
-    
+
     @Step
-    public ResponseEntity<List<String>> updateVariables(String id,
-                                                 SetProcessVariablesPayload setProcessVariablesPayload) {
+    public ResponseEntity<List<String>> updateVariables(
+            String id, SetProcessVariablesPayload setProcessVariablesPayload) {
         return processVariablesRuntimeAdminService.updateVariables(id, setProcessVariablesPayload);
     }
-    
-    @Step
-    public ResponseEntity<Void> removeVariables(String id,
-                                         RemoveProcessVariablesPayload removeProcessVariablesPayload) {
-        return processVariablesRuntimeAdminService.removeVariables(id, removeProcessVariablesPayload);
-        
-    }
 
+    @Step
+    public ResponseEntity<Void> removeVariables(
+            String id, RemoveProcessVariablesPayload removeProcessVariablesPayload) {
+        return processVariablesRuntimeAdminService.removeVariables(
+                id, removeProcessVariablesPayload);
+    }
 }

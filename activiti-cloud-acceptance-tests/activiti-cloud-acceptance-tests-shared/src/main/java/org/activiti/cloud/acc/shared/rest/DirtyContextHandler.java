@@ -20,13 +20,13 @@ import static org.springframework.hateoas.IanaLinkRelations.SELF;
 import feign.Headers;
 import feign.RequestLine;
 import feign.gson.GsonEncoder;
+
 import net.serenitybdd.core.Serenity;
+
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.springframework.hateoas.EntityModel;
 
-/**
- * Dirty context handler
- */
+/** Dirty context handler */
 public class DirtyContextHandler {
 
     private static final String DIRTY_CONTEXT = "dirtyContext";
@@ -44,11 +44,13 @@ public class DirtyContextHandler {
 
     public String dirty(String uri) {
         Serenity.setSessionVariable(DIRTY_CONTEXT)
-                .to(Serenity.hasASessionVariableCalled(DIRTY_CONTEXT) ?
-                            String.join(DIRTY_CONTEXT_DELIMITER,
+                .to(
+                        Serenity.hasASessionVariableCalled(DIRTY_CONTEXT)
+                                ? String.join(
+                                        DIRTY_CONTEXT_DELIMITER,
                                         uri,
-                                        Serenity.sessionVariableCalled(DIRTY_CONTEXT)) :
-                            uri);
+                                        Serenity.sessionVariableCalled(DIRTY_CONTEXT))
+                                : uri);
         return uri;
     }
 
@@ -62,7 +64,7 @@ public class DirtyContextHandler {
                 try {
                     deleteByUri(uri);
                 } catch (Exception ex) {
-                    //this uri is still dirty
+                    // this uri is still dirty
                     dirty(uri);
                 }
             }
@@ -71,8 +73,7 @@ public class DirtyContextHandler {
 
     public void deleteByUri(String uri) {
         FeignRestDataClient.builder(new GsonEncoder(), new feign.codec.Decoder.Default())
-                .target(DeleteByUriClient.class,
-                        uri)
+                .target(DeleteByUriClient.class, uri)
                 .delete();
     }
 

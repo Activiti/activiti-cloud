@@ -15,6 +15,15 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationDeployedEvent;
 import org.activiti.api.runtime.event.impl.ApplicationDeployedEventImpl;
@@ -39,37 +48,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class CloudApplicationDeployedProducerTest {
 
-    @InjectMocks
-    private CloudApplicationDeployedProducer cloudApplicationDeployedProducer;
+    @InjectMocks private CloudApplicationDeployedProducer cloudApplicationDeployedProducer;
 
-    @Mock
-    private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    @Mock private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    @Mock
-    private ProcessEngineChannels producer;
+    @Mock private ProcessEngineChannels producer;
 
-    @Mock
-    private MessageChannel auditProducer;
+    @Mock private MessageChannel auditProducer;
 
-    @Mock
-    private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
+    @Mock private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
 
-    @Mock
-    private MessageBuilderAppenderChain messageBuilderAppenderChain;
+    @Mock private MessageBuilderAppenderChain messageBuilderAppenderChain;
 
-    @Captor
-    private ArgumentCaptor<CloudRuntimeEvent<?, ?>[]> messagePayloadCaptor;
+    @Captor private ArgumentCaptor<CloudRuntimeEvent<?, ?>[]> messagePayloadCaptor;
 
     @BeforeEach
     public void setUp() {
@@ -80,26 +73,30 @@ public class CloudApplicationDeployedProducerTest {
 
     @Test
     public void shouldSendMessageWithDeployedApplication() {
-        //given
+        // given
         Deployment deployment1 = mock(Deployment.class);
         Deployment deployment2 = mock(Deployment.class);
-        List<ApplicationDeployedEvent> applicationDeployedEventList = Arrays.asList(
-                new ApplicationDeployedEventImpl(deployment1),
-                new ApplicationDeployedEventImpl(deployment2));
-        given(messageBuilderAppenderChain.withPayload(any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
+        List<ApplicationDeployedEvent> applicationDeployedEventList =
+                Arrays.asList(
+                        new ApplicationDeployedEventImpl(deployment1),
+                        new ApplicationDeployedEventImpl(deployment2));
+        given(messageBuilderAppenderChain.withPayload(any()))
+                .willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
 
-        //when
-        cloudApplicationDeployedProducer.sendApplicationDeployedEvents(new ApplicationDeployedEvents(applicationDeployedEventList));
+        // when
+        cloudApplicationDeployedProducer.sendApplicationDeployedEvents(
+                new ApplicationDeployedEvents(applicationDeployedEventList));
 
-        //then
-        verify(runtimeBundleInfoAppender,
-                times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        // then
+        verify(runtimeBundleInfoAppender, times(2))
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
         verify(auditProducer).send(any());
 
         verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
-        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays.stream(messagePayloadCaptor.getValue())
-                .map(CloudApplicationDeployedEvent.class::cast)
-                .collect(Collectors.toList());
+        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents =
+                Arrays.stream(messagePayloadCaptor.getValue())
+                        .map(CloudApplicationDeployedEvent.class::cast)
+                        .collect(Collectors.toList());
         assertThat(cloudApplicationDeployedEvents)
                 .extracting(CloudApplicationDeployedEvent::getEntity)
                 .containsOnly(deployment1, deployment2);

@@ -15,70 +15,57 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.config;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 @ConfigurationProperties(prefix = "spring.activiti.cloud.services.notifications.graphql.ws")
 @Validated
 public class GraphQLWebSocketMessageBrokerConfigurationProperties {
 
     /* Enable or disable GraphQL WS broker. Default is true */
-    @NotNull
-    private Boolean enabled;
+    @NotNull private Boolean enabled;
 
     /* stomp broker relay host. Default is localhost */
-    @NotEmpty
-    private String relayHost;
+    @NotEmpty private String relayHost;
 
     /* Stomp broker relay port. Default is 61613 */
-    @NotNull
-    private Integer relayPort;
+    @NotNull private Integer relayPort;
 
     /* Stomp broker client login. Default is guest */
-    @NotEmpty
-    private String clientLogin;
+    @NotEmpty private String clientLogin;
 
     /* Stomp broker client passcode. Default is guest */
-    @NotEmpty
-    private String clientPasscode;
+    @NotEmpty private String clientPasscode;
 
     /* Stomp broker system login. Default is guest */
-    @NotEmpty
-    private String systemLogin;
+    @NotEmpty private String systemLogin;
 
     /* Stomp broker system passcode. Default is guest */
-    @NotEmpty
-    private String systemPasscode;
+    @NotEmpty private String systemPasscode;
 
     /* WebSockets endpoint. Default is /ws/graphql */
-    @NotEmpty
-    private String endpoint;
+    @NotEmpty private String endpoint;
 
     /* Allowed origins. Default is '*' */
-    @NotEmpty
-    private String allowedOrigins;
+    @NotEmpty private String allowedOrigins;
 
     /* Maximum outbound channel message buffer count to clients. Default is 50 */
-    @NotNull
-    private Integer bufferCount;
+    @NotNull private Integer bufferCount;
 
     /* Fixed buffer timespan duration in ms to trigger sending outbound messages to clients. Default is 1000 */
-    @NotNull
-    private Integer bufferTimeSpanMs;
+    @NotNull private Integer bufferTimeSpanMs;
 
     @Configuration
     @PropertySource("classpath:META-INF/graphql-ws.properties")
     @PropertySource(value = "classpath:graphql-ws.properties", ignoreResourceNotFound = true)
     @EnableConfigurationProperties(GraphQLWebSocketMessageBrokerConfigurationProperties.class)
-    public static class AutoConfiguration {
-
-    }
+    public static class AutoConfiguration {}
 
     public Boolean isEnabled() {
         return enabled;
@@ -136,16 +123,13 @@ public class GraphQLWebSocketMessageBrokerConfigurationProperties {
         this.allowedOrigins = allowedOrigins;
     }
 
-
     public Integer getBufferCount() {
         return bufferCount;
     }
 
-
     public void setBufferCount(Integer bufferCount) {
         this.bufferCount = bufferCount;
     }
-
 
     public Integer getBufferTimeSpanMs() {
         return bufferTimeSpanMs;

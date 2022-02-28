@@ -15,30 +15,29 @@
  */
 package org.activiti.cloud.api.process.model.impl.events;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class CloudProcessStartedEventImplTest {
 
     @Test
     public void shouldSetFlattenInfoBasedOnEntity() {
-        //given
+        // given
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("instId");
         processInstance.setProcessDefinitionId("defId");
         processInstance.setBusinessKey("business");
 
+        // when
+        CloudProcessStartedEventImpl processStartedEvent =
+                new CloudProcessStartedEventImpl(processInstance);
 
-        //when
-        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl(processInstance);
-
-        //then
+        // then
         assertThat(processStartedEvent.getProcessInstanceId()).isEqualTo("instId");
         assertThat(processStartedEvent.getEntityId()).isEqualTo("instId");
         assertThat(processStartedEvent.getProcessDefinitionId()).isEqualTo("defId");
         assertThat(processStartedEvent.getBusinessKey()).isEqualTo("business");
     }
-
 }

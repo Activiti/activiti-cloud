@@ -31,11 +31,9 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext
 public class AuditorAwareIT {
 
-    @Autowired
-    private AuditorAware<String> auditorAware;
+    @Autowired private AuditorAware<String> auditorAware;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
     @Test
     public void testCurrentAuditor() {
@@ -44,11 +42,10 @@ public class AuditorAwareIT {
         when(securityManager.getAuthenticatedUserId()).thenReturn("test_user");
 
         // WHEN
-        assertThat(auditorAware.getCurrentAuditor()).hasValueSatisfying(
-                currentUser ->
-                        // THEN
-                        assertThat(currentUser).isEqualTo("test_user")
-        );
+        assertThat(auditorAware.getCurrentAuditor())
+                .hasValueSatisfying(
+                        currentUser ->
+                                // THEN
+                                assertThat(currentUser).isEqualTo("test_user"));
     }
-
 }

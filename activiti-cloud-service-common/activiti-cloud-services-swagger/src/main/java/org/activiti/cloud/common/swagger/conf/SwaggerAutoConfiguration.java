@@ -16,11 +16,12 @@
 package org.activiti.cloud.common.swagger.conf;
 
 import com.fasterxml.classmate.TypeResolver;
+
 import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
-import org.activiti.cloud.common.swagger.SwaggerOperationIdTrimmer;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.PathPrefixTransformationFilter;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
+import org.activiti.cloud.common.swagger.SwaggerOperationIdTrimmer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
+
 import springfox.documentation.RequestHandler;
 import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -43,21 +45,20 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * Provides base springfox configuration for swagger auto-generated specification file. It provides two
- * swagger specification files: the default one is available under `v2/api-docs` or `v2/api-docs?group=default`
- * and provides specification for Alfresco MediaType format
+ * Provides base springfox configuration for swagger auto-generated specification file. It provides
+ * two swagger specification files: the default one is available under `v2/api-docs` or
+ * `v2/api-docs?group=default` and provides specification for Alfresco MediaType format
  *
- * This configuration is not self-contained: the one adding this as dependency should provide a bean of type
- * {@link Predicate<RequestHandler>} that will be injected under {@link Docket#select()}. I.e
- * <code>test</code>
- * {@code test}
+ * <p>This configuration is not self-contained: the one adding this as dependency should provide a
+ * bean of type {@link Predicate<RequestHandler>} that will be injected under {@link
+ * Docket#select()}. I.e <code>test</code> {@code test}
+ *
  * <pre>
  *     &#64;Bean
  *     public Predicate&#60;RequestHandler&#62; apiSelector() {
  *         return RequestHandlerSelectors.basePackage("org.activiti.cloud.services");
  *     }
  *  </pre>
- *
  */
 @Configuration
 @EnableOpenApi
@@ -66,9 +67,12 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SwaggerDocketBuilder swaggerDocketBuilder(BuildProperties buildProperties, TypeResolver typeResolver,
-        List<DocketCustomizer> docketCustomizers) {
-        return new SwaggerDocketBuilder(new BaseAPIInfoBuilder(buildProperties), typeResolver, docketCustomizers);
+    public SwaggerDocketBuilder swaggerDocketBuilder(
+            BuildProperties buildProperties,
+            TypeResolver typeResolver,
+            List<DocketCustomizer> docketCustomizers) {
+        return new SwaggerDocketBuilder(
+                new BaseAPIInfoBuilder(buildProperties), typeResolver, docketCustomizers);
     }
 
     @Bean
@@ -79,27 +83,31 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PathPrefixTransformationFilter pathPrefixTransformationFilter(@Value("${activiti.cloud.swagger.base-path:/}") String swaggerBasePath) {
+    public PathPrefixTransformationFilter pathPrefixTransformationFilter(
+            @Value("${activiti.cloud.swagger.base-path:/}") String swaggerBasePath) {
         return new PathPrefixTransformationFilter(swaggerBasePath);
     }
 
     /**
-     * Springfox workaround required by Spring Boot 2.6
-     * See https://github.com/springfox/springfox/issues/346
+     * Springfox workaround required by Spring Boot 2.6 See
+     * https://github.com/springfox/springfox/issues/346
      */
     @Bean
     public static BeanPostProcessor springfoxHandlerProviderBeanPostProcessor() {
         return new BeanPostProcessor() {
 
             @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof WebMvcRequestHandlerProvider || bean instanceof WebFluxRequestHandlerProvider) {
+            public Object postProcessAfterInitialization(Object bean, String beanName)
+                    throws BeansException {
+                if (bean instanceof WebMvcRequestHandlerProvider
+                        || bean instanceof WebFluxRequestHandlerProvider) {
                     customizeSpringfoxHandlerMappings(getHandlerMappings(bean));
                 }
                 return bean;
             }
 
-            private <T extends RequestMappingInfoHandlerMapping> void customizeSpringfoxHandlerMappings(List<T> mappings) {
+            private <T extends RequestMappingInfoHandlerMapping>
+                    void customizeSpringfoxHandlerMappings(List<T> mappings) {
                 mappings.removeIf(mapping -> mapping.getPatternParser() != null);
             }
 
@@ -115,5 +123,4 @@ public class SwaggerAutoConfiguration {
             }
         };
     }
-
 }

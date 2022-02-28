@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.alfresco.converter.json;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
@@ -29,17 +33,11 @@ import org.springframework.hateoas.PagedModel;
 import java.util.Collections;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class PagedModelConverterTest {
 
-    @InjectMocks
-    private PagedModelConverter pagedCollectionModelConverter;
+    @InjectMocks private PagedModelConverter pagedCollectionModelConverter;
 
-    @Mock
-    private PageMetadataConverter pageMetadataConverter;
+    @Mock private PageMetadataConverter pageMetadataConverter;
 
     @BeforeEach
     public void setUp() {
@@ -47,42 +45,45 @@ public class PagedModelConverterTest {
     }
 
     @Test
-    public void toAlfrescoContentListWrapperShouldConvertFromPagedModelToAlfrescoContentListWrapper() {
-        //given
+    public void
+            toAlfrescoContentListWrapperShouldConvertFromPagedModelToAlfrescoContentListWrapper() {
+        // given
         List<EntityModel<String>> elements = Collections.singletonList(EntityModel.of("any"));
-        PagedModel.PageMetadata basePageMetaData = new PagedModel.PageMetadata(10,
-                                                                               1,
-                                                                               100);
+        PagedModel.PageMetadata basePageMetaData = new PagedModel.PageMetadata(10, 1, 100);
 
         PaginationMetadata alfrescoPageMetadata = new PaginationMetadata();
-        given(pageMetadataConverter.toAlfrescoPageMetadata(basePageMetaData, elements.size())).willReturn(alfrescoPageMetadata);
+        given(pageMetadataConverter.toAlfrescoPageMetadata(basePageMetaData, elements.size()))
+                .willReturn(alfrescoPageMetadata);
 
-        //when
-        ListResponseContent<String> alfrescoPageContentListWrapper = pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(PagedModel.of(elements,
-                                                                                                                                                           basePageMetaData));
+        // when
+        ListResponseContent<String> alfrescoPageContentListWrapper =
+                pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(
+                        PagedModel.of(elements, basePageMetaData));
 
-        //then
+        // then
         assertThat(alfrescoPageContentListWrapper).isNotNull();
         assertThat(alfrescoPageContentListWrapper.getList().getEntries())
                 .extracting(EntryResponseContent::getEntry)
                 .containsExactly("any");
-        assertThat(alfrescoPageContentListWrapper.getList().getPagination()).isEqualTo(alfrescoPageMetadata);
-
+        assertThat(alfrescoPageContentListWrapper.getList().getPagination())
+                .isEqualTo(alfrescoPageMetadata);
     }
 
     @Test
-    public void toAlfrescoContentListWrapperShouldConvertFromCollectionModelToAlfrescoContentListWrapper() {
-        //given
+    public void
+            toAlfrescoContentListWrapperShouldConvertFromCollectionModelToAlfrescoContentListWrapper() {
+        // given
         List<EntityModel<String>> elements = Collections.singletonList(EntityModel.of("any"));
 
-        //when
-        ListResponseContent<String> alfrescoPageContentListWrapper = pagedCollectionModelConverter.resourcesToListResponseContent(CollectionModel.of(elements));
+        // when
+        ListResponseContent<String> alfrescoPageContentListWrapper =
+                pagedCollectionModelConverter.resourcesToListResponseContent(
+                        CollectionModel.of(elements));
 
-        //then
+        // then
         assertThat(alfrescoPageContentListWrapper).isNotNull();
         assertThat(alfrescoPageContentListWrapper.getList().getEntries())
                 .extracting(EntryResponseContent::getEntry)
                 .containsExactly("any");
     }
-
 }

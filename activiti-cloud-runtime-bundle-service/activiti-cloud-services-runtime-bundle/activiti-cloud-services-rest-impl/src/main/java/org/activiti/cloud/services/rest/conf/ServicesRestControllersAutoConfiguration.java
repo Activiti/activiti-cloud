@@ -42,25 +42,25 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ConditionalOnWebApplication
 @AutoConfigureAfter(ServicesRestWebMvcAutoConfiguration.class)
-@Import({HomeControllerImpl.class,
-        ConnectorDefinitionControllerImpl.class,
-        ProcessDefinitionAdminControllerImpl.class,
-        ProcessDefinitionControllerImpl.class,
-        ProcessDefinitionMetaControllerImpl.class,
-        ProcessInstanceAdminControllerImpl.class,
-        ProcessInstanceControllerImpl.class,
-        ProcessInstanceTasksControllerImpl.class,
-        ProcessInstanceVariableAdminControllerImpl.class,
-        ProcessInstanceVariableControllerImpl.class,
-        RuntimeBundleExceptionHandler.class,
-        TaskAdminControllerImpl.class,
-        TaskControllerImpl.class,
-        TaskVariableAdminControllerImpl.class,
-        TaskVariableControllerImpl.class,
-        CandidateUserControllerImpl.class,
-        CandidateUserAdminControllerImpl.class,
-        CandidateGroupControllerImpl.class,
-        CandidateGroupAdminControllerImpl.class})
-public class ServicesRestControllersAutoConfiguration {
-
-}
+@Import({
+    HomeControllerImpl.class,
+    ConnectorDefinitionControllerImpl.class,
+    ProcessDefinitionAdminControllerImpl.class,
+    ProcessDefinitionControllerImpl.class,
+    ProcessDefinitionMetaControllerImpl.class,
+    ProcessInstanceAdminControllerImpl.class,
+    ProcessInstanceControllerImpl.class,
+    ProcessInstanceTasksControllerImpl.class,
+    ProcessInstanceVariableAdminControllerImpl.class,
+    ProcessInstanceVariableControllerImpl.class,
+    RuntimeBundleExceptionHandler.class,
+    TaskAdminControllerImpl.class,
+    TaskControllerImpl.class,
+    TaskVariableAdminControllerImpl.class,
+    TaskVariableControllerImpl.class,
+    CandidateUserControllerImpl.class,
+    CandidateUserAdminControllerImpl.class,
+    CandidateGroupControllerImpl.class,
+    CandidateGroupAdminControllerImpl.class
+})
+public class ServicesRestControllersAutoConfiguration {}

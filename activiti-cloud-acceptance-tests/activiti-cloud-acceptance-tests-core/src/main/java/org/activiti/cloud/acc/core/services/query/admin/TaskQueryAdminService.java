@@ -18,6 +18,7 @@ package org.activiti.cloud.acc.core.services.query.admin;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,9 +34,11 @@ public interface TaskQueryAdminService {
     @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedModel<CloudTask> getTasks();
 
-    @RequestLine("GET /admin/v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc")
+    @RequestLine(
+            "GET /admin/v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudTask> getRootTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
+    PagedModel<CloudTask> getRootTasksByProcessInstance(
+            @Param("processInstanceId") String processInstanceId);
 
     @RequestLine("GET /admin/v1/tasks?standalone=true&sort=createdDate,desc&sort=id,desc")
     @Headers("Accept: application/hal+json;charset=UTF-8")

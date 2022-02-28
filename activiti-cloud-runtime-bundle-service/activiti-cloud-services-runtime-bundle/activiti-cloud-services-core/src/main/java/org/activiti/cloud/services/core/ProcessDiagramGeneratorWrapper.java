@@ -32,12 +32,11 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Service logic for generating process diagrams
- */
+/** Service logic for generating process diagrams */
 public class ProcessDiagramGeneratorWrapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessDiagramGeneratorWrapper.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ProcessDiagramGeneratorWrapper.class);
 
     private final ProcessDiagramGenerator processDiagramGenerator;
 
@@ -62,43 +61,45 @@ public class ProcessDiagramGeneratorWrapper {
 
     /**
      * Generate the diagram for a BPNM model
+     *
      * @param bpmnModel the BPNM model
      * @return the diagram for the given model
      */
     public byte[] generateDiagram(BpmnModel bpmnModel) {
-        return generateDiagram(bpmnModel,
-            emptyList(),
-            emptyList(),
-            emptyList());
+        return generateDiagram(bpmnModel, emptyList(), emptyList(), emptyList());
     }
 
     /**
      * Generate the diagram for a BPNM model
+     *
      * @param bpmnModel the BPNM model
      * @param highLightedActivities the activity ids to highlight in diagram
      * @param highLightedFlows the flow ids to highlight in diagram
      * @return the diagram for the given model
      */
-    public byte[] generateDiagram(BpmnModel bpmnModel,
-        List<String> highLightedActivities,
-        List<String> highLightedFlows,
-        List<String> currentActivities) {
-        try (final InputStream imageStream = processDiagramGenerator.generateDiagram(bpmnModel,
-            highLightedActivities,
-            highLightedFlows,
-            currentActivities,
-            emptyList(),
-            getActivityFontName(),
-            getLabelFontName(),
-            getAnnotationFontName(),
-            isGenerateDefaultDiagram(),
-            getDiagramImageFileName())) {
+    public byte[] generateDiagram(
+            BpmnModel bpmnModel,
+            List<String> highLightedActivities,
+            List<String> highLightedFlows,
+            List<String> currentActivities) {
+        try (final InputStream imageStream =
+                processDiagramGenerator.generateDiagram(
+                        bpmnModel,
+                        highLightedActivities,
+                        highLightedFlows,
+                        currentActivities,
+                        emptyList(),
+                        getActivityFontName(),
+                        getLabelFontName(),
+                        getAnnotationFontName(),
+                        isGenerateDefaultDiagram(),
+                        getDiagramImageFileName())) {
             return StreamUtils.copyToByteArray(imageStream);
         } catch (ActivitiImageException e) {
             throw e;
         } catch (Exception e) {
-            throw new ActivitiException("Error occurred while getting process diagram for model: " + bpmnModel,
-                e);
+            throw new ActivitiException(
+                    "Error occurred while getting process diagram for model: " + bpmnModel, e);
         }
     }
 
@@ -112,46 +113,51 @@ public class ProcessDiagramGeneratorWrapper {
 
     /**
      * Get diagram file name to use when there is no diagram graphic info inside model.
+     *
      * @return the file name
      */
     public String getDiagramImageFileName() {
-        return !StringUtils.isEmpty(getDefaultDiagramImageFileName()) ?
-                getDefaultDiagramImageFileName() :
-                processDiagramGenerator.getDefaultDiagramImageFileName();
+        return !StringUtils.isEmpty(getDefaultDiagramImageFileName())
+                ? getDefaultDiagramImageFileName()
+                : processDiagramGenerator.getDefaultDiagramImageFileName();
     }
 
     /**
      * Get activity font name
+     *
      * @return the activity font name
      */
     public String getActivityFontName() {
-        return isFontAvailable(activityFontName) ?
-                activityFontName :
-                processDiagramGenerator.getDefaultActivityFontName();
+        return isFontAvailable(activityFontName)
+                ? activityFontName
+                : processDiagramGenerator.getDefaultActivityFontName();
     }
 
     /**
      * Get label font name
+     *
      * @return the label font name
      */
     public String getLabelFontName() {
-        return isFontAvailable(labelFontName) ?
-                labelFontName :
-                processDiagramGenerator.getDefaultLabelFontName();
+        return isFontAvailable(labelFontName)
+                ? labelFontName
+                : processDiagramGenerator.getDefaultLabelFontName();
     }
 
     /**
      * Get annotation font name
+     *
      * @return the annotation font name
      */
     public String getAnnotationFontName() {
-        return isFontAvailable(annotationFontName) ?
-                annotationFontName :
-                processDiagramGenerator.getDefaultAnnotationFontName();
+        return isFontAvailable(annotationFontName)
+                ? annotationFontName
+                : processDiagramGenerator.getDefaultAnnotationFontName();
     }
 
     /**
      * Check if a given font is available in the current system
+     *
      * @param fontName the font name to check
      * @return true if the specified font name exists
      */
@@ -160,9 +166,13 @@ public class ProcessDiagramGeneratorWrapper {
             return false;
         }
 
-        boolean available = Arrays
-                .stream(getAvailableFonts())
-                .anyMatch(availbleFontName -> availbleFontName.toLowerCase().startsWith(fontName.toLowerCase()));
+        boolean available =
+                Arrays.stream(getAvailableFonts())
+                        .anyMatch(
+                                availbleFontName ->
+                                        availbleFontName
+                                                .toLowerCase()
+                                                .startsWith(fontName.toLowerCase()));
 
         if (!available) {
             LOGGER.debug("Font not available while generating process diagram: " + fontName);

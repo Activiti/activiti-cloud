@@ -33,16 +33,19 @@ public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudTaskCandidateUserAddedEvent taskCandidateUserAddedEvent = (CloudTaskCandidateUserAddedEvent) event;
-        org.activiti.api.task.model.TaskCandidateUser taskCandidateUser = taskCandidateUserAddedEvent.getEntity();
+        CloudTaskCandidateUserAddedEvent taskCandidateUserAddedEvent =
+                (CloudTaskCandidateUserAddedEvent) event;
+        org.activiti.api.task.model.TaskCandidateUser taskCandidateUser =
+                taskCandidateUserAddedEvent.getEntity();
 
         try {
-            TaskCandidateUserEntity entity = new TaskCandidateUserEntity(taskCandidateUser.getTaskId(),
-                                                                         taskCandidateUser.getUserId());
+            TaskCandidateUserEntity entity =
+                    new TaskCandidateUserEntity(
+                            taskCandidateUser.getTaskId(), taskCandidateUser.getUserId());
             entityManager.persist(entity);
         } catch (Exception cause) {
-            throw new QueryException("Error handling TaskCandidateUserAddedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException(
+                    "Error handling TaskCandidateUserAddedEvent[" + event + "]", cause);
         }
     }
 

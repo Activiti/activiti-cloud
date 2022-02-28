@@ -30,8 +30,7 @@ public class ProcessCancelledAuditEventEntity extends ProcessAuditEventEntity {
 
     private String cause;
 
-    public ProcessCancelledAuditEventEntity() {
-    }
+    public ProcessCancelledAuditEventEntity() {}
 
     public ProcessCancelledAuditEventEntity(CloudProcessCancelledEvent cloudEvent) {
         super(cloudEvent);
@@ -50,10 +49,10 @@ public class ProcessCancelledAuditEventEntity extends ProcessAuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ProcessCancelledAuditEventEntity [cause=")
-               .append(cause)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(cause)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

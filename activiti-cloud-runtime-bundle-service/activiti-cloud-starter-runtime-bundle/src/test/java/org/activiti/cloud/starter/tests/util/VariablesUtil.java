@@ -15,62 +15,59 @@
  */
 package org.activiti.cloud.starter.tests.util;
 
+import org.activiti.common.util.DateFormatterProvider;
+import org.springframework.boot.test.context.TestComponent;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.activiti.common.util.DateFormatterProvider;
-import org.springframework.boot.test.context.TestComponent;
-
 @TestComponent
 public class VariablesUtil {
 
     private final DateFormatterProvider dateFormatterProvider;
-    
+
     public VariablesUtil(DateFormatterProvider dateFormatterProvider) {
-        
-        this.dateFormatterProvider = dateFormatterProvider; 
+
+        this.dateFormatterProvider = dateFormatterProvider;
     }
-    
+
     public String getDateFormattedString(Date date) throws Exception {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        
+
         return format.format(date);
     }
-    
+
     public LocalDateTime convertDateToLocalDate(Date date) {
-        return date.toInstant()
-               .atZone(dateFormatterProvider.getZoneId())
-               .toLocalDateTime();
+        return date.toInstant().atZone(dateFormatterProvider.getZoneId()).toLocalDateTime();
     }
-    
+
     public String formatLocalDateTimeStringWithPattern(LocalDateTime date, String datePattern) {
         return new DateTimeFormatterBuilder()
-                  .appendPattern(datePattern)
-                  .toFormatter()
-                  .withZone(dateFormatterProvider.getZoneId())
-                  .format(date);
+                .appendPattern(datePattern)
+                .toFormatter()
+                .withZone(dateFormatterProvider.getZoneId())
+                .format(date);
     }
-    
+
     public String getDateTimeFormattedString(Date date) throws Exception {
-        return formatLocalDateTimeStringWithPattern(convertDateToLocalDate(date), 
-                                                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    }  
-    
+        return formatLocalDateTimeStringWithPattern(
+                convertDateToLocalDate(date), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    }
+
     public String getExpectedDateFormattedString(Date date) throws Exception {
         SimpleDateFormat expDTFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         expDTFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-         
-        return expDTFormat.format(dateFormatterProvider
-                                  .parse(getDateFormattedString(date)));
+
+        return expDTFormat.format(dateFormatterProvider.parse(getDateFormattedString(date)));
     }
-    
+
     public String getExpectedDateTimeFormattedString(Date date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         return format.format(date);
-    } 
+    }
 }

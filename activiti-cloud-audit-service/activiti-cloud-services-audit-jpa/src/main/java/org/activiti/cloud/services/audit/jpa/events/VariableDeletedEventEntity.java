@@ -28,8 +28,7 @@ public class VariableDeletedEventEntity extends VariableAuditEventEntity {
 
     protected static final String VARIABLE_DELETED_EVENT = "VariableDeletedEvent";
 
-    public VariableDeletedEventEntity() {
-    }
+    public VariableDeletedEventEntity() {}
 
     public VariableDeletedEventEntity(CloudVariableDeletedEvent cloudEvent) {
         super(cloudEvent);
@@ -38,7 +37,9 @@ public class VariableDeletedEventEntity extends VariableAuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("VariableDeletedEventEntity [toString()=").append(super.toString()).append("]");
+        builder.append("VariableDeletedEventEntity [toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

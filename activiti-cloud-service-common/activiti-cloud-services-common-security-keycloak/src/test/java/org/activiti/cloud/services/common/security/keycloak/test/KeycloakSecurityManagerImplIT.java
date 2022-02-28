@@ -33,14 +33,11 @@ import java.util.List;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class KeycloakSecurityManagerImplIT {
 
-    @Autowired
-    private SecurityManager securityManager;
+    @Autowired private SecurityManager securityManager;
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    static class Application {
-
-    }
+    static class Application {}
 
     @Test
     public void contextLoads() {
@@ -68,8 +65,7 @@ public class KeycloakSecurityManagerImplIT {
         List<String> result = securityManager.getAuthenticatedUserGroups();
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("hr", "admins");
+        assertThat(result).isNotEmpty().containsExactly("hr", "admins");
     }
 
     @Test
@@ -81,8 +77,7 @@ public class KeycloakSecurityManagerImplIT {
         List<String> result = securityManager.getAuthenticatedUserRoles();
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("ACTIVITI_USER");
+        assertThat(result).isNotEmpty().containsExactly("ACTIVITI_USER");
     }
 
     @Test
@@ -90,7 +85,11 @@ public class KeycloakSecurityManagerImplIT {
         // given
 
         // when
-        Throwable thrown = catchThrowable(() -> { securityManager.getAuthenticatedUserId(); });
+        Throwable thrown =
+                catchThrowable(
+                        () -> {
+                            securityManager.getAuthenticatedUserId();
+                        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
@@ -101,7 +100,11 @@ public class KeycloakSecurityManagerImplIT {
         // given
 
         // when
-        Throwable thrown = catchThrowable(() -> { securityManager.getAuthenticatedUserGroups(); });
+        Throwable thrown =
+                catchThrowable(
+                        () -> {
+                            securityManager.getAuthenticatedUserGroups();
+                        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
@@ -112,12 +115,13 @@ public class KeycloakSecurityManagerImplIT {
         // given
 
         // when
-        Throwable thrown = catchThrowable(() -> { securityManager.getAuthenticatedUserRoles(); });
+        Throwable thrown =
+                catchThrowable(
+                        () -> {
+                            securityManager.getAuthenticatedUserRoles();
+                        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
-
     }
-
-
 }

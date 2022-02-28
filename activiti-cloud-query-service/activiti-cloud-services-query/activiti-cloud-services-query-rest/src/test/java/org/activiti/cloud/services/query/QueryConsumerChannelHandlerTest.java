@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.query;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import static java.util.Arrays.asList;
+
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -28,21 +34,13 @@ import org.mockito.Mock;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class QueryConsumerChannelHandlerTest {
 
-    @InjectMocks
-    private QueryConsumerChannelHandler consumer;
+    @InjectMocks private QueryConsumerChannelHandler consumer;
 
-    @Mock
-    private QueryEventHandlerContext eventHandlerContext;
+    @Mock private QueryEventHandlerContext eventHandlerContext;
 
-    @Mock
-    private QueryEventHandlerContextOptimizer optimizer;
+    @Mock private QueryEventHandlerContextOptimizer optimizer;
 
     @BeforeEach
     public void setUp() {
@@ -51,21 +49,19 @@ public class QueryConsumerChannelHandlerTest {
 
     @Test
     public void receiveShouldHandleReceivedEvent() {
-        //given
+        // given
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
 
-        List<CloudRuntimeEvent<?,?>> events = asList(processCreatedEvent,
-                                                     processStartedEvent);
+        List<CloudRuntimeEvent<?, ?>> events = asList(processCreatedEvent, processStartedEvent);
 
         when(optimizer.optimize(events)).thenReturn(events);
 
-        //when
+        // when
         consumer.receive(events);
 
-        //then
+        // then
         verify(optimizer).optimize(events);
         verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
     }
-
 }

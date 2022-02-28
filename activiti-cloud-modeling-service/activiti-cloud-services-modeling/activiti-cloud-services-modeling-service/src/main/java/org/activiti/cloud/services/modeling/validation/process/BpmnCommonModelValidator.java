@@ -15,17 +15,15 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
-import java.util.stream.Stream;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.ValidationContext;
 
-/**
- * Interface for validating {@link BpmnModel} objects
- */
+import java.util.stream.Stream;
+
+/** Interface for validating {@link BpmnModel} objects */
 public interface BpmnCommonModelValidator extends ModelValidationErrorProducer {
 
     Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext);
-
 }

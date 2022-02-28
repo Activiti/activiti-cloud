@@ -20,8 +20,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import java.util.Collections;
-import java.util.Optional;
+
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
@@ -30,15 +29,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+import java.util.Collections;
+import java.util.Optional;
+
 public class ModelRepositoryImplTest {
 
     private ModelRepositoryImpl repository;
 
-    @Mock
-    private ModelJpaRepository modelJpaRepository;
+    @Mock private ModelJpaRepository modelJpaRepository;
 
-    @Mock
-    private ProcessModelType processModelType;
+    @Mock private ProcessModelType processModelType;
 
     private ProjectEntity project;
     private ModelEntity model;
@@ -59,12 +59,17 @@ public class ModelRepositoryImplTest {
 
     @Test
     public void should_returnModel_when_getModelByNameInProjectAndModelExists() {
-        when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(project.getId(), model.getName(), processModelType.getName()))
-            .thenReturn(Collections.singletonList(model));
+        when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(
+                        project.getId(), model.getName(), processModelType.getName()))
+                .thenReturn(Collections.singletonList(model));
 
-        Optional<ModelEntity> result = repository.findModelByNameInProject(project, model.getName(), processModelType.getName());
+        Optional<ModelEntity> result =
+                repository.findModelByNameInProject(
+                        project, model.getName(), processModelType.getName());
 
-        verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(project.getId(), model.getName(), processModelType.getName());
+        verify(modelJpaRepository, times(1))
+                .findModelByProjectIdAndNameEqualsAndTypeEquals(
+                        project.getId(), model.getName(), processModelType.getName());
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId()).isEqualTo(model.getId());
         assertThat(result.get().hasProjects()).isTrue();
@@ -73,59 +78,83 @@ public class ModelRepositoryImplTest {
 
     @Test
     public void should_returnModel_when_getModelByNameInProjectAndModelExistsAndProjectIsNull() {
-        when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName()))
-            .thenReturn(Collections.singletonList(model));
+        when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(
+                        null, model.getName(), processModelType.getName()))
+                .thenReturn(Collections.singletonList(model));
 
-        Optional<ModelEntity> result = repository.findModelByNameInProject(null, model.getName(), processModelType.getName());
+        Optional<ModelEntity> result =
+                repository.findModelByNameInProject(
+                        null, model.getName(), processModelType.getName());
 
-        verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName());
+        verify(modelJpaRepository, times(1))
+                .findModelByProjectIdAndNameEqualsAndTypeEquals(
+                        null, model.getName(), processModelType.getName());
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId()).isEqualTo(model.getId());
     }
 
     @Test
     public void should_returnEmpty_when_getModelByNameInProjectAndModelNotExists() {
-        when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(project.getId(), model.getName(), processModelType.getName()))
-            .thenReturn(Collections.emptyList());
+        when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(
+                        project.getId(), model.getName(), processModelType.getName()))
+                .thenReturn(Collections.emptyList());
 
-        Optional<ModelEntity> result = repository.findModelByNameInProject(project, model.getName(), processModelType.getName());
+        Optional<ModelEntity> result =
+                repository.findModelByNameInProject(
+                        project, model.getName(), processModelType.getName());
 
-        verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(project.getId(), model.getName(), processModelType.getName());
+        verify(modelJpaRepository, times(1))
+                .findModelByProjectIdAndNameEqualsAndTypeEquals(
+                        project.getId(), model.getName(), processModelType.getName());
         assertThat(result.isEmpty()).isTrue();
     }
 
     @Test
     public void should_returnEmpty_when_getModelByNameInProjectAndModelNotExistsAndProjectIsNull() {
-        when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName()))
-            .thenReturn(Collections.emptyList());
+        when(modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(
+                        null, model.getName(), processModelType.getName()))
+                .thenReturn(Collections.emptyList());
 
-        Optional<ModelEntity> result = repository.findModelByNameInProject(null, model.getName(), processModelType.getName());
+        Optional<ModelEntity> result =
+                repository.findModelByNameInProject(
+                        null, model.getName(), processModelType.getName());
 
-        verify(modelJpaRepository, times(1)).findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName());
+        verify(modelJpaRepository, times(1))
+                .findModelByProjectIdAndNameEqualsAndTypeEquals(
+                        null, model.getName(), processModelType.getName());
         assertThat(result.isEmpty()).isTrue();
     }
 
     @Test
     public void should_returnModel_when_getModelByNameAndScopeExists() {
-        when(modelJpaRepository.findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL,processModelType.getName()))
-            .thenReturn(Collections.singletonList(model));
+        when(modelJpaRepository.findModelByNameAndScopeAndTypeEquals(
+                        model.getName(), ModelScope.GLOBAL, processModelType.getName()))
+                .thenReturn(Collections.singletonList(model));
 
-        Optional<ModelEntity> result = repository.findGlobalModelByNameAndType(model.getName(), processModelType.getName());
+        Optional<ModelEntity> result =
+                repository.findGlobalModelByNameAndType(
+                        model.getName(), processModelType.getName());
 
-        verify(modelJpaRepository, times(1)).findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL,processModelType.getName());
+        verify(modelJpaRepository, times(1))
+                .findModelByNameAndScopeAndTypeEquals(
+                        model.getName(), ModelScope.GLOBAL, processModelType.getName());
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId()).isEqualTo(model.getId());
     }
 
     @Test
     public void should_returnEmpty_when_getModelByNameAndScopeDoesNotExist() {
-        when(modelJpaRepository.findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL,processModelType.getName()))
-            .thenReturn(Collections.emptyList());
+        when(modelJpaRepository.findModelByNameAndScopeAndTypeEquals(
+                        model.getName(), ModelScope.GLOBAL, processModelType.getName()))
+                .thenReturn(Collections.emptyList());
 
-        Optional<ModelEntity> result = repository.findGlobalModelByNameAndType(model.getName(), processModelType.getName());
+        Optional<ModelEntity> result =
+                repository.findGlobalModelByNameAndType(
+                        model.getName(), processModelType.getName());
 
-        verify(modelJpaRepository, times(1)).findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL,processModelType.getName());
+        verify(modelJpaRepository, times(1))
+                .findModelByNameAndScopeAndTypeEquals(
+                        model.getName(), ModelScope.GLOBAL, processModelType.getName());
         assertThat(result.isPresent()).isFalse();
     }
-
 }

@@ -15,16 +15,14 @@
  */
 package org.activiti.cloud.services.test.asserts;
 
-import java.io.IOException;
-
-import org.activiti.cloud.services.common.file.FileContent;
-
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_ZIP;
 import static org.assertj.core.api.Assertions.*;
 
-/**
- * Asserts for file content
- */
+import org.activiti.cloud.services.common.file.FileContent;
+
+import java.io.IOException;
+
+/** Asserts for file content */
 public class AssertFileContent {
 
     private final FileContent fileContent;

@@ -19,15 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.Arrays;
-import java.util.List;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -60,29 +51,39 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+        initializers = {
+            RabbitMQContainerApplicationInitializer.class,
+            KeycloakContainerApplicationInitializer.class
+        })
 public class QueryProcessInstancesEntityIT {
 
     private static final String PROC_URL = "/v1/process-instances";
     private static final String ADMIN_PROC_URL = "/admin/v1/process-instances";
 
-    private static final ParameterizedTypeReference<PagedModel<ProcessInstanceEntity>> PAGED_PROCESS_INSTANCE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessInstanceEntity>>() {
-    };
+    private static final ParameterizedTypeReference<PagedModel<ProcessInstanceEntity>>
+            PAGED_PROCESS_INSTANCE_RESPONSE_TYPE =
+                    new ParameterizedTypeReference<PagedModel<ProcessInstanceEntity>>() {};
 
-    @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    @Autowired private KeycloakTokenProducer keycloakTokenProducer;
 
-    @Autowired
-    private TestRestTemplate testRestTemplate;
+    @Autowired private TestRestTemplate testRestTemplate;
 
-    @Autowired
-    private ProcessInstanceRepository processInstanceRepository;
+    @Autowired private ProcessInstanceRepository processInstanceRepository;
 
-    @Autowired
-    private MyProducer producer;
+    @Autowired private MyProducer producer;
 
     private EventsAggregator eventsAggregator;
 
@@ -101,145 +102,169 @@ public class QueryProcessInstancesEntityIT {
 
     @Test
     public void shouldGetAvailableProcInstancesAndFilteredProcessInstances() {
-        //given
-        ProcessInstance completedProcess = processInstanceBuilder.aCompletedProcessInstance("first");
+        // given
+        ProcessInstance completedProcess =
+                processInstanceBuilder.aCompletedProcessInstance("first");
         ProcessInstance runningProcess = processInstanceBuilder.aRunningProcessInstance("second");
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity =
+                                    executeRequestGetProcInstances();
 
-            //then
-            assertThat(responseEntity).isNotNull();
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntity).isNotNull();
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
-            assertThat(processInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId,
-                                ProcessInstanceEntity::getName,
-                                ProcessInstanceEntity::getStatus,
-                                ProcessInstanceEntity::getProcessDefinitionName)
-                    .contains(tuple(completedProcess.getId(),
-                                    "first",
-                                    ProcessInstance.ProcessInstanceStatus.COMPLETED,
-                                    completedProcess.getProcessDefinitionName()),
-                              tuple(runningProcess.getId(),
-                                    "second",
-                                    ProcessInstance.ProcessInstanceStatus.RUNNING,
-                                    runningProcess.getProcessDefinitionName()));
-        });
+                            Collection<ProcessInstanceEntity> processInstanceEntities =
+                                    responseEntity.getBody().getContent();
+                            assertThat(processInstanceEntities)
+                                    .extracting(
+                                            ProcessInstanceEntity::getId,
+                                            ProcessInstanceEntity::getName,
+                                            ProcessInstanceEntity::getStatus,
+                                            ProcessInstanceEntity::getProcessDefinitionName)
+                                    .contains(
+                                            tuple(
+                                                    completedProcess.getId(),
+                                                    "first",
+                                                    ProcessInstance.ProcessInstanceStatus.COMPLETED,
+                                                    completedProcess.getProcessDefinitionName()),
+                                            tuple(
+                                                    runningProcess.getId(),
+                                                    "second",
+                                                    ProcessInstance.ProcessInstanceStatus.RUNNING,
+                                                    runningProcess.getProcessDefinitionName()));
+                        });
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //and filter by status
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(PROC_URL + "?status={status}",
-                                                                                                                     HttpMethod.GET,
-                                                                                                                     keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
-                                                                                                                     ProcessInstance.ProcessInstanceStatus.COMPLETED);
+                            // and filter by status
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>>
+                                    responseEntityFiltered =
+                                            testRestTemplate.exchange(
+                                                    PROC_URL + "?status={status}",
+                                                    HttpMethod.GET,
+                                                    keycloakTokenProducer
+                                                            .entityWithAuthorizationHeader(),
+                                                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
+                                                    ProcessInstance.ProcessInstanceStatus
+                                                            .COMPLETED);
 
-            //then
-            assertThat(responseEntityFiltered).isNotNull();
-            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntityFiltered).isNotNull();
+                            assertThat(responseEntityFiltered.getStatusCode())
+                                    .isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered.getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId,
-                                ProcessInstanceEntity::getStatus)
-                    .containsExactly(tuple(completedProcess.getId(),
-                                           ProcessInstance.ProcessInstanceStatus.COMPLETED));
-        });
+                            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities =
+                                    responseEntityFiltered.getBody().getContent();
+                            assertThat(filteredProcessInstanceEntities)
+                                    .extracting(
+                                            ProcessInstanceEntity::getId,
+                                            ProcessInstanceEntity::getStatus)
+                                    .containsExactly(
+                                            tuple(
+                                                    completedProcess.getId(),
+                                                    ProcessInstance.ProcessInstanceStatus
+                                                            .COMPLETED));
+                        });
     }
 
     @Test
     public void shouldGetProcessWithUpdatedInfo() {
-        //given
+        // given
         ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
-
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity =
+                                    executeRequestGetProcInstances();
 
-            //then
-            assertThat(responseEntity).isNotNull();
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntity).isNotNull();
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
-            assertThat(processInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId,
-                                ProcessInstanceEntity::getStatus)
-                    .contains(tuple(process.getId(),
-                                    ProcessInstance.ProcessInstanceStatus.RUNNING));
-        });
+                            Collection<ProcessInstanceEntity> processInstanceEntities =
+                                    responseEntity.getBody().getContent();
+                            assertThat(processInstanceEntities)
+                                    .extracting(
+                                            ProcessInstanceEntity::getId,
+                                            ProcessInstanceEntity::getStatus)
+                                    .contains(
+                                            tuple(
+                                                    process.getId(),
+                                                    ProcessInstance.ProcessInstanceStatus.RUNNING));
+                        });
 
-        //when
+        // when
         ProcessInstanceImpl updatedProcess = new ProcessInstanceImpl();
         updatedProcess.setId(process.getId());
         updatedProcess.setBusinessKey("businessKey");
         updatedProcess.setName("name");
 
-
         producer.send(new CloudProcessUpdatedEventImpl(updatedProcess));
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
+                            ResponseEntity<ProcessInstance> responseEntity =
+                                    testRestTemplate.exchange(
+                                            PROC_URL + "/" + process.getId(),
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            new ParameterizedTypeReference<ProcessInstance>() {});
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody()).isNotNull();
+                            assertThat(responseEntity.getBody().getId()).isNotNull();
 
-             ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                            HttpMethod.GET,
-                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                            new ParameterizedTypeReference<ProcessInstance>() {
-                                                                            });
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getId()).isNotNull();
-
-            ProcessInstance responseProcess = responseEntity.getBody();
-            assertThat(responseProcess.getBusinessKey()).isEqualTo(updatedProcess.getBusinessKey());
-            assertThat(responseProcess.getName()).isEqualTo(updatedProcess.getName());
-
-        });
+                            ProcessInstance responseProcess = responseEntity.getBody();
+                            assertThat(responseProcess.getBusinessKey())
+                                    .isEqualTo(updatedProcess.getBusinessKey());
+                            assertThat(responseProcess.getName())
+                                    .isEqualTo(updatedProcess.getName());
+                        });
     }
-
 
     @Test
     public void shouldGetAdminProcessInfo() {
-        //given
+        // given
         ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
-
 
         eventsAggregator.sendAll();
 
+        await().untilAsserted(
+                        () -> {
+                            keycloakTokenProducer.setKeycloakTestUser("hradmin");
 
-        await().untilAsserted(() -> {
-             keycloakTokenProducer.setKeycloakTestUser("hradmin");
+                            ResponseEntity<ProcessInstance> responseEntity =
+                                    testRestTemplate.exchange(
+                                            ADMIN_PROC_URL + "/" + process.getId(),
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            new ParameterizedTypeReference<ProcessInstance>() {});
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody()).isNotNull();
+                            assertThat(responseEntity.getBody().getId()).isNotNull();
 
-             ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "/" + process.getId(),
-                                                                            HttpMethod.GET,
-                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                            new ParameterizedTypeReference<ProcessInstance>() {
-                                                                            });
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getId()).isNotNull();
-
-            ProcessInstance responseProcess = responseEntity.getBody();
-            assertThat(responseProcess.getId()).isEqualTo(process.getId());
-
-        });
+                            ProcessInstance responseProcess = responseEntity.getBody();
+                            assertThat(responseProcess.getId()).isEqualTo(process.getId());
+                        });
     }
 
     @Test
     public void shouldGetProcessDefinitionVersion() {
-        //given
+        // given
         ProcessInstanceImpl process = new ProcessInstanceImpl();
         process.setId("process-instance-id");
         process.setName("process");
@@ -248,36 +273,36 @@ public class QueryProcessInstancesEntityIT {
         process.setProcessDefinitionName("process-definition-name");
         process.setProcessDefinitionVersion(10);
 
-        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
-                                   new CloudProcessStartedEventImpl(process,
-                                                       null,
-                                                       null));
-
+        eventsAggregator.addEvents(
+                new CloudProcessCreatedEventImpl(process),
+                new CloudProcessStartedEventImpl(process, null, null));
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                       });
+                            // when
+                            ResponseEntity<ProcessInstance> responseEntity =
+                                    testRestTemplate.exchange(
+                                            PROC_URL + "/" + process.getId(),
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            new ParameterizedTypeReference<ProcessInstance>() {});
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
-            assertThat(responseEntity.getBody().getProcessDefinitionName()).isEqualTo("process-definition-name");
-
-
-        });
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody()).isNotNull();
+                            assertThat(responseEntity.getBody().getProcessDefinitionVersion())
+                                    .isEqualTo(10);
+                            assertThat(responseEntity.getBody().getProcessDefinitionName())
+                                    .isEqualTo("process-definition-name");
+                        });
     }
 
     @Test
     public void shouldSuspendResumeProcess() {
-        //given
+        // given
         ProcessInstanceImpl process = new ProcessInstanceImpl();
         process.setId("process-instance-id");
         process.setName("process");
@@ -285,152 +310,172 @@ public class QueryProcessInstancesEntityIT {
         process.setProcessDefinitionId("process-definition-id");
         process.setProcessDefinitionVersion(10);
 
-        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
-                                   new CloudProcessStartedEventImpl(process,
-                                                       null,
-                                                       null));
-
+        eventsAggregator.addEvents(
+                new CloudProcessCreatedEventImpl(process),
+                new CloudProcessStartedEventImpl(process, null, null));
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                       });
+                            // when
+                            ResponseEntity<ProcessInstance> responseEntity =
+                                    testRestTemplate.exchange(
+                                            PROC_URL + "/" + process.getId(),
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            new ParameterizedTypeReference<ProcessInstance>() {});
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
-
-        });
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody()).isNotNull();
+                            assertThat(responseEntity.getBody().getProcessDefinitionVersion())
+                                    .isEqualTo(10);
+                        });
 
         eventsAggregator.addEvents(new CloudProcessSuspendedEventImpl(process));
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                       });
+                            // when
+                            ResponseEntity<ProcessInstance> responseEntity =
+                                    testRestTemplate.exchange(
+                                            PROC_URL + "/" + process.getId(),
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            new ParameterizedTypeReference<ProcessInstance>() {});
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
-            assertThat(responseEntity.getBody().getProcessDefinitionKey()).isEqualTo("process-definition-key");
-            assertThat(responseEntity.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.SUSPENDED);
-
-        });
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody()).isNotNull();
+                            assertThat(responseEntity.getBody().getProcessDefinitionVersion())
+                                    .isEqualTo(10);
+                            assertThat(responseEntity.getBody().getProcessDefinitionKey())
+                                    .isEqualTo("process-definition-key");
+                            assertThat(responseEntity.getBody().getStatus())
+                                    .isEqualTo(ProcessInstanceStatus.SUSPENDED);
+                        });
 
         eventsAggregator.addEvents(new CloudProcessResumedEventImpl(process));
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                       });
+                            // when
+                            ResponseEntity<ProcessInstance> responseEntity =
+                                    testRestTemplate.exchange(
+                                            PROC_URL + "/" + process.getId(),
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            new ParameterizedTypeReference<ProcessInstance>() {});
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
-            assertThat(responseEntity.getBody().getProcessDefinitionKey()).isEqualTo("process-definition-key");
-            assertThat(responseEntity.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.RUNNING);
-
-        });
-
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody()).isNotNull();
+                            assertThat(responseEntity.getBody().getProcessDefinitionVersion())
+                                    .isEqualTo(10);
+                            assertThat(responseEntity.getBody().getProcessDefinitionKey())
+                                    .isEqualTo("process-definition-key");
+                            assertThat(responseEntity.getBody().getStatus())
+                                    .isEqualTo(ProcessInstanceStatus.RUNNING);
+                        });
     }
 
     @Test
     public void shouldGetProcessInstancesFilteredByNameDescription() {
-        //given
-        ProcessInstance completedProcess = processInstanceBuilder.aCompletedProcessInstance("Process for filter");
+        // given
+        ProcessInstance completedProcess =
+                processInstanceBuilder.aCompletedProcessInstance("Process for filter");
         ProcessInstance runningProcess = processInstanceBuilder.aRunningProcessInstance("Process");
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstancesFiltered("for filter",null);
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity =
+                                    executeRequestGetProcInstancesFiltered("for filter", null);
 
-            //then
-            assertThat(responseEntity).isNotNull();
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntity).isNotNull();
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
-            assertThat(processInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId,
-                                ProcessInstanceEntity::getName,
-                                ProcessInstanceEntity::getStatus)
-                    .contains(tuple(completedProcess.getId(),
-                                    completedProcess.getName(),
-                                    ProcessInstance.ProcessInstanceStatus.COMPLETED));
-        });
+                            Collection<ProcessInstanceEntity> processInstanceEntities =
+                                    responseEntity.getBody().getContent();
+                            assertThat(processInstanceEntities)
+                                    .extracting(
+                                            ProcessInstanceEntity::getId,
+                                            ProcessInstanceEntity::getName,
+                                            ProcessInstanceEntity::getStatus)
+                                    .contains(
+                                            tuple(
+                                                    completedProcess.getId(),
+                                                    completedProcess.getName(),
+                                                    ProcessInstance.ProcessInstanceStatus
+                                                            .COMPLETED));
+                        });
     }
 
     @Test
     public void shouldGetProcessInstancesAsAdmin() {
-        //given
-        ProcessInstance completedProcess = processInstanceBuilder.aCompletedProcessInstance("Process for filter");
+        // given
+        ProcessInstance completedProcess =
+                processInstanceBuilder.aCompletedProcessInstance("Process for filter");
         ProcessInstance runningProcess = processInstanceBuilder.aRunningProcessInstance("Process");
 
         eventsAggregator.sendAll();
 
         keycloakTokenProducer.setKeycloakTestUser("hradmin");
-        await().untilAsserted(() -> {
-
-            ResponseEntity<PagedModel<CloudProcessInstance>> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "?page=0&size=10",
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<PagedModel<CloudProcessInstance>>() {
-                                                                                       });
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody())
-                    .extracting(
-                    CloudProcessInstance::getId,
-                    CloudProcessInstance::getName,
-                    CloudProcessInstance::getStatus,
-                    CloudProcessInstance::getProcessDefinitionName)
-                    .containsExactly(
-                            tuple(completedProcess.getId(),
-                                  completedProcess.getName(),
-                                  ProcessInstanceStatus.COMPLETED,
-                                  completedProcess.getProcessDefinitionName()),
-                            tuple(runningProcess.getId(),
-                                  runningProcess.getName(),
-                                  ProcessInstanceStatus.RUNNING,
-                                  runningProcess.getProcessDefinitionName())
-                    );
-        });
+        await().untilAsserted(
+                        () -> {
+                            ResponseEntity<PagedModel<CloudProcessInstance>> responseEntity =
+                                    testRestTemplate.exchange(
+                                            ADMIN_PROC_URL + "?page=0&size=10",
+                                            HttpMethod.GET,
+                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                            new ParameterizedTypeReference<
+                                                    PagedModel<CloudProcessInstance>>() {});
+                            // then
+                            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntity.getBody())
+                                    .extracting(
+                                            CloudProcessInstance::getId,
+                                            CloudProcessInstance::getName,
+                                            CloudProcessInstance::getStatus,
+                                            CloudProcessInstance::getProcessDefinitionName)
+                                    .containsExactly(
+                                            tuple(
+                                                    completedProcess.getId(),
+                                                    completedProcess.getName(),
+                                                    ProcessInstanceStatus.COMPLETED,
+                                                    completedProcess.getProcessDefinitionName()),
+                                            tuple(
+                                                    runningProcess.getId(),
+                                                    runningProcess.getName(),
+                                                    ProcessInstanceStatus.RUNNING,
+                                                    runningProcess.getProcessDefinitionName()));
+                        });
     }
 
     private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstances() {
 
-        return testRestTemplate.exchange(PROC_URL,
-                                         HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                         PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+        return testRestTemplate.exchange(
+                PROC_URL,
+                HttpMethod.GET,
+                keycloakTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
 
     @Test
     public void shouldGetProcessInstancesFilteredByStartDate() {
-        //given
+        // given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -442,78 +487,97 @@ public class QueryProcessInstancesEntityIT {
         cal.set(Calendar.MILLISECOND, 0);
         Date now = cal.getTime();
 
-        //set start date as current date + 1
+        // set start date as current date + 1
         nextDay.setTime(now.getTime() + Duration.ofDays(1).toMillis());
 
-        ProcessInstance processInstanceStartedNextDay = processInstanceBuilder
-            .aRunningProcessInstanceWithStartDate("first", nextDay);
+        ProcessInstance processInstanceStartedNextDay =
+                processInstanceBuilder.aRunningProcessInstanceWithStartDate("first", nextDay);
 
         inThreeDays.setTime(now.getTime() + Duration.ofDays(3).toMillis());
-        ProcessInstance processInstanceStartedInThreeDays = processInstanceBuilder
-            .aRunningProcessInstanceWithStartDate("second", inThreeDays);
+        ProcessInstance processInstanceStartedInThreeDays =
+                processInstanceBuilder.aRunningProcessInstanceWithStartDate("second", inThreeDays);
 
         threeDaysAgo.setTime(now.getTime() - Duration.ofDays(3).toMillis());
-        ProcessInstance processInstanceStartedThreeDaysAgo = processInstanceBuilder
-            .aRunningProcessInstanceWithStartDate("third", threeDaysAgo);
+        ProcessInstance processInstanceStartedThreeDaysAgo =
+                processInstanceBuilder.aRunningProcessInstanceWithStartDate("third", threeDaysAgo);
 
         eventsAggregator.sendAll();
 
         // Filter using date range
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            //set from date to current date
-            Date fromDate = now;
-            // to date, from date plus 2 days
-            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                .exchange(PROC_URL + "?startFrom=" + sdf.format(fromDate) + "&startTo=" + sdf
-                        .format(toDate),
-                    HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+                            // when
+                            // set from date to current date
+                            Date fromDate = now;
+                            // to date, from date plus 2 days
+                            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>>
+                                    responseEntityFiltered =
+                                            testRestTemplate.exchange(
+                                                    PROC_URL
+                                                            + "?startFrom="
+                                                            + sdf.format(fromDate)
+                                                            + "&startTo="
+                                                            + sdf.format(toDate),
+                                                    HttpMethod.GET,
+                                                    keycloakTokenProducer
+                                                            .entityWithAuthorizationHeader(),
+                                                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
-            //then
-            assertThat(responseEntityFiltered).isNotNull();
-            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntityFiltered).isNotNull();
+                            assertThat(responseEntityFiltered.getStatusCode())
+                                    .isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                .getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                .extracting(ProcessInstanceEntity::getId,
-                    ProcessInstanceEntity::getStatus)
-                .containsExactly(tuple(processInstanceStartedNextDay.getId(),
-                    ProcessInstanceStatus.RUNNING));
-        });
+                            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities =
+                                    responseEntityFiltered.getBody().getContent();
+                            assertThat(filteredProcessInstanceEntities)
+                                    .extracting(
+                                            ProcessInstanceEntity::getId,
+                                            ProcessInstanceEntity::getStatus)
+                                    .containsExactly(
+                                            tuple(
+                                                    processInstanceStartedNextDay.getId(),
+                                                    ProcessInstanceStatus.RUNNING));
+                        });
 
         // Filter using static date
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                .exchange(PROC_URL + "?startDate=" + sdf.format(nextDay),
-                    HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>>
+                                    responseEntityFiltered =
+                                            testRestTemplate.exchange(
+                                                    PROC_URL + "?startDate=" + sdf.format(nextDay),
+                                                    HttpMethod.GET,
+                                                    keycloakTokenProducer
+                                                            .entityWithAuthorizationHeader(),
+                                                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
-            //then
-            assertThat(responseEntityFiltered).isNotNull();
-            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntityFiltered).isNotNull();
+                            assertThat(responseEntityFiltered.getStatusCode())
+                                    .isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                .getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                .extracting(ProcessInstanceEntity::getId,
-                    ProcessInstanceEntity::getStatus)
-                .containsExactly(tuple(processInstanceStartedNextDay.getId(),
-                    ProcessInstanceStatus.RUNNING));
-        });
+                            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities =
+                                    responseEntityFiltered.getBody().getContent();
+                            assertThat(filteredProcessInstanceEntities)
+                                    .extracting(
+                                            ProcessInstanceEntity::getId,
+                                            ProcessInstanceEntity::getStatus)
+                                    .containsExactly(
+                                            tuple(
+                                                    processInstanceStartedNextDay.getId(),
+                                                    ProcessInstanceStatus.RUNNING));
+                        });
     }
 
     @Test
     public void shouldGetProcessInstancesFilteredByCompletedDate() {
-        //given
+        // given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -526,72 +590,91 @@ public class QueryProcessInstancesEntityIT {
         cal.set(Calendar.MILLISECOND, 0);
         Date now = cal.getTime();
 
-        //Start a process and set it's completed date as current date
+        // Start a process and set it's completed date as current date
         completedDateToday.setTime(now.getTime());
-        ProcessInstance processInstanceCompletedToday = processInstanceBuilder
-            .aRunningProcessInstanceWithCompletedDate("completedDateToday", completedDateToday);
+        ProcessInstance processInstanceCompletedToday =
+                processInstanceBuilder.aRunningProcessInstanceWithCompletedDate(
+                        "completedDateToday", completedDateToday);
 
-        //Start a process and set it's completed date as current date minus two days
+        // Start a process and set it's completed date as current date minus two days
         completedDateTwoDaysAgo.setTime(now.getTime() - Duration.ofDays(2).toMillis());
-        processInstanceBuilder.aRunningProcessInstanceWithCompletedDate("completedDateTwoDaysAgo", completedDateTwoDaysAgo);
+        processInstanceBuilder.aRunningProcessInstanceWithCompletedDate(
+                "completedDateTwoDaysAgo", completedDateTwoDaysAgo);
 
-        //Start a process and set it's completed date as current date plus five days
+        // Start a process and set it's completed date as current date plus five days
         completedDateFiveDaysAfter.setTime(now.getTime() + Duration.ofDays(5).toMillis());
-        processInstanceBuilder.aRunningProcessInstanceWithCompletedDate("completedDateFiveDaysAfter", completedDateFiveDaysAfter);
+        processInstanceBuilder.aRunningProcessInstanceWithCompletedDate(
+                "completedDateFiveDaysAfter", completedDateFiveDaysAfter);
 
         eventsAggregator.sendAll();
 
         // Filter using date range
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            //set from date to yesterday date
-            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
-            // to date, from date plus 2 days
-            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                .exchange(PROC_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" + sdf
-                        .format(toDate),
-                    HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+                            // when
+                            // set from date to yesterday date
+                            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
+                            // to date, from date plus 2 days
+                            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>>
+                                    responseEntityFiltered =
+                                            testRestTemplate.exchange(
+                                                    PROC_URL
+                                                            + "?completedFrom="
+                                                            + sdf.format(fromDate)
+                                                            + "&completedTo="
+                                                            + sdf.format(toDate),
+                                                    HttpMethod.GET,
+                                                    keycloakTokenProducer
+                                                            .entityWithAuthorizationHeader(),
+                                                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
-            //then
-            assertThat(responseEntityFiltered).isNotNull();
-            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntityFiltered).isNotNull();
+                            assertThat(responseEntityFiltered.getStatusCode())
+                                    .isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                .getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                .extracting(ProcessInstanceEntity::getName)
-                .containsExactly(processInstanceCompletedToday.getName());
-        });
+                            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities =
+                                    responseEntityFiltered.getBody().getContent();
+                            assertThat(filteredProcessInstanceEntities)
+                                    .extracting(ProcessInstanceEntity::getName)
+                                    .containsExactly(processInstanceCompletedToday.getName());
+                        });
 
         // Filter using static date
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                .exchange(PROC_URL + "?completedDate=" + sdf.format(completedDateToday),
-                    HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>>
+                                    responseEntityFiltered =
+                                            testRestTemplate.exchange(
+                                                    PROC_URL
+                                                            + "?completedDate="
+                                                            + sdf.format(completedDateToday),
+                                                    HttpMethod.GET,
+                                                    keycloakTokenProducer
+                                                            .entityWithAuthorizationHeader(),
+                                                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
-            //then
-            assertThat(responseEntityFiltered).isNotNull();
-            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntityFiltered).isNotNull();
+                            assertThat(responseEntityFiltered.getStatusCode())
+                                    .isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                .getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                .extracting(ProcessInstanceEntity::getName)
-                .containsExactly(processInstanceCompletedToday.getName());
-        });
+                            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities =
+                                    responseEntityFiltered.getBody().getContent();
+                            assertThat(filteredProcessInstanceEntities)
+                                    .extracting(ProcessInstanceEntity::getName)
+                                    .containsExactly(processInstanceCompletedToday.getName());
+                        });
     }
 
-    private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstancesFiltered(String name,String description) {
-        String url=PROC_URL;
+    private ResponseEntity<PagedModel<ProcessInstanceEntity>>
+            executeRequestGetProcInstancesFiltered(String name, String description) {
+        String url = PROC_URL;
         boolean add = false;
         if (name != null || description != null) {
             url += "?";
@@ -605,51 +688,55 @@ public class QueryProcessInstancesEntityIT {
                 }
                 url += "description=" + description;
             }
-
         }
-        return testRestTemplate.exchange(url,
-                                         HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                         PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+        return testRestTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                keycloakTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
 
     @Test
     public void shouldGetProcessInstancesFilteredByInitiator() {
 
-        ProcessInstance processInstanceInitiatorUser1 = processInstanceBuilder
-                .aRunningProcessInstanceWithInitiator("first", "User1");
-        ProcessInstance processInstanceInitiatorUser2 = processInstanceBuilder
-                .aRunningProcessInstanceWithInitiator("second", "User2");
+        ProcessInstance processInstanceInitiatorUser1 =
+                processInstanceBuilder.aRunningProcessInstanceWithInitiator("first", "User1");
+        ProcessInstance processInstanceInitiatorUser2 =
+                processInstanceBuilder.aRunningProcessInstanceWithInitiator("second", "User2");
         processInstanceBuilder.aRunningProcessInstanceWithInitiator("third", "User3");
         eventsAggregator.sendAll();
 
-        List<String> processInstanceIds = Arrays.asList(processInstanceInitiatorUser1.getId(),
-                processInstanceInitiatorUser2.getId());
+        List<String> processInstanceIds =
+                Arrays.asList(
+                        processInstanceInitiatorUser1.getId(),
+                        processInstanceInitiatorUser2.getId());
 
-        shouldGetProcessInstancesFilteredBySingleValue(processInstanceInitiatorUser1.getId(), "initiator=User1");
-        shouldGetProcessInstancesFilteredByList(processInstanceIds,"initiator=User1,User2");
+        shouldGetProcessInstancesFilteredBySingleValue(
+                processInstanceInitiatorUser1.getId(), "initiator=User1");
+        shouldGetProcessInstancesFilteredByList(processInstanceIds, "initiator=User1,User2");
     }
 
     @Test
     public void shouldGetProcessInstancesFilteredByAppVersion() {
 
-        ProcessInstance processInstanceAppVersion1 = processInstanceBuilder
-                .aRunningProcessInstanceWithAppVersion("first", "1");
-        ProcessInstance processInstanceAppVersion2 = processInstanceBuilder
-                .aRunningProcessInstanceWithAppVersion("second", "2");
+        ProcessInstance processInstanceAppVersion1 =
+                processInstanceBuilder.aRunningProcessInstanceWithAppVersion("first", "1");
+        ProcessInstance processInstanceAppVersion2 =
+                processInstanceBuilder.aRunningProcessInstanceWithAppVersion("second", "2");
         processInstanceBuilder.aRunningProcessInstanceWithAppVersion("third", "3");
         eventsAggregator.sendAll();
 
-        List<String> processInstanceIds = List.of(processInstanceAppVersion1.getId(),
-                processInstanceAppVersion2.getId());
+        List<String> processInstanceIds =
+                List.of(processInstanceAppVersion1.getId(), processInstanceAppVersion2.getId());
 
-        shouldGetProcessInstancesFilteredBySingleValue(processInstanceAppVersion1.getId(), "appVersion=1" );
+        shouldGetProcessInstancesFilteredBySingleValue(
+                processInstanceAppVersion1.getId(), "appVersion=1");
         shouldGetProcessInstancesFilteredByList(processInstanceIds, "appVersion=1,2");
     }
 
     @Test
     public void shouldGetProcessInstancesFilteredBySuspendedDate() {
-        //given
+        // given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -662,90 +749,115 @@ public class QueryProcessInstancesEntityIT {
         cal.set(Calendar.MILLISECOND, 0);
         Date now = cal.getTime();
 
-        //Start a process and set it's suspended date as current date
+        // Start a process and set it's suspended date as current date
         suspendedDateToday.setTime(now.getTime());
-        ProcessInstance processInstanceSuspendedToday = processInstanceBuilder
-            .aRunningProcessInstanceWithSuspendedDate("suspendedDateToday", suspendedDateToday);
+        ProcessInstance processInstanceSuspendedToday =
+                processInstanceBuilder.aRunningProcessInstanceWithSuspendedDate(
+                        "suspendedDateToday", suspendedDateToday);
 
-        //Start a process and set it's suspended date as current date minus two days
+        // Start a process and set it's suspended date as current date minus two days
         suspendedDateTwoDaysAgo.setTime(now.getTime() - Duration.ofDays(2).toMillis());
-        processInstanceBuilder.aRunningProcessInstanceWithSuspendedDate("suspendedDateTwoDaysAgo", suspendedDateTwoDaysAgo);
+        processInstanceBuilder.aRunningProcessInstanceWithSuspendedDate(
+                "suspendedDateTwoDaysAgo", suspendedDateTwoDaysAgo);
 
-        //Start a process and set it's suspended date as current date plus five days
+        // Start a process and set it's suspended date as current date plus five days
         suspendedDateFiveDaysAfter.setTime(now.getTime() + Duration.ofDays(5).toMillis());
-        processInstanceBuilder.aRunningProcessInstanceWithSuspendedDate("suspendedDateFiveDaysAfter", suspendedDateFiveDaysAfter);
+        processInstanceBuilder.aRunningProcessInstanceWithSuspendedDate(
+                "suspendedDateFiveDaysAfter", suspendedDateFiveDaysAfter);
 
         eventsAggregator.sendAll();
 
         // Filter using date range
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            //set from date to yesterday date
-            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
-            // to date, from date plus 2 days
-            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                .exchange(PROC_URL + "?suspendedFrom=" + sdf.format(fromDate) + "&suspendedTo=" + sdf
-                        .format(toDate),
-                    HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+                            // when
+                            // set from date to yesterday date
+                            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
+                            // to date, from date plus 2 days
+                            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>>
+                                    responseEntityFiltered =
+                                            testRestTemplate.exchange(
+                                                    PROC_URL
+                                                            + "?suspendedFrom="
+                                                            + sdf.format(fromDate)
+                                                            + "&suspendedTo="
+                                                            + sdf.format(toDate),
+                                                    HttpMethod.GET,
+                                                    keycloakTokenProducer
+                                                            .entityWithAuthorizationHeader(),
+                                                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
-            //then
-            assertThat(responseEntityFiltered).isNotNull();
-            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntityFiltered).isNotNull();
+                            assertThat(responseEntityFiltered.getStatusCode())
+                                    .isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                .getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                .extracting(ProcessInstanceEntity::getName)
-                .containsExactly(processInstanceSuspendedToday.getName());
-        });
+                            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities =
+                                    responseEntityFiltered.getBody().getContent();
+                            assertThat(filteredProcessInstanceEntities)
+                                    .extracting(ProcessInstanceEntity::getName)
+                                    .containsExactly(processInstanceSuspendedToday.getName());
+                        });
 
         // Filter using static date
-        await().untilAsserted(() -> {
+        await().untilAsserted(
+                        () -> {
 
-            //when
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                .exchange(PROC_URL + "?suspendedDate=" + sdf.format(suspendedDateToday),
-                    HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+                            // when
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>>
+                                    responseEntityFiltered =
+                                            testRestTemplate.exchange(
+                                                    PROC_URL
+                                                            + "?suspendedDate="
+                                                            + sdf.format(suspendedDateToday),
+                                                    HttpMethod.GET,
+                                                    keycloakTokenProducer
+                                                            .entityWithAuthorizationHeader(),
+                                                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
-            //then
-            assertThat(responseEntityFiltered).isNotNull();
-            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            // then
+                            assertThat(responseEntityFiltered).isNotNull();
+                            assertThat(responseEntityFiltered.getStatusCode())
+                                    .isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                .getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                .extracting(ProcessInstanceEntity::getName)
-                .containsExactly(processInstanceSuspendedToday.getName());
-        });
+                            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities =
+                                    responseEntityFiltered.getBody().getContent();
+                            assertThat(filteredProcessInstanceEntities)
+                                    .extracting(ProcessInstanceEntity::getName)
+                                    .containsExactly(processInstanceSuspendedToday.getName());
+                        });
     }
 
-    private void shouldGetProcessInstancesFilteredBySingleValue(String processId, String queryString) {
+    private void shouldGetProcessInstancesFilteredBySingleValue(
+            String processId, String queryString) {
         shouldGetProcessInstancesFilteredByList(List.of(processId), queryString);
     }
 
-    private void shouldGetProcessInstancesFilteredByList(List<String> processInstanceIds, String queryString) {
-        await().untilAsserted(() -> {
-            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                    .exchange(PROC_URL + "?" + queryString,
-                            HttpMethod.GET,
-                            keycloakTokenProducer.entityWithAuthorizationHeader(),
-                            PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+    private void shouldGetProcessInstancesFilteredByList(
+            List<String> processInstanceIds, String queryString) {
+        await().untilAsserted(
+                        () -> {
+                            ResponseEntity<PagedModel<ProcessInstanceEntity>>
+                                    responseEntityFiltered =
+                                            testRestTemplate.exchange(
+                                                    PROC_URL + "?" + queryString,
+                                                    HttpMethod.GET,
+                                                    keycloakTokenProducer
+                                                            .entityWithAuthorizationHeader(),
+                                                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
-            assertThat(responseEntityFiltered).isNotNull();
-            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            assertThat(responseEntityFiltered).isNotNull();
+                            assertThat(responseEntityFiltered.getStatusCode())
+                                    .isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody().getContent();
-            assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId)
-                    .containsExactly(processInstanceIds.toArray(String[]::new));
-        });
+                            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities =
+                                    responseEntityFiltered.getBody().getContent();
+                            assertThat(filteredProcessInstanceEntities)
+                                    .extracting(ProcessInstanceEntity::getId)
+                                    .containsExactly(processInstanceIds.toArray(String[]::new));
+                        });
     }
 }

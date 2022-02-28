@@ -15,15 +15,16 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import java.util.Date;
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 
-import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
-import org.activiti.api.task.model.Task;
-import org.activiti.api.task.model.impl.TaskImpl;
-import org.junit.jupiter.api.Test;
 import static org.activiti.test.Assertions.assertThat;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.impl.TaskImpl;
+import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
+import org.junit.jupiter.api.Test;
+
+import java.util.Date;
 
 public class TaskJpaJsonConverterTest {
 
@@ -31,10 +32,9 @@ public class TaskJpaJsonConverterTest {
 
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
-        //given
+        // given
         Date now = new Date();
-        TaskImpl task = new TaskImpl("3", "task1",
-                                     Task.TaskStatus.CREATED);
+        TaskImpl task = new TaskImpl("3", "task1", Task.TaskStatus.CREATED);
         task.setAssignee("user1");
         task.setDescription("First task");
         task.setOwner("user2");
@@ -43,41 +43,49 @@ public class TaskJpaJsonConverterTest {
         task.setProcessInstanceId("10");
         task.setParentTaskId("parent-task-id");
 
-
-        //when
+        // when
         String jsonRepresentation = converter.convertToDatabaseColumn(task);
 
-        //then
+        // then
         assertThatJson(jsonRepresentation)
-                .node("id").isEqualTo("\"3\"")
-                .node("name").isEqualTo("task1")
-                .node("processDefinitionId").isEqualTo("proc-def-id")
-                .node("assignee").isEqualTo("user1")
-                .node("description").isEqualTo("First task")
-                .node("owner").isEqualTo("user2")
-                .node("priority").isEqualTo("50")
-                .node("processInstanceId").isEqualTo("\"10\"")
-                .node("parentTaskId").isEqualTo("parent-task-id");
+                .node("id")
+                .isEqualTo("\"3\"")
+                .node("name")
+                .isEqualTo("task1")
+                .node("processDefinitionId")
+                .isEqualTo("proc-def-id")
+                .node("assignee")
+                .isEqualTo("user1")
+                .node("description")
+                .isEqualTo("First task")
+                .node("owner")
+                .isEqualTo("user2")
+                .node("priority")
+                .isEqualTo("50")
+                .node("processInstanceId")
+                .isEqualTo("\"10\"")
+                .node("parentTaskId")
+                .isEqualTo("parent-task-id");
     }
 
     @Test
     public void convertToEntityAttributeShouldCreatedATaskInstanceWithFieldsSet() throws Exception {
-        //given
+        // given
         String jsonRepresentation =
-                "{\"id\":\"3\"," +
-                        "\"owner\":\"user2\"," +
-                        "\"assignee\":\"user1\"," +
-                        "\"name\":\"task1\"," +
-                        "\"description\":\"First task\"," +
-                        "\"priority\":50," +
-                        "\"parentTaskId\":\"parent-task-id\"," +
-                        "\"processDefinitionId\":\"proc-def-id\"," +
-                        "\"processInstanceId\":\"10\"}";
+                "{\"id\":\"3\","
+                        + "\"owner\":\"user2\","
+                        + "\"assignee\":\"user1\","
+                        + "\"name\":\"task1\","
+                        + "\"description\":\"First task\","
+                        + "\"priority\":50,"
+                        + "\"parentTaskId\":\"parent-task-id\","
+                        + "\"processDefinitionId\":\"proc-def-id\","
+                        + "\"processInstanceId\":\"10\"}";
 
-        //when
+        // when
         Task task = converter.convertToEntityAttribute(jsonRepresentation);
 
-        //then
+        // then
         assertThat(task)
                 .isNotNull()
                 .hasId("3")

@@ -24,7 +24,8 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RepositoryConnectorImplementationsProvider implements ConnectorImplementationsProvider {
+public class RepositoryConnectorImplementationsProvider
+        implements ConnectorImplementationsProvider {
 
     private final RepositoryService repositoryService;
 
@@ -37,17 +38,16 @@ public class RepositoryConnectorImplementationsProvider implements ConnectorImpl
         List<ProcessDefinition> list = repositoryService.createProcessDefinitionQuery().list();
 
         return list.stream()
-                   .map(ProcessDefinition::getId)
-                   .map(repositoryService::getBpmnModel)
-                   .flatMap(model -> model.getProcesses()
-                                          .stream())
-                   .flatMap(process -> process.getFlowElements()
-                                              .stream())
-                   .filter(ServiceTask.class::isInstance)
-                   .map(ServiceTask.class::cast)
-                   .filter(task -> !StringUtils.hasText(task.getImplementationType()))
-                   .map(ServiceTask::getImplementation)
-                   .distinct()
-                   .collect(Collectors.toList());
-    };
+                .map(ProcessDefinition::getId)
+                .map(repositoryService::getBpmnModel)
+                .flatMap(model -> model.getProcesses().stream())
+                .flatMap(process -> process.getFlowElements().stream())
+                .filter(ServiceTask.class::isInstance)
+                .map(ServiceTask.class::cast)
+                .filter(task -> !StringUtils.hasText(task.getImplementationType()))
+                .map(ServiceTask::getImplementation)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+    ;
 }

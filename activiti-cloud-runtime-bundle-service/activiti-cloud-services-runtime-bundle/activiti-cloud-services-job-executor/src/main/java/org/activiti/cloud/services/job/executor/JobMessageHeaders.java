@@ -15,14 +15,9 @@
  */
 package org.activiti.cloud.services.job.executor;
 
-
-/**
- * Holds message header key names used in messages with JobMessage payload type  
- *
- */
-
+/** Holds message header key names used in messages with JobMessage payload type */
 public final class JobMessageHeaders {
-    
+
     public static final String JOB_PROCESS_INSTANCE_ID = "jobProcessInstanceId";
     public static final String JOB_PROCESS_DEFINITION_ID = "jobProcessDefinitionId";
     public static final String JOB_EXECUTION_ID = "jobExecutionId";
@@ -33,5 +28,4 @@ public final class JobMessageHeaders {
     public static final String JOB_EXCEPTION_MESSAGE = "jobExceptionMessage";
     public static final String JOB_HANDLER_TYPE = "jobHandlerType";
     public static final String JOB_HANDLER_CONFIGURATION = "jobHandlerConfiguration";
-
 }

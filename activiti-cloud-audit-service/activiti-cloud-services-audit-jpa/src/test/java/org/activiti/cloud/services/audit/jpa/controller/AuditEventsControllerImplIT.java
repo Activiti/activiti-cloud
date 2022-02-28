@@ -15,6 +15,16 @@
  */
 package org.activiti.cloud.services.audit.jpa.controller;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
@@ -66,15 +76,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(AuditEventsControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
@@ -86,20 +87,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 public class AuditEventsControllerImplIT {
 
-    @MockBean
-    private EventsRepository eventsRepository;
+    @MockBean private EventsRepository eventsRepository;
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;
+    @MockBean private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
+    @MockBean private UserGroupManager userGroupManager;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -108,23 +104,16 @@ public class AuditEventsControllerImplIT {
 
     @Test
     public void getEvents() throws Exception {
-        PageRequest pageable = PageRequest.of(1,
-                                              10);
-        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1),
-                                                           pageable,
-                                                           11);
+        PageRequest pageable = PageRequest.of(1, 10);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 11);
 
-        given(eventsRepository.findAll(any(),
-                                       any(PageRequest.class))).willReturn(eventsPage);
+        given(eventsRepository.findAll(any(), any(PageRequest.class))).willReturn(eventsPage);
 
-        mockMvc.perform(get("/{version}/events",
-                            "v1")
-                                .param("page",
-                                       "1")
-                                .param("size",
-                                       "10")
-                                .param("sort",
-                                       "asc"))
+        mockMvc.perform(
+                        get("/{version}/events", "v1")
+                                .param("page", "1")
+                                .param("size", "10")
+                                .param("sort", "asc"))
                 .andExpect(status().isOk());
     }
 
@@ -133,7 +122,7 @@ public class AuditEventsControllerImplIT {
         List<AuditEventEntity> eventsList = new ArrayList<>();
 
         for (long i = 0; i < recordsNumber; i++) {
-            //would like to mock this but jackson and mockito not happy together
+            // would like to mock this but jackson and mockito not happy together
             AuditEventEntity eventEntity = buildAuditEventEntity(i);
             eventsList.add(eventEntity);
         }
@@ -162,66 +151,54 @@ public class AuditEventsControllerImplIT {
     @Test
     public void getEventsAlfresco() throws Exception {
 
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
         List<AuditEventEntity> events = buildEventsData(1);
 
-        given(eventsRepository.findAll(any(),
-                                       any(AlfrescoPageRequest.class)))
-                .willReturn(new PageImpl<>(events,
-                                           pageRequest,
-                                           12));
+        given(eventsRepository.findAll(any(), any(AlfrescoPageRequest.class)))
+                .willReturn(new PageImpl<>(events, pageRequest, 12));
 
-        MvcResult result = mockMvc.perform(get("/{version}/events?skipCount=11&maxItems=10",
-                                               "v1")
-                                                   .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                get("/{version}/events?skipCount=11&maxItems=10", "v1")
+                                        .accept(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+                .node("list.pagination.skipCount")
+                .isEqualTo(11)
+                .node("list.pagination.maxItems")
+                .isEqualTo(10)
+                .node("list.pagination.count")
+                .isEqualTo(1)
+                .node("list.pagination.hasMoreItems")
+                .isEqualTo(false)
+                .node("list.pagination.totalItems")
+                .isEqualTo(12);
     }
 
     @Test
     public void headEvents() throws Exception {
-        PageRequest pageable = PageRequest.of(1,
-                                              10);
-        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1),
-                                                           pageable,
-                                                           10);
+        PageRequest pageable = PageRequest.of(1, 10);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 10);
 
-        given(eventsRepository.findAll(any(),
-                                       any(PageRequest.class))).willReturn(eventsPage);
+        given(eventsRepository.findAll(any(), any(PageRequest.class))).willReturn(eventsPage);
 
-        mockMvc.perform(head("/{version}/events",
-                             "v1"))
-                .andExpect(status().isOk());
+        mockMvc.perform(head("/{version}/events", "v1")).andExpect(status().isOk());
     }
 
     @Test
     public void headEventsAlfresco() throws Exception {
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
         List<AuditEventEntity> events = buildEventsData(1);
 
-        given(eventsRepository.findAll(any(),
-                                       any(AlfrescoPageRequest.class)))
-                .willReturn(new PageImpl<>(events,
-                                           pageRequest,
-                                           12));
+        given(eventsRepository.findAll(any(), any(AlfrescoPageRequest.class)))
+                .willReturn(new PageImpl<>(events, pageRequest, 12));
 
-        mockMvc.perform(head("/{version}/events?skipCount=11&maxItems=10",
-                             "v1")
+        mockMvc.perform(
+                        head("/{version}/events?skipCount=11&maxItems=10", "v1")
                                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -233,9 +210,7 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("/{version}/events/{id}",
-                            "v1",
-                            eventEntity.getId()))
+        mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId()))
                 .andExpect(status().isOk());
     }
 
@@ -246,9 +221,9 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("/{version}/events/{id}",
-                            "v1",
-                            eventEntity.getId()).accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(
+                        get("/{version}/events/{id}", "v1", eventEntity.getId())
+                                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
@@ -263,9 +238,7 @@ public class AuditEventsControllerImplIT {
         event.setEventId("eventId");
         event.setTimestamp(System.currentTimeMillis());
 
-        mockMvc.perform(head("/{version}/events/{id}",
-                             "v1",
-                             eventEntity.getId()))
+        mockMvc.perform(head("/{version}/events/{id}", "v1", eventEntity.getId()))
                 .andExpect(status().isOk());
     }
 
@@ -273,8 +246,7 @@ public class AuditEventsControllerImplIT {
     public void getSignalEventById() throws Exception {
 
         BPMNSignalImpl signal = new BPMNSignalImpl("elementId");
-        signal.setSignalPayload(new SignalPayload("signal",
-                                                  null));
+        signal.setSignalPayload(new SignalPayload("signal", null));
 
         SignalReceivedAuditEventEntity eventEntity = new SignalReceivedAuditEventEntity();
 
@@ -289,9 +261,7 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("/{version}/events/{id}",
-                            "v1",
-                            eventEntity.getId()))
+        mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId()))
                 .andExpect(status().isOk());
     }
 
@@ -320,48 +290,46 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("/{version}/events/{id}",
-                            "v1",
-                            eventEntity.getId()))
+        mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void shouldGetMessageSentEventById() throws Exception {
-        MessageAuditEventEntity eventEntity = messageAuditEventEntity(MessageSentAuditEventEntity.class,
-                                                                      BPMNMessageEvent.MessageEvents.MESSAGE_SENT);
+        MessageAuditEventEntity eventEntity =
+                messageAuditEventEntity(
+                        MessageSentAuditEventEntity.class,
+                        BPMNMessageEvent.MessageEvents.MESSAGE_SENT);
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("/{version}/events/{id}",
-                            "v1",
-                            eventEntity.getId()))
+        mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void shouldGetMessageWaitingEventById() throws Exception {
-        MessageAuditEventEntity eventEntity = messageAuditEventEntity(MessageWaitingAuditEventEntity.class,
-                                                                      BPMNMessageEvent.MessageEvents.MESSAGE_WAITING);
+        MessageAuditEventEntity eventEntity =
+                messageAuditEventEntity(
+                        MessageWaitingAuditEventEntity.class,
+                        BPMNMessageEvent.MessageEvents.MESSAGE_WAITING);
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("/{version}/events/{id}",
-                            "v1",
-                            eventEntity.getId()))
+        mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void shouldGetMessageReceivedEventById() throws Exception {
-        MessageAuditEventEntity eventEntity = messageAuditEventEntity(MessageReceivedAuditEventEntity.class,
-                                                                      BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED);
+        MessageAuditEventEntity eventEntity =
+                messageAuditEventEntity(
+                        MessageReceivedAuditEventEntity.class,
+                        BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED);
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        mockMvc.perform(get("/{version}/events/{id}",
-                            "v1",
-                            eventEntity.getId()))
+        mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId()))
                 .andExpect(status().isOk());
     }
 
@@ -375,8 +343,10 @@ public class AuditEventsControllerImplIT {
         return timerPayload;
     }
 
-    private MessageAuditEventEntity messageAuditEventEntity(Class<? extends MessageAuditEventEntity> clazz,
-                                                            BPMNMessageEvent.MessageEvents eventType) throws Exception {
+    private MessageAuditEventEntity messageAuditEventEntity(
+            Class<? extends MessageAuditEventEntity> clazz,
+            BPMNMessageEvent.MessageEvents eventType)
+            throws Exception {
 
         MessageAuditEventEntity eventEntity = clazz.newInstance();
 
@@ -397,7 +367,6 @@ public class AuditEventsControllerImplIT {
         return eventEntity;
     }
 
-
     private BPMNMessage createBPMNMessage() {
         BPMNMessageImpl message = new BPMNMessageImpl("elementId");
         message.setProcessDefinitionId("processDefinitionId");
@@ -407,13 +376,13 @@ public class AuditEventsControllerImplIT {
         return message;
     }
 
-
     private MessageEventPayload createMessagePayload() {
-        MessageEventPayload messageEventPayload = MessagePayloadBuilder.event("messageName")
-                                                                       .withBusinessKey("businessId")
-                                                                       .withCorrelationKey("correlationId")
-                                                                       .withVariable("name", "value")
-                                                                       .build();
+        MessageEventPayload messageEventPayload =
+                MessagePayloadBuilder.event("messageName")
+                        .withBusinessKey("businessId")
+                        .withCorrelationKey("correlationId")
+                        .withVariable("name", "value")
+                        .build();
 
         return messageEventPayload;
     }

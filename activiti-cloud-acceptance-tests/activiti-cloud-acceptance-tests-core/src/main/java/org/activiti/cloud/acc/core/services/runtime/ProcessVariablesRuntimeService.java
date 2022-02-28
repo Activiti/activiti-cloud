@@ -18,6 +18,7 @@ package org.activiti.cloud.acc.core.services.runtime;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.hateoas.CollectionModel;
@@ -31,7 +32,6 @@ public interface ProcessVariablesRuntimeService {
 
     @RequestLine("POST /v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")
-    ResponseEntity<Void> setVariables(@Param("id") String id,
-                                      SetProcessVariablesPayload setProcessVariablesPayload);
-
+    ResponseEntity<Void> setVariables(
+            @Param("id") String id, SetProcessVariablesPayload setProcessVariablesPayload);
 }

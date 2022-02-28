@@ -25,6 +25,4 @@ import java.lang.annotation.*;
 @Inherited
 @EnableDiscoveryClient
 @EnableAutoConfiguration
-public @interface EnableActivitiCloudConnector {
-
-}
+public @interface EnableActivitiCloudConnector {}

@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.api.process.model;
 
-import java.util.List;
-
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
+
+import java.util.List;
 
 public interface IntegrationError extends CloudRuntimeEntity {
 
@@ -33,5 +33,4 @@ public interface IntegrationError extends CloudRuntimeEntity {
     public String getErrorMessage();
 
     public String getErrorClassName();
-
 }

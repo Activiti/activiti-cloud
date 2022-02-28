@@ -20,18 +20,17 @@ import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 
 public class ReceiveMessageCmdExecutor extends AbstractCommandExecutor<ReceiveMessagePayload> {
-    
+
     private final ProcessAdminRuntime processAdminRuntime;
-    
+
     public ReceiveMessageCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
         this.processAdminRuntime = processAdminRuntime;
     }
-    
+
     @Override
     public EmptyResult execute(ReceiveMessagePayload command) {
         processAdminRuntime.receive(command);
-        
+
         return new EmptyResult(command);
     }
-
 }

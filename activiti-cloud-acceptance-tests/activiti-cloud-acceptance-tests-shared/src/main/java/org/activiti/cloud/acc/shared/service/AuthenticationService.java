@@ -18,17 +18,17 @@ package org.activiti.cloud.acc.shared.service;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+
 import org.activiti.cloud.acc.shared.model.AuthToken;
 
-/**
- * Authentication service
- */
+/** Authentication service */
 public interface AuthenticationService {
 
     @RequestLine("POST")
     @Headers("Content-Type: application/x-www-form-urlencoded")
-    AuthToken authenticate(@Param("client_id") String clientId,
-                           @Param("grant_type") String grantType,
-                           @Param("username") String username,
-                           @Param("password") String password);
+    AuthToken authenticate(
+            @Param("client_id") String clientId,
+            @Param("grant_type") String grantType,
+            @Param("username") String username,
+            @Param("password") String password);
 }

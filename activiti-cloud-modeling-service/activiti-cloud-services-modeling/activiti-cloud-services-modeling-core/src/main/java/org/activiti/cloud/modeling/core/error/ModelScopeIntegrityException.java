@@ -16,12 +16,12 @@
 package org.activiti.cloud.modeling.core.error;
 
 /**
- * Exception thrown when a model cannot be created because there is another model with the same type within the project
+ * Exception thrown when a model cannot be created because there is another model with the same type
+ * within the project
  */
 public class ModelScopeIntegrityException extends ModelingException {
 
-    public ModelScopeIntegrityException() {
-    }
+    public ModelScopeIntegrityException() {}
 
     public ModelScopeIntegrityException(Throwable cause) {
         super(cause);
@@ -31,9 +31,7 @@ public class ModelScopeIntegrityException extends ModelingException {
         super(message);
     }
 
-    public ModelScopeIntegrityException(String message,
-                                Throwable cause) {
-        super(message,
-              cause);
+    public ModelScopeIntegrityException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

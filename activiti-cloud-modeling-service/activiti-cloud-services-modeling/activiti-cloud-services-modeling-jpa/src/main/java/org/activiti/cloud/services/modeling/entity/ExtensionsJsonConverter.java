@@ -15,22 +15,20 @@
  */
 package org.activiti.cloud.services.modeling.entity;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.persistence.AttributeConverter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Map;
 
-/**
- * Json to model metadata converter
- */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+import javax.persistence.AttributeConverter;
+
+/** Json to model metadata converter */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ExtensionsJsonConverter implements AttributeConverter<Map, String> {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -43,8 +41,8 @@ public class ExtensionsJsonConverter implements AttributeConverter<Map, String> 
             }
             return getObjectMapper().writeValueAsString(entity);
         } catch (JsonProcessingException ex) {
-            throw new DataIntegrityViolationException("Cannot convert entity to json data: " + entity,
-                                                      ex);
+            throw new DataIntegrityViolationException(
+                    "Cannot convert entity to json data: " + entity, ex);
         }
     }
 
@@ -54,11 +52,10 @@ public class ExtensionsJsonConverter implements AttributeConverter<Map, String> 
             if (StringUtils.isEmpty(json)) {
                 return null;
             }
-            return getObjectMapper().readValue(json,
-                                               Map.class);
+            return getObjectMapper().readValue(json, Map.class);
         } catch (IOException ex) {
-            throw new DataRetrievalFailureException("Cannot convert the json data to entity: " + json,
-                                                    ex);
+            throw new DataRetrievalFailureException(
+                    "Cannot convert the json data to entity: " + json, ex);
         }
     }
 

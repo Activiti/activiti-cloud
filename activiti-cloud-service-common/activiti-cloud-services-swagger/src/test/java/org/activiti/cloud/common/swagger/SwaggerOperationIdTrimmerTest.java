@@ -28,13 +28,15 @@ public class SwaggerOperationIdTrimmerTest {
 
     @Test
     void should_trimHttpVerbAndNumberInDefaultGeneratedMethods() {
-        String trimmedMethodName = operationIdTrimmer.startingWith(DEFAULT_METHOD_NAME_WITH_HTTP_VERB_AND_NUMBER);
+        String trimmedMethodName =
+                operationIdTrimmer.startingWith(DEFAULT_METHOD_NAME_WITH_HTTP_VERB_AND_NUMBER);
         assertThat(trimmedMethodName).isEqualTo("findAll");
     }
 
     @Test
     void should_trimHttpVerbInDefaultGeneratedMethods() {
-        String trimmedMethodName = operationIdTrimmer.startingWith(DEFAULT_METHOD_NAME_WITH_HTTP_VERB);
+        String trimmedMethodName =
+                operationIdTrimmer.startingWith(DEFAULT_METHOD_NAME_WITH_HTTP_VERB);
         assertThat(trimmedMethodName).isEqualTo("start");
     }
 }

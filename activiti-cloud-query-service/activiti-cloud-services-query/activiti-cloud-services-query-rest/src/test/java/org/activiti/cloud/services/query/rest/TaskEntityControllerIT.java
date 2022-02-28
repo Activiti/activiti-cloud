@@ -16,8 +16,8 @@
 package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,11 +26,8 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.querydsl.core.types.Predicate;
+
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
@@ -60,136 +57,143 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 @WebMvcTest(TaskController.class)
 @Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
 public class TaskEntityControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private TaskRepository taskRepository;
+    @MockBean private TaskRepository taskRepository;
 
-    @MockBean
-    private EntityFinder entityFinder;
+    @MockBean private EntityFinder entityFinder;
 
-    @MockBean
-    private TaskLookupRestrictionService taskLookupRestrictionService;
+    @MockBean private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;
+    @MockBean private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
-    private ProcessDefinitionRepository processDefinitionRepository;
+    @MockBean private ProcessDefinitionRepository processDefinitionRepository;
 
-    @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;
+    @MockBean private SecurityPoliciesProperties securityPoliciesProperties;
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
-        //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+            throws Exception {
+        // given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(),
-                                     eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                                           pageRequest,
-                                           12));
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+                .willReturn(
+                        new PageImpl<>(
+                                Collections.singletonList(buildDefaultTask()), pageRequest, 12));
 
-        //when
-        MvcResult result = mockMvc.perform(get("/v1/tasks?skipCount=11&maxItems=10")
-                                                   .accept(MediaType.APPLICATION_JSON))
-                                   //then
-                                   .andExpect(status().isOk())
-                                   .andReturn();
+        // when
+        MvcResult result =
+                mockMvc.perform(
+                                get("/v1/tasks?skipCount=11&maxItems=10")
+                                        .accept(MediaType.APPLICATION_JSON))
+                        // then
+                        .andExpect(status().isOk())
+                        .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+                .node("list.pagination.skipCount")
+                .isEqualTo(11)
+                .node("list.pagination.maxItems")
+                .isEqualTo(10)
+                .node("list.pagination.count")
+                .isEqualTo(1)
+                .node("list.pagination.hasMoreItems")
+                .isEqualTo(false)
+                .node("list.pagination.totalItems")
+                .isEqualTo(12);
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
-        //given
-        PageRequest pageRequest = PageRequest.of(1,
-                                                 10);
+    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson()
+            throws Exception {
+        // given
+        PageRequest pageRequest = PageRequest.of(1, 10);
 
-        given(taskRepository.findAll(any(),
-                                     eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                                           pageRequest,
-                                           11));
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+                .willReturn(
+                        new PageImpl<>(
+                                Collections.singletonList(buildDefaultTask()), pageRequest, 11));
 
-        //when
-        mockMvc.perform(get("/v1/tasks?page=1&size=10")
-                                .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
+        // when
+        mockMvc.perform(get("/v1/tasks?page=1&size=10").accept(MediaTypes.HAL_JSON_VALUE))
+                // then
                 .andExpect(status().isOk());
     }
 
     @Test
     public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
-        //given
+        // given
         TaskEntity taskEntity = buildDefaultTask();
-        given(entityFinder.findById(eq(taskRepository),
-                                    eq(taskEntity.getId()),
-                                    anyString()))
+        given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString()))
                 .willReturn(taskEntity);
 
         Predicate restrictionPredicate = mock(Predicate.class);
-        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
+        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any()))
+                .willReturn(restrictionPredicate);
         given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
 
-        //when
-        this.mockMvc.perform(get("/v1/tasks/{taskId}",
-                                 taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                //then
+        // when
+        this.mockMvc
+                .perform(
+                        get("/v1/tasks/{taskId}", taskEntity.getId())
+                                .accept(MediaType.APPLICATION_JSON_VALUE))
+                // then
                 .andExpect(status().isOk());
     }
 
     @Test
     public void should_returnCandidates_when_invokeGetTaskById() throws Exception {
-        //given
+        // given
         TaskEntity taskEntity = buildDefaultTask();
         taskEntity.setTaskCandidateGroups(buildCandidateGroups(taskEntity));
         taskEntity.setTaskCandidateUsers(buildCandidateUsers(taskEntity));
 
-        given(entityFinder.findById(eq(taskRepository),
-                                    eq(taskEntity.getId()),
-                                    anyString()))
+        given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString()))
                 .willReturn(taskEntity);
 
         Predicate restrictionPredicate = mock(Predicate.class);
-        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
+        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any()))
+                .willReturn(restrictionPredicate);
         given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
 
-        //when
-        MvcResult mvcResult = this.mockMvc.perform(get("/v1/tasks/{taskId}",
-                                                       taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                                      .andExpect(status().isOk())
-                                      .andReturn();
+        // when
+        MvcResult mvcResult =
+                this.mockMvc
+                        .perform(
+                                get("/v1/tasks/{taskId}", taskEntity.getId())
+                                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                        .andExpect(status().isOk())
+                        .andReturn();
 
         assertThatJson(mvcResult.getResponse().getContentAsString())
-                .node("entry.candidateUsers").isArray().ofLength(1).thatContains("testuser");
+                .node("entry.candidateUsers")
+                .isArray()
+                .ofLength(1)
+                .thatContains("testuser");
 
         assertThatJson(mvcResult.getResponse().getContentAsString())
-                .node("entry.candidateGroups").isArray().ofLength(1).thatContains("testgroup");
+                .node("entry.candidateGroups")
+                .isArray()
+                .ofLength(1)
+                .thatContains("testgroup");
     }
 
     private Set<TaskCandidateGroupEntity> buildCandidateGroups(TaskEntity taskEntity) {

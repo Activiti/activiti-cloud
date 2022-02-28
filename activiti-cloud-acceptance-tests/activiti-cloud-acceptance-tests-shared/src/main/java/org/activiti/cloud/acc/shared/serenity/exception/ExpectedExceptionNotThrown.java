@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.acc.shared.serenity.exception;
 
-/**
- * RuntimeException thrown when an expected exception was not thrown
- */
+/** RuntimeException thrown when an expected exception was not thrown */
 public class ExpectedExceptionNotThrown extends RuntimeException {
 
     private ExpectedException expectedExeption;
@@ -26,8 +24,7 @@ public class ExpectedExceptionNotThrown extends RuntimeException {
         this.expectedExeption = expectedExeption;
     }
 
-    public ExpectedExceptionNotThrown(String message,
-                                      ExpectedException expectedExeption) {
+    public ExpectedExceptionNotThrown(String message, ExpectedException expectedExeption) {
         super(message);
         this.expectedExeption = expectedExeption;
     }

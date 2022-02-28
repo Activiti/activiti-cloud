@@ -15,13 +15,10 @@
  */
 package org.activiti.cloud.api.model.shared.messages;
 
-/**
- * Holds message header key names used in messages with IntegrationContext payload type  
- *
- */
+/** Holds message header key names used in messages with IntegrationContext payload type */
 public final class IntegrationContextMessageHeaders {
     public static final String ROUTING_KEY = "routingKey";
-    public final static String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
+    public static final String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
     public static final String CONNECTOR_TYPE = "connectorType";
     public static final String BUSINESS_KEY = "businessKey";
     public static final String INTEGRATION_CONTEXT_ID = "integrationContextId";

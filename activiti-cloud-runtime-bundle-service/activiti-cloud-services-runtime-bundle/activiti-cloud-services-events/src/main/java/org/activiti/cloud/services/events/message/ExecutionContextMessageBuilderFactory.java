@@ -37,5 +37,4 @@ public class ExecutionContextMessageBuilderFactory
                 .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
                 .chain(new ExecutionContextMessageBuilderAppender(executionContext));
     }
-
 }

@@ -17,9 +17,7 @@ package org.activiti.cloud.modeling.api;
 
 import org.activiti.cloud.services.auditable.Auditable;
 
-/**
- * Interface for projects
- */
+/** Interface for projects */
 public interface Project<U> extends Auditable<U> {
 
     String getId();

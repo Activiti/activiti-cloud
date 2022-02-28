@@ -85,12 +85,15 @@ public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable
     @Override
     public Pageable withPage(int pageNumber) {
         if (pageNumber < 0) {
-            throw new IllegalArgumentException(format("Invalid request of a pageNumber %d. "
-                + "pageNumber must be a non negative number", pageNumber));
+            throw new IllegalArgumentException(
+                    format(
+                            "Invalid request of a pageNumber %d. "
+                                    + "pageNumber must be a non negative number",
+                            pageNumber));
         }
 
         return new AlfrescoPageRequest(
-            (long) pageNumber * getPageSize(), getPageSize(), getPageable());
+                (long) pageNumber * getPageSize(), getPageSize(), getPageable());
     }
 
     @Override

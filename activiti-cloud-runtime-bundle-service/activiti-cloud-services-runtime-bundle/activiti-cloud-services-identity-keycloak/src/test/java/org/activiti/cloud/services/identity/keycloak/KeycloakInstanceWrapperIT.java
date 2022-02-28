@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +24,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource("classpath:keycloak-configuration.properties")
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakInstanceWrapperIT {
 
-    @Autowired
-    private KeycloakInstanceWrapper keycloakInstanceWrapper;
+    @Autowired private KeycloakInstanceWrapper keycloakInstanceWrapper;
 
     @Test
     public void shouldWireWrapper() {

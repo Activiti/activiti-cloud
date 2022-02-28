@@ -19,21 +19,17 @@ import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 
-public class CloudVariableDeletedEventImpl extends CloudVariableEventImpl implements CloudVariableDeletedEvent {
+public class CloudVariableDeletedEventImpl extends CloudVariableEventImpl
+        implements CloudVariableDeletedEvent {
 
-    public CloudVariableDeletedEventImpl() {
-    }
+    public CloudVariableDeletedEventImpl() {}
 
     public CloudVariableDeletedEventImpl(VariableInstance entity) {
         super(entity);
     }
 
-    public CloudVariableDeletedEventImpl(String id,
-                                         Long timestamp,
-                                         VariableInstance entity) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudVariableDeletedEventImpl(String id, Long timestamp, VariableInstance entity) {
+        super(id, timestamp, entity);
     }
 
     @Override

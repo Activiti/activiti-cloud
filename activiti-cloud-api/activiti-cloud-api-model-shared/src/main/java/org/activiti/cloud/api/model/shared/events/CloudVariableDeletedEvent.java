@@ -17,7 +17,4 @@ package org.activiti.cloud.api.model.shared.events;
 
 import org.activiti.api.model.shared.event.VariableDeletedEvent;
 
-public interface CloudVariableDeletedEvent extends CloudVariableEvent,
-                                                   VariableDeletedEvent {
-
-}
+public interface CloudVariableDeletedEvent extends CloudVariableEvent, VariableDeletedEvent {}

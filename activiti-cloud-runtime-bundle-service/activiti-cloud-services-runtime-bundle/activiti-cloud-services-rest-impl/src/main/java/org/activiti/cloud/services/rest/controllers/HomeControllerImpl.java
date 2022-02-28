@@ -30,12 +30,12 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+
 import org.activiti.cloud.services.rest.api.HomeController;
 import org.activiti.cloud.services.rest.api.resources.HomeResource;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.RestController;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 public class HomeControllerImpl implements HomeController {
@@ -43,9 +43,10 @@ public class HomeControllerImpl implements HomeController {
     @Override
     public EntityModel<HomeResource> getHomeInfo() {
 
-        return EntityModel.of(new HomeResource(),
-                              linkTo(ProcessDefinitionControllerImpl.class).withRel("process-definitions"),
-                              linkTo(ProcessInstanceControllerImpl.class).withRel("process-instances"),
-                              linkTo(TaskControllerImpl.class).withRel("tasks"));
+        return EntityModel.of(
+                new HomeResource(),
+                linkTo(ProcessDefinitionControllerImpl.class).withRel("process-definitions"),
+                linkTo(ProcessInstanceControllerImpl.class).withRel("process-instances"),
+                linkTo(TaskControllerImpl.class).withRel("tasks"));
     }
 }

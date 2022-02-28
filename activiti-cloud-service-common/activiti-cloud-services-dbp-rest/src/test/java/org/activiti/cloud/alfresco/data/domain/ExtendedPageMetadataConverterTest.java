@@ -15,57 +15,58 @@
  */
 package org.activiti.cloud.alfresco.data.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.PagedModel;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExtendedPageMetadataConverterTest {
 
     private ExtendedPageMetadataConverter converter = new ExtendedPageMetadataConverter();
 
     @Test
-    public void getMetadataShouldReturnTotalPagesAsDivisionOfTotalElementsByPageSizeWhenNoRemainder() throws Exception {
-        //given
-        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
-                                                                                       1,
-                                                                                       30);
-        //when
-        ExtendedPageMetadata extendedPageMetadata = converter.toExtendedPageMetadata(10,
-                                                                                     basePageMetadata);
+    public void
+            getMetadataShouldReturnTotalPagesAsDivisionOfTotalElementsByPageSizeWhenNoRemainder()
+                    throws Exception {
+        // given
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 30);
+        // when
+        ExtendedPageMetadata extendedPageMetadata =
+                converter.toExtendedPageMetadata(10, basePageMetadata);
 
-        //then
+        // then
         assertThat(extendedPageMetadata.getTotalPages()).isEqualTo(3);
     }
 
     @Test
-    public void getMetadataShouldReturnTotalPagesAsDivisionOfTotalElementsByPageSizePlusOneWhenThereIsRemainder() throws Exception {
-        //given
-        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
-                                                                                       1,
-                                                                                       31);
+    public void
+            getMetadataShouldReturnTotalPagesAsDivisionOfTotalElementsByPageSizePlusOneWhenThereIsRemainder()
+                    throws Exception {
+        // given
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 31);
 
-        //when
-        ExtendedPageMetadata extendedPageMetadata = converter.toExtendedPageMetadata(10,
-                                                                                       basePageMetadata);
+        // when
+        ExtendedPageMetadata extendedPageMetadata =
+                converter.toExtendedPageMetadata(10, basePageMetadata);
 
-        //then
+        // then
         assertThat(extendedPageMetadata.getTotalPages()).isEqualTo(4);
     }
 
     @Test
-    public void getMetadataShouldIncreaseTotalPagesByOneWhenSkipCountIsNotDivisibleAndTotalElementsIsDivisible() throws Exception {
-        //given
-        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
-                                                                                       1,
-                                                                                       30);
-        //when
-        ExtendedPageMetadata extendedPageMetadata = converter.toExtendedPageMetadata(11,
-                                                                                     basePageMetadata);
+    public void
+            getMetadataShouldIncreaseTotalPagesByOneWhenSkipCountIsNotDivisibleAndTotalElementsIsDivisible()
+                    throws Exception {
+        // given
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 30);
+        // when
+        ExtendedPageMetadata extendedPageMetadata =
+                converter.toExtendedPageMetadata(11, basePageMetadata);
 
-        //then
-        //When the skip count is not divisible by page size, the first page will be considered as a smaller page
-        //in this example the remainder will be 1, so the first page will contain only one element:
+        // then
+        // When the skip count is not divisible by page size, the first page will be considered as a
+        // smaller page
+        // in this example the remainder will be 1, so the first page will contain only one element:
         // total elements 30 : [0 .. 29]
         // page 0: [0] -> 1 element
         // page 1: [1..10] -> 10 elements
@@ -75,19 +76,20 @@ public class ExtendedPageMetadataConverterTest {
     }
 
     @Test
-    public void getMetadataShouldNotChangeTotalPagesWhenTotalElementsRemainderIsLowerThanOrEqualsToSkipCountRemainder() throws Exception {
-        //given
-        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
-                                                                                       1,
-                                                                                       31);
+    public void
+            getMetadataShouldNotChangeTotalPagesWhenTotalElementsRemainderIsLowerThanOrEqualsToSkipCountRemainder()
+                    throws Exception {
+        // given
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 31);
 
-        //when
-        ExtendedPageMetadata extendedPageMetadata = converter.toExtendedPageMetadata(11,
-                                                                                       basePageMetadata);
+        // when
+        ExtendedPageMetadata extendedPageMetadata =
+                converter.toExtendedPageMetadata(11, basePageMetadata);
 
-        //then
-        //When the skip count is not divisible by page size, the first page will be considered as a smaller page
-        //in this example the remainder will be 1, so the first page will contain only one element:
+        // then
+        // When the skip count is not divisible by page size, the first page will be considered as a
+        // smaller page
+        // in this example the remainder will be 1, so the first page will contain only one element:
         // total elements 31 : [0 .. 30]
         // page 0: [0]
         // page 1: [1..10]
@@ -97,17 +99,18 @@ public class ExtendedPageMetadataConverterTest {
     }
 
     @Test
-    public void getMetadataShouldIncreaseTotalPagesByOneWhenTotalElementsRemainderIsGreaterThanSkipCountRemainder() throws Exception {
-        //given
-        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10,
-                                                                                       1,
-                                                                                       32);
-        //when
-        ExtendedPageMetadata extendedPageMetadata = converter.toExtendedPageMetadata(11,
-                                                                                       basePageMetadata);
-        //then
-        //When the skip count is not divisible by page size, the first page will be considered as a smaller page
-        //in this example the remainder will be 1, so the first page will contain only one element:
+    public void
+            getMetadataShouldIncreaseTotalPagesByOneWhenTotalElementsRemainderIsGreaterThanSkipCountRemainder()
+                    throws Exception {
+        // given
+        PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 32);
+        // when
+        ExtendedPageMetadata extendedPageMetadata =
+                converter.toExtendedPageMetadata(11, basePageMetadata);
+        // then
+        // When the skip count is not divisible by page size, the first page will be considered as a
+        // smaller page
+        // in this example the remainder will be 1, so the first page will contain only one element:
         // total elements 32 : [0 .. 31]
         // page 0: [0]
         // page 1: [1..10]
@@ -116,5 +119,4 @@ public class ExtendedPageMetadataConverterTest {
         // page 4: [31]
         assertThat(extendedPageMetadata.getTotalPages()).isEqualTo(5);
     }
-
 }

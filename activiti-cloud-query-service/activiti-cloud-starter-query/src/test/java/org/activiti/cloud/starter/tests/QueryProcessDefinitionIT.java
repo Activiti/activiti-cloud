@@ -40,37 +40,34 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.util.StreamUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import org.springframework.util.StreamUtils;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@Import({
-    ProcessDefinitionRestTemplate.class
-})
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@Import({ProcessDefinitionRestTemplate.class})
+@ContextConfiguration(
+        initializers = {
+            RabbitMQContainerApplicationInitializer.class,
+            KeycloakContainerApplicationInitializer.class
+        })
 public class QueryProcessDefinitionIT {
 
     public static final String TEST_CATEGORY = "Test category";
 
-    @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    @Autowired private KeycloakTokenProducer keycloakTokenProducer;
 
-    @Autowired
-    private ProcessDefinitionRestTemplate restTemplate;
+    @Autowired private ProcessDefinitionRestTemplate restTemplate;
 
-    @Autowired
-    private ProcessDefinitionRepository processDefinitionRepository;
+    @Autowired private ProcessDefinitionRepository processDefinitionRepository;
 
-    @Autowired
-    private ProcessModelRepository processModelRepository;
+    @Autowired private ProcessModelRepository processModelRepository;
 
-    @Autowired
-    private MyProducer producer;
+    @Autowired private MyProducer producer;
 
     @BeforeEach
     public void setUp() {
@@ -85,7 +82,7 @@ public class QueryProcessDefinitionIT {
 
     @Test
     public void shouldGetAvailableProcessDefinitions() {
-        //given
+        // given
         ProcessDefinitionImpl firstProcessDefinition = new ProcessDefinitionImpl();
         firstProcessDefinition.setId(UUID.randomUUID().toString());
         firstProcessDefinition.setKey("myFirstProcessKey");
@@ -97,32 +94,38 @@ public class QueryProcessDefinitionIT {
         secondProcessDefinition.setKey("mySecondProcess");
         secondProcessDefinition.setName("My second Process");
         secondProcessDefinition.setCategory(TEST_CATEGORY);
-        producer.send(new CloudProcessDeployedEventImpl(firstProcessDefinition),
-                      new CloudProcessDeployedEventImpl(secondProcessDefinition));
+        producer.send(
+                new CloudProcessDeployedEventImpl(firstProcessDefinition),
+                new CloudProcessDeployedEventImpl(secondProcessDefinition));
 
-        //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
+        // when
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity =
+                restTemplate.getProcDefinitions();
 
-        //then
+        // then
         assertThat(responseEntity.getBody())
                 .isNotNull()
-                .extracting(ProcessDefinition::getId,
-                            ProcessDefinition::getName,
-                            ProcessDefinition::getKey,
-                            ProcessDefinition::getCategory)
-                .containsExactly(tuple(firstProcessDefinition.getId(),
-                                       "My First Process",
-                                       "myFirstProcessKey",
-                                        TEST_CATEGORY),
-                                 tuple(secondProcessDefinition.getId(),
-                                       "My second Process",
-                                       "mySecondProcess",
-                                        TEST_CATEGORY));
+                .extracting(
+                        ProcessDefinition::getId,
+                        ProcessDefinition::getName,
+                        ProcessDefinition::getKey,
+                        ProcessDefinition::getCategory)
+                .containsExactly(
+                        tuple(
+                                firstProcessDefinition.getId(),
+                                "My First Process",
+                                "myFirstProcessKey",
+                                TEST_CATEGORY),
+                        tuple(
+                                secondProcessDefinition.getId(),
+                                "My second Process",
+                                "mySecondProcess",
+                                TEST_CATEGORY));
     }
 
     @Test
     public void shouldGetAvailableProcessModels() throws Exception {
-        //given
+        // given
         ProcessDefinitionImpl firstProcessDefinition = new ProcessDefinitionImpl();
         firstProcessDefinition.setId(UUID.randomUUID().toString());
         firstProcessDefinition.setKey("myFirstProcessKey");
@@ -132,35 +135,47 @@ public class QueryProcessDefinitionIT {
         secondProcessDefinition.setId(UUID.randomUUID().toString());
         secondProcessDefinition.setKey("mySecondProcess");
         secondProcessDefinition.setName("My second Process");
-        CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(firstProcessDefinition);
-        firstProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
-                                                                                   StandardCharsets.UTF_8));
-        CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(secondProcessDefinition);
-        secondProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
-                StandardCharsets.UTF_8));
-        producer.send(firstProcessDeployedEvent,
-                      secondProcessDeployedEvent);
+        CloudProcessDeployedEventImpl firstProcessDeployedEvent =
+                new CloudProcessDeployedEventImpl(firstProcessDefinition);
+        firstProcessDeployedEvent.setProcessModelContent(
+                StreamUtils.copyToString(
+                        Thread.currentThread()
+                                .getContextClassLoader()
+                                .getResourceAsStream(
+                                        "parse-for-test/processWithVariables.bpmn20.xml"),
+                        StandardCharsets.UTF_8));
+        CloudProcessDeployedEventImpl secondProcessDeployedEvent =
+                new CloudProcessDeployedEventImpl(secondProcessDefinition);
+        secondProcessDeployedEvent.setProcessModelContent(
+                StreamUtils.copyToString(
+                        Thread.currentThread()
+                                .getContextClassLoader()
+                                .getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
+                        StandardCharsets.UTF_8));
+        producer.send(firstProcessDeployedEvent, secondProcessDeployedEvent);
 
-        //when
-        ResponseEntity<String> responseEntity = restTemplate.getProcDefinitionModel(firstProcessDefinition.getId());
+        // when
+        ResponseEntity<String> responseEntity =
+                restTemplate.getProcDefinitionModel(firstProcessDefinition.getId());
 
-        //then
+        // then
         assertThat(responseEntity.getBody())
-                .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/processWithVariables.bpmn20.xml"));
+                .isXmlEqualToContentOf(
+                        new File(
+                                "src/test/resources/parse-for-test/processWithVariables.bpmn20.xml"));
 
-        //when
+        // when
         responseEntity = restTemplate.getProcDefinitionModel(secondProcessDefinition.getId());
 
-        //then
+        // then
         assertThat(responseEntity.getBody())
-                .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
+                .isXmlEqualToContentOf(
+                        new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
     }
 
     @Test
     public void shouldFilterOnProcessKey() {
-        //given
+        // given
         ProcessDefinitionImpl firstProcessDefinition = new ProcessDefinitionImpl();
         firstProcessDefinition.setId(UUID.randomUUID().toString());
         firstProcessDefinition.setKey("myFirstProcessKey");
@@ -170,26 +185,31 @@ public class QueryProcessDefinitionIT {
         secondProcessDefinition.setId(UUID.randomUUID().toString());
         secondProcessDefinition.setKey("mySecondProcess");
         secondProcessDefinition.setName("My second Process");
-        producer.send(new CloudProcessDeployedEventImpl(firstProcessDefinition),
-                      new CloudProcessDeployedEventImpl(secondProcessDefinition));
+        producer.send(
+                new CloudProcessDeployedEventImpl(firstProcessDefinition),
+                new CloudProcessDeployedEventImpl(secondProcessDefinition));
 
-        //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitionsFilteredOnKey("mySecondProcess");
+        // when
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity =
+                restTemplate.getProcDefinitionsFilteredOnKey("mySecondProcess");
 
-        //then
+        // then
         assertThat(responseEntity.getBody())
                 .isNotNull()
-                .extracting(ProcessDefinition::getId,
-                            ProcessDefinition::getName,
-                            ProcessDefinition::getKey)
-                .containsExactly(tuple(secondProcessDefinition.getId(),
-                                       "My second Process",
-                                       "mySecondProcess"));
+                .extracting(
+                        ProcessDefinition::getId,
+                        ProcessDefinition::getName,
+                        ProcessDefinition::getKey)
+                .containsExactly(
+                        tuple(
+                                secondProcessDefinition.getId(),
+                                "My second Process",
+                                "mySecondProcess"));
     }
 
     @Test
     public void shouldUpdateDefinitionOnDuplicate() {
-        //given
+        // given
         ProcessDefinitionImpl initialProcessDefinition = new ProcessDefinitionImpl();
         String processDefinitionId = UUID.randomUUID().toString();
         initialProcessDefinition.setId(processDefinitionId);
@@ -197,54 +217,70 @@ public class QueryProcessDefinitionIT {
         initialProcessDefinition.setName("My Process");
 
         ProcessDefinitionImpl duplicatedProcessDefinition = new ProcessDefinitionImpl();
-        duplicatedProcessDefinition.setId(processDefinitionId); //it has the same id as the first one, so it will be considered as duplicate
+        duplicatedProcessDefinition.setId(
+                processDefinitionId); // it has the same id as the first one, so it will be
+        // considered as duplicate
         duplicatedProcessDefinition.setKey("myProcessUpdated");
         duplicatedProcessDefinition.setName("My Process updated");
         duplicatedProcessDefinition.setDescription("Updated description");
-        producer.send(new CloudProcessDeployedEventImpl(initialProcessDefinition),
-                      new CloudProcessDeployedEventImpl(duplicatedProcessDefinition));
+        producer.send(
+                new CloudProcessDeployedEventImpl(initialProcessDefinition),
+                new CloudProcessDeployedEventImpl(duplicatedProcessDefinition));
 
-        //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
+        // when
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity =
+                restTemplate.getProcDefinitions();
 
-        //then
+        // then
         assertThat(responseEntity.getBody())
                 .isNotNull()
-                .extracting(ProcessDefinition::getId,
-                            ProcessDefinition::getKey,
-                            ProcessDefinition::getName,
-                            ProcessDefinition::getDescription)
-                .containsExactly(tuple(initialProcessDefinition.getId(),
-                                       "myProcessUpdated",
-                                       "My Process updated",
-                                       "Updated description"));
+                .extracting(
+                        ProcessDefinition::getId,
+                        ProcessDefinition::getKey,
+                        ProcessDefinition::getName,
+                        ProcessDefinition::getDescription)
+                .containsExactly(
+                        tuple(
+                                initialProcessDefinition.getId(),
+                                "myProcessUpdated",
+                                "My Process updated",
+                                "Updated description"));
     }
 
     @Test
     public void shouldUpdateProcessModelOnDuplicate() throws Exception {
-        //given
+        // given
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId(UUID.randomUUID().toString());
         processDefinition.setKey("myFirstProcessKey");
         processDefinition.setName("My First Process");
 
-        CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
-        firstProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
-                StandardCharsets.UTF_8));
-        CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
-        secondProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
-                StandardCharsets.UTF_8));
-        producer.send(firstProcessDeployedEvent,
-                      secondProcessDeployedEvent);
+        CloudProcessDeployedEventImpl firstProcessDeployedEvent =
+                new CloudProcessDeployedEventImpl(processDefinition);
+        firstProcessDeployedEvent.setProcessModelContent(
+                StreamUtils.copyToString(
+                        Thread.currentThread()
+                                .getContextClassLoader()
+                                .getResourceAsStream(
+                                        "parse-for-test/processWithVariables.bpmn20.xml"),
+                        StandardCharsets.UTF_8));
+        CloudProcessDeployedEventImpl secondProcessDeployedEvent =
+                new CloudProcessDeployedEventImpl(processDefinition);
+        secondProcessDeployedEvent.setProcessModelContent(
+                StreamUtils.copyToString(
+                        Thread.currentThread()
+                                .getContextClassLoader()
+                                .getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
+                        StandardCharsets.UTF_8));
+        producer.send(firstProcessDeployedEvent, secondProcessDeployedEvent);
 
-        //when
-        ResponseEntity<String> responseEntity = restTemplate.getProcDefinitionModel(processDefinition.getId());
+        // when
+        ResponseEntity<String> responseEntity =
+                restTemplate.getProcDefinitionModel(processDefinition.getId());
 
-        //then
+        // then
         assertThat(responseEntity.getBody())
-                .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
+                .isXmlEqualToContentOf(
+                        new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
     }
-
 }

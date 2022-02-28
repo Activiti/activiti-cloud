@@ -22,5 +22,4 @@ public interface ProcessDefinitionKeyBasedFilter {
     ProcessDefinitionRestrictionProperties getRestrictionProperties();
 
     Predicate buildImpossiblePredicate();
-
 }

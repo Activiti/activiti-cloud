@@ -15,10 +15,8 @@
  */
 package org.activiti.cloud.alfresco.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,23 +25,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 public class AlfrescoWebAutoConfigurationTest {
 
     private AlfrescoWebAutoConfiguration configurer;
 
-    @Mock
-    private PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
+    @Mock private PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
 
     @BeforeEach
     public void setUp() {
@@ -51,29 +49,31 @@ public class AlfrescoWebAutoConfigurationTest {
     }
 
     @Test
-    public void addArgumentResolversShouldAddAlfrescoPageArgumentMethodResolverAtTheFirstPosition() {
-        //given
+    public void
+            addArgumentResolversShouldAddAlfrescoPageArgumentMethodResolverAtTheFirstPosition() {
+        // given
         List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
         resolvers.add(mock(HandlerMethodArgumentResolver.class));
 
-        //when
+        // when
         configurer.addArgumentResolvers(resolvers);
 
-        //then
+        // then
         assertThat(resolvers.get(0)).isInstanceOf(AlfrescoPageArgumentMethodResolver.class);
     }
 
     @Test
     public void extendMessageConvertersShouldRemoveApplicationJsonFromHalConverter() {
-        //given
+        // given
 
-        //when
-        TypeConstrainedMappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(EntityModel.class);
-        halConverter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON,
-                                                          MediaType.APPLICATION_JSON));
+        // when
+        TypeConstrainedMappingJackson2HttpMessageConverter halConverter =
+                new TypeConstrainedMappingJackson2HttpMessageConverter(EntityModel.class);
+        halConverter.setSupportedMediaTypes(
+                Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON));
         configurer.extendMessageConverters(Collections.singletonList(halConverter));
 
-        //then
+        // then
         assertThat(halConverter.getSupportedMediaTypes()).containsExactly(MediaTypes.HAL_JSON);
     }
 }

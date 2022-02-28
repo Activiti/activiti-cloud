@@ -19,44 +19,39 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 
-public class CloudProcessStartedEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessStartedEvent {
+public class CloudProcessStartedEventImpl extends CloudProcessInstanceEventImpl
+        implements CloudProcessStartedEvent {
 
     private String nestedProcessDefinitionId;
     private String nestedProcessInstanceId;
 
-    public CloudProcessStartedEventImpl() {
-    }
+    public CloudProcessStartedEventImpl() {}
 
-    public CloudProcessStartedEventImpl(ProcessInstance processInstance,
-                                        String nestedProcessDefinitionId,
-                                        String nestedProcessInstanceId) {
+    public CloudProcessStartedEventImpl(
+            ProcessInstance processInstance,
+            String nestedProcessDefinitionId,
+            String nestedProcessInstanceId) {
         super(processInstance);
         this.nestedProcessDefinitionId = nestedProcessDefinitionId;
         this.nestedProcessInstanceId = nestedProcessInstanceId;
     }
 
     public CloudProcessStartedEventImpl(ProcessInstance processInstance) {
-        this(processInstance,
-             null,
-             null);
+        this(processInstance, null, null);
     }
 
-    public CloudProcessStartedEventImpl(String id,
-                                        Long timestamp,
-                                        ProcessInstance processInstance) {
-        super(id,
-              timestamp,
-              processInstance);
+    public CloudProcessStartedEventImpl(
+            String id, Long timestamp, ProcessInstance processInstance) {
+        super(id, timestamp, processInstance);
     }
 
-    public CloudProcessStartedEventImpl(String id,
-                                        Long timestamp,
-                                        ProcessInstance processInstance,
-                                        String nestedProcessDefinitionId,
-                                        String nestedProcessInstanceId) {
-        super(id,
-              timestamp,
-              processInstance);
+    public CloudProcessStartedEventImpl(
+            String id,
+            Long timestamp,
+            ProcessInstance processInstance,
+            String nestedProcessDefinitionId,
+            String nestedProcessInstanceId) {
+        super(id, timestamp, processInstance);
         this.nestedProcessDefinitionId = nestedProcessDefinitionId;
         this.nestedProcessInstanceId = nestedProcessInstanceId;
     }

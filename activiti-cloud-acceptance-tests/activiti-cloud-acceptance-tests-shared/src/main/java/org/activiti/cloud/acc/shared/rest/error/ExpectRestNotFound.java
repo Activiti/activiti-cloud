@@ -15,17 +15,14 @@
  */
 package org.activiti.cloud.acc.shared.rest.error;
 
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
-import static org.apache.http.HttpStatus.SC_NOT_FOUND;
-
-/**
- * Expect rest error annotation
- */
+/** Expect rest error annotation */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExpectRestNotFound {
@@ -33,5 +30,4 @@ public @interface ExpectRestNotFound {
     int statusCode() default SC_NOT_FOUND;
 
     String value() default "";
-
 }

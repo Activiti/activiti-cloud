@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -27,25 +35,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import javax.persistence.EntityManager;
 
 public class ProcessResumedEventHandlerTest {
 
-    @InjectMocks
-    private ProcessResumedEventHandler handler;
+    @InjectMocks private ProcessResumedEventHandler handler;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -54,45 +53,49 @@ public class ProcessResumedEventHandlerTest {
 
     @Test
     public void handleShouldUpdateCurrentProcessInstanceStateToRunning() {
-        //given
+        // given
         ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
         eventProcessInstance.setId(UUID.randomUUID().toString());
         CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(entityManager.find(ProcessInstanceEntity.class, eventProcessInstance.getId())).willReturn(currentProcessInstanceEntity);
+        given(entityManager.find(ProcessInstanceEntity.class, eventProcessInstance.getId()))
+                .willReturn(currentProcessInstanceEntity);
 
-        //when
+        // when
         handler.handle(event);
 
-        //then
+        // then
         verify(entityManager).persist(currentProcessInstanceEntity);
-        verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        verify(currentProcessInstanceEntity)
+                .setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
         verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     }
 
     @Test
     public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
-        //given
+        // given
         ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
         eventProcessInstance.setId(UUID.randomUUID().toString());
         CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
-        given(entityManager.find(ProcessInstanceEntity.class, eventProcessInstance.getId())).willReturn(null);
+        given(entityManager.find(ProcessInstanceEntity.class, eventProcessInstance.getId()))
+                .willReturn(null);
 
-        //then
-        //when
+        // then
+        // when
         assertThatExceptionOfType(QueryException.class)
-            .isThrownBy(() -> handler.handle(event))
-            .withMessageContaining("Unable to find process instance with the given id: ");
+                .isThrownBy(() -> handler.handle(event))
+                .withMessageContaining("Unable to find process instance with the given id: ");
     }
 
     @Test
     public void getHandledEventShouldReturnProcessResumedEvent() {
-        //when
+        // when
         String handledEvent = handler.getHandledEvent();
 
-        //then
-        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name());
+        // then
+        assertThat(handledEvent)
+                .isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name());
     }
 }

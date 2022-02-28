@@ -40,245 +40,294 @@ import org.junit.jupiter.api.Test;
 
 public class TimerEventConverterTest {
 
-    private TimerFiredEventConverter eventConverterTimerFired = new TimerFiredEventConverter(new EventContextInfoAppender());
-    private TimerScheduledEventConverter eventConverterTimerScheduled = new TimerScheduledEventConverter(new EventContextInfoAppender());
-    private TimerCancelledEventConverter eventConverterTimerCancelled = new TimerCancelledEventConverter(new EventContextInfoAppender());
-    private TimerExecutedEventConverter eventConverterTimerExecuted = new TimerExecutedEventConverter(new EventContextInfoAppender());
-    private TimerFailedEventConverter eventConverterTimerFailed = new TimerFailedEventConverter(new EventContextInfoAppender());
-    private TimerRetriesDecrementedEventConverter eventConverterTimerRetriesDecremented = new TimerRetriesDecrementedEventConverter(new EventContextInfoAppender());
-
-
+    private TimerFiredEventConverter eventConverterTimerFired =
+            new TimerFiredEventConverter(new EventContextInfoAppender());
+    private TimerScheduledEventConverter eventConverterTimerScheduled =
+            new TimerScheduledEventConverter(new EventContextInfoAppender());
+    private TimerCancelledEventConverter eventConverterTimerCancelled =
+            new TimerCancelledEventConverter(new EventContextInfoAppender());
+    private TimerExecutedEventConverter eventConverterTimerExecuted =
+            new TimerExecutedEventConverter(new EventContextInfoAppender());
+    private TimerFailedEventConverter eventConverterTimerFailed =
+            new TimerFailedEventConverter(new EventContextInfoAppender());
+    private TimerRetriesDecrementedEventConverter eventConverterTimerRetriesDecremented =
+            new TimerRetriesDecrementedEventConverter(new EventContextInfoAppender());
 
     @Test
     public void checkConvertToEntityTimerFiredEvent() {
-        //given
+        // given
         CloudBPMNTimerFiredEventImpl event = createTimerFiredEvent();
 
-        //when
-        TimerFiredAuditEventEntity auditEventEntity = (TimerFiredAuditEventEntity) eventConverterTimerFired.convertToEntity(event);
+        // when
+        TimerFiredAuditEventEntity auditEventEntity =
+                (TimerFiredAuditEventEntity) eventConverterTimerFired.convertToEntity(event);
 
-        //then
+        // then
         checkCloudAuditEvententity(auditEventEntity, event);
     }
 
     @Test
     public void checkConvertToEntityTimerScheduledEvent() {
-        //given
+        // given
         CloudBPMNTimerScheduledEventImpl event = createTimerScheduledEvent();
 
-        //when
-        TimerScheduledAuditEventEntity auditEventEntity = (TimerScheduledAuditEventEntity) eventConverterTimerScheduled.convertToEntity(event);
+        // when
+        TimerScheduledAuditEventEntity auditEventEntity =
+                (TimerScheduledAuditEventEntity)
+                        eventConverterTimerScheduled.convertToEntity(event);
 
-        //then
+        // then
         checkCloudAuditEvententity(auditEventEntity, event);
     }
 
     @Test
     public void checkConvertToEntityTimerCancelledEvent() {
-        //given
+        // given
         CloudBPMNTimerCancelledEventImpl event = createTimerCancelledEvent();
 
-        //when
-        TimerCancelledAuditEventEntity auditEventEntity = (TimerCancelledAuditEventEntity) eventConverterTimerCancelled.convertToEntity(event);
+        // when
+        TimerCancelledAuditEventEntity auditEventEntity =
+                (TimerCancelledAuditEventEntity)
+                        eventConverterTimerCancelled.convertToEntity(event);
 
-        //then
+        // then
         checkCloudAuditEvententity(auditEventEntity, event);
     }
 
     @Test
     public void checkConvertToEntityTimerExecutedEvent() {
-        //given
+        // given
         CloudBPMNTimerExecutedEventImpl event = createTimerExecutedEvent();
 
-        //when
-        TimerExecutedAuditEventEntity auditEventEntity = (TimerExecutedAuditEventEntity) eventConverterTimerExecuted.convertToEntity(event);
+        // when
+        TimerExecutedAuditEventEntity auditEventEntity =
+                (TimerExecutedAuditEventEntity) eventConverterTimerExecuted.convertToEntity(event);
 
-        //then
+        // then
         checkCloudAuditEvententity(auditEventEntity, event);
     }
 
     @Test
     public void checkConvertToEntityTimerRetriesDecrementedEvent() {
-        //given
+        // given
         CloudBPMNTimerRetriesDecrementedEventImpl event = createTimerRetriesDecrementedEvent();
 
-        //when
-        TimerRetriesDecrementedAuditEventEntity auditEventEntity = (TimerRetriesDecrementedAuditEventEntity) eventConverterTimerRetriesDecremented.convertToEntity(event);
+        // when
+        TimerRetriesDecrementedAuditEventEntity auditEventEntity =
+                (TimerRetriesDecrementedAuditEventEntity)
+                        eventConverterTimerRetriesDecremented.convertToEntity(event);
 
-        //then
+        // then
         checkCloudAuditEvententity(auditEventEntity, event);
     }
 
     @Test
     public void checkConvertToEntityTimerFailedEvent() {
-        //given
+        // given
         CloudBPMNTimerFailedEventImpl event = createTimerFailedEvent();
 
-        //when
-        TimerFailedAuditEventEntity auditEventEntity = (TimerFailedAuditEventEntity) eventConverterTimerFailed.convertToEntity(event);
+        // when
+        TimerFailedAuditEventEntity auditEventEntity =
+                (TimerFailedAuditEventEntity) eventConverterTimerFailed.convertToEntity(event);
 
-        //then
+        // then
         checkCloudAuditEvententity(auditEventEntity, event);
     }
 
     @Test
     public void checkConvertToAPITimerFiredEvent() {
-        //given
-        TimerFiredAuditEventEntity auditEventEntity = (TimerFiredAuditEventEntity) eventConverterTimerFired.convertToEntity(createTimerFiredEvent());
+        // given
+        TimerFiredAuditEventEntity auditEventEntity =
+                (TimerFiredAuditEventEntity)
+                        eventConverterTimerFired.convertToEntity(createTimerFiredEvent());
 
-        //when
-        CloudBPMNTimerFiredEventImpl cloudEvent= (CloudBPMNTimerFiredEventImpl) eventConverterTimerFired.convertToAPI(auditEventEntity);
+        // when
+        CloudBPMNTimerFiredEventImpl cloudEvent =
+                (CloudBPMNTimerFiredEventImpl)
+                        eventConverterTimerFired.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
 
     @Test
     public void checkConvertToAPITimerScheduledEvent() {
-        //given
-        TimerScheduledAuditEventEntity auditEventEntity = (TimerScheduledAuditEventEntity) eventConverterTimerScheduled.convertToEntity(createTimerScheduledEvent());
+        // given
+        TimerScheduledAuditEventEntity auditEventEntity =
+                (TimerScheduledAuditEventEntity)
+                        eventConverterTimerScheduled.convertToEntity(createTimerScheduledEvent());
 
-        //when
-        CloudBPMNTimerScheduledEventImpl cloudEvent= (CloudBPMNTimerScheduledEventImpl) eventConverterTimerScheduled.convertToAPI(auditEventEntity);
+        // when
+        CloudBPMNTimerScheduledEventImpl cloudEvent =
+                (CloudBPMNTimerScheduledEventImpl)
+                        eventConverterTimerScheduled.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
 
     @Test
     public void checkConvertToAPITimerCancelledEvent() {
-        //given
-        TimerCancelledAuditEventEntity auditEventEntity = (TimerCancelledAuditEventEntity) eventConverterTimerCancelled.convertToEntity(createTimerCancelledEvent());
+        // given
+        TimerCancelledAuditEventEntity auditEventEntity =
+                (TimerCancelledAuditEventEntity)
+                        eventConverterTimerCancelled.convertToEntity(createTimerCancelledEvent());
 
-        //when
-        CloudBPMNTimerCancelledEventImpl cloudEvent= (CloudBPMNTimerCancelledEventImpl) eventConverterTimerCancelled.convertToAPI(auditEventEntity);
+        // when
+        CloudBPMNTimerCancelledEventImpl cloudEvent =
+                (CloudBPMNTimerCancelledEventImpl)
+                        eventConverterTimerCancelled.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
 
     @Test
     public void checkConvertToAPITimerExecutedEvent() {
-        //given
-        TimerExecutedAuditEventEntity auditEventEntity = (TimerExecutedAuditEventEntity) eventConverterTimerExecuted.convertToEntity(createTimerExecutedEvent());
+        // given
+        TimerExecutedAuditEventEntity auditEventEntity =
+                (TimerExecutedAuditEventEntity)
+                        eventConverterTimerExecuted.convertToEntity(createTimerExecutedEvent());
 
-        //when
-        CloudBPMNTimerExecutedEventImpl cloudEvent= (CloudBPMNTimerExecutedEventImpl) eventConverterTimerExecuted.convertToAPI(auditEventEntity);
+        // when
+        CloudBPMNTimerExecutedEventImpl cloudEvent =
+                (CloudBPMNTimerExecutedEventImpl)
+                        eventConverterTimerExecuted.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
 
     @Test
     public void checkConvertToAPITimerFailedEvent() {
-        //given
-        TimerFailedAuditEventEntity auditEventEntity = (TimerFailedAuditEventEntity) eventConverterTimerFailed.convertToEntity(createTimerFailedEvent());
+        // given
+        TimerFailedAuditEventEntity auditEventEntity =
+                (TimerFailedAuditEventEntity)
+                        eventConverterTimerFailed.convertToEntity(createTimerFailedEvent());
 
-        //when
-        CloudBPMNTimerFailedEventImpl cloudEvent= (CloudBPMNTimerFailedEventImpl) eventConverterTimerFailed.convertToAPI(auditEventEntity);
+        // when
+        CloudBPMNTimerFailedEventImpl cloudEvent =
+                (CloudBPMNTimerFailedEventImpl)
+                        eventConverterTimerFailed.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
 
     @Test
     public void checkConvertToAPITimerRetriesDecrementedEvent() {
-        //given
-        TimerRetriesDecrementedAuditEventEntity auditEventEntity = (TimerRetriesDecrementedAuditEventEntity) eventConverterTimerRetriesDecremented.convertToEntity(createTimerRetriesDecrementedEvent());
+        // given
+        TimerRetriesDecrementedAuditEventEntity auditEventEntity =
+                (TimerRetriesDecrementedAuditEventEntity)
+                        eventConverterTimerRetriesDecremented.convertToEntity(
+                                createTimerRetriesDecrementedEvent());
 
-        //when
-        CloudBPMNTimerRetriesDecrementedEventImpl cloudEvent= (CloudBPMNTimerRetriesDecrementedEventImpl) eventConverterTimerRetriesDecremented.convertToAPI(auditEventEntity);
+        // when
+        CloudBPMNTimerRetriesDecrementedEventImpl cloudEvent =
+                (CloudBPMNTimerRetriesDecrementedEventImpl)
+                        eventConverterTimerRetriesDecremented.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
 
     private CloudBPMNTimerFiredEventImpl createTimerFiredEvent() {
-        //given
+        // given
         ProcessInstanceImpl processInstance = createProcess();
 
         BPMNTimerImpl timer = createBPMNTimer(processInstance);
 
-        CloudBPMNTimerFiredEventImpl event = new CloudBPMNTimerFiredEventImpl("eventId",
-                                                                              System.currentTimeMillis(),
-                                                                              timer,
-                                                                              timer.getProcessDefinitionId(),
-                                                                              timer.getProcessInstanceId());
+        CloudBPMNTimerFiredEventImpl event =
+                new CloudBPMNTimerFiredEventImpl(
+                        "eventId",
+                        System.currentTimeMillis(),
+                        timer,
+                        timer.getProcessDefinitionId(),
+                        timer.getProcessInstanceId());
         appendEventInfo(event, processInstance);
         return event;
     }
 
     private CloudBPMNTimerScheduledEventImpl createTimerScheduledEvent() {
-        //given
+        // given
         ProcessInstanceImpl processInstance = createProcess();
 
         BPMNTimerImpl timer = createBPMNTimer(processInstance);
 
-        CloudBPMNTimerScheduledEventImpl event = new CloudBPMNTimerScheduledEventImpl("eventId",
-                                                                                      System.currentTimeMillis(),
-                                                                                      timer,
-                                                                                      timer.getProcessDefinitionId(),
-                                                                                      timer.getProcessInstanceId());
+        CloudBPMNTimerScheduledEventImpl event =
+                new CloudBPMNTimerScheduledEventImpl(
+                        "eventId",
+                        System.currentTimeMillis(),
+                        timer,
+                        timer.getProcessDefinitionId(),
+                        timer.getProcessInstanceId());
         appendEventInfo(event, processInstance);
         return event;
     }
 
     private CloudBPMNTimerCancelledEventImpl createTimerCancelledEvent() {
-        //given
+        // given
         ProcessInstanceImpl processInstance = createProcess();
 
         BPMNTimerImpl timer = createBPMNTimer(processInstance);
 
-        CloudBPMNTimerCancelledEventImpl event = new CloudBPMNTimerCancelledEventImpl("eventId",
-                                                                                      System.currentTimeMillis(),
-                                                                                      timer,
-                                                                                      timer.getProcessDefinitionId(),
-                                                                                      timer.getProcessInstanceId());
+        CloudBPMNTimerCancelledEventImpl event =
+                new CloudBPMNTimerCancelledEventImpl(
+                        "eventId",
+                        System.currentTimeMillis(),
+                        timer,
+                        timer.getProcessDefinitionId(),
+                        timer.getProcessInstanceId());
         appendEventInfo(event, processInstance);
         return event;
     }
 
     private CloudBPMNTimerExecutedEventImpl createTimerExecutedEvent() {
-        //given
+        // given
         ProcessInstanceImpl processInstance = createProcess();
 
         BPMNTimerImpl timer = createBPMNTimer(processInstance);
 
-        CloudBPMNTimerExecutedEventImpl event = new CloudBPMNTimerExecutedEventImpl("eventId",
-                                                                                    System.currentTimeMillis(),
-                                                                                    timer,
-                                                                                    timer.getProcessDefinitionId(),
-                                                                                    timer.getProcessInstanceId());
+        CloudBPMNTimerExecutedEventImpl event =
+                new CloudBPMNTimerExecutedEventImpl(
+                        "eventId",
+                        System.currentTimeMillis(),
+                        timer,
+                        timer.getProcessDefinitionId(),
+                        timer.getProcessInstanceId());
         appendEventInfo(event, processInstance);
         return event;
     }
 
     private CloudBPMNTimerFailedEventImpl createTimerFailedEvent() {
-        //given
+        // given
         ProcessInstanceImpl processInstance = createProcess();
 
         BPMNTimerImpl timer = createBPMNTimer(processInstance);
 
-        CloudBPMNTimerFailedEventImpl event = new CloudBPMNTimerFailedEventImpl("eventId",
-                                                                                System.currentTimeMillis(),
-                                                                                timer,
-                                                                                timer.getProcessDefinitionId(),
-                                                                                timer.getProcessInstanceId());
+        CloudBPMNTimerFailedEventImpl event =
+                new CloudBPMNTimerFailedEventImpl(
+                        "eventId",
+                        System.currentTimeMillis(),
+                        timer,
+                        timer.getProcessDefinitionId(),
+                        timer.getProcessInstanceId());
         appendEventInfo(event, processInstance);
         return event;
     }
 
     private CloudBPMNTimerRetriesDecrementedEventImpl createTimerRetriesDecrementedEvent() {
-        //given
+        // given
         ProcessInstanceImpl processInstance = createProcess();
 
         BPMNTimerImpl timer = createBPMNTimer(processInstance);
 
-        CloudBPMNTimerRetriesDecrementedEventImpl event = new CloudBPMNTimerRetriesDecrementedEventImpl("eventId",
-                                                                                                        System.currentTimeMillis(),
-                                                                                                        timer,
-                                                                                                        timer.getProcessDefinitionId(),
-                                                                                                        timer.getProcessInstanceId());
+        CloudBPMNTimerRetriesDecrementedEventImpl event =
+                new CloudBPMNTimerRetriesDecrementedEventImpl(
+                        "eventId",
+                        System.currentTimeMillis(),
+                        timer,
+                        timer.getProcessDefinitionId(),
+                        timer.getProcessInstanceId());
         appendEventInfo(event, processInstance);
         return event;
     }
 
-
-    private ProcessInstanceImpl createProcess(){
+    private ProcessInstanceImpl createProcess() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("processInstanceId");
         processInstance.setProcessDefinitionId("processDefinitionId");
@@ -316,20 +365,26 @@ public class TimerEventConverterTest {
         event.setParentProcessInstanceId(processInstance.getParentId());
         event.setMessageId("message-id");
         event.setSequenceNumber(0);
-
     }
 
-    private void checkCloudAuditEvententity(TimerAuditEventEntity auditEventEntity, CloudBPMNTimerEvent event) {
+    private void checkCloudAuditEvententity(
+            TimerAuditEventEntity auditEventEntity, CloudBPMNTimerEvent event) {
         assertThat(event).isNotNull();
         assertThat(auditEventEntity).isNotNull();
         assertThat(auditEventEntity.getEntityId()).isEqualTo(event.getEntityId());
         assertThat(auditEventEntity.getProcessInstanceId()).isEqualTo(event.getProcessInstanceId());
-        assertThat(auditEventEntity.getProcessDefinitionId()).isEqualTo(event.getProcessDefinitionId());
-        assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(event.getProcessDefinitionKey());
+        assertThat(auditEventEntity.getProcessDefinitionId())
+                .isEqualTo(event.getProcessDefinitionId());
+        assertThat(auditEventEntity.getProcessDefinitionKey())
+                .isEqualTo(event.getProcessDefinitionKey());
         assertThat(auditEventEntity.getBusinessKey()).isEqualTo(event.getBusinessKey());
-        assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(event.getParentProcessInstanceId());
-        assertThat(auditEventEntity.getTimer().getProcessInstanceId()).isEqualTo(event.getEntity().getProcessInstanceId());
-        assertThat(auditEventEntity.getTimer().getProcessDefinitionId()).isEqualTo(event.getEntity().getProcessDefinitionId());
-        assertThat(auditEventEntity.getTimer().getTimerPayload()).isEqualTo(event.getEntity().getTimerPayload());
+        assertThat(auditEventEntity.getParentProcessInstanceId())
+                .isEqualTo(event.getParentProcessInstanceId());
+        assertThat(auditEventEntity.getTimer().getProcessInstanceId())
+                .isEqualTo(event.getEntity().getProcessInstanceId());
+        assertThat(auditEventEntity.getTimer().getProcessDefinitionId())
+                .isEqualTo(event.getEntity().getProcessDefinitionId());
+        assertThat(auditEventEntity.getTimer().getTimerPayload())
+                .isEqualTo(event.getEntity().getTimerPayload());
     }
 }

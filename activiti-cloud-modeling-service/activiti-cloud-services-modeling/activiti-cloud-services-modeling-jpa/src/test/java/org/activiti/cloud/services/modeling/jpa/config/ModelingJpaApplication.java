@@ -18,15 +18,11 @@ package org.activiti.cloud.services.modeling.jpa.config;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- * Modeling Test Configuration
- */
-
+/** Modeling Test Configuration */
 @SpringBootApplication
 public class ModelingJpaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ModelingJpaApplication.class,
-                              args);
+        SpringApplication.run(ModelingJpaApplication.class, args);
     }
 }

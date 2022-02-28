@@ -17,6 +17,7 @@
 package org.activiti.cloud.common.swagger;
 
 import org.springframework.boot.info.BuildProperties;
+
 import springfox.documentation.builders.ApiInfoBuilder;
 
 public class BaseAPIInfoBuilder {
@@ -29,13 +30,14 @@ public class BaseAPIInfoBuilder {
 
     public ApiInfoBuilder baseApiInfoBuilder(String title) {
         return new ApiInfoBuilder()
-            .title(title)
-            .version(buildProperties.getVersion())
-            .license(String.format("© %s-%s %s. All rights reserved",
-                buildProperties.get("inceptionYear"),
-                buildProperties.get("year"),
-                buildProperties.get("organization.name")))
-            .termsOfServiceUrl(buildProperties.get("organization.url"));
+                .title(title)
+                .version(buildProperties.getVersion())
+                .license(
+                        String.format(
+                                "© %s-%s %s. All rights reserved",
+                                buildProperties.get("inceptionYear"),
+                                buildProperties.get("year"),
+                                buildProperties.get("organization.name")))
+                .termsOfServiceUrl(buildProperties.get("organization.url"));
     }
-
 }

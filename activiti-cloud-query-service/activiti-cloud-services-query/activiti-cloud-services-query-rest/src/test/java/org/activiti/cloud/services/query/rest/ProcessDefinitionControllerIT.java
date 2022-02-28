@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
-import java.util.Collections;
+
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -51,78 +51,79 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+
 @WebMvcTest(ProcessDefinitionController.class)
 @Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class
 })
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
 public class ProcessDefinitionControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private ProcessDefinitionRepository processDefinitionRepository;
+    @MockBean private ProcessDefinitionRepository processDefinitionRepository;
 
-    @MockBean
-    private ProcessDefinitionRestrictionService processDefinitionRestrictionService;
+    @MockBean private ProcessDefinitionRestrictionService processDefinitionRestrictionService;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;
+    @MockBean private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;
+    @MockBean private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
-    private TaskLookupRestrictionService taskLookupRestrictionService;
+    @MockBean private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @MockBean
-    private TaskRepository taskRepository;
+    @MockBean private TaskRepository taskRepository;
 
     @Test
     public void shouldReturnAvailableProcessDefinitions() throws Exception {
-        //given
+        // given
         Predicate predicate = mock(Predicate.class);
-        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
+        given(
+                        processDefinitionRestrictionService.restrictProcessDefinitionQuery(
+                                any(), eq(SecurityPolicyAccess.READ)))
                 .willReturn(predicate);
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10);
-        given(processDefinitionRepository.findAll(predicate,
-                                                  pageRequest))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           pageRequest,
-                                           1));
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        given(processDefinitionRepository.findAll(predicate, pageRequest))
+                .willReturn(
+                        new PageImpl<>(
+                                Collections.singletonList(buildDefaultProcessDefinition()),
+                                pageRequest,
+                                1));
 
-        //when
-        mockMvc.perform(get("/v1/process-definitions?page=0&size=10")
+        // when
+        mockMvc.perform(
+                        get("/v1/process-definitions?page=0&size=10")
                                 .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
+                // then
                 .andExpect(status().isOk());
     }
 
     @Test
     public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat() throws Exception {
-        //given
+        // given
         Predicate predicate = mock(Predicate.class);
-        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
+        given(
+                        processDefinitionRestrictionService.restrictProcessDefinitionQuery(
+                                any(), eq(SecurityPolicyAccess.READ)))
                 .willReturn(predicate);
         given(processDefinitionRepository.findAll(eq(predicate), any(Pageable.class)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           PageRequest.of(1,10),
-                                           11));
+                .willReturn(
+                        new PageImpl<>(
+                                Collections.singletonList(buildDefaultProcessDefinition()),
+                                PageRequest.of(1, 10),
+                                11));
 
-        //when
-        mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10")
+        // when
+        mockMvc.perform(
+                        get("/v1/process-definitions?skipCount=10&maxItems=10")
                                 .accept(MediaType.APPLICATION_JSON))
-                //then
+                // then
                 .andExpect(status().isOk());
     }
-
 }

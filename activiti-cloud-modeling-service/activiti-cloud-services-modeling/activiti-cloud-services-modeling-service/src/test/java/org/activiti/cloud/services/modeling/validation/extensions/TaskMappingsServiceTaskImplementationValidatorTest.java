@@ -15,11 +15,12 @@
  */
 package org.activiti.cloud.services.modeling.validation.extensions;
 
-import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.when;
-import java.util.List;
+
+import static java.lang.String.format;
+
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -32,19 +33,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class TaskMappingsServiceTaskImplementationValidatorTest {
 
     private TaskMappingsServiceTaskImplementationValidator validator;
 
-    @Mock
-    private ValidationContext validationContext;
-    @Mock
-    private ConnectorModelType connectorModelType;
-    @Mock
-    private ConnectorModelContentConverter connectorModelContentConverter;
-    @Mock
-    private MappingModel mappingModel;
+    @Mock private ValidationContext validationContext;
+    @Mock private ConnectorModelType connectorModelType;
+    @Mock private ConnectorModelContentConverter connectorModelContentConverter;
+    @Mock private MappingModel mappingModel;
 
     private final String PROCESS_ID = "processId";
     private final String CUSTOM_ACTION = "custom-connector.ACTION";
@@ -53,7 +52,9 @@ class TaskMappingsServiceTaskImplementationValidatorTest {
 
     @BeforeEach
     void setUp() {
-        validator = new TaskMappingsServiceTaskImplementationValidator(connectorModelType, connectorModelContentConverter);
+        validator =
+                new TaskMappingsServiceTaskImplementationValidator(
+                        connectorModelType, connectorModelContentConverter);
     }
 
     @Test
@@ -63,7 +64,12 @@ class TaskMappingsServiceTaskImplementationValidatorTest {
 
         when(mappingModel.getFlowNode()).thenReturn(serviceTask);
 
-        assertThat(validator.validateTaskMappings(List.of(mappingModel), null, validationContext).count()).isEqualTo(0);
+        assertThat(
+                        validator
+                                .validateTaskMappings(
+                                        List.of(mappingModel), null, validationContext)
+                                .count())
+                .isEqualTo(0);
     }
 
     @Test
@@ -78,14 +84,27 @@ class TaskMappingsServiceTaskImplementationValidatorTest {
         when(mappingModel.getAction()).thenReturn(actionType);
 
         assertThat(validator.validateTaskMappings(List.of(mappingModel), null, validationContext))
-                .extracting(ModelValidationError::getProblem,
+                .extracting(
+                        ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
                         ModelValidationError::getValidatorSetName,
                         ModelValidationError::getReferenceId)
                 .contains(
-                        tuple(format(TaskMappingsServiceTaskImplementationValidator.UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_PROBLEM, INPUTS_TEXT, ID_TEXT,
+                        tuple(
+                                format(
+                                        TaskMappingsServiceTaskImplementationValidator
+                                                .UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_PROBLEM,
+                                        INPUTS_TEXT,
+                                        ID_TEXT,
                                         CUSTOM_ACTION),
-                                format(TaskMappingsServiceTaskImplementationValidator.UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_DESCRIPTION, PROCESS_ID,
-                                        INPUTS_TEXT, ID_TEXT, CUSTOM_ACTION), null, null));
+                                format(
+                                        TaskMappingsServiceTaskImplementationValidator
+                                                .UNKNOWN_CONNECTOR_ACTION_VALIDATION_ERROR_DESCRIPTION,
+                                        PROCESS_ID,
+                                        INPUTS_TEXT,
+                                        ID_TEXT,
+                                        CUSTOM_ACTION),
+                                null,
+                                null));
     }
 }

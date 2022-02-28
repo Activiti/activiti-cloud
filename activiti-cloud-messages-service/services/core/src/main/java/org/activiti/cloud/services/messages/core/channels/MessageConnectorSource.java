@@ -24,5 +24,4 @@ public interface MessageConnectorSource {
 
     @Output(MessageConnectorSource.OUTPUT)
     MessageChannel output();
-
 }

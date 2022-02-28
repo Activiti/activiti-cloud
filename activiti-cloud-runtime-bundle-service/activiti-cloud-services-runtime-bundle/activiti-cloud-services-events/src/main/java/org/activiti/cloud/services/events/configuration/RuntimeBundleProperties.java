@@ -47,13 +47,13 @@ public class RuntimeBundleProperties {
         return rbSpringAppName;
     }
 
-    public String getServiceFullName(){
-        //if we change this then we also have to change integration-result-stream.properties
+    public String getServiceFullName() {
+        // if we change this then we also have to change integration-result-stream.properties
         return rbSpringAppName;
     }
 
     // a level of indirection here as we may change this to use its own property
-    public String getServiceName(){
+    public String getServiceName() {
         return getRbSpringAppName();
     }
 
@@ -95,11 +95,9 @@ public class RuntimeBundleProperties {
 
     public static class RuntimeBundleEventsProperties {
 
-
         private boolean integrationAuditEventsEnabled = true;
 
-        @Positive
-        private int chunkSize = 100;
+        @Positive private int chunkSize = 100;
 
         public boolean isIntegrationAuditEventsEnabled() {
             return integrationAuditEventsEnabled;
@@ -116,6 +114,5 @@ public class RuntimeBundleProperties {
         public void setChunkSize(Integer chunkSize) {
             this.chunkSize = chunkSize;
         }
-
     }
 }

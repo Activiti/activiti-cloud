@@ -30,8 +30,7 @@ public class TaskCancelledEventEntity extends TaskAuditEventEntity {
 
     private String cause;
 
-    public TaskCancelledEventEntity() {
-    }
+    public TaskCancelledEventEntity() {}
 
     public TaskCancelledEventEntity(CloudTaskCancelledEvent cloudEvent) {
         super(cloudEvent);
@@ -50,10 +49,10 @@ public class TaskCancelledEventEntity extends TaskAuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("TaskCancelledEventEntity [cause=")
-               .append(cause)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(cause)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

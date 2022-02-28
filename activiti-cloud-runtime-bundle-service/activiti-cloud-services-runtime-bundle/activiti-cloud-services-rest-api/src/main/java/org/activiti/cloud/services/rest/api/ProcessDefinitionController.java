@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -29,24 +30,20 @@ public interface ProcessDefinitionController {
     @GetMapping("/v1/process-definitions")
     PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable);
 
-
     @GetMapping(value = "/v1/process-definitions/{id}")
     EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/v1/process-definitions/{id}/model",
-            produces = "application/xml")
+    @GetMapping(value = "/v1/process-definitions/{id}/model", produces = "application/xml")
     @ResponseBody
     @Operation(summary = "getProcessModel")
     String getProcessModel(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/v1/process-definitions/{id}/model",
-            produces = "application/json")
+    @GetMapping(value = "/v1/process-definitions/{id}/model", produces = "application/json")
     @ResponseBody
     @Operation(summary = "getProcessModel")
     String getBpmnModel(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/v1/process-definitions/{id}/model",
-            produces = "image/svg+xml")
+    @GetMapping(value = "/v1/process-definitions/{id}/model", produces = "image/svg+xml")
     @ResponseBody
     @Operation(summary = "getProcessModel")
     String getProcessDiagram(@PathVariable(value = "id") String id);

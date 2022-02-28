@@ -28,16 +28,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.security.Principal;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import javax.websocket.Session;
+import graphql.ExecutionResult;
+import graphql.ExecutionResultImpl;
+import graphql.GraphQLError;
 
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
@@ -63,53 +56,56 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 
-import graphql.ExecutionResult;
-import graphql.ExecutionResultImpl;
-import graphql.GraphQLError;
 import reactor.core.Disposable;
 import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.security.Principal;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+import javax.websocket.Session;
+
 public class GraphQLBrokerMessageHandlerTest {
 
-
-    private final static String destination = "/ws/graphql";
+    private static final String destination = "/ws/graphql";
 
     private GraphQLBrokerMessageHandler messageHandler;
 
-    @Mock
-    private SubscribableChannel clientInboundChannel;
+    @Mock private SubscribableChannel clientInboundChannel;
 
-    @Mock
-    private ExecutorSubscribableChannel clientOutboundChannel;
+    @Mock private ExecutorSubscribableChannel clientOutboundChannel;
 
-    @Mock
-    private SubscribableChannel brokerChannel;
+    @Mock private SubscribableChannel brokerChannel;
 
-    @Mock
-    private GraphQLSubscriptionExecutor graphQLExecutor;
+    @Mock private GraphQLSubscriptionExecutor graphQLExecutor;
 
-    @Mock
-    private TaskScheduler taskScheduler;
+    @Mock private TaskScheduler taskScheduler;
 
-    @Mock
-    private ScheduledFuture scheduledFuture;
+    @Mock private ScheduledFuture scheduledFuture;
 
-    @Captor
-    private ArgumentCaptor<Message<GraphQLMessage>> messageCaptor;
+    @Captor private ArgumentCaptor<Message<GraphQLMessage>> messageCaptor;
 
     @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        this.messageHandler = new GraphQLBrokerMessageHandler(this.clientInboundChannel,
-                                                              this.clientOutboundChannel,
-                                                              this.brokerChannel,
-                                                              graphQLExecutor);
+        this.messageHandler =
+                new GraphQLBrokerMessageHandler(
+                        this.clientInboundChannel,
+                        this.clientOutboundChannel,
+                        this.brokerChannel,
+                        graphQLExecutor);
 
         this.messageHandler.setTaskScheduler(taskScheduler);
-        when(taskScheduler.scheduleWithFixedDelay(any(Runnable.class), anyLong())).thenReturn(scheduledFuture);
+        when(taskScheduler.scheduleWithFixedDelay(any(Runnable.class), anyLong()))
+                .thenReturn(scheduledFuture);
 
         this.messageHandler.start();
 
@@ -167,7 +163,8 @@ public class GraphQLBrokerMessageHandlerTest {
         verify(this.clientOutboundChannel).send(this.messageCaptor.capture());
 
         assertThat(messageCaptor.getValue().getPayload()).isInstanceOf(GraphQLMessage.class);
-        assertThat(messageCaptor.getValue().getPayload().getType()).isEqualTo(GraphQLMessageType.CONNECTION_ACK);
+        assertThat(messageCaptor.getValue().getPayload().getType())
+                .isEqualTo(GraphQLMessageType.CONNECTION_ACK);
         assertThat(messageCaptor.getValue().getPayload().getId()).isEqualTo("id");
     }
 
@@ -182,21 +179,18 @@ public class GraphQLBrokerMessageHandlerTest {
         // then
         verify(this.clientOutboundChannel).send(this.messageCaptor.capture());
 
-        assertThat(messageCaptor.getValue()
-                                .getPayload()).isInstanceOf(GraphQLMessage.class);
+        assertThat(messageCaptor.getValue().getPayload()).isInstanceOf(GraphQLMessage.class);
 
-        assertThat(messageCaptor.getValue()
-                                .getPayload()
-                                .getType()).isEqualTo(GraphQLMessageType.CONNECTION_ERROR);
+        assertThat(messageCaptor.getValue().getPayload().getType())
+                .isEqualTo(GraphQLMessageType.CONNECTION_ERROR);
 
-        assertThat(messageCaptor.getValue()
-                                .getPayload()
-                                .getId()).isEqualTo("id");
+        assertThat(messageCaptor.getValue().getPayload().getId()).isEqualTo("id");
 
-        assertThat(messageCaptor.getValue()
-                                .getPayload()
-                                .getPayload()).containsEntry("errors",
-                                                             Collections.singletonList(GraphQLBrokerMessageHandler.BROKER_NOT_AVAILABLE));
+        assertThat(messageCaptor.getValue().getPayload().getPayload())
+                .containsEntry(
+                        "errors",
+                        Collections.singletonList(
+                                GraphQLBrokerMessageHandler.BROKER_NOT_AVAILABLE));
     }
 
     @Test
@@ -207,21 +201,24 @@ public class GraphQLBrokerMessageHandlerTest {
         CountDownLatch completeLatch = new CountDownLatch(1);
 
         // Simulate stomp relay  subscription stream
-        Flux<ExecutionResult> mockStompRelayObservable = Flux.interval(Duration.ofSeconds(1), Duration.ofMillis(10))
-                                                             .take(count)
-                                                             .map(i -> {
-                                                                 Map<String, Object> data = new HashMap<>();
-                                                                 data.put("key", i);
+        Flux<ExecutionResult> mockStompRelayObservable =
+                Flux.interval(Duration.ofSeconds(1), Duration.ofMillis(10))
+                        .take(count)
+                        .map(
+                                i -> {
+                                    Map<String, Object> data = new HashMap<>();
+                                    data.put("key", i);
 
-                                                                 return new ExecutionResultImpl(data,
-                                                                                                Collections.emptyList());
-                                                             });
+                                    return new ExecutionResultImpl(data, Collections.emptyList());
+                                });
 
-        StepVerifier observable = StepVerifier.create(mockStompRelayObservable)
-                .expectNextCount(count)
-                .expectComplete();
+        StepVerifier observable =
+                StepVerifier.create(mockStompRelayObservable)
+                        .expectNextCount(count)
+                        .expectComplete();
 
-        ExecutionResult executionResult = stubExecutionResult(mockStompRelayObservable, completeLatch);
+        ExecutionResult executionResult =
+                stubExecutionResult(mockStompRelayObservable, completeLatch);
 
         when(graphQLExecutor.execute(anyString(), any())).thenReturn(executionResult);
 
@@ -233,13 +230,16 @@ public class GraphQLBrokerMessageHandlerTest {
         assertThat(completeLatch.await(2000, TimeUnit.MILLISECONDS)).isTrue();
 
         // then get last message
-        await().untilAsserted(() -> {
-            verify(this.clientOutboundChannel, times(count+1)).send(this.messageCaptor.capture());
+        await().untilAsserted(
+                        () -> {
+                            verify(this.clientOutboundChannel, times(count + 1))
+                                    .send(this.messageCaptor.capture());
 
-            GraphQLMessage completeMessage = messageCaptor.getValue().getPayload();
+                            GraphQLMessage completeMessage = messageCaptor.getValue().getPayload();
 
-            assertThat(completeMessage.getType()).isEqualTo(GraphQLMessageType.COMPLETE);
-        });
+                            assertThat(completeMessage.getType())
+                                    .isEqualTo(GraphQLMessageType.COMPLETE);
+                        });
     }
 
     @Test
@@ -259,7 +259,8 @@ public class GraphQLBrokerMessageHandlerTest {
         verify(this.clientOutboundChannel).send(this.messageCaptor.capture());
 
         assertThat(messageCaptor.getValue().getPayload()).isInstanceOf(GraphQLMessage.class);
-        assertThat(messageCaptor.getValue().getPayload().getType()).isEqualTo(GraphQLMessageType.ERROR);
+        assertThat(messageCaptor.getValue().getPayload().getType())
+                .isEqualTo(GraphQLMessageType.ERROR);
         assertThat(messageCaptor.getValue().getPayload().getId()).isEqualTo("id");
         assertThat(messageCaptor.getValue().getPayload().getPayload()).containsKey("errors");
     }
@@ -271,7 +272,8 @@ public class GraphQLBrokerMessageHandlerTest {
 
         ExecutionResult executionResult = mock(ExecutionResult.class);
         when(graphQLExecutor.execute(anyString(), any())).thenReturn(executionResult);
-        when(executionResult.getErrors()).thenReturn(Collections.singletonList(mock(GraphQLError.class)));
+        when(executionResult.getErrors())
+                .thenReturn(Collections.singletonList(mock(GraphQLError.class)));
         when(executionResult.getData()).thenReturn(null);
 
         // when
@@ -281,7 +283,8 @@ public class GraphQLBrokerMessageHandlerTest {
         verify(this.clientOutboundChannel).send(this.messageCaptor.capture());
 
         assertThat(messageCaptor.getValue().getPayload()).isInstanceOf(GraphQLMessage.class);
-        assertThat(messageCaptor.getValue().getPayload().getType()).isEqualTo(GraphQLMessageType.ERROR);
+        assertThat(messageCaptor.getValue().getPayload().getType())
+                .isEqualTo(GraphQLMessageType.ERROR);
         assertThat(messageCaptor.getValue().getPayload().getId()).isEqualTo("id");
         assertThat(messageCaptor.getValue().getPayload().getPayload()).containsKey("errors");
     }
@@ -298,20 +301,14 @@ public class GraphQLBrokerMessageHandlerTest {
         // then
         verify(this.clientOutboundChannel).send(this.messageCaptor.capture());
 
-        assertThat(messageCaptor.getValue()
-                                .getPayload()).isInstanceOf(GraphQLMessage.class);
+        assertThat(messageCaptor.getValue().getPayload()).isInstanceOf(GraphQLMessage.class);
 
-        assertThat(messageCaptor.getValue()
-                                .getPayload()
-                                .getType()).isEqualTo(GraphQLMessageType.ERROR);
+        assertThat(messageCaptor.getValue().getPayload().getType())
+                .isEqualTo(GraphQLMessageType.ERROR);
 
-        assertThat(messageCaptor.getValue()
-                                .getPayload()
-                                .getId()).isEqualTo("id");
+        assertThat(messageCaptor.getValue().getPayload().getId()).isEqualTo("id");
 
-        assertThat(messageCaptor.getValue()
-                                .getPayload()
-                                .getPayload()).containsKey("errors");
+        assertThat(messageCaptor.getValue().getPayload().getPayload()).containsKey("errors");
     }
 
     @Test
@@ -320,7 +317,8 @@ public class GraphQLBrokerMessageHandlerTest {
         Message<GraphQLMessage> message = stopMessage("subscriptionId", "sessionId");
 
         GraphQLBrokerChannelSubscriber subscriber = mock(GraphQLBrokerChannelSubscriber.class);
-        GraphQLBrokerSubscriptionRegistry registry = messageHandler.getGraphQLsubscriptionRegistry();
+        GraphQLBrokerSubscriptionRegistry registry =
+                messageHandler.getGraphQLsubscriptionRegistry();
         registry.subscribe("sessionId", "subscriptionId", subscriber);
 
         // when
@@ -328,7 +326,6 @@ public class GraphQLBrokerMessageHandlerTest {
 
         // then
         verify(subscriber).onComplete();
-
     }
 
     @Test
@@ -338,7 +335,8 @@ public class GraphQLBrokerMessageHandlerTest {
         Message<GraphQLMessage> message = createDisconnectMessage(session);
 
         GraphQLBrokerChannelSubscriber subscriber = mock(GraphQLBrokerChannelSubscriber.class);
-        GraphQLBrokerSubscriptionRegistry registry = messageHandler.getGraphQLsubscriptionRegistry();
+        GraphQLBrokerSubscriptionRegistry registry =
+                messageHandler.getGraphQLsubscriptionRegistry();
         registry.subscribe("sessionId", "subscriptionId", subscriber);
 
         // when
@@ -346,39 +344,38 @@ public class GraphQLBrokerMessageHandlerTest {
 
         // then
         verify(subscriber).cancel();
-
     }
 
     private Message<GraphQLMessage> connectionInitMessage(String operationId, String sessionId) {
-        SimpMessageHeaderAccessor headerAccessor = simpHeaderAccessor(mockWebSocketSession(sessionId));
+        SimpMessageHeaderAccessor headerAccessor =
+                simpHeaderAccessor(mockWebSocketSession(sessionId));
 
-        headerAccessor.setHeader(StompHeaderAccessor.HEART_BEAT_HEADER, new long[]{0, 5000});
+        headerAccessor.setHeader(StompHeaderAccessor.HEART_BEAT_HEADER, new long[] {0, 5000});
 
-        GraphQLMessage payload = new GraphQLMessage(operationId,
-                                                    GraphQLMessageType.CONNECTION_INIT);
+        GraphQLMessage payload =
+                new GraphQLMessage(operationId, GraphQLMessageType.CONNECTION_INIT);
 
         return MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
     }
 
     private Message<GraphQLMessage> startMessage(String operationId, String sessionId) {
-        SimpMessageHeaderAccessor headerAccessor = simpHeaderAccessor(mockWebSocketSession(sessionId));
+        SimpMessageHeaderAccessor headerAccessor =
+                simpHeaderAccessor(mockWebSocketSession(sessionId));
 
         Map<String, Object> json = new HashMap<>();
         json.put("query", "{}");
         json.put("variables", "{}");
 
-        GraphQLMessage payload = new GraphQLMessage(operationId,
-                                                    GraphQLMessageType.START,
-                                                    json);
+        GraphQLMessage payload = new GraphQLMessage(operationId, GraphQLMessageType.START, json);
 
         return MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
     }
 
     private Message<GraphQLMessage> stopMessage(String operationId, String sessionId) {
-        SimpMessageHeaderAccessor headerAccessor = simpHeaderAccessor(mockWebSocketSession(sessionId));
+        SimpMessageHeaderAccessor headerAccessor =
+                simpHeaderAccessor(mockWebSocketSession(sessionId));
 
-        GraphQLMessage payload = new GraphQLMessage(operationId,
-                                                    GraphQLMessageType.STOP);
+        GraphQLMessage payload = new GraphQLMessage(operationId, GraphQLMessageType.STOP);
 
         return MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
     }
@@ -386,15 +383,16 @@ public class GraphQLBrokerMessageHandlerTest {
     private Message<GraphQLMessage> createDisconnectMessage(WebSocketSession session) {
         SimpMessageHeaderAccessor headerAccessor = simpHeaderAccessor(session);
 
-        GraphQLMessage payload = new GraphQLMessage(null,
-                                                    GraphQLMessageType.CONNECTION_TERMINATE,
-                                                    Collections.emptyMap());
+        GraphQLMessage payload =
+                new GraphQLMessage(
+                        null, GraphQLMessageType.CONNECTION_TERMINATE, Collections.emptyMap());
 
         return MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
     }
 
     private SimpMessageHeaderAccessor simpHeaderAccessor(WebSocketSession session) {
-        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+        SimpMessageHeaderAccessor headerAccessor =
+                SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 
         headerAccessor.setDestination(destination);
         headerAccessor.setSessionId(session.getId());
@@ -410,10 +408,8 @@ public class GraphQLBrokerMessageHandlerTest {
         when(nativeSession.getId()).thenReturn(sessionId);
         when(nativeSession.getUserPrincipal()).thenReturn(mock(Principal.class));
 
-        StandardWebSocketSession wsSession = spy(new StandardWebSocketSession(null,
-                                                                          null,
-                                                                          null,
-                                                                          null));
+        StandardWebSocketSession wsSession =
+                spy(new StandardWebSocketSession(null, null, null, null));
 
         when(wsSession.getId()).thenReturn(sessionId);
         wsSession.initializeNativeSession(nativeSession);
@@ -421,34 +417,37 @@ public class GraphQLBrokerMessageHandlerTest {
         return wsSession;
     }
 
-    private ExecutionResult stubExecutionResult(Flux<ExecutionResult> mockStompRelayObservable,
-                                                CountDownLatch completeDownLatch) {
+    private ExecutionResult stubExecutionResult(
+            Flux<ExecutionResult> mockStompRelayObservable, CountDownLatch completeDownLatch) {
         ExecutionResult executionResult = mock(ExecutionResult.class);
         when(executionResult.getErrors()).thenReturn(Collections.emptyList());
 
-        doAnswer(new Answer<Publisher<ExecutionResult>>() {
+        doAnswer(
+                        new Answer<Publisher<ExecutionResult>>() {
 
-            @Override
-            public Publisher<ExecutionResult> answer(InvocationOnMock invocation) throws Throwable {
+                            @Override
+                            public Publisher<ExecutionResult> answer(InvocationOnMock invocation)
+                                    throws Throwable {
 
-                ConnectableFlux<ExecutionResult> connectableObservable = mockStompRelayObservable.share()
-                                                                                                       .publish();
-                Disposable handle = connectableObservable.connect();
+                                ConnectableFlux<ExecutionResult> connectableObservable =
+                                        mockStompRelayObservable.share().publish();
+                                Disposable handle = connectableObservable.connect();
 
-                return connectableObservable.onBackpressureBuffer()
-                                            .doOnComplete(() -> {
-                                                completeDownLatch.countDown();
-                                            })
-                                            .doOnCancel(() -> {
-                                                handle.dispose();
-                                            });
-
-            }
-        }).when(executionResult)
-          .getData();
+                                return connectableObservable
+                                        .onBackpressureBuffer()
+                                        .doOnComplete(
+                                                () -> {
+                                                    completeDownLatch.countDown();
+                                                })
+                                        .doOnCancel(
+                                                () -> {
+                                                    handle.dispose();
+                                                });
+                            }
+                        })
+                .when(executionResult)
+                .getData();
 
         return executionResult;
-
     }
-
 }

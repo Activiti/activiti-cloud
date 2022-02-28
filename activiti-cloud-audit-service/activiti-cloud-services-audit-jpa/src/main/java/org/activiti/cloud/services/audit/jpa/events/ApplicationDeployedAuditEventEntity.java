@@ -36,8 +36,7 @@ public class ApplicationDeployedAuditEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private Deployment deployment;
 
-    public ApplicationDeployedAuditEventEntity() {
-    }
+    public ApplicationDeployedAuditEventEntity() {}
 
     public ApplicationDeployedAuditEventEntity(CloudApplicationDeployedEvent cloudEvent) {
         super(cloudEvent);

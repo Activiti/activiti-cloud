@@ -26,9 +26,9 @@ import org.activiti.cloud.services.rest.api.ProcessInstanceTasksController;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,10 +47,11 @@ public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksC
     private final SpringPageConverter pageConverter;
 
     @Autowired
-    public ProcessInstanceTasksControllerImpl(TaskRuntime taskRuntime,
-                                              TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                              AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
-                                              SpringPageConverter pageConverter) {
+    public ProcessInstanceTasksControllerImpl(
+            TaskRuntime taskRuntime,
+            TaskRepresentationModelAssembler taskRepresentationModelAssembler,
+            AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
+            SpringPageConverter pageConverter) {
         this.taskRuntime = taskRuntime;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
@@ -58,15 +59,17 @@ public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksC
     }
 
     @Override
-    public PagedModel<EntityModel<CloudTask>> getTasks(@PathVariable String processInstanceId,
-                                                        Pageable pageable) {
-        Page<Task> page = taskRuntime.tasks(pageConverter.toAPIPageable(pageable),
-                                            TaskPayloadBuilder.tasks()
-                                                                                                .withProcessInstanceId(processInstanceId)
-                                                                                                .build());
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  pageConverter.toSpringPage(pageable,
-                                                                             page),
-                                                  taskRepresentationModelAssembler);
+    public PagedModel<EntityModel<CloudTask>> getTasks(
+            @PathVariable String processInstanceId, Pageable pageable) {
+        Page<Task> page =
+                taskRuntime.tasks(
+                        pageConverter.toAPIPageable(pageable),
+                        TaskPayloadBuilder.tasks()
+                                .withProcessInstanceId(processInstanceId)
+                                .build());
+        return pagedCollectionModelAssembler.toModel(
+                pageable,
+                pageConverter.toSpringPage(pageable, page),
+                taskRepresentationModelAssembler);
     }
 }

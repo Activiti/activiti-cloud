@@ -34,34 +34,25 @@ public class CloudEventsAutoConfigurationIT {
 
     @SpringBootApplication
     static class MockRuntimeBundleApplication {
-        @MockBean
-        private ProcessEngineChannels processEngineChannels;
+        @MockBean private ProcessEngineChannels processEngineChannels;
 
-        @MockBean
-        private RuntimeService runtimeService;
+        @MockBean private RuntimeService runtimeService;
 
-        @MockBean
-        private ManagementService managementService;
+        @MockBean private ManagementService managementService;
 
-        @MockBean
-        private TaskService taskService;
+        @MockBean private TaskService taskService;
 
-        @MockBean
-        private UserGroupManager userGroupManager;
+        @MockBean private UserGroupManager userGroupManager;
 
-        @MockBean
-        private SecurityManager securityManager;
+        @MockBean private SecurityManager securityManager;
 
-        @MockBean
-        private RepositoryService repositoryService;
+        @MockBean private RepositoryService repositoryService;
 
-        @MockBean
-        private ProcessSecurityPoliciesManager processSecurityPoliciesManager;
+        @MockBean private ProcessSecurityPoliciesManager processSecurityPoliciesManager;
     }
 
     @Test
     public void contextLoads() {
         // success
     }
-
 }

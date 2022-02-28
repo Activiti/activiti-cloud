@@ -18,30 +18,40 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties.MessagingBroker;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    protected static final String ACTIVITI_CLOUD_MESSAGING_BROKER_KEY = "activiti.cloud.messaging.broker";
-    protected static final String SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY = "spring.cloud.stream.default-binder";
-    protected static final String MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY = "management.health.rabbit.enabled";
+    protected static final String ACTIVITI_CLOUD_MESSAGING_BROKER_KEY =
+            "activiti.cloud.messaging.broker";
+    protected static final String SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY =
+            "spring.cloud.stream.default-binder";
+    protected static final String MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY =
+            "management.health.rabbit.enabled";
 
     @Override
-    public void postProcessEnvironment(ConfigurableEnvironment environment,
-        SpringApplication application) {
-        final MessagingBroker messagingBroker = environment
-            .getProperty(ACTIVITI_CLOUD_MESSAGING_BROKER_KEY, MessagingBroker.class, MessagingBroker.rabbitmq);
+    public void postProcessEnvironment(
+            ConfigurableEnvironment environment, SpringApplication application) {
+        final MessagingBroker messagingBroker =
+                environment.getProperty(
+                        ACTIVITI_CLOUD_MESSAGING_BROKER_KEY,
+                        MessagingBroker.class,
+                        MessagingBroker.rabbitmq);
 
         environment
-            .getPropertySources()
-            .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, new MapPropertySource(
-                this.getClass().getSimpleName(), resolvePropertiesToSet(messagingBroker)));
+                .getPropertySources()
+                .addAfter(
+                        SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+                        new MapPropertySource(
+                                this.getClass().getSimpleName(),
+                                resolvePropertiesToSet(messagingBroker)));
     }
 
     private Map<String, Object> resolvePropertiesToSet(MessagingBroker messagingBroker) {
@@ -49,8 +59,8 @@ public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPos
         if (MessagingBroker.kafka.equals(messagingBroker)) {
             extraProperties.put(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY, false);
         }
-        extraProperties.put(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY,
-            resolveDefaultBinder(messagingBroker));
+        extraProperties.put(
+                SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY, resolveDefaultBinder(messagingBroker));
         return extraProperties;
     }
 

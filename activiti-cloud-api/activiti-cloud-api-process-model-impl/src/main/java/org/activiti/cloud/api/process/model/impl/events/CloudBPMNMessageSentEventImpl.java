@@ -19,29 +19,23 @@ import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageSentEvent;
 
-public class CloudBPMNMessageSentEventImpl extends CloudBPMNMessageEventImpl implements CloudBPMNMessageSentEvent {
+public class CloudBPMNMessageSentEventImpl extends CloudBPMNMessageEventImpl
+        implements CloudBPMNMessageSentEvent {
 
-    public CloudBPMNMessageSentEventImpl() {
+    public CloudBPMNMessageSentEventImpl() {}
+
+    public CloudBPMNMessageSentEventImpl(
+            BPMNMessage entity, String processDefinitionId, String processInstanceId) {
+        super(entity, processDefinitionId, processInstanceId);
     }
 
-    public CloudBPMNMessageSentEventImpl(BPMNMessage entity,
-                                         String processDefinitionId,
-                                         String processInstanceId) {
-        super(entity,
-              processDefinitionId,
-              processInstanceId);
-    }
-
-    public CloudBPMNMessageSentEventImpl(String id,
-                                         Long timestamp,
-                                         BPMNMessage entity,
-                                         String processDefinitionId,
-                                         String processInstanceId) {
-        super(id,
-              timestamp,
-              entity,
-              processDefinitionId,
-              processInstanceId);
+    public CloudBPMNMessageSentEventImpl(
+            String id,
+            Long timestamp,
+            BPMNMessage entity,
+            String processDefinitionId,
+            String processInstanceId) {
+        super(id, timestamp, entity, processDefinitionId, processInstanceId);
     }
 
     @Override
@@ -53,10 +47,10 @@ public class CloudBPMNMessageSentEventImpl extends CloudBPMNMessageEventImpl imp
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("CloudBPMNMessageSentEventImpl [getEventType()=")
-               .append(getEventType())
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(getEventType())
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

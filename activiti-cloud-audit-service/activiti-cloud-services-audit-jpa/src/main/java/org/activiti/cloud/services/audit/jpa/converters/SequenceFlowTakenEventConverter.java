@@ -24,11 +24,11 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.SequenceFlowAuditEventEntity;
 
 public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter {
-    
+
     public SequenceFlowTakenEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name();
@@ -41,10 +41,12 @@ public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter 
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        SequenceFlowAuditEventEntity sequenceFlowTakenAuditEventEntity = (SequenceFlowAuditEventEntity) auditEventEntity;
+        SequenceFlowAuditEventEntity sequenceFlowTakenAuditEventEntity =
+                (SequenceFlowAuditEventEntity) auditEventEntity;
 
-        return new CloudSequenceFlowTakenEventImpl(sequenceFlowTakenAuditEventEntity.getEventId(),
-                                                   sequenceFlowTakenAuditEventEntity.getTimestamp(),
-                                                   sequenceFlowTakenAuditEventEntity.getSequenceFlow());
+        return new CloudSequenceFlowTakenEventImpl(
+                sequenceFlowTakenAuditEventEntity.getEventId(),
+                sequenceFlowTakenAuditEventEntity.getTimestamp(),
+                sequenceFlowTakenAuditEventEntity.getSequenceFlow());
     }
 }

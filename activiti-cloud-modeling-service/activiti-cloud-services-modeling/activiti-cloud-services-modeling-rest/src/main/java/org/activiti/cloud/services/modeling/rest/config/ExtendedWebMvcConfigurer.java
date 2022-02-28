@@ -36,9 +36,7 @@ import org.springframework.web.util.UriComponents;
 
 import java.util.List;
 
-/**
- * Extended WebMvcConfigurer
- */
+/** Extended WebMvcConfigurer */
 @Configuration
 public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
 
@@ -53,7 +51,11 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.stream()
                 .filter(MappingJackson2HttpMessageConverter.class::isInstance)
-                .filter(converter -> !(converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter))
+                .filter(
+                        converter ->
+                                !(converter
+                                        instanceof
+                                        TypeConstrainedMappingJackson2HttpMessageConverter))
                 .map(MappingJackson2HttpMessageConverter.class::cast)
                 .map(MappingJackson2HttpMessageConverter::getObjectMapper)
                 .forEach(objectMapperBuilder::configure);
@@ -75,12 +77,11 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
     }
 
     @Bean
-    public PagedModelTypeAssembler pagedModelTypeAssembler(@Nullable HateoasPageableHandlerMethodArgumentResolver resolver,
-                                                           @Nullable UriComponents baseUri,
-                                                           ExtendedPageMetadataConverter extendedPageMetadataConverter) {
-        return new PagedModelTypeAssembler(resolver,
-                                           baseUri,
-                                           extendedPageMetadataConverter);
+    public PagedModelTypeAssembler pagedModelTypeAssembler(
+            @Nullable HateoasPageableHandlerMethodArgumentResolver resolver,
+            @Nullable UriComponents baseUri,
+            ExtendedPageMetadataConverter extendedPageMetadataConverter) {
+        return new PagedModelTypeAssembler(resolver, baseUri, extendedPageMetadataConverter);
     }
 
     @Bean
@@ -89,7 +90,8 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
     }
 
     @Bean
-    public ValidationErrorRepresentationModelAssembler ValidationErrorRepresentationModelAssembler() {
+    public ValidationErrorRepresentationModelAssembler
+            ValidationErrorRepresentationModelAssembler() {
         return new ValidationErrorRepresentationModelAssembler();
     }
 }

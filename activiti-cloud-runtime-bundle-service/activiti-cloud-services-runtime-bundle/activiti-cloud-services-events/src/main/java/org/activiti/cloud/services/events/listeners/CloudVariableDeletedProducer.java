@@ -24,8 +24,9 @@ public class CloudVariableDeletedProducer implements VariableEventListener<Varia
     private ToCloudVariableEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudVariableDeletedProducer(ToCloudVariableEventConverter converter,
-                                        ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudVariableDeletedProducer(
+            ToCloudVariableEventConverter converter,
+            ProcessEngineEventsAggregator eventsAggregator) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }

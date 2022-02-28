@@ -22,5 +22,4 @@ public interface MessageEventsSource {
 
     @Output
     MessageChannel messageEventsOutput();
-
 }

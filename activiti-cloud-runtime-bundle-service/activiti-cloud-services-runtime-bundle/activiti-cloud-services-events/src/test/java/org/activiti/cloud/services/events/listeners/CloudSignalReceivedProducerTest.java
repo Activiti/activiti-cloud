@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.runtime.event.impl.BPMNSignalReceivedEventImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
@@ -24,19 +28,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class CloudSignalReceivedProducerTest {
 
-    @InjectMocks
-    private CloudSignalReceivedProducer cloudSignalReceivedProducer;
+    @InjectMocks private CloudSignalReceivedProducer cloudSignalReceivedProducer;
 
-    @Mock
-    private ToCloudProcessRuntimeEventConverter eventConverter;
-    @Mock
-    private ProcessEngineEventsAggregator eventsAggregator;
+    @Mock private ToCloudProcessRuntimeEventConverter eventConverter;
+    @Mock private ProcessEngineEventsAggregator eventsAggregator;
 
     @BeforeEach
     public void setUp() {
@@ -45,15 +42,15 @@ public class CloudSignalReceivedProducerTest {
 
     @Test
     public void onEventShouldConvertEventToCloudEventAndAddToAggregator() {
-        //given
+        // given
         BPMNSignalReceivedEventImpl event = new BPMNSignalReceivedEventImpl(new BPMNSignalImpl());
         CloudBPMNSignalReceivedEventImpl cloudEvent = new CloudBPMNSignalReceivedEventImpl();
         given(eventConverter.from(event)).willReturn(cloudEvent);
 
-        //when
+        // when
         cloudSignalReceivedProducer.onEvent(event);
 
-        //then
+        // then
         verify(eventsAggregator).add(cloudEvent);
     }
 }

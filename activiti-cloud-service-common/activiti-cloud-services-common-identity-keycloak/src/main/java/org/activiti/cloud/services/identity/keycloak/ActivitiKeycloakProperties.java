@@ -29,14 +29,11 @@ public class ActivitiKeycloakProperties {
         client_credentials
     }
 
-    @NotEmpty
-    private String clientId;
+    @NotEmpty private String clientId;
 
-    @NotEmpty
-    private String clientSecret;
+    @NotEmpty private String clientSecret;
 
-    @NotNull
-    private GrantType grantType = GrantType.client_credentials;
+    @NotNull private GrantType grantType = GrantType.client_credentials;
 
     public String getClientId() {
         return clientId;
@@ -61,5 +58,4 @@ public class ActivitiKeycloakProperties {
     public void setGrantType(GrantType grantType) {
         this.grantType = grantType;
     }
-
 }

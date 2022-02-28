@@ -15,34 +15,33 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
-import java.security.Principal;
-
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.springframework.messaging.Message;
 
+import java.security.Principal;
+
 /**
- * Event raised when a new WebSocket client using a GraphQL Messaging Protocol
- * as the WebSocket sub-protocol issues a connect request.
+ * Event raised when a new WebSocket client using a GraphQL Messaging Protocol as the WebSocket
+ * sub-protocol issues a connect request.
  *
- * <p>Note that this is not the same as the WebSocket session getting established
- * but rather the client's first attempt to connect within the sub-protocol,
- * for example sending the CONNECT frame.
- *
+ * <p>Note that this is not the same as the WebSocket session getting established but rather the
+ * client's first attempt to connect within the sub-protocol, for example sending the CONNECT frame.
  */
 @SuppressWarnings("serial")
 public class GraphQLSessionSubscribeEvent extends AbstractGraphQLSubProtocolEvent {
 
-	/**
-	 * Create a new SessionConnectEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the connect message
-	 */
-	public GraphQLSessionSubscribeEvent(Object source, Message<GraphQLMessage> message) {
-		super(source, message);
-	}
+    /**
+     * Create a new SessionConnectEvent.
+     *
+     * @param source the component that published the event (never {@code null})
+     * @param message the connect message
+     */
+    public GraphQLSessionSubscribeEvent(Object source, Message<GraphQLMessage> message) {
+        super(source, message);
+    }
 
-	public GraphQLSessionSubscribeEvent(Object source, Message<GraphQLMessage> message, Principal user) {
-		super(source, message, user);
-	}
-
+    public GraphQLSessionSubscribeEvent(
+            Object source, Message<GraphQLMessage> message, Principal user) {
+        super(source, message, user);
+    }
 }

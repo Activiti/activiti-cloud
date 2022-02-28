@@ -15,17 +15,15 @@
  */
 package org.activiti.cloud.services.modeling.asserts;
 
+import static org.assertj.core.api.Assertions.*;
+
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import static org.assertj.core.api.Assertions.*;
-
-/**
- * Asserts for validation exceptions
- */
+/** Asserts for validation exceptions */
 public class AssertValidationException {
 
     private Exception validationException;
@@ -44,7 +42,10 @@ public class AssertValidationException {
 
     public AssertValidationException hasValidationErrorCodes(String... errorCodes) {
         assertThat(validationException).isInstanceOf(MethodArgumentNotValidException.class);
-        assertThat(((MethodArgumentNotValidException) validationException).getBindingResult().getAllErrors())
+        assertThat(
+                        ((MethodArgumentNotValidException) validationException)
+                                .getBindingResult()
+                                .getAllErrors())
                 .extracting(ObjectError::getCode)
                 .contains(errorCodes);
         return this;
@@ -52,11 +53,16 @@ public class AssertValidationException {
 
     public AssertValidationException hasValidationErrors(String... errors) {
         if (validationException instanceof MethodArgumentNotValidException) {
-            assertThat(((MethodArgumentNotValidException) validationException).getBindingResult().getAllErrors())
+            assertThat(
+                            ((MethodArgumentNotValidException) validationException)
+                                    .getBindingResult()
+                                    .getAllErrors())
                     .extracting(ObjectError::getCodes)
                     .contains(errors);
         } else if (validationException instanceof SemanticModelValidationException) {
-            assertThat(((SemanticModelValidationException) validationException).getValidationErrors())
+            assertThat(
+                            ((SemanticModelValidationException) validationException)
+                                    .getValidationErrors())
                     .hasSize(errors.length)
                     .flatExtracting(ModelValidationError::getProblem)
                     .contains(errors);
@@ -71,11 +77,16 @@ public class AssertValidationException {
 
     public AssertValidationException hasValidationErrorMessages(String... errorMessages) {
         if (validationException instanceof MethodArgumentNotValidException) {
-            assertThat(((MethodArgumentNotValidException) validationException).getBindingResult().getAllErrors())
+            assertThat(
+                            ((MethodArgumentNotValidException) validationException)
+                                    .getBindingResult()
+                                    .getAllErrors())
                     .extracting(ObjectError::getDefaultMessage)
                     .contains(errorMessages);
         } else if (validationException instanceof SemanticModelValidationException) {
-            assertThat(((SemanticModelValidationException) validationException).getValidationErrors())
+            assertThat(
+                            ((SemanticModelValidationException) validationException)
+                                    .getValidationErrors())
                     .hasSize(errorMessages.length)
                     .flatExtracting(ModelValidationError::getDescription)
                     .contains(errorMessages);

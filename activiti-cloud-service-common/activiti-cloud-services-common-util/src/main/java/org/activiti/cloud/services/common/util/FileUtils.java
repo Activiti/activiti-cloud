@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.common.util;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,17 +25,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Optional;
 
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.StreamUtils;
-
-
-/**
- * Utils for handling files
- */
+/** Utils for handling files */
 public class FileUtils {
 
     /**
      * Get classpath resource as byte array
+     *
      * @param path the path of the resource
      * @return the byte array of the resource
      * @throws IOException if the resource cannot be read
@@ -45,6 +43,7 @@ public class FileUtils {
 
     /**
      * Get classpath resource as file
+     *
      * @param name the name of the resource
      * @return the resource file, or {@link Optional#EMPTY}
      */
@@ -58,17 +57,18 @@ public class FileUtils {
 
     /**
      * Get classpath resource as file
+     *
      * @param name the name of the resource
      * @return the resource file, or {@link Optional#EMPTY}
      */
     public static Optional<InputStream> resourceAsStream(String name) {
         ClassLoader classLoader = classLoader();
-        return Optional.ofNullable(name)
-                .map(classLoader::getResourceAsStream);
+        return Optional.ofNullable(name).map(classLoader::getResourceAsStream);
     }
 
     /**
      * Get current class loader
+     *
      * @return the current class loader
      */
     public static ClassLoader classLoader() {

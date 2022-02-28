@@ -31,14 +31,14 @@ import javax.persistence.Entity;
 @DynamicInsert
 public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
 
-    protected static final String TASK_CANDIDATE_GROUP_REMOVED_EVENT = "TaskCandidateGroupRemovedEvent";
+    protected static final String TASK_CANDIDATE_GROUP_REMOVED_EVENT =
+            "TaskCandidateGroupRemovedEvent";
 
     @Convert(converter = TaskCandidateGroupJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private TaskCandidateGroupImpl candidateGroup;
 
-    public TaskCandidateGroupRemovedEventEntity() {
-    }
+    public TaskCandidateGroupRemovedEventEntity() {}
 
     public TaskCandidateGroupRemovedEventEntity(CloudTaskCandidateGroupRemovedEvent cloudEvent) {
         super(cloudEvent);
@@ -50,17 +50,18 @@ public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
     }
 
     public void setCandidateGroup(TaskCandidateGroup candidateGroup) {
-        this.candidateGroup = new TaskCandidateGroupImpl(candidateGroup.getGroupId(),candidateGroup.getTaskId());
+        this.candidateGroup =
+                new TaskCandidateGroupImpl(candidateGroup.getGroupId(), candidateGroup.getTaskId());
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("TaskCandidateGroupRemovedEventEntity [candidateGroup=")
-               .append(candidateGroup)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(candidateGroup)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

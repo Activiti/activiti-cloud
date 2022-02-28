@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
@@ -28,42 +29,52 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.persistence.*;
+
 @Entity(name = "Task")
-@Table(name = "TASK",
+@Table(
+        name = "TASK",
         indexes = {
-                @Index(name = "task_status_idx", columnList = "status", unique = false),
-                @Index(name = "task_processInstance_idx", columnList = "processInstanceId", unique = false),
-                @Index(name = "task_processDefinitionName_idx", columnList = "processDefinitionName", unique = false)
+            @Index(name = "task_status_idx", columnList = "status", unique = false),
+            @Index(
+                    name = "task_processInstance_idx",
+                    columnList = "processInstanceId",
+                    unique = false),
+            @Index(
+                    name = "task_processDefinitionName_idx",
+                    columnList = "processDefinitionName",
+                    unique = false)
         })
 @DynamicInsert
 @DynamicUpdate
 public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask {
 
-    /**
-     * serialVersionUID
-     */
+    /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
-    @Id
-    private String id;
+    @Id private String id;
     private String assignee;
     private String name;
     private String description;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date createdDate;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date dueDate;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date claimedDate;
+
     private int priority;
     private String processDefinitionId;
 
     @Column(nullable = true, insertable = true, updatable = false)
     private String processInstanceId;
+
     private Integer processDefinitionVersion;
     private String processDefinitionName;
     private String businessKey;
@@ -72,6 +83,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
 
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
+
     private String owner;
     private String parentTaskId;
     private String formKey;
@@ -131,40 +143,68 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private String candidateGroupId;
 
     @JsonIgnore
-    @ManyToOne(optional = true, fetch=FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false,
-            foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "processInstanceId",
+            referencedColumnName = "id",
+            insertable = false,
+            updatable = false,
+            foreignKey =
+                    @javax.persistence.ForeignKey(
+                            value = ConstraintMode.NO_CONSTRAINT,
+                            name = "none"))
     private ProcessInstanceEntity processInstance;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
-            foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+            name = "taskId",
+            referencedColumnName = "id",
+            insertable = false,
+            updatable = false,
+            foreignKey =
+                    @javax.persistence.ForeignKey(
+                            value = ConstraintMode.NO_CONSTRAINT,
+                            name = "none"))
     @Fetch(FetchMode.SUBSELECT)
     private Set<TaskCandidateUserEntity> taskCandidateUsers = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
-            foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+            name = "taskId",
+            referencedColumnName = "id",
+            insertable = false,
+            updatable = false,
+            foreignKey =
+                    @javax.persistence.ForeignKey(
+                            value = ConstraintMode.NO_CONSTRAINT,
+                            name = "none"))
     @Fetch(FetchMode.SUBSELECT)
     private Set<TaskCandidateGroupEntity> taskCandidateGroups = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
-            foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+            name = "taskId",
+            referencedColumnName = "id",
+            insertable = false,
+            updatable = false,
+            foreignKey =
+                    @javax.persistence.ForeignKey(
+                            value = ConstraintMode.NO_CONSTRAINT,
+                            name = "none"))
     private Set<TaskVariableEntity> variables = new LinkedHashSet<>();
 
-    public TaskEntity() {
-    }
+    public TaskEntity() {}
 
     public TaskEntity(CloudTaskCreatedEvent taskCreatedEvent) {
-        super(taskCreatedEvent.getServiceName(),
-              taskCreatedEvent.getServiceFullName(),
-              taskCreatedEvent.getServiceVersion(),
-              taskCreatedEvent.getAppName(),
-              taskCreatedEvent.getAppVersion());
+        super(
+                taskCreatedEvent.getServiceName(),
+                taskCreatedEvent.getServiceFullName(),
+                taskCreatedEvent.getServiceVersion(),
+                taskCreatedEvent.getAppName(),
+                taskCreatedEvent.getAppVersion());
         Task task = taskCreatedEvent.getEntity();
         this.id = task.getId();
         this.assignee = task.getAssignee();
@@ -300,7 +340,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         this.processDefinitionVersion = processDefinitionVersion;
     }
 
-
     public void setProcessDefinitionName(String processDefinitionName) {
         this.processDefinitionName = processDefinitionName;
     }
@@ -396,19 +435,21 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     @Override
-    public List<String> getCandidateUsers(){
-        return this.taskCandidateUsers != null ? this.taskCandidateUsers
-                       .stream()
-                       .map(TaskCandidateUserEntity::getUserId)
-                       .collect(Collectors.toList()) : Collections.emptyList();
+    public List<String> getCandidateUsers() {
+        return this.taskCandidateUsers != null
+                ? this.taskCandidateUsers.stream()
+                        .map(TaskCandidateUserEntity::getUserId)
+                        .collect(Collectors.toList())
+                : Collections.emptyList();
     }
 
     @Override
-    public List<String> getCandidateGroups(){
-        return this.taskCandidateGroups != null ? this.taskCandidateGroups
-                       .stream()
-                       .map(TaskCandidateGroupEntity::getGroupId)
-                       .collect(Collectors.toList()): Collections.emptyList();
+    public List<String> getCandidateGroups() {
+        return this.taskCandidateGroups != null
+                ? this.taskCandidateGroups.stream()
+                        .map(TaskCandidateGroupEntity::getGroupId)
+                        .collect(Collectors.toList())
+                : Collections.emptyList();
     }
 
     /**
@@ -494,7 +535,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         return lastClaimedTo;
     }
 
-
     public void setLastClaimedTo(Date lastClaimedTo) {
         this.lastClaimedTo = lastClaimedTo;
     }
@@ -503,7 +543,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     public Date getLastClaimedFrom() {
         return lastClaimedFrom;
     }
-
 
     public void setLastClaimedFrom(Date lastClaimedFrom) {
         this.lastClaimedFrom = lastClaimedFrom;
@@ -528,7 +567,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     @Override
-    public String getCompletedBy(){
+    public String getCompletedBy() {
         return completedBy;
     }
 
@@ -537,16 +576,13 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     public Optional<TaskVariableEntity> getVariable(String variableName) {
-        return getVariables().stream()
-                             .filter(v -> v.getName()
-                                           .equals(variableName))
-                             .findFirst();
+        return getVariables().stream().filter(v -> v.getName().equals(variableName)).findFirst();
     }
 
-    public boolean isInFinalState(){
-        return  !(TaskStatus.CREATED.equals(status) ||
-                  TaskStatus.ASSIGNED.equals(status)||
-                  TaskStatus.SUSPENDED.equals(status));
+    public boolean isInFinalState() {
+        return !(TaskStatus.CREATED.equals(status)
+                || TaskStatus.ASSIGNED.equals(status)
+                || TaskStatus.SUSPENDED.equals(status));
     }
 
     @Override
@@ -556,14 +592,10 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (!super.equals(obj)) return false;
+        if (getClass() != obj.getClass()) return false;
         TaskEntity other = (TaskEntity) obj;
         return this.id != null && Objects.equals(id, other.id);
     }
-
 }

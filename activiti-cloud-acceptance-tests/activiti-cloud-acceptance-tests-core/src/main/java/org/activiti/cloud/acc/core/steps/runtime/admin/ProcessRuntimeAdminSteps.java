@@ -18,6 +18,7 @@ package org.activiti.cloud.acc.core.steps.runtime.admin;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import net.thucydides.core.annotations.Step;
+
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
@@ -33,8 +34,7 @@ import java.io.IOException;
 @EnableRuntimeFeignContext
 public class ProcessRuntimeAdminSteps {
 
-    @Autowired
-    private ProcessRuntimeAdminService processRuntimeAdminService;
+    @Autowired private ProcessRuntimeAdminService processRuntimeAdminService;
 
     @Autowired
     @Qualifier("runtimeBundleBaseService")
@@ -46,7 +46,7 @@ public class ProcessRuntimeAdminSteps {
     }
 
     @Step
-    public PagedModel<CloudProcessInstance> getProcessInstances(){
+    public PagedModel<CloudProcessInstance> getProcessInstances() {
         return processRuntimeAdminService.getProcessInstances();
     }
 
@@ -64,5 +64,4 @@ public class ProcessRuntimeAdminSteps {
     public void message(ReceiveMessagePayload payload) throws IOException {
         processRuntimeAdminService.message(payload);
     }
-
 }

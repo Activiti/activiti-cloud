@@ -15,12 +15,12 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseCommandContextEventsAggregator<E, L extends CommandContextCloseListener> {
 
@@ -29,15 +29,13 @@ public abstract class BaseCommandContextEventsAggregator<E, L extends CommandCon
         List<E> attributes = currentCommandContext.getGenericAttribute(getAttributeKey());
         if (attributes == null) {
             attributes = new ArrayList<>();
-            currentCommandContext.addAttribute(getAttributeKey(),
-                                               attributes);
+            currentCommandContext.addAttribute(getAttributeKey(), attributes);
         }
         attributes.add(element);
 
         if (!currentCommandContext.hasCloseListener(getCloseListenerClass())) {
             currentCommandContext.addCloseListener(getCloseListener());
         }
-
     }
 
     protected abstract Class<L> getCloseListenerClass();
@@ -49,5 +47,4 @@ public abstract class BaseCommandContextEventsAggregator<E, L extends CommandCon
     protected CommandContext getCurrentCommandContext() {
         return Context.getCommandContext();
     }
-
 }

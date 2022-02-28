@@ -31,6 +31,7 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
@@ -47,9 +48,9 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,12 +77,13 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     private final SpringPageConverter pageConverter;
 
     @Autowired
-    public ProcessDefinitionControllerImpl(RepositoryService repositoryService,
-                                           ProcessDiagramGeneratorWrapper processDiagramGenerator,
-                                           ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
-                                           ProcessRuntime processRuntime,
-                                           AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
-                                           SpringPageConverter pageConverter) {
+    public ProcessDefinitionControllerImpl(
+            RepositoryService repositoryService,
+            ProcessDiagramGeneratorWrapper processDiagramGenerator,
+            ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
+            ProcessRuntime processRuntime,
+            AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
+            SpringPageConverter pageConverter) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.representationModelAssembler = representationModelAssembler;
@@ -91,11 +93,12 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     }
 
     @Override
-    public PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable) {
-        Page<ProcessDefinition> page = processRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  pageConverter.toSpringPage(pageable, page),
-                                                  representationModelAssembler);
+    public PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(
+            Pageable pageable) {
+        Page<ProcessDefinition> page =
+                processRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
+        return pagedCollectionModelAssembler.toModel(
+                pageable, pageConverter.toSpringPage(pageable, page), representationModelAssembler);
     }
 
     @Override
@@ -108,18 +111,17 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         checkUserCanReadProcessDefinition(id);
 
         try (final InputStream resourceStream = repositoryService.getProcessModel(id)) {
-            return new String(IoUtil.readInputStream(resourceStream,
-                                                     null),
-                              StandardCharsets.UTF_8);
+            return new String(IoUtil.readInputStream(resourceStream, null), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new ActivitiException("Error occured while getting process model '" + id + "' : " + e.getMessage(),
-                                        e);
+            throw new ActivitiException(
+                    "Error occured while getting process model '" + id + "' : " + e.getMessage(),
+                    e);
         }
     }
 
     private void checkUserCanReadProcessDefinition(@PathVariable String id) {
         // check the user can see the process definition (which has same ID as BPMN model in engine)
-        //will thrown an exception with the user is not authorized
+        // will thrown an exception with the user is not authorized
         processRuntime.processDefinition(id);
     }
 
@@ -136,7 +138,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         checkUserCanReadProcessDefinition(id);
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
-        return new String(processDiagramGenerator.generateDiagram(bpmnModel),
-                          StandardCharsets.UTF_8);
+        return new String(
+                processDiagramGenerator.generateDiagram(bpmnModel), StandardCharsets.UTF_8);
     }
 }

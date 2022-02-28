@@ -22,9 +22,7 @@ public class TaskCandidateGroupId implements Serializable {
     private String taskId;
     private String groupId;
 
-    public TaskCandidateGroupId() {
-
-    }
+    public TaskCandidateGroupId() {}
 
     public TaskCandidateGroupId(String taskId, String groupId) {
         this.taskId = taskId;
@@ -46,21 +44,14 @@ public class TaskCandidateGroupId implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         TaskCandidateGroupId other = (TaskCandidateGroupId) obj;
         if (taskId == null) {
-            if (other.taskId != null)
-                return false;
-        } else if (!taskId.equals(other.taskId))
-            return false;
-        if (groupId != other.groupId)
-            return false;
+            if (other.taskId != null) return false;
+        } else if (!taskId.equals(other.taskId)) return false;
+        if (groupId != other.groupId) return false;
         return true;
     }
-
 }

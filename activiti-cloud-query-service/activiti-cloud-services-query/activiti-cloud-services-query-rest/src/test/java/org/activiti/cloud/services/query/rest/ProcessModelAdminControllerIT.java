@@ -22,7 +22,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -46,6 +45,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 @WebMvcTest(ProcessModelAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
@@ -57,45 +58,40 @@ import org.springframework.test.web.servlet.MockMvc;
 @WithMockUser
 public class ProcessModelAdminControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private ProcessModelRepository processModelRepository;
+    @MockBean private ProcessModelRepository processModelRepository;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
+    @MockBean private UserGroupManager userGroupManager;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
-    @MockBean
-    private SecurityPoliciesManager securityPoliciesManager;
+    @MockBean private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
-    private SecurityPoliciesProperties securityPoliciesProperties;
+    @MockBean private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
-    private EntityFinder entityFinder;
+    @MockBean private EntityFinder entityFinder;
 
-    @MockBean
-    private TaskRepository taskRepository;
+    @MockBean private TaskRepository taskRepository;
 
     @Test
     public void shouldReturnProcessModelById() throws Exception {
-        //given
+        // given
         String processDefinitionId = UUID.randomUUID().toString();
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
+        given(
+                        entityFinder.findById(
+                                eq(processModelRepository), eq(processDefinitionId), anyString()))
                 .willReturn(new ProcessModelEntity(new ProcessDefinitionEntity(), "<model/>"));
 
-        //when
-        mockMvc.perform(get("/admin/v1/process-definitions/{processDefinitionId}/model",
-                            processDefinitionId)
+        // when
+        mockMvc.perform(
+                        get(
+                                        "/admin/v1/process-definitions/{processDefinitionId}/model",
+                                        processDefinitionId)
                                 .accept(MediaType.APPLICATION_XML_VALUE))
-                //then
+                // then
                 .andExpect(status().isOk())
                 .andExpect(content().xml("<model/>"));
     }
-
 }

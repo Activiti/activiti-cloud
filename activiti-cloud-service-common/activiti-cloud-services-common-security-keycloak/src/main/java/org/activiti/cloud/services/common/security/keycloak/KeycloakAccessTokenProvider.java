@@ -27,10 +27,9 @@ public interface KeycloakAccessTokenProvider {
 
     default Optional<AccessToken> accessToken(@NonNull Principal principal) {
         return Optional.of(principal)
-                       .filter(KeycloakPrincipal.class::isInstance)
-                       .map(KeycloakPrincipal.class::cast)
-                       .map(KeycloakPrincipal::getKeycloakSecurityContext)
-                       .map(KeycloakSecurityContext::getToken);
+                .filter(KeycloakPrincipal.class::isInstance)
+                .map(KeycloakPrincipal.class::cast)
+                .map(KeycloakPrincipal::getKeycloakSecurityContext)
+                .map(KeycloakSecurityContext::getToken);
     }
-
 }

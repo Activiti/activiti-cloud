@@ -37,11 +37,9 @@ public class VariableSearchArgumentResolverTest {
     private static final String VARIABLES_VALUE_KEY = "variables.value";
     private static final String VARIABLES_TYPE_KEY = "variables.type";
 
-    @InjectMocks
-    private VariableSearchArgumentResolver argumentResolver;
+    @InjectMocks private VariableSearchArgumentResolver argumentResolver;
 
-    @Mock
-    private ConversionService conversionService;
+    @Mock private ConversionService conversionService;
 
     @BeforeEach
     public void setUp() {
@@ -50,25 +48,25 @@ public class VariableSearchArgumentResolverTest {
 
     @Test
     public void supportsParameter_should_returnTrue_when_itsVariableSearch() {
-        //given
+        // given
         MethodParameter methodParameter = buildMethodParameter(VariableSearch.class);
 
-        //when
+        // when
         boolean supportsParameter = argumentResolver.supportsParameter(methodParameter);
 
-        //then
+        // then
         assertThat(supportsParameter).isTrue();
     }
 
     @Test
     public void supportsParameter_should_returnFalse_when_itsNotVariableSearch() {
-        //given
+        // given
         MethodParameter methodParameter = buildMethodParameter(String.class);
 
-        //when
+        // when
         boolean supportsParameter = argumentResolver.supportsParameter(methodParameter);
 
-        //then
+        // then
         assertThat(supportsParameter).isFalse();
     }
 
@@ -79,21 +77,22 @@ public class VariableSearchArgumentResolverTest {
     }
 
     @Test
-    public void resolveArgument_should_constructVariableSearchFromQueryParametersAfterConvertingValue() {
-        //given
+    public void
+            resolveArgument_should_constructVariableSearchFromQueryParametersAfterConvertingValue() {
+        // given
         String variableName = "myVar";
         String variableValue = "10";
         String variableType = "integer";
         NativeWebRequest webRequest = buildWebRequest(variableName, variableValue, variableType);
         given(conversionService.convert(variableValue, Integer.class)).willReturn(10);
 
-        //when
-        Object resolvedArgument = argumentResolver
-            .resolveArgument(mock(MethodParameter.class), null, webRequest, null);
+        // when
+        Object resolvedArgument =
+                argumentResolver.resolveArgument(
+                        mock(MethodParameter.class), null, webRequest, null);
 
-        //then
-        assertThat(resolvedArgument)
-            .isInstanceOf(VariableSearch.class);
+        // then
+        assertThat(resolvedArgument).isInstanceOf(VariableSearch.class);
         VariableSearch variableSearch = (VariableSearch) resolvedArgument;
         assertThat(variableSearch.getName()).isEqualTo(variableName);
         assertThat(variableSearch.getValue().getValue()).isEqualTo(10);
@@ -102,19 +101,19 @@ public class VariableSearchArgumentResolverTest {
 
     @Test
     public void resolveArgument_should_useRawValueWithoutConversion_when_typeIsString() {
-        //given
+        // given
         String variableName = "myVar";
         String variableValue = "text";
         String variableType = "string";
         NativeWebRequest webRequest = buildWebRequest(variableName, variableValue, variableType);
 
-        //when
-        Object resolvedArgument = argumentResolver
-            .resolveArgument(mock(MethodParameter.class), null, webRequest, null);
+        // when
+        Object resolvedArgument =
+                argumentResolver.resolveArgument(
+                        mock(MethodParameter.class), null, webRequest, null);
 
-        //then
-        assertThat(resolvedArgument)
-            .isInstanceOf(VariableSearch.class);
+        // then
+        assertThat(resolvedArgument).isInstanceOf(VariableSearch.class);
         VariableSearch variableSearch = (VariableSearch) resolvedArgument;
         assertThat(variableSearch.getName()).isEqualTo(variableName);
         assertThat(variableSearch.getValue().getValue()).isEqualTo(variableValue);
@@ -123,8 +122,8 @@ public class VariableSearchArgumentResolverTest {
         verifyNoInteractions(conversionService);
     }
 
-    private NativeWebRequest buildWebRequest(String variableName, String variableValue,
-        String variableType) {
+    private NativeWebRequest buildWebRequest(
+            String variableName, String variableValue, String variableType) {
         NativeWebRequest webRequest = buildWebRequest(variableName, variableValue);
         given(webRequest.getParameter(VARIABLES_TYPE_KEY)).willReturn(variableType);
         return webRequest;

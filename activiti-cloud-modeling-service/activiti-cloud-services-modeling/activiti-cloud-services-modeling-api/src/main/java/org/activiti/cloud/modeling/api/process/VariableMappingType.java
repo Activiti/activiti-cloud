@@ -15,14 +15,12 @@
  */
 package org.activiti.cloud.modeling.api.process;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * Extensions variable mapping types
- */
+import java.util.Optional;
+
+/** Extensions variable mapping types */
 public enum VariableMappingType {
     VARIABLE,
     VALUE;

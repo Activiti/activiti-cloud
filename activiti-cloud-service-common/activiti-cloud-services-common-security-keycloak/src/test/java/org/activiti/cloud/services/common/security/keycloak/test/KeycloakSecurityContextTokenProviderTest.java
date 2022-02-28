@@ -35,19 +35,16 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
-
 public class KeycloakSecurityContextTokenProviderTest {
 
-    private KeycloakSecurityContextTokenProvider subject = new KeycloakSecurityContextTokenProvider();
+    private KeycloakSecurityContextTokenProvider subject =
+            new KeycloakSecurityContextTokenProvider();
 
-    @Mock
-    private KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
+    @Mock private KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
 
-    @Mock
-    private RefreshableKeycloakSecurityContext keycloakSecurityContext;
+    @Mock private RefreshableKeycloakSecurityContext keycloakSecurityContext;
 
-    @Mock
-    private AccessToken accessToken;
+    @Mock private AccessToken accessToken;
 
     @BeforeEach
     public void setUp() {
@@ -61,24 +58,21 @@ public class KeycloakSecurityContextTokenProviderTest {
     public void testGetCurrentToken() {
         // given
         String subjectId = UUID.randomUUID().toString();
-        KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal = new KeycloakPrincipal<>(subjectId,
-                                                                                                  keycloakSecurityContext);
-        KeycloakAccount account = new SimpleKeycloakAccount(principal,
-                                                            Collections.emptySet(),
-                                                            principal.getKeycloakSecurityContext());
+        KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal =
+                new KeycloakPrincipal<>(subjectId, keycloakSecurityContext);
+        KeycloakAccount account =
+                new SimpleKeycloakAccount(
+                        principal, Collections.emptySet(), principal.getKeycloakSecurityContext());
 
         SecurityContextHolder.getContext()
-                             .setAuthentication(new KeycloakAuthenticationToken(account,
-                                                                                false));
+                .setAuthentication(new KeycloakAuthenticationToken(account, false));
 
         // when
         Optional<String> result = subject.getCurrentToken();
 
         // then
-        assertThat(result).isPresent()
-                          .contains("bearer");
+        assertThat(result).isPresent().contains("bearer");
     }
-
 
     @Test
     public void testGetCurrentTokenEmpty() {
@@ -91,5 +85,4 @@ public class KeycloakSecurityContextTokenProviderTest {
         // then
         assertThat(result).isEmpty();
     }
-
 }

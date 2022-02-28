@@ -20,5 +20,4 @@ import springfox.documentation.spring.web.plugins.Docket;
 public interface DocketCustomizer {
 
     Docket customize(Docket docket);
-
 }

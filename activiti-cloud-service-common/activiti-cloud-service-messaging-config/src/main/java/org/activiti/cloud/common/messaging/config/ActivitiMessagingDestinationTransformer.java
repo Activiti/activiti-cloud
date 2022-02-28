@@ -25,54 +25,60 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class ActivitiMessagingDestinationTransformer implements Function<String, String> {
-    private static final Logger log = LoggerFactory.getLogger(ActivitiMessagingDestinationTransformer.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(ActivitiMessagingDestinationTransformer.class);
 
     private final ActivitiCloudMessagingProperties messagingProperties;
 
-    public ActivitiMessagingDestinationTransformer(ActivitiCloudMessagingProperties messagingProperties) {
+    public ActivitiMessagingDestinationTransformer(
+            ActivitiCloudMessagingProperties messagingProperties) {
         this.messagingProperties = messagingProperties;
     }
 
     @Override
     public String apply(String source) {
-        ActivitiCloudMessagingProperties.DestinationProperties destinationProperties = messagingProperties.getDestinations()
-                                                                                                          .get(source);
-        String prefix = Optional.ofNullable(destinationProperties)
-                                .map(ActivitiCloudMessagingProperties.DestinationProperties::getPrefix)
-                                .orElseGet(this::getPrefix);
+        ActivitiCloudMessagingProperties.DestinationProperties destinationProperties =
+                messagingProperties.getDestinations().get(source);
+        String prefix =
+                Optional.ofNullable(destinationProperties)
+                        .map(ActivitiCloudMessagingProperties.DestinationProperties::getPrefix)
+                        .orElseGet(this::getPrefix);
 
-        String separator = Optional.ofNullable(destinationProperties)
-                                   .map(ActivitiCloudMessagingProperties.DestinationProperties::getSeparator)
-                                   .orElseGet(this::getSeparator);
+        String separator =
+                Optional.ofNullable(destinationProperties)
+                        .map(ActivitiCloudMessagingProperties.DestinationProperties::getSeparator)
+                        .orElseGet(this::getSeparator);
 
-        String scope = Optional.ofNullable(destinationProperties)
-                                   .map(ActivitiCloudMessagingProperties.DestinationProperties::getScope)
-                                   .orElse(null);
+        String scope =
+                Optional.ofNullable(destinationProperties)
+                        .map(ActivitiCloudMessagingProperties.DestinationProperties::getScope)
+                        .orElse(null);
 
-        String name = Optional.ofNullable(destinationProperties)
-                              .map(it -> it.getName())
-                              .filter(StringUtils::hasText)
-                              .orElse(source);
+        String name =
+                Optional.ofNullable(destinationProperties)
+                        .map(it -> it.getName())
+                        .filter(StringUtils::hasText)
+                        .orElse(source);
 
-        log.warn("Processing source destination '{}' with prefix '{}' and separator '{} to target name '{}' with scope '{}'",
-                 source,
-                 prefix,
-                 separator,
-                 name,
-                 scope);
+        log.warn(
+                "Processing source destination '{}' with prefix '{}' and separator '{} to target"
+                        + " name '{}' with scope '{}'",
+                source,
+                prefix,
+                separator,
+                name,
+                scope);
 
         StringBuilder value = new StringBuilder();
 
         if (StringUtils.hasText(prefix)) {
-            value.append(prefix)
-                 .append(separator);
+            value.append(prefix).append(separator);
         }
 
         value.append(name);
 
         if (StringUtils.hasText(scope)) {
-            value.append(separator)
-                 .append(scope);
+            value.append(separator).append(scope);
         }
 
         String target = value.toString();
@@ -89,5 +95,4 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
     public String getSeparator() {
         return messagingProperties.getDestinationSeparator();
     }
-
 }

@@ -27,5 +27,4 @@ class ActivitiCloudAuditLiquibaseAutoConfigurationIT {
     void contextLoads() {
         // application context loads successfully
     }
-
 }

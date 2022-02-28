@@ -36,23 +36,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-
 public class KeycloakAccessTokenPrincipalGroupsProviderTest {
 
-    @InjectMocks
-    private KeycloakAccessTokenPrincipalGroupsProvider subject;
+    @InjectMocks private KeycloakAccessTokenPrincipalGroupsProvider subject;
 
-    @Mock
-    private KeycloakAccessTokenProvider keycloakSecurityContextProvider;
+    @Mock private KeycloakAccessTokenProvider keycloakSecurityContextProvider;
 
-    @Mock
-    private KeycloakAccessTokenValidator keycloakAccessTokenValidator;
+    @Mock private KeycloakAccessTokenValidator keycloakAccessTokenValidator;
 
-    @Mock
-    private KeycloakPrincipal<RefreshableKeycloakSecurityContext> keycloakPrincipal;
+    @Mock private KeycloakPrincipal<RefreshableKeycloakSecurityContext> keycloakPrincipal;
 
-    @Mock
-    private AccessToken accessToken;
+    @Mock private AccessToken accessToken;
 
     @BeforeEach
     public void setUp() {
@@ -62,24 +56,23 @@ public class KeycloakAccessTokenPrincipalGroupsProviderTest {
     @Test
     public void testGetGroups() {
         // given
-        when(keycloakSecurityContextProvider.accessToken(any())).thenReturn(Optional.of(accessToken));
+        when(keycloakSecurityContextProvider.accessToken(any()))
+                .thenReturn(Optional.of(accessToken));
         when(keycloakAccessTokenValidator.isValid(any())).thenReturn(true);
-        when(accessToken.getOtherClaims()).thenReturn(Collections.singletonMap("groups",
-                                                                               Arrays.asList("group1",
-                                                                                             "group2")));
+        when(accessToken.getOtherClaims())
+                .thenReturn(Collections.singletonMap("groups", Arrays.asList("group1", "group2")));
         // when
         List<String> result = subject.getGroups(keycloakPrincipal);
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("group1",
-                                           "group2");
+        assertThat(result).isNotEmpty().containsExactly("group1", "group2");
     }
 
     @Test
     public void testGetGroupsInvalidToken() {
         // given
-        when(keycloakSecurityContextProvider.accessToken(any())).thenReturn(Optional.of(accessToken));
+        when(keycloakSecurityContextProvider.accessToken(any()))
+                .thenReturn(Optional.of(accessToken));
         when(keycloakAccessTokenValidator.isValid(any())).thenReturn(false);
 
         // when

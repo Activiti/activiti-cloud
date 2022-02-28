@@ -16,25 +16,22 @@
 package org.activiti.cloud.acc.core.rest.feign;
 
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
-import org.springframework.test.context.ContextConfiguration;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextConfiguration;
 import org.activiti.cloud.acc.core.rest.RuntimeFeignConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Allow Feign runtime clients autowiring
- */
+/** Allow Feign runtime clients autowiring */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ContextConfiguration(classes = {
-        RuntimeTestsConfigurationProperties.class,
-        RuntimeFeignConfiguration.class,
-        RuntimeDirtyContextConfiguration.class
-})
-public @interface EnableRuntimeFeignContext {
-
-}
+@ContextConfiguration(
+        classes = {
+            RuntimeTestsConfigurationProperties.class,
+            RuntimeFeignConfiguration.class,
+            RuntimeDirtyContextConfiguration.class
+        })
+public @interface EnableRuntimeFeignContext {}

@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
+import static java.lang.String.format;
+
 import org.activiti.bpmn.model.BoundaryEvent;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.EndEvent;
@@ -28,19 +33,17 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
 
-    private IntermediateFlowNodeIncomingOutgoingFlowValidator intermediateFlowNodeIncomingOutgoingFlowValidator;
+    private IntermediateFlowNodeIncomingOutgoingFlowValidator
+            intermediateFlowNodeIncomingOutgoingFlowValidator;
     private final String userTaskId = "theTask";
     private final String userTaskName = "userTaskName";
 
     @BeforeEach
     void setUp() {
-        intermediateFlowNodeIncomingOutgoingFlowValidator = new IntermediateFlowNodeIncomingOutgoingFlowValidator();
+        intermediateFlowNodeIncomingOutgoingFlowValidator =
+                new IntermediateFlowNodeIncomingOutgoingFlowValidator();
     }
 
     @Test
@@ -51,15 +54,23 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         userTask.setIncomingFlows(new ArrayList<>());
 
         assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
-            .extracting(ModelValidationError::getProblem,
+                .extracting(
+                        ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
                         ModelValidationError::getValidatorSetName,
                         ModelValidationError::getReferenceId)
-            .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM,
-                            format(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
-                                   userTaskName, userTaskId),
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
-                            userTaskId));
+                .contains(
+                        tuple(
+                                IntermediateFlowNodeIncomingOutgoingFlowValidator
+                                        .NO_INCOMING_FLOW_PROBLEM,
+                                format(
+                                        IntermediateFlowNodeIncomingOutgoingFlowValidator
+                                                .NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
+                                        userTaskName,
+                                        userTaskId),
+                                IntermediateFlowNodeIncomingOutgoingFlowValidator
+                                        .INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                                userTaskId));
     }
 
     @Test
@@ -70,44 +81,62 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         userTask.setOutgoingFlows(new ArrayList<>());
 
         assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
-            .extracting(ModelValidationError::getProblem,
+                .extracting(
+                        ModelValidationError::getProblem,
                         ModelValidationError::getDescription,
                         ModelValidationError::getValidatorSetName,
                         ModelValidationError::getReferenceId)
-            .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
-                            format(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
-                                   userTaskName, userTaskId),
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
-                            userTaskId));
+                .contains(
+                        tuple(
+                                IntermediateFlowNodeIncomingOutgoingFlowValidator
+                                        .NO_OUTGOING_FLOW_PROBLEM,
+                                format(
+                                        IntermediateFlowNodeIncomingOutgoingFlowValidator
+                                                .NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
+                                        userTaskName,
+                                        userTaskId),
+                                IntermediateFlowNodeIncomingOutgoingFlowValidator
+                                        .INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                                userTaskId));
     }
 
     @Test
     public void canValidate_should_returnTrue_whenItsNotStartEventEndEventOrEventSubprocess() {
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new UserTask())).isTrue();
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new UserTask()))
+                .isTrue();
     }
 
     @Test
     public void canValidate_should_returnTrue_whenItsASubprocess() {
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new SubProcess())).isTrue();
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new SubProcess()))
+                .isTrue();
     }
 
     @Test
     public void canValidate_should_returnFalse_whenItsAStartEvent() {
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new StartEvent())).isFalse();
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new StartEvent()))
+                .isFalse();
     }
 
     @Test
     public void canValidate_should_returnFalse_whenItsAEndEvent() {
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new EndEvent())).isFalse();
+        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new EndEvent()))
+                .isFalse();
     }
 
     @Test
     public void canValidate_should_returnFalse_whenItsAEventSubprocess() {
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new EventSubProcess())).isFalse();
+        assertThat(
+                        intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(
+                                new EventSubProcess()))
+                .isFalse();
     }
 
     @Test
     public void canValidate_should_returnFalse_whenItsABoundaryEvent() {
-        assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(new BoundaryEvent())).isFalse();
+        assertThat(
+                        intermediateFlowNodeIncomingOutgoingFlowValidator.canValidate(
+                                new BoundaryEvent()))
+                .isFalse();
     }
 }

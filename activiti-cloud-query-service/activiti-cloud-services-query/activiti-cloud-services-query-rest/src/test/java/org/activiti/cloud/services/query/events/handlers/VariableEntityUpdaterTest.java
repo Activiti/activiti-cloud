@@ -15,37 +15,35 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.test.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import java.util.Date;
+import java.util.Optional;
+
+import javax.persistence.EntityManager;
 
 @ExtendWith(MockitoExtension.class)
 public class VariableEntityUpdaterTest {
 
-    @InjectMocks
-    private ProcessVariableUpdater updater;
+    @InjectMocks private ProcessVariableUpdater updater;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
-    @Mock
-    private EntityManagerFinder entityManagerFinder;
+    @Mock private EntityManagerFinder entityManagerFinder;
 
     @Test
     public void updateShouldUpdateVariableRetrievedByPredicate() {
-        //given
+        // given
         ProcessVariableEntity currentVariableEntity = new ProcessVariableEntity();
         currentVariableEntity.setName("var");
 
@@ -53,7 +51,7 @@ public class VariableEntityUpdaterTest {
         processInstanceEntity.getVariables().add(currentVariableEntity);
 
         given(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-                                 .willReturn(Optional.of(processInstanceEntity));
+                .willReturn(Optional.of(processInstanceEntity));
         Date now = new Date();
         ProcessVariableEntity updatedVariableEntity = new ProcessVariableEntity();
         updatedVariableEntity.setName("var");
@@ -62,11 +60,10 @@ public class VariableEntityUpdaterTest {
         updatedVariableEntity.setLastUpdatedTime(now);
         updatedVariableEntity.setProcessInstanceId("procInstId");
 
-        //when
-        updater.update(updatedVariableEntity,
-                       "error");
+        // when
+        updater.update(updatedVariableEntity, "error");
 
-        //then
+        // then
         assertThat(currentVariableEntity)
                 .hasType("string")
                 .hasValue("content")
@@ -74,5 +71,4 @@ public class VariableEntityUpdaterTest {
 
         verify(entityManager).persist(currentVariableEntity);
     }
-
 }

@@ -18,21 +18,21 @@ package org.activiti.cloud.api.model.shared.events;
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
-public interface CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> extends CloudRuntimeEntity, RuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
+public interface CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE extends Enum<?>>
+        extends CloudRuntimeEntity, RuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
 
     /**
-     * Sequence index of the event if it is part of an aggregate within the message if part of the same transaction.
+     * Sequence index of the event if it is part of an aggregate within the message if part of the
+     * same transaction.
      */
     Integer getSequenceNumber();
 
     /**
-     * ID of the message that carried the event, all the events that are part of the same tx are aggregated in the same message.
+     * ID of the message that carried the event, all the events that are part of the same tx are
+     * aggregated in the same message.
      */
     String getMessageId();
 
-    /**
-     * ID of the entity included in the message.
-     */
+    /** ID of the entity included in the message. */
     String getEntityId();
-
 }

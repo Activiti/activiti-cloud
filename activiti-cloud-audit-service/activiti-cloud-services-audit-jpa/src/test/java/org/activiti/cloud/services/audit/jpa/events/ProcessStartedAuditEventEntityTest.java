@@ -15,21 +15,20 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import static org.activiti.test.Assertions.assertThat;
+
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.junit.jupiter.api.Test;
-
-import static org.activiti.test.Assertions.assertThat;
 
 public class ProcessStartedAuditEventEntityTest {
 
     @Test
     public void shouldSetAllInformationAvailableFromCloudEvent() {
-        //given
+        // given
         long timestamp = System.currentTimeMillis();
-        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl("eventId",
-                                                                                            timestamp,
-                                                                                            new ProcessInstanceImpl());
+        CloudProcessStartedEventImpl processStartedEvent =
+                new CloudProcessStartedEventImpl("eventId", timestamp, new ProcessInstanceImpl());
         processStartedEvent.setAppName("appName");
         processStartedEvent.setAppVersion("appV1");
         processStartedEvent.setServiceName("serviceName");
@@ -45,10 +44,11 @@ public class ProcessStartedAuditEventEntityTest {
         processStartedEvent.setBusinessKey("BusinessKey");
         processStartedEvent.setParentProcessInstanceId("parentProcId");
 
-        //when
-        ProcessStartedAuditEventEntity auditEventEntity = new ProcessStartedAuditEventEntity(processStartedEvent);
+        // when
+        ProcessStartedAuditEventEntity auditEventEntity =
+                new ProcessStartedAuditEventEntity(processStartedEvent);
 
-        //then
+        // then
         assertThat(auditEventEntity)
                 .hasEventId(processStartedEvent.getId())
                 .hasTimestamp(timestamp)

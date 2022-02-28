@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.starter.tests.conf;
 
+import static org.assertj.core.api.Assertions.*;
+
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
@@ -31,137 +33,163 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.AbstractMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
-                              "ACT_MESSAGING_DEST_SEPARATOR=.",
-                              "ACT_MESSAGING_DEST_PREFIX=namespace",
-                              "ACT_RB_ENG_EVT_DEST=engine-events",
-                              "ACT_RB_SIG_EVT_DEST=signal-event",
-                              "ACT_RB_CMD_CONSUMER_DEST=command-consumer",
-                              "ACT_RB_ASYNC_JOB_EXEC_DEST=async-executor-jobs",
-                              "ACT_RB_MSG_EVT_DEST=message-events",
-                              "ACT_RB_CMD_RES_DEST=command-results",
-                              "ACT_INT_RES_CONSUMER=integration-result",
-                              "ACT_INT_ERR_CONSUMER:integration-error"})
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+            "ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
+            "ACT_MESSAGING_DEST_SEPARATOR=.",
+            "ACT_MESSAGING_DEST_PREFIX=namespace",
+            "ACT_RB_ENG_EVT_DEST=engine-events",
+            "ACT_RB_SIG_EVT_DEST=signal-event",
+            "ACT_RB_CMD_CONSUMER_DEST=command-consumer",
+            "ACT_RB_ASYNC_JOB_EXEC_DEST=async-executor-jobs",
+            "ACT_RB_MSG_EVT_DEST=message-events",
+            "ACT_RB_CMD_RES_DEST=command-results",
+            "ACT_INT_RES_CONSUMER=integration-result",
+            "ACT_INT_ERR_CONSUMER:integration-error"
+        })
 @DirtiesContext
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+        initializers = {
+            RabbitMQContainerApplicationInitializer.class,
+            KeycloakContainerApplicationInitializer.class
+        })
 public class EngineConfigurationIT {
 
-    @Autowired
-    private SpringProcessEngineConfiguration configuration;
+    @Autowired private SpringProcessEngineConfiguration configuration;
 
-    @Autowired
-    private BindingServiceProperties bindingServiceProperties;
+    @Autowired private BindingServiceProperties bindingServiceProperties;
 
     @Test
     public void shouldConfigureDefaultConnectorBindingProperties() {
-        //given
+        // given
 
-        //when
+        // when
         Map<String, BindingProperties> bindings = bindingServiceProperties.getBindings();
 
-        //then
+        // then
         assertThat(bindings)
-            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
-                                                                                        entry.getValue()
-                                                                                             .getDestination()))
-            .contains(entry("mealsConnector", "namespace.mealsconnector"),
-                      entry("rest.GET", "namespace.rest.get"),
-                      entry("perfromBusinessTask", "namespace.perfrombusinesstask"),
-                      entry("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
-                      entry("payment", "namespace.payment"),
-                      entry("Constants Connector.constantsActionName", "namespace.constants-connector.constantsactionname"),
-                      entry("Variable Mapping Connector.variableMappingActionName", "namespace.variable-mapping-connector.variablemappingactionname"),
-                      entry("miCloudConnector", "namespace.micloudconnector"));
+                .extractingFromEntries(
+                        entry ->
+                                new AbstractMap.SimpleEntry<String, String>(
+                                        entry.getKey(), entry.getValue().getDestination()))
+                .contains(
+                        entry("mealsConnector", "namespace.mealsconnector"),
+                        entry("rest.GET", "namespace.rest.get"),
+                        entry("perfromBusinessTask", "namespace.perfrombusinesstask"),
+                        entry("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
+                        entry("payment", "namespace.payment"),
+                        entry(
+                                "Constants Connector.constantsActionName",
+                                "namespace.constants-connector.constantsactionname"),
+                        entry(
+                                "Variable Mapping Connector.variableMappingActionName",
+                                "namespace.variable-mapping-connector.variablemappingactionname"),
+                        entry("miCloudConnector", "namespace.micloudconnector"));
     }
-
 
     @Test
     public void shouldUseCloudActivityBehaviorFactory() {
         assertThat(configuration.getActivityBehaviorFactory())
-            .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
-            .isInstanceOf(CloudActivityBehaviorFactory.class);
+                .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
+                .isInstanceOf(CloudActivityBehaviorFactory.class);
 
         assertThat(configuration.getBpmnParser().getActivityBehaviorFactory())
-            .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
-            .isInstanceOf(CloudActivityBehaviorFactory.class);
+                .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
+                .isInstanceOf(CloudActivityBehaviorFactory.class);
     }
 
     @Test
     public void shouldHaveRequiredGroupsSetForAuditProducer() {
-        //when
-        BindingProperties auditProducer = bindingServiceProperties.getBindingProperties("auditProducer");
+        // when
+        BindingProperties auditProducer =
+                bindingServiceProperties.getBindingProperties("auditProducer");
 
-        //then
+        // then
         assertThat(auditProducer.getDestination())
-            .as("should have required groups set for audit producer")
-            .isEqualTo("namespace.engine-events");
+                .as("should have required groups set for audit producer")
+                .isEqualTo("namespace.engine-events");
 
         assertThat(auditProducer.getProducer().getRequiredGroups())
-            .as("should have required groups set for audit producer")
-            .containsExactly("query", "audit");
+                .as("should have required groups set for audit producer")
+                .containsExactly("query", "audit");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForMessageEvents() {
-        //when
-        BindingProperties messageEventsOutput = bindingServiceProperties.getBindingProperties("messageEventsOutput");
+        // when
+        BindingProperties messageEventsOutput =
+                bindingServiceProperties.getBindingProperties("messageEventsOutput");
 
-        //then
-        assertThat(messageEventsOutput.getDestination()).isEqualTo("namespace.message-events.activiti-app");
-        assertThat(messageEventsOutput.getProducer().getRequiredGroups()).containsExactly("messages");
+        // then
+        assertThat(messageEventsOutput.getDestination())
+                .isEqualTo("namespace.message-events.activiti-app");
+        assertThat(messageEventsOutput.getProducer().getRequiredGroups())
+                .containsExactly("messages");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForCommandEndpoint() {
-        //when
-        BindingProperties commandConsumer = bindingServiceProperties.getBindingProperties("commandConsumer");
-        BindingProperties commandResults = bindingServiceProperties.getBindingProperties("commandResults");
+        // when
+        BindingProperties commandConsumer =
+                bindingServiceProperties.getBindingProperties("commandConsumer");
+        BindingProperties commandResults =
+                bindingServiceProperties.getBindingProperties("commandResults");
 
-        //then
-        assertThat(commandConsumer.getDestination()).isEqualTo("namespace.command-consumer.activiti-app");
+        // then
+        assertThat(commandConsumer.getDestination())
+                .isEqualTo("namespace.command-consumer.activiti-app");
         assertThat(commandConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
-        assertThat(commandResults.getDestination()).isEqualTo("namespace.command-results.activiti-app");
+        assertThat(commandResults.getDestination())
+                .isEqualTo("namespace.command-results.activiti-app");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForSignalEvents() {
-        //when
-        BindingProperties signalProducer = bindingServiceProperties.getBindingProperties("signalProducer");
-        BindingProperties signalConsumer = bindingServiceProperties.getBindingProperties("signalConsumer");
+        // when
+        BindingProperties signalProducer =
+                bindingServiceProperties.getBindingProperties("signalProducer");
+        BindingProperties signalConsumer =
+                bindingServiceProperties.getBindingProperties("signalConsumer");
 
-        //then
+        // then
         assertThat(signalProducer.getDestination()).isEqualTo("namespace.signal-event");
-        assertThat(signalProducer.getProducer().getRequiredGroups()).containsExactly("my-activiti-rb-app");
+        assertThat(signalProducer.getProducer().getRequiredGroups())
+                .containsExactly("my-activiti-rb-app");
         assertThat(signalConsumer.getDestination()).isEqualTo("namespace.signal-event");
         assertThat(signalConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForCloudConnectors() {
-        //when
-        BindingProperties integrationResultsConsumer = bindingServiceProperties.getBindingProperties("integrationResultsConsumer");
-        BindingProperties integrationErrorsConsumer = bindingServiceProperties.getBindingProperties("integrationErrorsConsumer");
+        // when
+        BindingProperties integrationResultsConsumer =
+                bindingServiceProperties.getBindingProperties("integrationResultsConsumer");
+        BindingProperties integrationErrorsConsumer =
+                bindingServiceProperties.getBindingProperties("integrationErrorsConsumer");
 
-        //then
-        assertThat(integrationResultsConsumer.getDestination()).isEqualTo("namespace.integration-result.my-activiti-rb-app");
+        // then
+        assertThat(integrationResultsConsumer.getDestination())
+                .isEqualTo("namespace.integration-result.my-activiti-rb-app");
         assertThat(integrationResultsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
-        assertThat(integrationErrorsConsumer.getDestination()).isEqualTo("namespace.integration-error.my-activiti-rb-app");
+        assertThat(integrationErrorsConsumer.getDestination())
+                .isEqualTo("namespace.integration-error.my-activiti-rb-app");
         assertThat(integrationErrorsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForAsyncJobExecutor() {
-        //when
-        BindingProperties asyncExecutorJobsInput = bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput");
-        BindingProperties asyncExecutorJobsOutput = bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput");
+        // when
+        BindingProperties asyncExecutorJobsInput =
+                bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput");
+        BindingProperties asyncExecutorJobsOutput =
+                bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput");
 
-        //then
-        assertThat(asyncExecutorJobsInput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
+        // then
+        assertThat(asyncExecutorJobsInput.getDestination())
+                .isEqualTo("namespace.async-executor-jobs.activiti-app");
         assertThat(asyncExecutorJobsInput.getGroup()).isEqualTo("my-activiti-rb-app");
-        assertThat(asyncExecutorJobsOutput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
+        assertThat(asyncExecutorJobsOutput.getDestination())
+                .isEqualTo("namespace.async-executor-jobs.activiti-app");
     }
-
 }

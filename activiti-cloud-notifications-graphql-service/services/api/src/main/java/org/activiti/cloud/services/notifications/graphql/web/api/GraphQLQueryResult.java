@@ -31,11 +31,8 @@ public class GraphQLQueryResult {
         this.extensions = builder.extensions;
     }
 
-    /**
-     * Default
-     */
-    GraphQLQueryResult() {
-    }
+    /** Default */
+    GraphQLQueryResult() {}
 
     public Map<String, Object> getData() {
         return data;
@@ -50,7 +47,9 @@ public class GraphQLQueryResult {
     }
 
     /**
-     * Creates a builder to build {@link GraphQLQueryResult} and initialize it with the given object.
+     * Creates a builder to build {@link GraphQLQueryResult} and initialize it with the given
+     * object.
+     *
      * @param graphQLQueryResult to initialize the builder with
      * @return created builder
      */
@@ -58,17 +57,14 @@ public class GraphQLQueryResult {
         return new Builder(graphQLQueryResult);
     }
 
-    /**
-     * Builder to build {@link GraphQLQueryResult}.
-     */
+    /** Builder to build {@link GraphQLQueryResult}. */
     public static final class Builder {
 
         private Map<String, Object> data = Collections.emptyMap();
         private List<Map<String, Object>> errors = Collections.emptyList();
         private Map<Object, Object> extensions = Collections.emptyMap();
 
-        public Builder() {
-        }
+        public Builder() {}
 
         private Builder(GraphQLQueryResult graphQLQueryResult) {
             this.data = graphQLQueryResult.data;
@@ -77,39 +73,43 @@ public class GraphQLQueryResult {
         }
 
         /**
-        * Builder method for data parameter.
-        * @param data field to set
-        * @return builder
-        */
+         * Builder method for data parameter.
+         *
+         * @param data field to set
+         * @return builder
+         */
         public Builder withData(Map<String, Object> data) {
             this.data = data;
             return this;
         }
 
         /**
-        * Builder method for errors parameter.
-        * @param errors field to set
-        * @return builder
-        */
+         * Builder method for errors parameter.
+         *
+         * @param errors field to set
+         * @return builder
+         */
         public Builder withErrors(List<Map<String, Object>> errors) {
             this.errors = errors;
             return this;
         }
 
         /**
-        * Builder method for extensions parameter.
-        * @param extensions field to set
-        * @return builder
-        */
+         * Builder method for extensions parameter.
+         *
+         * @param extensions field to set
+         * @return builder
+         */
         public Builder withExtensions(Map<Object, Object> extensions) {
             this.extensions = extensions;
             return this;
         }
 
         /**
-        * Builder method of the builder.
-        * @return built class
-        */
+         * Builder method of the builder.
+         *
+         * @return built class
+         */
         public GraphQLQueryResult build() {
             return new GraphQLQueryResult(this);
         }

@@ -15,7 +15,10 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.config;
 
-import java.util.List;
+import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaConfigurer;
+import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLShemaRegistration;
+
+import graphql.GraphQL;
 
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
@@ -35,48 +38,55 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
 
-import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaConfigurer;
-import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLShemaRegistration;
-import graphql.GraphQL;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 @Configuration
 @ConditionalOnClass({GraphQL.class, ReactorNettyTcpStompClient.class})
-@ConditionalOnProperty(name="spring.activiti.cloud.services.notifications.graphql.subscriptions.enabled", matchIfMissing = true)
+@ConditionalOnProperty(
+        name = "spring.activiti.cloud.services.notifications.graphql.subscriptions.enabled",
+        matchIfMissing = true)
 public class GraphQLSubscriptionsAutoConfiguration {
 
     @Configuration
     static class DefaultGraphQLSubscriptionsSchemaConfiguration {
 
-        @Autowired
-        private GraphQLSubscriptionSchemaProperties subscriptionProperties;
+        @Autowired private GraphQLSubscriptionSchemaProperties subscriptionProperties;
 
         @Bean
         @ConditionalOnMissingBean
-        public EngineEventsPredicateFactory engineEventsPredicateFactory(RoutingKeyResolver routingKeyResolver) {
+        public EngineEventsPredicateFactory engineEventsPredicateFactory(
+                RoutingKeyResolver routingKeyResolver) {
             return new EngineEventsDestinationsPredicateFactory(routingKeyResolver);
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
-        public EngineEventsPublisherFactory engineEventPublisherFactory(EngineEventsPredicateFactory engineEventsPredicateFactory,
-                                                                        Flux<Message<List<EngineEvent>>> engineEventsFlux) {
-            return new EngineEventsFluxPublisherFactory(engineEventsFlux, engineEventsPredicateFactory);
+        public EngineEventsPublisherFactory engineEventPublisherFactory(
+                EngineEventsPredicateFactory engineEventsPredicateFactory,
+                Flux<Message<List<EngineEvent>>> engineEventsFlux) {
+            return new EngineEventsFluxPublisherFactory(
+                    engineEventsFlux, engineEventsPredicateFactory);
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public EngineEventsPublisherDataFetcher engineEventPublisherDataFetcher(EngineEventsPublisherFactory engineEventPublisherFactory) {
+        public EngineEventsPublisherDataFetcher engineEventPublisherDataFetcher(
+                EngineEventsPublisherFactory engineEventPublisherFactory) {
             return new EngineEventsPublisherDataFetcher(engineEventPublisherFactory);
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
-        public GraphQLSubscriptionSchemaBuilder graphQLSubscriptionSchemaBuilder(EngineEventsPublisherDataFetcher engineEventPublisherDataFetcher) {
-            GraphQLSubscriptionSchemaBuilder schemaBuilder = new GraphQLSubscriptionSchemaBuilder(subscriptionProperties.getGraphqls());
+        public GraphQLSubscriptionSchemaBuilder graphQLSubscriptionSchemaBuilder(
+                EngineEventsPublisherDataFetcher engineEventPublisherDataFetcher) {
+            GraphQLSubscriptionSchemaBuilder schemaBuilder =
+                    new GraphQLSubscriptionSchemaBuilder(subscriptionProperties.getGraphqls());
 
-            schemaBuilder.withSubscription(subscriptionProperties.getSubscriptionFieldName(),
-                                           engineEventPublisherDataFetcher);
+            schemaBuilder.withSubscription(
+                    subscriptionProperties.getSubscriptionFieldName(),
+                    engineEventPublisherDataFetcher);
 
             return schemaBuilder;
         }
@@ -85,15 +95,11 @@ public class GraphQLSubscriptionsAutoConfiguration {
     @Configuration
     static class DefaultGraphQLSubscriptionsConfigurer implements GraphQLSchemaConfigurer {
 
-        @Autowired
-        private GraphQLSubscriptionSchemaBuilder graphQLSubscriptionSchemaBuilder;
+        @Autowired private GraphQLSubscriptionSchemaBuilder graphQLSubscriptionSchemaBuilder;
 
         @Override
         public void configure(GraphQLShemaRegistration registry) {
             registry.register(graphQLSubscriptionSchemaBuilder.getGraphQLSchema());
-            
         }
     }
-
-
 }

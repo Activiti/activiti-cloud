@@ -28,11 +28,9 @@ import org.mockito.Mock;
 
 public class SuspendProcessInstanceCmdExecutorTest {
 
-    @InjectMocks
-    private SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor;
+    @InjectMocks private SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor;
 
-    @Mock
-    private ProcessAdminRuntime processAdminRuntime;
+    @Mock private ProcessAdminRuntime processAdminRuntime;
 
     @BeforeEach
     public void setUp() {
@@ -41,14 +39,15 @@ public class SuspendProcessInstanceCmdExecutorTest {
 
     @Test
     public void suspendProcessInstanceCmdExecutorTest() {
-        //given
+        // given
         SuspendProcessPayload suspendProcessInstanceCmd = new SuspendProcessPayload("x");
-        assertThat(suspendProcessInstanceCmdExecutor.getHandledType()).isEqualTo(SuspendProcessPayload.class.getName());
+        assertThat(suspendProcessInstanceCmdExecutor.getHandledType())
+                .isEqualTo(SuspendProcessPayload.class.getName());
 
-        //when
+        // when
         suspendProcessInstanceCmdExecutor.execute(suspendProcessInstanceCmd);
 
-        //then
+        // then
         verify(processAdminRuntime).suspend(suspendProcessInstanceCmd);
     }
 }

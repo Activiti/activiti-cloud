@@ -34,9 +34,7 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-/**
- * Test context configuration for integration tests over Activiti process engine
- */
+/** Test context configuration for integration tests over Activiti process engine */
 @TestConfiguration
 public class TestProcessEngineConfiguration {
 
@@ -62,9 +60,9 @@ public class TestProcessEngineConfiguration {
 
     @Bean
     public ProcessEngine processEngine() {
-        return ProcessEngineConfiguration
-                .createStandaloneInMemProcessEngineConfiguration()
-                .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE)
+        return ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()
+                .setDatabaseSchemaUpdate(
+                        ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE)
                 .buildProcessEngine();
     }
 
@@ -96,7 +94,8 @@ public class TestProcessEngineConfiguration {
     @Bean
     public ProcessValidator processValidator() {
         ProcessValidatorImpl processValidator = new ProcessValidatorImpl();
-        processValidator.addValidatorSet(new ValidatorSetFactory().createActivitiExecutableProcessValidatorSet());
+        processValidator.addValidatorSet(
+                new ValidatorSetFactory().createActivitiExecutableProcessValidatorSet());
         return processValidator;
     }
 

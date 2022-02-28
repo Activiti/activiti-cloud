@@ -15,15 +15,13 @@
  */
 package org.activiti.cloud.starter.audit.configuration;
 
-import com.fasterxml.classmate.TypeResolver;
-import java.util.List;
-import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
@@ -31,15 +29,18 @@ public class AuditSwaggerConfig {
 
     @Bean(name = "auditApiDocket")
     @ConditionalOnMissingBean(name = "auditApiDocket")
-    public Docket auditApiDocket(SwaggerDocketBuilder docketBuilder,
-        @Value("${activiti.cloud.swagger.audit-base-path:}") String auditSwaggerBasePath) {
-        return docketBuilder.buildApiDocket("Audit Service ReST API", "Audit",
-            auditSwaggerBasePath, "org.activiti.cloud.services.audit");
+    public Docket auditApiDocket(
+            SwaggerDocketBuilder docketBuilder,
+            @Value("${activiti.cloud.swagger.audit-base-path:}") String auditSwaggerBasePath) {
+        return docketBuilder.buildApiDocket(
+                "Audit Service ReST API",
+                "Audit",
+                auditSwaggerBasePath,
+                "org.activiti.cloud.services.audit");
     }
 
     @Bean
     public DocketCustomizer payloadsDocketCustomizer() {
         return new PayloadsDocketCustomizer();
     }
-
 }

@@ -35,13 +35,17 @@ public class ApplicationDeployedEventConverter extends BaseEventToEntityConverte
     }
 
     @Override
-    protected ApplicationDeployedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new ApplicationDeployedAuditEventEntity((CloudApplicationDeployedEvent) cloudRuntimeEvent);
+    protected ApplicationDeployedAuditEventEntity createEventEntity(
+            CloudRuntimeEvent cloudRuntimeEvent) {
+        return new ApplicationDeployedAuditEventEntity(
+                (CloudApplicationDeployedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ApplicationDeployedAuditEventEntity applicationDeployedAuditEventEntity = (ApplicationDeployedAuditEventEntity) auditEventEntity;
-        return new CloudApplicationDeployedEventImpl(applicationDeployedAuditEventEntity.getDeployment());
+        ApplicationDeployedAuditEventEntity applicationDeployedAuditEventEntity =
+                (ApplicationDeployedAuditEventEntity) auditEventEntity;
+        return new CloudApplicationDeployedEventImpl(
+                applicationDeployedAuditEventEntity.getDeployment());
     }
 }

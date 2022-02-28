@@ -21,9 +21,7 @@ import org.activiti.cloud.modeling.api.Project;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Identifier by name
- */
+/** Identifier by name */
 public abstract class ModelingNamingIdentifier<M> implements ModelingIdentifier<M> {
 
     private List<String> names;
@@ -73,5 +71,4 @@ public abstract class ModelingNamingIdentifier<M> implements ModelingIdentifier<
             }
         };
     }
-
 }

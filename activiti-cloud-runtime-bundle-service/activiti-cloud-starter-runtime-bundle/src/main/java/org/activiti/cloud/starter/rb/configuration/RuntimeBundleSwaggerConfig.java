@@ -15,15 +15,12 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import com.fasterxml.classmate.TypeResolver;
-import java.util.List;
-import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
-import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
@@ -31,10 +28,14 @@ public class RuntimeBundleSwaggerConfig {
 
     @Bean(name = "rbApiDocket")
     @ConditionalOnMissingBean(name = "rbApiDocket")
-    public Docket rbApiDocket(SwaggerDocketBuilder docketBuilder,
-        @Value("${activiti.cloud.swagger.rb-base-path:}") String rbSwaggerBasePath) {
-        return docketBuilder.buildApiDocket("Runtime Bundle ReST API", "Runtime Bundle",
-            rbSwaggerBasePath, "org.activiti.cloud.services.rest");
+    public Docket rbApiDocket(
+            SwaggerDocketBuilder docketBuilder,
+            @Value("${activiti.cloud.swagger.rb-base-path:}") String rbSwaggerBasePath) {
+        return docketBuilder.buildApiDocket(
+                "Runtime Bundle ReST API",
+                "Runtime Bundle",
+                rbSwaggerBasePath,
+                "org.activiti.cloud.services.rest");
     }
 
     @Bean
@@ -42,5 +43,4 @@ public class RuntimeBundleSwaggerConfig {
     public PayloadsDocketCustomizer payloadsDocketCustomizer() {
         return new PayloadsDocketCustomizer();
     }
-
 }

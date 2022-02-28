@@ -50,5 +50,4 @@ public class AlfrescoPageParameterParser {
         }
         return new SkipCountParameter(isSet, skipCount);
     }
-
 }

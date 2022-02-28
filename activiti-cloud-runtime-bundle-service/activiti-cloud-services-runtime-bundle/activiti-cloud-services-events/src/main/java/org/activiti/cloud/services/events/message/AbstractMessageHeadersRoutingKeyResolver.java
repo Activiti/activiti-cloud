@@ -20,8 +20,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class AbstractMessageHeadersRoutingKeyResolver implements RoutingKeyResolver<Map<String, Object>> {
-    
+public abstract class AbstractMessageHeadersRoutingKeyResolver
+        implements RoutingKeyResolver<Map<String, Object>> {
+
     private static final String REPLACEMENT = "-";
     private static final String ILLEGAL_CHARACTERS = "[\\t\\s\\.*#:]";
     private static final String DELIMITER = ".";
@@ -30,24 +31,25 @@ public abstract class AbstractMessageHeadersRoutingKeyResolver implements Routin
     public abstract String resolve(Map<String, Object> headers);
 
     protected String build(Map<String, Object> headers, String... keys) {
-        return getPrefix() + DELIMITER + Stream.of(keys)
-                     .map(headers::get)
-                     .map(Optional::ofNullable)
-                     .map(this::mapNullOrEmptyValue)
-                     .collect(Collectors.joining(DELIMITER));
+        return getPrefix()
+                + DELIMITER
+                + Stream.of(keys)
+                        .map(headers::get)
+                        .map(Optional::ofNullable)
+                        .map(this::mapNullOrEmptyValue)
+                        .collect(Collectors.joining(DELIMITER));
     }
-    
+
     private String mapNullOrEmptyValue(Optional<Object> obj) {
         return obj.map(Object::toString)
-                  .filter(value -> !value.isEmpty())
-                  .map(this::escapeIllegalCharacters)
-                  .orElse(UNDERSCORE);
+                .filter(value -> !value.isEmpty())
+                .map(this::escapeIllegalCharacters)
+                .orElse(UNDERSCORE);
     }
-    
+
     protected String escapeIllegalCharacters(String value) {
         return value.replaceAll(ILLEGAL_CHARACTERS, REPLACEMENT);
     }
-    
-    public abstract String getPrefix(); 
 
+    public abstract String getPrefix();
 }

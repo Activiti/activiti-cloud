@@ -15,32 +15,22 @@
  */
 package org.activiti.cloud.api.events;
 
-/**
- * Enumeration for all the Activiti Cloud event types.
- */
+/** Enumeration for all the Activiti Cloud event types. */
 public enum CloudRuntimeEventType {
     ACTIVITY_CANCELLED,
     ACTIVITY_COMPLETED,
     ACTIVITY_STARTED,
     ERROR_RECEIVED,
-    /**
-     * The runtime bundle has sent a request to a cloud connector.
-     */
+    /** The runtime bundle has sent a request to a cloud connector. */
     INTEGRATION_REQUESTED,
-    /**
-     * The runtime bundle has received a result from a cloud connector.
-     */
+    /** The runtime bundle has received a result from a cloud connector. */
     INTEGRATION_RESULT_RECEIVED,
-    /**
-     * The runtime bundle has received a error from a cloud connector.
-     */
+    /** The runtime bundle has received a error from a cloud connector. */
     INTEGRATION_ERROR_RECEIVED,
     MESSAGE_RECEIVED,
     MESSAGE_SENT,
     MESSAGE_SUBSCRIPTION_CANCELLED,
-    /**
-     * The process reached a message catch event and is listening for a BPMN message.
-     */
+    /** The process reached a message catch event and is listening for a BPMN message. */
     MESSAGE_WAITING,
     PROCESS_CANCELLED,
     PROCESS_COMPLETED,
@@ -52,9 +42,7 @@ public enum CloudRuntimeEventType {
     PROCESS_UPDATED,
     SEQUENCE_FLOW_TAKEN,
     SIGNAL_RECEIVED,
-    /**
-     * Similar to MESSAGE_WAITING, but for start message events.
-     */
+    /** Similar to MESSAGE_WAITING, but for start message events. */
     START_MESSAGE_DEPLOYED,
     TASK_ACTIVATED,
     TASK_ASSIGNED,
@@ -76,8 +64,6 @@ public enum CloudRuntimeEventType {
     VARIABLE_CREATED,
     VARIABLE_DELETED,
     VARIABLE_UPDATED,
-    /**
-     * The runtime bundle has deployed an application
-     */
+    /** The runtime bundle has deployed an application */
     APPLICATION_DEPLOYED;
 }

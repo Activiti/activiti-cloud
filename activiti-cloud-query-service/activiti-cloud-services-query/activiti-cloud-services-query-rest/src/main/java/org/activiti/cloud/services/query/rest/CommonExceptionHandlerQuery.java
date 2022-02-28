@@ -32,9 +32,10 @@ public class CommonExceptionHandlerQuery {
     // TODO: 12/04/2019 this exception handler should be moved to activiti-cloud-service-common
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public EntityModel<ActivitiErrorMessage> handleAppException(ActivitiForbiddenException ex, HttpServletResponse response) {
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+            ActivitiForbiddenException ex, HttpServletResponse response) {
         response.setContentType("application/json");
-        return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
+        return EntityModel.of(
+                new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 }
-

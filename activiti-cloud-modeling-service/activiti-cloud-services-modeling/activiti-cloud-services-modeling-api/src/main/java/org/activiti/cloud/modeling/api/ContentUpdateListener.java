@@ -17,19 +17,16 @@ package org.activiti.cloud.modeling.api;
 
 import org.activiti.cloud.services.common.file.FileContent;
 
-/**
- * Business logic related with actions to be done when the Model Content changes
- */
+/** Business logic related with actions to be done when the Model Content changes */
 public interface ContentUpdateListener {
 
     /**
      * Perform an action over the model from the file content.
      *
-     * @param model       the model to act with
+     * @param model the model to act with
      * @param fileContent the file content that has been updated
      */
-    void execute(Model model,
-                 FileContent fileContent);
+    void execute(Model model, FileContent fileContent);
 
     /**
      * Get handled model type by this listener.

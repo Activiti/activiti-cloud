@@ -36,23 +36,17 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
-
 public class KeycloakAccessTokenPrincipalRolesProviderTest {
 
-    @InjectMocks
-    private KeycloakAccessTokenPrincipalRolesProvider subject;
+    @InjectMocks private KeycloakAccessTokenPrincipalRolesProvider subject;
 
-    @Mock
-    private KeycloakAccessTokenProvider keycloakSecurityContextProvider;
+    @Mock private KeycloakAccessTokenProvider keycloakSecurityContextProvider;
 
-    @Mock
-    private KeycloakAccessTokenValidator keycloakAccessTokenValidator;
+    @Mock private KeycloakAccessTokenValidator keycloakAccessTokenValidator;
 
-    @Mock
-    private KeycloakPrincipal<RefreshableKeycloakSecurityContext> keycloakPrincipal;
+    @Mock private KeycloakPrincipal<RefreshableKeycloakSecurityContext> keycloakPrincipal;
 
-    @Mock
-    private AccessToken accessToken;
+    @Mock private AccessToken accessToken;
 
     @BeforeEach
     public void setUp() {
@@ -62,23 +56,25 @@ public class KeycloakAccessTokenPrincipalRolesProviderTest {
     @Test
     public void testGetRoles() {
         // given
-        when(keycloakSecurityContextProvider.accessToken(any())).thenReturn(Optional.of(accessToken));
+        when(keycloakSecurityContextProvider.accessToken(any()))
+                .thenReturn(Optional.of(accessToken));
         when(keycloakAccessTokenValidator.isValid(any())).thenReturn(true);
-        when(accessToken.getRealmAccess()).thenReturn(new AccessToken.Access().roles(new LinkedHashSet<>(Arrays.asList("role1",
-                                                                                                                       "role2"))));
+        when(accessToken.getRealmAccess())
+                .thenReturn(
+                        new AccessToken.Access()
+                                .roles(new LinkedHashSet<>(Arrays.asList("role1", "role2"))));
         // when
         List<String> result = subject.getRoles(keycloakPrincipal);
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("role1",
-                                           "role2");
+        assertThat(result).isNotEmpty().containsExactly("role1", "role2");
     }
 
     @Test
     public void testGetRolesInvalidToken() {
         // given
-        when(keycloakSecurityContextProvider.accessToken(any())).thenReturn(Optional.of(accessToken));
+        when(keycloakSecurityContextProvider.accessToken(any()))
+                .thenReturn(Optional.of(accessToken));
         when(keycloakAccessTokenValidator.isValid(any())).thenReturn(false);
 
         // when

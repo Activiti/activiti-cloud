@@ -15,10 +15,11 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
-import java.util.function.Predicate;
-
 import graphql.schema.DataFetchingEnvironment;
+
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
+
+import java.util.function.Predicate;
 
 public interface EngineEventsPredicateFactory {
 

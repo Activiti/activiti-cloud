@@ -24,38 +24,44 @@ import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
-@Entity(name="BPMNActivity")
-@Table(name="BPMN_ACTIVITY", indexes={
-    @Index(name="bpmn_activity_status_idx", columnList="status", unique=false),
-    @Index(name="bpmn_activity_processInstance_idx", columnList="processInstanceId", unique=false),
-    @Index(name="bpmn_activity_processInstance_elementId_idx", columnList="processInstanceId,elementId,executionId", unique=true)
-})
+@Entity(name = "BPMNActivity")
+@Table(
+        name = "BPMN_ACTIVITY",
+        indexes = {
+            @Index(name = "bpmn_activity_status_idx", columnList = "status", unique = false),
+            @Index(
+                    name = "bpmn_activity_processInstance_idx",
+                    columnList = "processInstanceId",
+                    unique = false),
+            @Index(
+                    name = "bpmn_activity_processInstance_elementId_idx",
+                    columnList = "processInstanceId,elementId,executionId",
+                    unique = true)
+        })
 @DynamicInsert
 @DynamicUpdate
 public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudBPMNActivity {
 
-    public BPMNActivityEntity() { }
+    public BPMNActivityEntity() {}
 
-    public BPMNActivityEntity(String serviceName,
-                              String serviceFullName,
-                              String serviceVersion,
-                              String appName,
-                              String appVersion) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
+    public BPMNActivityEntity(
+            String serviceName,
+            String serviceFullName,
+            String serviceVersion,
+            String appName,
+            String appVersion) {
+        super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
     }
 
     public static class IdBuilderHelper {
         public static String from(BPMNActivity bpmnActivity) {
-            return new StringBuilder().append(bpmnActivity.getProcessInstanceId())
-                                      .append(":")
-                                      .append(bpmnActivity.getElementId())
-                                      .append(":")
-                                      .append(bpmnActivity.getExecutionId())
-                                      .toString();
+            return new StringBuilder()
+                    .append(bpmnActivity.getProcessInstanceId())
+                    .append(":")
+                    .append(bpmnActivity.getElementId())
+                    .append(":")
+                    .append(bpmnActivity.getExecutionId())
+                    .toString();
         }
     }
 }

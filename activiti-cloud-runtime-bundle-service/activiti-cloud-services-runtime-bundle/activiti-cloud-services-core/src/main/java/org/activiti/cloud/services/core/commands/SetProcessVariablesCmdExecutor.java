@@ -19,7 +19,8 @@ import org.activiti.api.model.shared.EmptyResult;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 
-public class SetProcessVariablesCmdExecutor extends AbstractCommandExecutor<SetProcessVariablesPayload> {
+public class SetProcessVariablesCmdExecutor
+        extends AbstractCommandExecutor<SetProcessVariablesPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;
 
@@ -30,7 +31,7 @@ public class SetProcessVariablesCmdExecutor extends AbstractCommandExecutor<SetP
     @Override
     public EmptyResult execute(SetProcessVariablesPayload setProcessVariablesPayload) {
         processAdminRuntime.setVariables(setProcessVariablesPayload);
-        
+
         return new EmptyResult(setProcessVariablesPayload);
     }
 }

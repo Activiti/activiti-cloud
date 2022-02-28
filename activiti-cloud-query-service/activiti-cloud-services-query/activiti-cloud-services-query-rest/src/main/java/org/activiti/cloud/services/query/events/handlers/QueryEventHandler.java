@@ -22,5 +22,4 @@ public interface QueryEventHandler {
     void handle(CloudRuntimeEvent<?, ?> event);
 
     String getHandledEvent();
-
 }

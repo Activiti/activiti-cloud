@@ -35,7 +35,6 @@ import java.lang.annotation.Target;
 @Inherited
 @EnableDiscoveryClient
 @EnableWebSecurity
-@EnableAutoConfiguration(exclude = {TaskExecutionAutoConfiguration.class, TaskSchedulingAutoConfiguration.class})
-public @interface ActivitiRuntimeBundle {
-
-}
+@EnableAutoConfiguration(
+        exclude = {TaskExecutionAutoConfiguration.class, TaskSchedulingAutoConfiguration.class})
+public @interface ActivitiRuntimeBundle {}

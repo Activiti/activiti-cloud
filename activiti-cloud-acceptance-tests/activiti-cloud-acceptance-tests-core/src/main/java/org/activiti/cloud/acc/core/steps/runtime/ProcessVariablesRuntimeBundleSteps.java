@@ -18,6 +18,7 @@ package org.activiti.cloud.acc.core.steps.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import net.thucydides.core.annotations.Step;
+
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.ProcessVariablesRuntimeService;
@@ -31,8 +32,7 @@ import org.springframework.http.ResponseEntity;
 @EnableRuntimeFeignContext
 public class ProcessVariablesRuntimeBundleSteps {
 
-    @Autowired
-    private ProcessVariablesRuntimeService processVariablesRuntimeService;
+    @Autowired private ProcessVariablesRuntimeService processVariablesRuntimeService;
 
     @Autowired
     @Qualifier("runtimeBundleBaseService")
@@ -49,9 +49,8 @@ public class ProcessVariablesRuntimeBundleSteps {
     }
 
     @Step
-    public ResponseEntity<Void> setVariables(String id,
-                                      SetProcessVariablesPayload setProcessVariablesPayload) {
+    public ResponseEntity<Void> setVariables(
+            String id, SetProcessVariablesPayload setProcessVariablesPayload) {
         return processVariablesRuntimeService.setVariables(id, setProcessVariablesPayload);
     }
-
 }

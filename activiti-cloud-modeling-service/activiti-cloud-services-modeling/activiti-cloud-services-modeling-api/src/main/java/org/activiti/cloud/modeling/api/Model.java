@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.modeling.api;
 
-import java.util.Map;
-import java.util.Set;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.auditable.Auditable;
 
-/**
- * Interface for models
- */
+import java.util.Map;
+import java.util.Set;
+
+/** Interface for models */
 public interface Model<A extends Project, U> extends Auditable<U> {
 
     String getId();
@@ -55,9 +54,9 @@ public interface Model<A extends Project, U> extends Auditable<U> {
 
     void setContent(byte[] content);
 
-    Map<String,Object> getExtensions();
+    Map<String, Object> getExtensions();
 
-    void setExtensions(Map<String,Object> extensions);
+    void setExtensions(Map<String, Object> extensions);
 
     String getTemplate();
 

@@ -33,14 +33,11 @@ import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationResultSenderImplTest {
 
-    @InjectMocks
-    private IntegrationResultSenderImpl integrationResultSender;
+    @InjectMocks private IntegrationResultSenderImpl integrationResultSender;
 
-    @Mock
-    private IntegrationResultChannelResolver resolver;
+    @Mock private IntegrationResultChannelResolver resolver;
 
-    @Mock
-    private MessageChannel messageChannel;
+    @Mock private MessageChannel messageChannel;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -49,7 +46,7 @@ public class IntegrationResultSenderImplTest {
 
     @Test
     public void sendShouldSendMessageBasedOnTheTargetApplication() throws Exception {
-        //given
+        // given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setServiceFullName("myApp");
@@ -57,17 +54,19 @@ public class IntegrationResultSenderImplTest {
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
-        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
-                integrationRequest.getIntegrationContext());
+        IntegrationResult integrationResultEvent =
+                new IntegrationResultImpl(
+                        integrationRequest, integrationRequest.getIntegrationContext());
 
         given(resolver.resolveDestination(integrationRequest)).willReturn(messageChannel);
 
-        Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
+        Message<IntegrationResult> message =
+                MessageBuilder.withPayload(integrationResultEvent).build();
 
-        //when
+        // when
         integrationResultSender.send(message);
 
-        //then
+        // then
         verify(messageChannel).send(message);
     }
 }

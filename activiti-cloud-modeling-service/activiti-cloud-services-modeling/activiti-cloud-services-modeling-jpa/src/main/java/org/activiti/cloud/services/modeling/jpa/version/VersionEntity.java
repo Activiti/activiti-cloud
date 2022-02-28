@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.jpa.version;
 
-/**
- * Interface for version entity
- */
+/** Interface for version entity */
 public interface VersionEntity<T extends VersionedEntity> {
 
     void setVersionIdentifier(VersionIdentifier versionIdentifier);

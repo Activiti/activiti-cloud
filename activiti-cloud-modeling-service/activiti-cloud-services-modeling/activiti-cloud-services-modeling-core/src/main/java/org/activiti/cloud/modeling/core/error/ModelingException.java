@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.modeling.core.error;
 
-/**
- * Generic modeling exception
- */
+/** Generic modeling exception */
 public class ModelingException extends RuntimeException {
 
     public ModelingException() {

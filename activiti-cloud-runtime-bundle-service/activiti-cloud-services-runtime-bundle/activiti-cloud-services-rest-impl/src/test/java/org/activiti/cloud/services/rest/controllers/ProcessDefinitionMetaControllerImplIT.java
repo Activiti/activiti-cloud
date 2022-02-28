@@ -40,14 +40,13 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessDefinitionMetaControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
+@EnableAutoConfiguration(
+        exclude = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessDefinitionMetaControllerImplIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private RepositoryService repositoryService;
+    @MockBean private RepositoryService repositoryService;
 
     @MockBean
     private ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler;
@@ -62,9 +61,10 @@ public class ProcessDefinitionMetaControllerImplIT {
         final BpmnModel bpmnModel = new BpmnModel();
         when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
 
-        this.mockMvc.perform(get("/v1/process-definitions/{id}/meta",
-                                 1).accept(MediaTypes.HAL_JSON_VALUE))
+        this.mockMvc
+                .perform(
+                        get("/v1/process-definitions/{id}/meta", 1)
+                                .accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk());
     }
-
 }

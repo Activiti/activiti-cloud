@@ -30,8 +30,7 @@ public class ActivityCancelledAuditEventEntity extends BPMNActivityAuditEventEnt
 
     private String cause;
 
-    public ActivityCancelledAuditEventEntity() {
-    }
+    public ActivityCancelledAuditEventEntity() {}
 
     public ActivityCancelledAuditEventEntity(CloudBPMNActivityCancelledEvent cloudEvent) {
         super(cloudEvent);
@@ -46,10 +45,10 @@ public class ActivityCancelledAuditEventEntity extends BPMNActivityAuditEventEnt
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ActivityCancelledAuditEventEntity [cause=")
-               .append(cause)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(cause)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }

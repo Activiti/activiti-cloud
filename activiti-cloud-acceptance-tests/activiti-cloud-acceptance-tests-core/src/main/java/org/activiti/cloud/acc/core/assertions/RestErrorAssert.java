@@ -15,17 +15,17 @@
  */
 package org.activiti.cloud.acc.core.assertions;
 
-import javax.servlet.http.HttpServletResponse;
-
-import feign.FeignException;
-import net.thucydides.core.steps.StepEventBus;
-import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
-
 import static org.assertj.core.api.Assertions.*;
 
-/**
- * Rest errors assertions
- */
+import feign.FeignException;
+
+import net.thucydides.core.steps.StepEventBus;
+
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+
+import javax.servlet.http.HttpServletResponse;
+
+/** Rest errors assertions */
 public class RestErrorAssert {
 
     private FeignException exception;
@@ -34,27 +34,28 @@ public class RestErrorAssert {
         this.exception = exception;
     }
 
-    public static RestErrorAssert assertThatFeignExceptionIsThrownBy(final ThrowingCallable throwingCallable) {
+    public static RestErrorAssert assertThatFeignExceptionIsThrownBy(
+            final ThrowingCallable throwingCallable) {
         Throwable throwable = catchThrowable(throwingCallable);
         assertThat(throwable).isInstanceOf(FeignException.class);
 
-        StepEventBus
-                .getEventBus()
-                .getBaseStepListener()
-                .exceptionExpected(FeignException.class);
+        StepEventBus.getEventBus().getBaseStepListener().exceptionExpected(FeignException.class);
 
         return new RestErrorAssert((FeignException) throwable);
     }
 
-    public static RestErrorAssert assertThatRestNotFoundErrorIsThrownBy(final ThrowingCallable throwingCallable) {
+    public static RestErrorAssert assertThatRestNotFoundErrorIsThrownBy(
+            final ThrowingCallable throwingCallable) {
         return assertThatFeignExceptionIsThrownBy(throwingCallable).withNotFoundCode();
     }
 
-    public static RestErrorAssert assertThatRestBadRequestErrorIsThrownBy(final ThrowingCallable throwingCallable) {
+    public static RestErrorAssert assertThatRestBadRequestErrorIsThrownBy(
+            final ThrowingCallable throwingCallable) {
         return assertThatFeignExceptionIsThrownBy(throwingCallable).withBadRequestCode();
     }
 
-    public static RestErrorAssert assertThatRestInternalServerErrorIsThrownBy(final ThrowingCallable throwingCallable) {
+    public static RestErrorAssert assertThatRestInternalServerErrorIsThrownBy(
+            final ThrowingCallable throwingCallable) {
         return assertThatFeignExceptionIsThrownBy(throwingCallable).withInternalServerErrorCode();
     }
 
@@ -84,5 +85,4 @@ public class RestErrorAssert {
     public RestErrorAssert withInternalServerErrorCode() {
         return withErrorCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
-
 }

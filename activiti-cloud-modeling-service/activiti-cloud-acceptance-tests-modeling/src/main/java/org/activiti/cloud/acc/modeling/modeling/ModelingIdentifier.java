@@ -17,9 +17,5 @@ package org.activiti.cloud.acc.modeling.modeling;
 
 import java.util.function.Predicate;
 
-/**
- * Model identifier
- */
-public interface ModelingIdentifier<M> extends Predicate<M> {
-
-}
+/** Model identifier */
+public interface ModelingIdentifier<M> extends Predicate<M> {}

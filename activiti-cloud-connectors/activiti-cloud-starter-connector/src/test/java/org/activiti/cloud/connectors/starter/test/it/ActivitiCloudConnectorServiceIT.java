@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.connectors.starter.test.it;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -40,9 +43,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
@@ -51,14 +51,11 @@ public class ActivitiCloudConnectorServiceIT {
 
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
 
-    @Autowired
-    private MessageChannel integrationEventsProducer;
+    @Autowired private MessageChannel integrationEventsProducer;
 
-    @ClassRule
-    public static RabbitTestSupport rabbitTestSupport = new RabbitTestSupport();
+    @ClassRule public static RabbitTestSupport rabbitTestSupport = new RabbitTestSupport();
 
-    @Autowired
-    private ConnectorsITStreamHandlers streamHandler;
+    @Autowired private ConnectorsITStreamHandlers streamHandler;
 
     @Value("${activiti.cloud.application.name}")
     private String appName;
@@ -66,9 +63,10 @@ public class ActivitiCloudConnectorServiceIT {
     @Value("${spring.application.name}")
     private String serviceFullName;
 
-    private final static String PROCESS_INSTANCE_ID = "processInstanceId-" + UUID.randomUUID().toString();
-    private final static String PROCESS_DEFINITION_ID = "myProcessDefinitionId";
-    private final static String INTEGRATION_ID = "integrationId-" + UUID.randomUUID().toString();
+    private static final String PROCESS_INSTANCE_ID =
+            "processInstanceId-" + UUID.randomUUID().toString();
+    private static final String PROCESS_DEFINITION_ID = "myProcessDefinitionId";
+    private static final String INTEGRATION_ID = "integrationId-" + UUID.randomUUID().toString();
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -82,7 +80,7 @@ public class ActivitiCloudConnectorServiceIT {
 
     @Test
     public void integrationEventShouldBePickedByConnectorMock() throws Exception {
-        //given
+        // given
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1", "value1");
@@ -100,37 +98,41 @@ public class ActivitiCloudConnectorServiceIT {
         integrationRequest.setServiceVersion("1");
         integrationRequest.setAppVersion("1");
 
-        Message<IntegrationRequest> message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
-            .setHeader("type", "Mock")
-            .build();
+        Message<IntegrationRequest> message =
+                MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
+                        .setHeader("type", "Mock")
+                        .build();
         integrationEventsProducer.send(message);
 
-        message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
-            .setHeader("type", "MockProcessRuntime")
-            .build();
+        message =
+                MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
+                        .setHeader("type", "MockProcessRuntime")
+                        .build();
         integrationEventsProducer.send(message);
 
         await("Should receive at least 2 integration results")
-            .untilAsserted(() ->
-                assertThat(streamHandler.getIntegrationResultEventsCounter().get()).isGreaterThanOrEqualTo(1)
-            );
+                .untilAsserted(
+                        () ->
+                                assertThat(streamHandler.getIntegrationResultEventsCounter().get())
+                                        .isGreaterThanOrEqualTo(1));
     }
 
     @Test
     public void integrationErrorShouldBeProducedByConnectorRuntimeExceptionMock() throws Exception {
-        //given
+        // given
         streamHandler.isIntegrationErrorEventProduced().set(false);
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
-            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
-            .setHeader("type", "RuntimeException")
-            .build();
+        Message<IntegrationRequest> message =
+                MessageBuilder.withPayload(integrationRequest)
+                        .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+                        .setHeader("type", "RuntimeException")
+                        .build();
         integrationEventsProducer.send(message);
 
         await("Should produce RuntimeException integration error")
-            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+                .untilTrue(streamHandler.isIntegrationErrorEventProduced());
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
@@ -142,19 +144,20 @@ public class ActivitiCloudConnectorServiceIT {
 
     @Test
     public void integrationErrorShouldBeProducedByConnectorErrorMock() throws Exception {
-        //given
+        // given
         streamHandler.isIntegrationErrorEventProduced().set(false);
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
-            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
-            .setHeader("type", "Error")
-            .build();
+        Message<IntegrationRequest> message =
+                MessageBuilder.withPayload(integrationRequest)
+                        .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+                        .setHeader("type", "Error")
+                        .build();
         integrationEventsProducer.send(message);
 
         await("Should produce Error integration error")
-            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+                .untilTrue(streamHandler.isIntegrationErrorEventProduced());
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
@@ -162,97 +165,104 @@ public class ActivitiCloudConnectorServiceIT {
         assertThat(integrationError.getErrorMessage()).isEqualTo("Mock Error");
         assertThat(integrationError.getStackTraceElements()).asList().isNotEmpty();
         assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
-
     }
 
     @Test
-    public void integrationErrorShouldBeProducedByConnectorCloudBpmnErrorCauseMock() throws Exception {
-        //given
+    public void integrationErrorShouldBeProducedByConnectorCloudBpmnErrorCauseMock()
+            throws Exception {
+        // given
         streamHandler.isIntegrationErrorEventProduced().set(false);
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
-            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
-            .setHeader("type", "CloudBpmnErrorCause")
-            .build();
+        Message<IntegrationRequest> message =
+                MessageBuilder.withPayload(integrationRequest)
+                        .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+                        .setHeader("type", "CloudBpmnErrorCause")
+                        .build();
 
         integrationEventsProducer.send(message);
 
         await("Should produce CloudBpmnError with root cause and message integration error")
-            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+                .untilTrue(streamHandler.isIntegrationErrorEventProduced());
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
         assertThat(integrationError.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
         assertThat(integrationError.getErrorCode()).isEqualTo("ERROR_CODE");
         assertThat(integrationError.getErrorMessage()).isEqualTo("Error cause message");
-        assertThat(integrationError.getStackTraceElements()).asList()
-                                                            .isNotEmpty()
-                                                            .extracting("methodName")
-                                                            .contains("raiseErrorCause", "mockTypeIntegrationCloudBpmnErrorRootCauseSender");
+        assertThat(integrationError.getStackTraceElements())
+                .asList()
+                .isNotEmpty()
+                .extracting("methodName")
+                .contains("raiseErrorCause", "mockTypeIntegrationCloudBpmnErrorRootCauseSender");
 
         assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
     }
 
     @Test
-    public void integrationErrorShouldBeProducedByConnectorCloudBpmnErrorMessageMock() throws Exception {
-        //given
+    public void integrationErrorShouldBeProducedByConnectorCloudBpmnErrorMessageMock()
+            throws Exception {
+        // given
         streamHandler.isIntegrationErrorEventProduced().set(false);
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
-            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
-            .setHeader("type", "CloudBpmnErrorMessage")
-            .build();
+        Message<IntegrationRequest> message =
+                MessageBuilder.withPayload(integrationRequest)
+                        .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+                        .setHeader("type", "CloudBpmnErrorMessage")
+                        .build();
 
         integrationEventsProducer.send(message);
 
         await("Should produce CloudBpmnError with error code and message integration error")
-            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+                .untilTrue(streamHandler.isIntegrationErrorEventProduced());
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
         assertThat(integrationError.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
         assertThat(integrationError.getErrorCode()).isEqualTo("ERROR_CODE");
         assertThat(integrationError.getErrorMessage()).isEqualTo("Error code message");
-        assertThat(integrationError.getStackTraceElements()).asList()
-                                                            .isNotEmpty()
-                                                            .extracting("methodName")
-                                                            .contains("mockTypeIntegrationCloudBpmnErrorMessageSender")
-                                                            .doesNotContain("raiseErrorCause");
+        assertThat(integrationError.getStackTraceElements())
+                .asList()
+                .isNotEmpty()
+                .extracting("methodName")
+                .contains("mockTypeIntegrationCloudBpmnErrorMessageSender")
+                .doesNotContain("raiseErrorCause");
 
         assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
     }
 
     @Test
     public void integrationErrorShouldBeProducedByConnectorCloudBpmnErrorMock() throws Exception {
-        //given
+        // given
         streamHandler.isIntegrationErrorEventProduced().set(false);
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
-            .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
-            .setHeader("type", "CloudBpmnError")
-            .build();
+        Message<IntegrationRequest> message =
+                MessageBuilder.withPayload(integrationRequest)
+                        .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+                        .setHeader("type", "CloudBpmnError")
+                        .build();
 
         integrationEventsProducer.send(message);
 
         await("Should produce CloudBpmnError integration error")
-            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+                .untilTrue(streamHandler.isIntegrationErrorEventProduced());
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
         assertThat(integrationError.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
         assertThat(integrationError.getErrorCode()).isEqualTo("ERROR_CODE");
         assertThat(integrationError.getErrorMessage()).isEqualTo("ERROR_CODE");
-        assertThat(integrationError.getStackTraceElements()).asList()
-                                                            .isNotEmpty()
-                                                            .extracting("methodName")
-                                                            .contains("mockTypeIntegrationCloudBpmnErrorSender")
-                                                            .doesNotContain("raiseErrorCause");
+        assertThat(integrationError.getStackTraceElements())
+                .asList()
+                .isNotEmpty()
+                .extracting("methodName")
+                .contains("mockTypeIntegrationCloudBpmnErrorSender")
+                .doesNotContain("raiseErrorCause");
 
         assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
     }
@@ -273,5 +283,3 @@ public class ActivitiCloudConnectorServiceIT {
         return integrationRequest;
     }
 }
-
-

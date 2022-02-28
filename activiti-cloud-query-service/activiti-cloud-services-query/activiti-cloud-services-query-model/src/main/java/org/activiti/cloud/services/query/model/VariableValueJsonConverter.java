@@ -15,19 +15,18 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 
 import javax.persistence.AttributeConverter;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class VariableValueJsonConverter implements AttributeConverter<VariableValue<?>, String> {
 
     private static ObjectMapper objectMapper;
 
-    public VariableValueJsonConverter() {
-    }
+    public VariableValueJsonConverter() {}
 
     public VariableValueJsonConverter(ObjectMapper objectMapper) {
         VariableValueJsonConverter.objectMapper = objectMapper;
@@ -45,7 +44,7 @@ public class VariableValueJsonConverter implements AttributeConverter<VariableVa
     @Override
     public VariableValue<?> convertToEntityAttribute(String dbData) {
         try {
-            if(dbData != null && dbData.length() > 0) {
+            if (dbData != null && dbData.length() > 0) {
                 return objectMapper.readValue(dbData, VariableValue.class);
             } else {
                 return new VariableValue<Object>(null);
@@ -55,5 +54,4 @@ public class VariableValueJsonConverter implements AttributeConverter<VariableVa
             throw new QueryException("Unable to deserialize variable.", e);
         }
     }
-
 }

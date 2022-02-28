@@ -15,7 +15,8 @@
  */
 package org.activiti.cloud.services.query.liquibase;
 
-import javax.sql.DataSource;
+import liquibase.exception.LiquibaseException;
+import liquibase.integration.spring.SpringLiquibase;
 
 import org.activiti.cloud.common.liquibase.SpringLiquibaseConfigurationSupport;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -26,13 +27,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import liquibase.exception.LiquibaseException;
-import liquibase.integration.spring.SpringLiquibase;
+import javax.sql.DataSource;
 
 @Configuration
 @ConditionalOnProperty(prefix = "spring.liquibase", name = "enabled", matchIfMissing = true)
 @PropertySource("classpath:config/query-liquibase.properties")
-public class ActivitiCloudQueryLiquibaseAutoConfiguration extends SpringLiquibaseConfigurationSupport {
+public class ActivitiCloudQueryLiquibaseAutoConfiguration
+        extends SpringLiquibaseConfigurationSupport {
 
     @Bean
     @ConditionalOnMissingBean(name = "queryLiquibase")

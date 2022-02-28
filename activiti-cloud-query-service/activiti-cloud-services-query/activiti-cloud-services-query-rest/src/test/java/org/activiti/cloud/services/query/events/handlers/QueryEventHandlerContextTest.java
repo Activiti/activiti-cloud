@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
@@ -26,16 +30,11 @@ import org.mockito.Mock;
 
 import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class QueryEventHandlerContextTest {
 
     private QueryEventHandlerContext context;
 
-    @Mock
-    private QueryEventHandler handler;
+    @Mock private QueryEventHandler handler;
 
     @BeforeEach
     public void setUp() {
@@ -46,25 +45,25 @@ public class QueryEventHandlerContextTest {
 
     @Test
     public void handleShouldSelectHandlerBasedOnEventType() {
-        //given
+        // given
         CloudTaskCreatedEvent event = new CloudTaskCreatedEventImpl();
 
-        //when
+        // when
         context.handle(event);
 
-        //then
+        // then
         verify(handler).handle(event);
     }
 
     @Test
     public void handleShouldDoNothingWhenNoHandlerIsFoundForTheGivenEvent() {
-        //given
+        // given
         CloudTaskCompletedEvent event = new CloudTaskCompletedEventImpl();
 
-        //when
+        // when
         context.handle(event);
 
-        //then
+        // then
         verify(handler, never()).handle(any());
     }
 }

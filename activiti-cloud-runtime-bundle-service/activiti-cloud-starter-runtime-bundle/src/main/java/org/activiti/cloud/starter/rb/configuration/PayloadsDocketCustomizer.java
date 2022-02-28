@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.rb.configuration;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
@@ -33,30 +34,39 @@ import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
+
 import springfox.documentation.spring.web.plugins.Docket;
 
-/**
- * Swagger Api Models substitution with the payload field enriched Models version
- */
+/** Swagger Api Models substitution with the payload field enriched Models version */
 public class PayloadsDocketCustomizer implements DocketCustomizer {
 
     public Docket customize(Docket docket) {
-        return docket
-                .directModelSubstitute(StartProcessPayload.class, StartProcessPayloadApiModel.class)
+        return docket.directModelSubstitute(
+                        StartProcessPayload.class, StartProcessPayloadApiModel.class)
                 .directModelSubstitute(SignalPayload.class, SignalPayloadApiModel.class)
-                .directModelSubstitute(UpdateProcessPayload.class, UpdateProcessPayloadApiModel.class)
-                .directModelSubstitute(SetProcessVariablesPayload.class, SetProcessVariablesPayloadApiModel.class)
-                .directModelSubstitute(RemoveProcessVariablesPayload.class, RemoveProcessVariablesPayloadApiModel.class)
+                .directModelSubstitute(
+                        UpdateProcessPayload.class, UpdateProcessPayloadApiModel.class)
+                .directModelSubstitute(
+                        SetProcessVariablesPayload.class, SetProcessVariablesPayloadApiModel.class)
+                .directModelSubstitute(
+                        RemoveProcessVariablesPayload.class,
+                        RemoveProcessVariablesPayloadApiModel.class)
                 .directModelSubstitute(AssignTaskPayload.class, AssignTaskPayloadApiModel.class)
                 .directModelSubstitute(CompleteTaskPayload.class, CompleteTaskPayloadApiModel.class)
-                .directModelSubstitute(CandidateGroupsPayload.class, CandidateGroupsPayloadApiModel.class)
-                .directModelSubstitute(CandidateUsersPayload.class, CandidateUsersPayloadApiModel.class)
+                .directModelSubstitute(
+                        CandidateGroupsPayload.class, CandidateGroupsPayloadApiModel.class)
+                .directModelSubstitute(
+                        CandidateUsersPayload.class, CandidateUsersPayloadApiModel.class)
                 .directModelSubstitute(CreateTaskPayload.class, CreateTaskPayloadApiModel.class)
-                .directModelSubstitute(CreateTaskVariablePayload.class, CreateTaskVariablePayloadApiModel.class)
-                .directModelSubstitute(UpdateTaskVariablePayload.class, UpdateTaskVariablePayloadApiModel.class)
+                .directModelSubstitute(
+                        CreateTaskVariablePayload.class, CreateTaskVariablePayloadApiModel.class)
+                .directModelSubstitute(
+                        UpdateTaskVariablePayload.class, UpdateTaskVariablePayloadApiModel.class)
                 .directModelSubstitute(UpdateTaskPayload.class, UpdateTaskPayloadApiModel.class)
                 .directModelSubstitute(SaveTaskPayload.class, SaveTaskPayloadApiModel.class)
-                .directModelSubstitute(CreateProcessInstancePayload.class, CreateProcessInstancePayloadApiModel.class);
+                .directModelSubstitute(
+                        CreateProcessInstancePayload.class,
+                        CreateProcessInstancePayloadApiModel.class);
     }
 
     @ApiModel("StartProcessPayload")
@@ -84,7 +94,8 @@ public class PayloadsDocketCustomizer implements DocketCustomizer {
     }
 
     @ApiModel("RemoveProcessVariablesPayload")
-    public static class RemoveProcessVariablesPayloadApiModel extends RemoveProcessVariablesPayload {
+    public static class RemoveProcessVariablesPayloadApiModel
+            extends RemoveProcessVariablesPayload {
         @ApiModelProperty(allowableValues = "RemoveProcessVariablesPayload")
         public String payloadType;
     }

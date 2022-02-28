@@ -16,8 +16,11 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.*;
+
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.Objects;
 
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -28,43 +31,47 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.Objects;
 
-@Entity(name="TaskCandidateUser")
+@Entity(name = "TaskCandidateUser")
 @IdClass(TaskCandidateUserId.class)
-@Table(name="TASK_CANDIDATE_USER", indexes= {
-		@Index(name="tcu_userId_idx", columnList="userId", unique=false),
-		@Index(name="tcu_taskId_idx", columnList="taskId", unique=false)
-	}
-)
+@Table(
+        name = "TASK_CANDIDATE_USER",
+        indexes = {
+            @Index(name = "tcu_userId_idx", columnList = "userId", unique = false),
+            @Index(name = "tcu_taskId_idx", columnList = "taskId", unique = false)
+        })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @DynamicInsert
 @DynamicUpdate
 public class TaskCandidateUserEntity {
 
-    @Id
-    private String taskId;
+    @Id private String taskId;
 
-    @Id
-    private String userId;
+    @Id private String userId;
 
     @JsonIgnore
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+            name = "taskId",
+            referencedColumnName = "id",
+            insertable = false,
+            updatable = false,
+            nullable = true,
+            foreignKey =
+                    @javax.persistence.ForeignKey(
+                            value = ConstraintMode.NO_CONSTRAINT,
+                            name = "none"))
     private TaskEntity task;
 
     @JsonCreator
-    public TaskCandidateUserEntity(@JsonProperty("taskId") String taskid,
-                                   @JsonProperty("userId") String userId) {
+    public TaskCandidateUserEntity(
+            @JsonProperty("taskId") String taskid, @JsonProperty("userId") String userId) {
         this.taskId = taskid;
         this.userId = userId;
     }
 
-    public TaskCandidateUserEntity() {
-
-    }
+    public TaskCandidateUserEntity() {}
 
     public String getTaskId() {
         return taskId;
@@ -97,15 +104,13 @@ public class TaskCandidateUserEntity {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         TaskCandidateUserEntity other = (TaskCandidateUserEntity) obj;
-        return this.userId != null &&
-            this.taskId != null &&
-            Objects.equals(taskId, other.taskId) && Objects.equals(userId, other.userId);
+        return this.userId != null
+                && this.taskId != null
+                && Objects.equals(taskId, other.taskId)
+                && Objects.equals(userId, other.userId);
     }
 }

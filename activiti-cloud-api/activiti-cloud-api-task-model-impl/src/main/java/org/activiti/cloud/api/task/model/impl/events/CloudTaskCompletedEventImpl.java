@@ -21,19 +21,14 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 public class CloudTaskCompletedEventImpl extends CloudTaskEventImpl
         implements CloudTaskCompletedEvent {
 
-    public CloudTaskCompletedEventImpl() {
-    }
+    public CloudTaskCompletedEventImpl() {}
 
     public CloudTaskCompletedEventImpl(Task task) {
         super(task);
     }
 
-    public CloudTaskCompletedEventImpl(String id,
-                                       Long timestamp,
-                                       Task task) {
-        super(id,
-              timestamp,
-              task);
+    public CloudTaskCompletedEventImpl(String id, Long timestamp, Task task) {
+        super(id, timestamp, task);
     }
 
     @Override

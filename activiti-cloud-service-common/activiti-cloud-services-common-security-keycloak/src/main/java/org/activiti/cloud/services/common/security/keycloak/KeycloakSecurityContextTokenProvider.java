@@ -24,9 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
-/**
- * Keycloak implementation for {@link SecurityContextTokenProvider}
- */
+/** Keycloak implementation for {@link SecurityContextTokenProvider} */
 public class KeycloakSecurityContextTokenProvider implements SecurityContextTokenProvider {
 
     @Override

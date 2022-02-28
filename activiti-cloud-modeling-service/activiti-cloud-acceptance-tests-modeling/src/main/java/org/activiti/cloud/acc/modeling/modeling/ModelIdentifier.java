@@ -19,9 +19,7 @@ import org.activiti.cloud.modeling.api.Model;
 
 import java.util.Optional;
 
-/**
- * Modeling model identifier
- */
+/** Modeling model identifier */
 public class ModelIdentifier<M> implements ModelingIdentifier<M> {
 
     private String modelName;
@@ -30,16 +28,11 @@ public class ModelIdentifier<M> implements ModelingIdentifier<M> {
 
     private String modelVersion;
 
-    public ModelIdentifier(String modelName,
-                           String modelType) {
-        this(modelName,
-             modelType,
-             null);
+    public ModelIdentifier(String modelName, String modelType) {
+        this(modelName, modelType, null);
     }
 
-    public ModelIdentifier(String modelName,
-                           String modelType,
-                           String modelVersion) {
+    public ModelIdentifier(String modelName, String modelType, String modelVersion) {
         this.modelName = modelName;
         this.modelType = modelType;
         this.modelVersion = modelVersion;
@@ -68,17 +61,12 @@ public class ModelIdentifier<M> implements ModelingIdentifier<M> {
         return modelVersion == null || modelVersion.equals(model.getVersion());
     }
 
-    public static ModelIdentifier identified(String modelName,
-                                             String modelType) {
-        return new ModelIdentifier(modelName,
-                                   modelType);
+    public static ModelIdentifier identified(String modelName, String modelType) {
+        return new ModelIdentifier(modelName, modelType);
     }
 
-    public static ModelIdentifier identified(String modelName,
-                                             String modelType,
-                                             String modelVersion) {
-        return new ModelIdentifier(modelName,
-                                   modelType,
-                                   modelVersion);
+    public static ModelIdentifier identified(
+            String modelName, String modelType, String modelVersion) {
+        return new ModelIdentifier(modelName, modelType, modelVersion);
     }
 }

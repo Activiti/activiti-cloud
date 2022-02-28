@@ -35,16 +35,13 @@ public class IntegrationResultChannelResolverImplTest {
 
     private IntegrationResultChannelResolver subject;
 
-    @Mock
-    private BinderAwareChannelResolver resolver;
+    @Mock private BinderAwareChannelResolver resolver;
 
     private IntegrationResultDestinationBuilder builder;
 
-    @Mock
-    private ConnectorProperties connectorProperties;
+    @Mock private ConnectorProperties connectorProperties;
 
-    @Mock
-    private MessageChannel messageChannel;
+    @Mock private MessageChannel messageChannel;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -55,8 +52,7 @@ public class IntegrationResultChannelResolverImplTest {
 
         builder = spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
 
-        subject = new IntegrationResultChannelResolverImpl(resolver,
-                                                     builder);
+        subject = new IntegrationResultChannelResolverImpl(resolver, builder);
     }
 
     @Test
@@ -78,5 +74,4 @@ public class IntegrationResultChannelResolverImplTest {
 
         verify(builder).buildDestination(integrationRequest);
     }
-
 }

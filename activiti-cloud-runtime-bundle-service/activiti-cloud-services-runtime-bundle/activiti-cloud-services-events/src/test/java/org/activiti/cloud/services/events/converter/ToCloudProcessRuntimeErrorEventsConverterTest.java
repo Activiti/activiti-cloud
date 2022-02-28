@@ -33,11 +33,9 @@ import org.mockito.Mock;
 
 public class ToCloudProcessRuntimeErrorEventsConverterTest {
 
-    @InjectMocks
-    private ToCloudProcessRuntimeEventConverter converter;
+    @InjectMocks private ToCloudProcessRuntimeEventConverter converter;
 
-    @Mock
-    private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    @Mock private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @BeforeEach
     public void setUp() {
@@ -56,7 +54,8 @@ public class ToCloudProcessRuntimeErrorEventsConverterTest {
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender)
+                .appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     private BPMNError bpmnErrorEntity(String entityId) {

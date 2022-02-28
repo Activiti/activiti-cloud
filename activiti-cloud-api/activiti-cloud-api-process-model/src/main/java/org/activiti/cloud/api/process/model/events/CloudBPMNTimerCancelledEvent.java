@@ -15,6 +15,4 @@
  */
 package org.activiti.cloud.api.process.model.events;
 
-public interface CloudBPMNTimerCancelledEvent extends CloudBPMNTimerEvent {
-
-}
+public interface CloudBPMNTimerCancelledEvent extends CloudBPMNTimerEvent {}

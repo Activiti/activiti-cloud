@@ -30,8 +30,7 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private ProcessInstance processInstance;
 
-    public ProcessAuditEventEntity() {
-    }
+    public ProcessAuditEventEntity() {}
 
     public ProcessAuditEventEntity(CloudProcessRuntimeEvent cloudEvent) {
         super(cloudEvent);
@@ -50,11 +49,10 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ProcessAuditEventEntity [processInstance=")
-               .append(processInstance)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+                .append(processInstance)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
-
 }

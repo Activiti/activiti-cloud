@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,35 +28,35 @@ import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
 import org.springframework.security.core.Authentication;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class KeycloakAuthenticationProviderTest {
 
-    private KeycloakActivitiAuthenticationProvider keycloakActivitiAuthenticationProvider = spy(new KeycloakActivitiAuthenticationProvider());
+    private KeycloakActivitiAuthenticationProvider keycloakActivitiAuthenticationProvider =
+            spy(new KeycloakActivitiAuthenticationProvider());
     private KeycloakAuthenticationToken token;
     private RefreshableKeycloakSecurityContext keycloakSecurityContext;
 
     @BeforeEach
     public void setUp() {
         keycloakSecurityContext = mock(RefreshableKeycloakSecurityContext.class);
-        KeycloakPrincipal principal = new KeycloakPrincipal("bob",
-                                                            keycloakSecurityContext);
-        KeycloakAccount keycloakAccount = new SimpleKeycloakAccount(principal,
-                                                                    new HashSet<>(Arrays.asList("role1",
-                                                                                                "role2")),
-                                                                    keycloakSecurityContext);
-        token = new KeycloakAuthenticationToken(keycloakAccount,
-                                                false);
+        KeycloakPrincipal principal = new KeycloakPrincipal("bob", keycloakSecurityContext);
+        KeycloakAccount keycloakAccount =
+                new SimpleKeycloakAccount(
+                        principal,
+                        new HashSet<>(Arrays.asList("role1", "role2")),
+                        keycloakSecurityContext);
+        token = new KeycloakAuthenticationToken(keycloakAccount, false);
     }
 
     @Test
     public void authenticateShouldUseNameFromAuthenticationWhenPreferredUserNameIsNotSet() {
 
-        //when
+        // when
         Authentication authentication = keycloakActivitiAuthenticationProvider.authenticate(token);
 
-        //then
+        // then
         assertThat(authentication).isNotNull();
         verify(keycloakActivitiAuthenticationProvider).setAuthenticatedUserId("bob");
     }
@@ -64,15 +64,15 @@ public class KeycloakAuthenticationProviderTest {
     @Test
     public void authenticateShouldUsePreferredUsernameWhenSet() {
 
-        //given
+        // given
         AccessToken accessToken = mock(AccessToken.class);
         when(keycloakSecurityContext.getToken()).thenReturn(accessToken);
         when(accessToken.getPreferredUsername()).thenReturn("bob@any.org");
 
-        //when
+        // when
         Authentication authentication = keycloakActivitiAuthenticationProvider.authenticate(token);
 
-        //then
+        // then
         assertThat(authentication).isNotNull();
         verify(keycloakActivitiAuthenticationProvider).setAuthenticatedUserId("bob@any.org");
     }

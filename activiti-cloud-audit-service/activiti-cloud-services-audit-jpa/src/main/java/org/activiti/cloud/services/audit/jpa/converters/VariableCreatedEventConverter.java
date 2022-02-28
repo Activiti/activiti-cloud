@@ -28,7 +28,7 @@ public class VariableCreatedEventConverter extends BaseEventToEntityConverter {
     public VariableCreatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return VariableEvent.VariableEvents.VARIABLE_CREATED.name();
@@ -41,10 +41,12 @@ public class VariableCreatedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        VariableCreatedEventEntity variableCreatedEventEntity = (VariableCreatedEventEntity) auditEventEntity;
+        VariableCreatedEventEntity variableCreatedEventEntity =
+                (VariableCreatedEventEntity) auditEventEntity;
 
-        return new CloudVariableCreatedEventImpl(variableCreatedEventEntity.getEventId(),
-                                                 variableCreatedEventEntity.getTimestamp(),
-                                                 variableCreatedEventEntity.getVariableInstance());
+        return new CloudVariableCreatedEventImpl(
+                variableCreatedEventEntity.getEventId(),
+                variableCreatedEventEntity.getTimestamp(),
+                variableCreatedEventEntity.getVariableInstance());
     }
 }

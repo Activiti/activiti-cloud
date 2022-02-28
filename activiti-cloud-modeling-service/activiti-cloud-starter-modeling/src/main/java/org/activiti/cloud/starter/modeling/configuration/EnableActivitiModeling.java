@@ -31,6 +31,4 @@ import java.lang.annotation.Target;
 @Inherited
 @EnableDiscoveryClient
 @ImportAutoConfiguration(ModelingSwaggerConfig.class)
-public @interface EnableActivitiModeling {
-
-}
+public @interface EnableActivitiModeling {}

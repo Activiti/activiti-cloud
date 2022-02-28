@@ -18,18 +18,19 @@ package org.activiti.cloud.services.query.rest.predicate;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+
 import java.util.List;
 import java.util.Optional;
 
 public class QueryDslPredicateAggregator {
 
-    public Predicate applyFilters(Predicate currentPredicate, List<QueryDslPredicateFilter> filters) {
-        Predicate extendedPredicate = Optional.ofNullable(currentPredicate)
-            .orElseGet(BooleanBuilder::new);
+    public Predicate applyFilters(
+            Predicate currentPredicate, List<QueryDslPredicateFilter> filters) {
+        Predicate extendedPredicate =
+                Optional.ofNullable(currentPredicate).orElseGet(BooleanBuilder::new);
         for (QueryDslPredicateFilter filter : filters) {
             extendedPredicate = filter.extend(extendedPredicate);
         }
         return extendedPredicate;
     }
-
 }

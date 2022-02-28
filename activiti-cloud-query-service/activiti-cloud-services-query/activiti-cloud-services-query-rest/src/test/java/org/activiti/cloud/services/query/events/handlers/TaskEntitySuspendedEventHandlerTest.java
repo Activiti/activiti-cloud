@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -26,25 +34,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import javax.persistence.EntityManager;
 
 public class TaskEntitySuspendedEventHandlerTest {
 
-    @InjectMocks
-    private TaskSuspendedEventHandler handler;
+    @InjectMocks private TaskSuspendedEventHandler handler;
 
-    @Mock
-    private EntityManager entityManager;
+    @Mock private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
@@ -53,51 +52,48 @@ public class TaskEntitySuspendedEventHandlerTest {
 
     @Test
     public void handleShouldUpdateTaskStatusToSuspended() {
-        //given
+        // given
         CloudTaskSuspendedEventImpl event = buildTaskSuspendedEvent();
         String taskId = event.getEntity().getId();
-        TaskEntity taskEntity = aTask()
-                .withId(taskId)
-                .build();
+        TaskEntity taskEntity = aTask().withId(taskId).build();
 
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(taskEntity);
 
-        //when
+        // when
         handler.handle(event);
 
-        //then
+        // then
         verify(entityManager).persist(taskEntity);
         verify(taskEntity).setStatus(Task.TaskStatus.SUSPENDED);
         verify(taskEntity).setLastModified(any(Date.class));
     }
 
     private CloudTaskSuspendedEventImpl buildTaskSuspendedEvent() {
-        return new CloudTaskSuspendedEventImpl(new TaskImpl(UUID.randomUUID().toString(),
-                                                            "task",
-                                                            Task.TaskStatus.SUSPENDED));
+        return new CloudTaskSuspendedEventImpl(
+                new TaskImpl(UUID.randomUUID().toString(), "task", Task.TaskStatus.SUSPENDED));
     }
 
     @Test
     public void handleShouldThrowExceptionWhenNoTaskIsFoundForTheGivenId() {
-        //given
+        // given
         CloudTaskSuspendedEventImpl event = buildTaskSuspendedEvent();
         String taskId = event.getEntity().getId();
 
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(null);
 
-        //then
-        //when
+        // then
+        // when
         assertThatExceptionOfType(QueryException.class)
-            .isThrownBy(() -> handler.handle(event))
-            .withMessageContaining("Unable to find task with id: " + taskId);
+                .isThrownBy(() -> handler.handle(event))
+                .withMessageContaining("Unable to find task with id: " + taskId);
     }
 
     @Test
     public void getHandledEventShouldReturnTaskSuspendedEvent() {
-        //when
+        // when
         String handledEvent = handler.getHandledEvent();
 
-        //then
+        // then
         assertThat(handledEvent).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name());
     }
 }

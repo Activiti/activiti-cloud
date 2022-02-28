@@ -21,6 +21,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import com.querydsl.core.types.Predicate;
+
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
@@ -42,17 +43,13 @@ import java.util.UUID;
 @SpringBootTest
 public class ProcessDefinitionRestrictionServiceIT {
 
-    @Autowired
-    private ProcessDefinitionRepository processDefinitionRepository;
+    @Autowired private ProcessDefinitionRepository processDefinitionRepository;
 
-    @Autowired
-    private ProcessDefinitionRestrictionService restrictionService;
+    @Autowired private ProcessDefinitionRestrictionService restrictionService;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
+    @MockBean private UserGroupManager userGroupManager;
 
-    @MockBean
-    private SecurityManager securityManager;
+    @MockBean private SecurityManager securityManager;
 
     private ProcessDefinitionEntity defKey1AuthorizedService;
     private ProcessDefinitionEntity defKey2AuthorizedService;
@@ -63,24 +60,20 @@ public class ProcessDefinitionRestrictionServiceIT {
 
     @BeforeEach
     public void setUp() {
-        defKey1AuthorizedService = buildProcessDefinition("test-cmd-endpoint",
-                                                          "defKey1");
-        defKey2AuthorizedService = buildProcessDefinition("test-cmd-endpoint",
-                                                          "defKey2");
-        defKey3AuthorizedService = buildProcessDefinition("test-cmd-endpoint",
-                                                          "defKey3");
-        defKey1UnauthorizedService = buildProcessDefinition("non-authorized-service",
-                                                            "defKey1");
-        defKey1WildService = buildProcessDefinition("test-cmd-endpoint-wild",
-                                                    "defKey1");
-        defKey2WildService = buildProcessDefinition("test-cmd-endpoint-wild",
-                                                    "defKey2");
-        processDefinitionRepository.saveAll(Arrays.asList(defKey1AuthorizedService,
-                                                          defKey2AuthorizedService,
-                                                          defKey3AuthorizedService,
-                                                          defKey1UnauthorizedService,
-                                                          defKey1WildService,
-                                                          defKey2WildService));
+        defKey1AuthorizedService = buildProcessDefinition("test-cmd-endpoint", "defKey1");
+        defKey2AuthorizedService = buildProcessDefinition("test-cmd-endpoint", "defKey2");
+        defKey3AuthorizedService = buildProcessDefinition("test-cmd-endpoint", "defKey3");
+        defKey1UnauthorizedService = buildProcessDefinition("non-authorized-service", "defKey1");
+        defKey1WildService = buildProcessDefinition("test-cmd-endpoint-wild", "defKey1");
+        defKey2WildService = buildProcessDefinition("test-cmd-endpoint-wild", "defKey2");
+        processDefinitionRepository.saveAll(
+                Arrays.asList(
+                        defKey1AuthorizedService,
+                        defKey2AuthorizedService,
+                        defKey3AuthorizedService,
+                        defKey1UnauthorizedService,
+                        defKey1WildService,
+                        defKey2WildService));
     }
 
     @AfterEach
@@ -90,72 +83,74 @@ public class ProcessDefinitionRestrictionServiceIT {
 
     @Test
     public void shouldGetOnlyProcessDefinitionAllowedToTheUser() {
-        //given
+        // given
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
-        //when
-        Predicate predicate = restrictionService.restrictProcessDefinitionQuery(null,
-                                                                                SecurityPolicyAccess.READ);
+        // when
+        Predicate predicate =
+                restrictionService.restrictProcessDefinitionQuery(null, SecurityPolicyAccess.READ);
 
-        //then
-        Iterable<ProcessDefinitionEntity> processDefinitions = processDefinitionRepository.findAll(predicate);
+        // then
+        Iterable<ProcessDefinitionEntity> processDefinitions =
+                processDefinitionRepository.findAll(predicate);
         assertThat(processDefinitions)
-                .extracting(ProcessDefinitionEntity::getServiceName,
-                            ProcessDefinitionEntity::getKey)
-                .containsExactly(tuple("test-cmd-endpoint",
-                                       "defKey1"));
+                .extracting(
+                        ProcessDefinitionEntity::getServiceName, ProcessDefinitionEntity::getKey)
+                .containsExactly(tuple("test-cmd-endpoint", "defKey1"));
     }
 
     @Test
-    public void shouldGetAllDefinitionsInAllowedServiceInAdditionToDirectSpecifiedKeysWhenUsingWildcard() {
-        //given
+    public void
+            shouldGetAllDefinitionsInAllowedServiceInAdditionToDirectSpecifiedKeysWhenUsingWildcard() {
+        // given
         given(securityManager.getAuthenticatedUserId()).willReturn("hruser");
 
-        //when
-        Predicate predicate = restrictionService.restrictProcessDefinitionQuery(null,
-                                                                                SecurityPolicyAccess.READ);
+        // when
+        Predicate predicate =
+                restrictionService.restrictProcessDefinitionQuery(null, SecurityPolicyAccess.READ);
 
-        //then
-        Iterable<ProcessDefinitionEntity> processDefinitions = processDefinitionRepository.findAll(predicate);
+        // then
+        Iterable<ProcessDefinitionEntity> processDefinitions =
+                processDefinitionRepository.findAll(predicate);
         assertThat(processDefinitions)
-                .extracting(ProcessDefinitionEntity::getServiceName,
-                            ProcessDefinitionEntity::getKey)
-                .containsOnly(tuple("test-cmd-endpoint",
-                                    "defKey2"), // access given via key
-                              tuple("test-cmd-endpoint-wild",
-                                    "defKey1"), //access given via wildcard
-                              tuple("test-cmd-endpoint-wild",
-                                    "defKey2")); //access given via wild card
+                .extracting(
+                        ProcessDefinitionEntity::getServiceName, ProcessDefinitionEntity::getKey)
+                .containsOnly(
+                        tuple("test-cmd-endpoint", "defKey2"), // access given via key
+                        tuple("test-cmd-endpoint-wild", "defKey1"), // access given via wildcard
+                        tuple("test-cmd-endpoint-wild", "defKey2")); // access given via wild card
     }
 
     @Test
     public void shouldGetAllProcessDefinitionsAllowedToGroup() {
-        //given
+        // given
         when(securityManager.getAuthenticatedUserId()).thenReturn("bobinhr");
-        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Collections.singletonList("hrgroup"));
+        when(securityManager.getAuthenticatedUserGroups())
+                .thenReturn(Collections.singletonList("hrgroup"));
 
-        //when
-        Predicate predicate = restrictionService.restrictProcessDefinitionQuery(null,
-                                                                                SecurityPolicyAccess.READ);
+        // when
+        Predicate predicate =
+                restrictionService.restrictProcessDefinitionQuery(null, SecurityPolicyAccess.READ);
 
-        //then
-        Iterable<ProcessDefinitionEntity> processDefinitions = processDefinitionRepository.findAll(predicate);
+        // then
+        Iterable<ProcessDefinitionEntity> processDefinitions =
+                processDefinitionRepository.findAll(predicate);
         assertThat(processDefinitions)
-                .extracting(ProcessDefinitionEntity::getServiceName,
-                            ProcessDefinitionEntity::getKey)
-                .containsOnly(tuple("test-cmd-endpoint-wild",
-                                    "defKey1"), //access given via wildcard to hrgroup
-                              tuple("test-cmd-endpoint-wild",
-                                    "defKey2")); //access given via wildcard to hrgroup
+                .extracting(
+                        ProcessDefinitionEntity::getServiceName, ProcessDefinitionEntity::getKey)
+                .containsOnly(
+                        tuple(
+                                "test-cmd-endpoint-wild",
+                                "defKey1"), // access given via wildcard to hrgroup
+                        tuple(
+                                "test-cmd-endpoint-wild",
+                                "defKey2")); // access given via wildcard to hrgroup
     }
 
-    private ProcessDefinitionEntity buildProcessDefinition(String serviceName,
-                                                           String key) {
-        ProcessDefinitionEntity def1 = new ProcessDefinitionEntity(serviceName,
-                                                                   "full-test-cmd-endpoint",
-                                                                   "v1",
-                                                                   "app",
-                                                                   "version");
+    private ProcessDefinitionEntity buildProcessDefinition(String serviceName, String key) {
+        ProcessDefinitionEntity def1 =
+                new ProcessDefinitionEntity(
+                        serviceName, "full-test-cmd-endpoint", "v1", "app", "version");
         def1.setId(UUID.randomUUID().toString());
         def1.setKey(key);
         return def1;

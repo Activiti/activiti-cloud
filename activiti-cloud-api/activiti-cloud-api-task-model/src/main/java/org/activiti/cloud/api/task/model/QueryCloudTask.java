@@ -15,6 +15,6 @@
  */
 package org.activiti.cloud.api.task.model;
 
-public interface QueryCloudTask extends CloudTask{
+public interface QueryCloudTask extends CloudTask {
     public String getProcessDefinitionName();
 }

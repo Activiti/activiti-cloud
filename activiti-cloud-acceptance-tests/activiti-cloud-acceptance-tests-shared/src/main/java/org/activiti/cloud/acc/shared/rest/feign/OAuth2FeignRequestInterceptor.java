@@ -17,11 +17,10 @@ package org.activiti.cloud.acc.shared.rest.feign;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+
 import org.activiti.cloud.acc.shared.rest.TokenHolder;
 
-/**
- * Feign RequestInterceptor to add Bearer token in all headers
- */
+/** Feign RequestInterceptor to add Bearer token in all headers */
 public class OAuth2FeignRequestInterceptor implements RequestInterceptor {
 
     public static final String BEARER = "Bearer";
@@ -30,9 +29,6 @@ public class OAuth2FeignRequestInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        template.header(AUTHORIZATION,
-                String.format("%s %s",
-                        BEARER,
-                        TokenHolder.getAuthToken()));
+        template.header(AUTHORIZATION, String.format("%s %s", BEARER, TokenHolder.getAuthToken()));
     }
 }

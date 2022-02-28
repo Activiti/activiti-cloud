@@ -15,17 +15,15 @@
  */
 package org.activiti.cloud.services.modeling.converter;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.assertj.core.api.Assertions.*;
 
-import org.activiti.bpmn.model.CallActivity;
-import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.bpmn.model.UserTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReferenceIdOverriderTest {
 

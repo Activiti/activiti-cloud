@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
-
-import java.util.Optional;
 import org.activiti.cloud.services.modeling.rest.api.ModelsSchemaRestApi;
 import org.activiti.cloud.services.modeling.service.SchemaService;
 import org.json.JSONObject;
@@ -26,14 +24,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for Schema resources.
- */
+import java.util.Optional;
+
+/** Controller for Schema resources. */
 @RestController
 public class ModelsSchemaController implements ModelsSchemaRestApi {
 
-    @Autowired
-    private SchemaService schemaService;
+    @Autowired private SchemaService schemaService;
 
     @Override
     public ResponseEntity<String> getSchema(String modelType) {

@@ -20,28 +20,29 @@ import org.activiti.api.model.shared.model.ApplicationElement;
 public interface CloudRuntimeEntity extends ApplicationElement {
 
     /**
-     * Application name, for a runtime-bundle it is the value of the <i>activiti.cloud.application.name</i> spring property.
+     * Application name, for a runtime-bundle it is the value of the
+     * <i>activiti.cloud.application.name</i> spring property.
      */
     String getAppName();
 
     /**
-     * Service name, for a runtime-bundle it is the value of the <i>spring.application.name</i> spring property.
+     * Service name, for a runtime-bundle it is the value of the <i>spring.application.name</i>
+     * spring property.
      */
     String getServiceName();
 
-    /**
-     * Service full name, at the moment it is the same as serviceName.
-     */
+    /** Service full name, at the moment it is the same as serviceName. */
     String getServiceFullName();
 
     /**
-     * Service type, for a runtime-bundle it is the value of the <i>activiti.cloud.service.type</i> spring property.
+     * Service type, for a runtime-bundle it is the value of the <i>activiti.cloud.service.type</i>
+     * spring property.
      */
     String getServiceType();
 
     /**
-     * Service version, for a runtime-bundle it is the value of the <i>activiti.cloud.service.version</i> spring property.
+     * Service version, for a runtime-bundle it is the value of the
+     * <i>activiti.cloud.service.version</i> spring property.
      */
     String getServiceVersion();
-
 }

@@ -18,16 +18,14 @@ package org.activiti.cloud.modeling.api.process;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Model extensions
- */
+import java.util.HashMap;
+import java.util.Map;
+
+/** Model extensions */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
 public class Extensions {
@@ -36,10 +34,11 @@ public class Extensions {
     private Map<String, ProcessVariable> processVariables = new HashMap<>();
 
     @JsonProperty("mappings")
-    private Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>> variablesMappings = new HashMap<>();
+    private Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>>
+            variablesMappings = new HashMap<>();
 
     @JsonProperty("constants")
-    private Map<String,  Map<String, Constant>> constants = new HashMap<>();
+    private Map<String, Map<String, Constant>> constants = new HashMap<>();
 
     @JsonProperty("templates")
     private TemplatesDefinition templates = new TemplatesDefinition();
@@ -52,11 +51,14 @@ public class Extensions {
         this.processVariables = processVariables;
     }
 
-    public Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>> getVariablesMappings() {
+    public Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>>
+            getVariablesMappings() {
         return variablesMappings;
     }
 
-    public void setVariablesMappings(Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>> variablesMappings) {
+    public void setVariablesMappings(
+            Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>>
+                    variablesMappings) {
         this.variablesMappings = variablesMappings;
     }
 
@@ -76,12 +78,12 @@ public class Extensions {
         this.templates = templates;
     }
 
-    public Map<String,Object> getAsMap() {
-        Map<String,Object> extensions = new HashMap<>();
-        extensions.put("properties",this.processVariables);
-        extensions.put("mappings",this.variablesMappings);
-        extensions.put("constants",this.constants);
-        extensions.put("templates",this.templates);
+    public Map<String, Object> getAsMap() {
+        Map<String, Object> extensions = new HashMap<>();
+        extensions.put("properties", this.processVariables);
+        extensions.put("mappings", this.variablesMappings);
+        extensions.put("constants", this.constants);
+        extensions.put("templates", this.templates);
         return extensions;
     }
 }

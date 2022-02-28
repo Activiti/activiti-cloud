@@ -26,10 +26,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 public class RepositoryRestConfig implements RepositoryRestConfigurer {
 
     @Override
-    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
-        config
-            .exposeIdsFor(Project.class)
-            .exposeIdsFor(Model.class);
+    public void configureRepositoryRestConfiguration(
+            RepositoryRestConfiguration config, CorsRegistry cors) {
+        config.exposeIdsFor(Project.class).exposeIdsFor(Model.class);
     }
-
 }

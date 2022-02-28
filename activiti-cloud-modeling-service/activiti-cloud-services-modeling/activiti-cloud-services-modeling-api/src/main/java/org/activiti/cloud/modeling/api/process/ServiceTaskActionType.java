@@ -15,14 +15,12 @@
  */
 package org.activiti.cloud.modeling.api.process;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * Extensions service task action types
- */
+import java.util.Optional;
+
+/** Extensions service task action types */
 public enum ServiceTaskActionType {
     INPUTS,
     OUTPUTS;

@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class KeycloakPrincipalGroupsProviderChain implements PrincipalGroupsProvider {
-    
+
     private final List<PrincipalGroupsProvider> providers;
-    
+
     public KeycloakPrincipalGroupsProviderChain(@NonNull List<PrincipalGroupsProvider> providers) {
         this.providers = Collections.unmodifiableList(providers);
     }
@@ -34,10 +34,10 @@ public class KeycloakPrincipalGroupsProviderChain implements PrincipalGroupsProv
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
         return providers.stream()
-                        .map(provider -> provider.getGroups(principal))
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElseThrow(this::securityException);
+                .map(provider -> provider.getGroups(principal))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(this::securityException);
     }
 
     protected SecurityException securityException() {

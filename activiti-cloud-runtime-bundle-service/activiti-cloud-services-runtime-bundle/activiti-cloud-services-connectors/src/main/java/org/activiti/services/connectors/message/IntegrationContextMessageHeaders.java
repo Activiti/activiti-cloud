@@ -15,10 +15,7 @@
  */
 package org.activiti.services.connectors.message;
 
-/**
- * Holds message header key names used in messages with IntegrationContext payload type
- *
- */
+/** Holds message header key names used in messages with IntegrationContext payload type */
 class IntegrationContextMessageHeaders {
     public static final String CONNECTOR_TYPE = "connectorType";
     public static final String BUSINESS_KEY = "businessKey";
@@ -31,5 +28,4 @@ class IntegrationContextMessageHeaders {
     public static final String EXECUTION_ID = "executionId";
     public static final String PROCESS_DEFINITION_VERSION = "processDefinitionVersion";
     public static final String APP_VERSION = "appVersion";
-
 }

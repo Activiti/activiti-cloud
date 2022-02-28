@@ -18,11 +18,7 @@ package org.activiti.cloud.services.modeling.jpa.version;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
-/**
- * Custom JPA Repository for version entities
- */
+/** Custom JPA Repository for version entities */
 @NoRepositoryBean
 public interface VersionedJpaRepository<T extends VersionedEntity, K, V extends VersionEntity>
-        extends JpaRepository<T, K> {
-
-}
+        extends JpaRepository<T, K> {}

@@ -25,11 +25,11 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.springframework.data.domain.Pageable;
@@ -48,12 +48,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * Controller for process resources.
- */
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
+/** Controller for process resources. */
 @RestController
 @Tag(name = MODELS, description = "Retrieve and manage models")
-@RequestMapping(path = "/v1", produces = {HAL_JSON_VALUE, APPLICATION_JSON_VALUE})
+@RequestMapping(
+        path = "/v1",
+        produces = {HAL_JSON_VALUE, APPLICATION_JSON_VALUE})
 public interface ModelRestApi {
 
     String MODELS = "models";
@@ -66,7 +70,8 @@ public interface ModelRestApi {
 
     String CREATE_MODEL_PARAM_DESCR = "The details of the model to create";
 
-    String CREATE_MODEL_PROJECT_ID_PARAM_DESCR = "The id of the project to associate the new model with";
+    String CREATE_MODEL_PROJECT_ID_PARAM_DESCR =
+            "The id of the project to associate the new model with";
 
     String UPDATE_MODEL_ID_PARAM_DESCR = "The id of the model to update";
 
@@ -88,57 +93,70 @@ public interface ModelRestApi {
 
     String VALIDATE_MODEL_FILE_PARAM_DESCR = "The file containing the model definition to validate";
 
-    String VALIDATE_EXTENSIONS_FILE_PARAM_DESCR = "The file containing the model extensions to validate";
+    String VALIDATE_EXTENSIONS_FILE_PARAM_DESCR =
+            "The file containing the model extensions to validate";
 
     String MODEL_TYPE_PARAM_NAME = "type";
 
-    String VALIDATE_PROJECT_ID_PARAM_DESCR = "The id of the project in whose context the model is going to be validated";
+    String VALIDATE_PROJECT_ID_PARAM_DESCR =
+            "The id of the project in whose context the model is going to be validated";
 
     String PROJECT_ID_PARAM_NAME = "projectId";
 
-    String MODEL_USED_PARAM_DESCR = "The model is going to be validated and checked used in other model";
+    String MODEL_USED_PARAM_DESCR =
+            "The model is going to be validated and checked used in other model";
 
     String MODEL_USED_PARAM_NAME = "validateUsage";
 
-    String INCLUDE_ORPHANS_PARAM_DESCR = "If true, then models with no relationship to any project are retrieved regardless of their scope";
+    String INCLUDE_ORPHANS_PARAM_DESCR =
+            "If true, then models with no relationship to any project are retrieved regardless of"
+                    + " their scope";
 
     String INCLUDE_ORPHANS_PARAM_NAME = "includeOrphans";
 
-    String RELATE_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR = "The id of the project to associate the model with";
+    String RELATE_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR =
+            "The id of the project to associate the model with";
 
-    String RELATE_MODEL_PROJECT_MODEL_ID_PARAM_DESCR = "The id of the model to associate the project with";
+    String RELATE_MODEL_PROJECT_MODEL_ID_PARAM_DESCR =
+            "The id of the model to associate the project with";
 
     String SCOPE_PARAM_DESCR = "Scope to update the model if needed (optional)";
 
     String SCOPE_PARAM_NAME = "scope";
 
-    String FORCE_PARAM_DESCR = "If the scope of the model has restrictions on the number of projects that a model can belong to, remove the other relationships of the model with other projects";
+    String FORCE_PARAM_DESCR =
+            "If the scope of the model has restrictions on the number of projects that a model can"
+                    + " belong to, remove the other relationships of the model with other projects";
 
     String FORCE_PARAM_NAME = "force";
 
-    String DELETE_RELATIONSHIP_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR = "The id of the project of the relationship to delete";
+    String DELETE_RELATIONSHIP_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR =
+            "The id of the project of the relationship to delete";
 
-    String DELETE_RELATIONSHIP_MODEL_PROJECT_MODEL_ID_PARAM_DESCR = "The id of the model of the relationship to delete";
+    String DELETE_RELATIONSHIP_MODEL_PROJECT_MODEL_ID_PARAM_DESCR =
+            "The id of the model of the relationship to delete";
 
     @Operation(
             tags = MODELS,
             summary = "List models for an project",
-            description = "Get the models associated with an project. Minimal information for each model is returned.")
+            description =
+                    "Get the models associated with an project. Minimal information for each model"
+                            + " is returned.")
     @GetMapping(path = "/projects/{projectId}/models")
     PagedModel<EntityModel<Model>> getModels(
             @Parameter(description = GET_MODELS_PROJECT_ID_PARAM_DESCR, required = true)
-            @PathVariable String projectId,
+                    @PathVariable
+                    String projectId,
             @Parameter(description = GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
+                    @RequestParam(MODEL_TYPE_PARAM_NAME)
+                    String type,
             Pageable pageable);
 
-    @Operation(
-            tags = MODELS,
-            summary = "Get metadata information for a model")
+    @Operation(tags = MODELS, summary = "Get metadata information for a model")
     @GetMapping(path = "/models/{modelId}")
     EntityModel<Model> getModel(
-            @Parameter(description = GET_MODEL_ID_PARAM_DESCR, required = true)
-            @PathVariable String modelId);
+            @Parameter(description = GET_MODEL_ID_PARAM_DESCR, required = true) @PathVariable
+                    String modelId);
 
     @Operation(
             tags = MODELS,
@@ -148,9 +166,9 @@ public interface ModelRestApi {
     @ResponseStatus(CREATED)
     EntityModel<Model> createModel(
             @Parameter(description = CREATE_MODEL_PROJECT_ID_PARAM_DESCR, required = true)
-            @PathVariable String projectId,
-            @Parameter(description = CREATE_MODEL_PARAM_DESCR)
-            @RequestBody Model model);
+                    @PathVariable
+                    String projectId,
+            @Parameter(description = CREATE_MODEL_PARAM_DESCR) @RequestBody Model model);
 
     @Operation(
             tags = MODELS,
@@ -158,10 +176,9 @@ public interface ModelRestApi {
             description = "Update the details of a model.")
     @PutMapping(path = "/models/{modelId}")
     EntityModel<Model> updateModel(
-            @Parameter(description = UPDATE_MODEL_ID_PARAM_DESCR, required = true)
-            @PathVariable String modelId,
-            @Parameter(description = UPDATE_MODEL_PARAM_DESCR)
-            @RequestBody Model model);
+            @Parameter(description = UPDATE_MODEL_ID_PARAM_DESCR, required = true) @PathVariable
+                    String modelId,
+            @Parameter(description = UPDATE_MODEL_PARAM_DESCR) @RequestBody Model model);
 
     @Operation(
             tags = MODELS,
@@ -170,39 +187,44 @@ public interface ModelRestApi {
     @PutMapping(path = "/models/{modelId}/content")
     @ResponseStatus(NO_CONTENT)
     void updateModelContent(
-            @Parameter(description = UPDATE_MODEL_ID_PARAM_DESCR,required = true)
-            @PathVariable String modelId,
+            @Parameter(description = UPDATE_MODEL_ID_PARAM_DESCR, required = true) @PathVariable
+                    String modelId,
             @Parameter(description = UPDATE_MODEL_FILE_PARAM_DESCR)
-            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
+                    @RequestPart(UPLOAD_FILE_PARAM_NAME)
+                    MultipartFile file)
+            throws IOException;
 
-    @Operation(
-            tags = MODELS,
-            summary = "Delete model")
+    @Operation(tags = MODELS, summary = "Delete model")
     @DeleteMapping(path = "/models/{modelId}")
     @ResponseStatus(NO_CONTENT)
     void deleteModel(
-            @Parameter(description = DELETE_MODEL_ID_PARAM_DESCR, required = true)
-            @PathVariable String modelId);
+            @Parameter(description = DELETE_MODEL_ID_PARAM_DESCR, required = true) @PathVariable
+                    String modelId);
 
     @Operation(
             tags = MODELS,
             summary = "Get the model content",
-            description = "Retrieve the content of the model for the identifier <b>modelId</b> " +
-                    "with the content type corresponding to the model type " +
-                    "(xml for process models and json for the others).<br>" +
-                    "For <b>Accept: image/svg+xml</b> request header, " +
-                    "the svg image corresponding to the model content will be retrieved.")
+            description =
+                    "Retrieve the content of the model for the identifier <b>modelId</b> "
+                            + "with the content type corresponding to the model type "
+                            + "(xml for process models and json for the others).<br>"
+                            + "For <b>Accept: image/svg+xml</b> request header, "
+                            + "the svg image corresponding to the model content will be retrieved.")
     @GetMapping(path = "/models/{modelId}/content")
     void getModelContent(
             HttpServletResponse response,
             @Parameter(description = GET_MODEL_CONTENT_ID_PARAM_DESCR, required = true)
-            @PathVariable String modelId) throws IOException;
+                    @PathVariable
+                    String modelId)
+            throws IOException;
 
     @GetMapping(path = "/models/{modelId}/content", produces = CONTENT_TYPE_SVG)
     void getModelDiagram(
             HttpServletResponse response,
             @Parameter(description = GET_MODEL_CONTENT_ID_PARAM_DESCR, required = true)
-            @PathVariable String modelId) throws IOException;
+                    @PathVariable
+                    String modelId)
+            throws IOException;
 
     @Operation(
             tags = MODELS,
@@ -212,25 +234,34 @@ public interface ModelRestApi {
     @ResponseStatus(CREATED)
     EntityModel<Model> importModel(
             @Parameter(description = CREATE_MODEL_PROJECT_ID_PARAM_DESCR, required = true)
-            @PathVariable String projectId,
+                    @PathVariable
+                    String projectId,
             @Parameter(description = IMPORT_MODEL_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
+                    @RequestParam(MODEL_TYPE_PARAM_NAME)
+                    String type,
             @Parameter(description = IMPORT_MODEL_FILE_PARAM_DESCR)
-            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
+                    @RequestPart(UPLOAD_FILE_PARAM_NAME)
+                    MultipartFile file)
+            throws IOException;
 
     @Operation(
             tags = MODELS,
             summary = "Export a model definition as file",
-            description = "Allows to download a file containing a model metadata along with the model content.")
+            description =
+                    "Allows to download a file containing a model metadata along with the model"
+                            + " content.")
     @GetMapping(path = "/models/{modelId}/export")
     void exportModel(
             HttpServletResponse response,
-            @Parameter(description = EXPORT_MODEL_ID_PARAM_DESCR, required = true)
-            @PathVariable String modelId,
+            @Parameter(description = EXPORT_MODEL_ID_PARAM_DESCR, required = true) @PathVariable
+                    String modelId,
             @Parameter(description = ATTACHMENT_API_PARAM_DESCR)
-            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
-                    required = false,
-                    defaultValue = "true") boolean attachment) throws IOException;
+                    @RequestParam(
+                            name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
+                            required = false,
+                            defaultValue = "true")
+                    boolean attachment)
+            throws IOException;
 
     @Operation(
             tags = MODELS,
@@ -246,14 +277,18 @@ public interface ModelRestApi {
     @PostMapping("/models/{modelId}/validate")
     @ResponseStatus(NO_CONTENT)
     void validateModel(
-            @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR, required = true)
-            @PathVariable String modelId,
+            @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR, required = true) @PathVariable
+                    String modelId,
             @Parameter(description = VALIDATE_MODEL_FILE_PARAM_DESCR)
-            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+                    @RequestPart(UPLOAD_FILE_PARAM_NAME)
+                    MultipartFile file,
             @Parameter(description = VALIDATE_PROJECT_ID_PARAM_DESCR, required = false)
-            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId,
+                    @RequestParam(value = PROJECT_ID_PARAM_NAME, required = false)
+                    String projectId,
             @Parameter(description = MODEL_USED_PARAM_DESCR, required = false)
-            @RequestParam(value= MODEL_USED_PARAM_DESCR,required = false) boolean isUsed) throws IOException;
+                    @RequestParam(value = MODEL_USED_PARAM_DESCR, required = false)
+                    boolean isUsed)
+            throws IOException;
 
     @Operation(
             tags = MODELS,
@@ -262,64 +297,83 @@ public interface ModelRestApi {
     @PostMapping("/models/{modelId}/validate/extensions")
     @ResponseStatus(NO_CONTENT)
     void validateModelExtensions(
-            @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR)
-            @PathVariable String modelId,
+            @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR) @PathVariable String modelId,
             @Parameter(description = VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
-            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+                    @RequestPart(UPLOAD_FILE_PARAM_NAME)
+                    MultipartFile file,
             @Parameter(description = VALIDATE_PROJECT_ID_PARAM_DESCR, required = false)
-            @RequestParam(value=PROJECT_ID_PARAM_NAME,required = false) String projectId) throws IOException;
+                    @RequestParam(value = PROJECT_ID_PARAM_NAME, required = false)
+                    String projectId)
+            throws IOException;
 
     @Operation(
             tags = MODELS,
             summary = "List all the models that are not coupled to a project",
-            description = "Get the models that has GLOBAL as scope. Minimal information for each model is returned."
-    )
+            description =
+                    "Get the models that has GLOBAL as scope. Minimal information for each model is"
+                            + " returned.")
     @GetMapping(path = "/models")
     PagedModel<EntityModel<Model>> getGlobalModels(
-        @Parameter(description = GET_MODELS_TYPE_PARAM_DESCR)
-        @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
-        @Parameter(description = INCLUDE_ORPHANS_PARAM_DESCR, required = false)
-        @RequestParam(value = INCLUDE_ORPHANS_PARAM_NAME, required = false, defaultValue = "false") boolean includeOrphans,
-        Pageable pageable);
+            @Parameter(description = GET_MODELS_TYPE_PARAM_DESCR)
+                    @RequestParam(MODEL_TYPE_PARAM_NAME)
+                    String type,
+            @Parameter(description = INCLUDE_ORPHANS_PARAM_DESCR, required = false)
+                    @RequestParam(
+                            value = INCLUDE_ORPHANS_PARAM_NAME,
+                            required = false,
+                            defaultValue = "false")
+                    boolean includeOrphans,
+            Pageable pageable);
 
     @Operation(
             tags = MODELS,
             summary = "Add or update the relationship between an existing model, and the project",
-            description = "Get the model associated with the project updated. Minimal information for the model is returned."
-    )
+            description =
+                    "Get the model associated with the project updated. Minimal information for the"
+                            + " model is returned.")
     @PutMapping(path = "/projects/{projectId}/models/{modelId}")
     EntityModel<Model> putProjectModelRelationship(
-        @Parameter(description = RELATE_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR, required = true)
-        @PathVariable String projectId,
-        @Parameter(description = RELATE_MODEL_PROJECT_MODEL_ID_PARAM_DESCR, required = true)
-        @PathVariable String modelId,
-        @Parameter(description = SCOPE_PARAM_DESCR, required = false)
-        @RequestParam(value = SCOPE_PARAM_NAME, required = false) String scope,
-        @Parameter(description = FORCE_PARAM_DESCR, required = false)
-        @RequestParam(value = FORCE_PARAM_NAME, required = false, defaultValue = "false") boolean force);
+            @Parameter(description = RELATE_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR, required = true)
+                    @PathVariable
+                    String projectId,
+            @Parameter(description = RELATE_MODEL_PROJECT_MODEL_ID_PARAM_DESCR, required = true)
+                    @PathVariable
+                    String modelId,
+            @Parameter(description = SCOPE_PARAM_DESCR, required = false)
+                    @RequestParam(value = SCOPE_PARAM_NAME, required = false)
+                    String scope,
+            @Parameter(description = FORCE_PARAM_DESCR, required = false)
+                    @RequestParam(
+                            value = FORCE_PARAM_NAME,
+                            required = false,
+                            defaultValue = "false")
+                    boolean force);
 
     @Operation(
             tags = MODELS,
             summary = "Delete the relationship between an existing model, and the project",
-            description = "Get the model associated with the project updated. " +
-                "Minimal information for the model is returned."
-    )
+            description =
+                    "Get the model associated with the project updated. "
+                            + "Minimal information for the model is returned.")
     @DeleteMapping(path = "/projects/{projectId}/models/{modelId}")
     EntityModel<Model> deleteProjectModelRelationship(
-        @Parameter(description = DELETE_RELATIONSHIP_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR, required = true)
-        @PathVariable String projectId,
-        @Parameter(description = DELETE_RELATIONSHIP_MODEL_PROJECT_MODEL_ID_PARAM_DESCR, required = true)
-        @PathVariable String modelId);
+            @Parameter(
+                            description = DELETE_RELATIONSHIP_MODEL_PROJECT_PROJECT_ID_PARAM_DESCR,
+                            required = true)
+                    @PathVariable
+                    String projectId,
+            @Parameter(
+                            description = DELETE_RELATIONSHIP_MODEL_PROJECT_MODEL_ID_PARAM_DESCR,
+                            required = true)
+                    @PathVariable
+                    String modelId);
 
     @Operation(
-        tags = MODELS,
-        summary = "Create new model that does note belong to a project",
-        description = "Create a new model with no relationship to other projects"
-    )
+            tags = MODELS,
+            summary = "Create new model that does note belong to a project",
+            description = "Create a new model with no relationship to other projects")
     @PostMapping(path = "/models")
     @ResponseStatus(CREATED)
     EntityModel<Model> createModelWithoutProject(
-        @Parameter(description = CREATE_MODEL_PARAM_DESCR)
-        @RequestBody Model model);
-
+            @Parameter(description = CREATE_MODEL_PARAM_DESCR) @RequestBody Model model);
 }

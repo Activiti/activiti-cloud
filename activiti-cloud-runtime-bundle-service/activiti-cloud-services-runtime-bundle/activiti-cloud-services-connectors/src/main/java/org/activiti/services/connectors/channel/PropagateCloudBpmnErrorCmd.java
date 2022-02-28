@@ -16,12 +16,13 @@
 
 package org.activiti.services.connectors.channel;
 
-import java.util.Optional;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.helper.ErrorPropagation;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
+
+import java.util.Optional;
 
 class PropagateCloudBpmnErrorCmd implements Command<Void> {
 
@@ -36,8 +37,9 @@ class PropagateCloudBpmnErrorCmd implements Command<Void> {
     @Override
     public Void execute(CommandContext commandContext) {
         // Fallback to error message for backward compatibility
-        String errorCode = Optional.ofNullable(integrationError.getErrorCode())
-            .orElse(integrationError.getErrorMessage());
+        String errorCode =
+                Optional.ofNullable(integrationError.getErrorCode())
+                        .orElse(integrationError.getErrorMessage());
 
         propagateError(errorCode);
 
@@ -45,9 +47,8 @@ class PropagateCloudBpmnErrorCmd implements Command<Void> {
     }
 
     protected void propagateError(String errorCode) {
-        // throw business fault so that it can be caught by an Error Intermediate Event or Error Event Sub-Process in the process
-        ErrorPropagation.propagateError(errorCode,
-            execution);
+        // throw business fault so that it can be caught by an Error Intermediate Event or Error
+        // Event Sub-Process in the process
+        ErrorPropagation.propagateError(errorCode, execution);
     }
-
 }

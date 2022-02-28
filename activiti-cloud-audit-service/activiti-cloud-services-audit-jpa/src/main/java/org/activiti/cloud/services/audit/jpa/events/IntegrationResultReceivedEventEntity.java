@@ -26,7 +26,8 @@ import javax.persistence.Entity;
 @DynamicInsert
 public class IntegrationResultReceivedEventEntity extends IntegrationEventEntity {
 
-    protected static final String INTEGRATION_RESULT_RECEIVED_EVENT = "IntegrationResultReceivedEvent";
+    protected static final String INTEGRATION_RESULT_RECEIVED_EVENT =
+            "IntegrationResultReceivedEvent";
 
     IntegrationResultReceivedEventEntity() {}
 
@@ -37,8 +38,9 @@ public class IntegrationResultReceivedEventEntity extends IntegrationEventEntity
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("IntegrationResultReceivedEventEntity [toString()=").append(super.toString()).append("]");
+        builder.append("IntegrationResultReceivedEventEntity [toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
-
 }

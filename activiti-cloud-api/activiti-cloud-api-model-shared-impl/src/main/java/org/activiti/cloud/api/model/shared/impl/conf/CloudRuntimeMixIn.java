@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.api.model.shared.impl.conf;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(
         use = NAME,
@@ -27,6 +27,4 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
         property = "eventType",
         defaultImpl = IgnoredRuntimeEvent.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CloudRuntimeMixIn {
-
-}
+public class CloudRuntimeMixIn {}
