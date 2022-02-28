@@ -25,7 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -65,9 +64,6 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
 
     @MockBean
     private TaskRepository taskRepository;
-
-    @MockBean
-    private UserGroupManager userGroupManager;
 
     @MockBean
     private SecurityManager securityManager;
