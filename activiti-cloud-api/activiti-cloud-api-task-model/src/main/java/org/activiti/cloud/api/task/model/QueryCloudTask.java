@@ -15,6 +15,19 @@
  */
 package org.activiti.cloud.api.task.model;
 
+import java.util.List;
+
 public interface QueryCloudTask extends CloudTask{
     public String getProcessDefinitionName();
+
+    List<TaskPermissions> getPermissions();
+    
+    void setPermissions(List<TaskPermissions> User);
+
+    enum TaskPermissions {
+        VIEW,
+        CLAIM,
+        RELEASE,
+        UPDATE;
+    }
 }

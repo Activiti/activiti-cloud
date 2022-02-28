@@ -130,6 +130,9 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     @QueryType(PropertyType.STRING)
     private String candidateGroupId;
 
+    @Transient
+    private List<TaskPermissions> permissions;
+
     @JsonIgnore
     @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false,
@@ -547,6 +550,16 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         return  !(TaskStatus.CREATED.equals(status) ||
                   TaskStatus.ASSIGNED.equals(status)||
                   TaskStatus.SUSPENDED.equals(status));
+    }
+
+    @Override
+    public List<TaskPermissions> getPermissions() {
+        return this.permissions;
+    }
+
+    @Override
+    public void setPermissions(List<TaskPermissions> permissions) {
+        this.permissions = permissions;
     }
 
     @Override

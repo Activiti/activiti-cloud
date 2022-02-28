@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,6 +34,7 @@ import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
@@ -155,6 +155,7 @@ public class TaskEntityControllerIT {
         Predicate restrictionPredicate = mock(Predicate.class);
         given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
         given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         //when
         this.mockMvc.perform(get("/v1/tasks/{taskId}",
@@ -178,6 +179,7 @@ public class TaskEntityControllerIT {
         Predicate restrictionPredicate = mock(Predicate.class);
         given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
         given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         //when
         MvcResult mvcResult = this.mockMvc.perform(get("/v1/tasks/{taskId}",
@@ -210,5 +212,31 @@ public class TaskEntityControllerIT {
         Set<TaskCandidateUserEntity> users = new HashSet<>();
         users.add(taskCandidateUser);
         return users;
+    }
+
+    @Test
+    public void should_returnTaskPermissions_when_invokeGetTaskById() throws Exception {
+        //given
+        TaskEntity taskEntity = buildDefaultTask();
+        taskEntity.setTaskCandidateUsers(buildCandidateUsers(taskEntity));
+        given(entityFinder.findById(eq(taskRepository),
+                                    eq(taskEntity.getId()),
+                                    anyString()))
+                .willReturn(taskEntity);
+
+        Predicate restrictionPredicate = mock(Predicate.class);
+        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
+        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+
+        //when
+        MvcResult mvcResult = this.mockMvc.perform(get("/v1/tasks/{taskId}",
+                                 taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
+                //then
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThatJson(mvcResult.getResponse().getContentAsString())
+                .node("entry.permissions").isArray().ofLength(1)
+                .thatContains(TaskPermissions.VIEW);
     }
 }
