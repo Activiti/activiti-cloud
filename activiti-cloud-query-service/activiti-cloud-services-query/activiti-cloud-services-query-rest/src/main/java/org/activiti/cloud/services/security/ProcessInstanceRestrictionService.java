@@ -16,6 +16,9 @@
 package org.activiti.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.StringPath;
+import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 
@@ -27,24 +30,40 @@ public class ProcessInstanceRestrictionService {
 
     private ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder;
 
+    private SecurityManager securityManager;
+
     public ProcessInstanceRestrictionService(SecurityPoliciesManager securityPoliciesManager,
                                              ProcessInstanceFilter processInstanceFilter,
-                                             ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
+                                             ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder,
+                                             SecurityManager securityManager) {
         this.securityPoliciesManager = securityPoliciesManager;
         this.processInstanceFilter = processInstanceFilter;
         this.restrictionBuilder = restrictionBuilder;
+        this.securityManager = securityManager;
     }
 
     public Predicate restrictProcessInstanceQuery(Predicate predicate,
                                                   SecurityPolicyAccess securityPolicyAccess) {
+        Predicate initiatorPredicate = applyInitiatorRestriction(predicate);
+
         if (!securityPoliciesManager.arePoliciesDefined()) {
-            return predicate;
+            return initiatorPredicate;
         }
 
-        return restrictionBuilder.applyProcessDefinitionKeyFilter(predicate,
+        return restrictionBuilder.applyProcessDefinitionKeyFilter(initiatorPredicate,
                                                  securityPolicyAccess,
                                                  processInstanceFilter);
     }
 
+    private Predicate applyInitiatorRestriction(Predicate predicate) {
+        String userId = securityManager.getAuthenticatedUserId();
+
+        if (userId == null) {
+            return predicate;
+        }
+
+        StringPath initiatorPath = QProcessInstanceEntity.processInstanceEntity.initiator;
+        return initiatorPath.eq(userId).and(predicate);
+    }
 
 }

@@ -23,9 +23,9 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.Arrays;
 import java.util.List;
 
 import org.activiti.api.process.model.ProcessInstance;
@@ -92,6 +92,7 @@ public class QueryProcessInstancesEntityIT {
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
+        keycloakTokenProducer.setKeycloakTestUser("testuser");
     }
 
     @AfterEach
@@ -191,17 +192,7 @@ public class QueryProcessInstancesEntityIT {
 
         await().untilAsserted(() -> {
 
-             ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                            HttpMethod.GET,
-                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                            new ParameterizedTypeReference<ProcessInstance>() {
-                                                                            });
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getId()).isNotNull();
-
-            ProcessInstance responseProcess = responseEntity.getBody();
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
             assertThat(responseProcess.getBusinessKey()).isEqualTo(updatedProcess.getBusinessKey());
             assertThat(responseProcess.getName()).isEqualTo(updatedProcess.getName());
 
@@ -241,6 +232,7 @@ public class QueryProcessInstancesEntityIT {
     public void shouldGetProcessDefinitionVersion() {
         //given
         ProcessInstanceImpl process = new ProcessInstanceImpl();
+        process.setInitiator("testuser");
         process.setId("process-instance-id");
         process.setName("process");
         process.setProcessDefinitionKey("process-definition-key");
@@ -258,19 +250,9 @@ public class QueryProcessInstancesEntityIT {
 
         await().untilAsserted(() -> {
 
-            //when
-            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                       });
-
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
-            assertThat(responseEntity.getBody().getProcessDefinitionName()).isEqualTo("process-definition-name");
-
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
+            assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
+            assertThat(responseProcess.getProcessDefinitionName()).isEqualTo("process-definition-name");
 
         });
     }
@@ -279,6 +261,7 @@ public class QueryProcessInstancesEntityIT {
     public void shouldSuspendResumeProcess() {
         //given
         ProcessInstanceImpl process = new ProcessInstanceImpl();
+        process.setInitiator("testuser");
         process.setId("process-instance-id");
         process.setName("process");
         process.setProcessDefinitionKey("process-definition-key");
@@ -295,17 +278,8 @@ public class QueryProcessInstancesEntityIT {
 
         await().untilAsserted(() -> {
 
-            //when
-            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                       });
-
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
+            assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
 
         });
 
@@ -315,19 +289,11 @@ public class QueryProcessInstancesEntityIT {
 
         await().untilAsserted(() -> {
 
-            //when
-            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                       });
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
-            assertThat(responseEntity.getBody().getProcessDefinitionKey()).isEqualTo("process-definition-key");
-            assertThat(responseEntity.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.SUSPENDED);
+            assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
+            assertThat(responseProcess.getProcessDefinitionKey()).isEqualTo("process-definition-key");
+            assertThat(responseProcess.getStatus()).isEqualTo(ProcessInstanceStatus.SUSPENDED);
 
         });
 
@@ -337,19 +303,11 @@ public class QueryProcessInstancesEntityIT {
 
         await().untilAsserted(() -> {
 
-            //when
-            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
-                                                                                       HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                       });
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
-            assertThat(responseEntity.getBody().getProcessDefinitionKey()).isEqualTo("process-definition-key");
-            assertThat(responseEntity.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.RUNNING);
+            assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
+            assertThat(responseProcess.getProcessDefinitionKey()).isEqualTo("process-definition-key");
+            assertThat(responseProcess.getStatus()).isEqualTo(ProcessInstanceStatus.RUNNING);
 
         });
 
@@ -426,6 +384,31 @@ public class QueryProcessInstancesEntityIT {
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+    }
+
+    private ResponseEntity<ProcessInstance> executeRequestGetProcessInstance(String processInstanceId) {
+        return testRestTemplate.exchange(PROC_URL + "/" + processInstanceId,
+            HttpMethod.GET,
+            keycloakTokenProducer.entityWithAuthorizationHeader(),
+            new ParameterizedTypeReference<ProcessInstance>() {});
+    }
+
+    private ProcessInstance shouldGetProcessInstance(String processInstanceId) {
+        ResponseEntity<ProcessInstance> responseEntity = executeRequestGetProcessInstance(processInstanceId);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().getId()).isNotNull();
+
+        ProcessInstance responseProcess = responseEntity.getBody();
+        assertThat(responseProcess.getId()).isEqualTo(processInstanceId);
+        return responseProcess;
+    }
+
+    private void shouldNotGetProcessInstance(String processInstanceId) {
+        ResponseEntity<ProcessInstance> responseEntity = executeRequestGetProcessInstance(processInstanceId);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -614,20 +597,29 @@ public class QueryProcessInstancesEntityIT {
     }
 
     @Test
-    public void shouldGetProcessInstancesFilteredByInitiator() {
-
-        ProcessInstance processInstanceInitiatorUser1 = processInstanceBuilder
+    public void shouldGetProcessInstancesInitiatedByCurrentUser() {
+        ProcessInstance processInstanceCurrentUserInitiator = processInstanceBuilder
+                .aRunningProcessInstanceWithInitiator("currentUser", "testuser");
+        processInstanceBuilder
                 .aRunningProcessInstanceWithInitiator("first", "User1");
-        ProcessInstance processInstanceInitiatorUser2 = processInstanceBuilder
-                .aRunningProcessInstanceWithInitiator("second", "User2");
-        processInstanceBuilder.aRunningProcessInstanceWithInitiator("third", "User3");
+        processInstanceBuilder.aRunningProcessInstanceWithInitiator("second", "User2");
         eventsAggregator.sendAll();
 
-        List<String> processInstanceIds = Arrays.asList(processInstanceInitiatorUser1.getId(),
-                processInstanceInitiatorUser2.getId());
+        shouldGetProcessInstancesFilteredBySingleValue(processInstanceCurrentUserInitiator.getId(), "initiator=testuser");
+        shouldGetProcessInstancesFilteredBySingleValue(processInstanceCurrentUserInitiator.getId(),"initiator=User1,testuser");
+        shouldGetProcessInstancesFilteredByList(Collections.emptyList(),"initiator=User1,User2");
+    }
 
-        shouldGetProcessInstancesFilteredBySingleValue(processInstanceInitiatorUser1.getId(), "initiator=User1");
-        shouldGetProcessInstancesFilteredByList(processInstanceIds,"initiator=User1,User2");
+    @Test
+    public void shouldGetProcessInstanceInitiatedByCurrentUser() {
+        ProcessInstance processInstanceCurrentUserInitiator = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("currentUser", "testuser");
+        ProcessInstance processInstanceInitiatedByUser1 = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("first", "User1");
+        eventsAggregator.sendAll();
+
+        shouldGetProcessInstance(processInstanceCurrentUserInitiator.getId());
+        shouldNotGetProcessInstance(processInstanceInitiatedByUser1.getId());
     }
 
     @Test
@@ -748,4 +740,6 @@ public class QueryProcessInstancesEntityIT {
                     .containsExactly(processInstanceIds.toArray(String[]::new));
         });
     }
+
+
 }

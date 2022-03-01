@@ -19,6 +19,7 @@ import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.query.rest.ApplicationAdminController;
 import org.activiti.cloud.services.query.rest.ApplicationController;
 import org.activiti.cloud.services.query.rest.CommonExceptionHandlerQuery;
+import org.activiti.cloud.services.query.rest.ProcessInstanceTasksAdminController;
 import org.activiti.cloud.services.query.rest.ServiceTaskIntegrationContextAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionController;
@@ -56,6 +57,7 @@ import org.springframework.context.annotation.Import;
     ProcessInstanceDeleteController.class,
     ProcessInstanceDiagramAdminController.class,
     ProcessInstanceDiagramController.class,
+    ProcessInstanceTasksAdminController.class,
     ProcessInstanceTasksController.class,
     ProcessInstanceVariableAdminController.class,
     ProcessInstanceVariableController.class,
