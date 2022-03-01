@@ -270,6 +270,15 @@ public class Tasks {
         newTask = tasksList.get(0);
     }
 
+    private void adminGetTaskToUpdateForCurrentProcessInstance() {
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        adminWaitForTasks(processInstanceId);
+        Collection<CloudTask> tasksCollection = taskQueryAdminSteps
+            .getTasksByProcessInstance(processInstanceId).getContent();
+        List<CloudTask> tasksList = new ArrayList<>(tasksCollection);
+        newTask = tasksList.get(0);
+    }
+
     private void waitForTasks(String processInstanceId) {
         await().untilAsserted(() -> {
             Collection<CloudTask> tasksCollection = taskQuerySteps
@@ -277,10 +286,17 @@ public class Tasks {
             assertThat(tasksCollection).isNotEmpty();
         });
     }
+    private void adminWaitForTasks(String processInstanceId) {
+        await().untilAsserted(() -> {
+            Collection<CloudTask> tasksCollection = taskQueryAdminSteps
+                .getTasksByProcessInstance(processInstanceId).getContent();
+            assertThat(tasksCollection).isNotEmpty();
+        });
+    }
 
     @When("the admin updates the updatable fields of the task")
     public void adminUpdateTaskFields() {
-        getTaskToUpdateForCurrentProcessInstance();
+        adminGetTaskToUpdateForCurrentProcessInstance();
 
         Date tomorrow = new Date(System.currentTimeMillis() + 86400000);
         Serenity.setSessionVariable("tomorrow").to(tomorrow);
