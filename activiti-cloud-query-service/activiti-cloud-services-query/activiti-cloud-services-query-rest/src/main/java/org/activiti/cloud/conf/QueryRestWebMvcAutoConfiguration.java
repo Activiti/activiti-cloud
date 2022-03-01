@@ -148,10 +148,12 @@ public class QueryRestWebMvcAutoConfiguration  {
     @ConditionalOnMissingBean
     public ProcessInstanceRestrictionService processInstanceRestrictionService(SecurityPoliciesManager securityPoliciesManager,
                                                                                ProcessInstanceFilter processInstanceFilter,
-                                                                               ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
+                                                                               ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder,
+                                                                               SecurityManager securityManager) {
         return new ProcessInstanceRestrictionService(securityPoliciesManager,
                                                      processInstanceFilter,
-                                                     restrictionBuilder);
+                                                     restrictionBuilder,
+                                                     securityManager);
     }
 
     @Bean
@@ -172,14 +174,14 @@ public class QueryRestWebMvcAutoConfiguration  {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskControllerHelper taskControllerHelper(TaskRepository taskRepository, 
-                                                     AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler, 
+    public TaskControllerHelper taskControllerHelper(TaskRepository taskRepository,
+                                                     AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
                                                      TaskRepresentationModelAssembler taskRepresentationModelAssembler,
                                                      TaskLookupRestrictionService taskLookupRestrictionService) {
-        return new TaskControllerHelper(taskRepository, 
-                                        pagedCollectionModelAssembler, 
-                                        new QueryDslPredicateAggregator(), 
-                                        taskRepresentationModelAssembler, 
+        return new TaskControllerHelper(taskRepository,
+                                        pagedCollectionModelAssembler,
+                                        new QueryDslPredicateAggregator(),
+                                        taskRepresentationModelAssembler,
                                         taskLookupRestrictionService);
     }
 
