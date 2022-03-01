@@ -47,4 +47,8 @@ public interface TaskQueryAdminService {
 
     @RequestLine("DELETE /admin/v1/tasks")
     CollectionModel<EntityModel<CloudTask>> deleteTasks();
+
+    @RequestLine("GET /admin/v1/process-instances/{processInstanceId}/tasks")
+    @Headers("Content-Type: application/json")
+    PagedModel<CloudTask> getTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 }
