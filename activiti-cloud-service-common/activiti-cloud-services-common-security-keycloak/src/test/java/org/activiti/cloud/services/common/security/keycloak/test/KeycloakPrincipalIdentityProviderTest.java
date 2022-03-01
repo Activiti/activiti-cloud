@@ -24,12 +24,14 @@ import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenV
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class KeycloakPrincipalIdentityProviderTest {
 
     private KeycloakPrincipalIdentityProvider subject;
@@ -45,8 +47,6 @@ public class KeycloakPrincipalIdentityProviderTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         KeycloakAccessTokenProvider keycloakAccessTokenProvider = new KeycloakAccessTokenProvider() { };
         KeycloakAccessTokenValidator keycloakAccessTokenValidator = new KeycloakAccessTokenValidator() { };
 
@@ -55,12 +55,12 @@ public class KeycloakPrincipalIdentityProviderTest {
 
         when(principal.getKeycloakSecurityContext()).thenReturn(keycloakSecurityContext);
         when(keycloakSecurityContext.getToken()).thenReturn(accessToken);
-        when(accessToken.getPreferredUsername()).thenReturn("username");
     }
 
     @Test
     public void testGetUserIdValidToken() {
         // given
+        when(accessToken.getPreferredUsername()).thenReturn("username");
         when(accessToken.isActive()).thenReturn(true);
 
         // when

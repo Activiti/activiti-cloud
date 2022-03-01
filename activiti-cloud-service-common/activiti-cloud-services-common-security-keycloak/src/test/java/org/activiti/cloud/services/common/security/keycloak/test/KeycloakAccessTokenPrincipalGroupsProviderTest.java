@@ -22,14 +22,14 @@ import static org.mockito.Mockito.when;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalGroupsProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 
 
+@ExtendWith(MockitoExtension.class)
 public class KeycloakAccessTokenPrincipalGroupsProviderTest {
 
     @InjectMocks
@@ -53,11 +54,6 @@ public class KeycloakAccessTokenPrincipalGroupsProviderTest {
 
     @Mock
     private AccessToken accessToken;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testGetGroups() {
