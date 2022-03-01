@@ -42,7 +42,7 @@
     <java-semver.version>0.9.0</java-semver.version>
     <keycloak.version>15.0.2</keycloak.version>
     <resteasy.version>4.7.1.Final</resteasy.version>
-    <logstash.version>6.6</logstash.version>
+    <logstash.version>7.0.1</logstash.version>
     <springfox.version>3.0.0</springfox.version>
     <swagger.version>2.1.11</swagger.version>
     <xstream.version>1.4.19</xstream.version>
