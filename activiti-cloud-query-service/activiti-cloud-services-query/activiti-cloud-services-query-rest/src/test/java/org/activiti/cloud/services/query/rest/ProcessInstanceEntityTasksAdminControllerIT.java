@@ -18,25 +18,19 @@ package org.activiti.cloud.services.query.rest;
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.querydsl.core.types.Predicate;
 import java.util.Collections;
+
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.Test;
@@ -47,32 +41,29 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@WebMvcTest(TaskAdminController.class)
+@WebMvcTest(ProcessInstanceTasksAdminController.class)
+@EnableSpringDataWebSupport
+@AutoConfigureMockMvc
 @Import({
         QueryRestWebMvcAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class
 })
-@EnableSpringDataWebSupport
-@AutoConfigureMockMvc
 @WithMockUser
-public class TaskEntityAdminControllerIT {
-
+public class ProcessInstanceEntityTasksAdminControllerIT {
+    
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private TaskRepository taskRepository;
-
-    @MockBean
-    private EntityFinder entityFinder;
 
     @MockBean
     private SecurityManager securityManager;
@@ -81,30 +72,20 @@ public class TaskEntityAdminControllerIT {
     private SecurityPoliciesManager securityPoliciesManager;
 
     @MockBean
-    private ProcessDefinitionRepository processDefinitionRepository;
-
-    @MockBean
     private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
-    private TaskLookupRestrictionService taskLookupRestrictionService;
-
     @Test
-    public void allTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
-
-        given(taskRepository.findAll(any(),
-                                     eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                                           pageRequest,
-                                           12));
+        TaskEntity taskEntity = buildDefaultTask();
+        
+        given(taskRepository.findAll(any(), any(Pageable.class)))
+                .willReturn(new PageImpl<>(Collections.singletonList(taskEntity),
+                                           new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)), 12));
 
         //when
-        MvcResult result = mockMvc.perform(get("/admin/v1/tasks?skipCount=11&maxItems=10")
+        MvcResult result = mockMvc.perform(get("/admin/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
+                                               taskEntity.getProcessInstanceId())
                                                    .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk())
@@ -116,44 +97,5 @@ public class TaskEntityAdminControllerIT {
                 .node("list.pagination.count").isEqualTo(1)
                 .node("list.pagination.hasMoreItems").isEqualTo(false)
                 .node("list.pagination.totalItems").isEqualTo(12);
-    }
-
-    @Test
-    public void allTasksShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
-        //given
-        PageRequest pageRequest = PageRequest.of(1,
-                                                 10);
-
-        given(taskRepository.findAll(any(),
-                                     eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                                           pageRequest,
-                                           11));
-
-        //when
-        mockMvc.perform(get("/admin/v1/tasks?page=1&size=10")
-                                                   .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
-
-    }
-
-    @Test
-    public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
-        //given
-        TaskEntity taskEntity = buildDefaultTask();
-        given(entityFinder.findById(eq(taskRepository),
-                                    eq(taskEntity.getId()),
-                                    anyString()))
-                .willReturn(taskEntity);
-
-        Predicate restrictionPredicate = mock(Predicate.class);
-        given(taskRepository.findAll(restrictionPredicate)).willReturn(Collections.singletonList(taskEntity));
-
-        //when
-        this.mockMvc.perform(get("/admin/v1/tasks/{taskId}",
-                                 taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
     }
 }

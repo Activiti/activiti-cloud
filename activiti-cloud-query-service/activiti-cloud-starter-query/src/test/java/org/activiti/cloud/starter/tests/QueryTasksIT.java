@@ -1011,6 +1011,14 @@ public class QueryTasksIT {
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
 
+    private ResponseEntity<PagedModel<Task>> executeRequestGetAdminTasks(ProcessInstance processInstance) {
+        return testRestTemplate.exchange("/admin/v1/process-instances/{processInstanceId}/tasks",
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         PAGED_TASKS_RESPONSE_TYPE,
+                                         processInstance.getId());
+    }
+
     private ResponseEntity<PagedModel<Task>> executeRequestGetTasks(ProcessInstance processInstance) {
         return testRestTemplate.exchange("/v1/process-instances/{processInstanceId}/tasks",
                                          HttpMethod.GET,
@@ -1019,11 +1027,18 @@ public class QueryTasksIT {
                                          processInstance.getId());
     }
 
+    private ResponseEntity<Task> executeRequestGetAdminTasksById(String id) {
+        return testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + id, 
+                                         HttpMethod.GET, 
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(), 
+                                         SINGLE_TASK_RESPONSE_TYPE);
+    }
+
     private ResponseEntity<Task> executeRequestGetTasksById(String id) {
         return testRestTemplate.exchange(TASKS_URL + "/" + id,
-                HttpMethod.GET,
-                keycloakTokenProducer.entityWithAuthorizationHeader(),
-                SINGLE_TASK_RESPONSE_TYPE);
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         SINGLE_TASK_RESPONSE_TYPE);
     }
 
     private  ResponseEntity<List<String>> getCandidateUsers(String taskId) {
@@ -1785,6 +1800,44 @@ public class QueryTasksIT {
         assertCanRetrieveTaskById(task1.getId());
     }
 
+    @Test
+    public void should_getAllTasks_by_ProcessInstance_whenUserIsAdmin() {
+        //given
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+                                                                      "user",
+                                                                      runningProcessInstance);
+        Task task2 = taskEventContainedBuilder.aTaskWithGroupCandidate("Task2",
+                                                                       "group",
+                                                                       runningProcessInstance);
+        Task task3 = taskEventContainedBuilder.anAssignedTask("Task3", 
+                                                              TESTUSER,
+                                                              runningProcessInstance);
+
+        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetAdminTasks(runningProcessInstance);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.size()).isEqualTo(3);
+            assertThat(tasks).contains(task1, task2, task3);
+        });
+        assertAdminCanRetrieveTaskById(task1.getId());
+        assertAdminCanRetrieveTaskById(task2.getId());
+        assertAdminCanRetrieveTaskById(task3.getId());
+        
+        keycloakTokenProducer.setKeycloakTestUser(TESTUSER);
+    }
+
 
     private void assertCanRetrieveTaskById(String taskId) {
         await().untilAsserted(() -> {
@@ -1799,6 +1852,21 @@ public class QueryTasksIT {
             assertThat(task.getId()).isEqualTo(taskId);
         });
     }
+
+    private void assertAdminCanRetrieveTaskById(String taskId) {
+        await().untilAsserted(() -> {
+
+            ResponseEntity<Task> responseEntity = executeRequestGetAdminTasksById(taskId);
+
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Task task = responseEntity.getBody();
+            assertThat(task.getId()).isEqualTo(taskId);
+        });
+    }
+
 
     @Test
     public void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance() {
