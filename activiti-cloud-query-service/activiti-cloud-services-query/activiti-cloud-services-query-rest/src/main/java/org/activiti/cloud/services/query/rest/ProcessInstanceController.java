@@ -110,10 +110,9 @@ public class ProcessInstanceController {
                                                                             processInstanceId,
                                                                             "Unable to find process instance for the given id:'" + processInstanceId + "'");
 
-        if (!securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
-                                                        processInstanceEntity.getServiceName())) {
-            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey());
-            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey());
+        if (!canRead(processInstanceEntity)) {
+            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance id " + processInstanceId);
+            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance");
         }
 
         return processInstanceRepresentationModelAssembler.toModel(processInstanceEntity);
@@ -131,10 +130,9 @@ public class ProcessInstanceController {
                                                                             processInstanceId,
                                                                             "Unable to find process for the given id:'" + processInstanceId + "'");
 
-        if (!securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
-                                                        processInstanceEntity.getServiceName())) {
-            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey());
-            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey());
+        if (!canRead(processInstanceEntity)) {
+            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance id " + processInstanceId);
+            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance");
         }
 
         QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
@@ -148,5 +146,11 @@ public class ProcessInstanceController {
                                                   processInstanceRepository.findAll(extendedPredicate,
                                                                                     pageable),
                                                   processInstanceRepresentationModelAssembler);
+    }
+
+    private boolean canRead(ProcessInstanceEntity processInstanceEntity) {
+        return securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
+                                                          processInstanceEntity.getServiceName()) &&
+                securityManager.getAuthenticatedUserId().equals(processInstanceEntity.getInitiator());
     }
 }

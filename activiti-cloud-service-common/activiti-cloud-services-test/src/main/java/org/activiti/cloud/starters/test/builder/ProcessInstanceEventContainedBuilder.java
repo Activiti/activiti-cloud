@@ -55,8 +55,13 @@ public class ProcessInstanceEventContainedBuilder {
     }
 
     private ProcessInstanceImpl buildProcessInstance(String name) {
+        return buildProcessInstance(name, "testuser");
+    }
+
+    private ProcessInstanceImpl buildProcessInstance(String name, String initiator) {
         ProcessInstanceImpl completedProcess = new ProcessInstanceImpl();
         completedProcess.setId(UUID.randomUUID().toString());
+        completedProcess.setInitiator(initiator);
         completedProcess.setName(name);
         completedProcess.setProcessDefinitionKey("my-proc");
         completedProcess.setProcessDefinitionId(UUID.randomUUID().toString());
@@ -67,6 +72,7 @@ public class ProcessInstanceEventContainedBuilder {
     private CloudProcessInstanceImpl buildSuspendedProcessInstance(String name) {
         CloudProcessInstanceImpl suspendedProcess = new CloudProcessInstanceImpl();
         suspendedProcess.setId(UUID.randomUUID().toString());
+        suspendedProcess.setInitiator("testuser");
         suspendedProcess.setName(name);
         suspendedProcess.setProcessDefinitionKey("my-proc");
         suspendedProcess.setProcessDefinitionId(UUID.randomUUID().toString());
@@ -92,8 +98,7 @@ public class ProcessInstanceEventContainedBuilder {
     }
 
     public ProcessInstanceImpl aRunningProcessInstanceWithInitiator(String name, String initiator) {
-        ProcessInstanceImpl processInstance = buildProcessInstance(name);
-        processInstance.setInitiator(initiator);
+        ProcessInstanceImpl processInstance = buildProcessInstance(name, initiator);
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
                 new CloudProcessStartedEventImpl(processInstance));
         return processInstance;
