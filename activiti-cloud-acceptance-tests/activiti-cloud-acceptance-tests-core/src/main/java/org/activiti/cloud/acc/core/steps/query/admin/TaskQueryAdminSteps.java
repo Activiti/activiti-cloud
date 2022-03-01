@@ -75,4 +75,9 @@ public class TaskQueryAdminSteps {
         return taskQueryAdminService.deleteTasks();
     }
 
+    @Step
+    public PagedModel<CloudTask> getTasksByProcessInstance(String processInstanceId){
+        return taskQueryAdminService.getTasksByProcessInstance(processInstanceId);
+    }
+
 }
