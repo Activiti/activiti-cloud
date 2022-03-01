@@ -1884,6 +1884,5 @@
     "bruteForceProtected" : "false",
     "_browser_header.contentSecurityPolicy" : "frame-src 'self'",
     "waitIncrementSeconds" : "60"
-  },
-  "keycloakVersion" : "15.0.2"
+  }
 }
