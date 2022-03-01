@@ -150,16 +150,17 @@ public class ProcessInstanceEntityControllerIT {
     public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
+        processInstanceEntity.setInitiator("testuser");
         given(entityFinder.findById(eq(processInstanceRepository), eq(processInstanceEntity.getId()), any())).willReturn(processInstanceEntity);
         given(securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(), processInstanceEntity.getServiceName()))
                 .willReturn(true);
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         //when
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}",
                                  processInstanceEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
                 //then
                 .andExpect(status().isOk());
-
     }
 
 }
