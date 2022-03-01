@@ -56,7 +56,7 @@ class AuthorizationConfigurerTest {
         authorizationProperties.setSecurityConstraints(asList(
             createSecurityConstraint(new String[]{"ROLE_1", "ROLE_2"}, new String[]{"/a", "/b"}),
             createSecurityConstraint(new String[]{"ROLE_3"}, new String[]{"/c"})));
-        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties);
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeRequests()).thenReturn(authorizeRequests);
         when(authorizeRequests.antMatchers(any(String.class))).thenReturn(authorizedUrl);
@@ -78,7 +78,7 @@ class AuthorizationConfigurerTest {
         authorizationProperties.setSecurityConstraints(asList(
             createSecurityConstraint(new String[]{"ROLE_3"}, new String[]{"/c"}),
             createSecurityConstraint(new String[]{}, new String[]{"/d"})));
-        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties);
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeRequests()).thenReturn(authorizeRequests);
         when(authorizeRequests.antMatchers(any(String.class))).thenReturn(authorizedUrl);
@@ -100,7 +100,7 @@ class AuthorizationConfigurerTest {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
         authorizationProperties.setSecurityConstraints(asList(
             createSecurityConstraint(new String[]{"ROLE_1"}, new String[]{"/c"}, new String[]{"POST", "DELETE", "PUT"})));
-        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties);
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeRequests()).thenReturn(authorizeRequests);
         when(authorizeRequests.antMatchers(any(HttpMethod.class), any(String.class))).thenReturn(authorizedUrl);

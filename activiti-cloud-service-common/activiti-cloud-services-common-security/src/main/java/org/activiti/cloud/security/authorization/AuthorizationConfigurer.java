@@ -28,10 +28,12 @@ import org.activiti.cloud.security.authorization.AuthorizationProperties.Securit
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.stereotype.Component;
+import javax.annotation.PostConstruct;
 
 /**
  * This class aims to define authorizations on a REST API using a configuration like below:
@@ -46,11 +48,23 @@ public class AuthorizationConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationConfigurer.class);
 
-    private AuthorizationProperties authorizationProperties;
+    private final AuthorizationProperties authorizationProperties;
+    private final Environment environment;
+
 
     @Autowired
-    public AuthorizationConfigurer(AuthorizationProperties authorizationProperties) {
+    public AuthorizationConfigurer(AuthorizationProperties authorizationProperties, Environment environment) {
         this.authorizationProperties = authorizationProperties;
+        this.environment = environment;
+    }
+
+    @PostConstruct
+    public void checkKeycloakConfig() {
+        //if there is a Keycloak security constraint defined it could be configuration issue
+        String securityConstraintProperty = environment.getProperty("keycloak.security-constraints[0].securityCollections[0].patterns[0]");
+        if(securityConstraintProperty != null) {
+            LOGGER.warn("A Keycloak security configuration was found, it could override Spring Security configuration, please check if we have properties starting with \"keycloak.security-constraints\".");
+        }
     }
 
     public void configure(HttpSecurity http) throws Exception {
