@@ -34,7 +34,7 @@ public class ApplicationJpaJsonConverterTest {
         deployment.setName("DeploymentName");
         deployment.setVersion(1);
         deployment.setId("DeploymentId");
-        
+
         //when
         String jsonRepresentation = converter.convertToDatabaseColumn(deployment);
 

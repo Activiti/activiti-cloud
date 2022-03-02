@@ -24,11 +24,11 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessUpdatedAuditEventEntity;
 
 public class ProcessUpdatedEventConverter extends BaseEventToEntityConverter {
-    
+
     public ProcessUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name();

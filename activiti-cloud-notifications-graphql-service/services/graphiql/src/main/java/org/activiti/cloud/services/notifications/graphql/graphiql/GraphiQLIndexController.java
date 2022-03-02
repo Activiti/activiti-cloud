@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 @ConditionalOnWebApplication
 public class GraphiQLIndexController {
-	
+
 	@Value("${graphiql.index:/graphiql/graphiql.html}")
 	private String graphiqlHtml;
 

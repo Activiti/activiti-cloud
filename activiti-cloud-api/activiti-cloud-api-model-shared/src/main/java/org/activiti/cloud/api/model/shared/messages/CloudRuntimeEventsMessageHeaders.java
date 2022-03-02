@@ -16,11 +16,11 @@
 package org.activiti.cloud.api.model.shared.messages;
 
 /**
- * Holds message header key names used in messages with CloudRuntimeEvent[] payload type  
+ * Holds message header key names used in messages with CloudRuntimeEvent[] payload type
  *
  */
 public final class CloudRuntimeEventsMessageHeaders {
-    
+
     public final static String ROUTING_KEY = "routingKey";
     public final static String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
     public final static String BUSINESS_KEY = "businessKey";
@@ -34,5 +34,5 @@ public final class CloudRuntimeEventsMessageHeaders {
     public final static String DEPLOYMENT_ID = "deploymentId";
     public final static String DEPLOYMENT_NAME = "deploymentName";
     public final static String PARENT_PROCESS_INSTANCE_NAME = "parentProcessInstanceName";
-    
+
 }

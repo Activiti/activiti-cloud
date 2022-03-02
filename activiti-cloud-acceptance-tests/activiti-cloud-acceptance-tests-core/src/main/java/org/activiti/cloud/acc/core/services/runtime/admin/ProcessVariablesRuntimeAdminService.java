@@ -29,7 +29,7 @@ public interface ProcessVariablesRuntimeAdminService {
     @Headers("Content-Type: application/json")
     ResponseEntity<List<String>> updateVariables(@Param("id") String id,
                                                  SetProcessVariablesPayload setProcessVariablesPayload);
-    
+
     @RequestLine("DELETE /admin/v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")
     ResponseEntity<Void> removeVariables(@Param("id") String id,

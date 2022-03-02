@@ -5,7 +5,7 @@ Activiti Cloud Native APIs &amp; Shared Models.
 
 These events are sent to the `engineEvents` Spring Cloud Stream destination in the runtime-bundle microservice in JSON format.
 
-All events have a set of common Activiti Cloud API properties defined in [org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent](./activiti-cloud-api-model-shared/src/main/java/org/activiti/cloud/api/model/shared/events/CloudRuntimeEvent.java). 
+All events have a set of common Activiti Cloud API properties defined in [org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent](./activiti-cloud-api-model-shared/src/main/java/org/activiti/cloud/api/model/shared/events/CloudRuntimeEvent.java).
 
 | Name | Description | Type | Example |
 |------|-------------|------|---------|
@@ -44,8 +44,8 @@ A new enum is available for all the Cloud events: [org.activiti.cloud.api.proces
 
 | Name | Description | Class |
 |------|-------------|---------|
-| ACTIVITY_STARTED | | [org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent](./activiti-cloud-api-process-model/src/main/java/org/activiti/cloud/api/process/model/events/CloudBPMNActivityStartedEvent.java) | 
-| ACTIVITY_CANCELLED | | [org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent](./activiti-cloud-api-process-model/src/main/java/org/activiti/cloud/api/process/model/events/CloudBPMNActivityCancelledEvent.java) | 
+| ACTIVITY_STARTED | | [org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent](./activiti-cloud-api-process-model/src/main/java/org/activiti/cloud/api/process/model/events/CloudBPMNActivityStartedEvent.java) |
+| ACTIVITY_CANCELLED | | [org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent](./activiti-cloud-api-process-model/src/main/java/org/activiti/cloud/api/process/model/events/CloudBPMNActivityCancelledEvent.java) |
 | ACTIVITY_COMPLETED | | [org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent](./activiti-cloud-api-process-model/src/main/java/org/activiti/cloud/api/process/model/events/CloudBPMNActivityCompletedEvent.java) |
 | ERROR_RECEIVED | | [org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent](./activiti-cloud-api-process-model/src/main/java/org/activiti/cloud/api/process/model/events/CloudBPMNErrorReceivedEvent.java) |
 | SIGNAL_RECEIVED | | [org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent](./activiti-cloud-api-process-model/src/main/java/org/activiti/cloud/api/process/model/events/CloudBPMNSignalReceivedEvent.java) |

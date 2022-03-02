@@ -25,9 +25,9 @@ import org.springframework.messaging.Message;
 public class MessageSelectors {
 
     public static class MessageEventTypeSelector implements MessageSelector {
-        
+
         private final Enum<?> type;
-        
+
         public MessageEventTypeSelector(Enum<?> type) {
             this.type = type;
         }
@@ -39,6 +39,6 @@ public class MessageSelectors {
                            .filter(type.name()::equals)
                            .isPresent();
         }
-        
+
     }
 }

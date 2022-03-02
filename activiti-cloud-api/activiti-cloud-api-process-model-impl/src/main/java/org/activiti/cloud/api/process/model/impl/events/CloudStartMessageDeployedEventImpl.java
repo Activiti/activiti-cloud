@@ -20,8 +20,8 @@ import org.activiti.api.process.model.events.MessageDefinitionEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudStartMessageDeployedEvent;
 
-public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<StartMessageDeploymentDefinition, 
-                                                                              MessageDefinitionEvent.MessageDefinitionEvents> 
+public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<StartMessageDeploymentDefinition,
+                                                                              MessageDefinitionEvent.MessageDefinitionEvents>
                                                 implements CloudStartMessageDeployedEvent {
 
     private CloudStartMessageDeployedEventImpl(Builder builder) {
@@ -30,26 +30,26 @@ public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<St
 
     public CloudStartMessageDeployedEventImpl() {
     }
-    
+
     public CloudStartMessageDeployedEventImpl(StartMessageDeploymentDefinition entity) {
         super(entity);
-        
+
         setEntityId(entity.getMessageSubscription().getId());
-        
+
         setProcessDefinitionId(entity.getProcessDefinition().getId());
         setProcessDefinitionKey(entity.getProcessDefinition().getKey());
         setProcessDefinitionVersion(entity.getProcessDefinition().getVersion());
     }
-    
+
     public CloudStartMessageDeployedEventImpl(String id,
                                               Long timestamp,
                                               StartMessageDeploymentDefinition entity) {
         super(id, timestamp, entity);
-        
+
         if (getEntity() != null) {
             setEntityId(getEntity().getMessageSubscription().getId());
         }
-    }    
+    }
 
     @Override
     public int hashCode() {
@@ -80,7 +80,7 @@ public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<St
     public static Builder builder() {
         return new Builder();
     }
-    
+
     /**
      * Creates a builder to build {@link CloudStartMessageDeployedEventImpl} and initialize it with the given object.
      * @param cloudStartMessageDeployedEventImpl to initialize the builder with
@@ -122,5 +122,5 @@ public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<St
             return new CloudStartMessageDeployedEventImpl(this);
         }
     }
-    
+
 }

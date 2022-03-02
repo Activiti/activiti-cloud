@@ -31,7 +31,7 @@ public class ClaimTaskCmdExecutor extends AbstractCommandExecutor<ClaimTaskPaylo
     @Override
     public TaskResult execute(ClaimTaskPayload claimTaskPayload) {
         Task task = taskAdminRuntime.claim(claimTaskPayload);
-        
+
         return new TaskResult(claimTaskPayload, task);
     }
 }

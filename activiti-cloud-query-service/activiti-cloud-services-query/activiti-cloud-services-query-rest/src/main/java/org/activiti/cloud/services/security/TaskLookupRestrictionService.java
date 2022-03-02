@@ -79,11 +79,11 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
         Predicate defaultRestrictions = restrictTaskQuery(new BooleanBuilder());
 
         BooleanExpression userIsInvolved = processInstanceEntity.initiator.eq(userId) //is Initiator
-                .or(taskEntity.processInstanceId.in( //user is Involved in one of the tasks of the Process 
+                .or(taskEntity.processInstanceId.in( //user is Involved in one of the tasks of the Process
                         JPAExpressions.select(taskEntity.processInstanceId)
                                 .from(taskEntity)
                                 .where(defaultRestrictions)))
-                .or(defaultRestrictions); //apply default conditions 
+                .or(defaultRestrictions); //apply default conditions
 
         return addAndConditionToPredicate(predicate,userIsInvolved);
     }
@@ -145,7 +145,7 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
     public boolean isRestrictionsEnabled() {
         return restrictionsEnabled;
     }
-    
+
     public boolean isRestrictionsInvolvedUserEnabled() {
         return restrictionsInvolvedUserEnabled;
     }

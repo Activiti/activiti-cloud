@@ -1,7 +1,7 @@
 # Activiti Cloud Services Swagger
 
 This module provides base springfox configuration for swagger auto-generated specification file. It provides two
-swagger specification files: 
+swagger specification files:
 
 - default: available under `v2/api-docs` or `v2/api-docs?group=default`;
  provides specification for Alfresco MediaType format
@@ -25,6 +25,6 @@ public Predicate<RequestHandler> apiSelector() {
 }
 ```
 
-*Note:* make sure the controllers are returning Spring objects only (`PagedModel<EntityModel<DomainObject>>`, 
-`CollectionModel<EntityModel<DomainObject>>`, `EntityModel<DomainObject>`); the mapping will not work if custom `*Model` 
+*Note:* make sure the controllers are returning Spring objects only (`PagedModel<EntityModel<DomainObject>>`,
+`CollectionModel<EntityModel<DomainObject>>`, `EntityModel<DomainObject>`); the mapping will not work if custom `*Model`
 are used.

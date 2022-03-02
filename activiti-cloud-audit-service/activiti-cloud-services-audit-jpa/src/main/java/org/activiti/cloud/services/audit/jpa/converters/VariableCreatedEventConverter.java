@@ -28,7 +28,7 @@ public class VariableCreatedEventConverter extends BaseEventToEntityConverter {
     public VariableCreatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return VariableEvent.VariableEvents.VARIABLE_CREATED.name();

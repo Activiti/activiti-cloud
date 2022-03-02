@@ -28,7 +28,7 @@ public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
     public VariableDeletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return VariableEvent.VariableEvents.VARIABLE_DELETED.name();
@@ -36,7 +36,7 @@ public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected VariableDeletedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new VariableDeletedEventEntity((CloudVariableDeletedEvent) cloudRuntimeEvent);       
+        return new VariableDeletedEventEntity((CloudVariableDeletedEvent) cloudRuntimeEvent);
     }
 
     @Override

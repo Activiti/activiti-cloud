@@ -25,7 +25,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class ActivitiNotificationsGraphQLStarterAutoConfiguration {
-	
+
     @Configuration
     public class DefaultActivitiNotificationsGraphQLStarterConfiguration {
 
@@ -38,14 +38,14 @@ public class ActivitiNotificationsGraphQLStarterAutoConfiguration {
 				public void addCorsMappings(CorsRegistry registry) {
 					registry.addMapping("/**")
 							.allowedOrigins("*")
-							.allowedMethods(HttpMethod.GET.toString(), 
+							.allowedMethods(HttpMethod.GET.toString(),
 										    HttpMethod.POST.toString(),
-										    HttpMethod.PUT.toString(), 
-										    HttpMethod.DELETE.toString(), 
+										    HttpMethod.PUT.toString(),
+										    HttpMethod.DELETE.toString(),
 										    HttpMethod.OPTIONS.toString());
 				}
 			};
 		}
-    }    	
+    }
 
 }

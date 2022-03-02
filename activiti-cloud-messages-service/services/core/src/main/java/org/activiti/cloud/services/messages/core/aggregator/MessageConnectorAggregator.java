@@ -67,23 +67,23 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
         return this.expireGroupsUponCompletion;
     }
 
-    
+
     public boolean isCompleteGroupsWhenEmpty() {
         return completeGroupsWhenEmpty;
     }
 
-    
+
     public void setCompleteGroupsWhenEmpty(boolean completeGroupsWhenEmpty) {
         this.completeGroupsWhenEmpty = completeGroupsWhenEmpty;
-    }    
+    }
     /**
-     * Remove all completed messages from group. Complete the group if empty and remove if expired 
+     * Remove all completed messages from group. Complete the group if empty and remove if expired
      * If the {@link #expireGroupsUponCompletion} is true, then remove group fully.
      * @param messageGroup the group to clean up.
-     * @param completedMessages The completed messages. 
+     * @param completedMessages The completed messages.
      */
     @Override
-    protected void afterRelease(MessageGroup messageGroup, 
+    protected void afterRelease(MessageGroup messageGroup,
                                 @Nullable Collection<Message<?>> completedMessages) {
         Object groupId = messageGroup.getGroupId();
         MessageGroupStore messageStore = getMessageStore();
@@ -94,22 +94,22 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
                         .stream()
                         .filter(completedMessages::contains)
                         .collect(Collectors.toList());
-                        
+
             if (!deletedMessages.isEmpty()) {
                 messageStore.removeMessagesFromGroup(groupId, deletedMessages);
             }
         }
-        
+
         if (this.completeGroupsWhenEmpty) {
             if (messageStore.messageGroupSize(groupId) == 0) {
                 messageStore.completeGroup(groupId);
                 isCompleted = true;
             }
         }
-        
+
         if (this.expireGroupsUponCompletion && isCompleted) {
             remove(messageGroup);
-        } 
+        }
     }
-    
+
 }

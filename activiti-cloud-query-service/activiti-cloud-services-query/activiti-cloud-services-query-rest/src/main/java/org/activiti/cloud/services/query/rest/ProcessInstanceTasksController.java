@@ -45,14 +45,14 @@ public class ProcessInstanceTasksController {
     private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
     private AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
-    
+
     private TaskControllerHelper taskControllerHelper;
-    
+
     private final TaskRepository taskRepository;
     @Autowired
     public ProcessInstanceTasksController(TaskRepository taskRepository,
                                           TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                          AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler, 
+                                          AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
                                           TaskControllerHelper taskControllerHelper) {
         this.taskRepository = taskRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
@@ -64,7 +64,7 @@ public class ProcessInstanceTasksController {
     public PagedModel<EntityModel<QueryCloudTask>> getTasks(@PathVariable String processInstanceId,
                                                         Pageable pageable) {
         Predicate restrictQuery = QTaskEntity.taskEntity.processInstanceId.eq(processInstanceId);
-        
+
         return  taskControllerHelper.findAllByInvolvedUserQuery(restrictQuery, pageable);
     }
 }

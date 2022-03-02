@@ -1,33 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions id="definitions" 
+<definitions id="definitions"
   xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
   xmlns:activiti="http://activiti.org/bpmn"
   targetNamespace="Examples">
-  
+
   <process id="basicParallelGateway" name="Basic Parallel Gateway" isExecutable="true">
-  
+
     <startEvent id="theStart" />
-    
+
     <sequenceFlow id="flow1" sourceRef="theStart" targetRef="task1" />
-  
+
     <task id="task1" name="Task 1" />
-    
+
     <sequenceFlow id="flow2" sourceRef="task1" targetRef="parallelGateway" />
-    
+
      <parallelGateway id="parallelGateway"/>
-  
+
   	<sequenceFlow id="flow3" sourceRef="parallelGateway" targetRef="task2" />
     <task id="task2" name="Task 2" />
     <sequenceFlow id="flow4" sourceRef="task2" targetRef="theEnd1" />
-    
+
     <sequenceFlow id="flow5" sourceRef="parallelGateway" targetRef="task3" />
     <task id="task3" name="Task 3" />
     <sequenceFlow id="flow6" sourceRef="task3" targetRef="theEnd2" />
-    
+
     <endEvent id="theEnd1" />
-    
+
     <endEvent id="theEnd2" />
   </process>
 
 </definitions>
-

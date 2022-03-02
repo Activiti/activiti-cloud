@@ -28,20 +28,20 @@ public class MessageSentReleaseHandler implements MessageGroupReleaseHandler {
 
     public MessageSentReleaseHandler() {
     }
-    
+
     @Override
     public Boolean handle(MessageGroup group) {
         if (canRelease(group)) {
             return true;
         }
-        
+
         return null;
     }
-    
+
     protected boolean canRelease(MessageGroup group) {
         Collection<Message<?>> messages = group.getMessages();
 
-        return messages.stream().anyMatch(MESSAGE_WAITING.or(START_MESSAGE_DEPLOYED)) 
+        return messages.stream().anyMatch(MESSAGE_WAITING.or(START_MESSAGE_DEPLOYED))
                 && messages.stream().anyMatch(MESSAGE_SENT);
     }
 

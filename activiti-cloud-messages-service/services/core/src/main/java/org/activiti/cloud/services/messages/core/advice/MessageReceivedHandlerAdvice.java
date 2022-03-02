@@ -31,7 +31,7 @@ public class MessageReceivedHandlerAdvice extends AbstractMessageConnectorHandle
     private final MessageGroupStore messageStore;
     private final LockTemplate lockTemplate;
     private final CorrelationStrategy correlationStrategy;
-    
+
     public MessageReceivedHandlerAdvice(MessageGroupStore messageStore,
                                         CorrelationStrategy correlationStrategy,
                                         LockTemplate lockTemplate) {
@@ -39,7 +39,7 @@ public class MessageReceivedHandlerAdvice extends AbstractMessageConnectorHandle
         this.lockTemplate = lockTemplate;
         this.correlationStrategy = correlationStrategy;
     }
-    
+
     @Override
     public <T> T doHandle(Message<?> message) {
         Object groupId = correlationStrategy.getCorrelationKey(message);
@@ -47,23 +47,23 @@ public class MessageReceivedHandlerAdvice extends AbstractMessageConnectorHandle
 
         lockTemplate.lockInterruptibly(key, () -> {
             MessageGroup group = messageStore.getMessageGroup(groupId);
-            
+
             group.getMessages()
                  .stream()
                  .filter(MESSAGE_WAITING)
                  .min(TIMESTAMP)
                  .ifPresent(result -> {
-                     messageStore.removeMessagesFromGroup(groupId, result);                            
+                     messageStore.removeMessagesFromGroup(groupId, result);
                  });
         });
-        
+
         return null;
-        
+
     }
 
     @Override
     public boolean canHandle(Message<?> message) {
         return MESSAGE_RECEIVED.test(message);
     }
-    
+
 }

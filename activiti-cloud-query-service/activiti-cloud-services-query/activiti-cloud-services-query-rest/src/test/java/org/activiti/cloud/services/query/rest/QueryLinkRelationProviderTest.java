@@ -202,5 +202,5 @@ public class QueryLinkRelationProviderTest {
         //then
         assertThat(supports).isTrue();
     }
-    
+
 }

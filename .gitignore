@@ -38,4 +38,3 @@ hs_err_pid*
 #updatebot checkout dir
 .updatebot-repos/
 .updatebot-repos/**
-

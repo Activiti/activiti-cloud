@@ -21,9 +21,9 @@ import org.springframework.integration.aggregator.MessageSequenceComparator;
 import org.springframework.messaging.Message;
 
 public class MessageComparators {
-    
+
     public static final Comparator<Message<?>> TIMESTAMP = new MessageTimestampComparator();
 
     public static final Comparator<Message<?>> SEQUENCE = new MessageSequenceComparator();
-    
+
 }

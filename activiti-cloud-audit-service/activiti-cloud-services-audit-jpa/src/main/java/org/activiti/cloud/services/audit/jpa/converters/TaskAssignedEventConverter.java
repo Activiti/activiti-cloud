@@ -28,7 +28,7 @@ public class TaskAssignedEventConverter extends BaseEventToEntityConverter {
     public TaskAssignedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name();

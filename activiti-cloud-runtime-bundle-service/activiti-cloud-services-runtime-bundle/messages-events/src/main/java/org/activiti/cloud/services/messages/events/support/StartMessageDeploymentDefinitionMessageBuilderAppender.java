@@ -37,9 +37,9 @@ public class StartMessageDeploymentDefinitionMessageBuilderAppender implements M
     @Override
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
-        
+
         StartMessageSubscription messageEventSubscription = startMessageDeploymentDefinition.getMessageSubscription();
-        
+
         // TODO Add more headers
         return request.setHeader(MESSAGE_EVENT_NAME, messageEventSubscription.getEventName())
                       .setHeader(MESSAGE_EVENT_ID, messageEventSubscription.getId())

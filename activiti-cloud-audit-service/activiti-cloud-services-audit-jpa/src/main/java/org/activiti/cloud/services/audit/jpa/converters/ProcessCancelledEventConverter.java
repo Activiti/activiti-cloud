@@ -28,7 +28,7 @@ public class ProcessCancelledEventConverter extends BaseEventToEntityConverter {
     public ProcessCancelledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name();
@@ -36,7 +36,7 @@ public class ProcessCancelledEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected ProcessCancelledAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new ProcessCancelledAuditEventEntity((CloudProcessCancelledEvent) cloudRuntimeEvent); 
+        return new ProcessCancelledAuditEventEntity((CloudProcessCancelledEvent) cloudRuntimeEvent);
     }
 
     @Override

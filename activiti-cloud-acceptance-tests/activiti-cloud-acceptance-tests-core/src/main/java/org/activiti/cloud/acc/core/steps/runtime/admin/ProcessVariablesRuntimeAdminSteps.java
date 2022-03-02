@@ -43,18 +43,18 @@ public class ProcessVariablesRuntimeAdminSteps {
     public void checkServicesHealth() {
         assertThat(baseService.isServiceUp()).isTrue();
     }
-    
+
     @Step
     public ResponseEntity<List<String>> updateVariables(String id,
                                                  SetProcessVariablesPayload setProcessVariablesPayload) {
         return processVariablesRuntimeAdminService.updateVariables(id, setProcessVariablesPayload);
     }
-    
+
     @Step
     public ResponseEntity<Void> removeVariables(String id,
                                          RemoveProcessVariablesPayload removeProcessVariablesPayload) {
         return processVariablesRuntimeAdminService.removeVariables(id, removeProcessVariablesPayload);
-        
+
     }
 
 }

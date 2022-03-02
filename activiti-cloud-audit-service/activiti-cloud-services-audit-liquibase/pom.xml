@@ -7,7 +7,7 @@
     <relativePath>../activiti-cloud-audit-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-audit-liquibase</artifactId>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -32,7 +32,7 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
   </dependencies>
-    
+
 </project>

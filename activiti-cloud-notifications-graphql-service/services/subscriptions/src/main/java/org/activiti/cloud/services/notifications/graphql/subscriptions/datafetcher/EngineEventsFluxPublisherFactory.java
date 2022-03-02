@@ -33,13 +33,13 @@ public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFa
 
     private final Flux<Message<List<EngineEvent>>> engineEventsFlux;
     private final EngineEventsPredicateFactory predicateFactory;
-    
+
     public EngineEventsFluxPublisherFactory(Flux<Message<List<EngineEvent>>> engineEventsFlux,
                                             EngineEventsPredicateFactory predicateFactory) {
         this.engineEventsFlux = engineEventsFlux;
         this.predicateFactory = predicateFactory;
     }
-    
+
     @Override
     public Flux<List<EngineEvent>> getPublisher(DataFetchingEnvironment environment) {
         Predicate<? super EngineEvent> predicate = predicateFactory.getPredicate(environment);

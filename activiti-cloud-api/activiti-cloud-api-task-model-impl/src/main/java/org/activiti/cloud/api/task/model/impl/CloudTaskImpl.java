@@ -340,4 +340,3 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                status == task.status;
     }
 }
-

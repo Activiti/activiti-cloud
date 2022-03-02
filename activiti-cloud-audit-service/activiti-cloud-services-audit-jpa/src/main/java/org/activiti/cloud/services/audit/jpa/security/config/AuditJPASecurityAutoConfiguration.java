@@ -29,8 +29,8 @@ public class AuditJPASecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService(SecurityManager securityManager,
                                                                                      SecurityPoliciesProperties securityPoliciesProperties) {
-        return new SecurityPoliciesApplicationServiceImpl(securityManager, 
+        return new SecurityPoliciesApplicationServiceImpl(securityManager,
                                                           securityPoliciesProperties);
     }
-    
+
 }

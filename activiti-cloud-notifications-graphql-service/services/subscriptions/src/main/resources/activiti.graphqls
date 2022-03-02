@@ -87,4 +87,3 @@ type EngineEvent {
     entity : ObjectScalar
     eventType : EngineEventType
 }
-

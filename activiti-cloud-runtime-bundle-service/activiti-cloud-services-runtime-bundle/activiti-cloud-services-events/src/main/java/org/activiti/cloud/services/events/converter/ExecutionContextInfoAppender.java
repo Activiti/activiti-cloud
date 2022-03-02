@@ -30,17 +30,17 @@ public class ExecutionContextInfoAppender {
     public ExecutionContextInfoAppender(ExecutionContext executionContext) {
         this.executionContext = executionContext;
     }
-    
+
     public CloudRuntimeEvent<?, ?> appendExecutionContextInfoTo(CloudRuntimeEventImpl<?, ?> event) {
         // inject execution context info
         if(executionContext != null) {
             ExecutionEntity processInstance = executionContext.getProcessInstance();
             ProcessDefinition processDefinition = executionContext.getProcessDefinition();
 
-            if(processInstance != null) { 
+            if(processInstance != null) {
                 event.setProcessInstanceId(processInstance.getId());
                 event.setBusinessKey(processInstance.getBusinessKey());
-                
+
                 // Let's try extract parent info from super execution if exists
                 if(processInstance.getSuperExecutionId() != null) {
                     Optional.ofNullable(processInstance.getSuperExecution())
@@ -54,9 +54,9 @@ public class ExecutionContextInfoAppender {
                 event.setProcessDefinitionVersion(processDefinition.getVersion());
             }
         }
-        
+
         return event;
-    }    
-    
-    
+    }
+
+
 }

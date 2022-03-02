@@ -71,14 +71,14 @@ public class TaskControllerHelper {
             taskRepresentationModelAssembler);
     }
 
-    public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate, 
+    public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate,
                                                                      Pageable pageable) {
 
         Predicate conditions = taskLookupRestrictionService.restrictToInvolvedUsersQuery(predicate);
         Page<TaskEntity> page = taskRepository.findInProcessInstanceScope(conditions, pageable);
-        
-        return pagedCollectionModelAssembler.toModel(pageable, 
-                                                     page, 
+
+        return pagedCollectionModelAssembler.toModel(pageable,
+                                                     page,
                                                      taskRepresentationModelAssembler);
     }
 

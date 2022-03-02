@@ -38,4 +38,3 @@ public interface BaseService {
         return appInfo != null && "UP".equals(appInfo.get("status"));
     }
 }
-

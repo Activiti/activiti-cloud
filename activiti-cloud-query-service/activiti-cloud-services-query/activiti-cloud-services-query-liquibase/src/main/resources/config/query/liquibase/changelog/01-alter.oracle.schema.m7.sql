@@ -19,7 +19,7 @@ create table integration_context
     client_id                  	varchar(255),
     client_name                	varchar(255),
     client_type                	varchar(255),
-    
+
     connector_type            	varchar(255),
     status                      varchar(255),
 
@@ -33,7 +33,7 @@ create table integration_context
 
 	inbound_variables	 	   	CLOB,
 	out_bound_variables 	   	CLOB,
-	
+
     primary key (id)
 );
 
@@ -42,10 +42,9 @@ alter table integration_context
 
 alter table bpmn_activity
     add execution_id varchar(255);
-    
+
 alter table bpmn_activity
     drop constraint bpmn_activity_processInstance_elementId_idx;
-    
+
 alter table bpmn_activity
     add constraint bpmn_activity_processInstance_elementId_idx unique (process_instance_id, element_id, execution_id);
-    

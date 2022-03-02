@@ -46,7 +46,7 @@ public class JobMessageHandler  implements MessageHandler {
             String jobId = new String((byte[]) message.getPayload());
 
             logger.info("Received job message with id: " + jobId);
-            
+
             JobEntity job = findJobById(jobId);
 
             if(job != null) {
@@ -65,7 +65,7 @@ public class JobMessageHandler  implements MessageHandler {
             throw new ActivitiException("Exception when handling message from job queue", cause);
         }
     }
-    
+
     public JobEntity findJobById(String jobId) {
         return processEngineConfiguration.getCommandExecutor()
                                          .execute(new Command<JobEntity>() {
@@ -75,9 +75,9 @@ public class JobMessageHandler  implements MessageHandler {
                                              }
                                          });
     }
-    
+
     public void executeJob(JobEntity job) {
-        ExecuteAsyncRunnable executeAsyncRunnable = new ExecuteAsyncRunnable(job, 
+        ExecuteAsyncRunnable executeAsyncRunnable = new ExecuteAsyncRunnable(job,
                                                                              processEngineConfiguration);
 
         executeAsyncRunnable.run();

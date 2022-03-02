@@ -24,13 +24,13 @@ public class JobMessageFailedEvent extends ApplicationEvent {
     private static final long serialVersionUID = 1L;
     private final Message<?> message;
     private final Throwable exception;
-    
+
     public JobMessageFailedEvent(Message<?> message, Throwable exception, Object source) {
         super(source);
         this.message = message;
         this.exception = exception;
     }
-    
+
     public Throwable getException() {
         return exception;
     }

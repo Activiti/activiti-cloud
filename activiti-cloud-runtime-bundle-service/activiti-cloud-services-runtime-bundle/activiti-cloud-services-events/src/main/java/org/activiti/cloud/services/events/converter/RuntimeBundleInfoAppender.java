@@ -44,7 +44,7 @@ public class RuntimeBundleInfoAppender {
         cloudRuntimeEntity.setServiceFullName(properties.getServiceFullName());
         cloudRuntimeEntity.setServiceType(properties.getServiceType());
         cloudRuntimeEntity.setServiceVersion(properties.getServiceVersion());
-        
+
         return cloudRuntimeEntity;
     }
 

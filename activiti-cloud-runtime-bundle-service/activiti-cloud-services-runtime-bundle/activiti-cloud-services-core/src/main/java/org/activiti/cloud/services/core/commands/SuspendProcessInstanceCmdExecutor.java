@@ -31,7 +31,7 @@ public class SuspendProcessInstanceCmdExecutor extends AbstractCommandExecutor<S
     @Override
     public ProcessInstanceResult execute(SuspendProcessPayload suspendProcessPayload) {
         ProcessInstance processInstance = processAdminRuntime.suspend(suspendProcessPayload);
-        
+
         return new ProcessInstanceResult(suspendProcessPayload,processInstance);
     }
 }

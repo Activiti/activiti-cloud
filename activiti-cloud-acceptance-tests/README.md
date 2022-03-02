@@ -12,5 +12,5 @@ To run all tests:
 > mvn clean install -DskipTests && mvn clean verify
 
 Or to run just runtime:
- 
+
 > mvn clean install -DskipTests && mvn -pl '!apps-acceptance-tests,!multiple-runtime-acceptance-tests,!security-policies-acceptance-tests,!shared-acceptance-tests' clean verify

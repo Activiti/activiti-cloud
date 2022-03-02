@@ -20,5 +20,5 @@ import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public interface CloudBPMNMessageEvent extends CloudRuntimeEvent<BPMNMessage, BPMNMessageEvent.MessageEvents> {
-    
+
 }

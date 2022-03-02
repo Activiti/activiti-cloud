@@ -34,12 +34,12 @@ public class TestProducerAutoConfiguration {
     @ConditionalOnBean(BindingService.class)
     @EnableBinding(StreamProducer.class)
     static class MyProducerConfiguration {
-    
+
         @Bean
         @ConditionalOnMissingBean
         public MyProducer myProducer(MessageChannel producer) {
             return new MyProducer(producer);
         }
     }
-    
+
 }

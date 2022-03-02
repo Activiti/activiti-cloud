@@ -30,13 +30,13 @@ public class KeycloakAccessTokenPrincipalGroupsProvider implements PrincipalGrou
 
     private final KeycloakAccessTokenProvider keycloakAccessTokenProvider;
     private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
-    
+
     public KeycloakAccessTokenPrincipalGroupsProvider(@NonNull KeycloakAccessTokenProvider keycloakAccessTokenProvider,
                                                       @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
         this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
     }
-    
+
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
         return keycloakAccessTokenProvider.accessToken(principal)
@@ -53,5 +53,5 @@ public class KeycloakAccessTokenPrincipalGroupsProvider implements PrincipalGrou
     protected @Nullable List<String> empty() {
         return null;
     }
-    
+
 }

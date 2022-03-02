@@ -213,9 +213,9 @@ public class TaskRuntimeBundleSteps {
             .map(EntityModel::getContent)
             .collect(Collectors.toSet());
     }
-    
+
     @Step
-    public void assignTask(String id, AssignTaskPayload assignTaskPayload) { 
+    public void assignTask(String id, AssignTaskPayload assignTaskPayload) {
         taskApiClient.assign(id, assignTaskPayload);
     }
 

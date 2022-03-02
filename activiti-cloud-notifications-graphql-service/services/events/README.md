@@ -1,4 +1,4 @@
-# Notifications Module 
+# Notifications Module
 
 <p>This module consumes events made available by an Activiti runtime bundle (by default though the engineEvents destination). It transforms these events to a flattened format and passes on to queues for consumption by clients.</p>
 

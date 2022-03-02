@@ -28,14 +28,14 @@ public class TaskCandidateGroupRemovedEventConverter extends BaseEventToEntityCo
     public TaskCandidateGroupRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name();
     }
 
     @Override
-    public TaskCandidateGroupRemovedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {             
+    public TaskCandidateGroupRemovedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
         return new TaskCandidateGroupRemovedEventEntity((CloudTaskCandidateGroupRemovedEvent) cloudRuntimeEvent);
     }
 

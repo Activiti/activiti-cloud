@@ -39,17 +39,17 @@ import org.springframework.test.context.TestContext;
 public @interface WithMockKeycloakUser {
 
     String username() default "testuser";
-    
+
     String[] roles() default {};
 
     String[] groups() default {};
-    
+
     boolean isActive() default true;
 
     boolean isInteractive() default false;
-    
+
     String rolePrefix() default "ROLE_";
-    
+
     /**
      * Determines when the {@link SecurityContext} is setup. The default is before
      * {@link TestExecutionEvent#TEST_METHOD} which occurs during
@@ -58,5 +58,5 @@ public @interface WithMockKeycloakUser {
      * @since 5.1
      */
     @AliasFor(annotation = WithSecurityContext.class)
-    TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_METHOD;    
+    TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_METHOD;
 }

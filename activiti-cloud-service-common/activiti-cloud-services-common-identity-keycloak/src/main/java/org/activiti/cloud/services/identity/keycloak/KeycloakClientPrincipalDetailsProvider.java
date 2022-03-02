@@ -28,13 +28,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class KeycloakClientPrincipalDetailsProvider implements PrincipalGroupsProvider, PrincipalRolesProvider {
-    
+
     private final KeycloakInstanceWrapper keycloakInstanceWrapper;
-    
+
     public KeycloakClientPrincipalDetailsProvider(KeycloakInstanceWrapper keycloakInstanceWrapper) {
         this.keycloakInstanceWrapper = keycloakInstanceWrapper;
     }
-    
+
 
     @Override
     public List<String> getGroups(Principal principal) {
@@ -44,7 +44,7 @@ public class KeycloakClientPrincipalDetailsProvider implements PrincipalGroupsPr
                                       .collect(Collectors.collectingAndThen(Collectors.toList(),
                                                                             Collections::unmodifiableList));
     }
-    
+
     @Override
     public List<String> getRoles(Principal principal) {
         return userResource(principal).roles()
@@ -55,19 +55,19 @@ public class KeycloakClientPrincipalDetailsProvider implements PrincipalGroupsPr
                                       .collect(Collectors.collectingAndThen(Collectors.toList(),
                                                                             Collections::unmodifiableList));
     }
-    
+
     protected UserResource userResource(Principal principal) {
         return keycloakInstanceWrapper.getRealm()
                                       .users()
                                       .get(subjectId(principal));
     }
-    
+
     protected String subjectId(Principal principal) {
         return Optional.of(principal)
                        .map(Principal::getName)
                        .orElseThrow(this::securityException);
     }
-    
+
     protected SecurityException securityException() {
         return new SecurityException("Invalid Keycloak principal subject id");
     }

@@ -21,7 +21,7 @@ import org.activiti.api.process.model.events.MessageSubscriptionEvent.MessageSub
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 
-public class CloudMessageSubscriptionCancelledEventImpl extends CloudRuntimeEventImpl<MessageSubscription, MessageSubscriptionEvent.MessageSubscriptionEvents> 
+public class CloudMessageSubscriptionCancelledEventImpl extends CloudRuntimeEventImpl<MessageSubscription, MessageSubscriptionEvent.MessageSubscriptionEvents>
                                                         implements CloudMessageSubscriptionCancelledEvent {
 
     private CloudMessageSubscriptionCancelledEventImpl(Builder builder) {
@@ -32,16 +32,16 @@ public class CloudMessageSubscriptionCancelledEventImpl extends CloudRuntimeEven
     }
 
     public CloudMessageSubscriptionCancelledEventImpl(MessageSubscription entity) {
-        super(entity);    
-        
+        super(entity);
+
         setProcessInstanceId(entity.getProcessInstanceId());
         setProcessDefinitionId(entity.getProcessDefinitionId());
-        
+
         if (entity != null) {
             setEntityId(entity.getId());
         }
     }
-    
+
     public CloudMessageSubscriptionCancelledEventImpl(String id,
                                            Long timestamp,
                                            MessageSubscription entity,
@@ -50,15 +50,15 @@ public class CloudMessageSubscriptionCancelledEventImpl extends CloudRuntimeEven
         super(id,
               timestamp,
               entity);
-        
+
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
-        
+
         if (entity != null) {
             setEntityId(entity.getId());
         }
     }
-    
+
     @Override
     public MessageSubscriptionEvent.MessageSubscriptionEvents getEventType() {
         return MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED;
@@ -101,7 +101,7 @@ public class CloudMessageSubscriptionCancelledEventImpl extends CloudRuntimeEven
     public static Builder builder() {
         return new Builder();
     }
-    
+
     /**
      * Creates a builder to build {@link CloudMessageSubscriptionCancelledEventImpl} and initialize it with the given object.
      * @param cloudMessageSubscriptionCancelledEventImpl to initialize the builder with

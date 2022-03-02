@@ -28,7 +28,7 @@ public class TaskCandidateUserRemovedEventConverter extends BaseEventToEntityCon
     public TaskCandidateUserRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name();

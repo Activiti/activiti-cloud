@@ -32,7 +32,7 @@ public class CloudRuntimeEventMessageBuilderAppender implements MessageBuilderAp
     @Override
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
-        
+
         return request.setHeader(CloudRuntimeEventMessageHeaders.EVENT_TYPE, event.getEventType().name())
                 .setHeader(CloudRuntimeEventMessageHeaders.BUSINESS_KEY, event.getBusinessKey())
                 .setHeader(CloudRuntimeEventMessageHeaders.PROCESS_DEFINITION_KEY, event.getProcessDefinitionKey())

@@ -49,7 +49,7 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
 	private final UnicastProcessor<ExecutionResult> processor = UnicastProcessor.create();
 
     private final AtomicReference<Subscription> subscriptionRef = new AtomicReference<>();
-    
+
     private final Disposable control;
 
 	public GraphQLBrokerChannelSubscriber(Message<?> message,  String operationMessageId,
@@ -67,11 +67,11 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
 
 	public void cancel() {
 	    control.dispose();
-	    
+
         Subscription subscription = subscriptionRef.get();
 
         log.info("Cancel subscription {}", subscription);
-        
+
         if (subscription != null) {
             try {
                 subscription.cancel();
@@ -83,7 +83,7 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
     public void onSubscribe(Subscription s) {
         log.info("New subscription: {}", s);
         subscriptionRef.set(s);
-        
+
         requestNext(1);
     }
 
@@ -138,11 +138,11 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
 		// Send message directly to user
 	    outboundChannel.send(responseMessage);
     }
-    
+
     private MessageHeaders getMessageHeaders() {
         MessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.getMutableAccessor(message);
         headerAccessor.setLeaveMutable(true); // must be mutable to preserve publish order!
-        
+
         return headerAccessor.getMessageHeaders();
     }
 

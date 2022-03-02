@@ -61,7 +61,7 @@ public class AuditSteps {
     public void checkServicesHealth() {
         assertThat(baseService.isServiceUp()).isTrue();
     }
-    
+
     @Step
     public Collection<CloudRuntimeEvent> getEventsByProcessInstanceId(String processInstanceId) throws Exception {
         return auditService.getEvents("processInstanceId:" + processInstanceId).getContent();
@@ -369,13 +369,13 @@ public class AuditSteps {
         String filter = "entityId:";
         return auditService.getEvents(filter + entityId).getContent();
     }
-    
+
     @Step
     public Collection<CloudRuntimeEvent> getEventsByProcessAndEntityId(String processInstanceId,
                                                                        String entityId){
         return auditService.getEvents("entityId:" + entityId + ",processInstanceId:" + processInstanceId).getContent();
     }
-    
+
     @Step
     public Collection<CloudRuntimeEvent> getEventsByProcessDefinitionKey(String processDefinitionKey){
         return auditService.getEvents("processDefinitionKey:" + processDefinitionKey).getContent();
@@ -416,7 +416,7 @@ public class AuditSteps {
                     .isNotNull();
         });
     }
-    
+
     @Step
     public void checkProcessInstanceSubProcessEvents(String processInstanceId){
 
@@ -436,14 +436,14 @@ public class AuditSteps {
                                     processInstanceId));
         });
     }
-  
+
     @Step
     public void checkProcessInstanceInclusiveGatewayEvents(String processInstanceId, String gatewayId){
-     
+
         await().untilAsserted(() -> {
             Collection <CloudRuntimeEvent> receivedEvents = getEventsByProcessInstanceId(processInstanceId);
             assertThat(receivedEvents)
-                    .filteredOn(event -> (BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.equals(event.getEventType()) || 
+                    .filteredOn(event -> (BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.equals(event.getEventType()) ||
                                           BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.equals(event.getEventType())))
                     .isNotEmpty()
                     .extracting("eventType",
@@ -460,12 +460,12 @@ public class AuditSteps {
                                     processInstanceId));
         });
     }
-    
+
     @Step
-    public void checkProcessInstanceTimerScheduledEvents(String processInstanceId, 
+    public void checkProcessInstanceTimerScheduledEvents(String processInstanceId,
                                                          String timerId,
                                                          long timeoutSeconds){
-        
+
         await().atMost(timeoutSeconds,
                       TimeUnit.SECONDS).untilAsserted(() -> {
             Collection <CloudRuntimeEvent> receivedEvents = getEventsByProcessAndEntityId(processInstanceId, timerId);
@@ -482,12 +482,12 @@ public class AuditSteps {
                                     processInstanceId));
         });
     }
-    
+
     @Step
-    public void checkProcessInstanceTimerFiredEvents(String processInstanceId, 
+    public void checkProcessInstanceTimerFiredEvents(String processInstanceId,
                                                      String timerId,
                                                      long timeoutSeconds){
-        
+
         await().atMost(timeoutSeconds,
                       TimeUnit.SECONDS).untilAsserted(() -> {
             Collection <CloudRuntimeEvent> receivedEvents = getEventsByProcessAndEntityId(processInstanceId, timerId);
@@ -501,12 +501,12 @@ public class AuditSteps {
                                     processInstanceId));
         });
     }
-    
+
     @Step
-    public void checkProcessInstanceTimerExecutedEvents(String processInstanceId, 
+    public void checkProcessInstanceTimerExecutedEvents(String processInstanceId,
                                                         String timerId,
                                                         long timeoutSeconds){
-        
+
         await().atMost(timeoutSeconds,
                          TimeUnit.SECONDS).untilAsserted(() -> {
             Collection <CloudRuntimeEvent> receivedEvents = getEventsByProcessAndEntityId(processInstanceId, timerId);
@@ -525,13 +525,13 @@ public class AuditSteps {
                                     timerId,
                                     processInstanceId));
         });
-    }   
-    
+    }
+
     @Step
-    public void checkProcessInstanceTimerCancelledEvents(String processInstanceId, 
+    public void checkProcessInstanceTimerCancelledEvents(String processInstanceId,
                                                          String timerId,
                                                          long timeoutSeconds){
-        
+
         await().atMost(timeoutSeconds,
                           TimeUnit.SECONDS).untilAsserted(() -> {
             Collection <CloudRuntimeEvent> receivedEvents = getEventsByProcessAndEntityId(processInstanceId, timerId);
@@ -544,13 +544,13 @@ public class AuditSteps {
                                     timerId,
                                     processInstanceId));
         });
-    }   
-    
+    }
+
     @Step
-    public void checkProcessInstanceTimerFailedEvents(String processInstanceId, 
+    public void checkProcessInstanceTimerFailedEvents(String processInstanceId,
                                                       String timerId,
                                                       long timeoutSeconds){
-        
+
         await().atMost(timeoutSeconds,
                        TimeUnit.SECONDS).untilAsserted(() -> {
             Collection <CloudRuntimeEvent> receivedEvents = getEventsByProcessAndEntityId(processInstanceId, timerId);
@@ -567,12 +567,9 @@ public class AuditSteps {
                                     processInstanceId));
         });
     }
-    
+
     @Step
     public Collection<CloudRuntimeEvent> getEventsByEventType(String eventType) throws Exception {
         return auditService.getEvents("eventType:" + eventType).getContent();
     }
 }
-
-
-

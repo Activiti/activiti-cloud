@@ -128,7 +128,7 @@ public class CommandEndPointITStreamHandler {
     public AtomicBoolean getCreateTaskVariableAck() {
         return createTaskVariableAck;
     }
-    
+
     public AtomicBoolean getUpdateTaskVariableAck() {
         return updateTaskVariableAck;
     }

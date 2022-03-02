@@ -47,7 +47,7 @@ public class KeycloakSecurityContextInerceptorConfigurer implements WebSocketMes
     public KeycloakSecurityContextInerceptorConfigurer(KeycloakAccessTokenVerifier tokenVerifier) {
         this.tokenVerifier = tokenVerifier;
     }
-    
+
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
@@ -67,7 +67,7 @@ public class KeycloakSecurityContextInerceptorConfigurer implements WebSocketMes
                                     try {
                                         logger.info("Verifying Access Token for {}", accessor.getHeader(GRAPHQL_MESSAGE_TYPE));
                                         tokenVerifier.verifyToken(keycloakSecurityContext.getTokenString());
-                                        
+
                                     } catch (Exception e) {
                                         throw new BadCredentialsException("Invalid token", e);
                                     }
@@ -79,12 +79,12 @@ public class KeycloakSecurityContextInerceptorConfigurer implements WebSocketMes
         });
     }
 
-    
+
     public void setHeaderValues(List<String> headerValues) {
         this.headerValues = headerValues;
     }
 
-    
+
     public void setHeaderName(String headerName) {
         this.headerName = headerName;
     }

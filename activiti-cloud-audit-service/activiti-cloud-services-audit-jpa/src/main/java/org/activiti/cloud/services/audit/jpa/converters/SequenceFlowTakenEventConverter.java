@@ -24,11 +24,11 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.SequenceFlowAuditEventEntity;
 
 public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter {
-    
+
     public SequenceFlowTakenEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name();

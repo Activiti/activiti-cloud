@@ -38,12 +38,12 @@ public interface BPMNSequenceFlowRepository extends PagingAndSortingRepository<B
         bindings.bind(String.class).first(
                 (StringPath path, String value) -> path.eq(value));
     }
-    
+
     List<BPMNSequenceFlowEntity> findByProcessInstanceId(String processInstanceId);
 
-    BPMNSequenceFlowEntity findByProcessInstanceIdAndElementId(String processInstanceId, 
+    BPMNSequenceFlowEntity findByProcessInstanceIdAndElementId(String processInstanceId,
                                                                String elementId);
 
     BPMNSequenceFlowEntity findByEventId(String eventId);
-    
+
 }

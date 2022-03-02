@@ -28,15 +28,15 @@ public class ProcessSuspendedEventConverter extends BaseEventToEntityConverter {
     public ProcessSuspendedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name();
     }
 
     @Override
-    protected ProcessSuspendedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {      
-        return new ProcessSuspendedAuditEventEntity((CloudProcessSuspendedEvent) cloudRuntimeEvent); 
+    protected ProcessSuspendedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
+        return new ProcessSuspendedAuditEventEntity((CloudProcessSuspendedEvent) cloudRuntimeEvent);
     }
 
     @Override

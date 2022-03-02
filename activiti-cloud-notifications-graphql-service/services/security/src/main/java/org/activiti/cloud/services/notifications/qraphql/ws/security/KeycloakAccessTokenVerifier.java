@@ -62,7 +62,7 @@ public class KeycloakAccessTokenVerifier {
                             .verify()
                             .getToken();
     }
-    
+
     protected PublicKey getPublicKey(JWSHeader jwsHeader) {
         return publicKeys.computeIfAbsent(getRealmCertsUrl(),
                                           (url) -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader));

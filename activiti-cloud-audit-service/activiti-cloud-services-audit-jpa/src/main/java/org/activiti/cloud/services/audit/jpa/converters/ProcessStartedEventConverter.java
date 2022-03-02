@@ -24,7 +24,7 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 
 public class ProcessStartedEventConverter extends BaseEventToEntityConverter {
-   
+
     public ProcessStartedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }

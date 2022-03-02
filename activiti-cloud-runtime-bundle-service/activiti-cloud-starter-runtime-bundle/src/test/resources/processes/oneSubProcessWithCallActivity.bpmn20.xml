@@ -15,9 +15,9 @@
       <sequenceFlow id="flow2" sourceRef="theSubProcessStart" targetRef="task" />
 
       <userTask id="task" name="Task in subprocess" activiti:candidateGroups="hr"/>
-      
+
       <sequenceFlow id="flow3" sourceRef="task" targetRef="callSubProcess" />
-      
+
       <callActivity id="callSubProcess" calledElement="simpleSubProcess1" />
 
       <sequenceFlow id="flow4" sourceRef="callSubProcess" targetRef="theSubProcessEnd" />

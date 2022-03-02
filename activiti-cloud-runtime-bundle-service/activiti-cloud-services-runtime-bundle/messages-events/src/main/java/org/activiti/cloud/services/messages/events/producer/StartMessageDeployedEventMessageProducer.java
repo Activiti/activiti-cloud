@@ -40,7 +40,7 @@ public class StartMessageDeployedEventMessageProducer implements ProcessRuntimeE
         this.messageEventsDispatcher = messageEventsDispatcher;
         this.messageBuilderFactory = messageBuilderFactory;
     }
-    
+
     @Override
     public void onEvent(StartMessageDeployedEvent event) {
         logger.debug("onEvent: {}", event);
@@ -51,8 +51,8 @@ public class StartMessageDeployedEventMessageProducer implements ProcessRuntimeE
         MessageEventPayload messageEventPayload = MessageEventPayloadBuilder.messageEvent(messageSubscription.getEventName())
                                                                             .withCorrelationKey(messageSubscription.getConfiguration())
                                                                             .build();
-        
-        
+
+
         Message<MessageEventPayload> message = messageBuilderFactory.create(event)
                                                                     .withPayload(messageEventPayload)
                                                                     .setHeader(MessageEventHeaders.MESSAGE_EVENT_TYPE,

@@ -20,5 +20,5 @@ public interface RoutingKeyResolver<T> {
     default String resolve(T value) {
         return null;
     };
-    
+
 }

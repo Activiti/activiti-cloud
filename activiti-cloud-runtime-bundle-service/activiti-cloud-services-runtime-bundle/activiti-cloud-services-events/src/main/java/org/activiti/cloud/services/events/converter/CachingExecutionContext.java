@@ -23,12 +23,12 @@ import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 
 /**
- * Wraps ExecutionContext to cache parent method lookups to reduce 
- * unnecessary db queries to lookup entities 
+ * Wraps ExecutionContext to cache parent method lookups to reduce
+ * unnecessary db queries to lookup entities
  *
  */
 public class CachingExecutionContext extends ExecutionContext {
-    
+
     private volatile DeploymentEntity deploymentEntity = null;
     private volatile ExecutionEntity execution = null;
     private volatile ExecutionEntity processInstance = null;
@@ -41,28 +41,28 @@ public class CachingExecutionContext extends ExecutionContext {
     @Override
     public DeploymentEntity getDeployment() {
         return Optional.ofNullable(deploymentEntity).orElseGet(() -> {
-            return (this.deploymentEntity = super.getDeployment());            
+            return (this.deploymentEntity = super.getDeployment());
         });
     }
 
     @Override
     public ExecutionEntity getExecution() {
         return Optional.ofNullable(execution).orElseGet(() -> {
-            return (this.execution = super.getExecution());            
+            return (this.execution = super.getExecution());
         });
     }
 
     @Override
     public ExecutionEntity getProcessInstance() {
         return Optional.ofNullable(processInstance).orElseGet(() -> {
-            return (this.processInstance = super.getProcessInstance());            
+            return (this.processInstance = super.getProcessInstance());
         });
     }
 
     @Override
     public ProcessDefinition getProcessDefinition() {
         return Optional.ofNullable(processDefinition).orElseGet(() -> {
-            return (this.processDefinition = super.getProcessDefinition());            
+            return (this.processDefinition = super.getProcessDefinition());
         });
     }
 }
