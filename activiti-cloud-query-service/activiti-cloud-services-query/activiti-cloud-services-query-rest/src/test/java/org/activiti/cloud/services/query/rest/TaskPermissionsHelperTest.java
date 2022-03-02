@@ -105,7 +105,8 @@ public class TaskPermissionsHelperTest {
         taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
 
         verify(taskEntity, times(1))
-                .setPermissions(List.of(TaskPermissions.VIEW));
+                .setPermissions(List.of(TaskPermissions.VIEW,
+                                        TaskPermissions.UPDATE));
     }
 
     @Test
@@ -122,9 +123,9 @@ public class TaskPermissionsHelperTest {
     }
 
     @Test
-    public void should_addReleasePermission_when_UserIsAssigneeAndCandidate() {
+    public void should_addReleasePermission_when_UserIsAssignee() {
         TaskEntity taskEntity = aTask().withId("task1").withAssignee("testuser")
-                .withCandidateUsers(List.of("testuser")).build();
+                .withCandidateUsers(List.of("user1")).build();
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
         given(taskControllerHelper.canUserViewTask(any())).willReturn(true);
 

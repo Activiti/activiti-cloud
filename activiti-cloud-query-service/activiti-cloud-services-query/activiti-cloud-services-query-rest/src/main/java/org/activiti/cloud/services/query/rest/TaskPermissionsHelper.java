@@ -47,11 +47,11 @@ public class TaskPermissionsHelper {
                 permissions.add(TaskPermissions.CLAIM);
             }
             
-            if(canUserReleaseTask(task, userId, userGroups)) {
+            if(canUserReleaseTask(task, userId)) {
                 permissions.add(TaskPermissions.RELEASE);
             }
             
-            if(isUserAssignee(task, userId)) {
+            if(canUserUpdateTask(task, userId)) {
                 permissions.add(TaskPermissions.UPDATE);
             }
 
@@ -67,16 +67,21 @@ public class TaskPermissionsHelper {
         return !isTaskAssigned(task) && isUserCandidate(task, userId, userGroups);
     }
 
-    private boolean canUserReleaseTask(TaskEntity task, String userId, List<String> userGroups) {
-        return isUserAssignee(task,userId) && isUserCandidate(task, userId, userGroups);
+    private boolean canUserReleaseTask(TaskEntity task, String userId) {
+        boolean taskHasCandidatesUser = task.getCandidateUsers() != null && !task.getCandidateUsers().isEmpty();
+        boolean taskHasCandidateGroups = task.getCandidateGroups() != null && !task.getCandidateGroups().isEmpty();
+        return isUserAssignee(task,userId) && (taskHasCandidatesUser || taskHasCandidateGroups);
+    }
+
+    private boolean canUserUpdateTask(TaskEntity task, String userId) {
+        boolean isUserOwner = task.getOwner() != null && task.getOwner().equals(userId);
+        return isUserAssignee(task, userId) || isUserOwner;
     }
     
     private boolean isUserCandidate(TaskEntity task, String userId, List<String> userGroups) {
-        
         boolean isCandidateUser = task.getCandidateUsers() != null && task.getCandidateUsers().contains(userId);
         boolean isCandidateGroup = task.getCandidateGroups() != null &&
                 task.getCandidateGroups().stream().anyMatch(userGroups::contains);
-
         return  isCandidateUser || isCandidateGroup;
     }
     
