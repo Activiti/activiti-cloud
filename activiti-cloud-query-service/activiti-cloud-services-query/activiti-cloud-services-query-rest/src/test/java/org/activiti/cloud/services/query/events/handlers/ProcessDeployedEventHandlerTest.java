@@ -21,19 +21,20 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEven
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.UUID;
 
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessDeployedEventHandlerTest {
 
     @InjectMocks
@@ -41,11 +42,6 @@ public class ProcessDeployedEventHandlerTest {
 
     @Mock
     private EntityManager entityManager;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldStoreProcessDefinitionAndProcessModel() {

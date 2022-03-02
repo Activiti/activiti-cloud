@@ -23,12 +23,13 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -37,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class AuditConsumerChannelHandlerImplTest {
 
     @InjectMocks
@@ -50,11 +52,6 @@ public class AuditConsumerChannelHandlerImplTest {
 
     @Captor
     private ArgumentCaptor<Iterable<AuditEventEntity>> argumentCaptor;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void receiveEventShouldStoreEntity() {

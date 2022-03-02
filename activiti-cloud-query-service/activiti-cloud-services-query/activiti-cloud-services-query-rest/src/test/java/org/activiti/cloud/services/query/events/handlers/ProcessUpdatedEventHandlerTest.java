@@ -23,8 +23,10 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -35,8 +37,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessUpdatedEventHandlerTest {
 
     @InjectMocks
@@ -44,11 +46,6 @@ public class ProcessUpdatedEventHandlerTest {
 
     @Mock
     private EntityManager entityManager;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUpdateCurrentProcessInstance() {

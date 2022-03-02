@@ -19,18 +19,19 @@ import java.util.Optional;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.hateoas.IanaLinkRelations.SELF;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessDefinitionRepresentationModelAssemblerTest {
 
     @InjectMocks
@@ -38,11 +39,6 @@ public class ProcessDefinitionRepresentationModelAssemblerTest {
 
     @Mock
     private ToCloudProcessDefinitionConverter converter;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {
@@ -57,4 +53,5 @@ public class ProcessDefinitionRepresentationModelAssemblerTest {
         assertThat(selfResourceLink).isPresent();
         assertThat(selfResourceLink.get().getHref()).contains("my-identifier");
     }
+
 }

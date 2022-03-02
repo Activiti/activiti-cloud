@@ -153,7 +153,7 @@ public class MessageEventsIT {
     }
 
     @Test
-    public void testIntermdiateThrowMessageEvent() {
+    public void testIntermediateThrowMessageEvent() {
         //given
         StartProcessPayload throwProcessPayload = ProcessPayloadBuilder.start()
             .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)

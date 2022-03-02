@@ -17,7 +17,6 @@ package org.activiti.cloud.services.events.listeners;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.api.process.model.events.BPMNMessageReceivedEvent;
@@ -38,11 +37,13 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEven
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class CloudMessageProducerTest {
 
     @InjectMocks
@@ -62,11 +63,6 @@ public class CloudMessageProducerTest {
 
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void shouldConvertMessageSentEventToCloudEventAndAddToAggregator() {

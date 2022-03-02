@@ -41,14 +41,13 @@ import javax.websocket.Session;
 
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.reactivestreams.Publisher;
 import org.springframework.messaging.Message;
@@ -71,6 +70,7 @@ import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+@ExtendWith(MockitoExtension.class)
 public class GraphQLBrokerMessageHandlerTest {
 
 
@@ -100,9 +100,7 @@ public class GraphQLBrokerMessageHandlerTest {
     private ArgumentCaptor<Message<GraphQLMessage>> messageCaptor;
 
     @BeforeEach
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
+    public void setUp() {
         this.messageHandler = new GraphQLBrokerMessageHandler(this.clientInboundChannel,
                                                               this.clientOutboundChannel,
                                                               this.brokerChannel,
@@ -118,11 +116,6 @@ public class GraphQLBrokerMessageHandlerTest {
 
         // then
         assertThat(this.messageHandler.isBrokerAvailable()).isTrue();
-    }
-
-    @AfterEach
-    public void tearDown() throws Exception {
-        //
     }
 
     @Test
@@ -272,7 +265,6 @@ public class GraphQLBrokerMessageHandlerTest {
         ExecutionResult executionResult = mock(ExecutionResult.class);
         when(graphQLExecutor.execute(anyString(), any())).thenReturn(executionResult);
         when(executionResult.getErrors()).thenReturn(Collections.singletonList(mock(GraphQLError.class)));
-        when(executionResult.getData()).thenReturn(null);
 
         // when
         this.messageHandler.handleMessage(message);
@@ -407,7 +399,6 @@ public class GraphQLBrokerMessageHandlerTest {
 
     private WebSocketSession mockWebSocketSession(String sessionId) {
         Session nativeSession = mock(Session.class);
-        when(nativeSession.getId()).thenReturn(sessionId);
         when(nativeSession.getUserPrincipal()).thenReturn(mock(Principal.class));
 
         StandardWebSocketSession wsSession = spy(new StandardWebSocketSession(null,
@@ -426,29 +417,23 @@ public class GraphQLBrokerMessageHandlerTest {
         ExecutionResult executionResult = mock(ExecutionResult.class);
         when(executionResult.getErrors()).thenReturn(Collections.emptyList());
 
-        doAnswer(new Answer<Publisher<ExecutionResult>>() {
+        doAnswer((Answer<Publisher<ExecutionResult>>) invocation -> {
 
-            @Override
-            public Publisher<ExecutionResult> answer(InvocationOnMock invocation) throws Throwable {
+            ConnectableFlux<ExecutionResult> connectableObservable = mockStompRelayObservable.share().publish();
+            Disposable handle = connectableObservable.connect();
 
-                ConnectableFlux<ExecutionResult> connectableObservable = mockStompRelayObservable.share()
-                                                                                                       .publish();
-                Disposable handle = connectableObservable.connect();
+            return connectableObservable.onBackpressureBuffer()
+                                        .doOnComplete(() -> {
+                                            completeDownLatch.countDown();
+                                        })
+                                        .doOnCancel(() -> {
+                                            handle.dispose();
+                                        });
 
-                return connectableObservable.onBackpressureBuffer()
-                                            .doOnComplete(() -> {
-                                                completeDownLatch.countDown();
-                                            })
-                                            .doOnCancel(() -> {
-                                                handle.dispose();
-                                            });
-
-            }
         }).when(executionResult)
           .getData();
 
         return executionResult;
-
     }
 
 }

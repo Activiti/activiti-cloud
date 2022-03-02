@@ -75,7 +75,7 @@ class MultipleRbMessagesIT {
     static class H2Application {
 
         @Bean(initMethod = "start", destroyMethod = "stop")
-        public Server inMemoryH2DatabaseaServer() throws SQLException {
+        public Server inMemoryH2DatabaseServer() throws SQLException {
             return Server.createTcpServer(
                 "-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
         }
@@ -124,15 +124,18 @@ class MultipleRbMessagesIT {
                           .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
                           .applyToSystemProperties(() -> {
                                 h2Context = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
+                                                                                             .properties("spring.main.banner-mode=off")
                                                                                              .profiles("h2")
                                                                                              .run();
 
                                 rb1Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081",
+                                                                                                          "spring.main.banner-mode=off",
                                                                                                           "activiti.cloud.application.name=messages-app1",
                                                                                                           "spring.application.name=rb")
                                                                                               .run();
 
                                 rb2Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082",
+                                                                                                          "spring.main.banner-mode=off",
                                                                                                           "activiti.cloud.application.name=messages-app2",
                                                                                                           "spring.application.name=rb")
                                                                                               .run();
@@ -149,7 +152,7 @@ class MultipleRbMessagesIT {
     }
 
     @Test
-    void contextLoads() throws Exception {
+    void contextLoads() {
         assertThat(h2Context).isNotNull();
         assertThat(rb1Context).isNotNull();
         assertThat(rb2Context).isNotNull();

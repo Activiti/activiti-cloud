@@ -22,10 +22,11 @@ import org.activiti.cloud.api.task.model.events.CloudTaskUpdatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -38,8 +39,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityUpdatedEventHandlerTest {
 
     @InjectMocks
@@ -48,21 +49,12 @@ public class TaskEntityUpdatedEventHandlerTest {
     @Mock
     private EntityManager entityManager;
 
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
-
     @Test
     public void handleShouldUpdateTask() {
         //given
         CloudTaskUpdatedEvent event = buildTaskUpdateEvent();
         String taskId = event.getEntity().getId();
-        TaskEntity eventTaskEntity = aTask().withId(taskId)
-                .withName("name")
-                .withDescription("description")
-                .withPriority(10)
-                .withFormKey("formKey")
+        TaskEntity eventTaskEntity = aTask()
                 .build();
 
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(eventTaskEntity);

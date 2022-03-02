@@ -21,11 +21,12 @@ import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployed
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.UUID;
@@ -35,8 +36,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ApplicationDeployedEventHandlerTest {
 
     private static final String APPLICATION_DEPLOYMENT_NAME= "SpringAutoDeployment";
@@ -49,11 +50,6 @@ public class ApplicationDeployedEventHandlerTest {
 
     @Mock
     private ApplicationRepository applicationRepository;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldStoreApplication() {

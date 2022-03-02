@@ -22,11 +22,12 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAdde
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.UUID;
@@ -36,8 +37,8 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityCandidateGroupAddedEventHandlerTest {
 
     @InjectMocks
@@ -48,11 +49,6 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
 
     @Mock
     private EntityManager entityManager;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldStoreNewTaskCandidateGroup() {
@@ -98,4 +94,5 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         //then
         assertThat(event).isEqualTo(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name());
     }
+
 }

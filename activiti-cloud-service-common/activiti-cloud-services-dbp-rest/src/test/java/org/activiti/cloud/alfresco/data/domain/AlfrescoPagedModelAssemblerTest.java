@@ -16,11 +16,12 @@
 package org.activiti.cloud.alfresco.data.domain;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
@@ -33,8 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class AlfrescoPagedModelAssemblerTest {
 
     @Spy
@@ -49,11 +50,6 @@ public class AlfrescoPagedModelAssemblerTest {
 
     @Mock
     private Page<String> page;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
 
     @Test
     public void toResourceShouldReplaceBasePageMetadataByExtendedPageMetadata() throws Exception {

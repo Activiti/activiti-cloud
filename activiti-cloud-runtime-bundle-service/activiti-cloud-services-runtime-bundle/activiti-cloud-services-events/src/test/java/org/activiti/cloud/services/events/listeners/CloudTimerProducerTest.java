@@ -17,7 +17,6 @@ package org.activiti.cloud.services.events.listeners;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.runtime.event.impl.BPMNTimerFiredEventImpl;
 import org.activiti.api.runtime.event.impl.BPMNTimerScheduledEventImpl;
@@ -25,11 +24,13 @@ import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class CloudTimerProducerTest {
 
     @InjectMocks
@@ -40,13 +41,9 @@ public class CloudTimerProducerTest {
 
     @Mock
     private ToCloudProcessRuntimeEventConverter eventConverter;
+
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void onEventShouldConvertEventToCloudEventAndAddToAggregator() {

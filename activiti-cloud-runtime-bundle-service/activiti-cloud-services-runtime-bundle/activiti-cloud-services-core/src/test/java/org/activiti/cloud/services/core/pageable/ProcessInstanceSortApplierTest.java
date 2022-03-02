@@ -35,26 +35,22 @@ import org.activiti.engine.impl.ProcessInstanceQueryProperty;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.cloud.services.core.utils.MockUtils;
 import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessInstanceSortApplierTest {
 
     @InjectMocks
     private ProcessInstanceSortApplier sortApplier;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
 
     @Test
     public void applySort_should_oder_by_process_instance_id_asc_by_default() throws Exception {

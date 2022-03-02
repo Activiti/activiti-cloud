@@ -22,10 +22,11 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -36,8 +37,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessCancelledEventHandlerTest {
 
     @InjectMocks
@@ -45,11 +46,6 @@ public class ProcessCancelledEventHandlerTest {
 
     @Mock
     private EntityManager entityManager;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     /**
      * Test that ProcessCancelledEventHandler updates the existing process instance as following:

@@ -33,18 +33,13 @@ import javax.websocket.Session;
 
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubProtocolHandler;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionConnectEvent;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionDisconnectEvent;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionSubscribeEvent;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSessionUnsubscribeEvent;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -58,6 +53,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 
 
+@ExtendWith(MockitoExtension.class)
 public class GraphQLBrokerSubProtocolHandlerTest {
 
     private GraphQLBrokerSubProtocolHandler testSubject;
@@ -72,18 +68,9 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     private ArgumentCaptor<Message<GraphQLMessage>> messageCaptor;
 
     @BeforeEach
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
+    public void setUp() {
         this.testSubject = new GraphQLBrokerSubProtocolHandler("/ws/graphql");
         this.testSubject.setApplicationEventPublisher(applicationEventPublisher);
-
-        when(outputChannel.send(any(Message.class))).thenReturn(true);
-    }
-
-    @AfterEach
-    public void tearDown() throws Exception {
-        // nothing
     }
 
     @Test
@@ -95,7 +82,8 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     public void testHandleConnectionInitMessageFromClient() throws Exception {
         // given
         TextMessage message = new TextMessage("{\"id\":\"1\",\"payload\":null,\"type\":\"connection_init\"}".getBytes());
-        WebSocketSession session = mockWebSocketSession("sess1");
+        WebSocketSession session = mockWebSocketSession();
+        when(outputChannel.send(any(Message.class))).thenReturn(true);
 
         // when
         testSubject.handleMessageFromClient(session, message, outputChannel);
@@ -113,8 +101,8 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     public void testHandleStartMessageFromClient() throws Exception {
         // given
         TextMessage message = new TextMessage("{\"id\":\"1\", \"payload\":{\"query\": \"{}\"}, \"type\":\"start\"}".getBytes());
-
-        WebSocketSession session = mockWebSocketSession("sess1");
+        WebSocketSession session = mockWebSocketSession();
+        when(outputChannel.send(any(Message.class))).thenReturn(true);
 
         // when
         testSubject.handleMessageFromClient(session, message, outputChannel);
@@ -132,8 +120,8 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     public void testHandleStopMessageFromClient() throws Exception {
         // given
         TextMessage message = new TextMessage("{\"id\":\"1\", \"payload\":null, \"type\":\"stop\"}".getBytes());
-
-        WebSocketSession session = mockWebSocketSession("sess1");
+        WebSocketSession session = mockWebSocketSession();
+        when(outputChannel.send(any(Message.class))).thenReturn(true);
 
         // when
         testSubject.handleMessageFromClient(session, message, outputChannel);
@@ -152,7 +140,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
         // given
         TextMessage message = new TextMessage("{\"id\":\"1\", \"payload\":null, \"type\":\"connection_terminate\"}".getBytes());
 
-        WebSocketSession session = mockWebSocketSession("sess1");
+        WebSocketSession session = mockWebSocketSession();
 
         // when
         testSubject.handleMessageFromClient(session, message, outputChannel);
@@ -168,7 +156,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Test
     public void testHandleInvalidMessageToClient() throws IOException {
         // given
-        WebSocketSession session = spy(mockWebSocketSession("sess1"));
+        WebSocketSession session = spy(mockWebSocketSession());
 
         // when
         testSubject.handleMessageToClient(session, new GenericMessage<String>("Text Message"));
@@ -180,7 +168,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Test
     public void testHandleConnectionAckMessageToClient() throws IOException {
         // given
-        WebSocketSession session = spy(mockWebSocketSession("sess1"));
+        WebSocketSession session = spy(mockWebSocketSession());
 
         doNothing().when(session).sendMessage(any(TextMessage.class));
 
@@ -197,7 +185,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Test
     public void testHandleProtocolErrorMessageToClient() throws IOException {
         // given
-        WebSocketSession session = spy(mockWebSocketSession("sess1"));
+        WebSocketSession session = spy(mockWebSocketSession());
         doThrow(RuntimeException.class).when(session).sendMessage(any(TextMessage.class));
 
         Message<GraphQLMessage> message = connectionAckMessage("operationId", session);
@@ -213,7 +201,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Test
     public void testAfterSessionEnded() throws Exception {
         // given
-        WebSocketSession session = spy(mockWebSocketSession("sess1"));
+        WebSocketSession session = spy(mockWebSocketSession());
 
         // when
         testSubject.afterSessionEnded(session, CloseStatus.BAD_DATA, outputChannel);
@@ -229,7 +217,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Test
     public void testAfterSessionStarted() throws Exception {
         // given
-        WebSocketSession session = spy(mockWebSocketSession("sess1"));
+        WebSocketSession session = spy(mockWebSocketSession());
         when(session.getTextMessageSizeLimit()).thenReturn(1);
 
         // when
@@ -240,9 +228,8 @@ public class GraphQLBrokerSubProtocolHandlerTest {
         verify(session).setTextMessageSizeLimit(eq(GraphQLBrokerSubProtocolHandler.MINIMUM_WEBSOCKET_MESSAGE_SIZE));
     }
 
-    private WebSocketSession mockWebSocketSession(String sessionId) {
+    private WebSocketSession mockWebSocketSession() {
         Session nativeSession = mock(Session.class);
-        when(nativeSession.getId()).thenReturn(sessionId);
         when(nativeSession.getUserPrincipal()).thenReturn(mock(Principal.class));
 
         StandardWebSocketSession wsSession = new StandardWebSocketSession(null,
@@ -267,7 +254,6 @@ public class GraphQLBrokerSubProtocolHandlerTest {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 
         headerAccessor.setDestination("/destination");
-        headerAccessor.setSessionId(session.getId());
         headerAccessor.setSessionAttributes(session.getAttributes());
         headerAccessor.setUser(session.getPrincipal());
         headerAccessor.setLeaveMutable(true);

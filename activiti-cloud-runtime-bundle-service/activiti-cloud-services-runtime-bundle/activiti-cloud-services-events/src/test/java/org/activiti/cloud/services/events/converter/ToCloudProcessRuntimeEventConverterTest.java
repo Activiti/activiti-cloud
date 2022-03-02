@@ -18,7 +18,6 @@ package org.activiti.cloud.services.events.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.runtime.event.impl.BPMNSignalReceivedEventImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
@@ -27,11 +26,13 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class ToCloudProcessRuntimeEventConverterTest {
 
     @InjectMocks
@@ -39,11 +40,6 @@ public class ToCloudProcessRuntimeEventConverterTest {
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void fromShouldConvertInternalProcessStartedEventToExternalEvent() {

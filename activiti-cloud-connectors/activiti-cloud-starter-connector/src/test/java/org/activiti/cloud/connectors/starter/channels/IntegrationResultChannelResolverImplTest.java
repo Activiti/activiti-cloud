@@ -20,17 +20,19 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.MessageChannel;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationResultChannelResolverImplTest {
 
     private IntegrationResultChannelResolver subject;
@@ -47,9 +49,7 @@ public class IntegrationResultChannelResolverImplTest {
     private MessageChannel messageChannel;
 
     @BeforeEach
-    public void setUp() throws Exception {
-        initMocks(this);
-
+    public void setUp() {
         when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
         when(resolver.resolveDestination(anyString())).thenReturn(messageChannel);
 

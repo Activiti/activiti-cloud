@@ -18,7 +18,6 @@ package org.activiti.cloud.services.events.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.process.model.BPMNError;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
@@ -26,11 +25,13 @@ import org.activiti.api.runtime.event.impl.BPMNErrorReceivedEventImpl;
 import org.activiti.api.runtime.model.impl.BPMNErrorImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class ToCloudProcessRuntimeErrorEventsConverterTest {
 
     @InjectMocks
@@ -38,11 +39,6 @@ public class ToCloudProcessRuntimeErrorEventsConverterTest {
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void shouldConvertBPMNErrorReceivedEventToCloudBPMNErrorReceivedEvent() {

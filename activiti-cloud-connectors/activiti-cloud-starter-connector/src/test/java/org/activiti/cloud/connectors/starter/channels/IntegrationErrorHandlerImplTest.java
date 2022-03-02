@@ -15,19 +15,20 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationErrorHandlerImplTest {
 
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
@@ -42,7 +43,6 @@ public class IntegrationErrorHandlerImplTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         integrationErrorHandler = new IntegrationErrorHandlerImpl(integrationErrorSender,
             connectorProperties, new ObjectMapper());
     }

@@ -27,7 +27,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -48,11 +47,13 @@ import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class ProjectServiceImplTest {
 
     @InjectMocks
@@ -84,11 +85,6 @@ public class ProjectServiceImplTest {
 
     @Mock
     private Model modelOne;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void should_getUsersAndGroupsBelongingToAProject_when_getProcessAccessControl() {
@@ -198,7 +194,6 @@ public class ProjectServiceImplTest {
         Project project = new ProjectImpl("name", "id");
         Optional<InputStream> file = resourceAsStream("project/project-xy-invalid.zip");
 
-        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
 
         Exception exception = assertThrows(ImportProjectException.class, () -> {
@@ -230,7 +225,6 @@ public class ProjectServiceImplTest {
     public void should_throwImportProjectException_replacingProjectContentWithInvalidProject() {
         Optional<InputStream> file = resourceAsStream("project/project-xy-invalid.zip");
 
-        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
 
         Exception exception = assertThrows(ImportProjectException.class, () -> {
@@ -258,7 +252,6 @@ public class ProjectServiceImplTest {
         when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
         projectValidators.add(new ProjectNameValidator());
-        when(projectRepository.createProject(any())).thenReturn(project);
 
         projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
 
@@ -274,7 +267,6 @@ public class ProjectServiceImplTest {
         ProcessModelType processModelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(processModelType));
         projectValidators.add(new ProjectNameValidator());
-        when(projectRepository.createProject(any())).thenReturn(project);
         when(modelService.contentFilenameToModelName("process-x.bpmn20.xml", processModelType)).thenReturn(Optional.of("process-x"));
         when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType)).thenReturn(Optional.of("process-y"));
         when(modelService.importModel(eq(project),eq(processModelType),any())).thenReturn(new ModelImpl());
