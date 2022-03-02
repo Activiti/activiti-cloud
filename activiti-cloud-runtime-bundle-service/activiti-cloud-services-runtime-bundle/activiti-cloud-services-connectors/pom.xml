@@ -95,7 +95,6 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
-      <version>3.8.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -113,7 +112,6 @@
       <artifactId>spring-cloud-stream-test-support</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
   <build>
     <plugins>
@@ -136,19 +134,15 @@
             <package>org.activiti.engine.impl.persistence.entity.integration</package>
             <package>org.activiti.api.process.model</package>
           </packages>
-
           <!-- whether generated assertions classes can be inherited with consistent assertion chaining -->
           <hierarchical>true</hierarchical>
-
           <!-- where to generate assertions entry point classes -->
           <entryPointClassPackage>${generated-assertions-package}</entryPointClassPackage>
-
           <targetDir>${generated-assertions-folder}</targetDir>
           <generateAssertions>true</generateAssertions>
           <generateBddAssertions>false</generateBddAssertions>
           <generateSoftAssertions>false</generateSoftAssertions>
           <generateJUnitSoftAssertions>false</generateJUnitSoftAssertions>
-
         </configuration>
       </plugin>
     </plugins>
