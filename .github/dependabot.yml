@@ -9,3 +9,8 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "org.activiti:activiti-dependencies"
+      - dependency-name: "org.activiti:activiti-api-dependencies"
+      - dependency-name: "org.activiti:activiti-core-dependencies"
+      - dependency-name: "org.activiti:activiti-core-common-dependencies"
