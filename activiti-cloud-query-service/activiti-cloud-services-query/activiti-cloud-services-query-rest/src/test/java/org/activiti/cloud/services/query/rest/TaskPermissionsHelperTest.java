@@ -97,7 +97,7 @@ public class TaskPermissionsHelperTest {
     }
 
     @Test
-    public void should_addClaimPermission_when_isOwner() {
+    public void should_not_addClaimPermission_when_isOwner() {
         TaskEntity taskEntity = aTask().withId("task1").withOwner("testuser").build();
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
         given(taskControllerHelper.canUserViewTask(any())).willReturn(true);
@@ -105,13 +105,26 @@ public class TaskPermissionsHelperTest {
         taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
 
         verify(taskEntity, times(1))
-                .setPermissions(List.of(TaskPermissions.VIEW,
-                                        TaskPermissions.CLAIM));
+                .setPermissions(List.of(TaskPermissions.VIEW));
     }
 
     @Test
-    public void should_addReleaseAndUpdatePermissions_when_UserIsAssignee() {
+    public void should_addUpdatePermission_when_UserIsAssignee() {
         TaskEntity taskEntity = aTask().withId("task1").withAssignee("testuser").build();
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+        given(taskControllerHelper.canUserViewTask(any())).willReturn(true);
+
+        taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
+
+        verify(taskEntity, times(1))
+                .setPermissions(List.of(TaskPermissions.VIEW,
+                                        TaskPermissions.UPDATE));
+    }
+
+    @Test
+    public void should_addReleasePermission_when_UserIsAssigneeAndCandidate() {
+        TaskEntity taskEntity = aTask().withId("task1").withAssignee("testuser")
+                .withCandidateUsers(List.of("testuser")).build();
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
         given(taskControllerHelper.canUserViewTask(any())).willReturn(true);
 
