@@ -37,7 +37,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
@@ -83,7 +83,7 @@ public class QueryTasksIT {
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks";
     private static final String HRUSER = "hruser";
     private static final String TESTUSER = "testuser";
-    
+
     private static final ParameterizedTypeReference<PagedModel<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<Task>>() {
     };
 
@@ -91,7 +91,7 @@ public class QueryTasksIT {
     };
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -133,7 +133,7 @@ public class QueryTasksIT {
         variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
         runningProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator",
                                                                                              TESTUSER);
-        keycloakTokenProducer.setKeycloakTestUser(TESTUSER);
+        identityTokenProducer.setTestUser(TESTUSER);
     }
 
     @AfterEach
@@ -189,7 +189,7 @@ public class QueryTasksIT {
             //when
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
                                                                                             HttpMethod.GET,
-                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                            identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
                                                                                             Task.TaskStatus.ASSIGNED);
 
@@ -209,7 +209,7 @@ public class QueryTasksIT {
             //when
             ResponseEntity<PagedModel<Task>> cancelEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE,
                     Task.TaskStatus.CANCELLED);
 
@@ -381,7 +381,7 @@ public class QueryTasksIT {
         ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
         .exchange(tasksUrl + "?variables.name={name}&variables.value={outcome}&variables.type={type}&status={status}",
             HttpMethod.GET,
-            keycloakTokenProducer.entityWithAuthorizationHeader(),
+            identityTokenProducer.entityWithAuthorizationHeader(),
             PAGED_TASKS_RESPONSE_TYPE,
             variableName,
             variableValue,
@@ -419,7 +419,7 @@ public class QueryTasksIT {
 
             ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASKS_URL + "/" + assignedTask.getId(),
                                                                             HttpMethod.GET,
-                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                            identityTokenProducer.entityWithAuthorizationHeader(),
                 new ParameterizedTypeReference<Task>() {
                 });
 
@@ -513,7 +513,7 @@ public class QueryTasksIT {
             //when
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?rootTasksOnly=true&status={status}",
                                                                                             HttpMethod.GET,
-                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                            identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
                                                                                             Task.TaskStatus.CREATED);
             //then
@@ -547,7 +547,7 @@ public class QueryTasksIT {
             //when
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?standalone=true&status={status}",
                                                                                             HttpMethod.GET,
-                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                            identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
                                                                                             Task.TaskStatus.CREATED);
             //then
@@ -587,7 +587,7 @@ public class QueryTasksIT {
     @Test
     public void shouldGetRestrictedTasksWithUserPermission() {
         //given
-        keycloakTokenProducer.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate("task with candidate",
                                                                                   "testuser",
                                                                                   runningProcessInstance);
@@ -635,13 +635,13 @@ public class QueryTasksIT {
                                                                   runningProcessInstance);
         eventsAggregator.sendAll();
 
-        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
 
         await().untilAsserted(() -> {
             //when
             ResponseEntity<Task> responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                 new ParameterizedTypeReference<Task>() {
                 });
 
@@ -704,7 +704,7 @@ public class QueryTasksIT {
 
         eventsAggregator.sendAll();
 
-        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
 
 
         await().untilAsserted(() -> {
@@ -742,7 +742,7 @@ public class QueryTasksIT {
                                                                             runningProcessInstance);
         eventsAggregator.sendAll();
 
-        keycloakTokenProducer.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
 
         //when
         await().untilAsserted(() -> {
@@ -810,7 +810,7 @@ public class QueryTasksIT {
                                                                              runningProcessInstance);
         eventsAggregator.sendAll();
 
-        keycloakTokenProducer.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
 
         //when
         await().untilAsserted(() -> {
@@ -880,13 +880,13 @@ public class QueryTasksIT {
                                                                   runningProcessInstance);
         eventsAggregator.sendAll();
 
-        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
 
         await().untilAsserted(() -> {
             //when
             ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                 new ParameterizedTypeReference<CloudTask>() {
                 });
 
@@ -908,7 +908,7 @@ public class QueryTasksIT {
             //then
             responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                 new ParameterizedTypeReference<CloudTask>() {
                 });
 
@@ -922,7 +922,7 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody().getAssignee()).isEqualTo("hruser");
 
             //Restore user
-            keycloakTokenProducer.setKeycloakTestUser("testuser");
+            identityTokenProducer.setTestUser("testuser");
 
         });
     }
@@ -1000,21 +1000,21 @@ public class QueryTasksIT {
         }
         return testRestTemplate.exchange(url,
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
 
     private ResponseEntity<PagedModel<Task>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
 
     private ResponseEntity<PagedModel<Task>> executeRequestGetAdminTasks(ProcessInstance processInstance) {
         return testRestTemplate.exchange("/admin/v1/process-instances/{processInstanceId}/tasks",
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_TASKS_RESPONSE_TYPE,
                                          processInstance.getId());
     }
@@ -1022,29 +1022,29 @@ public class QueryTasksIT {
     private ResponseEntity<PagedModel<Task>> executeRequestGetTasks(ProcessInstance processInstance) {
         return testRestTemplate.exchange("/v1/process-instances/{processInstanceId}/tasks",
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_TASKS_RESPONSE_TYPE,
                                          processInstance.getId());
     }
 
     private ResponseEntity<Task> executeRequestGetAdminTasksById(String id) {
-        return testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + id, 
-                                         HttpMethod.GET, 
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(), 
+        return testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + id,
+                                         HttpMethod.GET,
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                                          SINGLE_TASK_RESPONSE_TYPE);
     }
 
     private ResponseEntity<Task> executeRequestGetTasksById(String id) {
         return testRestTemplate.exchange(TASKS_URL + "/" + id,
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                                          SINGLE_TASK_RESPONSE_TYPE);
     }
 
     private  ResponseEntity<List<String>> getCandidateUsers(String taskId) {
         return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-users",
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
             new ParameterizedTypeReference<List<String>>() {
             });
     }
@@ -1052,7 +1052,7 @@ public class QueryTasksIT {
     private  ResponseEntity<List<String>> getCandidateGroups(String taskId) {
         return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-groups",
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
             new ParameterizedTypeReference<List<String>>() {
             });
     }
@@ -1096,7 +1096,7 @@ public class QueryTasksIT {
             Date checkDate=new Date(start2.getTime() - 3600000);
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdFrom="+sdf.format(checkDate),
                                                  HttpMethod.GET,
-                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                 identityTokenProducer.entityWithAuthorizationHeader(),
                                                  PAGED_TASKS_RESPONSE_TYPE
                                                  );
             //then
@@ -1111,7 +1111,7 @@ public class QueryTasksIT {
             checkDate=new Date(start2.getTime() + 3600000);
             responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdFrom="+sdf.format(checkDate),
                                                  HttpMethod.GET,
-                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                 identityTokenProducer.entityWithAuthorizationHeader(),
                                                  PAGED_TASKS_RESPONSE_TYPE
                                                  );
             //then
@@ -1126,7 +1126,7 @@ public class QueryTasksIT {
             checkDate=new Date(start2.getTime() + 3600000);
             responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdTo="+sdf.format(checkDate),
                                                  HttpMethod.GET,
-                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                 identityTokenProducer.entityWithAuthorizationHeader(),
                                                  PAGED_TASKS_RESPONSE_TYPE
                                                  );
             //then
@@ -1145,7 +1145,7 @@ public class QueryTasksIT {
 
             responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdFrom="+sdf.format(checkDate)+"&createdTo="+sdf.format(checkDate1),
                                                  HttpMethod.GET,
-                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                 identityTokenProducer.entityWithAuthorizationHeader(),
                                                  PAGED_TASKS_RESPONSE_TYPE
                                                  );
             //then
@@ -1293,7 +1293,7 @@ public class QueryTasksIT {
             //when
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?processDefinitionVersion={processDefinitionVersion}",
                                                                                             HttpMethod.GET,
-                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                            identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
                                                                                             10);
 
@@ -1349,7 +1349,7 @@ public class QueryTasksIT {
             //when
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?taskDefinitionKey={taskDefinitionKey}",
                                                                                             HttpMethod.GET,
-                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                            identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
                                                                                             "taskDefinitionKey");
 
@@ -1410,7 +1410,7 @@ public class QueryTasksIT {
             assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
         });
 
-        keycloakTokenProducer.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
 
         ((TaskImpl)task).setAssignee("testuser");
         ((TaskImpl)task).setStatus(Task.TaskStatus.ASSIGNED);
@@ -1463,7 +1463,7 @@ public class QueryTasksIT {
                                                                      runningProcessInstance);
         eventsAggregator.sendAll();
 
-        keycloakTokenProducer.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
 
         //when
         await().untilAsserted(() -> {
@@ -1569,7 +1569,7 @@ public class QueryTasksIT {
                 .exchange(TASKS_URL + "?dueDateFrom=" + sdf.format(fromDate) + "&dueDateTo=" +
                         sdf.format(toDate),
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE
                 );
             //then
@@ -1590,7 +1590,7 @@ public class QueryTasksIT {
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
                 .exchange(TASKS_URL + "?dueDate=" + sdf.format(dueDate),
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE
                 );
 
@@ -1640,7 +1640,7 @@ public class QueryTasksIT {
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
                 .exchange(TASKS_URL + "?processDefinitionName={processDefinitionName}",
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE,
                     "my-proc-definition-name");
 
@@ -1658,9 +1658,9 @@ public class QueryTasksIT {
 
     @Test
     public void should_notGetTasks_by_ProcessInstance_userIsNotInvolved() {
-        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
-        taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
-                                                         "fakeUser", 
+        identityTokenProducer.setTestUser(HRUSER);
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+                                                         "fakeUser",
                                                          runningProcessInstance);
 
         await().untilAsserted(() -> {
@@ -1677,21 +1677,21 @@ public class QueryTasksIT {
             assertThat(tasks).isEmpty();
         });
     }
-    
+
     @Test
     public void should_getTasks_by_ProcessInstance_when_userIsCandidate() {
-        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        identityTokenProducer.setTestUser(HRUSER);
         //given
-        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
-                                                                      TESTUSER, 
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+                                                                      TESTUSER,
                                                                       runningProcessInstance);
 
-        Task task2 = taskEventContainedBuilder.aTaskWithUserCandidate("Task2", 
-                                                                      HRUSER, 
+        Task task2 = taskEventContainedBuilder.aTaskWithUserCandidate("Task2",
+                                                                      HRUSER,
                                                                       runningProcessInstance);
-        
+
         eventsAggregator.sendAll();
-        
+
         await().untilAsserted(() -> {
 
             //when
@@ -1712,15 +1712,15 @@ public class QueryTasksIT {
 
     @Test
     public void should_getTasks_by_ProcessInstance_when_userIsAssignee() {
-        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        identityTokenProducer.setTestUser(HRUSER);
 
         //given
-        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
-                                                                      TESTUSER, 
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+                                                                      TESTUSER,
                                                                       runningProcessInstance);
 
-        Task task2 = taskEventContainedBuilder.anAssignedTask("Task2", 
-                                                              HRUSER, 
+        Task task2 = taskEventContainedBuilder.anAssignedTask("Task2",
+                                                              HRUSER,
                                                               runningProcessInstance);
 
         eventsAggregator.sendAll();
@@ -1745,14 +1745,14 @@ public class QueryTasksIT {
 
     @Test
     public void should_getTasks_by_ProcessInstance_when_userIsInGroupCandidate() {
-        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        identityTokenProducer.setTestUser(HRUSER);
         //given
-        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
-                                                                      TESTUSER, 
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+                                                                      TESTUSER,
                                                                       runningProcessInstance);
 
-        Task task2 = taskEventContainedBuilder.aTaskWithGroupCandidate("Task2", 
-                                                                       "hr", 
+        Task task2 = taskEventContainedBuilder.aTaskWithGroupCandidate("Task2",
+                                                                       "hr",
                                                                        runningProcessInstance);
 
         eventsAggregator.sendAll();
@@ -1777,8 +1777,8 @@ public class QueryTasksIT {
     @Test
     public void should_getTasks_by_ProcessInstance_when_userIsInitiator() {
         //given
-        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", 
-                                                                      HRUSER, 
+        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+                                                                      HRUSER,
                                                                       runningProcessInstance);
 
         eventsAggregator.sendAll();
@@ -1809,11 +1809,10 @@ public class QueryTasksIT {
         Task task2 = taskEventContainedBuilder.aTaskWithGroupCandidate("Task2",
                                                                        "group",
                                                                        runningProcessInstance);
-        Task task3 = taskEventContainedBuilder.anAssignedTask("Task3", 
+        Task task3 = taskEventContainedBuilder.anAssignedTask("Task3",
                                                               TESTUSER,
                                                               runningProcessInstance);
-
-        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
 
         eventsAggregator.sendAll();
 
@@ -1834,8 +1833,8 @@ public class QueryTasksIT {
         assertAdminCanRetrieveTaskById(task1.getId());
         assertAdminCanRetrieveTaskById(task2.getId());
         assertAdminCanRetrieveTaskById(task3.getId());
-        
-        keycloakTokenProducer.setKeycloakTestUser(TESTUSER);
+
+        identityTokenProducer.setTestUser(TESTUSER);
     }
 
 
@@ -1916,7 +1915,7 @@ public class QueryTasksIT {
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
                 .exchange(TASKS_URL + "?completedBy=" + completedByFirstUser,
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE
                 );
 
@@ -1948,7 +1947,7 @@ public class QueryTasksIT {
             //when
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?priority={priority}",
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE,
                     "20");
 
@@ -2006,7 +2005,7 @@ public class QueryTasksIT {
                 .exchange(TASKS_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" +
                         sdf.format(toDate),
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE
                 );
 
@@ -2047,7 +2046,7 @@ public class QueryTasksIT {
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
                 .exchange(TASKS_URL + "?candidateGroupId=testgroup",
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE
                 );
             assertThat(responseEntity).isNotNull();
@@ -2065,7 +2064,7 @@ public class QueryTasksIT {
             ResponseEntity<PagedModel<Task>> responseEntity = testRestTemplate
                 .exchange(TASKS_URL + "?candidateGroupId=testgroup,hrgroup",
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE
                 );
 

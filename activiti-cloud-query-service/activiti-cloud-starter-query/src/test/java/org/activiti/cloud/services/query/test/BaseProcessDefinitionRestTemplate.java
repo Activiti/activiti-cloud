@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.test;
 
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
@@ -33,12 +33,12 @@ public abstract class BaseProcessDefinitionRestTemplate {
 
     private TestRestTemplate testRestTemplate;
 
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     protected BaseProcessDefinitionRestTemplate(TestRestTemplate testRestTemplate,
-                                                KeycloakTokenProducer keycloakTokenProducer) {
+                                                IdentityTokenProducer identityTokenProducer) {
         this.testRestTemplate = testRestTemplate;
-        this.keycloakTokenProducer = keycloakTokenProducer;
+        this.identityTokenProducer = identityTokenProducer;
     }
 
     protected abstract String getProcessDefinitionsURL();
@@ -46,7 +46,7 @@ public abstract class BaseProcessDefinitionRestTemplate {
     public ResponseEntity<PagedModel<CloudProcessDefinition>> getProcDefinitions() {
         ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(getProcessDefinitionsURL(),
                                                                                                           HttpMethod.GET,
-                                                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                          identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                                           PAGED_PROCESS_DEFINITION_RESPONSE_TYPE);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
@@ -55,7 +55,7 @@ public abstract class BaseProcessDefinitionRestTemplate {
     public ResponseEntity<String> getProcDefinitionModel(String processDefinitionId) {
         ResponseEntity<String> responseEntity = testRestTemplate.exchange(getProcessDefinitionsURL() + "/" + processDefinitionId + "/model",
                                                                           HttpMethod.GET,
-                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                          identityTokenProducer.entityWithAuthorizationHeader(),
                                                                           String.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
@@ -64,7 +64,7 @@ public abstract class BaseProcessDefinitionRestTemplate {
     public ResponseEntity<PagedModel<CloudProcessDefinition>> getProcDefinitionsFilteredOnKey(String key) {
         ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(getProcessDefinitionsURL() + "?key={key}",
                                                                                                           HttpMethod.GET,
-                                                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                          identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                                           PAGED_PROCESS_DEFINITION_RESPONSE_TYPE,
                                                                                                           key);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);

@@ -32,7 +32,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.cloud.starter.tests.util.VariablesUtil;
@@ -56,7 +56,7 @@ import org.springframework.test.context.TestPropertySource;
 public class TaskVariableMappingIT {
 
     @Autowired
-    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
@@ -72,7 +72,7 @@ public class TaskVariableMappingIT {
 
     @BeforeEach
     public void setUp() {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
+        identityTokenProducer.setTestUser(keycloakTestUser);
     }
 
     @Test

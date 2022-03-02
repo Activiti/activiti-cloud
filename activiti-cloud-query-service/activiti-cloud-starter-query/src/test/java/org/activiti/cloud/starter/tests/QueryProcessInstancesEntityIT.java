@@ -41,7 +41,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
@@ -73,7 +73,7 @@ public class QueryProcessInstancesEntityIT {
     };
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -92,7 +92,7 @@ public class QueryProcessInstancesEntityIT {
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
-        keycloakTokenProducer.setKeycloakTestUser("testuser");
+        identityTokenProducer.setTestUser("testuser");
     }
 
     @AfterEach
@@ -139,7 +139,7 @@ public class QueryProcessInstancesEntityIT {
             //when
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(PROC_URL + "?status={status}",
                                                                                                                      HttpMethod.GET,
-                                                                                                                     keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                                     identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                                                      PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
                                                                                                                      ProcessInstance.ProcessInstanceStatus.COMPLETED);
 
@@ -210,11 +210,11 @@ public class QueryProcessInstancesEntityIT {
 
 
         await().untilAsserted(() -> {
-             keycloakTokenProducer.setKeycloakTestUser("hradmin");
+             identityTokenProducer.setTestUser("hradmin");
 
              ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "/" + process.getId(),
                                                                             HttpMethod.GET,
-                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                            identityTokenProducer.entityWithAuthorizationHeader(),
                                                                             new ParameterizedTypeReference<ProcessInstance>() {
                                                                             });
             //then
@@ -349,12 +349,12 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
         await().untilAsserted(() -> {
 
             ResponseEntity<PagedModel<CloudProcessInstance>> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "?page=0&size=10",
                                                                                        HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                        new ParameterizedTypeReference<PagedModel<CloudProcessInstance>>() {
                                                                                        });
             //then
@@ -382,14 +382,14 @@ public class QueryProcessInstancesEntityIT {
 
         return testRestTemplate.exchange(PROC_URL,
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
 
     private ResponseEntity<ProcessInstance> executeRequestGetProcessInstance(String processInstanceId) {
         return testRestTemplate.exchange(PROC_URL + "/" + processInstanceId,
             HttpMethod.GET,
-            keycloakTokenProducer.entityWithAuthorizationHeader(),
+            identityTokenProducer.entityWithAuthorizationHeader(),
             new ParameterizedTypeReference<ProcessInstance>() {});
     }
 
@@ -454,7 +454,7 @@ public class QueryProcessInstancesEntityIT {
                 .exchange(PROC_URL + "?startFrom=" + sdf.format(fromDate) + "&startTo=" + sdf
                         .format(toDate),
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
             //then
@@ -477,7 +477,7 @@ public class QueryProcessInstancesEntityIT {
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
                 .exchange(PROC_URL + "?startDate=" + sdf.format(nextDay),
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
             //then
@@ -537,7 +537,7 @@ public class QueryProcessInstancesEntityIT {
                 .exchange(PROC_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" + sdf
                         .format(toDate),
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
             //then
@@ -558,7 +558,7 @@ public class QueryProcessInstancesEntityIT {
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
                 .exchange(PROC_URL + "?completedDate=" + sdf.format(completedDateToday),
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
             //then
@@ -592,7 +592,7 @@ public class QueryProcessInstancesEntityIT {
         }
         return testRestTemplate.exchange(url,
                                          HttpMethod.GET,
-                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
 
@@ -682,7 +682,7 @@ public class QueryProcessInstancesEntityIT {
                 .exchange(PROC_URL + "?suspendedFrom=" + sdf.format(fromDate) + "&suspendedTo=" + sdf
                         .format(toDate),
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
             //then
@@ -703,7 +703,7 @@ public class QueryProcessInstancesEntityIT {
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
                 .exchange(PROC_URL + "?suspendedDate=" + sdf.format(suspendedDateToday),
                     HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
             //then
@@ -727,7 +727,7 @@ public class QueryProcessInstancesEntityIT {
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
                     .exchange(PROC_URL + "?" + queryString,
                             HttpMethod.GET,
-                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                            identityTokenProducer.entityWithAuthorizationHeader(),
                             PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
             assertThat(responseEntityFiltered).isNotNull();

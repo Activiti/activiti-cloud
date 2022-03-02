@@ -45,7 +45,7 @@ import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.awaitility.Durations;
@@ -71,7 +71,7 @@ public class QueryProcessDiagramIT {
     private static final String PROC_URL = "/v1/process-instances";
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private ProcessDefinitionRepository processDefinitionRepository;
@@ -102,7 +102,7 @@ public class QueryProcessDiagramIT {
 
     @BeforeEach
     public void setUp() throws IOException {
-        keycloakTokenProducer.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
 
         eventsAggregator = new EventsAggregator(producer);
 
@@ -157,7 +157,7 @@ public class QueryProcessDiagramIT {
             //when
             ResponseEntity<String> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/diagram",
                                                                                        HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                        String.class);
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -185,7 +185,7 @@ public class QueryProcessDiagramIT {
             //when
             ResponseEntity<String> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/diagram",
                                                                                        HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                        String.class);
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);

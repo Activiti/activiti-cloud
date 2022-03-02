@@ -42,7 +42,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.awaitility.Durations;
@@ -69,7 +69,7 @@ public class QueryAdminProcessDiagramIT {
     private static final String PROC_URL = "/admin/v1/process-instances";
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private ProcessDefinitionRepository processDefinitionRepository;
@@ -99,7 +99,7 @@ public class QueryAdminProcessDiagramIT {
 
     @BeforeEach
     public void setUp() throws IOException {
-        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
 
         eventsAggregator = new EventsAggregator(producer);
 
@@ -143,7 +143,7 @@ public class QueryAdminProcessDiagramIT {
             //when
             ResponseEntity<String> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/diagram",
                                                                                        HttpMethod.GET,
-                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                        String.class);
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -155,7 +155,7 @@ public class QueryAdminProcessDiagramIT {
     @Test
     public void shouldNotGetProcessInstanceDiagramAdmin() throws InterruptedException {
         //given
-        keycloakTokenProducer.setKeycloakTestUser("hruser");
+        identityTokenProducer.setTestUser("hruser");
 
         ProcessInstanceImpl process = startSimpleProcessInstance();
 
@@ -172,7 +172,7 @@ public class QueryAdminProcessDiagramIT {
            //when
            ResponseEntity<Map<String,Object>> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId() + "/diagram",
                                                                                          HttpMethod.GET,
-                                                                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                         identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                          new ParameterizedTypeReference<Map<String, Object>>() {
                                                                                        });
            //then

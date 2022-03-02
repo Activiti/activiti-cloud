@@ -25,7 +25,7 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
@@ -56,7 +56,7 @@ public class QueryProcessInstanceEntityVariablesIT {
     };
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -116,7 +116,7 @@ public class QueryProcessInstanceEntityVariablesIT {
             //when
             ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                       HttpMethod.GET,
-                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                      identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,
                                                                                                       runningProcessInstance.getId());
 
@@ -156,7 +156,7 @@ public class QueryProcessInstanceEntityVariablesIT {
             //when
             ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                       HttpMethod.GET,
-                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                      identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,
                                                                                                       runningProcessInstance.getId());
 
@@ -199,7 +199,7 @@ public class QueryProcessInstanceEntityVariablesIT {
             //when
             ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
                                                                                                       HttpMethod.GET,
-                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                      identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,
                                                                                                       runningProcessInstance.getId(),
                                                                                                       "var2");

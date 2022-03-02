@@ -27,7 +27,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.test.ProcessDefinitionAdminRestTemplate;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +56,7 @@ import org.springframework.util.StreamUtils;
 public class QueryAdminProcessDefinitionIT {
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private ProcessDefinitionAdminRestTemplate testRestTemplate;
@@ -72,7 +72,7 @@ public class QueryAdminProcessDefinitionIT {
 
     @BeforeEach
     public void setUp() {
-        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        identityTokenProducer.setTestUser("hradmin");
     }
 
     @AfterEach

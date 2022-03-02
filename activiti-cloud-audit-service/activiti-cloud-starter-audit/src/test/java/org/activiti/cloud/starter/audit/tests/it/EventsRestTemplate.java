@@ -19,7 +19,7 @@ import static org.activiti.test.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -38,11 +38,11 @@ public class EventsRestTemplate {
 
     private ObjectMapper mapper;
 
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
-    public EventsRestTemplate(ObjectMapper mapper, KeycloakTokenProducer keycloakTokenProducer) {
+    public EventsRestTemplate(ObjectMapper mapper, IdentityTokenProducer identityTokenProducer) {
         this.mapper = mapper;
-        this.keycloakTokenProducer = keycloakTokenProducer;
+        this.identityTokenProducer = identityTokenProducer;
     }
 
     @Autowired
@@ -51,7 +51,7 @@ public class EventsRestTemplate {
     public ResponseEntity<PagedModel<CloudRuntimeEvent>> executeFindAll() {
         ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(RELATIVE_EVENTS_ENDPOINT,
                                                                                                  HttpMethod.GET,
-                                                                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                 identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                                  new ParameterizedTypeReference<PagedModel<CloudRuntimeEvent>>() {
                                                                                                  });
         assertThat(eventsResponse).hasStatusCode(HttpStatus.OK);
@@ -71,7 +71,7 @@ public class EventsRestTemplate {
 
         ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(endPointBuilder.toString(),
                                                                                                  HttpMethod.GET,
-                                                                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                 identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                                  new ParameterizedTypeReference<PagedModel<CloudRuntimeEvent>>() {
                                                                                                  },
                                                                                                  filters);
@@ -82,7 +82,7 @@ public class EventsRestTemplate {
     public ResponseEntity<CloudRuntimeEvent> executeFindById(String id) {
         ResponseEntity<CloudRuntimeEvent> responseEntity = restTemplate.exchange(RELATIVE_EVENTS_ENDPOINT + "/" + id,
                                                                                  HttpMethod.GET,
-                                                                                keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                identityTokenProducer.entityWithAuthorizationHeader(),
                                                                                  new ParameterizedTypeReference<CloudRuntimeEvent>() {
                                                                                  });
         assertThat(responseEntity).hasStatusCode(HttpStatus.OK);

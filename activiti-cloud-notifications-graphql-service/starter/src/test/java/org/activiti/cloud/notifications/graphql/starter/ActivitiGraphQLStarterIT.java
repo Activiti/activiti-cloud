@@ -62,7 +62,7 @@ import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageTy
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.apache.groovy.util.Maps;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
@@ -115,7 +115,7 @@ public class ActivitiGraphQLStarterIT {
     private String port;
 
     @Autowired
-    private KeycloakTokenProducer keycloakTokenProducer;
+    private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     private TestRestTemplate rest;
@@ -137,8 +137,8 @@ public class ActivitiGraphQLStarterIT {
     @BeforeEach
     public void setUp() {
 
-        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        authHeaders = keycloakTokenProducer.authorizationHeaders();
+        identityTokenProducer.setTestUser(TESTADMIN);
+        authHeaders = identityTokenProducer.authorizationHeaders();
         authHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
     }
 
@@ -150,8 +150,8 @@ public class ActivitiGraphQLStarterIT {
     public void testGraphqlWsSubprotocolConnectionInitXAuthorizationSupported() throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
-        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        final String accessToken = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        identityTokenProducer.setTestUser(TESTADMIN);
+        final String accessToken = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
 
         Map<String, Object> payload = new StringObjectMapBuilder().put("kaInterval", 1000)
                                               .put("X-Authorization", accessToken)
@@ -206,8 +206,8 @@ public class ActivitiGraphQLStarterIT {
     public void testGraphqlWsSubprotocolServerStartStopSubscription() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
 
-        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        final String auth = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        identityTokenProducer.setTestUser(TESTADMIN);
+        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
 
         Map<String, Object> variables = mapBuilder().put("appName", "default-app")
                                                 .put("eventTypes", Arrays.array("PROCESS_CREATED", "PROCESS_STARTED"))
@@ -327,8 +327,8 @@ public class ActivitiGraphQLStarterIT {
     public void testGraphqlSubscriptionPROCESS_DEPLOYED() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
 
-        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        final String auth = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        identityTokenProducer.setTestUser(TESTADMIN);
+        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
 
         Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app")
                                                 .get();
@@ -420,8 +420,8 @@ public class ActivitiGraphQLStarterIT {
     public void testGraphqlSubscriptionSIGNAL_RECEIVED() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
 
-        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        final String auth = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        identityTokenProducer.setTestUser(TESTADMIN);
+        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
 
         Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app")
                                                 .put("eventType", "SIGNAL_RECEIVED")
@@ -521,8 +521,8 @@ public class ActivitiGraphQLStarterIT {
     public void testGraphqlSubscriptionShouldFilterEmptyResults() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
 
-        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        final String auth = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        identityTokenProducer.setTestUser(TESTADMIN);
+        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
 
         Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app")
                                                 .put("eventType", "PROCESS_STARTED")
@@ -608,8 +608,8 @@ public class ActivitiGraphQLStarterIT {
     public void testGraphqlSubscriptionCloudBPMNTimerEvents() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
 
-        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        final String auth = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        identityTokenProducer.setTestUser(TESTADMIN);
+        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
 
         Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app")
                                                 .put("eventTypes", Arrays.array("TIMER_SCHEDULED",
@@ -839,8 +839,8 @@ public class ActivitiGraphQLStarterIT {
     public void testGraphqlSubscriptionCloudBPMNMessageEvents() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
 
-        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        final String auth = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        identityTokenProducer.setTestUser(TESTADMIN);
+        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
 
         Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app")
                                                 .put("eventTypes", Arrays.array("MESSAGE_SENT",
@@ -995,9 +995,9 @@ public class ActivitiGraphQLStarterIT {
             throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
-        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
+        identityTokenProducer.setTestUser(HRUSER);
 
-        final String accessToken = keycloakTokenProducer.authorizationHeaders()
+        final String accessToken = identityTokenProducer.authorizationHeaders()
                                            .getFirst(AUTHORIZATION);
 
         Map<String, Object> payload = mapBuilder().put("X-Authorization", accessToken)
@@ -1117,8 +1117,8 @@ public class ActivitiGraphQLStarterIT {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
                 "{Tasks(where:{name:{EQ: \"" + TASK_NAME + "\"}}){select{id assignee priority}}}");
 
-        keycloakTokenProducer.setKeycloakTestUser(HRUSER);
-        authHeaders = keycloakTokenProducer.authorizationHeaders();
+        identityTokenProducer.setTestUser(HRUSER);
+        authHeaders = identityTokenProducer.authorizationHeaders();
 
         ResponseEntity<GraphQLQueryResult> entity = rest
                                                             .postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders),

@@ -34,7 +34,7 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RuntimeService;
@@ -67,7 +67,7 @@ public abstract class AbstractMQServiceTaskIT {
     protected TaskService taskService;
 
     @Autowired
-    protected KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
+    protected IdentityTokenProducer identityTokenProducer;
 
     @Autowired
     protected ProcessInstanceRestTemplate processInstanceRestTemplate;
@@ -86,7 +86,7 @@ public abstract class AbstractMQServiceTaskIT {
 
     @BeforeEach
     public void setUp() {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
+        identityTokenProducer.setTestUser(keycloakTestUser);
     }
 
     @Test
