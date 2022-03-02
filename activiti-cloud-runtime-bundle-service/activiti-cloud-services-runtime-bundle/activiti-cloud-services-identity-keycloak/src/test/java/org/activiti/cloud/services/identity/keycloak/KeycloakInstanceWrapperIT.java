@@ -25,7 +25,7 @@ import org.springframework.test.context.TestPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@TestPropertySource("classpath:keycloak-configuration.properties")
+@TestPropertySource({"classpath:keycloak-configuration.properties", "classpath:application-test.properties"})
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakInstanceWrapperIT {
 

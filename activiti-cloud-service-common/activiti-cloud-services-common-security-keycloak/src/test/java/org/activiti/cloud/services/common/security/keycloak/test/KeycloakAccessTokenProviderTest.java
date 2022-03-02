@@ -20,19 +20,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.security.Principal;
 import java.util.Optional;
 
 
+@ExtendWith(MockitoExtension.class)
 public class KeycloakAccessTokenProviderTest {
 
     private KeycloakAccessTokenProvider subject = new KeycloakAccessTokenProvider() { };
@@ -45,11 +46,6 @@ public class KeycloakAccessTokenProviderTest {
 
     @Mock
     private AccessToken accessToken;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testAccessToken() {

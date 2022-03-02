@@ -27,15 +27,17 @@ import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.KeycloakPrincipal;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 
 
+@ExtendWith(MockitoExtension.class)
 public class KeycloakPrincipalGroupsProviderChainTest {
 
     private KeycloakPrincipalGroupsProviderChain subject;
@@ -48,8 +50,6 @@ public class KeycloakPrincipalGroupsProviderChainTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         subject = new KeycloakPrincipalGroupsProviderChain(Arrays.asList(provider1, provider2));
     }
 
