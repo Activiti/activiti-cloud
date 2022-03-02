@@ -22,11 +22,11 @@ import org.activiti.api.process.model.StartMessageSubscription;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinition;
 
-public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntityImpl 
+public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntityImpl
                                                        implements CloudStartMessageDeploymentDefinition {
-    
+
     private ProcessDefinition processDefinition;
-    
+
     private StartMessageSubscription messageSubscription;
 
     private CloudStartMessageDeploymentDefinitionImpl(Builder builder) {
@@ -39,7 +39,7 @@ public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntit
         super.setServiceType(builder.serviceType);
         super.setServiceVersion(builder.serviceVersion);
     }
-    
+
     CloudStartMessageDeploymentDefinitionImpl() { }
 
     @Override
@@ -68,7 +68,7 @@ public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntit
             return false;
         }
         CloudStartMessageDeploymentDefinitionImpl other = (CloudStartMessageDeploymentDefinitionImpl) obj;
-        return Objects.equals(messageSubscription, other.messageSubscription) && 
+        return Objects.equals(messageSubscription, other.messageSubscription) &&
                Objects.equals(processDefinition, other.processDefinition);
     }
 
@@ -82,7 +82,7 @@ public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntit
                .append("]");
         return builder.toString();
     }
-    
+
     public static Builder builder() {
         return new Builder();
     }

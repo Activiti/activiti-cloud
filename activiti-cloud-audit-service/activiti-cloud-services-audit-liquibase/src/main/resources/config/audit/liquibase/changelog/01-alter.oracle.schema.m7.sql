@@ -6,4 +6,3 @@ alter table audit_event
     add error_class_name varchar(255);
 alter table audit_event
     add stack_trace_elements CLOB;
-    

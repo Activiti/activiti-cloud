@@ -41,19 +41,19 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         public JWSAuthenticationInterceptorConfigurer jwsTokenChannelSecurityContextConfigurer(JWSAuthenticationManager keycloakWebSocketAuthManager) {
             return new JWSAuthenticationInterceptorConfigurer(keycloakWebSocketAuthManager);
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
         public KeycloakSecurityContextInerceptorConfigurer jwsTokenChannelAuthenticationConfigurer(KeycloakAccessTokenVerifier keycloakTokenVerifier) {
             return new KeycloakSecurityContextInerceptorConfigurer(keycloakTokenVerifier);
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
         public KeycloakAccessTokenVerifier keycloakTokenVerifier(KeycloakProperties keycloakProperties) {
             return new KeycloakAccessTokenVerifier(keycloakProperties);
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
         public JWSAuthenticationManager keycloakWebSocketAuthManager(KeycloakAccessTokenVerifier keycloakTokenVerifier) {

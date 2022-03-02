@@ -112,7 +112,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudProcessUpdatedEvent from(ProcessUpdatedEvent event) {
         CloudProcessUpdatedEventImpl cloudEvent = new CloudProcessUpdatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
@@ -167,7 +167,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudBPMNSignalReceivedEvent from(BPMNSignalReceivedEvent event) {
         CloudBPMNSignalReceivedEventImpl cloudEvent = new CloudBPMNSignalReceivedEventImpl(event.getEntity(),
                                                                                            event.getEntity().getProcessDefinitionId(),
@@ -187,7 +187,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudStartMessageDeployedEvent from(StartMessageDeployedEvent event) {
         CloudStartMessageDeployedEventImpl cloudEvent = CloudStartMessageDeployedEventImpl.builder()
                                                                                           .withEntity(event.getEntity())
@@ -203,7 +203,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudBPMNTimerFiredEvent from(BPMNTimerFiredEvent event) {
         CloudBPMNTimerFiredEventImpl cloudEvent = new CloudBPMNTimerFiredEventImpl(event.getEntity(),
                                                                                    event.getEntity().getProcessDefinitionId(),
@@ -211,7 +211,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudBPMNTimerScheduledEvent from(BPMNTimerScheduledEvent event) {
         CloudBPMNTimerScheduledEventImpl cloudEvent = new CloudBPMNTimerScheduledEventImpl(event.getEntity(),
                                                                                            event.getEntity().getProcessDefinitionId(),
@@ -219,7 +219,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudBPMNTimerCancelledEvent from(BPMNTimerCancelledEvent event) {
         CloudBPMNTimerCancelledEventImpl cloudEvent = new CloudBPMNTimerCancelledEventImpl(event.getEntity(),
                                                                                            event.getEntity().getProcessDefinitionId(),
@@ -227,7 +227,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudBPMNTimerFailedEvent from(BPMNTimerFailedEvent event) {
         CloudBPMNTimerFailedEventImpl cloudEvent = new CloudBPMNTimerFailedEventImpl(event.getEntity(),
                                                                                      event.getEntity().getProcessDefinitionId(),
@@ -251,7 +251,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudBPMNMessageSentEvent from(BPMNMessageSentEvent event) {
         CloudBPMNMessageSentEventImpl cloudEvent = new CloudBPMNMessageSentEventImpl(event.getEntity(),
                                                                                      event.getEntity().getProcessDefinitionId(),
@@ -259,7 +259,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudBPMNMessageReceivedEvent from(BPMNMessageReceivedEvent event) {
         CloudBPMNMessageReceivedEventImpl cloudEvent = new CloudBPMNMessageReceivedEventImpl(event.getEntity(),
                                                                                              event.getEntity().getProcessDefinitionId(),
@@ -267,7 +267,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudBPMNMessageWaitingEvent from(BPMNMessageWaitingEvent event) {
         CloudBPMNMessageWaitingEventImpl cloudEvent = new CloudBPMNMessageWaitingEventImpl(event.getEntity(),
                                                                                            event.getEntity().getProcessDefinitionId(),
@@ -275,7 +275,7 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
-    
+
     public CloudBPMNErrorReceivedEvent from(BPMNErrorReceivedEvent event) {
         CloudBPMNErrorReceivedEventImpl cloudEvent = new CloudBPMNErrorReceivedEventImpl(event.getEntity(),
                                                                                          event.getEntity().getProcessDefinitionId(),

@@ -185,14 +185,14 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
             return false;
         }
         CloudRuntimeEventImpl other = (CloudRuntimeEventImpl) obj;
-        return Objects.equals(appName, other.appName) 
-                && Objects.equals(appVersion, other.appVersion) 
-                && Objects.equals(entityId, other.entityId) 
-                && Objects.equals(messageId, other.messageId) 
-                && Objects.equals(sequenceNumber, other.sequenceNumber) 
-                && Objects.equals(serviceFullName, other.serviceFullName) 
-                && Objects.equals(serviceName, other.serviceName) 
-                && Objects.equals(serviceType, other.serviceType) 
+        return Objects.equals(appName, other.appName)
+                && Objects.equals(appVersion, other.appVersion)
+                && Objects.equals(entityId, other.entityId)
+                && Objects.equals(messageId, other.messageId)
+                && Objects.equals(sequenceNumber, other.sequenceNumber)
+                && Objects.equals(serviceFullName, other.serviceFullName)
+                && Objects.equals(serviceName, other.serviceName)
+                && Objects.equals(serviceType, other.serviceType)
                 && Objects.equals(serviceVersion, other.serviceVersion);
     }
 

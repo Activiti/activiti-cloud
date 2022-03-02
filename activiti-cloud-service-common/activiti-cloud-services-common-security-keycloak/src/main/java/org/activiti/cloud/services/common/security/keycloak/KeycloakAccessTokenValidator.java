@@ -21,7 +21,7 @@ import org.springframework.lang.NonNull;
 import java.util.Optional;
 
 public interface KeycloakAccessTokenValidator {
-    
+
     default boolean isValid(@NonNull AccessToken accessToken) {
         return Optional.ofNullable(accessToken)
                        .map(AccessToken::isActive)

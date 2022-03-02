@@ -28,7 +28,7 @@ public class ProcessCreatedEventConverter  extends BaseEventToEntityConverter {
     public ProcessCreatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name();

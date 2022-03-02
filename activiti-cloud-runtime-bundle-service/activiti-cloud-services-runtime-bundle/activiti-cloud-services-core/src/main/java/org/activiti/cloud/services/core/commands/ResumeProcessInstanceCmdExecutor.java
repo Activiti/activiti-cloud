@@ -31,7 +31,7 @@ public class ResumeProcessInstanceCmdExecutor extends AbstractCommandExecutor<Re
     @Override
     public ProcessInstanceResult execute(ResumeProcessPayload resumeProcessPayload) {
         ProcessInstance processInstance = processAdminRuntime.resume(resumeProcessPayload);
-        
+
         return new ProcessInstanceResult(resumeProcessPayload, processInstance);
     }
 }

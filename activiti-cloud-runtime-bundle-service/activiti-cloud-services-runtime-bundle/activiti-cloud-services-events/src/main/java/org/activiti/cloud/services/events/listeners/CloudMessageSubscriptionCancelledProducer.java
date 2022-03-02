@@ -28,7 +28,7 @@ public class CloudMessageSubscriptionCancelledProducer implements ProcessRuntime
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }
-   
+
     @Override
     public void onEvent(MessageSubscriptionCancelledEvent event) {
         eventsAggregator.add(eventConverter.from(event));

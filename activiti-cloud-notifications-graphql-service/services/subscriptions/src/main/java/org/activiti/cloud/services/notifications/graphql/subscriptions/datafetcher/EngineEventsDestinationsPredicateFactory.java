@@ -33,23 +33,23 @@ public class EngineEventsDestinationsPredicateFactory implements EngineEventsPre
 
     private DataFetcherDestinationResolver destinationResolver = new AntPathDestinationResolver();
     private AntPathMatcher pathMatcher = new AntPathMatcher(".");
-    
+
     public EngineEventsDestinationsPredicateFactory(RoutingKeyResolver routingKeyResolver) {
         this.routingKeyResolver = routingKeyResolver;
-    }    
+    }
 
     // filter events that do not match subscription arguments
     @Override
     public Predicate<? super EngineEvent> getPredicate(DataFetchingEnvironment environment) {
         List<String> destinations = destinationResolver.resolveDestinations(environment);
-        
+
         logger.info("Resolved destinations {} for environment: {}", destinations, environment);
-        
+
         return (engineEvent) -> {
             String routingKey = routingKeyResolver.resolveRoutingKey(engineEvent);
-            
+
             logger.debug("Resolved routing key {} for {}", routingKey, engineEvent);
-            
+
             return destinations.stream()
                                .anyMatch(pattern -> pathMatcher.match(pattern, routingKey));
         };
@@ -60,10 +60,10 @@ public class EngineEventsDestinationsPredicateFactory implements EngineEventsPre
 
         return this;
     }
-    
+
     public EngineEventsDestinationsPredicateFactory pathMatcher(AntPathMatcher pathMatcher) {
         this.pathMatcher = pathMatcher;
-        
+
         return this;
     }
 }

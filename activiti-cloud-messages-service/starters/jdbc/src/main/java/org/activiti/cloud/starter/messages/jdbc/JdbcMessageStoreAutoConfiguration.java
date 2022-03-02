@@ -60,23 +60,23 @@ public class JdbcMessageStoreAutoConfiguration {
         }
         return messageStore;
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ConcurrentMetadataStore metadataStore(JdbcTemplate jdbcTemplate) {
         return new JdbcMetadataStore(jdbcTemplate);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public LockRepository lockRepository(DataSource dataSource) {
         return new DefaultLockRepository(dataSource);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public LockRegistry lockRegistry(LockRepository lockRepository) {
         return new JdbcLockRegistry(lockRepository);
-    }        
+    }
 
 }

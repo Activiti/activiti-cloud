@@ -38,7 +38,7 @@ public class TaskBuilder {
         when(taskEntity.getId()).thenReturn(taskId);
         return this;
     }
-    
+
     public TaskBuilder withName(String name) {
         when(taskEntity.getName()).thenReturn(name);
         return this;
@@ -48,27 +48,27 @@ public class TaskBuilder {
         when(taskEntity.getDescription()).thenReturn(description);
         return this;
     }
-    
+
     public TaskBuilder withPriority(Integer priority) {
         when(taskEntity.getPriority()).thenReturn(priority);
         return this;
     }
-    
+
     public TaskBuilder withDueDate(Date dueDate) {
         when(taskEntity.getDueDate()).thenReturn(dueDate);
         return this;
     }
-    
+
     public TaskBuilder withFormKey(String formKey) {
         when(taskEntity.getFormKey()).thenReturn(formKey);
         return this;
     }
-    
+
     public TaskBuilder withParentTaskId(String parentTaskId) {
         when(taskEntity.getParentTaskId()).thenReturn(parentTaskId);
         return this;
     }
-    
+
     public TaskBuilder withAssignee(String assignee) {
         when(taskEntity.getAssignee()).thenReturn(assignee);
         return this;
@@ -83,7 +83,7 @@ public class TaskBuilder {
         when(taskEntity.getCompletedDate()).thenReturn(completedDate);
         return this;
     }
-    
+
     public TaskEntity build() {
         return taskEntity;
     }

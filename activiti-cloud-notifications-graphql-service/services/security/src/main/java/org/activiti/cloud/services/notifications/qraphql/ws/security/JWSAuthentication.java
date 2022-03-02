@@ -31,7 +31,7 @@ public class JWSAuthentication extends AbstractAuthenticationToken implements Au
 
     public JWSAuthentication(String token) {
         this(token, null, null);
-        
+
         setAuthenticated(false);
     }
 
@@ -39,7 +39,7 @@ public class JWSAuthentication extends AbstractAuthenticationToken implements Au
         super(authorities);
         this.token = token;
         this.principal = principal;
-        
+
         setAuthenticated(true);
     }
 

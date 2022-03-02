@@ -28,7 +28,7 @@ public class ActivityCompletedEventConverter extends BaseEventToEntityConverter 
     public ActivityCompletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name();
@@ -41,7 +41,7 @@ public class ActivityCompletedEventConverter extends BaseEventToEntityConverter 
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-  
+
         ActivityCompletedAuditEventEntity activityCompletedAuditEventEntity = (ActivityCompletedAuditEventEntity) auditEventEntity;
 
         return new CloudBPMNActivityCompletedEventImpl(activityCompletedAuditEventEntity.getEventId(),

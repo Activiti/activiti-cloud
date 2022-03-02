@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class AbstractMessageHeadersRoutingKeyResolver implements RoutingKeyResolver<Map<String, Object>> {
-    
+
     private static final String REPLACEMENT = "-";
     private static final String ILLEGAL_CHARACTERS = "[\\t\\s\\.*#:]";
     private static final String DELIMITER = ".";
@@ -36,18 +36,18 @@ public abstract class AbstractMessageHeadersRoutingKeyResolver implements Routin
                      .map(this::mapNullOrEmptyValue)
                      .collect(Collectors.joining(DELIMITER));
     }
-    
+
     private String mapNullOrEmptyValue(Optional<Object> obj) {
         return obj.map(Object::toString)
                   .filter(value -> !value.isEmpty())
                   .map(this::escapeIllegalCharacters)
                   .orElse(UNDERSCORE);
     }
-    
+
     protected String escapeIllegalCharacters(String value) {
         return value.replaceAll(ILLEGAL_CHARACTERS, REPLACEMENT);
     }
-    
-    public abstract String getPrefix(); 
+
+    public abstract String getPrefix();
 
 }

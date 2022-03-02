@@ -50,7 +50,7 @@ public class AuthenticationSteps {
         TokenHolder.setAuthToken(authToken);
         TokenHolder.setUserName(authUsername);
     }
-    
+
     @Step
     public void ensureUserIsAuthenticated() {
         AuthToken authToken = TokenHolder.getAuthToken();

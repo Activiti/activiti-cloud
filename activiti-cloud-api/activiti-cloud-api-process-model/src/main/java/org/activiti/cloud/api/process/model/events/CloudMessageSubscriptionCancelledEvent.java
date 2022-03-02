@@ -26,6 +26,5 @@ public interface CloudMessageSubscriptionCancelledEvent extends CloudRuntimeEven
     default MessageSubscriptionEvents getEventType() {
         return MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED;
     }
-    
-}
 
+}

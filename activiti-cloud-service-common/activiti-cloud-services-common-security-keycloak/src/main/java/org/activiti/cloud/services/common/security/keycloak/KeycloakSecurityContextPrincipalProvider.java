@@ -25,7 +25,7 @@ import java.security.Principal;
 import java.util.Optional;
 
 public class KeycloakSecurityContextPrincipalProvider implements SecurityContextPrincipalProvider {
-    
+
     @Override
     public Optional<Principal> getCurrentPrincipal() {
         return Optional.ofNullable(SecurityContextHolder.getContext())
@@ -34,5 +34,5 @@ public class KeycloakSecurityContextPrincipalProvider implements SecurityContext
                        .filter(KeycloakPrincipal.class::isInstance)
                        .map(KeycloakPrincipal.class::cast);
     }
-        
+
 }

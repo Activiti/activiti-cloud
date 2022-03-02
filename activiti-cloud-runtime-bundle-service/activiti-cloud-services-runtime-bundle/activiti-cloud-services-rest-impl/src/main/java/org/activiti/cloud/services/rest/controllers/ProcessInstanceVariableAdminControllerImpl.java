@@ -38,11 +38,11 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
     @Override
     public ResponseEntity<Void> updateVariables(@PathVariable String processInstanceId,
                                                 @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
-        
+
         if (setProcessVariablesPayload != null) {
             setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
         }
-        
+
         processAdminRuntime.setVariables(setProcessVariablesPayload);
         return new ResponseEntity<>(HttpStatus.OK);
     }

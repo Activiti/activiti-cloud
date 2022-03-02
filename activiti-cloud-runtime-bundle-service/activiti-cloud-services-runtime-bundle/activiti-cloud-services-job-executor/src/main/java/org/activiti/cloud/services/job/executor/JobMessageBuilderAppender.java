@@ -33,7 +33,7 @@ public class JobMessageBuilderAppender implements MessageBuilderAppender {
     @Override
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
-        
+
         return request.setHeader(JobMessageHeaders.JOB_TYPE, job.getJobType())
                       .setHeader(JobMessageHeaders.JOB_PROCESS_DEFINITION_ID, job.getProcessDefinitionId())
                       .setHeader(JobMessageHeaders.JOB_DUE_DATE, job.getDuedate())

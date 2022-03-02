@@ -23,10 +23,10 @@ import java.security.Principal;
 import java.util.Optional;
 
 public class KeycloakPrincipalIdentityProvider implements PrincipalIdentityProvider {
-    
+
     private final KeycloakAccessTokenProvider keycloakAccessTokenProvider;
-    private final KeycloakAccessTokenValidator keycloakAccessTokenValidator; 
-    
+    private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
+
     public KeycloakPrincipalIdentityProvider(@NonNull KeycloakAccessTokenProvider keycloakAccessTokenProvider,
                                              @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
@@ -40,14 +40,14 @@ public class KeycloakPrincipalIdentityProvider implements PrincipalIdentityProvi
                                           .map(this::getUserId)
                                           .orElseThrow(this::securityException);
     }
-    
+
     protected String getUserId(AccessToken accessToken) {
         return Optional.ofNullable(accessToken)
                        .map(AccessToken::getPreferredUsername)
                        .orElseThrow(this::securityException);
     }
-    
+
     protected SecurityException securityException() {
         return new SecurityException("Invalid accessToken object instance");
-    }    
+    }
 }

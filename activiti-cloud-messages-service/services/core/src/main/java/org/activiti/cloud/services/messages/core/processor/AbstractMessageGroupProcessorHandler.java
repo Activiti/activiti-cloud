@@ -21,15 +21,15 @@ public abstract class AbstractMessageGroupProcessorHandler implements MessageGro
 
     @Override
     public Object handle(MessageGroup group) {
-        
+
         if (canProcess(group)) {
             return process(group);
         }
-        
+
         return null;
     }
 
     protected abstract Object process(MessageGroup group);
 
-    protected abstract boolean canProcess(MessageGroup group);    
+    protected abstract boolean canProcess(MessageGroup group);
 }

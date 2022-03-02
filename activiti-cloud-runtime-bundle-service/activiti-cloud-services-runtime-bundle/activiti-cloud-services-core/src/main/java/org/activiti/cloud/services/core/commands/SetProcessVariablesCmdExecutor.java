@@ -30,7 +30,7 @@ public class SetProcessVariablesCmdExecutor extends AbstractCommandExecutor<SetP
     @Override
     public EmptyResult execute(SetProcessVariablesPayload setProcessVariablesPayload) {
         processAdminRuntime.setVariables(setProcessVariablesPayload);
-        
+
         return new EmptyResult(setProcessVariablesPayload);
     }
 }

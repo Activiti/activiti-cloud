@@ -9,4 +9,3 @@ alter table audit_event
     add column timer text;
 alter table audit_event
     add column error text;
-

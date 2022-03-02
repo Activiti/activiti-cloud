@@ -42,7 +42,7 @@ public class BpmnMessageReceivedEventMessageProducer implements BPMNElementEvent
     @Override
     public void onEvent(@NonNull BPMNMessageReceivedEvent event) {
         logger.debug("onEvent: {}", event);
-        
+
         Message<MessageEventPayload> message = messageBuilderFactory.create(event.getEntity())
                                                                     .withPayload(event.getEntity()
                                                                                       .getMessagePayload())

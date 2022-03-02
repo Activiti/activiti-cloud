@@ -56,7 +56,7 @@ public class GraphQLSubscriptionsAutoConfiguration {
         public EngineEventsPredicateFactory engineEventsPredicateFactory(RoutingKeyResolver routingKeyResolver) {
             return new EngineEventsDestinationsPredicateFactory(routingKeyResolver);
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
         public EngineEventsPublisherFactory engineEventPublisherFactory(EngineEventsPredicateFactory engineEventsPredicateFactory,
@@ -69,7 +69,7 @@ public class GraphQLSubscriptionsAutoConfiguration {
         public EngineEventsPublisherDataFetcher engineEventPublisherDataFetcher(EngineEventsPublisherFactory engineEventPublisherFactory) {
             return new EngineEventsPublisherDataFetcher(engineEventPublisherFactory);
         }
-        
+
         @Bean
         @ConditionalOnMissingBean
         public GraphQLSubscriptionSchemaBuilder graphQLSubscriptionSchemaBuilder(EngineEventsPublisherDataFetcher engineEventPublisherDataFetcher) {
@@ -91,7 +91,7 @@ public class GraphQLSubscriptionsAutoConfiguration {
         @Override
         public void configure(GraphQLShemaRegistration registry) {
             registry.register(graphQLSubscriptionSchemaBuilder.getGraphQLSchema());
-            
+
         }
     }
 

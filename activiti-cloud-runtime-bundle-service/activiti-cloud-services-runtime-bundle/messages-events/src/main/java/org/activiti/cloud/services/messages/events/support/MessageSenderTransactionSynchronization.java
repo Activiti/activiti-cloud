@@ -38,14 +38,14 @@ public class MessageSenderTransactionSynchronization implements TransactionSynch
     @Override
     public void afterCommit() {
         logger.debug("Sending bpmn message '{}' via message channel: {}", message, messageChannel);
-        
-        try { 
+
+        try {
             boolean sent = messageChannel.send(message);
-            
+
             if(!sent) {
                 throw new MessageDispatchingException(message);
             }
-            
+
         } catch(Exception cause) {
             logger.error("Sending bpmn message {} failed due to error: {}", message, cause.getMessage());
         }

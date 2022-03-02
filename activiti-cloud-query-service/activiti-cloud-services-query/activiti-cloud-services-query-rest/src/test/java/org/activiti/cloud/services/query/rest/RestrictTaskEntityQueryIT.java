@@ -86,7 +86,7 @@ public class RestrictTaskEntityQueryIT {
         shouldGetTasksWhenCandidateRestrictTaskQuery();
         shouldGetTasksWhenCandidateRestrictToInvolvedUser();
     }
-    
+
     private void shouldGetTasksWhenCandidateRestrictTaskQuery() {
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -130,7 +130,7 @@ public class RestrictTaskEntityQueryIT {
         Iterable<TaskEntity> iterable = taskRepository.findInProcessInstanceScope(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
-    
+
     @Test
     public void shouldNotGetTasksAssignedToSomeOneElseWhenCandidate() {
         //given
@@ -143,7 +143,7 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
-        
+
         shouldNotGetTasksAssignedToSomeOneElseWhenCandidate_RestrictTaskQuery();
         shouldNotGetTasksAssignedToSomeOneElseWhenCandidate_RestrictToInvolvedUser();
     }

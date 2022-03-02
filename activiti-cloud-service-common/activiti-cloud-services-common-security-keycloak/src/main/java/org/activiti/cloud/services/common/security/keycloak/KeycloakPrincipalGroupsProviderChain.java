@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class KeycloakPrincipalGroupsProviderChain implements PrincipalGroupsProvider {
-    
+
     private final List<PrincipalGroupsProvider> providers;
-    
+
     public KeycloakPrincipalGroupsProviderChain(@NonNull List<PrincipalGroupsProvider> providers) {
         this.providers = Collections.unmodifiableList(providers);
     }

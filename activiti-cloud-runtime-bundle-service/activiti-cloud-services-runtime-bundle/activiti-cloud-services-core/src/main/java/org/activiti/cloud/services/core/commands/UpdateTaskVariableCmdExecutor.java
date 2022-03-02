@@ -30,7 +30,7 @@ public class UpdateTaskVariableCmdExecutor extends AbstractCommandExecutor<Updat
     @Override
     public EmptyResult execute(UpdateTaskVariablePayload updateTaskVariablePayload) {
         taskAdminRuntime.updateVariable(updateTaskVariablePayload);
-        
+
         return new EmptyResult(updateTaskVariablePayload);
     }
 }

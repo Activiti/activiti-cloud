@@ -35,7 +35,7 @@ public class EngineEvent extends LinkedHashMap<String, Object>{
     public EngineEvent(Map<? extends String, ? extends Object> m) {
         super(m);
     }
-    
+
     public String getEventType() {
         return get("eventType").toString();
     }

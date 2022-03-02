@@ -58,7 +58,7 @@ import org.springframework.test.web.servlet.MvcResult;
 })
 @WithMockUser
 public class ProcessInstanceEntityTasksAdminControllerIT {
-    
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -78,7 +78,7 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
     public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
-        
+
         given(taskRepository.findAll(any(), any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(taskEntity),
                                            new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)), 12));

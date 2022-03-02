@@ -37,13 +37,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/v1/process-instances/{processInstanceId}/diagram")
 public class ProcessInstanceDiagramController extends ProcessInstanceDiagramControllerBase {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceDiagramController.class);
 
     private final SecurityPoliciesManager securityPoliciesManager;
-    
+
     private final SecurityManager securityManager;
-    
+
     @Autowired
     public ProcessInstanceDiagramController(ProcessModelRepository processModelRepository,
                                             BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
@@ -59,7 +59,7 @@ public class ProcessInstanceDiagramController extends ProcessInstanceDiagramCont
               processInstanceRepository,
               bpmnActivityRepository,
               entityFinder);
-        
+
         this.securityPoliciesManager = securityPoliciesManager;
         this.securityManager = securityManager;
     }
@@ -67,7 +67,7 @@ public class ProcessInstanceDiagramController extends ProcessInstanceDiagramCont
     @GetMapping(produces = IMAGE_SVG_XML)
     @ResponseBody
     public String getProcessDiagram(@PathVariable String processInstanceId) {
-        
+
         ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
                                                                             processInstanceId,
                                                                             "Unable to find process for the given id:'" + processInstanceId + "'");

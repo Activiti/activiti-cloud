@@ -28,7 +28,7 @@ public class TaskCancelledEventConverter extends BaseEventToEntityConverter {
     public TaskCancelledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name();

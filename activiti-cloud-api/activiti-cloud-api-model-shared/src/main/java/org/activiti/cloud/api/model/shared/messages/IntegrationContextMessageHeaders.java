@@ -16,7 +16,7 @@
 package org.activiti.cloud.api.model.shared.messages;
 
 /**
- * Holds message header key names used in messages with IntegrationContext payload type  
+ * Holds message header key names used in messages with IntegrationContext payload type
  *
  */
 public final class IntegrationContextMessageHeaders {

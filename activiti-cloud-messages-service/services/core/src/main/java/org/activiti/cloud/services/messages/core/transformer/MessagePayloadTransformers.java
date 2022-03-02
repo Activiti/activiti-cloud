@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.messages.core.transformer;
 
 public class MessagePayloadTransformers {
-    
+
     public static ReceiveMessagePayloadTransformer toReceiveMessagePayload() {
         return new ReceiveMessagePayloadTransformer();
     }
@@ -24,5 +24,5 @@ public class MessagePayloadTransformers {
     public static StartMessagePayloadTransformer toStartMessagePayload() {
         return new StartMessagePayloadTransformer();
     }
-    
+
 }

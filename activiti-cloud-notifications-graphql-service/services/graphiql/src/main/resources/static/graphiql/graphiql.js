@@ -20043,7 +20043,7 @@ return CodeMirror$1;
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
- * 
+ *
  */
 
 function makeEmptyFunction(arg) {
@@ -20225,7 +20225,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                                                                                                                                                            *  This source code is licensed under the license found in the
                                                                                                                                                            *  LICENSE file in the root directory of this source tree.
                                                                                                                                                            *
-                                                                                                                                                           *  
+                                                                                                                                                           *
                                                                                                                                                            */
 
 var GraphQLLanguageService = exports.GraphQLLanguageService = function () {
@@ -20474,7 +20474,7 @@ function getDefinitionState(tokenState) {
  *  This source code is licensed under the license found in the
  *  LICENSE file in the root directory of this source tree.
  *
- *  
+ *
  */
 
 function getFieldDef(schema, type, fieldName) {
@@ -20634,7 +20634,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
                                                                                                                                                                                                                                                                    *  This source code is licensed under the license found in the
                                                                                                                                                                                                                                                                    *  LICENSE file in the root directory of this source tree.
                                                                                                                                                                                                                                                                    *
-                                                                                                                                                                                                                                                                   *  
+                                                                                                                                                                                                                                                                   *
                                                                                                                                                                                                                                                                    */
 
 exports.getAutocompleteSuggestions = getAutocompleteSuggestions;
@@ -21180,7 +21180,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *  This source code is licensed under the license found in the
  *  LICENSE file in the root directory of this source tree.
  *
- *  
+ *
  */
 
 var LANGUAGE = exports.LANGUAGE = 'GraphQL';
@@ -21288,7 +21288,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *  This source code is licensed under the license found in the
  *  LICENSE file in the root directory of this source tree.
  *
- *  
+ *
  */
 
 var SEVERITY = exports.SEVERITY = {
@@ -21412,7 +21412,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
                                                                                                                                                                                                                                                                    *  This source code is licensed under the license found in the
                                                                                                                                                                                                                                                                    *  LICENSE file in the root directory of this source tree.
                                                                                                                                                                                                                                                                    *
-                                                                                                                                                                                                                                                                   *  
+                                                                                                                                                                                                                                                                   *
                                                                                                                                                                                                                                                                    */
 
 exports.getOutline = getOutline;
@@ -21786,7 +21786,7 @@ var CharacterStream = function () {
       *  This source code is licensed under the license found in the
       *  LICENSE file in the root directory of this source tree.
       *
-      *  
+      *
       */
 
 /**
@@ -21827,7 +21827,7 @@ function opt(ofRule) {
  *  This source code is licensed under the license found in the
  *  LICENSE file in the root directory of this source tree.
  *
- *  
+ *
  */
 
 // These functions help build matching rules for ParseRules.
@@ -21887,7 +21887,7 @@ var _RuleHelpers = require('./RuleHelpers');
  *  This source code is licensed under the license found in the
  *  LICENSE file in the root directory of this source tree.
  *
- *  
+ *
  */
 
 var isIgnored = exports.isIgnored = function isIgnored(ch) {
@@ -22176,7 +22176,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
                                                                                                                                                                                                                                                                    *  This source code is licensed under the license found in the
                                                                                                                                                                                                                                                                    *  LICENSE file in the root directory of this source tree.
                                                                                                                                                                                                                                                                    *
-                                                                                                                                                                                                                                                                   *  
+                                                                                                                                                                                                                                                                   *
                                                                                                                                                                                                                                                                    */
 
 /**
@@ -22477,7 +22477,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  *  This source code is licensed under the license found in the
  *  LICENSE file in the root directory of this source tree.
  *
- *  
+ *
  */
 
 var Range = exports.Range = function () {
@@ -22588,7 +22588,7 @@ function getASTNodeAtPosition(query, ast, point) {
    *  This source code is licensed under the license found in the
    *  LICENSE file in the root directory of this source tree.
    *
-   *  
+   *
    */
 
 function pointToOffset(text, point) {
@@ -22700,7 +22700,7 @@ function validateWithCustomRules(schema, ast, customRules) {
    *  This source code is licensed under the license found in the
    *  LICENSE file in the root directory of this source tree.
    *
-   *  
+   *
    */
 },{"graphql":94,"graphql/validation/rules/NoUnusedFragments":151}],85:[function(require,module,exports){
 'use strict';
@@ -27753,7 +27753,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                                                                                                                                                                                                                    * LICENSE file in the root directory of this source tree. An additional grant
                                                                                                                                                                                                                    * of patent rights can be found in the PATENTS file in the same directory.
                                                                                                                                                                                                                    *
-                                                                                                                                                                                                                   * 
+                                                                                                                                                                                                                   *
                                                                                                                                                                                                                    */
 
 /**
@@ -27855,7 +27855,7 @@ function subscribe(argsOrSchema, document, rootValue, contextValue, variableValu
    * LICENSE file in the root directory of this source tree. An additional grant
    * of patent rights can be found in the PATENTS file in the same directory.
    *
-   * 
+   *
    */
 
 function subscribeImpl(schema, document, rootValue, contextValue, variableValues, operationName, fieldResolver, subscribeFieldResolver) {
@@ -38126,7 +38126,7 @@ function escape(html, encode) {
 }
 
 function unescape(html) {
-	// explicitly match decimal, hex, and named HTML entities 
+	// explicitly match decimal, hex, and named HTML entities
   return html.replace(/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/g, function(_, n) {
     n = n.toLowerCase();
     if (n === 'colon') return ':';

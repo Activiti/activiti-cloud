@@ -34,7 +34,7 @@ public class SubscriptionCancelledHandlerAdvice extends AbstractMessageConnector
     private final MessageGroupStore messageStore;
     private final LockTemplate lockTemplate;
     private final CorrelationStrategy correlationStrategy;
-    
+
     public SubscriptionCancelledHandlerAdvice(MessageGroupStore messageStore,
                                               CorrelationStrategy correlationStrategy,
                                               LockTemplate lockTemplate) {
@@ -42,7 +42,7 @@ public class SubscriptionCancelledHandlerAdvice extends AbstractMessageConnector
         this.lockTemplate = lockTemplate;
         this.correlationStrategy = correlationStrategy;
     }
-    
+
     @Override
     public <T> T doHandle(Message<?> message) {
         Object groupId = correlationStrategy.getCorrelationKey(message);
@@ -50,7 +50,7 @@ public class SubscriptionCancelledHandlerAdvice extends AbstractMessageConnector
 
         lockTemplate.lockInterruptibly(key, () -> {
             MessageGroup group = messageStore.getMessageGroup(groupId);
-            
+
             Collection<Message<?>> messages = group.getMessages()
                                                    .stream()
                                                    .filter(not(START_MESSAGE_DEPLOYED))
@@ -59,13 +59,13 @@ public class SubscriptionCancelledHandlerAdvice extends AbstractMessageConnector
                 messageStore.removeMessagesFromGroup(groupId, messages);
             }
         });
-        
+
         return null;
-    } 
-    
+    }
+
     @Override
     public boolean canHandle(Message<?> message) {
-        return MESSAGE_SUBSCRIPTION_CANCELLED.test(message);        
+        return MESSAGE_SUBSCRIPTION_CANCELLED.test(message);
     }
 
 }

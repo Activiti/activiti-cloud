@@ -18,7 +18,7 @@ package org.activiti.cloud.services.job.executor;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 
 public interface MessageBasedJobManagerFactory {
-    
+
     MessageBasedJobManager create(ProcessEngineConfigurationImpl processEngineConfiguration);
 
 }

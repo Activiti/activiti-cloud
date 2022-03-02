@@ -30,7 +30,7 @@ public class CreateTaskVariableCmdExecutor extends AbstractCommandExecutor<Creat
     @Override
     public EmptyResult execute(CreateTaskVariablePayload createTaskVariablePayload) {
         taskAdminRuntime.createVariable(createTaskVariablePayload);
-        
+
         return new EmptyResult(createTaskVariablePayload);
     }
 }

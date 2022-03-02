@@ -37,11 +37,11 @@ public class BpmnMessageSentEventMessageProducer implements BPMNElementEventList
         this.messageEventsDispatcher = messageEventsDispatcher;
         this.messageBuilderFactory = messageBuilderFactory;
     }
-    
+
     @Override
     public void onEvent(@NonNull BPMNMessageSentEvent event) {
         logger.debug("onEvent: {}", event);
-        
+
         Message<MessageEventPayload> message = messageBuilderFactory.create(event.getEntity())
                                                                     .withPayload(event.getEntity()
                                                                                       .getMessagePayload())
@@ -49,9 +49,9 @@ public class BpmnMessageSentEventMessageProducer implements BPMNElementEventList
                                                                                event.getEventType()
                                                                                     .name())
                                                                     .build();
-        
+
         messageEventsDispatcher.dispatch(message);
 
-    }    
-    
+    }
+
 }

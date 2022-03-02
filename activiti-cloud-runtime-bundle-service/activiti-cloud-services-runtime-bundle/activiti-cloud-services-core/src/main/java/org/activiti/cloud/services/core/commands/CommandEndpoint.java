@@ -33,7 +33,7 @@ public class CommandEndpoint<T extends Payload> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandEndpoint.class);
     private Map<String, CommandExecutor<T>> commandExecutors;
-    
+
     public CommandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
         this.commandExecutors = cmdExecutors.stream()
                                             .collect(Collectors.toMap(CommandExecutor::getHandledType,
@@ -43,12 +43,12 @@ public class CommandEndpoint<T extends Payload> {
     @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
     @SendTo(ProcessEngineChannels.COMMAND_RESULTS)
     public <R> R execute(T payload) {
-        
+
         SecurityContextHolder.getContext()
                              .setAuthentication(new CommandEndpointAdminAuthentication());
         try {
             return (R) processCommand(payload);
-            
+
         } finally {
             SecurityContextHolder.clearContext();
         }
@@ -60,11 +60,11 @@ public class CommandEndpoint<T extends Payload> {
         CommandExecutor<T> cmdExecutor = commandExecutors.get(payload.getClass().getName());
         if (cmdExecutor != null) {
             return cmdExecutor.execute(payload);
-            
+
         } else {
             LOGGER.warn(">>> No Command Found for type: " + payload.getClass());
         }
-        
+
         return new EmptyResult();
     }
 }

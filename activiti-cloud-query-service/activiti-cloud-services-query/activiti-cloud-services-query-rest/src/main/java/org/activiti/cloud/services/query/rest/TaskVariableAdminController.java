@@ -90,6 +90,3 @@ public class TaskVariableAdminController {
     }
 
 }
-
-
-

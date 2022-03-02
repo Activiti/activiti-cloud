@@ -28,7 +28,7 @@ public class ActivityStartedEventConverter extends BaseEventToEntityConverter {
     public ActivityStartedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name();
@@ -36,7 +36,7 @@ public class ActivityStartedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected ActivityStartedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new ActivityStartedAuditEventEntity((CloudBPMNActivityStartedEvent) cloudRuntimeEvent);           
+        return new ActivityStartedAuditEventEntity((CloudBPMNActivityStartedEvent) cloudRuntimeEvent);
     }
 
     @Override

@@ -43,14 +43,14 @@ public class JWSAuthenticationInterceptorConfigurer implements WebSocketMessageB
 
     private List<String> headerValues = Arrays.asList(CONNECTION_INIT);
     private Predicate<SimpMessageHeaderAccessor> messageSelector = new DefaultMessageSelector();
-    
+
     private final JWSAuthenticationManager authenticationManager;
-    
+
     @Autowired
     public JWSAuthenticationInterceptorConfigurer(JWSAuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
-    
+
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
@@ -67,7 +67,7 @@ public class JWSAuthenticationInterceptorConfigurer implements WebSocketMessageB
                                 Authentication jwsAuthToken = new JWSAuthentication(bearer);
 
                                 Principal principal = authenticationManager.authenticate(jwsAuthToken);
-                                
+
                                 accessor.setUser(principal);
                             });
                 }
@@ -76,23 +76,23 @@ public class JWSAuthenticationInterceptorConfigurer implements WebSocketMessageB
         });
     }
 
-    
+
     public void setHeaderValues(List<String> headerValues) {
         this.headerValues = headerValues;
     }
 
-    
+
     public void setMessageSelector(Predicate<SimpMessageHeaderAccessor> messageSelector) {
         this.messageSelector = messageSelector;
     }
-    
+
     class DefaultMessageSelector implements Predicate<SimpMessageHeaderAccessor> {
-        
+
         @Override
         public boolean test(SimpMessageHeaderAccessor accessor) {
             Object value = accessor.getHeader(GRAPHQL_MESSAGE_TYPE);
             return headerValues.contains(value);
         }
     }
-    
+
 }

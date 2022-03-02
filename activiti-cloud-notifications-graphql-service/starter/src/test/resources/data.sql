@@ -19,4 +19,3 @@ insert into TASK_VARIABLE (id, create_time, execution_id, last_updated_time, nam
   (5, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable4', 0, '2', 'map', '{"value": { "key" : "data" }}'),
   (6, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable5', 1, '4', 'String', '{"value": 1.0}'),
   (7, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable6', 1, '4', 'list', '{"value": [1,2,3,4,5]}');
-

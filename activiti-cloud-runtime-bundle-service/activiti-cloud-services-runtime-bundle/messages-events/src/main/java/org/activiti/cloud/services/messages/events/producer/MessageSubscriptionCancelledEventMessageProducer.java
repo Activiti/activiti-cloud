@@ -44,13 +44,13 @@ public class MessageSubscriptionCancelledEventMessageProducer implements Process
     @Override
     public void onEvent(@NonNull MessageSubscriptionCancelledEvent event) {
         logger.debug("onEvent: {}", event);
-        
+
         MessageSubscription messageSubscription = event.getEntity();
 
         MessageEventPayload messageEventPayload = MessageEventPayloadBuilder.messageEvent(messageSubscription.getEventName())
                                                                             .withCorrelationKey(messageSubscription.getConfiguration())
                                                                             .build();
-        
+
         Message<MessageEventPayload> message = messageBuilderFactory.create(event.getEntity())
                                                                     .withPayload(messageEventPayload)
                                                                     .setHeader(MessageEventHeaders.MESSAGE_EVENT_TYPE,

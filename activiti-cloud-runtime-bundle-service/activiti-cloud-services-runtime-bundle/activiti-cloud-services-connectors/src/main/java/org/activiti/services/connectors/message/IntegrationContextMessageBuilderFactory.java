@@ -36,7 +36,7 @@ public class IntegrationContextMessageBuilderFactory
     @Override
     public MessageBuilderAppenderChain create(IntegrationContext integrationContext) {
         Assert.notNull(integrationContext, "integrationContext must not be null");
-        
+
         return new MessageBuilderAppenderChain()
                 .routingKeyResolver(new IntegrationContextRoutingKeyResolver())
                 .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))

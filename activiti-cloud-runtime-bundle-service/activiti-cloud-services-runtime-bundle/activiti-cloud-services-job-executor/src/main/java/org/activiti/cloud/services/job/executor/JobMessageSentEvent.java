@@ -23,13 +23,13 @@ import org.springframework.messaging.Message;
 public class JobMessageSentEvent extends ApplicationEvent {
     private static final long serialVersionUID = 1L;
     private final Message<?> message;
-    
+
     public JobMessageSentEvent(Message<?> message, Object source) {
         super(source);
         this.message = message;
     }
 
-    
+
     public Message<?> getMessage() {
         return message;
     }
@@ -62,6 +62,6 @@ public class JobMessageSentEvent extends ApplicationEvent {
         builder.append("]");
         return builder.toString();
     }
-    
-    
+
+
 }

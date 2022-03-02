@@ -114,8 +114,8 @@
             }).join('&');
         history.replaceState(null, null, newSearch);
       }
-      
-      
+
+
       function fetchGraphqlConfig(configUrl, accessToken) {
     	  return fetch(configUrl, {
               method: 'get',
@@ -130,36 +130,36 @@
           }).then(function(json) {
        	    console.log('Loaded Graphiql Json:', json)
             return json;
-          })    	  
+          })
       }
 
       function getGraphqlApi() {
 	      console.log('Using Graphql Api Config:', window.GraphqlApi)
-    	  return Promise.resolve(window.GraphqlApi);    	  
+    	  return Promise.resolve(window.GraphqlApi);
       }
-      
+
       function setCookie(name, value) {
     	  document.cookie = name +'='+ value +'; Path=/;';
     	}
     	function deleteCookie(name) {
     	  document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    	}      
-      
+    	}
+
       keycloak.init({
           onLoad: 'login-required',
         })
         .success(function(authenticated) {
-          
+
           function getToken() {
               return keycloak.token;
-          } 
-          
+          }
+
           keycloak.loadUserProfile().then(function(userProfile) {
         	  console.log('Loaded User Profile:', userProfile)
-        	  
+
         	  // Let's reset ingress cookie on load
         	  deleteCookie('activiti-cloud-notifications-graphql-route');
-        	  
+
               getGraphqlApi().then(function(config) {
                   // Defines a GraphQL fetcher using the fetch API. You're not required to
                   // use fetch, and could instead implement graphQLFetcher however you like,
@@ -191,8 +191,8 @@
                   };
 
                   // Build websocket endpoint
-                  var wsURL = (window.location.protocol == "https:" ? "wss://" : "ws://") 
-                  				+ window.location.host 
+                  var wsURL = (window.location.protocol == "https:" ? "wss://" : "ws://")
+                  				+ window.location.host
                   				+ config.graphqlWsPath;
 
                   //  create a SubscriptionClient with your subscriptions endpoint
@@ -203,16 +203,16 @@
 	                                 'X-Authorization': 'Bearer '+getToken()
 	                             };
                           }, reconnect: true, lazy: true });
-                  
-                  // Let's update token and refresh backend session on every subscription request 
-                  var keycloakMiddleware = { 
+
+                  // Let's update token and refresh backend session on every subscription request
+                  var keycloakMiddleware = {
                		  applyMiddleware: function(options, next) {
                			  graphQLFetcher("{hello}")
            			  		.then(result => next())
 	               	        .catch(err => next(err))
 		              }
-               	  }; 
-                  
+               	  };
+
                   // Let's apply middleware action for subscriptions
                   subscriptionsClient.use([keycloakMiddleware]);
 
@@ -231,12 +231,12 @@
                     onEditVariables: onEditVariables,
                     onEditOperationName: onEditOperationName
                   }), document.getElementById('graphiql'));
-            	  
+
               })
           }, function() {
             alert('failed to load user profile');
-          });            
-            
+          });
+
         }).error(function() {
           alert('failed to initialize Keycloak');
         });    </script>

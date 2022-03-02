@@ -43,10 +43,10 @@ public abstract class CloudBPMNTimerEventImpl extends CloudRuntimeEventImpl<BPMN
               entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
-        
+
         if (entity!=null) {
             setEntityId(entity.getElementId());
         }
     }
-    
+
 }

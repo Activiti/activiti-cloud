@@ -22,7 +22,7 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.messaging.SubscribableChannel;
 
 public class JobMessageInputChannelFactory {
-    
+
     private final SubscribableChannelBindingTargetFactory bindingTargetFactory;
     private final BindingServiceProperties bindingServiceProperties;
     private final ConfigurableListableBeanFactory  beanFactory;
@@ -34,13 +34,13 @@ public class JobMessageInputChannelFactory {
         this.bindingServiceProperties = bindingServiceProperties;
         this.beanFactory = beanFactory;
     }
-    
+
     public SubscribableChannel createInputChannel(String consumerName, BindingProperties bindingProperties) {
         bindingServiceProperties.getBindings().put(consumerName, bindingProperties);
         SubscribableChannel channel = bindingTargetFactory.createInput(consumerName);
         beanFactory.registerSingleton(consumerName, channel);
         channel = (SubscribableChannel) beanFactory.initializeBean(channel, consumerName);
-        
+
         return channel;
     }
 

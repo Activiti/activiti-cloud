@@ -43,7 +43,7 @@ public abstract class CloudBPMNMessageEventImpl extends CloudRuntimeEventImpl<BP
               entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
-        
+
         if (entity!=null) {
             setEntityId(entity.getElementId());
         }

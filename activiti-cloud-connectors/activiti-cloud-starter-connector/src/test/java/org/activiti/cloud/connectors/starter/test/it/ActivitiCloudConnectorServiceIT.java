@@ -273,5 +273,3 @@ public class ActivitiCloudConnectorServiceIT {
         return integrationRequest;
     }
 }
-
-

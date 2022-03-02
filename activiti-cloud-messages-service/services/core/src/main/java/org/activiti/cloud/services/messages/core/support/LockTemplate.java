@@ -45,15 +45,15 @@ public class LockTemplate {
 
     public void lockInterruptibly(Object key, Runnable runnable) {
         Callable<Void> callable = () -> {
-            runnable.run(); 
-            return null; 
+            runnable.run();
+            return null;
         };
-        
+
         this.executeWithLock(key, Lock::lockInterruptibly, callable);
     }
-    
-    private <T> T doExecuteWithLock(Object key, 
-                                    ExceptionSwallowingFunction<Lock, Boolean> lockProducer, 
+
+    private <T> T doExecuteWithLock(Object key,
+                                    ExceptionSwallowingFunction<Lock, Boolean> lockProducer,
                                     Callable<T> callable) {
         try {
             Lock lock = registry.obtain(key);
@@ -76,9 +76,9 @@ public class LockTemplate {
         }
         return null;
     }
-    
-    private <T> T executeWithLock(Object key, 
-                                 ExceptionSwallowingProvider<Lock> lockProvider, 
+
+    private <T> T executeWithLock(Object key,
+                                 ExceptionSwallowingProvider<Lock> lockProvider,
                                  Callable <T> callable) {
         try {
             Lock lock = registry.obtain(key);
@@ -97,10 +97,10 @@ public class LockTemplate {
         catch (Exception e) {
             ReflectionUtils.rethrowRuntimeException(e);
         }
-        
+
         return null;
     }
-    
+
     private interface ExceptionSwallowingProvider<I> {
         void apply(I i) throws Exception;
     }

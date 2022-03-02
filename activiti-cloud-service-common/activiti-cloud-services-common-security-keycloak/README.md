@@ -7,7 +7,7 @@ This module provides Keycloak implementation of the Activiti [SecurityManager](h
  * [PrincipalGroupsProvider](src/main/java/org/activiti/cloud/services/common/security/keycloak/KeycloakAccessTokenPrincipalGroupsProvider.java)
  * [PrincipalRolesProvider](src/main/java/org/activiti/cloud/services/common/security/keycloak/KeycloakAccessTokenPrincipalRolesProvider.java)
 
-In order to be able to extract groups from Keycloak JWT the 'KeycloakAccessTokenPrincipalGroupsProvider' requires extra configuration on Keycloak client to map groups as claims in the JWT, i.e. 
+In order to be able to extract groups from Keycloak JWT the 'KeycloakAccessTokenPrincipalGroupsProvider' requires extra configuration on Keycloak client to map groups as claims in the JWT, i.e.
 
 ```json
 {

@@ -19,11 +19,11 @@ import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudApplication;
 
 public class CloudApplicationImpl implements CloudApplication {
-    
+
     private String id;
     private String name;
     private String version;
-    
+
     public void setId(String id) {
         this.id = id;
     }
@@ -35,7 +35,7 @@ public class CloudApplicationImpl implements CloudApplication {
     public void setVersion(String version) {
         this.version = version;
     }
-    
+
     @Override
     public String getName() {
         return name;

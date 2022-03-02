@@ -30,7 +30,7 @@ public class SignalCmdExecutor extends AbstractCommandExecutor<SignalPayload> {
     @Override
     public EmptyResult execute(SignalPayload signalPayload) {
         processAdminRuntime.signal(signalPayload);
-        
+
         return new EmptyResult(signalPayload);
     }
 }

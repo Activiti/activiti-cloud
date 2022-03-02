@@ -50,7 +50,7 @@ public class GraphQLSubscriptionSchemaBuilder {
             throw new RuntimeException(cause);
         }
         this.typeRegistry = new SchemaParser().parse(streamReader);
-        
+
         this.wiring = RuntimeWiring.newRuntimeWiring()
                                    .scalar(new ObjectScalar());
    }

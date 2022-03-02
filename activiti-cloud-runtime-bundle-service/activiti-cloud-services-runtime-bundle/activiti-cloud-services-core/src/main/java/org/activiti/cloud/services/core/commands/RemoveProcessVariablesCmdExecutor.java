@@ -30,7 +30,7 @@ public class RemoveProcessVariablesCmdExecutor extends AbstractCommandExecutor<R
     @Override
     public EmptyResult execute(RemoveProcessVariablesPayload removeProcessVariablesPayload) {
         processAdminRuntime.removeVariables(removeProcessVariablesPayload);
-        
+
         return new EmptyResult(removeProcessVariablesPayload);
     }
 }

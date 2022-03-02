@@ -30,13 +30,13 @@ import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 
 public class ReceiveMessagePayloadGroupProcessor extends AbstractMessageGroupProcessorHandler {
-    
+
     private final MessageGroupStore messageGroupStore;
 
     public ReceiveMessagePayloadGroupProcessor(MessageGroupStore messageGroupStore) {
         this.messageGroupStore = messageGroupStore;
     }
-    
+
     @Override
     protected Message<?> process(MessageGroup group) {
         Message<?> result = group.getMessages()
@@ -47,24 +47,24 @@ public class ReceiveMessagePayloadGroupProcessor extends AbstractMessageGroupPro
 
         messageGroupStore.removeMessagesFromGroup(group.getGroupId(),
                                                   result);
-        return buildOutputMessage(result);     
+        return buildOutputMessage(result);
     }
-    
-    
+
+
     protected Message<?> buildOutputMessage(Message<?> message) {
         ReceiveMessagePayload payload = ReceiveMessagePayloadTransformer.from(message);
-        
+
         return MessageBuilder.withPayload(payload)
                              .setHeader(MESSAGE_PAYLOAD_TYPE,
                                         ReceiveMessagePayload.class.getSimpleName())
                              .build();
     }
-    
+
     @Override
     protected boolean canProcess(MessageGroup group) {
         Collection<Message<?>> messages = group.getMessages();
-             
-        return messages.stream().anyMatch(MESSAGE_WAITING) 
+
+        return messages.stream().anyMatch(MESSAGE_WAITING)
                 && messages.stream().anyMatch(MESSAGE_SENT);
     }
 }

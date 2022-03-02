@@ -28,7 +28,7 @@ public class ProcessResumedEventConverter extends BaseEventToEntityConverter {
     public ProcessResumedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name();

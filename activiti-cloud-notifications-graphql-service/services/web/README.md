@@ -4,7 +4,7 @@ This service provides querying capabilities using GraphQL Schema generated at ru
 
 ## Approach
 
-The service provides GraphQL query endpoints with flexible criteria search expressions, paging and sorting. So an example query might be e.g. 
+The service provides GraphQL query endpoints with flexible criteria search expressions, paging and sorting. So an example query might be e.g.
 
     query {
       ProcessInstance(processInstanceId:1) {
@@ -19,7 +19,7 @@ The service provides GraphQL query endpoints with flexible criteria search expre
             value
           }
         }
-      } 
+      }
     }
 
 The query result will be in JSON format:
@@ -60,13 +60,13 @@ It supports querying for nested objects and nested collections by specifying the
 
 ## Database Support
 
-The implementation is using JPA EntityManager in as agnostic a way as available so that alternative databases could be used. 
+The implementation is using JPA EntityManager in as agnostic a way as available so that alternative databases could be used.
 
 The project relies on the open-source `graphql-jpa-query' module that provides configuration, discovery, schema generation, JPA data fetchers with type-safe JPA queries execution.
 
 ## Implementation Details
 
-The Activiti GraphQL Query leverages open-source 'graphql-jpa-query' library https://github.com/introproventures/graphql-jpa-query to do the heavy lifting of GraphQL schema generation and query execution. 
+The Activiti GraphQL Query leverages open-source 'graphql-jpa-query' library https://github.com/introproventures/graphql-jpa-query to do the heavy lifting of GraphQL schema generation and query execution.
 
 The following dependencies are introduced in `activiti-cloud-services-query-models` for GraphQL JPA Query Schema documentation support:
 
@@ -101,7 +101,7 @@ The schema builder will wrap each discovered entity into two query fields for ea
 - One that models the Entity directly using singular form, i.e. ProcessInstance or Task to query single instance by id.
 - One that wraps the Entity in a pagable query request with where criteria expression using Entity pluralized form, i.e. ProcessInstances or Tasks
 
-You can use singular query wrapper, if you need a single object as root of your query. 
+You can use singular query wrapper, if you need a single object as root of your query.
 
 For Example:
 
@@ -114,7 +114,7 @@ For Example:
           assignee
           status
         }
-      } 
+      }
     }
 
 Will return:
@@ -143,7 +143,7 @@ Query Wrapper with Where Criteria Expressions
 -------------------------------------
 This library supports flexible type safe criteria expressions with user-friendly SQL query syntax semantics using `where` arguments and `select` field to specify the entity graph query with entiy attribute names as a combination of logical expressions like OR, AND, EQ, NE, GT, GE, LT, LR, IN, NIN, IS_NULL, NOT_NULL.
 
-For example the following query will find all running process instances with completed tasks: 
+For example the following query will find all running process instances with completed tasks:
 
     query {
       ProcessInstances(where: {
@@ -160,7 +160,7 @@ For example the following query will find all running process instances with com
             assignee
             status
           }
-        } 
+        }
       }
     }
 
@@ -201,7 +201,7 @@ Reverse Query
 -------------
 You can execute an inverse query to fitler results with a join in many-to-one association with some limitations. If you do this, be aware that only static parameter binding are supported in `where` criteria expressions.
 
-For Example: 
+For Example:
 
     query {
       Tasks {
@@ -218,7 +218,7 @@ For Example:
             type
             value
           }
-        } 
+        }
       }
     }
 
@@ -278,7 +278,7 @@ Use plural query wrapper with Where Criteria Expressions to run complex queries 
             assignee
             status
           }
-        } 
+        }
       }
     }
 
@@ -315,7 +315,7 @@ The result will be:
         ]
       }
     }
-    
+
 Sorting
 -------
 
@@ -331,10 +331,10 @@ For Example:
           name(orderBy:DESC)
           assignee
           status
-        } 
+        }
       }
     }
-  
+
 Will Return:
 
     {
@@ -376,13 +376,13 @@ Will Return:
 
 Performance
 -----------
-The GraphQL JPA Query Data Fetcher implementation will build dynamic fetch graph in order to optimize number of queries executed against database and to avoid N+1 lazy loading problems. 
+The GraphQL JPA Query Data Fetcher implementation will build dynamic fetch graph in order to optimize number of queries executed against database and to avoid N+1 lazy loading problems.
 
 ## How to run the example
 
 Embedded GraphiQL browser (https://github.com/graphql/graphiql) is used for simple testing. It provides schema documentation browser, query builder with auto-completion support, as well as parameter bindings.
 
-Build and run provided Spring Boot Applicatiion class `org.activiti.cloud.services.query.graphql.example.Application` from IDE in the `activiti-cloud-services-query-graphql' module. 
+Build and run provided Spring Boot Applicatiion class `org.activiti.cloud.services.query.graphql.example.Application` from IDE in the `activiti-cloud-services-query-graphql' module.
 
 Navigate to http://localhost:8080/graphiql.html to load GraphiQL browser. The collapsed Docs panel can opened by clicking on the button in the upper right corner to expose current test schema models.
 
@@ -391,4 +391,3 @@ panel. If your query has variables, there is a minimized panel at the bottom lef
 type in your variables as a JSON string with quoted keys.
 
 ## Outstanding
-

@@ -24,18 +24,18 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskCreatedEventEntity;
 
 public class TaskCreatedEventConverter extends BaseEventToEntityConverter {
-    
+
     public TaskCreatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_CREATED.name();
     }
 
     @Override
-    protected TaskCreatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {      
+    protected TaskCreatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
         return new TaskCreatedEventEntity((CloudTaskCreatedEvent) cloudRuntimeEvent);
     }
 

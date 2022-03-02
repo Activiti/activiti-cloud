@@ -31,13 +31,13 @@ import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 
 public class StartMessagePayloadGroupProcessor extends AbstractMessageGroupProcessorHandler {
-    
+
     private final MessageGroupStore messageGroupStore;
 
     public StartMessagePayloadGroupProcessor(MessageGroupStore messageGroupStore) {
         this.messageGroupStore = messageGroupStore;
-    }    
-    
+    }
+
     @Override
     protected Collection<Message<?>> process(MessageGroup group) {
         Collection<Message<?>> result =group.getMessages()
@@ -51,24 +51,24 @@ public class StartMessagePayloadGroupProcessor extends AbstractMessageGroupProce
                      .sorted(MessageComparators.TIMESTAMP)
                      .map(this::buildOutputMessage)
                      .collect(Collectors.toList());
-        
+
     }
-    
+
     protected Message<?> buildOutputMessage(Message<?> message) {
         StartMessagePayload startPayload = StartMessagePayloadTransformer.from(message);
 
         return MessageBuilder.withPayload(startPayload)
-                             .setHeader(MESSAGE_PAYLOAD_TYPE, 
+                             .setHeader(MESSAGE_PAYLOAD_TYPE,
                                         StartMessagePayload.class.getSimpleName())
-                             .build();       
+                             .build();
     }
-    
+
     @Override
     protected boolean canProcess(MessageGroup group) {
         Collection<Message<?>> messages = group.getMessages();
-        
-        return messages.stream().anyMatch(START_MESSAGE_DEPLOYED) 
+
+        return messages.stream().anyMatch(START_MESSAGE_DEPLOYED)
                 && messages.stream().anyMatch(MESSAGE_SENT);
     }
-    
+
 }

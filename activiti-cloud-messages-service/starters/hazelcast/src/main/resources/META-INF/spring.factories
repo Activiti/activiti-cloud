@@ -1,3 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     org.activiti.cloud.starter.messages.hazelcast.HazelcastMessageStoreAutoConfiguration
-    

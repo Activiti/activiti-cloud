@@ -21,4 +21,4 @@ public interface IntegrationErrorHandler {
 
     void handleErrorMessage(ErrorMessage errorMessage);
 
-} 
+}

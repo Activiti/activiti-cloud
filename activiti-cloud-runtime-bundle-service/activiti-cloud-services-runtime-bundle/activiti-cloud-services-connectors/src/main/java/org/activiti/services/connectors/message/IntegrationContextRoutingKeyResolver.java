@@ -21,9 +21,9 @@ import org.activiti.cloud.services.events.message.AbstractMessageHeadersRoutingK
 import org.activiti.cloud.services.events.message.RuntimeBundleInfoMessageHeaders;
 
 public class IntegrationContextRoutingKeyResolver extends AbstractMessageHeadersRoutingKeyResolver {
-    
+
     private static final String INTEGRATION_CONTEXT = "integrationContext";
-    
+
     public final String[] HEADER_KEYS = {RuntimeBundleInfoMessageHeaders.SERVICE_NAME,
                                          RuntimeBundleInfoMessageHeaders.APP_NAME,
                                          IntegrationContextMessageHeaders.CONNECTOR_TYPE,
@@ -33,7 +33,7 @@ public class IntegrationContextRoutingKeyResolver extends AbstractMessageHeaders
     public String resolve(Map<String, Object> headers) {
         return build(headers, HEADER_KEYS);
     }
-    
+
     @Override
     public String getPrefix() {
         return INTEGRATION_CONTEXT;

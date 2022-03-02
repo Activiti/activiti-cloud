@@ -90,7 +90,7 @@ public class GraphQLSubscriptionSchemaProperties {
     public void setSubscriptionArgumentNames(String[] argumentNames) {
         this.subscriptionArgumentNames = argumentNames;
     }
-    
+
     public String getRelayHost() {
         return relayHost;
     }
@@ -122,6 +122,6 @@ public class GraphQLSubscriptionSchemaProperties {
     public void setClientPasscode(String relayPasscode) {
         this.clientPasscode = relayPasscode;
     }
-    
+
 
 }

@@ -42,7 +42,7 @@ public class BpmnMessageWaitingEventMessageProducer implements BPMNElementEventL
     @Override
     public void onEvent(BPMNMessageWaitingEvent event) {
         logger.debug("onEvent: {}", event);
-        
+
         Message<MessageEventPayload> message = messageBuilderFactory.create(event.getEntity())
                                                                     .withPayload(event.getEntity()
                                                                                       .getMessagePayload())

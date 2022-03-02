@@ -22,7 +22,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
 public class MessageTimestampComparator implements Comparator<Message<?>> {
-    
+
     @Override
     public int compare(Message<?> o1, Message<?> o2) {
         Long sequenceNumber1 = getTimestamp(o1);
@@ -30,7 +30,7 @@ public class MessageTimestampComparator implements Comparator<Message<?>> {
 
         return Long.compare(sequenceNumber1, sequenceNumber2);
     }
-    
+
     @Nullable
     public Long getTimestamp(Message<?> m) {
         Object value = m.getHeaders().get(MessageHeaders.TIMESTAMP);
@@ -39,6 +39,6 @@ public class MessageTimestampComparator implements Comparator<Message<?>> {
         }
         return (value instanceof Long ? (Long) value : Long.parseLong(value.toString()));
     }
-    
+
 
 }

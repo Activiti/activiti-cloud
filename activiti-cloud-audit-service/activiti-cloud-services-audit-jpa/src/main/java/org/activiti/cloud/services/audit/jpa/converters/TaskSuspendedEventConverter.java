@@ -28,7 +28,7 @@ public class TaskSuspendedEventConverter extends BaseEventToEntityConverter {
     public TaskSuspendedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name();

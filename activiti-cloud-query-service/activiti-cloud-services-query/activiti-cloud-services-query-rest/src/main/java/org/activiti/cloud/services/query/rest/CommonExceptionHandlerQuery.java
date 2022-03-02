@@ -37,4 +37,3 @@ public class CommonExceptionHandlerQuery {
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 }
-

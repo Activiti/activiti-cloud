@@ -63,7 +63,7 @@ public class ApplicationControllerIT {
 
     @MockBean
     private ApplicationRepository applicationRepository;
-    
+
     @MockBean
     private SecurityManager securityManager;
 

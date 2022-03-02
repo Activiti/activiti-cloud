@@ -21,4 +21,3 @@ insert into variable (create_time, execution_id, last_updated_time, name, proces
   (CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable6', '1', '4', 'String', 'value6'),
   (CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable7', '1', '5', 'String', 'value7'),
   (CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'initiator', '1', null, 'String', 'admin');
-

@@ -28,14 +28,14 @@ public class TaskCandidateUserAddedEventConverter extends BaseEventToEntityConve
     public TaskCandidateUserAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
     }
-    
+
     @Override
     public String getSupportedEvent() {
         return TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name();
     }
 
     @Override
-    public TaskCandidateUserAddedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {                
+    public TaskCandidateUserAddedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
         return new TaskCandidateUserAddedEventEntity((CloudTaskCandidateUserAddedEvent) cloudRuntimeEvent);
     }
 

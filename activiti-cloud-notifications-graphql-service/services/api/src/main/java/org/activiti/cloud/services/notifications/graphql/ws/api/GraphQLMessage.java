@@ -37,11 +37,11 @@ public class GraphQLMessage {
 
     GraphQLMessage() {
 	}
-	
+
     public GraphQLMessage(String id, GraphQLMessageType type) {
         this(id, type, Collections.emptyMap());
     }
-	
+
 	public GraphQLMessage(String id, GraphQLMessageType type, Map<String, Object> payload) {
 		super();
 		this.payload = payload;

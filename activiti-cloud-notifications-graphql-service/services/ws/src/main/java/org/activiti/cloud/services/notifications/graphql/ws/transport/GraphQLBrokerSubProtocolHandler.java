@@ -126,12 +126,12 @@ public class GraphQLBrokerSubProtocolHandler implements SubProtocolHandler, Appl
 				boolean isConnect = GraphQLMessageType.CONNECTION_INIT.equals(sourceMessage.getType());
 				if (isConnect) {
 					this.stats.incrementConnectCount();
-					
+
                     // Let's inject connectionParams into headers
 					Optional.ofNullable(sourceMessage.getPayload())
 					    .ifPresent(map -> {
 					        map.entrySet().forEach(e-> {
-        					   headerAccessor.setHeader(e.getKey(), e.getValue());               
+        					   headerAccessor.setHeader(e.getKey(), e.getValue());
 					        });
 					    });
 
@@ -139,7 +139,7 @@ public class GraphQLBrokerSubProtocolHandler implements SubProtocolHandler, Appl
 	                Integer kaInterval = Optional.ofNullable(headerAccessor.getHeader(KA_INTERVAL_HEADER))
 	                                             .map(v -> Integer.parseInt(v.toString()))
 	                                             .orElse(DEFAULT_KA_INTERVAL);
-    	                
+
 	                headerAccessor.setHeader(StompHeaderAccessor.HEART_BEAT_HEADER, new long[] {0, kaInterval});
 				}
 				else if (GraphQLMessageType.CONNECTION_TERMINATE.equals(sourceMessage.getType())) {
@@ -362,8 +362,8 @@ public class GraphQLBrokerSubProtocolHandler implements SubProtocolHandler, Appl
         public Integer errorCount() {
         	return this.error.get();
         }
-    	
-        
+
+
 		public void incrementConnectCount() {
 			this.connect.incrementAndGet();
 		}
