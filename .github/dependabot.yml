@@ -9,3 +9,17 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "org.activiti.cloud:activiti-cloud-audit-dependencies"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-api-dependencies"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-parent"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-build-parent"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-build-dependencies-parent"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-connectors-dependencies"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-messages-dependencies"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-modeling-dependencies"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-query-dependencies"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-acceptance-tests-dependencies"
+      - dependency-name: "org.activiti.cloud:activiti-cloud-service-common-dependencies"
