@@ -90,6 +90,50 @@
       }
     },
     {
+      "id": "5f682999-d11d-4a42-bc42-86b7e6752222",
+      "createdTimestamp": 1528383051279,
+      "username": "testActivitiAdmin",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "testActivitiAdmin",
+      "lastName": "testActivitiAdmin",
+      "email": "testActivitiAdmin@test.com",
+      "credentials": [
+        {
+          "type": "password",
+          "hashedSaltedValue": "05tcUaYgNzF71eB1HKeaH9IC7Do7JUig2JNLSXiADgLx0YfyOPnL5t7TuZ+Rxj3ttsyLkWqp0TM0UbLWGOvuLQ==",
+          "salt": "xZovRbq5QU0Cm5aQWEW2bg==",
+          "hashIterations": 27500,
+          "counter": 0,
+          "algorithm": "pbkdf2-sha256",
+          "digits": 0,
+          "period": 0,
+          "createdDate": 1522141994128,
+          "config": {}
+        }
+      ],
+      "disableableCredentialTypes": [
+        "password"
+      ],
+      "requiredActions": [],
+      "realmRoles": [
+        "uma_authorization",
+        "ACTIVITI_ADMIN",
+        "offline_access"
+      ],
+      "clientRoles": {
+        "account": [
+          "manage-account",
+          "view-profile"
+        ]
+      },
+      "notBefore": 0,
+      "groups": [
+        "/testgroup"
+      ]
+    },
+    {
       "username": "hradmin",
       "enabled": true,
       "firstName": "HR",
@@ -190,6 +234,50 @@
         "uma_authorization",
         "offline_access"
       ],
+      "groups": [
+        "/testgroup"
+      ]
+    },
+    {
+      "id": "331a12d1-766e-4897-b0a8-309ae5caeb12",
+      "createdTimestamp": 1498557164913,
+      "username": "testdevops",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "test",
+      "lastName": "devops",
+      "email": "testdevops@test.com",
+      "credentials": [
+        {
+          "type": "password",
+          "hashedSaltedValue": "IKMsbXtjX7K+2h4gvVPtYCVSm4T73DqYs8m1sS2+VMw/IBWL/KOxYMl/Q1GEyYZWHbih7QfNsIOGA/Kv8+fC2g==",
+          "salt": "OsGQRYz1p7VsRdCOYBCb0Q==",
+          "hashIterations": 20000,
+          "counter": 0,
+          "algorithm": "pbkdf2",
+          "digits": 0,
+          "period": 0,
+          "createdDate": 1498566963313,
+          "config": {}
+        }
+      ],
+      "disableableCredentialTypes": [
+        "password"
+      ],
+      "requiredActions": [],
+      "realmRoles": [
+        "ACTIVITI_DEVOPS",
+        "uma_authorization",
+        "offline_access"
+      ],
+      "clientRoles": {
+        "account": [
+          "manage-account",
+          "view-profile"
+        ]
+      },
+      "notBefore": 0,
       "groups": [
         "/testgroup"
       ]
