@@ -94,7 +94,7 @@ public class TaskBuilder {
         when(taskEntity.getCandidateGroups()).thenReturn(candidateGroups);
         return this;
     }
-    
+
     public TaskBuilder withOwner(String owner) {
         when(taskEntity.getOwner()).thenReturn(owner);
         return this;

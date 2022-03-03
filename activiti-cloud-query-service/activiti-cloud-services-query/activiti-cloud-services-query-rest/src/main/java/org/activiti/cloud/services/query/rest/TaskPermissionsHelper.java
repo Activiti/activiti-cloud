@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskPermissionsHelper {
-    
+
     private final SecurityManager securityManager;
 
     private final TaskControllerHelper taskControllerHelper;
@@ -40,17 +40,17 @@ public class TaskPermissionsHelper {
             List<String> userGroups = securityManager.getAuthenticatedUserGroups();
             List<TaskPermissions> permissions = new ArrayList<>();
             if(!canUserViewTask(task)) return;
-            
+
             permissions.add(TaskPermissions.VIEW);
-            
+
             if(canUserClaimTask(task, userId, userGroups)) {
                 permissions.add(TaskPermissions.CLAIM);
             }
-            
+
             if(canUserReleaseTask(task, userId)) {
                 permissions.add(TaskPermissions.RELEASE);
             }
-            
+
             if(canUserUpdateTask(task, userId)) {
                 permissions.add(TaskPermissions.UPDATE);
             }
@@ -58,11 +58,11 @@ public class TaskPermissionsHelper {
             task.setPermissions(permissions);
         }
     }
-    
+
     private boolean canUserViewTask(TaskEntity task) {
         return taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(task.getId()));
     }
-    
+
     private boolean canUserClaimTask(TaskEntity task, String userId, List<String> userGroups) {
         return !isTaskAssigned(task) && isUserCandidate(task, userId, userGroups);
     }
@@ -77,15 +77,15 @@ public class TaskPermissionsHelper {
         boolean isUserOwner = task.getOwner() != null && task.getOwner().equals(userId);
         return isUserAssignee(task, userId) || isUserOwner;
     }
-    
+
     private boolean isUserCandidate(TaskEntity task, String userId, List<String> userGroups) {
         boolean isCandidateUser = task.getCandidateUsers() != null && task.getCandidateUsers().contains(userId);
         boolean isCandidateGroup = task.getCandidateGroups() != null &&
                 task.getCandidateGroups().stream().anyMatch(userGroups::contains);
         return  isCandidateUser || isCandidateGroup;
     }
-    
-    
+
+
     private boolean isUserAssignee(TaskEntity task, String userId) {
         return isTaskAssigned(task) && task.getAssignee().equals(userId);
     }

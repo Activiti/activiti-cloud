@@ -21,13 +21,13 @@ public interface QueryCloudTask extends CloudTask{
     public String getProcessDefinitionName();
 
     List<TaskPermissions> getPermissions();
-    
+
     void setPermissions(List<TaskPermissions> User);
 
     enum TaskPermissions {
         VIEW,
         CLAIM,
         RELEASE,
-        UPDATE;
+        UPDATE
     }
 }
