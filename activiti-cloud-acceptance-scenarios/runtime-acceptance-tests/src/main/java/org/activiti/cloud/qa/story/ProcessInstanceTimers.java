@@ -32,6 +32,7 @@ import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
+import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -46,6 +47,9 @@ public class ProcessInstanceTimers {
 
     @Steps
     private ProcessQuerySteps processQuerySteps;
+
+    @Steps
+    private ProcessQueryAdminSteps processQueryAdminSteps;
 
     @Steps
     private AuditSteps auditSteps;
@@ -120,7 +124,7 @@ public class ProcessInstanceTimers {
                 ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
 
-    @Then("the query returns $number processes called $processName with timeout $timeoutSeconds seconds")
+    @Then("the admin query returns $number processes called $processName with timeout $timeoutSeconds seconds")
     public void checkProcessByProcessDefintionKey(long number,
                                                   String processName,
                                                   long timeoutSeconds) throws IOException, InterruptedException {
@@ -130,7 +134,7 @@ public class ProcessInstanceTimers {
 
         await().atMost(timeoutSeconds,
                        TimeUnit.SECONDS).untilAsserted(() -> {
-                PagedModel<CloudProcessInstance> processInstances = processQuerySteps
+                PagedModel<CloudProcessInstance> processInstances = processQueryAdminSteps
                                                                        .getProcessInstancesByProcessDefinitionKey(processDefinitionKeyMatcher(processName));
 
                 assertThat(processInstances).isNotEmpty();

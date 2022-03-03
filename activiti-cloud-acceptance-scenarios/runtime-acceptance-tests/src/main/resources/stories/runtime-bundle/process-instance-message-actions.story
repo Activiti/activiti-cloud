@@ -39,7 +39,7 @@ And messages: the user gets internal server error when starting a process with m
 
 Scenario: execute processes using cloud native message events with businessKey correlation
 Given messages: session timeout of 5 seconds
-And the user is authenticated as hruser
+And the user is authenticated as testadmin
 And messages: generated unique sessionVariable called businessId
 When messages: the user sends a start message named StartCloudMessage1 with businessKey value of businessId session variable
 Then messages: MESSAGE_RECEIVED event is emitted for the message 'StartCloudMessage1'

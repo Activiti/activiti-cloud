@@ -35,6 +35,7 @@ import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
+import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -52,6 +53,9 @@ public class ProcessInstanceMessages {
 
     @Steps
     private ProcessQuerySteps processQuerySteps;
+
+    @Steps
+    private ProcessQueryAdminSteps processQueryAdminSteps;
 
     @Steps
     private AuditSteps auditSteps;
@@ -163,7 +167,7 @@ public class ProcessInstanceMessages {
         await()
                .atMost(timeoutSeconds, TimeUnit.SECONDS)
                .untilAsserted(() -> {
-                   Collection<CloudProcessInstance> result = processQuerySteps.getProcessInstancesByProcessDefinitionKey(processDefinitionKey)
+                   Collection<CloudProcessInstance> result = processQueryAdminSteps.getProcessInstancesByProcessDefinitionKey(processDefinitionKey)
                                                                     .getContent()
                                                                     .stream()
                                                                     .filter(it -> businessKey.equals(it.getBusinessKey()))
