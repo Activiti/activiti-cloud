@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -22,8 +23,10 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
@@ -58,6 +61,8 @@ public class ProcessInstanceController {
 
     private final ProcessInstanceRepository processInstanceRepository;
 
+    private final TaskRepository taskRepository;
+
     private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
     private AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
@@ -74,6 +79,7 @@ public class ProcessInstanceController {
 
     @Autowired
     public ProcessInstanceController(ProcessInstanceRepository processInstanceRepository,
+                                     TaskRepository taskRepository,
                                      ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
                                      AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
                                      ProcessInstanceRestrictionService processInstanceRestrictionService,
@@ -81,6 +87,7 @@ public class ProcessInstanceController {
                                      SecurityPoliciesManager securityPoliciesApplicationService,
                                      SecurityManager securityManager) {
         this.processInstanceRepository = processInstanceRepository;
+        this.taskRepository = taskRepository;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.processInstanceRestrictionService = processInstanceRestrictionService;
@@ -151,6 +158,26 @@ public class ProcessInstanceController {
     private boolean canRead(ProcessInstanceEntity processInstanceEntity) {
         return securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
                                                           processInstanceEntity.getServiceName()) &&
-                securityManager.getAuthenticatedUserId().equals(processInstanceEntity.getInitiator());
+               (securityManager.getAuthenticatedUserId().equals(processInstanceEntity.getInitiator()) ||
+                   isInvolvedInATask(processInstanceEntity.getId()));
+    }
+
+    private boolean isInvolvedInATask(String processInstanceId) {
+        String authenticatedUserId = securityManager.getAuthenticatedUserId();
+        List<String> authenticatedUserGroups = securityManager.getAuthenticatedUserGroups();
+
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+
+        BooleanExpression taskInvolved = taskEntity.assignee.eq(authenticatedUserId)
+            .or(taskEntity.owner.eq(authenticatedUserId))
+            .or(taskEntity.taskCandidateUsers.any().userId.eq(authenticatedUserId));
+
+        if (authenticatedUserGroups != null && authenticatedUserGroups.size() > 0) {
+            taskInvolved = taskInvolved.or(taskEntity.taskCandidateGroups.any().groupId.in(authenticatedUserGroups));
+        }
+
+        Predicate whereExpression = taskEntity.processInstanceId.eq(processInstanceId).and(taskInvolved);
+
+        return taskRepository.exists(whereExpression);
     }
 }
