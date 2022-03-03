@@ -33,10 +33,12 @@ import org.activiti.services.connectors.message.IntegrationContextMessageBuilder
 import org.activiti.services.test.DelegateExecutionBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -44,25 +46,21 @@ import org.springframework.messaging.MessageChannel;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationRequestSenderTest {
 
     private static final String MY_PARENT_PROC_ID = "my-parent-proc-id";
-    private static final String MY_PROC_DEF_KEY = "my-proc-def-key";
     private static final String SERVICE_VERSION = "serviceVersion";
     private static final String SERVICE_TYPE = "serviceType";
     private static final String SPRING_APP_NAME = "springAppName";
     private static final String CONNECTOR_TYPE = "payment";
-    private static final String EXECUTION_ID = "execId";
     private static final String ROOT_PROC_INST_ID = "rootProcInstId";
     private static final String PROC_INST_ID = "procInstId";
     private static final String PROC_DEF_ID = "procDefId";
     private static final String BUSINESS_KEY = "my-business-key";
     private static final String INTEGRATION_CONTEXT_ID = "intContextId";
-    private static final String FLOW_NODE_ID = "myServiceTask";
     private static final String APP_NAME = "appName";
-    private static final int PROC_DEF_VERSION = 1;
 
     private IntegrationRequestSender integrationRequestSender;
 
@@ -105,8 +103,6 @@ public class IntegrationRequestSenderTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         configureDeploymentManager();
         messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
 
@@ -117,7 +113,6 @@ public class IntegrationRequestSenderTest {
 
         configureProperties();
         configureExecution();
-        configureIntegrationContext();
 
         when(runtimeBundleProperties.getServiceFullName()).thenReturn(APP_NAME);
 
@@ -138,16 +133,6 @@ public class IntegrationRequestSenderTest {
 
         given(processEngineConfiguration.getDeploymentManager()).willReturn(deploymentManager);
         given(deploymentManager.findDeployedProcessDefinitionById(PROC_DEF_ID)).willReturn(processDefinition);
-
-        given(processDefinition.getId()).willReturn(PROC_DEF_ID);
-        given(processDefinition.getKey()).willReturn(MY_PROC_DEF_KEY);
-        given(processDefinition.getVersion()).willReturn(PROC_DEF_VERSION);
-    }
-
-    private void configureIntegrationContext() {
-        when(integrationContextEntity.getExecutionId()).thenReturn(EXECUTION_ID);
-        when(integrationContextEntity.getId()).thenReturn(INTEGRATION_CONTEXT_ID);
-        when(integrationContextEntity.getFlowNodeId()).thenReturn(FLOW_NODE_ID);
     }
 
     private void configureExecution() {
@@ -160,15 +145,12 @@ public class IntegrationRequestSenderTest {
                                                     .withRootProcessInstanceId(ROOT_PROC_INST_ID)
                                                     .withProcessInstanceId(PROC_INST_ID)
                                                     .withBusinessKey(BUSINESS_KEY)
-                                                    .withProcessDefinitionKey(MY_PROC_DEF_KEY)
-                                                    .withProcessDefinitionVersion(PROC_DEF_VERSION)
                                                     .withParentProcessInstanceId(MY_PARENT_PROC_ID)
                                                     .build();
     }
 
     private void configureProperties() {
         when(runtimeBundleProperties.getServiceFullName()).thenReturn(APP_NAME);
-        when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
     }
 
     @Test

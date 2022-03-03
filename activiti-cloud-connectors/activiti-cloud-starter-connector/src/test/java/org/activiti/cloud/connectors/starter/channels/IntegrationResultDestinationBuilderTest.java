@@ -18,15 +18,16 @@ package org.activiti.cloud.connectors.starter.channels;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationResultDestinationBuilderTest {
 
     @InjectMocks
@@ -34,13 +35,6 @@ public class IntegrationResultDestinationBuilderTest {
 
     @Mock
     private ConnectorProperties connectorProperties;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        initMocks(this);
-
-        when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
-    }
 
     @Test
     public void shouldResolveDestination() {
@@ -52,6 +46,7 @@ public class IntegrationResultDestinationBuilderTest {
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
+        when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
 
         // when
         String result = subject.buildDestination(integrationRequest);

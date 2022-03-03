@@ -22,10 +22,11 @@ import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.UUID;
@@ -34,8 +35,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessStartedEventHandlerTest {
 
     @InjectMocks
@@ -43,11 +44,6 @@ public class ProcessStartedEventHandlerTest {
 
     @Mock
     private EntityManager entityManager;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUpdateProcessInstanceStatusToRunningAndUpdateInstanceName() {
@@ -97,7 +93,7 @@ public class ProcessStartedEventHandlerTest {
         //given
         CloudProcessStartedEvent event = buildProcessStartedEvent();
 
-        given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(null);
+        given(entityManager.find(ProcessInstanceEntity.class, event.getProcessInstanceId())).willReturn(null);
 
         //then
         //when

@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
@@ -56,7 +55,7 @@ public class RestrictProcessInstanceEntityQueryIT {
     private UserGroupManager userGroupManager;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("15");
         processInstanceEntity.setName("name");
@@ -64,13 +63,10 @@ public class RestrictProcessInstanceEntityQueryIT {
         processInstanceEntity.setProcessDefinitionKey("defKey1");
         processInstanceEntity.setServiceName("test-cmd-endpoint");
         processInstanceRepository.save(processInstanceEntity);
-
-        initMocks(this);
     }
 
     @Test
-    public void shouldGetProcessInstancesWhenPermitted() throws Exception {
-
+    public void shouldGetProcessInstancesWhenPermitted() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
         Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(null, SecurityPolicyAccess.READ);
@@ -78,9 +74,8 @@ public class RestrictProcessInstanceEntityQueryIT {
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
 
-
     @Test
-    public void shouldGetProcessInstancesWhenUserPermittedByWildcard() throws Exception {
+    public void shouldGetProcessInstancesWhenUserPermittedByWildcard() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("16");
         processInstanceEntity.setName("name");
@@ -98,7 +93,7 @@ public class RestrictProcessInstanceEntityQueryIT {
 
 
     @Test
-    public void shouldGetProcessInstancesWhenGroupPermittedByWildcard() throws Exception {
+    public void shouldGetProcessInstancesWhenGroupPermittedByWildcard() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("17");
         processInstanceEntity.setName("name");
@@ -116,7 +111,7 @@ public class RestrictProcessInstanceEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetProcessInstancesWhenPolicyNotForUser() throws Exception {
+    public void shouldNotGetProcessInstancesWhenPolicyNotForUser() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("18");
         processInstanceEntity.setName("name");
@@ -141,7 +136,7 @@ public class RestrictProcessInstanceEntityQueryIT {
     }
 
     @Test
-    public void shouldMatchAppNameCaseInsensitiveIgnoringHyphens() throws Exception {
+    public void shouldMatchAppNameCaseInsensitiveIgnoringHyphens() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("19");
         processInstanceEntity.setName("name");
@@ -176,7 +171,7 @@ public class RestrictProcessInstanceEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetProcessInstancesWhenNotPermitted() throws Exception {
+    public void shouldNotGetProcessInstancesWhenNotPermitted() {
 
         Predicate predicate = QProcessInstanceEntity.processInstanceEntity.id.isNotNull();
 
@@ -189,7 +184,7 @@ public class RestrictProcessInstanceEntityQueryIT {
 
 
     @Test
-    public void shouldGetProcessInstancesWhenMatchesFullServiceName() throws Exception {
+    public void shouldGetProcessInstancesWhenMatchesFullServiceName() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("21");
         processInstanceEntity.setName("name");
@@ -204,4 +199,5 @@ public class RestrictProcessInstanceEntityQueryIT {
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
+
 }

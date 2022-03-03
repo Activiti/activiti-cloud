@@ -17,16 +17,17 @@ package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class VariableValueJsonConverterTest {
 
     @InjectMocks
@@ -37,11 +38,6 @@ public class VariableValueJsonConverterTest {
 
     private static final VariableValue<Integer> ENTITY_REPRESENTATION = new VariableValue<>(10);
     private static final String JSON_REPRESENTATION = "{\"value\": 10}";
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void convertToDatabaseColumnShouldConvertToJson() throws Exception {

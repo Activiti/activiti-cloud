@@ -18,10 +18,11 @@ package org.activiti.cloud.alfresco.argument.resolver;
 import java.util.Collections;
 
 import org.activiti.test.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
@@ -33,8 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class AlfrescoPageArgumentMethodResolverTest {
 
     @InjectMocks
@@ -45,11 +46,6 @@ public class AlfrescoPageArgumentMethodResolverTest {
 
     @Mock
     private PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
 
     @Test
     public void supportsParameterShouldReturnTrueWhenItsAPageable() throws Exception {
@@ -88,8 +84,6 @@ public class AlfrescoPageArgumentMethodResolverTest {
         ModelAndViewContainer modelAndViewContainer = mock(ModelAndViewContainer.class);
 
         NativeWebRequest webRequest = mock(NativeWebRequest.class);
-        given(webRequest.getParameterMap()).willReturn(Collections.singletonMap("skipCount",
-                                                                                new String[]{"40"}));
         WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
 
         Pageable basePageable = mock(Pageable.class);

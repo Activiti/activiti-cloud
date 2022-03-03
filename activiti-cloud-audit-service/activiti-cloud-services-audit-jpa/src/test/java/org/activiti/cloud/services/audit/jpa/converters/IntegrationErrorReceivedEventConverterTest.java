@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
@@ -25,17 +24,15 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorRec
 import org.activiti.cloud.services.audit.jpa.events.IntegrationErrorReceivedEventEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationErrorReceivedEventConverterTest {
 
     @InjectMocks
     private IntegrationErrorReceivedEventConverter converter;
-
-    @BeforeEach
-    void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void createEventEntity_should_setErrorRelatedProperties() {

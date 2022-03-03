@@ -19,9 +19,10 @@ import org.activiti.cloud.services.metadata.MetadataProperties;
 import org.activiti.cloud.services.metadata.MetadataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,8 +30,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class MetadataServiceTest {
-
 
     @InjectMocks
     private MetadataService metadataService;
@@ -38,30 +39,23 @@ public class MetadataServiceTest {
     @Mock
     private MetadataProperties metadataProperties;
 
-
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
 
         HashMap<String,String> application = new HashMap<>();
         application.put("name","app");
         application.put("version","1");
 
-
         HashMap<String,String> service = new HashMap<>();
         service.put("name","rb");
         service.put("version","2");
 
-
         when(metadataProperties.getApplication()).thenReturn(application);
         when(metadataProperties.getService()).thenReturn(service);
-
     }
 
-
-
     @Test
-    public void shouldGetMetaData() throws Exception {
+    public void shouldGetMetaData() {
 
         Map<String,String> metaData = metadataService.getMetadata();
 

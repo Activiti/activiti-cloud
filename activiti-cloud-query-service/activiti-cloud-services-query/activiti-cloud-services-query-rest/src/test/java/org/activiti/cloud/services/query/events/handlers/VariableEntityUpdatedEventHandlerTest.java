@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
@@ -25,12 +24,14 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEvent
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.test.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class VariableEntityUpdatedEventHandlerTest {
 
     @InjectMocks
@@ -41,11 +42,6 @@ public class VariableEntityUpdatedEventHandlerTest {
 
     @Mock
     private TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUseProcessVariableUpdateHandlerWhenNoTaskId() {

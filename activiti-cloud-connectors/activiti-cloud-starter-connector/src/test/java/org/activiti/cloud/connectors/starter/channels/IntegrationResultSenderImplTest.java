@@ -17,20 +17,21 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationResultSenderImplTest {
 
     @InjectMocks
@@ -42,13 +43,8 @@ public class IntegrationResultSenderImplTest {
     @Mock
     private MessageChannel messageChannel;
 
-    @BeforeEach
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
-
     @Test
-    public void sendShouldSendMessageBasedOnTheTargetApplication() throws Exception {
+    public void sendShouldSendMessageBasedOnTheTargetApplication() {
         //given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
@@ -70,4 +66,5 @@ public class IntegrationResultSenderImplTest {
         //then
         verify(messageChannel).send(message);
     }
+
 }

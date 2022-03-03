@@ -21,16 +21,17 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.web.context.request.NativeWebRequest;
 
+@ExtendWith(MockitoExtension.class)
 public class VariableSearchArgumentResolverTest {
 
     private static final String VARIABLES_NAME_KEY = "variables.name";
@@ -42,11 +43,6 @@ public class VariableSearchArgumentResolverTest {
 
     @Mock
     private ConversionService conversionService;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void supportsParameter_should_returnTrue_when_itsVariableSearch() {

@@ -15,19 +15,18 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityVariableEntityUpdatedEventHandlerTest {
 
     @InjectMocks
@@ -35,12 +34,6 @@ public class TaskEntityVariableEntityUpdatedEventHandlerTest {
 
     @Mock
     private TaskVariableUpdater variableUpdater;
-
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUpdateVariableValue() {

@@ -17,7 +17,6 @@ package org.activiti.cloud.services.events.converter;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.MessageSubscription;
@@ -38,11 +37,13 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNMessageSentEvent;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class ToCloudProcessRuntimeMessageEventsConverterTest {
 
     @InjectMocks
@@ -50,11 +51,6 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void shouldConvertBPMNMessageSentEventToCloudBPMNMessageSentEvent() {

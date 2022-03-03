@@ -34,10 +34,11 @@ import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivestreams.Subscription;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -47,6 +48,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 
+@ExtendWith(MockitoExtension.class)
 public class GraphQLBrokerChannelSubscriberTest {
 
     private GraphQLBrokerChannelSubscriber testSubject;
@@ -62,9 +64,7 @@ public class GraphQLBrokerChannelSubscriberTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        Message<GraphQLMessage> startMessage = startMessage("operationId", "sessionId");
+        Message<GraphQLMessage> startMessage = startMessage("operationId");
 
         this.testSubject = new GraphQLBrokerChannelSubscriber(startMessage, "operationId", messageChannel, 1000, 1);
     }
@@ -138,8 +138,8 @@ public class GraphQLBrokerChannelSubscriberTest {
 
     }
 
-    private Message<GraphQLMessage> startMessage(String operationId, String sessionId) {
-        SimpMessageHeaderAccessor headerAccessor = simpHeaderAccessor(mockWebSocketSession(sessionId));
+    private Message<GraphQLMessage> startMessage(String operationId) {
+        SimpMessageHeaderAccessor headerAccessor = simpHeaderAccessor(mockWebSocketSession());
 
         Map<String, Object> json = new HashMap<>();
         json.put("query", "{}");
@@ -152,9 +152,8 @@ public class GraphQLBrokerChannelSubscriberTest {
         return MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
     }
 
-    private WebSocketSession mockWebSocketSession(String sessionId) {
+    private WebSocketSession mockWebSocketSession() {
         Session nativeSession = mock(Session.class);
-        when(nativeSession.getId()).thenReturn(sessionId);
         when(nativeSession.getUserPrincipal()).thenReturn(mock(Principal.class));
 
         StandardWebSocketSession wsSession = new StandardWebSocketSession(null,
@@ -170,7 +169,6 @@ public class GraphQLBrokerChannelSubscriberTest {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 
         headerAccessor.setDestination("/destination");
-        headerAccessor.setSessionId(session.getId());
         headerAccessor.setSessionAttributes(session.getAttributes());
         headerAccessor.setUser(session.getPrincipal());
         headerAccessor.setLeaveMutable(true);

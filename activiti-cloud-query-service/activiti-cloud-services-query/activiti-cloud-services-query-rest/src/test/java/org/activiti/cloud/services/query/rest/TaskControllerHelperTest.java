@@ -19,7 +19,6 @@ package org.activiti.cloud.services.query.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.querydsl.core.types.Predicate;
 import java.util.Collections;
@@ -32,15 +31,17 @@ import org.activiti.cloud.services.query.model.VariableValue;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
+@ExtendWith(MockitoExtension.class)
 public class TaskControllerHelperTest {
 
     @InjectMocks
@@ -60,11 +61,6 @@ public class TaskControllerHelperTest {
 
     @Mock
     private PagedModel<EntityModel<QueryCloudTask>> cloudTaskPagedModel;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void findAll_should_useFindByVariableNameAndValue_when_variableSearchIsSet() {

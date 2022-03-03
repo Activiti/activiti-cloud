@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
@@ -40,7 +39,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.Arrays;
 import java.util.UUID;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.main.banner-mode=off")
 @EnableAutoConfiguration
 public class RestrictTaskEntityQueryIT {
 
@@ -64,7 +63,6 @@ public class RestrictTaskEntityQueryIT {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         taskRepository.deleteAll();

@@ -82,11 +82,6 @@ public class DelegateExecutionBuilder {
             return this;
         }
 
-        public DelegateExecutionBuilder withProcessDefinitionVersion(Integer processDefinitionVersion) {
-            when(processInstance.getProcessDefinitionVersion()).thenReturn(processDefinitionVersion);
-            return this;
-        }
-
         public DelegateExecutionBuilder withParentProcessInstanceId(String parentProcessInstanceId) {
             when(processInstance.getParentProcessInstanceId()).thenReturn(parentProcessInstanceId);
             return this;

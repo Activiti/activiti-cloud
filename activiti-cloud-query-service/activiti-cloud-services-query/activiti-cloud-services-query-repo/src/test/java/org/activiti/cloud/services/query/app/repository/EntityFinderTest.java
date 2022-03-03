@@ -19,17 +19,18 @@ import java.util.Optional;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class EntityFinderTest {
 
     @InjectMocks
@@ -37,11 +38,6 @@ public class EntityFinderTest {
 
     @Mock
     private ProcessInstanceRepository repository;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
 
     @Test
     public void findByIdShouldReturnResultWhenIsPresent() throws Exception {

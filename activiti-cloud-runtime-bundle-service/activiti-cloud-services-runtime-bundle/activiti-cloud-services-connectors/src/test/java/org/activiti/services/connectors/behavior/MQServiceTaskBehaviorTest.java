@@ -23,26 +23,28 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class MQServiceTaskBehaviorTest {
 
     private static final String CONNECTOR_TYPE = "payment";
@@ -51,7 +53,6 @@ public class MQServiceTaskBehaviorTest {
     private static final String PROC_DEF_ID = "procDefId";
     private static final String FLOW_NODE_ID = "flowNodeId";
     private static final String INTEGRATION_CONTEXT_ID = "entityId";
-    private static final String APP_NAME = "myApp";
 
     private MQServiceTaskBehavior behavior;
 
@@ -63,9 +64,6 @@ public class MQServiceTaskBehaviorTest {
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
-
-    @Mock
-    private ApplicationContext applicationContext;
 
     @Mock
     private IntegrationContextBuilder integrationContextBuilder;
@@ -87,9 +85,6 @@ public class MQServiceTaskBehaviorTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
-        when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
-
         behavior = spy(new MQServiceTaskBehavior(integrationContextManager,
                                                  eventPublisher,
                                                  integrationContextBuilder,
@@ -123,23 +118,22 @@ public class MQServiceTaskBehaviorTest {
                 .withId(EXECUTION_ID)
                 .withProcessInstanceId(PROC_INST_ID)
                 .withProcessDefinitionId(PROC_DEF_ID)
-                .withServiceTask(serviceTask)
                 .withFlowNodeId(FLOW_NODE_ID)
                 .build();
-        given(runtimeBundleProperties.getServiceFullName()).willReturn(APP_NAME);
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
         given(integrationContextManager.create()).willReturn(entity);
 
-        given(applicationContext.containsBean(CONNECTOR_TYPE)).willReturn(false);
-
         IntegrationContext integrationContext = mock(IntegrationContext.class);
         given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+        when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
 
         //when
         behavior.execute(execution);
 
         //then
+        ((ExecutionEntity) execution).getProcessInstance();
+
         assertThat(entity)
                 .hasExecutionId(EXECUTION_ID)
                 .hasProcessDefinitionId(PROC_DEF_ID)
