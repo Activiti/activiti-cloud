@@ -45,6 +45,7 @@ import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
+import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,10 +89,13 @@ public class QueryProcessInstancesEntityIT {
 
     private ProcessInstanceEventContainedBuilder processInstanceBuilder;
 
+    private TaskEventContainedBuilder taskEventBuilder;
+
     @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
+        taskEventBuilder = new TaskEventContainedBuilder(eventsAggregator);
         identityTokenProducer.setTestUser("testuser");
     }
 
@@ -620,6 +624,54 @@ public class QueryProcessInstancesEntityIT {
 
         shouldGetProcessInstance(processInstanceCurrentUserInitiator.getId());
         shouldNotGetProcessInstance(processInstanceInitiatedByUser1.getId());
+    }
+
+    @Test
+    public void shouldGetProcessInstanceWhenCurrentUserIsTaskAssignee() {
+        ProcessInstance runningProcessInstance = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("auser", "randomuser");
+
+        taskEventBuilder.anAssignedTask("ATask", "testuser", runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        shouldGetProcessInstance(runningProcessInstance.getId());
+    }
+
+    @Test
+    public void shouldGetProcessInstanceWhenCurrentUserIsTaskCandidateUser() {
+        ProcessInstance runningProcessInstance = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("auser", "randomuser");
+
+        taskEventBuilder.aTaskWithUserCandidate("ATask", "testuser", runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        shouldGetProcessInstance(runningProcessInstance.getId());
+    }
+
+    @Test
+    public void shouldGetProcessInstanceWhenCurrentUserIsMemberOfTaskCandidateGroup() {
+        ProcessInstance runningProcessInstance = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("auser", "randomuser");
+
+        taskEventBuilder.aTaskWithGroupCandidate("ATask", "testgroup", runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        shouldGetProcessInstance(runningProcessInstance.getId());
+    }
+
+    @Test
+    public void shouldNotGetProcessInstanceWhenCurrentUserIsNotInitiatorOrTaskInvolved() {
+        ProcessInstance runningProcessInstance = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("auser", "randomuser");
+
+        taskEventBuilder.anAssignedTask("ATask", "anotheruser", runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        shouldNotGetProcessInstance(runningProcessInstance.getId());
     }
 
     @Test
