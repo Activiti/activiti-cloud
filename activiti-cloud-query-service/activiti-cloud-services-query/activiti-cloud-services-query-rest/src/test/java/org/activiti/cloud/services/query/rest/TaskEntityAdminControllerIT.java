@@ -89,6 +89,9 @@ public class TaskEntityAdminControllerIT {
     @MockBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
+    @MockBean
+    private TaskPermissionsHelper taskPermissionsHelper;
+
     @Test
     public void allTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given

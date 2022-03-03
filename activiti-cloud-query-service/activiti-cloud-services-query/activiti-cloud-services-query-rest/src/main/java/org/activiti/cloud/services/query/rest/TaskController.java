@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QTaskEntity;
@@ -67,6 +68,8 @@ public class TaskController {
 
     private TaskControllerHelper taskControllerHelper;
 
+    private TaskPermissionsHelper taskPermissionsHelper;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
 
     public TaskController(TaskRepository taskRepository,
@@ -74,13 +77,15 @@ public class TaskController {
         EntityFinder entityFinder,
         TaskLookupRestrictionService taskLookupRestrictionService,
         SecurityManager securityManager,
-        TaskControllerHelper taskControllerHelper) {
+        TaskControllerHelper taskControllerHelper,
+        TaskPermissionsHelper taskPermissionsHelper) {
         this.taskRepository = taskRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.entityFinder = entityFinder;
         this.taskLookupRestrictionService = taskLookupRestrictionService;
         this.securityManager = securityManager;
         this.taskControllerHelper = taskControllerHelper;
+        this.taskPermissionsHelper = taskPermissionsHelper;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -100,8 +105,8 @@ public class TaskController {
                                                       taskId,
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
-        //do restricted query and check if still able to see it
-        boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
+        taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
+        boolean canUserViewTask = taskEntity.getPermissions() != null && taskEntity.getPermissions().contains(TaskPermissions.VIEW);
         if (!canUserViewTask) {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
