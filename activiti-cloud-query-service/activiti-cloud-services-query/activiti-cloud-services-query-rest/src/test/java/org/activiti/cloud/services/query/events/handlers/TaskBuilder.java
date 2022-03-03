@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
+import java.util.List;
 
 import org.activiti.cloud.services.query.model.TaskEntity;
 
@@ -81,6 +82,21 @@ public class TaskBuilder {
 
     public TaskBuilder withCompletedDate(Date completedDate){
         when(taskEntity.getCompletedDate()).thenReturn(completedDate);
+        return this;
+    }
+
+    public TaskBuilder withCandidateUsers( List<String> candidateUsers){
+        when(taskEntity.getCandidateUsers()).thenReturn(candidateUsers);
+        return this;
+    }
+
+    public TaskBuilder withCandidateGroups( List<String> candidateGroups){
+        when(taskEntity.getCandidateGroups()).thenReturn(candidateGroups);
+        return this;
+    }
+
+    public TaskBuilder withOwner(String owner) {
+        when(taskEntity.getOwner()).thenReturn(owner);
         return this;
     }
 

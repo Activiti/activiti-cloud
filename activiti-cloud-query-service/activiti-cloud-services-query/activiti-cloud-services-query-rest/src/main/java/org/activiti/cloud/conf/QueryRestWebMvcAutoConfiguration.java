@@ -21,6 +21,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
+import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
 import org.activiti.cloud.services.query.rest.assembler.ApplicationRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
@@ -189,5 +190,12 @@ public class QueryRestWebMvcAutoConfiguration  {
     @ConditionalOnMissingBean
     public ApplicationRepresentationModelAssembler applicationRepresentationModelAssembler() {
         return new ApplicationRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TaskPermissionsHelper taskPermissionsHelper(SecurityManager securityManager,
+                                                       TaskControllerHelper taskControllerHelper) {
+        return new TaskPermissionsHelper(securityManager, taskControllerHelper);
     }
 }
