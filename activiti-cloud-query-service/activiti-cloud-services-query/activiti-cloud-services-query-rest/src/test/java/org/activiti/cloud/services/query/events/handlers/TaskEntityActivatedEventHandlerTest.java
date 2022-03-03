@@ -102,7 +102,6 @@ public class TaskEntityActivatedEventHandlerTest {
         CloudTaskActivatedEventImpl event = buildActivatedEvent();
 
         String taskId = event.getEntity().getId();
-        TaskEntity taskEntity = aTask().build();
 
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(null);
 
