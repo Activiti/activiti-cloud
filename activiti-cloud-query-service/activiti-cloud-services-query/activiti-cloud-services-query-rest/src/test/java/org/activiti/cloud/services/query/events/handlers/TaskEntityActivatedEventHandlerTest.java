@@ -21,10 +21,11 @@ import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskActivatedEventImpl;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -36,8 +37,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityActivatedEventHandlerTest {
 
     @InjectMocks
@@ -46,11 +47,6 @@ public class TaskEntityActivatedEventHandlerTest {
     @Mock
     private EntityManager entityManager;
 
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
-
     @Test
     public void handleShouldUpdateTaskStatusToCreatedWhenNoAssignee() {
         //given
@@ -58,7 +54,6 @@ public class TaskEntityActivatedEventHandlerTest {
 
         String taskId = event.getEntity().getId();
         TaskEntity taskEntity = aTask()
-                .withId(taskId)
                 .build();
 
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(taskEntity);
@@ -81,7 +76,6 @@ public class TaskEntityActivatedEventHandlerTest {
         String taskId = event.getEntity().getId();
         TaskEntity taskEntity = aTask()
                 .withAssignee("user")
-                .withId(taskId)
                 .build();
 
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(taskEntity);
@@ -108,7 +102,7 @@ public class TaskEntityActivatedEventHandlerTest {
         CloudTaskActivatedEventImpl event = buildActivatedEvent();
 
         String taskId = event.getEntity().getId();
-        TaskEntity taskEntity = aTask().withId(taskId).build();
+        TaskEntity taskEntity = aTask().build();
 
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(null);
 

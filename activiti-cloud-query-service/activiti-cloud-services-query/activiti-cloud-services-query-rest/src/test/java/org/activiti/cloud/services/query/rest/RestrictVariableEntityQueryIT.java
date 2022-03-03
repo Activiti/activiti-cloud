@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
@@ -35,7 +34,6 @@ import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.security.ProcessVariableLookupRestrictionService;
 import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -80,13 +78,8 @@ public class RestrictVariableEntityQueryIT {
     @Autowired
     private TaskVariableRepository taskVariableRepository;
 
-    @BeforeEach
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
-
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() {
         taskCandidateUserRepository.deleteAll();
         variableRepository.deleteAll();
         taskRepository.deleteAll();

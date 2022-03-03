@@ -22,10 +22,11 @@ import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -37,8 +38,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessSuspendedEventHandlerTest {
 
     @InjectMocks
@@ -46,11 +47,6 @@ public class ProcessSuspendedEventHandlerTest {
 
     @Mock
     private EntityManager entityManager;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUpdateCurrentProcessInstanceStateToSuspended() {
@@ -80,7 +76,7 @@ public class ProcessSuspendedEventHandlerTest {
         //given
         CloudProcessSuspendedEvent event = buildProcessSuspendedEvent();
 
-        given(entityManager.find(ProcessInstanceEntity.class, "200")).willReturn(null);
+        given(entityManager.find(ProcessInstanceEntity.class, event.getProcessInstanceId())).willReturn(null);
 
 
         //then
