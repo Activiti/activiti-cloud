@@ -1,0 +1,264 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Test ReST API",
+    "termsOfService": "alfresco.com",
+    "license": {
+      "name": "© 1900-1992 Alfresco. All rights reserved"
+    },
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "/test"
+    }
+  ],
+  "paths": {
+    "/test": {
+      "get": {
+        "tags": [
+          "test-controller"
+        ],
+        "summary": "getTest",
+        "operationId": "getTest",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/test/paged": {
+      "get": {
+        "tags": [
+          "test-controller"
+        ],
+        "summary": "getPagedModel",
+        "operationId": "getPagedModel",
+        "parameters": [
+          {
+            "name": "maxItems",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "skipCount",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/test/entity": {
+      "get": {
+        "tags": [
+          "test-controller"
+        ],
+        "summary": "getEntityModel",
+        "operationId": "getEntityModel",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/test/collection": {
+      "get": {
+        "tags": [
+          "test-controller"
+        ],
+        "summary": "getCollectionModel",
+        "operationId": "getCollectionModel",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EntriesResponseContentString": {
+        "title": "EntriesResponseContentString",
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryResponseContentString"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          }
+        }
+      },
+      "EntryResponseContentString": {
+        "title": "EntryResponseContentString",
+        "type": "object",
+        "properties": {
+          "entry": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponseContentString": {
+        "title": "ListResponseContentString",
+        "type": "object",
+        "properties": {
+          "list": {
+            "$ref": "#/components/schemas/EntriesResponseContentString"
+          }
+        }
+      },
+      "PaginationMetadata": {
+        "title": "PaginationMetadata",
+        "type": "object",
+        "properties": {
+          "skipCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hasMoreItems": {
+            "type": "boolean"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "oauth": {
+        "type": "oauth2",
+        "description": "Authorizing with SSO",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "http://authserver.mock/realms/activiti/protocol/openid-connect/auth",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  },
+  "x-service-url-prefix": "/test"
+}
