@@ -15,11 +15,17 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableAdminController;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,11 +34,26 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstanceVariableAdminController {
+
+    private final ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler;
     private final ProcessAdminRuntime processAdminRuntime;
+    private final CollectionModelAssembler resourcesAssembler;
 
     @Autowired
-    public ProcessInstanceVariableAdminControllerImpl(ProcessAdminRuntime processAdminRuntime) {
+    public ProcessInstanceVariableAdminControllerImpl(ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
+                                                      ProcessAdminRuntime processAdminRuntime,
+                                                      CollectionModelAssembler resourcesAssembler) {
+        this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.processAdminRuntime = processAdminRuntime;
+        this.resourcesAssembler = resourcesAssembler;
+    }
+
+    @Override
+    public CollectionModel<EntityModel<CloudVariableInstance>> getVariables(String processInstanceId) {
+        return resourcesAssembler.toCollectionModel(processAdminRuntime.variables(ProcessPayloadBuilder.variables()
+                .withProcessInstanceId(processInstanceId)
+                .build()),
+            variableRepresentationModelAssembler);
     }
 
     @Override

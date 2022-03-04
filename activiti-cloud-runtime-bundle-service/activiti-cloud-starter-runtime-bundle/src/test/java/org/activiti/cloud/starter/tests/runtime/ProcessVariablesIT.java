@@ -36,6 +36,7 @@ import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
@@ -108,6 +109,9 @@ public class ProcessVariablesIT {
 
     @Autowired
     private ProcessRuntime processRuntime;
+
+    @Autowired
+    private ProcessAdminRuntime processAdminRuntime;
 
     @Autowired
     private DateFormatterProvider dateFormatterProvider;
@@ -357,7 +361,7 @@ public class ProcessVariablesIT {
         await().untilAsserted(() -> {
 
             // when
-            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.adminGetVariables(startResponse);
 
             // then
             Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
@@ -672,7 +676,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    @WithMockKeycloakUser(username = "hruser", roles = "ACTIVITI_USER")
+    @WithMockKeycloakUser(username = "hradmin", roles = "ACTIVITI_ADMIN")
     public void testAdminStartProcessVariablesPayloadConverter() {
         // given
         identityTokenProducer.setTestUser("hradmin");
@@ -683,13 +687,13 @@ public class ProcessVariablesIT {
         CloudProcessInstance processInstance = processInstanceRestTemplate.adminStartProcess(startProcessPayload)
             .getBody();
         // then
-        List<VariableInstance> variableInstances = processRuntime.variables(ProcessPayloadBuilder.variables()
+        List<VariableInstance> variableInstances = processAdminRuntime.variables(ProcessPayloadBuilder.variables()
             .withProcessInstance(processInstance)
             .build());
         assertStartProcessPayloadVariablesAreConverted(variableInstances);
 
         // cleanup
-        processRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
+        processAdminRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
     }
 
     @Test
@@ -714,7 +718,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    @WithMockKeycloakUser(username = "hruser", roles = "ACTIVITI_USER")
+    @WithMockKeycloakUser(username = "hradmin", roles = "ACTIVITI_ADMIN")
     public void testAdminStartMessageVariablesPayloadConverter() {
         // given
         identityTokenProducer.setTestUser("hradmin");
@@ -725,13 +729,13 @@ public class ProcessVariablesIT {
         CloudProcessInstance processInstance = messageRestTemplate.adminMessage(startMessagePayload)
             .getBody();
         // then
-        List<VariableInstance> variableInstances = processRuntime.variables(ProcessPayloadBuilder.variables()
+        List<VariableInstance> variableInstances = processAdminRuntime.variables(ProcessPayloadBuilder.variables()
             .withProcessInstance(processInstance)
             .build());
         assertStartProcessPayloadVariablesAreConverted(variableInstances);
 
         // cleanup
-        processRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
+        processAdminRuntime.delete(ProcessPayloadBuilder.delete(processInstance.getId()));
     }
 
     private StartMessagePayload testStartMessagePayload() {

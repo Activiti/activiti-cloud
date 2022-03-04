@@ -244,6 +244,19 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
+    public ResponseEntity<CollectionModel<CloudVariableInstance>> adminGetVariables(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
+        assertThat(processInstanceEntity.getBody()).isNotNull();
+        return adminGetVariables(processInstanceEntity.getBody().getId());
+    }
+
+    public ResponseEntity<CollectionModel<CloudVariableInstance>> adminGetVariables(String processInstanceId) {
+        return testRestTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceId + "/variables",
+                                   HttpMethod.GET,
+                                  null,
+                                   new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {
+                                   });
+    }
+
     public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariables(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         return getVariables(processInstanceEntity.getBody().getId());
