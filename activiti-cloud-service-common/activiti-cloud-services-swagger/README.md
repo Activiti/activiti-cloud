@@ -4,10 +4,10 @@ This module provides base springfox and springdoc configuration for swagger auto
 
 It provides two swagger specification files:
 
-  - default: available under `v3/api-docs` or `v3/api-docs?group=default`;
-  provides specification for Alfresco MediaType format
+-  default: available under `v3/api-docs` or `v3/api-docs?group=default`;
+   provides specification for Alfresco MediaType format
 
-  - HAL: available under `v2/api-docs?group=hal`; provides specification for HAL format
+-  HAL: available under `v2/api-docs?group=hal`; provides specification for HAL format
 
 *Note:* make sure the controllers are returning Spring objects only (`PagedModel<EntityModel<DomainObject>>`,
 `CollectionModel<EntityModel<DomainObject>>`, `EntityModel<DomainObject>`); the mapping will not work if custom `*Model`
