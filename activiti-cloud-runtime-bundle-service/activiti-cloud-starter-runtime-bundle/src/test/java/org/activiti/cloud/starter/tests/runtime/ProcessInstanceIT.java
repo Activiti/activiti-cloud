@@ -385,6 +385,9 @@ public class ProcessInstanceIT {
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // switch back to initiator user to access the process instance
+        identityTokenProducer.setTestUser("hruser");
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
     }
@@ -414,6 +417,9 @@ public class ProcessInstanceIT {
         identityTokenProducer.setTestUser("testadmin");
         ResponseEntity<Void> responseEntity = processInstanceRestTemplate.adminSuspend(startProcessEntity);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // switch back to initiator user to access the process instance
+        identityTokenProducer.setTestUser("hruser");
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         //Check that process is really in a suspended state
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
@@ -434,6 +440,9 @@ public class ProcessInstanceIT {
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // switch back to initiator user to access the process instance
+        identityTokenProducer.setTestUser("hruser");
         processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }

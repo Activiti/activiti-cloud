@@ -266,7 +266,7 @@ public class TaskVariablesIT {
         // when
         variablesResponse = taskRestTemplate.adminGetVariables(taskId);
 
-        processInstanceRestTemplate.delete(startResponse);
+        processInstanceRestTemplate.adminDelete(startResponse);
     }
 
     private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection) {
