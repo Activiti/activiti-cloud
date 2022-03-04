@@ -21,6 +21,7 @@ import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -28,6 +29,7 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
@@ -52,13 +54,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessInstanceVariableAdminControllerImpl.class)
@@ -73,6 +75,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class})
 public class ProcessInstanceVariableAdminControllerImplIT {
+
+    private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
     @Autowired
     private MockMvc mockMvc;
@@ -96,6 +100,9 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     private CollectionModelAssembler resourcesAssembler;
 
     @MockBean
+    private ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler;
+
+    @MockBean
     private RepositoryService repositoryService;
 
     @MockBean
@@ -112,12 +119,34 @@ public class ProcessInstanceVariableAdminControllerImplIT {
         processInstance.setProcessDefinitionKey("1");
 
         this.mockMvc = MockMvcBuilders
-                .standaloneSetup(new ProcessInstanceVariableAdminControllerImpl(processAdminRuntime))
+                .standaloneSetup(new ProcessInstanceVariableAdminControllerImpl(variableRepresentationModelAssembler,
+                                                                                processAdminRuntime,
+                                                                                resourcesAssembler))
                 .setControllerAdvice(new RuntimeBundleExceptionHandler())
                 .build();
 
         given(processAdminRuntime.processInstance(any()))
                 .willReturn(processInstance);
+    }
+
+    @Test
+    public void shouldGetVariables() throws Exception {
+        VariableInstanceImpl<String> name = new VariableInstanceImpl<>("name",
+            String.class.getName(),
+            "Paul",
+            PROCESS_INSTANCE_ID, null);
+        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
+            Integer.class.getName(),
+            12,
+            PROCESS_INSTANCE_ID, null);
+        given(processAdminRuntime.variables(any()))
+            .willReturn(Arrays.asList(name,
+                age));
+
+        this.mockMvc.perform(get("/admin/v1/process-instances/{processInstanceId}/variables",
+                1,
+                1).accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isOk());
     }
 
     @Test
