@@ -15,15 +15,29 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.rest.api.configuration.ClientConfiguration;
 import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @FeignClient(value = "processInstanceApiClient",
     url = "${runtime.url}",
     path = "${runtime.path}",
     configuration = {ClientConfiguration.class})
-@CollectionFormat(feign.CollectionFormat.CSV)
 public interface ProcessInstanceApiClient extends ProcessInstanceController {
+
+    @Override
+    @GetMapping("/v1/process-instances")
+    @CollectionFormat(feign.CollectionFormat.CSV)
+    PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(Pageable pageable);
+
+    @Override
+    @GetMapping(value = "/v1/process-instances/{processInstanceId}/subprocesses")
+    @CollectionFormat(feign.CollectionFormat.CSV)
+    PagedModel<EntityModel<CloudProcessInstance>> subprocesses(String processInstanceId, Pageable pageable);
 
 }

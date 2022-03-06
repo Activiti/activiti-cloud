@@ -27,4 +27,5 @@ public interface ProcessInstanceTasksController {
     @GetMapping(value = "/v1/process-instances/{processInstanceId}/tasks")
     PagedModel<EntityModel<CloudTask>> getTasks(@PathVariable(value = "processInstanceId") String processInstanceId,
         Pageable pageable);
+
 }

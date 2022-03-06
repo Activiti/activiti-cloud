@@ -41,4 +41,5 @@ public interface TaskVariableController {
     ResponseEntity<Void> updateVariable(@PathVariable(value = "taskId") String taskId,
         @PathVariable(value = "variableName") String variableName,
         @RequestBody UpdateTaskVariablePayload updateTaskVariablePayload);
+
 }
