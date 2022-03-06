@@ -90,4 +90,5 @@ public interface ProcessInstanceController {
     @GetMapping(value = "/v1/process-instances/{processInstanceId}/subprocesses")
     PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable(value = "processInstanceId") String processInstanceId,
         Pageable pageable);
+
 }

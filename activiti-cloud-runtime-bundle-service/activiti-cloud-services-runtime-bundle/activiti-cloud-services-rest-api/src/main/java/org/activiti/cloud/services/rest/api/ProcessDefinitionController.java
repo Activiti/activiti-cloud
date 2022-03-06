@@ -29,7 +29,6 @@ public interface ProcessDefinitionController {
     @GetMapping("/v1/process-definitions")
     PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable);
 
-
     @GetMapping(value = "/v1/process-definitions/{id}")
     EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable(value = "id") String id);
 
@@ -50,4 +49,5 @@ public interface ProcessDefinitionController {
     @ResponseBody
     @Operation(summary = "getProcessModel")
     String getProcessDiagram(@PathVariable(value = "id") String id);
+
 }

@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.api;
 
 import org.activiti.cloud.services.rest.api.configuration.ClientConfiguration;
-import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.cloud.openfeign.FeignClient;
 
 @FeignClient(value = "taskVariableApiClient",
@@ -24,7 +23,6 @@ import org.springframework.cloud.openfeign.FeignClient;
     path = "${runtime.path}",
     configuration = {ClientConfiguration.class},
     decode404 = true)
-@CollectionFormat(feign.CollectionFormat.CSV)
 public interface TaskVariableApiClient extends TaskVariableController {
 
 }
