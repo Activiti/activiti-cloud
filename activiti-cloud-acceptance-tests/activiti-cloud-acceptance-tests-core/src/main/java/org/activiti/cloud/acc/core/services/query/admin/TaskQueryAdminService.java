@@ -19,7 +19,6 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -30,24 +29,20 @@ public interface TaskQueryAdminService {
     @Headers("Accept: application/hal+json;charset=UTF-8")
     CloudTask getTask(@Param("taskId") String taskId);
 
-    @RequestLine("GET /admin/v1/tasks?sort=createdDate,desc&sort=id,desc")
+    @RequestLine("GET /admin/v1/tasks?sort=createdDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getTasks();
 
-    @RequestLine("GET /admin/v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc")
+    @RequestLine("GET /admin/v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Content-Type: application/json")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getRootTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 
-    @RequestLine("GET /admin/v1/tasks?standalone=true&sort=createdDate,desc&sort=id,desc")
+    @RequestLine("GET /admin/v1/tasks?standalone=true&sort=createdDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getStandaloneTasks();
 
-    @RequestLine("GET /admin/v1/tasks?standalone=false&sort=createdDate,desc&sort=id,desc")
+    @RequestLine("GET /admin/v1/tasks?standalone=false&sort=createdDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getNonStandaloneTasks();
 
     @RequestLine("DELETE /admin/v1/tasks")

@@ -21,14 +21,12 @@ import feign.RequestLine;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.hateoas.PagedModel;
 
 public interface ProcessRuntimeAdminService {
 
-    @RequestLine("GET /admin/v1/process-instances?sort=startDate,desc&sort=id,desc")
+    @RequestLine("GET /admin/v1/process-instances?sort=startDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudProcessInstance> getProcessInstances();
 
     @RequestLine("DELETE /admin/v1/process-instances/{id}")

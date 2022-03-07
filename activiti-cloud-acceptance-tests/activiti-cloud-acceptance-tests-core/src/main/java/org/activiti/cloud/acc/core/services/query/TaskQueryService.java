@@ -22,7 +22,6 @@ import java.util.List;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 
@@ -30,14 +29,13 @@ public interface TaskQueryService {
 
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
     PagedModel<CloudTask> queryTasksByIdAnsStatus(@Param("taskId") String taskId,
-                                                      @Param("status") Task.TaskStatus taskStatus);
+                                                  @Param("status") Task.TaskStatus taskStatus);
 
     @RequestLine("GET /v1/tasks?id={taskId}")
     PagedModel<CloudTask> getTask(@Param("taskId") String taskId);
 
-    @RequestLine("GET /v1/tasks?sort=createdDate,desc&sort=id,desc")
+    @RequestLine("GET /v1/tasks?sort=createdDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Content-Type: application/json")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getTasks();
 
     @RequestLine("GET /v1/tasks/{taskId}/variables")
@@ -48,24 +46,21 @@ public interface TaskQueryService {
     @Headers("Content-Type: application/json")
     PagedModel<CloudTask> getTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 
-    @RequestLine("GET /v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc")
+    @RequestLine("GET /v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Content-Type: application/json")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getRootTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 
-    @RequestLine("GET /v1/tasks?standalone=true&sort=createdDate,desc&sort=id,desc")
+    @RequestLine("GET /v1/tasks?standalone=true&sort=createdDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getStandaloneTasks();
 
-    @RequestLine("GET /v1/tasks?standalone=false&sort=createdDate,desc&sort=id,desc")
+    @RequestLine("GET /v1/tasks?standalone=false&sort=createdDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getNonStandaloneTasks();
 
     @RequestLine("GET /v1/tasks?name={taskName}&description={taskDescription}")
     PagedModel<CloudTask> getTasksByNameAndDescription(@Param("taskName") String taskName,
-                                                            @Param("taskDescription") String taskDescription);
+                                                       @Param("taskDescription") String taskDescription);
 
     @RequestLine("GET /v1/tasks/{id}/variables")
     @Headers("Accept: application/hal+json;charset=UTF-8")
@@ -73,10 +68,10 @@ public interface TaskQueryService {
 
     @RequestLine("GET /v1/tasks/{taskId}/candidate-groups")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    public List<String> getTaskCandidateGroups(@Param("taskId") String taskId);
+    List<String> getTaskCandidateGroups(@Param("taskId") String taskId);
 
     @RequestLine("GET /v1/tasks/{taskId}/candidate-users")
     @Headers("Accept: application/hal+json;charset=UTF-8")
-    public List<String> getTaskCandidateUsers(@Param("taskId") String taskId);
+    List<String> getTaskCandidateUsers(@Param("taskId") String taskId);
 
 }

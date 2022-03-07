@@ -21,7 +21,6 @@ import feign.RequestLine;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.hateoas.PagedModel;
 
 public interface ProcessQueryService {
@@ -30,9 +29,8 @@ public interface ProcessQueryService {
     @Headers("Content-Type: application/json")
     CloudProcessInstance getProcessInstance(@Param("processInstanceId") String processInstanceId);
 
-    @RequestLine("GET /v1/process-instances?sort=startDate,desc&sort=id,desc")
+    @RequestLine("GET /v1/process-instances?sort=startDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Content-Type: application/json")
-    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudProcessInstance> getProcessInstances();
 
     @RequestLine("GET /v1/process-instances/{processInstanceId}/variables")
