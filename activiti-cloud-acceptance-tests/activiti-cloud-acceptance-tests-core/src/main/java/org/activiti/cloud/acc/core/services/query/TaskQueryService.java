@@ -22,6 +22,7 @@ import java.util.List;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 
@@ -36,6 +37,7 @@ public interface TaskQueryService {
 
     @RequestLine("GET /v1/tasks?sort=createdDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getTasks();
 
     @RequestLine("GET /v1/tasks/{taskId}/variables")
@@ -48,14 +50,17 @@ public interface TaskQueryService {
 
     @RequestLine("GET /v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getRootTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 
     @RequestLine("GET /v1/tasks?standalone=true&sort=createdDate,desc&sort=id,desc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getStandaloneTasks();
 
     @RequestLine("GET /v1/tasks?standalone=false&sort=createdDate,desc&sort=id,desc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudTask> getNonStandaloneTasks();
 
     @RequestLine("GET /v1/tasks?name={taskName}&description={taskDescription}")

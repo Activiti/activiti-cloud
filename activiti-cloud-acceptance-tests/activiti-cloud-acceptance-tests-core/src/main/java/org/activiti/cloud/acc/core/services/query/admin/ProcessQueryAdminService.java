@@ -21,6 +21,7 @@ import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
+import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -38,6 +39,7 @@ public interface ProcessQueryAdminService {
 
     @RequestLine("GET /admin/v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudProcessInstance> getProcessInstances();
 
     @RequestLine("DELETE /admin/v1/process-instances")
@@ -45,6 +47,7 @@ public interface ProcessQueryAdminService {
 
     @RequestLine("GET /admin/v1/service-tasks?sort=id,desc")
     @Headers("Content-Type: application/json")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudServiceTask> getServiceTasks();
 
     @RequestLine("GET /admin/v1/service-tasks")

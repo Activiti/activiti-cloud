@@ -19,15 +19,19 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.hateoas.PagedModel;
 
 public interface AuditService {
 
     @RequestLine("GET /v1/events?search={search}&sort=timestamp,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudRuntimeEvent> getEvents(@Param("search") String search);
 
     @RequestLine("GET /v1/events?sort=timestamp,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<CloudRuntimeEvent> getEvents();
+
 }
