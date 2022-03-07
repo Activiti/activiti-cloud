@@ -21,6 +21,7 @@ import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface TaskController {
 
     @GetMapping("/v1/tasks")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
 
     @GetMapping(value = "/v1/tasks/{taskId}")
@@ -67,6 +69,7 @@ public interface TaskController {
         @RequestBody UpdateTaskPayload updateTaskPayload);
 
     @GetMapping(value = "/v1/tasks/{taskId}/subtasks")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudTask>> getSubtasks(Pageable pageable, @PathVariable(value = "taskId") String taskId);
 
     @PostMapping(value = "/v1/tasks/{taskId}/assign",

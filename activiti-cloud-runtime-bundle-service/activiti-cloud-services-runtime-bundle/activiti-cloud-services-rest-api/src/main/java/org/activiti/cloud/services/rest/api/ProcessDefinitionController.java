@@ -17,6 +17,7 @@ package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public interface ProcessDefinitionController {
 
     @GetMapping("/v1/process-definitions")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable);
 
     @GetMapping(value = "/v1/process-definitions/{id}")

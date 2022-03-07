@@ -15,24 +15,13 @@
  */
 package org.activiti.cloud.services.rest.api;
 
-import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.rest.api.configuration.ClientConfiguration;
-import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.web.bind.annotation.GetMapping;
 
 @FeignClient(value = "processInstanceTasksApiClient",
     url = "${runtime.url}",
     path = "${runtime.path}",
     configuration = {ClientConfiguration.class})
 public interface ProcessInstanceTasksApiClient extends ProcessInstanceTasksController {
-
-    @Override
-    @GetMapping(value = "/v1/process-instances/{processInstanceId}/tasks")
-    @CollectionFormat(feign.CollectionFormat.CSV)
-    PagedModel<EntityModel<CloudTask>> getTasks(String processInstanceId, Pageable pageable);
 
 }

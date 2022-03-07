@@ -22,6 +22,7 @@ import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public interface ProcessInstanceController {
 
     @GetMapping("/v1/process-instances")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(Pageable pageable);
 
     @PostMapping(path = "/v1/process-instances", headers = "Content-type=application/json")
@@ -88,6 +90,7 @@ public interface ProcessInstanceController {
         @RequestBody UpdateProcessPayload payload);
 
     @GetMapping(value = "/v1/process-instances/{processInstanceId}/subprocesses")
+    @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable(value = "processInstanceId") String processInstanceId,
         Pageable pageable);
 
