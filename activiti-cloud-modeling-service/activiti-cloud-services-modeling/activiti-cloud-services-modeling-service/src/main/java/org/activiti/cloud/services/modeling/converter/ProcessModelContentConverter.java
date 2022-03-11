@@ -117,15 +117,7 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
 
     private void overrideAllIdReferences(Process process,
         ReferenceIdOverrider referenceIdOverrider) {
-
-        process.getFlowElements().forEach(element -> {
-            if (element instanceof SubProcess) {
-                ((SubProcess) element).getFlowElements().forEach(elementInSubprocess ->
-                    elementInSubprocess.accept(referenceIdOverrider));
-            } else {
-                element.accept(referenceIdOverrider);
-            }
-        });
+        process.getFlowElements().forEach(element -> element.accept(referenceIdOverrider));
     }
 
 }
