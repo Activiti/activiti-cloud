@@ -13,25 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.common.swagger.springdoc.customizer;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import org.apache.commons.lang3.StringUtils;
+import org.springdoc.core.customizers.OpenApiCustomiser;
 
-import java.util.Optional;
-
-public class SchemaTitleOpenApiCustomizer implements DefaultOpenApiCustomizer {
-
-    @Override
-    public void customise(OpenAPI openApi) {
-        Optional.ofNullable(openApi.getComponents())
-            .map(Components::getSchemas)
-            .ifPresent(schemas -> schemas.forEach((schemaName, schema) -> {
-                if (StringUtils.isBlank(schema.getTitle())) {
-                    schema.setTitle(schemaName);
-                }
-            }));
-    }
+public interface DefaultOpenApiCustomizer extends OpenApiCustomiser {
 }

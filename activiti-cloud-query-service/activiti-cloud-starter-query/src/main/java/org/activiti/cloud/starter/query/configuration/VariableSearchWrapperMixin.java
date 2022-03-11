@@ -13,20 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.activiti.cloud.starter.query.configuration;
 
-package org.activiti.cloud.common.swagger.springdoc.customizer;
+import org.springdoc.api.annotations.ParameterObject;
 
-import io.swagger.v3.oas.models.Operation;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.method.HandlerMethod;
+@ParameterObject
+public class VariableSearchWrapperMixin {
 
-public class SummaryOperationCustomizer implements DefaultOperationCustomizer {
+    private static class VariableSearchMixin {
 
-    @Override
-    public Operation customize(Operation operation, HandlerMethod handlerMethod) {
-        if (StringUtils.isBlank(operation.getSummary())) {
-            operation.summary(operation.getOperationId());
+        private String name;
+        private String value;
+        private String type;
+
+        public String getName() {
+            return name;
         }
-        return operation;
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getType() {
+            return type;
+        }
+    }
+
+    private VariableSearchMixin variables;
+
+    public VariableSearchMixin getVariables() {
+        return variables;
     }
 }

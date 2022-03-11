@@ -29,7 +29,6 @@ import org.activiti.cloud.common.swagger.springdoc.modelconverter.CollectionMode
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.EntityModelConverter;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.PageableMixin;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.PagedModelConverter;
-import org.springdoc.core.SpringDocUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.data.domain.Pageable;
@@ -51,7 +50,7 @@ public class BaseOpenApiBuilder {
         ModelConverters.getInstance().addConverter(new EntityModelConverter());
         ModelConverters.getInstance().addConverter(new CollectionModelConverter());
         ModelConverters.getInstance().addConverter(new PagedModelConverter());
-        SpringDocUtils.getConfig().replaceParameterObjectWithClass(Pageable.class, PageableMixin.class);
+        SwaggerDocUtils.replaceParameterObjectWithClass(Pageable.class, PageableMixin.class);
     }
 
     public OpenAPI build(String title, String serviceURLPrefix) {

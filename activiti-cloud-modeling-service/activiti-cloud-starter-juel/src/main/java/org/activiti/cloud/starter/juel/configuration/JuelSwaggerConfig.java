@@ -15,22 +15,23 @@
  */
 package org.activiti.cloud.starter.juel.configuration;
 
-import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
+import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
+import org.springdoc.core.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
 public class JuelSwaggerConfig {
 
-    @Bean(name = "juelApiDocket")
-    @ConditionalOnMissingBean(name = "juelApiDocket")
-    public Docket juelApiDocket(SwaggerDocketBuilder swaggerDocketBuilder,
-                                @Value("${activiti.cloud.swagger.juel-base-path:}") String swaggerBasePath) {
-        return swaggerDocketBuilder.buildApiDocket("Juel ReST API", "Juel", swaggerBasePath,
-                "org.activiti.cloud.starter.juel");
+    @Bean
+    @ConditionalOnMissingBean(name = "juelApi")
+    public GroupedOpenApi juelApi(@Value("${activiti.cloud.swagger.juel-base-path:}") String swaggerBasePath) {
+        return GroupedOpenApi.builder()
+            .group("Juel")
+            .packagesToScan("org.activiti.cloud.starter.juel")
+            .addOpenApiCustomiser(openApi -> openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath))
+            .build();
     }
-
 }

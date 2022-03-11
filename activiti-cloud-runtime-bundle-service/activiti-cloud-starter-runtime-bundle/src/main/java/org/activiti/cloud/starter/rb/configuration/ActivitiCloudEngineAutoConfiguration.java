@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import static org.activiti.spring.boot.ProcessEngineAutoConfiguration.BEHAVIOR_FACTORY_MAPPING_CONFIGURER;
-
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
@@ -29,10 +27,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
+
+import static org.activiti.spring.boot.ProcessEngineAutoConfiguration.BEHAVIOR_FACTORY_MAPPING_CONFIGURER;
 
 @AutoConfigureBefore(ProcessEngineAutoConfiguration.class)
 @Configuration
 @Import(RuntimeBundleSwaggerConfig.class)
+@PropertySource("classpath:rb.properties")
 public class ActivitiCloudEngineAutoConfiguration {
 
     @Bean(BEHAVIOR_FACTORY_MAPPING_CONFIGURER)

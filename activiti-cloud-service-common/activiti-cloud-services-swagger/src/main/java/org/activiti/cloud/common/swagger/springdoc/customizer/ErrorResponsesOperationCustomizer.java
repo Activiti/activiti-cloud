@@ -19,10 +19,9 @@ package org.activiti.cloud.common.swagger.springdoc.customizer;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.web.method.HandlerMethod;
 
-public class ErrorResponsesOperationCustomizer implements OperationCustomizer {
+public class ErrorResponsesOperationCustomizer implements DefaultOperationCustomizer {
 
     @Override
     public Operation customize(Operation operation, HandlerMethod handlerMethod) {

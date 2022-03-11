@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.activiti.cloud.common.swagger.springdoc;
 
-package org.activiti.cloud.common.swagger.springdoc.customizer;
+import org.springdoc.core.SpringDocUtils;
 
-import io.swagger.v3.oas.models.Operation;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.method.HandlerMethod;
+public class SwaggerDocUtils {
 
-public class SummaryOperationCustomizer implements DefaultOperationCustomizer {
+    public static void replaceParameterObjectWithClass(Class source, Class target) {
+        SpringDocUtils.getConfig().replaceParameterObjectWithClass(source, target);
+    }
 
-    @Override
-    public Operation customize(Operation operation, HandlerMethod handlerMethod) {
-        if (StringUtils.isBlank(operation.getSummary())) {
-            operation.summary(operation.getOperationId());
-        }
-        return operation;
+    public static void replaceWithClass(Class source, Class target) {
+        SpringDocUtils.getConfig().replaceWithClass(source, target);
     }
 }

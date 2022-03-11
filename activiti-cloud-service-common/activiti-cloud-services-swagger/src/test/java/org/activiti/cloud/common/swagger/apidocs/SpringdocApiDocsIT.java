@@ -45,7 +45,7 @@ public class SpringdocApiDocsIT {
 
     @Test
     public void should_generateSpringdocApiDocs() throws Exception {
-        mockMvc.perform(get("/springdoc/v3/api-docs?group=testing").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/springdoc/v3/api-docs/testing").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(new String(springdocApiDocsFile.getInputStream().readAllBytes())))

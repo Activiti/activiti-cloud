@@ -50,6 +50,9 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:swagger-config.properties")
 public class SwaggerAutoConfiguration {
 
+    @Value("${activiti.cloud.swagger.base-path:/}")
+    private String swaggerBasePath;
+
     @Bean
     @ConditionalOnMissingBean
     public BaseOpenApiBuilder baseOpenApiBuilder(BuildProperties buildProperties) {
@@ -58,7 +61,7 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PathPrefixOpenApiCustomizer pathPrefixCustomizer(@Value("${activiti.cloud.swagger.base-path:/}") String swaggerBasePath) {
+    public PathPrefixOpenApiCustomizer pathPrefixCustomizer() {
         return new PathPrefixOpenApiCustomizer(swaggerBasePath);
     }
 
@@ -85,5 +88,4 @@ public class SwaggerAutoConfiguration {
     public SchemaTitleOpenApiCustomizer schemaTitleOpenApiCustomizer() {
         return new SchemaTitleOpenApiCustomizer();
     }
-
 }
