@@ -6,6 +6,7 @@ It provides swagger specification files:
 
 -   for springfox available under `v3/api-docs` or `v3/api-docs?group=[groupName]`;
     provides specification for Alfresco MediaType format
+
 -   for springdoc available under `v3/api-docs` or `v3/api-docs/[groupName]`;
     provides specification for Alfresco MediaType format
 
@@ -14,7 +15,7 @@ It provides swagger specification files:
 are used.
 
 ## How to use it
-- Add a Maven dependency to this project:
+-   Add a Maven dependency to this project:
 
 ```xml
 <dependency>
@@ -23,10 +24,10 @@ are used.
 </dependency>
 ```
 
-###Springdoc
+### Springdoc
 When adding this as dependency provide
 
-#### for base OpenApi:
+#### for base OpenApi
 the following properties
 ```
     springdoc.enabled=true
@@ -40,7 +41,7 @@ and a bean for OpenApi:
         return baseOpenApiBuilder.build("title", "service-url-prefix");
     }
 ```
-#### for group OpenApi:
+#### for group OpenApi
 the following property
 ```
     springdoc.enabled=true
@@ -56,9 +57,8 @@ and a bean for GroupedOpenApi:
     }
 ```
 
-
-###Springfox (deprecated)
-- Declare a bean that will select the apis to be scanned. I.e.:
+### Springfox (deprecated)
+-   Declare a bean that will select the apis to be scanned. I.e.:
 ```
 @Bean
 public Predicate<RequestHandler> apiSelector() {
