@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @Import(BuildProperties.class)
-@SpringBootTest(classes = {TestSwaggerSpringdocConfig.class, TestSwaggerSpringfoxConfig.class, BuildPropertiesConfig.class})
+@SpringBootTest(classes = {TestSwaggerSpringdocConfig.class, BuildPropertiesConfig.class})
 @TestPropertySource("classpath:application-springdoc.properties")
 public class SpringdocApiDocsIT {
 
@@ -45,7 +45,7 @@ public class SpringdocApiDocsIT {
 
     @Test
     public void should_generateSpringdocApiDocs() throws Exception {
-        mockMvc.perform(get("/springdoc/v3/api-docs/testing").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/springdoc/v3/api-docs").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(new String(springdocApiDocsFile.getInputStream().readAllBytes())))
