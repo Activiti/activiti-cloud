@@ -54,8 +54,7 @@ public class ProcessModelContentConverterTest {
 
     @BeforeEach
     public void setUp() {
-        processModelContentConverter = new ProcessModelContentConverter(processModelType,
-            bpmnXMLConverter);
+        processModelContentConverter = new ProcessModelContentConverter(processModelType, bpmnXMLConverter);
     }
 
     @Test
