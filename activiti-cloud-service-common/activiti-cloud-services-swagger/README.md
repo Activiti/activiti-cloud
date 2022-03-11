@@ -2,12 +2,12 @@
 
 This module provides base springfox and springdoc configuration for swagger auto-generated specification file.
 
-It provides two swagger specification files:
+It provides swagger specification files:
 
--   default: available under `v3/api-docs` or `v3/api-docs?group=default`;
+-   for springfox available under `v3/api-docs` or `v3/api-docs?group=[groupName]`;
     provides specification for Alfresco MediaType format
-
--   HAL: available under `v2/api-docs?group=hal`; provides specification for HAL format
+-   for springdoc available under `v3/api-docs` or `v3/api-docs/[groupName]`;
+    provides specification for Alfresco MediaType format
 
 *Note:* make sure the controllers are returning Spring objects only (`PagedModel<EntityModel<DomainObject>>`,
 `CollectionModel<EntityModel<DomainObject>>`, `EntityModel<DomainObject>`); the mapping will not work if custom `*Model`
@@ -24,7 +24,10 @@ are used.
 ```
 
 ###Springdoc
-When adding this as dependency provide following properties
+When adding this as dependency provide
+
+#### for base OpenApi:
+the following properties
 ```
     springdoc.enabled=true
     springdoc.packages-to-scan=[base-package-to-scan]
@@ -37,9 +40,25 @@ and a bean for OpenApi:
         return baseOpenApiBuilder.build("title", "service-url-prefix");
     }
 ```
+#### for group OpenApi:
+the following property
+```
+    springdoc.enabled=true
+```
+and a bean for GroupedOpenApi:
+```
+    @Bean
+    public GroupedOpenApi groupedOpenApi() {
+        return GroupedOpenApi.builder()
+            .group("group-name")
+            .packagesToScan([base-package-to-scan])
+            .build();
+    }
+```
+
 
 ###Springfox (deprecated)
-- Declare a bean the will select the apis to be scanned. I.e.:
+- Declare a bean that will select the apis to be scanned. I.e.:
 ```
 @Bean
 public Predicate<RequestHandler> apiSelector() {
