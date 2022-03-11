@@ -20,6 +20,12 @@ import org.springdoc.api.annotations.ParameterObject;
 @ParameterObject
 public class VariableSearchWrapperMixin {
 
+    private VariableSearchMixin variables;
+
+    public VariableSearchMixin getVariables() {
+        return variables;
+    }
+
     private static class VariableSearchMixin {
 
         private String name;
@@ -39,9 +45,4 @@ public class VariableSearchWrapperMixin {
         }
     }
 
-    private VariableSearchMixin variables;
-
-    public VariableSearchMixin getVariables() {
-        return variables;
-    }
 }
