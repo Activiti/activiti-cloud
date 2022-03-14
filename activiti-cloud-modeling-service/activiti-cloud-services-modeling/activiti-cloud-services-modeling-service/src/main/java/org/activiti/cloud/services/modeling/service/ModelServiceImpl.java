@@ -190,20 +190,24 @@ public class ModelServiceImpl implements ModelService{
         }
 
         if(ModelScope.PROJECT.equals(model.getScope()) && model.hasMultipleProjects()){
-            throw new ModelScopeIntegrityException(
-                "A model at PROJECT scope can only be associated to one project");
+            throw new ModelScopeIntegrityException("A model at PROJECT scope can only be associated to one project");
         }
     }
 
     @Override
     public Model updateModel(Model modelToBeUpdated,
                              Model newModel) {
-        if(newModel.hasProjects()){
-            newModel.getProjects().stream().forEach(project -> checkIfModelNameExistsInProject((Project) project,newModel));
+        if (newModel.hasProjects()) {
+            newModel.getProjects()
+                .stream()
+                .forEach(project -> checkIfModelNameExistsInProject((Project) project, newModel));
         }
+
         checkModelScopeIntegrity(newModel);
 
-        findModelUpdateListeners(modelToBeUpdated.getType()).stream().forEach(listener -> listener.execute(modelToBeUpdated, newModel));
+        findModelUpdateListeners(modelToBeUpdated.getType())
+            .stream()
+            .forEach(listener -> listener.execute(modelToBeUpdated, newModel));
 
         return modelRepository.updateModel(modelToBeUpdated,
                                            newModel);
@@ -306,7 +310,8 @@ public class ModelServiceImpl implements ModelService{
         }
 
         try {
-            Optional.ofNullable(modelToBeUpdated.getType()).flatMap(modelContentService::findModelContentConverter)
+            Optional.ofNullable(modelToBeUpdated.getType())
+                .flatMap(modelContentService::findModelContentConverter)
                 .flatMap(validator -> validator.convertToModelContent(fixedFileContent.getFileContent()))
                 .ifPresent(modelContent -> modelToBeUpdated.setTemplate(modelContent.getTemplate()));
         } catch (XMLException e) {
