@@ -40,7 +40,7 @@ public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandle
         bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));
         bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
 
-        entityManager.persist(bpmnActivityEntity);
+        entityManager.merge(bpmnActivityEntity);
     }
 
     @Override
