@@ -21,6 +21,7 @@ import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import java.util.Date;
 
@@ -40,10 +41,10 @@ public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandle
         bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));
         bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
 
-        if (entityManager.contains(bpmnActivityEntity)) {
-            entityManager.merge(bpmnActivityEntity);
-        } else {
+        try {
             entityManager.persist(bpmnActivityEntity);
+        } catch (EntityExistsException e) {
+            entityManager.merge(bpmnActivityEntity);
         }
     }
 
