@@ -23,6 +23,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import java.util.Objects;
 
 @Entity(name="BPMNActivity")
 @Table(name="BPMN_ACTIVITY", indexes={
@@ -57,5 +58,27 @@ public class BPMNActivityEntity extends BaseBPMNActivityEntity implements CloudB
                                       .append(bpmnActivity.getExecutionId())
                                       .toString();
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        BPMNActivityEntity other = (BPMNActivityEntity) obj;
+
+        return getId() != null && Objects.equals(getId(), other.getId());
     }
 }
