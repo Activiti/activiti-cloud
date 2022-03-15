@@ -129,22 +129,24 @@ public class QueryBPMNActivityIT {
         startActivity.setProcessInstanceId(process.getId());
         startActivity.setExecutionId("executionId");
 
-        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sid-68945AF1-396F-4B8A-B836-FC318F62313F", "startEvent1", "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94");
+        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sf-1",
+                                                                     "startEvent1",
+                                                                     "reviewTaskActivity");
         sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
         sequenceFlow.setProcessInstanceId(process.getId());
 
-        BPMNActivityImpl taskActivity = new BPMNActivityImpl("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask");
-        taskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
-        taskActivity.setProcessInstanceId(process.getId());
-        taskActivity.setExecutionId("executionId");
+        BPMNActivityImpl reviewTaskActivity = new BPMNActivityImpl("reviewTaskActivity", "Employee Review", "userTask");
+        reviewTaskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
+        reviewTaskActivity.setProcessInstanceId(process.getId());
+        reviewTaskActivity.setExecutionId("executionId");
 
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
                                    new CloudProcessStartedEventImpl(process, null, null),
                                    new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
                                    new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
                                    new CloudSequenceFlowTakenEventImpl(sequenceFlow),
-                                   new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId()),
-                                   new CloudBPMNActivityCompletedEventImpl(taskActivity, processDefinitionId, process.getId())
+                                   new CloudBPMNActivityStartedEventImpl(reviewTaskActivity, processDefinitionId, process.getId()),
+                                   new CloudBPMNActivityCompletedEventImpl(reviewTaskActivity, processDefinitionId, process.getId())
         );
 
         //when
@@ -156,25 +158,42 @@ public class QueryBPMNActivityIT {
             assertThat(activities).hasSize(2);
             assertThat(activities).extracting(BPMNActivityEntity::getElementId, BPMNActivityEntity::getActivityType,  BPMNActivityEntity::getStatus)
                                   .containsExactly(tuple(startActivity.getElementId(),startActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.COMPLETED),
-                                                   tuple(taskActivity.getElementId(),taskActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.COMPLETED));
+                                                   tuple(reviewTaskActivity.getElementId(),reviewTaskActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.COMPLETED));
         });
 
-        BPMNActivityImpl restartTaskActivity = new BPMNActivityImpl("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask");
-        restartTaskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
-        restartTaskActivity.setProcessInstanceId(process.getId());
-        restartTaskActivity.setExecutionId("executionId");
+        BPMNSequenceFlowImpl sequenceFlow2 = new BPMNSequenceFlowImpl("sf-2",
+                                                                      "reviewTaskActivity",
+                                                                      "employeeTaskActivity");
+        sequenceFlow2.setProcessDefinitionId(process.getProcessDefinitionId());
+        sequenceFlow2.setProcessInstanceId(process.getId());
 
-        eventsAggregator.addEvents(new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId()));
+        BPMNActivityImpl employeeTaskActivity = new BPMNActivityImpl("employeeTaskActivity", "Employee", "userTask");
+        employeeTaskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
+        employeeTaskActivity.setProcessInstanceId(process.getId());
+        employeeTaskActivity.setExecutionId("executionId");
+
+        BPMNSequenceFlowImpl sequenceFlow3 = new BPMNSequenceFlowImpl("sf-3",
+                                                                      "employeeTaskActivity",
+                                                                      "reviewTaskActivity");
+        sequenceFlow3.setProcessDefinitionId(process.getProcessDefinitionId());
+        sequenceFlow3.setProcessInstanceId(process.getId());
+
+        eventsAggregator.addEvents(new CloudSequenceFlowTakenEventImpl(sequenceFlow2),
+                                   new CloudBPMNActivityStartedEventImpl(employeeTaskActivity, processDefinitionId, process.getId()),
+                                   new CloudBPMNActivityCompletedEventImpl(employeeTaskActivity, processDefinitionId, process.getId()),
+                                   new CloudSequenceFlowTakenEventImpl(sequenceFlow3),
+                                   new CloudBPMNActivityStartedEventImpl(reviewTaskActivity, processDefinitionId, process.getId()));
 
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
             List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
 
-            assertThat(activities).hasSize(2);
+            assertThat(activities).hasSize(3);
             assertThat(activities).extracting(BPMNActivityEntity::getElementId, BPMNActivityEntity::getActivityType,  BPMNActivityEntity::getStatus)
-                                  .containsExactly(tuple(startActivity.getElementId(),startActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.COMPLETED),
-                                                   tuple(taskActivity.getElementId(),taskActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.STARTED));
+                                  .containsOnly(tuple(startActivity.getElementId(),startActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.COMPLETED),
+                                                tuple(employeeTaskActivity.getElementId(),employeeTaskActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.COMPLETED),
+                                                tuple(reviewTaskActivity.getElementId(),reviewTaskActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.STARTED));
         });
     }
 }
