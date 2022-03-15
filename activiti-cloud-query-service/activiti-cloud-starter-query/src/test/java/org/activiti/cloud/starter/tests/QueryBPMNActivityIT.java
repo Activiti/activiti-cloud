@@ -41,7 +41,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -62,8 +61,6 @@ import static org.awaitility.Awaitility.await;
 @DirtiesContext
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class QueryBPMNActivityIT {
-
-    private static final String PROC_URL = "/v1/process-instances";
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
@@ -86,12 +83,7 @@ public class QueryBPMNActivityIT {
     @Autowired
     private MyProducer producer;
 
-    @Autowired
-    private TestRestTemplate testRestTemplate;
-
     private String processDefinitionId = UUID.randomUUID().toString();
-
-    private String processDefinitionId2 = UUID.randomUUID().toString();
 
     private EventsAggregator eventsAggregator;
 
@@ -102,7 +94,7 @@ public class QueryBPMNActivityIT {
         eventsAggregator = new EventsAggregator(producer);
 
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
-        processDefinition.setId(processDefinitionId2);
+        processDefinition.setId(processDefinitionId);
         processDefinition.setKey("mySimpleProcess2");
         processDefinition.setName("My Simple Process");
 
@@ -129,7 +121,7 @@ public class QueryBPMNActivityIT {
         process.setId(UUID.randomUUID().toString());
         process.setName("process");
         process.setProcessDefinitionKey("mySimpleProcess2");
-        process.setProcessDefinitionId(processDefinitionId2);
+        process.setProcessDefinitionId(processDefinitionId);
         process.setProcessDefinitionVersion(1);
 
         BPMNActivityImpl startActivity = new BPMNActivityImpl("startEvent1", "", "startEvent");
