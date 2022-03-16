@@ -33,7 +33,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
@@ -63,7 +63,7 @@ import static org.awaitility.Awaitility.await;
 public class QueryBPMNActivityIT {
 
     @Autowired
-    private IdentityTokenProducer identityTokenProducer;
+    private KeycloakTokenProducer identityTokenProducer;
 
     @Autowired
     private ProcessDefinitionRepository processDefinitionRepository;
@@ -89,7 +89,7 @@ public class QueryBPMNActivityIT {
 
     @BeforeEach
     public void setUp() throws IOException {
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.setKeycloakTestUser("hruser");
 
         eventsAggregator = new EventsAggregator(producer);
 
