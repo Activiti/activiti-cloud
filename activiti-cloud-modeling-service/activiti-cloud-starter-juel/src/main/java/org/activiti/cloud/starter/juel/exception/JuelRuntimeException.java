@@ -15,9 +15,13 @@
  */
 package org.activiti.cloud.starter.juel.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * Generic Juel Runtime Exception
  */
+@ResponseStatus(code = HttpStatus.BAD_REQUEST)
 public class JuelRuntimeException extends RuntimeException {
     public JuelRuntimeException() {
         super();
