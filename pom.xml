@@ -68,6 +68,7 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.deploy.skip>true</maven.deploy.skip>
+    <liquibase.version>4.8.0</liquibase.version>
     <project.scm.organization>Activiti</project.scm.organization>
     <project.scm.repository>activiti-cloud-application</project.scm.repository>
     <project.year>2020</project.year>
