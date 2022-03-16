@@ -4,7 +4,7 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   push:
-    branches: [ develop ]
+    branches: [ develop, hotfix-M17.4 ]
   pull_request:
     branches: [ develop ]
 
@@ -62,15 +62,11 @@ jobs:
       - name: Build with Maven
         run: mvn -B verify
 
-      - name: Install jx-release-version
-        if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-jx-release-version@v1.1.0
-
-      - name: Bump version with jx-release-version
+      - name: Create temporary tag 7.1.774
         if: ${{ github.event_name == 'push' }}
         run: |
           git fetch --tags -q
-          echo $(jx-release-version -next-version increment) > VERSION
+          echo 7.1.774 > VERSION
 
       - name: Set preview version
         if: ${{ contains(github.head_ref, 'preview') }}
@@ -108,29 +104,3 @@ jobs:
           git commit -am "Release $VERSION" --allow-empty
           git tag -fa v$VERSION -m "Release version $VERSION"
           git push -f -q origin v$VERSION
-
-      - name: Install updatebot
-        if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.1.0
-
-      - name: Run updatebot
-        if: ${{ github.event_name == 'push' }}
-        run: |
-          echo -e "https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
-          updatebot push-version --kind maven \
-            org.activiti.cloud:activiti-cloud-audit-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-api-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-parent $VERSION \
-            org.activiti.cloud:activiti-cloud-build-parent $VERSION \
-            org.activiti.cloud:activiti-cloud-build-dependencies-parent $VERSION\
-            org.activiti.cloud:activiti-cloud-connectors-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-messages-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-modeling-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-query-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-acceptance-tests-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-service-common-dependencies $VERSION
-        env:
-          GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
-          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
