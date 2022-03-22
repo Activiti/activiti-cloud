@@ -45,6 +45,12 @@
     },
     {
       "name": "testgroup"
+    },
+    {
+      "name": "salesgroup",
+      "realmRoles": [
+        "ACTIVITI_USER"
+      ]
     }
   ],
   "users": [
