@@ -42,13 +42,18 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         IntegrationContext integrationContext = integrationEvent.getEntity();
         String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
-        IntegrationContextEntity entity = new IntegrationContextEntity(event.getServiceName(),
-                                                                       event.getServiceFullName(),
-                                                                       event.getServiceVersion(),
-                                                                       event.getAppName(),
-                                                                       event.getAppVersion());
-        entity.setId(entityId);
-        entity.setClientId(integrationContext.getClientId());
+
+        // Activity can be cyclical, so try to find existing before creating a new one
+        IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, entityId);
+        if (entity == null) {
+            entity = new IntegrationContextEntity(event.getServiceName(),
+                event.getServiceFullName(),
+                event.getServiceVersion(),
+                event.getAppName(),
+                event.getAppVersion());
+            entity.setId(entityId);
+            entity.setClientId(integrationContext.getClientId());
+        }
         entity.setClientName(integrationContext.getClientName());
         entity.setClientType(integrationContext.getClientType());
         entity.setConnectorType(integrationContext.getConnectorType());
