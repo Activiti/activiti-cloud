@@ -15,8 +15,12 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.*;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
@@ -69,6 +73,8 @@ public class QueryAdminProcessServiceTasksIT {
     private static final String SERVICE_TASK_TYPE = "serviceTask";
 
     private static final String PROC_URL = "/admin/v1/process-instances";
+
+    public static final String SERVICE_TASKS_URL = "/admin/v1/service-tasks";
 
     private static final ParameterizedTypeReference<PagedModel<CloudServiceTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudServiceTask>>() {
     };
@@ -455,6 +461,148 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getBody().getStackTraceElements()).isNotEmpty();
 
         });
+    }
+    private CloudIntegrationContext retrieveIntegrationContext(String serviceTaskId) {
+        ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange(
+            "/admin/v1/service-tasks/{serviceTaskId}/integration-context",
+            HttpMethod.GET,
+            keycloakTokenProducer.entityWithAuthorizationHeader(),
+            SINGLE_INT_CONTEXT_RESPONSE_TYPE,
+            serviceTaskId);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        return responseEntity.getBody();
+    }
+
+    private void sendIntegrationResultReceivedEvent(IntegrationContext integrationContext) {
+        eventsAggregator.addEvents(new CloudIntegrationResultReceivedEventImpl(integrationContext));
+
+        eventsAggregator.sendAll();
+    }
+
+    private void sendIntegrationRequestedEvent(IntegrationContext integrationContext) {
+        eventsAggregator.addEvents(new CloudIntegrationRequestedEventImpl(integrationContext));
+
+        eventsAggregator.sendAll();
+    }
+
+    private CloudServiceTask waitForServiceTask(BPMNActivityStatus status) {
+        await()
+            .untilAsserted(() -> {
+                final PagedModel<CloudServiceTask> page = testRestTemplate.exchange(
+                    SERVICE_TASKS_URL, HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE).getBody();
+                assertThat(page)
+                    .isNotEmpty();
+                final CloudServiceTask serviceTask = page.getContent().iterator().next();
+                assertThat(serviceTask.getStatus()).isEqualTo(status);
+            });
+        return retrieveServiceTask();
+    }
+
+    private CloudServiceTask waitForServiceTask() {
+        return waitForServiceTask(BPMNActivityStatus.STARTED);
+    }
+
+    private CloudServiceTask retrieveServiceTask() {
+        ResponseEntity<PagedModel<CloudServiceTask>> serviceTasksResponse = testRestTemplate.exchange(
+            SERVICE_TASKS_URL,
+            HttpMethod.GET,
+            keycloakTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_TASKS_RESPONSE_TYPE);
+
+        assertThat(serviceTasksResponse.getBody()).isNotEmpty();
+
+        return serviceTasksResponse.getBody()
+            .getContent()
+            .iterator()
+            .next();
+    }
+
+    private void sendActivitiStartedEvent(ProcessInstanceImpl process, BPMNActivityImpl bpmnActivity) {
+        eventsAggregator.addEvents(
+            new CloudBPMNActivityStartedEventImpl(bpmnActivity, process.getProcessDefinitionId(),
+                process.getId()));
+
+        eventsAggregator.sendAll();
+    }
+
+    private void sendActivityCompletedEvent(BPMNActivity bpmnActivity, ProcessInstance processInstance) {
+        final CloudBPMNActivityCompletedEventImpl activityCompletedEvent = new CloudBPMNActivityCompletedEventImpl(
+            bpmnActivity, processInstance.getProcessDefinitionId(),
+            processInstance.getId());
+        eventsAggregator.addEvents(activityCompletedEvent);
+        eventsAggregator.sendAll();
+    }
+
+    private void waitForIntegrationContext(CloudServiceTask serviceTask, IntegrationContextStatus status) {
+        await()
+            .untilAsserted(() -> {
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(
+                    serviceTask.getId());
+                assertThat(cloudIntegrationContext.getStatus()).isEqualTo(status);
+            });
+    }
+
+    private ProcessInstanceImpl sendEventsForStartSimpleProcessInstance() {
+        ProcessInstanceImpl process = startSimpleProcessInstance();
+        eventsAggregator.sendAll();
+        return process;
+    }
+
+    private IntegrationContextImpl buildIntegrationContext(ProcessInstance process,
+        String rootProcessInstanceId, CloudBPMNActivity serviceTask) {
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setProcessInstanceId(process.getId());
+        integrationContext.setRootProcessInstanceId(rootProcessInstanceId);
+        integrationContext.setExecutionId(serviceTask.getExecutionId());
+        integrationContext.setClientId(serviceTask.getElementId());
+        integrationContext.setClientType(serviceTask.getActivityType());
+        integrationContext.setClientName(serviceTask.getActivityName());
+        integrationContext.setProcessDefinitionId(process.getProcessDefinitionId());
+        integrationContext.addInBoundVariable("key", "value");
+        return integrationContext;
+    }
+
+    private BPMNActivityImpl buildServiceTask(String executionId, ProcessInstanceImpl process) {
+        BPMNActivityImpl activity = new BPMNActivityImpl(SERVICE_TASK_ELEMENT_ID, "Service Task",
+            SERVICE_TASK_TYPE);
+        activity.setProcessDefinitionId(process.getProcessDefinitionId());
+        activity.setProcessInstanceId(process.getId());
+        activity.setExecutionId(executionId);
+        return activity;
+    }
+
+    @Test
+    public void should_supportLoopInvolvingServiceTasks() {
+        //given
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        CloudServiceTask serviceTaskIt1 = waitForServiceTask();
+
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+        IntegrationContextImpl integrationContext = buildIntegrationContext(process,
+            rootProcessInstanceId,
+            serviceTaskIt1);
+
+        sendIntegrationRequestedEvent(integrationContext);
+        sendIntegrationResultReceivedEvent(integrationContext);
+        sendActivityCompletedEvent(serviceTaskIt1, process);
+
+        waitForServiceTask(BPMNActivityStatus.COMPLETED);
+        waitForIntegrationContext(serviceTaskIt1, IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+
+        //when the process loop back and reaches the task a second time
+        final BPMNActivityImpl bpmnActivity = buildServiceTask(serviceTaskIt1.getExecutionId(),
+            process);
+        sendActivitiStartedEvent(process, bpmnActivity);
+
+        final CloudServiceTask serviceTask = waitForServiceTask(BPMNActivityStatus.STARTED);
+        IntegrationContextImpl integrationContextIt2 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
+        sendIntegrationRequestedEvent(integrationContextIt2);
+
+        //then
+        waitForIntegrationContext(serviceTaskIt1, IntegrationContextStatus.INTEGRATION_REQUESTED);
     }
 
     @Test
