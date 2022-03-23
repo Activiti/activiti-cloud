@@ -72,7 +72,7 @@ public class IdentityManagementController {
                                                   @RequestParam(value = "role", required = false)  Set<String> roles,
                                                   Pageable pageable) {
         List<Group> groups = identityManagementService.findGroups(search, roles, pageable.getPageNumber(), pageable.getPageSize());
-        Page<Group> page = new PageImpl<>(groups);
+        Page<Group> page = new PageImpl<>(groups, pageable, groups.size());
         return pagedCollectionGroupAssembler.toModel(pageable,
                                                     page,
                                                     modelRepresentationGroupAssembler);

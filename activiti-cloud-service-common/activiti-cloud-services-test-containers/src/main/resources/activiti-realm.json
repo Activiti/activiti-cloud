@@ -183,6 +183,27 @@
       ]
     },
     {
+      "username": "johnsnow",
+      "enabled": true,
+      "firstName": "John",
+      "lastName": "Snow",
+      "email": "john@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "ACTIVITI_USER",
+        "uma_authorization",
+        "offline_access"
+      ],
+      "groups": [
+        "/hr"
+      ]
+    },
+    {
       "username": "modeler",
       "enabled": true,
       "firstName": "activiti",
