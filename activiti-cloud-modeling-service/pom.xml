@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.1.775</version>
+    <version>7.1.0-M17.5</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-modeling-service-parent</artifactId>
-  <version>7.1.775</version>
+  <version>7.1.0-M17.5</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Modeling Services :: Parent</name>
   <modules>
@@ -20,7 +20,7 @@
     <module>activiti-cloud-acceptance-tests-modeling</module>
   </modules>
   <properties>
-    <activiti.version>7.1.0-M17.4</activiti.version>
+    <activiti.version>7.1.0-M17.5</activiti.version>
     <everit-json-schema.version>1.12.2</everit-json-schema.version>
     <commons-collections4.version>4.4</commons-collections4.version>
   </properties>
