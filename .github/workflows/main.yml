@@ -4,7 +4,7 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   push:
-    branches: [ develop, hotfix-M17.4 ]
+    branches: [ develop, hotfix-M17.5 ]
   pull_request:
     branches: [ develop ]
 
@@ -62,11 +62,11 @@ jobs:
       - name: Build with Maven
         run: mvn -B verify
 
-      - name: Create temporary tag 7.1.774
+      - name: Create temporary tag 7.1.775
         if: ${{ github.event_name == 'push' }}
         run: |
           git fetch --tags -q
-          echo 7.1.774 > VERSION
+          echo 7.1.775 > VERSION
 
       - name: Set preview version
         if: ${{ contains(github.head_ref, 'preview') }}
