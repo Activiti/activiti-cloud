@@ -147,6 +147,12 @@
       <organization>${project.organization.name}</organization>
       <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
+    <developer>
+      <id>gicappa</id>
+      <name>Gian Carlo Pace</name>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
+    </developer>
   </developers>
   <modules>
     <module>activiti-cloud-build</module>
