@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.rest.config;
 
-import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeLinkRelationProvider;
@@ -34,6 +33,8 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UriComponents;
+
+import java.util.List;
 
 /**
  * Extended WebMvcConfigurer
@@ -91,5 +92,4 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
     public ValidationErrorRepresentationModelAssembler ValidationErrorRepresentationModelAssembler() {
         return new ValidationErrorRepresentationModelAssembler();
     }
-
 }
