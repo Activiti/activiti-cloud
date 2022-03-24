@@ -13,26 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.modeling.rest.assembler;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+package org.activiti.cloud.identity.web.assembler;
 
 import org.activiti.cloud.identity.model.Group;
-import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.services.modeling.rest.controller.ModelController;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
 
 /**
- * Assembler for {@link Model} resource
+ * Assembler for {@link Group} resource
  */
+@Component
 public class ModelRepresentationGroupAssembler implements RepresentationModelAssembler<Group, EntityModel<Group>> {
 
     @Override
     public EntityModel<Group> toModel(Group group) {
-        return EntityModel.of(group,
-                              linkTo(methodOn(ModelController.class).getModel(group.getId())).withSelfRel());
+        return EntityModel.of(group);
     }
 
 }

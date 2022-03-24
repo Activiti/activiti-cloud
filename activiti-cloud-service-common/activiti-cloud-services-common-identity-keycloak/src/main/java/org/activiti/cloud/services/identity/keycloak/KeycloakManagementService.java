@@ -25,10 +25,8 @@ import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-@Component
 public class KeycloakManagementService implements IdentityManagementService {
 
     private final KeycloakClient keycloakClient;

@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.modeling.rest.controller;
+package org.activiti.cloud.identity.web.controller;
 
 import java.util.List;
 import java.util.Set;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.identity.IdentityManagementService;
+import org.activiti.cloud.identity.web.assembler.ModelRepresentationGroupAssembler;
+import org.activiti.cloud.identity.web.assembler.ModelRepresentationUserAssembler;
 import org.activiti.cloud.identity.model.Group;
-import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationGroupAssembler;
-import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationUserAssembler;
+import org.activiti.cloud.identity.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-import org.activiti.cloud.identity.model.User;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
