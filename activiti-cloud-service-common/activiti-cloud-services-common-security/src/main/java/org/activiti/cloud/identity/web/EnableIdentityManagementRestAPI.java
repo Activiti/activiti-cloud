@@ -25,6 +25,10 @@ import org.activiti.cloud.identity.web.assembler.ModelRepresentationUserAssemble
 import org.activiti.cloud.identity.web.controller.IdentityManagementController;
 import org.springframework.context.annotation.Import;
 
+/**
+ * This annotation enables the IdentityManagementRestController that exposes
+ * users and groups search using the target identity management service (e.g. Keycloak)
+ */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
