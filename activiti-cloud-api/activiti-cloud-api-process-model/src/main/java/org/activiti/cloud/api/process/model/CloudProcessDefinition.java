@@ -16,8 +16,16 @@
 package org.activiti.cloud.api.process.model;
 
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.VariableDefinition;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
+import java.util.List;
+
 public interface CloudProcessDefinition extends CloudRuntimeEntity, ProcessDefinition {
+
+    @Override
+    default List<VariableDefinition> getVariableDefinitions() {
+        return List.of();
+    }
 
 }
