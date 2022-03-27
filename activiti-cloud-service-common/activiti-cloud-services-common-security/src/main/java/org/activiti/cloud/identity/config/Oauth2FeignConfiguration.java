@@ -19,6 +19,7 @@ import feign.RequestInterceptor;
 import java.util.Collection;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
@@ -33,6 +34,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Configuration
+@ConditionalOnBean(ClientRegistrationRepository.class) //Load this configuration only if Client Security is enabled
 public class Oauth2FeignConfiguration {
 
     @Bean
