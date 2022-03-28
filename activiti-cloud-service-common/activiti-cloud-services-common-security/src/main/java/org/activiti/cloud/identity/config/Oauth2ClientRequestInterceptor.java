@@ -37,11 +37,11 @@ public class Oauth2ClientRequestInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        boolean isIdpClient = clientRegistrationId.equals(template.feignTarget().name());
+        boolean isIdpClient = template.feignTarget().name().equals(clientRegistrationId);
         if (isIdpClient) {
             OAuth2AccessToken accessToken = oAuth2AuthorizedClientManager.authorize(oAuth2AuthorizeRequest).getAccessToken();
             String authorizationToken = String.format("%s %s", accessToken.getTokenType().getValue(), accessToken.getTokenValue());
-            template.header("Authorization", new String[]{authorizationToken});
+            template.header("Authorization", authorizationToken);
         }
     }
 
