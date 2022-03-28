@@ -32,6 +32,7 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.activiti.engine.RuntimeService;
+import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -476,8 +477,8 @@ class MessageEventsIT {
         IntStream.range(0, processInstances)
                 .mapToObj(i -> BUSINESS_KEY + i)
                 .map("messages-app:BpmnMessage:"::concat)
-                .forEach(
-                        groupId -> assertThat(messageGroupStore.getMessagesForGroup(groupId)).isEmpty());
+                .forEach(groupId -> await().atMost(Durations.FIVE_SECONDS)
+                    .untilAsserted(() -> assertThat(messageGroupStore.getMessagesForGroup(groupId)).isEmpty()));
 
     }
 }
