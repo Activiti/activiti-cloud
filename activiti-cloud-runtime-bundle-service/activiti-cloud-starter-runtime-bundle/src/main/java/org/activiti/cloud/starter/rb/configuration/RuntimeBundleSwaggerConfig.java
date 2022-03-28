@@ -15,32 +15,59 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import com.fasterxml.classmate.TypeResolver;
-import java.util.List;
-import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
-import org.activiti.cloud.common.swagger.DocketCustomizer;
-import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
+import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
+import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
+import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.model.payloads.UpdateProcessPayload;
+import org.activiti.api.task.model.payloads.AssignTaskPayload;
+import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
+import org.activiti.api.task.model.payloads.CandidateUsersPayload;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
+import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
+import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
+import org.springdoc.core.GroupedOpenApi;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
-public class RuntimeBundleSwaggerConfig {
-
-    @Bean(name = "rbApiDocket")
-    @ConditionalOnMissingBean(name = "rbApiDocket")
-    public Docket rbApiDocket(SwaggerDocketBuilder docketBuilder,
-        @Value("${activiti.cloud.swagger.rb-base-path:}") String rbSwaggerBasePath) {
-        return docketBuilder.buildApiDocket("Runtime Bundle ReST API", "Runtime Bundle",
-            rbSwaggerBasePath, "org.activiti.cloud.services.rest");
-    }
+public class RuntimeBundleSwaggerConfig implements InitializingBean {
 
     @Bean
-    @ConditionalOnMissingBean
-    public PayloadsDocketCustomizer payloadsDocketCustomizer() {
-        return new PayloadsDocketCustomizer();
+    @ConditionalOnMissingBean(name = "runtimeBundleApi")
+    public GroupedOpenApi runtimeBundleApi(@Value("${activiti.cloud.swagger.rb-base-path:}") String swaggerBasePath) {
+        return GroupedOpenApi.builder()
+            .group("Runtime Bundle")
+            .packagesToScan("org.activiti.cloud.services.rest")
+            .addOpenApiCustomiser(openApi -> openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath))
+            .build();
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        SwaggerDocUtils.replaceWithClass(StartProcessPayload.class, PayloadApiModels.StartProcessPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(SignalPayload.class, PayloadApiModels.SignalPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(UpdateProcessPayload.class, PayloadApiModels.UpdateProcessPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(SetProcessVariablesPayload.class, PayloadApiModels.SetProcessVariablesPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(RemoveProcessVariablesPayload.class, PayloadApiModels.RemoveProcessVariablesPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(AssignTaskPayload.class, PayloadApiModels.AssignTaskPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(CompleteTaskPayload.class, PayloadApiModels.CompleteTaskPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(CandidateGroupsPayload.class, PayloadApiModels.CandidateGroupsPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(CandidateUsersPayload.class, PayloadApiModels.CandidateUsersPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(CreateTaskPayload.class, PayloadApiModels.CreateTaskPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(CreateTaskVariablePayload.class, PayloadApiModels.CreateTaskVariablePayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(UpdateTaskVariablePayload.class, PayloadApiModels.UpdateTaskVariablePayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(UpdateTaskPayload.class, PayloadApiModels.UpdateTaskPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(SaveTaskPayload.class, PayloadApiModels.SaveTaskPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(CreateProcessInstancePayload.class, PayloadApiModels.CreateProcessInstancePayloadApiModel.class);
+    }
 }

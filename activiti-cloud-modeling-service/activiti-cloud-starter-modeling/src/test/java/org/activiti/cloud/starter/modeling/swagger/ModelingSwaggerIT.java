@@ -40,7 +40,7 @@ public class ModelingSwaggerIT {
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
-        mockMvc.perform(get("/v3/api-docs?group=Modeling").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/springdoc/v3/api-docs/Modeling").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.servers").isNotEmpty())
@@ -52,7 +52,8 @@ public class ModelingSwaggerIT {
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
             .andExpect(jsonPath("$.info.title").value("Modeling ReST API"))
             .andExpect(jsonPath("$['paths']['/v1/projects/{projectId}/models']['get']['parameters'][*]['name']",
-                containsInAnyOrder("projectId", "type", "skipCount", "maxItems", "sort")));
+                containsInAnyOrder("projectId", "type", "skipCount", "maxItems", "sort")))
+            .andExpect(jsonPath("$.x-service-url-prefix").value(""));
     }
 
 }

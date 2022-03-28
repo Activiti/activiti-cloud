@@ -15,31 +15,32 @@
  */
 package org.activiti.cloud.starter.audit.configuration;
 
-import com.fasterxml.classmate.TypeResolver;
-import java.util.List;
-import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
-import org.activiti.cloud.common.swagger.DocketCustomizer;
-import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
+import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
+import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventModel;
+import org.springdoc.core.GroupedOpenApi;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
-public class AuditSwaggerConfig {
-
-    @Bean(name = "auditApiDocket")
-    @ConditionalOnMissingBean(name = "auditApiDocket")
-    public Docket auditApiDocket(SwaggerDocketBuilder docketBuilder,
-        @Value("${activiti.cloud.swagger.audit-base-path:}") String auditSwaggerBasePath) {
-        return docketBuilder.buildApiDocket("Audit Service ReST API", "Audit",
-            auditSwaggerBasePath, "org.activiti.cloud.services.audit");
-    }
+public class AuditSwaggerConfig implements InitializingBean {
 
     @Bean
-    public DocketCustomizer payloadsDocketCustomizer() {
-        return new PayloadsDocketCustomizer();
+    @ConditionalOnMissingBean(name = "auditApi")
+    public GroupedOpenApi auditApi(@Value("${activiti.cloud.swagger.audit-base-path:}") String swaggerBasePath) {
+        return GroupedOpenApi.builder()
+            .group("Audit")
+            .packagesToScan("org.activiti.cloud.services.audit")
+            .addOpenApiCustomiser(openApi -> openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath))
+            .build();
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        SwaggerDocUtils.replaceWithClass(CloudRuntimeEvent.class, CloudRuntimeEventModel.class);
+    }
 }
