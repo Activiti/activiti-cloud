@@ -16,24 +16,50 @@
 package org.activiti.cloud.identity.config;
 
 import feign.RequestInterceptor;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesRegistrationAdapter;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 
 @Configuration
-@ConditionalOnProperty("activiti.cloud.services.oauth2.client-registration-id")
+@ConditionalOnProperty("activiti.cloud.services.oauth2.iam-name")
+@EnableConfigurationProperties(OAuth2ClientProperties.class)
 public class Oauth2FeignConfiguration {
 
+    @Value("${activiti.cloud.services.oauth2.iam-name}")
+    private String clientRegistrationId;
+
     @Bean
+    @ConditionalOnMissingBean({ClientRegistrationRepository.class})
+    public InMemoryClientRegistrationRepository clientRegistrationRepository(OAuth2ClientProperties properties) {
+        List<ClientRegistration> registrations = new ArrayList(OAuth2ClientPropertiesRegistrationAdapter.getClientRegistrations(properties).values());
+        return new InMemoryClientRegistrationRepository(registrations);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean({OAuth2AuthorizedClientService.class})
+    public OAuth2AuthorizedClientService oauth2AuthorizedClientService(ClientRegistrationRepository clientRegistrationRepository) {
+        return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientServiceAndManager(ClientRegistrationRepository clientRegistrationRepository, OAuth2AuthorizedClientService authorizedClientService) {
 
         OAuth2AuthorizedClientProvider authorizedClientProvider =
@@ -49,17 +75,11 @@ public class Oauth2FeignConfiguration {
 
     @Bean
     public RequestInterceptor requestInterceptor(OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, OAuth2AuthorizeRequest oAuth2AuthorizeRequest) {
-        return template -> {
-            if ("keycloak".equals(template.feignTarget().name())) {
-                OAuth2AccessToken accessToken = oAuth2AuthorizedClientManager.authorize(oAuth2AuthorizeRequest).getAccessToken();
-                String authorizationToken = String.format("%s %s", accessToken.getTokenType().getValue(), accessToken.getTokenValue());
-                template.header("Authorization", new String[]{authorizationToken});
-            }
-        };
+        return new Oauth2ClientRequestInterceptor(clientRegistrationId, oAuth2AuthorizedClientManager, oAuth2AuthorizeRequest);
     }
 
     @Bean
-    public OAuth2AuthorizeRequest oAuth2AuthorizeRequest(@Value("${activiti.cloud.services.oauth2.client-registration-id}") String clientRegistrationId, OAuth2AuthorizedClientManager authorizedClientManager) {
+    public OAuth2AuthorizeRequest oAuth2AuthorizeRequest() {
         return OAuth2AuthorizeRequest
             .withClientRegistrationId(clientRegistrationId)
             .principal("ActivitiCloud")
