@@ -15,22 +15,30 @@
  */
 package org.activiti.cloud.starter.modeling.configuration;
 
-import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
+import io.swagger.v3.oas.models.OpenAPI;
+import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
+import org.springdoc.core.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
 public class ModelingSwaggerConfig {
 
-    @Bean(name = "modelingApiDocket")
-    @ConditionalOnMissingBean(name = "modelingApiDocket")
-    public Docket modelingApiDocket(SwaggerDocketBuilder swaggerDocketBuilder,
-        @Value("${activiti.cloud.swagger.modeling-base-path:}") String swaggerBasePath) {
-        return swaggerDocketBuilder.buildApiDocket("Modeling ReST API", "Modeling", swaggerBasePath,
-            "org.activiti.cloud.services.modeling.rest");
+    @Bean
+    @ConditionalOnMissingBean
+    public OpenAPI baseOpenApi(BaseOpenApiBuilder baseOpenApiBuilder,
+                               @Value("${activiti.cloud.swagger.modeling-base-path:}") String swaggerBasePath) {
+        return baseOpenApiBuilder.build("Modeling ReST API", swaggerBasePath);
     }
 
+    @Bean
+    @ConditionalOnMissingBean(name = "modelingApi")
+    public GroupedOpenApi modelingApi() {
+        return GroupedOpenApi.builder()
+            .group("Modeling")
+            .packagesToScan("org.activiti.cloud.services.modeling.rest")
+            .build();
+    }
 }

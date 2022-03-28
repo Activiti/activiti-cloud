@@ -18,8 +18,6 @@ package org.activiti.cloud.starter.tests.swagger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import java.io.File;
-import java.nio.file.Files;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.spring.ProcessDeployedEventProducer;
@@ -31,6 +29,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.io.File;
+import java.nio.file.Files;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
@@ -52,7 +54,7 @@ class RuntimeBundleSwaggerITSupport {
      */
     @Test
     void generateSwagger() throws Exception {
-        mockMvc.perform(get("/v3/api-docs?group=Runtime Bundle").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/springdoc/v3/api-docs/Runtime Bundle").accept(MediaType.APPLICATION_JSON))
             .andDo((result) -> {
                 JsonNode jsonNodeTree = objectMapper
                     .readTree(result.getResponse().getContentAsByteArray());

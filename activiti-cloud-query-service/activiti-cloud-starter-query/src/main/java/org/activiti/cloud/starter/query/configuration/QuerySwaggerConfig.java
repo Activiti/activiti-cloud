@@ -15,31 +15,31 @@
  */
 package org.activiti.cloud.starter.query.configuration;
 
-import com.fasterxml.classmate.TypeResolver;
-import java.util.List;
-import org.activiti.cloud.common.swagger.BaseAPIInfoBuilder;
-import org.activiti.cloud.common.swagger.DocketCustomizer;
-import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
+import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
+import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
+import org.activiti.cloud.services.query.rest.VariableSearch;
+import org.springdoc.core.GroupedOpenApi;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
-public class QuerySwaggerConfig {
-
-    @Bean(name = "queryApiDocket")
-    @ConditionalOnMissingBean(name = "queryApiDocket")
-    public Docket queryApiDocket(SwaggerDocketBuilder docketBuilder,
-        @Value("${activiti.cloud.swagger.query-base-path:}") String querySwaggerBasePath) {
-        return docketBuilder.buildApiDocket("Query Service ReST API", "Query",
-            querySwaggerBasePath, "org.activiti.cloud.services.query.rest");
-    }
+public class QuerySwaggerConfig implements InitializingBean {
 
     @Bean
-    @ConditionalOnMissingBean
-    public VariableSearchDocketCustomizer variableSearchDocketCustomizer(TypeResolver typeResolver) {
-        return new VariableSearchDocketCustomizer(typeResolver);
+    @ConditionalOnMissingBean(name = "queryApi")
+    public GroupedOpenApi queryApi(@Value("${activiti.cloud.swagger.query-base-path:}") String querySwaggerBasePath) {
+        return GroupedOpenApi.builder()
+            .group("Query")
+            .packagesToScan("org.activiti.cloud.services.query.rest")
+            .addOpenApiCustomiser(openApi -> openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, querySwaggerBasePath))
+            .build();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        SwaggerDocUtils.replaceParameterObjectWithClass(VariableSearch.class, VariableSearchWrapperMixin.class);
     }
 }

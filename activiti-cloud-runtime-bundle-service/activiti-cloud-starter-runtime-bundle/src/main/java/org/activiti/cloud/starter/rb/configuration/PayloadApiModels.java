@@ -15,8 +15,7 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
@@ -32,120 +31,99 @@ import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
-import org.activiti.cloud.common.swagger.DocketCustomizer;
-import springfox.documentation.spring.web.plugins.Docket;
 
 /**
  * Swagger Api Models substitution with the payload field enriched Models version
  */
-public class PayloadsDocketCustomizer implements DocketCustomizer {
+public class PayloadApiModels {
 
-    public Docket customize(Docket docket) {
-        return docket
-                .directModelSubstitute(StartProcessPayload.class, StartProcessPayloadApiModel.class)
-                .directModelSubstitute(SignalPayload.class, SignalPayloadApiModel.class)
-                .directModelSubstitute(UpdateProcessPayload.class, UpdateProcessPayloadApiModel.class)
-                .directModelSubstitute(SetProcessVariablesPayload.class, SetProcessVariablesPayloadApiModel.class)
-                .directModelSubstitute(RemoveProcessVariablesPayload.class, RemoveProcessVariablesPayloadApiModel.class)
-                .directModelSubstitute(AssignTaskPayload.class, AssignTaskPayloadApiModel.class)
-                .directModelSubstitute(CompleteTaskPayload.class, CompleteTaskPayloadApiModel.class)
-                .directModelSubstitute(CandidateGroupsPayload.class, CandidateGroupsPayloadApiModel.class)
-                .directModelSubstitute(CandidateUsersPayload.class, CandidateUsersPayloadApiModel.class)
-                .directModelSubstitute(CreateTaskPayload.class, CreateTaskPayloadApiModel.class)
-                .directModelSubstitute(CreateTaskVariablePayload.class, CreateTaskVariablePayloadApiModel.class)
-                .directModelSubstitute(UpdateTaskVariablePayload.class, UpdateTaskVariablePayloadApiModel.class)
-                .directModelSubstitute(UpdateTaskPayload.class, UpdateTaskPayloadApiModel.class)
-                .directModelSubstitute(SaveTaskPayload.class, SaveTaskPayloadApiModel.class)
-                .directModelSubstitute(CreateProcessInstancePayload.class, CreateProcessInstancePayloadApiModel.class);
-    }
-
-    @ApiModel("StartProcessPayload")
+    @Schema(name = "StartProcessPayload")
     public static class StartProcessPayloadApiModel extends StartProcessPayload {
-        @ApiModelProperty(allowableValues = "StartProcessPayload")
+        @Schema(allowableValues = "StartProcessPayload")
         public String payloadType;
     }
 
-    @ApiModel("SignalPayload")
+    @Schema(name = "SignalPayload")
     public static class SignalPayloadApiModel extends SignalPayload {
-        @ApiModelProperty(allowableValues = "SignalPayload")
+        @Schema(allowableValues = "SignalPayload")
         public String payloadType;
     }
 
-    @ApiModel("UpdateProcessPayload")
+    @Schema(name = "UpdateProcessPayload")
     public static class UpdateProcessPayloadApiModel extends UpdateProcessPayload {
-        @ApiModelProperty(allowableValues = "UpdateProcessPayload")
+        @Schema(allowableValues = "UpdateProcessPayload")
         public String payloadType;
     }
 
-    @ApiModel("SetProcessVariablesPayload")
+    @Schema(name = "SetProcessVariablesPayload")
     public static class SetProcessVariablesPayloadApiModel extends SetProcessVariablesPayload {
-        @ApiModelProperty(allowableValues = "SetProcessVariablesPayload")
+        @Schema(allowableValues = "SetProcessVariablesPayload")
         public String payloadType;
     }
 
-    @ApiModel("RemoveProcessVariablesPayload")
+    @Schema(name = "RemoveProcessVariablesPayload")
     public static class RemoveProcessVariablesPayloadApiModel extends RemoveProcessVariablesPayload {
-        @ApiModelProperty(allowableValues = "RemoveProcessVariablesPayload")
+        @Schema(allowableValues = "RemoveProcessVariablesPayload")
         public String payloadType;
     }
 
-    @ApiModel("CandidateGroupsPayload")
+    @Schema(name = "CandidateGroupsPayload")
     public static class CandidateGroupsPayloadApiModel extends CandidateGroupsPayload {
-        @ApiModelProperty(allowableValues = "CandidateGroupsPayload")
+        @Schema(allowableValues = "CandidateGroupsPayload")
         public String payloadType;
     }
 
-    @ApiModel("CandidateUsersPayload")
+    @Schema(name = "CandidateUsersPayload")
     public static class CandidateUsersPayloadApiModel extends CandidateUsersPayload {
-        @ApiModelProperty(allowableValues = "CandidateUsersPayload")
+        @Schema(allowableValues = "CandidateUsersPayload")
         public String payloadType;
     }
 
-    @ApiModel("AssignTaskPayload")
+    @Schema(name = "AssignTaskPayload")
     public static class AssignTaskPayloadApiModel extends AssignTaskPayload {
-        @ApiModelProperty(allowableValues = "AssignTaskPayload")
+        @Schema(allowableValues = "AssignTaskPayload")
         public String payloadType;
     }
 
-    @ApiModel("CompleteTaskPayload")
+    @Schema(name = "CompleteTaskPayload")
     public static class CompleteTaskPayloadApiModel extends CompleteTaskPayload {
-        @ApiModelProperty(allowableValues = "CompleteTaskPayload")
+        @Schema(allowableValues = "CompleteTaskPayload")
         public String payloadType;
     }
 
-    @ApiModel("CreateTaskPayload")
+    @Schema(name = "CreateTaskPayload")
     public static class CreateTaskPayloadApiModel extends CreateTaskPayload {
-        @ApiModelProperty(allowableValues = "CreateTaskPayload")
+        @Schema(allowableValues = "CreateTaskPayload")
         public String payloadType;
     }
 
-    @ApiModel("CreateTaskVariablePayload")
+    @Schema(name = "CreateTaskVariablePayload")
     public static class CreateTaskVariablePayloadApiModel extends CreateTaskVariablePayload {
-        @ApiModelProperty(allowableValues = "CreateTaskVariablePayload")
+        @Schema(allowableValues = "CreateTaskVariablePayload")
         public String payloadType;
     }
 
-    @ApiModel("UpdateTaskVariablePayload")
+    @Schema(name = "UpdateTaskVariablePayload")
     public static class UpdateTaskVariablePayloadApiModel extends UpdateTaskVariablePayload {
-        @ApiModelProperty(allowableValues = "UpdateTaskVariablePayload")
+        @Schema(allowableValues = "UpdateTaskVariablePayload")
         public String payloadType;
     }
 
-    @ApiModel("UpdateTaskPayload")
+    @Schema(name = "UpdateTaskPayload")
     public static class UpdateTaskPayloadApiModel extends UpdateTaskPayload {
-        @ApiModelProperty(allowableValues = "UpdateTaskPayload")
+        @Schema(allowableValues = "UpdateTaskPayload")
         public String payloadType;
     }
 
-    @ApiModel("SaveTaskPayload")
+    @Schema(name = "SaveTaskPayload")
     public static class SaveTaskPayloadApiModel extends SaveTaskPayload {
-        @ApiModelProperty(allowableValues = "SaveTaskPayload")
+        @Schema(allowableValues = "SaveTaskPayload")
         public String payloadType;
     }
 
-    @ApiModel("CreateProcessInstancePayload")
+    @Schema(name = "CreateProcessInstancePayload")
     public static class CreateProcessInstancePayloadApiModel extends CreateProcessInstancePayload {
-        @ApiModelProperty(allowableValues = "CreateProcessInstancePayload")
+        @Schema(allowableValues = "CreateProcessInstancePayload")
         public String payloadType;
     }
 }
