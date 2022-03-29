@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.identity.keycloak.config;
 
 import org.activiti.cloud.identity.IdentityManagementService;
-import org.activiti.cloud.identity.config.Oauth2FeignConfiguration;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDetailsProvider;
 import org.activiti.cloud.services.identity.keycloak.KeycloakInstanceWrapper;
@@ -33,7 +32,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -42,7 +40,6 @@ import org.springframework.core.annotation.Order;
 @PropertySource("classpath:keycloak-client.properties")
 @ConditionalOnProperty(name = "activiti.cloud.services.keycloak.enabled", matchIfMissing = true)
 @EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
-@Import(Oauth2FeignConfiguration.class)
 @EnableFeignClients(clients = KeycloakClient.class)
 public class ActivitiKeycloakAutoConfiguration {
 
