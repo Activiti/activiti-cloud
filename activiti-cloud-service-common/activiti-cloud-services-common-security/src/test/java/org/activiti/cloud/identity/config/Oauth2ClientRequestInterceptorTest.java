@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.identity.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -23,6 +24,8 @@ import static org.mockito.Mockito.when;
 
 import feign.RequestTemplate;
 import feign.Target.HardCodedTarget;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -61,6 +64,20 @@ class Oauth2ClientRequestInterceptorTest {
         oauth2ClientRequestInterceptor.apply(template);
 
         verify(template).header(eq("Authorization"), eq("Bearer 123"));
+    }
+
+    @Test
+    void shouldNotSetAuthHeaderWhenItIsAlreadyPresent() {
+        String clientRegistrationId = "keycloak";
+        Oauth2ClientRequestInterceptor oauth2ClientRequestInterceptor = new Oauth2ClientRequestInterceptor(clientRegistrationId, oAuth2AuthorizedClientManager, oAuth2AuthorizeRequest);
+
+        when(template.headers()).thenReturn(Map.of("Authorization", List.of("Bearer 456")));
+        when(template.feignTarget()).thenReturn(new HardCodedTarget(String.class, "keycloak", "http://"));
+
+        oauth2ClientRequestInterceptor.apply(template);
+
+        verify(template, never()).header(anyString(), anyString());
+        assertThat(template.headers().get("Authorization")).containsOnly("Bearer 456");
     }
 
     @Test

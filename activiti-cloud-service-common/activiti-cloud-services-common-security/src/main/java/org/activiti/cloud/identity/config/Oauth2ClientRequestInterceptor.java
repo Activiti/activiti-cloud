@@ -17,11 +17,16 @@ package org.activiti.cloud.identity.config;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.util.CollectionUtils;
 
 public class Oauth2ClientRequestInterceptor implements RequestInterceptor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Oauth2ClientRequestInterceptor.class);
 
     private String clientRegistrationId;
     private OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
@@ -38,11 +43,25 @@ public class Oauth2ClientRequestInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate template) {
         boolean isIdpClient = template.feignTarget().name().equals(clientRegistrationId);
-        if (isIdpClient) {
+        if (isIdpClient && hasNotAuthorizationHeader(template)) {
             OAuth2AccessToken accessToken = oAuth2AuthorizedClientManager.authorize(oAuth2AuthorizeRequest).getAccessToken();
             String authorizationToken = String.format("%s %s", accessToken.getTokenType().getValue(), accessToken.getTokenValue());
             template.header("Authorization", authorizationToken);
         }
+    }
+
+    /**
+     * Check if the authorization header it is already propagated.
+     * Other interceptors like org.activiti.cloud.security.feign.TokenRelayRequestInterceptor could do this
+     * @param template
+     * @return true if the header doesn't contain an Authorization property
+     */
+    private boolean hasNotAuthorizationHeader(RequestTemplate template) {
+        boolean result = CollectionUtils.isEmpty(template.headers().get("Authorization"));
+        if(!result && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Authorization header already set, don't retrieve a new one.");
+        }
+        return result;
     }
 
 }
