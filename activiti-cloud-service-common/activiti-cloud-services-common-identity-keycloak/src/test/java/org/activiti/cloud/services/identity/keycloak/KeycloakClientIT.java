@@ -28,7 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest(classes = KeycloakClientApplication.class, properties = {"keycloak.realm=activiti"})
+@SpringBootTest(classes = KeycloakClientApplication.class,
+    properties = {"keycloak.realm=activiti", "activiti.cloud.services.oauth2.iam-name=keycloak"})
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientIT {
 

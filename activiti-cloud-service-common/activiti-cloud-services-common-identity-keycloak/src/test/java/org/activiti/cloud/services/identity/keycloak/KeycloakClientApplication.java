@@ -15,10 +15,12 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import org.activiti.cloud.identity.web.EnableIdentityManagementRestAPI;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@EnableIdentityManagementRestAPI
 public class KeycloakClientApplication {
 
 	public static void main(String[] args) {
