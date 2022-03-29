@@ -28,7 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = ModelingRestApplication.class, properties = {"activiti.cloud.services.oauth2.iam-name=keycloak"})
+@SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})

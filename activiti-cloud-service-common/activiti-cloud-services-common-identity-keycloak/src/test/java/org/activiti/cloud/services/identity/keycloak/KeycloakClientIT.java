@@ -29,7 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(classes = KeycloakClientApplication.class,
-    properties = {"keycloak.realm=activiti", "activiti.cloud.services.oauth2.iam-name=keycloak"})
+    properties = {"keycloak.realm=activiti"})
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientIT {
 
