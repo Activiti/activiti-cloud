@@ -15,22 +15,32 @@
  */
 package org.activiti.cloud.services.identity.keycloak.config;
 
+import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDetailsProvider;
 import org.activiti.cloud.services.identity.keycloak.KeycloakInstanceWrapper;
+import org.activiti.cloud.services.identity.keycloak.KeycloakManagementService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
+import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingToRole;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
 @Configuration
+@PropertySource("classpath:keycloak-client.properties")
 @ConditionalOnProperty(name = "activiti.cloud.services.keycloak.enabled", matchIfMissing = true)
 @EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
+@EnableFeignClients(clients = KeycloakClient.class)
 public class ActivitiKeycloakAutoConfiguration {
 
     @Bean
@@ -50,6 +60,32 @@ public class ActivitiKeycloakAutoConfiguration {
     @ConditionalOnMissingBean
     public KeycloakClientPrincipalDetailsProvider keycloakClientPrincipalDetailsProvider(KeycloakInstanceWrapper keycloakInstanceWrapper) {
         return new KeycloakClientPrincipalDetailsProvider(keycloakInstanceWrapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IdentityManagementService identityManagementService(KeycloakClient keycloakClient,
+                                                               KeycloakUserToUser keycloakUserToUser,
+                                                               KeycloakGroupToGroup keycloakGroupToGroup) {
+        return new KeycloakManagementService(keycloakClient, keycloakUserToUser, keycloakGroupToGroup);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public KeycloakUserToUser keycloakUserToUser(KeycloakClient keycloakClient, KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
+        return new KeycloakUserToUser(keycloakClient, keycloakRoleMappingToRole);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public KeycloakRoleMappingToRole keycloakRoleMappingToRole() {
+        return new KeycloakRoleMappingToRole();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public KeycloakGroupToGroup keycloakGroupToGroup(KeycloakClient keycloakClient, KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
+        return new KeycloakGroupToGroup(keycloakClient, keycloakRoleMappingToRole);
     }
 
 }
