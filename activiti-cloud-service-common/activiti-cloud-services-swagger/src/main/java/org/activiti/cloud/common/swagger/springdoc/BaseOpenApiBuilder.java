@@ -27,6 +27,8 @@ import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.CollectionModelConverter;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.EntityModelConverter;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.EntriesResponseModelConverter;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.EntryResponseModelConverter;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.PageableMixin;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.PagedModelConverter;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +52,8 @@ public class BaseOpenApiBuilder {
         ModelConverters.getInstance().addConverter(new EntityModelConverter());
         ModelConverters.getInstance().addConverter(new CollectionModelConverter());
         ModelConverters.getInstance().addConverter(new PagedModelConverter());
+        ModelConverters.getInstance().addConverter(new EntryResponseModelConverter());
+        ModelConverters.getInstance().addConverter(new EntriesResponseModelConverter());
         SwaggerDocUtils.replaceParameterObjectWithClass(Pageable.class, PageableMixin.class);
     }
 

@@ -93,7 +93,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentString"
+                  "$ref": "#/components/schemas/ListResponseContentOfString"
                 }
               }
             }
@@ -128,7 +128,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntryResponseContentString"
+                  "$ref": "#/components/schemas/EntryResponseContentOfString"
                 }
               }
             }
@@ -163,7 +163,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentString"
+                  "$ref": "#/components/schemas/ListResponseContentOfString"
                 }
               }
             }
@@ -188,14 +188,14 @@
   },
   "components": {
     "schemas": {
-      "EntriesResponseContentString": {
-        "title": "EntriesResponseContentString",
+      "EntriesResponseContentOfString": {
+        "title": "EntriesResponseContentOfString",
         "type": "object",
         "properties": {
           "entries": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/EntryResponseContentString"
+              "$ref": "#/components/schemas/EntryResponseContentOfString"
             }
           },
           "pagination": {
@@ -203,8 +203,8 @@
           }
         }
       },
-      "EntryResponseContentString": {
-        "title": "EntryResponseContentString",
+      "EntryResponseContentOfString": {
+        "title": "EntryResponseContentOfString",
         "type": "object",
         "properties": {
           "entry": {
@@ -212,12 +212,12 @@
           }
         }
       },
-      "ListResponseContentString": {
-        "title": "ListResponseContentString",
+      "ListResponseContentOfString": {
+        "title": "ListResponseContentOfString",
         "type": "object",
         "properties": {
           "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentString"
+            "$ref": "#/components/schemas/EntriesResponseContentOfString"
           }
         }
       },

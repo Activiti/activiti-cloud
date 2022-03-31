@@ -46,9 +46,21 @@ public abstract class InternalModelConverter<T> implements ModelConverter {
                         .jsonViewAnnotation(annotatedType.getJsonViewAnnotation())
                         .propertyName(annotatedType.getPropertyName())
                         .skipOverride(true);
-                return this.resolve(annotatedType, context, chain);
+                return resolveWhenApplied(annotatedType, context, chain);
             }
         }
+        return resolveNext(annotatedType, context, chain);
+    }
+
+    protected Schema resolveWhenApplied(AnnotatedType annotatedType,
+                                        ModelConverterContext context,
+                                        Iterator<ModelConverter> chain) {
+        return this.resolve(annotatedType, context, chain);
+    }
+
+    protected Schema resolveNext(AnnotatedType annotatedType,
+                                 ModelConverterContext context,
+                                 Iterator<ModelConverter> chain) {
         return (chain.hasNext()) ? chain.next().resolve(annotatedType, context, chain) : null;
     }
 
@@ -59,7 +71,7 @@ public abstract class InternalModelConverter<T> implements ModelConverter {
     protected abstract JavaType getContainedType(JavaType javaType);
 
     private String getName(JavaType javaType) {
-        return getAlternateTypeClass().getSimpleName() + getContainedType(javaType).getRawClass().getSimpleName();
+        return getAlternateTypeClass().getSimpleName() + "Of" + getContainedType(javaType).getRawClass().getSimpleName();
     }
 
     private ResolvedRecursiveType resolveType(JavaType javaType) {

@@ -47,9 +47,9 @@ public class ModelingSwaggerIT {
             .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").isNotEmpty())
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
-            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContentOf"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContentOf"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContentOf"))))
             .andExpect(jsonPath("$.info.title").value("Modeling ReST API"))
             .andExpect(jsonPath("$['paths']['/v1/projects/{projectId}/models']['get']['parameters'][*]['name']",
                 containsInAnyOrder("projectId", "type", "skipCount", "maxItems", "sort")))
