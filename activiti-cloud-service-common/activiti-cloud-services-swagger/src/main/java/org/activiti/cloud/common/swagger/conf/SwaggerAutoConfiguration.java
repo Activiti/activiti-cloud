@@ -44,7 +44,7 @@ import java.util.function.Predicate;
 
 /**
  * Provides base springfox configuration for swagger auto-generated specification file. It provides two
- * swagger specification files: the default one is available under `v2/api-docs` or `v2/api-docs?group=default`
+ * swagger specification files: the default one is available under `v2/api-docs`
  * and provides specification for Alfresco MediaType format
  *
  * This configuration is not self-contained: the one adding this as dependency should provide a bean of type

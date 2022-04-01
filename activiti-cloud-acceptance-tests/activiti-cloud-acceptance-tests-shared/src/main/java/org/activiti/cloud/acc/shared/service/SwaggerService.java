@@ -23,7 +23,7 @@ public interface SwaggerService {
     @RequestLine("GET /v3/api-docs")
     String getSwaggerSpecification();
 
-    @RequestLine("GET /v3/api-docs?group={group}")
+    @RequestLine("GET /springdoc/v3/api-docs/{group}")
     String getSwaggerSpecification(@Param("group") String group);
 
 }
