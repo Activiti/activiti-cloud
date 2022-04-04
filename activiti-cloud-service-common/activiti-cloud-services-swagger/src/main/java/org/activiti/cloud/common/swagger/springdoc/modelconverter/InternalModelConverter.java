@@ -41,7 +41,6 @@ public abstract class InternalModelConverter<T> implements ModelConverter {
                         .ctxAnnotations(annotatedType.getCtxAnnotations())
                         .parent(annotatedType.getParent())
                         .schemaProperty(annotatedType.isSchemaProperty())
-                        .name(getName(javaType))
                         .resolveAsRef(annotatedType.isResolveAsRef())
                         .jsonViewAnnotation(annotatedType.getJsonViewAnnotation())
                         .propertyName(annotatedType.getPropertyName())
@@ -57,10 +56,6 @@ public abstract class InternalModelConverter<T> implements ModelConverter {
     protected abstract Class<T> getAlternateTypeClass();
 
     protected abstract JavaType getContainedType(JavaType javaType);
-
-    private String getName(JavaType javaType) {
-        return getAlternateTypeClass().getSimpleName() + getContainedType(javaType).getRawClass().getSimpleName();
-    }
 
     private ResolvedRecursiveType resolveType(JavaType javaType) {
         return new ResolvedRecursiveType(getAlternateTypeClass(),
