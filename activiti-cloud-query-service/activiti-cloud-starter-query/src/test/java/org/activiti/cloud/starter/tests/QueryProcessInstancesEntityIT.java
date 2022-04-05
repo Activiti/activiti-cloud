@@ -627,6 +627,102 @@ public class QueryProcessInstancesEntityIT {
     }
 
     @Test
+    public void shouldGetProcessInstancesWhenCurrentUserIsTaskAssignee() {
+        ProcessInstance firstProcessInstanceWithTestUserAssignedToATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.anAssignedTask("ATask", "testuser", firstProcessInstanceWithTestUserAssignedToATask);
+
+        ProcessInstance secondProcessInstanceWithTestUserAssignedToATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.anAssignedTask("ATask", "testuser", secondProcessInstanceWithTestUserAssignedToATask);
+
+        ProcessInstance thirdProcessInstanceWithRandomUserAssignedToTask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.anAssignedTask("ATask", "arandomuser", thirdProcessInstanceWithRandomUserAssignedToTask);
+
+        eventsAggregator.sendAll();
+
+        shouldGetProcessInstancesList(List.of(firstProcessInstanceWithTestUserAssignedToATask.getId(),
+            secondProcessInstanceWithTestUserAssignedToATask.getId()));
+    }
+
+    @Test
+    public void shouldGetProcessInstancesWhenCurrentUserIsTaskCandidate() {
+        ProcessInstance firstProcessInstanceWithTestUserCandidateOfATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.aTaskWithUserCandidate("ATask", "testuser", firstProcessInstanceWithTestUserCandidateOfATask);
+
+        ProcessInstance secondProcessInstanceWithTestUserCandidateOfATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.aTaskWithUserCandidate("ATask", "testuser", secondProcessInstanceWithTestUserCandidateOfATask);
+
+        ProcessInstance thirdProcessInstanceWithRandomUserCandidateOfATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.aTaskWithUserCandidate("ATask", "arandomuser", thirdProcessInstanceWithRandomUserCandidateOfATask);
+
+        eventsAggregator.sendAll();
+
+        shouldGetProcessInstancesList(List.of(firstProcessInstanceWithTestUserCandidateOfATask.getId(),
+            secondProcessInstanceWithTestUserCandidateOfATask.getId()));
+    }
+
+    @Test
+    public void shouldGetProcessInstancesWhenCurrentUserIsTaskAssigneeOrCandidate() {
+        ProcessInstance firstProcessInstanceWithTestUserAssignedToATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.anAssignedTask("ATask", "testuser", firstProcessInstanceWithTestUserAssignedToATask);
+
+        ProcessInstance secondProcessInstanceWithTestUserCandidateOfATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.aTaskWithUserCandidate("ATask", "testuser", secondProcessInstanceWithTestUserCandidateOfATask);
+
+        ProcessInstance thirdProcessInstanceWithRandomUserAssignedToATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.anAssignedTask("ATask", "arandomuser", thirdProcessInstanceWithRandomUserAssignedToATask);
+
+        eventsAggregator.sendAll();
+
+        shouldGetProcessInstancesList(List.of(firstProcessInstanceWithTestUserAssignedToATask.getId(),
+            secondProcessInstanceWithTestUserCandidateOfATask.getId()));
+    }
+
+    @Test
+    public void shouldGetProcessInstancesWhenCurrentUserIsInitiatorOrTaskAssigneeOrCandidate() {
+        ProcessInstance firstProcessInstanceWithTestUserAssignedToATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.anAssignedTask("ATask", "testuser", firstProcessInstanceWithTestUserAssignedToATask);
+
+        ProcessInstance secondProcessInstanceWithTestUserCandidateOfATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.aTaskWithUserCandidate("ATask", "testuser", secondProcessInstanceWithTestUserCandidateOfATask);
+
+        ProcessInstance thirdProcessInstanceWithRandomUserAssignedToATask = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "arandomuser");
+
+        taskEventBuilder.anAssignedTask("ATask", "arandomuser", thirdProcessInstanceWithRandomUserAssignedToATask);
+
+        ProcessInstance fourthProcessInstanceWithTestUserAsInitiator = processInstanceBuilder
+            .aRunningProcessInstanceWithInitiator("process", "testuser");
+
+        eventsAggregator.sendAll();
+
+        shouldGetProcessInstancesList(List.of(firstProcessInstanceWithTestUserAssignedToATask.getId(),
+            secondProcessInstanceWithTestUserCandidateOfATask.getId(),
+            fourthProcessInstanceWithTestUserAsInitiator.getId()));
+    }
+
+    @Test
     public void shouldGetProcessInstanceWhenCurrentUserIsTaskAssignee() {
         ProcessInstance runningProcessInstance = processInstanceBuilder
             .aRunningProcessInstanceWithInitiator("auser", "randomuser");
@@ -774,24 +870,31 @@ public class QueryProcessInstancesEntityIT {
         shouldGetProcessInstancesFilteredByList(List.of(processId), queryString);
     }
 
-    private void shouldGetProcessInstancesFilteredByList(List<String> processInstanceIds, String queryString) {
+    private void shouldGetProcessInstancesList(List<String> processInstanceIds, String url) {
         await().untilAsserted(() -> {
             ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate
-                    .exchange(PROC_URL + "?" + queryString,
-                            HttpMethod.GET,
-                            identityTokenProducer.entityWithAuthorizationHeader(),
-                            PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+                .exchange(url,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
 
             assertThat(responseEntityFiltered).isNotNull();
             assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody().getContent();
+                .getBody().getContent();
             assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId)
-                    .containsExactly(processInstanceIds.toArray(String[]::new));
+                .extracting(ProcessInstanceEntity::getId)
+                .containsExactly(processInstanceIds.toArray(String[]::new));
         });
     }
 
+    private void shouldGetProcessInstancesList(List<String> processInstanceIds) {
+        shouldGetProcessInstancesList(processInstanceIds, PROC_URL);
+    }
+
+    private void shouldGetProcessInstancesFilteredByList(List<String> processInstanceIds, String queryString) {
+        shouldGetProcessInstancesList(processInstanceIds, PROC_URL + "?" + queryString);
+    }
 
 }
