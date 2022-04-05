@@ -21,7 +21,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud.version>7.2.0-alpha.9</activiti-cloud.version>
+    <activiti-cloud.version>7.3.0-alpha.4</activiti-cloud.version>
     <start-class>org.activiti.cloud.query.QueryApplication</start-class>
   </properties>
   <dependencyManagement>
@@ -124,7 +124,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
-      <scope>test</scope>
     </dependency>
     <!-- Marker Pom for Dependency Conversion Validation  -->
   </dependencies>

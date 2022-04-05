@@ -37,12 +37,12 @@ public class ModelingSwaggerActions {
     @Then("the user gets swagger specification following Alfresco MediaType")
     public void isFollowingAlfrescoMediaType(){
         assertThat(swaggerSpecification)
-                .contains("ListResponseContentOf")
-                .contains("EntriesResponseContentOf")
-                .contains("EntryResponseContentOf")
-                .doesNotContain("PagedModelOf")
-                .doesNotContain("ResourcesOfResourceOf")
-                .doesNotContain("ResourceOf");
+                .contains("ListResponseContent")
+                .contains("EntriesResponseContent")
+                .contains("EntryResponseContent")
+                .doesNotContain("PagedModel")
+                .doesNotContain("ResourcesResource")
+                .doesNotContain("\"Resource\"");
     }
 
 }

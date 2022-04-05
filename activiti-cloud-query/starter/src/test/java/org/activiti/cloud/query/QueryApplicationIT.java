@@ -53,17 +53,16 @@ public class QueryApplicationIT {
     @Test
     public void defaultSpecificationFileShouldBeAlfrescoFormat() throws Exception {
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-        mockMvc.perform(MockMvcRequestBuilders.get("/v3/api-docs?group=Query").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.get("/springdoc/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().string(
                    both(notNullValue(String.class))
-                       .and(containsString("ListResponseContentOfCloudProcessDefinition"))
-                       .and(containsString("EntriesResponseContentOfCloudProcessDefinition"))
-                       .and(containsString("EntryResponseContentOfCloudProcessDefinition"))
-                       .and(not(containsString("PagedModelOf")))
-                       .and(not(containsString("PagedModelOf")))
-                       .and(not(containsString("ResourcesOfResourceOf")))
-                       .and(not(containsString("ResourceOf")))
+                       .and(containsString("ListResponseContentCloudProcessDefinition"))
+                       .and(containsString("EntriesResponseContentCloudProcessDefinition"))
+                       .and(containsString("EntryResponseContentCloudProcessDefinition"))
+                       .and(not(containsString("PagedModel")))
+                       .and(not(containsString("ResourcesOfResource")))
+                       .and(not(containsString("Resource")))
                ));
     }
 

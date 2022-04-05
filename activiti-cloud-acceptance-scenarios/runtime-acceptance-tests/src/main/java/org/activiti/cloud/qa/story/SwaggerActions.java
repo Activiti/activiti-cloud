@@ -56,31 +56,31 @@ public class SwaggerActions {
     @Then("the user gets swagger specification following Alfresco MediaType")
     public void isFollowingAlfrescoMediaType(){
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.RUNTIME_BUNDLE))
-                .contains("ListResponseContentOfCloudProcessDefinition")
-                .contains("EntriesResponseContentOfCloudProcessDefinition")
-                .contains("EntryResponseContentOfCloudProcessDefinition")
+                .contains("ListResponseContentCloudProcessDefinition")
+                .contains("EntriesResponseContentCloudProcessDefinition")
+                .contains("EntryResponseContentCloudProcessDefinition")
                 .contains("payloadType")
-                .doesNotContain("PagedModelOf")
-                .doesNotContain("ResourcesOfResourceOf")
-                .doesNotContain("ResourceOf");
+                .doesNotContain("PagedModel")
+                .doesNotContain("ResourcesResource")
+                .doesNotContain("\"Resource\"");
 
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.QUERY))
-                .contains("ListResponseContentOfCloudProcessDefinition")
-                .contains("EntriesResponseContentOfCloudProcessDefinition")
-                .contains("EntryResponseContentOfCloudProcessDefinition")
-                .doesNotContain("PagedModelOf")
-                .doesNotContain("ResourcesOfResourceOf")
-                .doesNotContain("ResourceOf");
+                .contains("ListResponseContentCloudProcessDefinition")
+                .contains("EntriesResponseContentCloudProcessDefinition")
+                .contains("EntryResponseContentCloudProcessDefinition")
+                .doesNotContain("PagedModel")
+                .doesNotContain("ResourcesResource")
+                .doesNotContain("\"Resource\"");
 
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.AUDIT))
-                .contains("ListResponseContentOfCloudRuntimeEventOfobjectAndstring")
-                .contains("EntriesResponseContentOfCloudRuntimeEventOfobjectAndstring")
-                .contains("EntryResponseContentOfCloudRuntimeEventOfobjectAndstring")
+                .contains("ListResponseContentCloudRuntimeEventObjectCloudRuntimeEventType")
+                .contains("EntriesResponseContentCloudRuntimeEventObjectCloudRuntimeEventType")
+                .contains("EntryResponseContentCloudRuntimeEventObjectCloudRuntimeEventType")
                 .contains("CloudRuntimeEventModel")
-                .doesNotContain("PagedModelOf")
-                .doesNotContain("ResourcesOfResourceOf")
-                .doesNotContain("ResourceOf")
-                .doesNotContain("EnumOf");
+                .doesNotContain("PagedModel")
+                .doesNotContain("ResourcesResource")
+                .doesNotContain("\"Resource\"")
+                .doesNotContain("Enum");
     }
 
 }
