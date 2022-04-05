@@ -19,11 +19,9 @@ import org.activiti.cloud.starter.juel.service.JuelExpressionResolverService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @Import({JuelRestConfiguration.class, JuelSwaggerConfig.class})
-@PropertySource("classpath:juel.properties")
 public class ActivitiJuelAutoConfiguration {
 
     @Bean
