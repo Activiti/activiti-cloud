@@ -18,6 +18,7 @@ package org.activiti.cloud.services.rest.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -33,10 +34,10 @@ public interface ProcessDefinitionController {
 
     @GetMapping("/v1/process-definitions")
     @CollectionFormat(feign.CollectionFormat.CSV)
-    PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(@Parameter(description = "List of values to include in response")
-                                                                          @RequestParam(value = "include", required = false)
-                                                                          List<String> include,
-                                                                          Pageable pageable);
+    PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getProcessDefinitions(
+        @Parameter(description = "List of values to include in response")
+        @RequestParam(value = "include", required = false) List<String> include,
+        Pageable pageable);
 
     @GetMapping(value = "/v1/process-definitions/{id}")
     EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable(value = "id") String id);

@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 
@@ -28,9 +28,12 @@ public class ToCloudProcessDefinitionConverter {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
-    public CloudProcessDefinition from(ProcessDefinition processDefinition) {
+    public ExtendedCloudProcessDefinition from(ProcessDefinition processDefinition) {
         CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDefinition);
+        if (processDefinition instanceof ExtendedCloudProcessDefinition) {
+            cloudProcessDefinition.setVariableDefinitions(((ExtendedCloudProcessDefinition) processDefinition).getVariableDefinitions());
+        }
         return cloudProcessDefinition;
     }
 

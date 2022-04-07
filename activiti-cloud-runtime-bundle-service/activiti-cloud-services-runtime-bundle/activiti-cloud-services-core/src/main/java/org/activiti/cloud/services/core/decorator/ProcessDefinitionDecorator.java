@@ -13,11 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.process.model;
+package org.activiti.cloud.services.core.decorator;
 
-import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
+import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
+import org.apache.commons.lang3.StringUtils;
 
-public interface CloudProcessDefinition extends CloudRuntimeEntity, ProcessDefinition {
+public interface ProcessDefinitionDecorator {
+
+    String getHandledValue();
+
+    ExtendedCloudProcessDefinition decorate(ExtendedCloudProcessDefinition processDefinition);
+
+    default boolean applies(String include){
+        return StringUtils.equalsIgnoreCase(getHandledValue(), include);
+    }
 
 }

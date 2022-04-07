@@ -19,7 +19,6 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
-import org.activiti.api.runtime.model.impl.VariableDefinitionImpl;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.bpmn.model.BpmnModel;
@@ -37,7 +36,10 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
+import org.activiti.spring.process.CachingProcessExtensionService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
+import org.activiti.spring.process.model.Extension;
+import org.activiti.spring.process.model.VariableDefinition;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -56,14 +58,14 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -114,6 +116,9 @@ public class ProcessDefinitionControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private CachingProcessExtensionService cachingProcessExtensionService;
+
     @Test
     public void getProcessDefinitions() throws Exception {
 
@@ -121,13 +126,11 @@ public class ProcessDefinitionControllerImplIT {
         String my_process = "my process";
         String this_is_my_process = "this is my process";
         int version = 1;
-        List<ProcessDefinition> processDefinitionList = Collections.singletonList(buildProcessDefinition(procId,
-                                                                                                         my_process,
-                                                                                                         this_is_my_process,
-                                                                                                         version));
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                                                                       processDefinitionList.size());
-        when(processRuntime.processDefinitions(any(), anyList())).thenReturn(processDefinitionPage);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(buildProcessDefinition(procId, my_process, this_is_my_process, version));
+        Page<ProcessDefinition> processDefinitionPage =
+            new PageImpl<>(processDefinitionList, processDefinitionList.size());
+        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
         .andExpect(status().isOk());
@@ -153,10 +156,11 @@ public class ProcessDefinitionControllerImplIT {
                                                                      "my process",
                                                                      "This is my process",
                                                                      1);
-        List<ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
                                                                        11);
-        given(processRuntime.processDefinitions(any(), anyList())).willReturn(processDefinitionPage);
+        given(processRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
 
         //when
         MvcResult result = mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
@@ -185,13 +189,24 @@ public class ProcessDefinitionControllerImplIT {
         String this_is_my_process = "this is my process";
         int version = 1;
         ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
-        VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
-        variableDefinition.setDisplayName("Var name");
-        processDefinition.getVariableDefinitions().add(variableDefinition);
-        List<ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-            processDefinitionList.size());
-        when(processRuntime.processDefinitions(any(), anyList())).thenReturn(processDefinitionPage);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(processDefinition);
+        Page<ProcessDefinition> processDefinitionPage =
+            new PageImpl<>(processDefinitionList, processDefinitionList.size());
+        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+
+        Extension extension = new Extension();
+        VariableDefinition givenVariableDefinition = new VariableDefinition();
+        givenVariableDefinition.setId("VAR_ID");
+        givenVariableDefinition.setName("var1");
+        givenVariableDefinition.setDescription("Variable no 1");
+        givenVariableDefinition.setType("string");
+        givenVariableDefinition.setRequired(true);
+        givenVariableDefinition.setDisplay(true);
+        givenVariableDefinition.setDisplayName("Var name");
+        extension.setProperties(Map.of("var1", givenVariableDefinition));
+
+        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         mockMvc.perform(get("/v1/process-definitions")
                 .queryParam("include", "variables")

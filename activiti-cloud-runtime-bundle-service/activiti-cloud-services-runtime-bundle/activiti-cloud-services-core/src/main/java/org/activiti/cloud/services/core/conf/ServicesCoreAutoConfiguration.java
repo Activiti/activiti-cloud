@@ -17,13 +17,11 @@ package org.activiti.cloud.services.core.conf;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
+import org.activiti.cloud.services.core.ProcessDefinitionService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariableDateConverter;
 import org.activiti.cloud.services.core.ProcessVariableJsonNodeConverter;
@@ -46,6 +44,8 @@ import org.activiti.cloud.services.core.commands.StartMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartProcessInstanceCmdExecutor;
 import org.activiti.cloud.services.core.commands.SuspendProcessInstanceCmdExecutor;
 import org.activiti.cloud.services.core.commands.UpdateTaskVariableCmdExecutor;
+import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
+import org.activiti.cloud.services.core.decorator.ProcessDefinitionVariablesDecorator;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.core.pageable.sort.ProcessDefinitionSortApplier;
 import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
@@ -53,6 +53,7 @@ import org.activiti.cloud.services.core.pageable.sort.TaskSortApplier;
 import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
+import org.activiti.spring.process.CachingProcessExtensionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.annotation.Bean;
@@ -60,6 +61,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.support.FormattingConversionService;
+
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Configuration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
@@ -222,4 +228,18 @@ public class ServicesCoreAutoConfiguration {
     public ProcessVariablesPayloadConverter processVariablesPayloadConverter(ProcessVariableValueConverter variableValueConverter) {
         return new ProcessVariablesPayloadConverter(variableValueConverter);
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionVariablesDecorator processDefinitionVariablesDecorator(CachingProcessExtensionService cachingProcessExtensionService) {
+        return new ProcessDefinitionVariablesDecorator(cachingProcessExtensionService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionService processDefinitionService(ProcessRuntime processRuntime,
+                                                             List<ProcessDefinitionDecorator> processDefinitionDecorators) {
+        return new ProcessDefinitionService(processRuntime, processDefinitionDecorators);
+    }
+
 }
