@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.modeling.security;
+package org.activiti.cloud.services.common.security.oidc;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.security.Principal;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
-import java.lang.annotation.Retention;
+public class OAuth2PrincipalIdentityProvider implements PrincipalIdentityProvider {
 
-import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockOAuth2User;
 
-/**
- * Annotation for testing with mock modeler user
- */
-@Retention(RUNTIME)
-@WithMockOAuth2User(roles = {"ACTIVITI_MODELER"})
-public @interface WithMockModelerUser {
+    @Override
+    public String getUserId(Principal principal) {
+        return principal.getName();
+    }
 
 }

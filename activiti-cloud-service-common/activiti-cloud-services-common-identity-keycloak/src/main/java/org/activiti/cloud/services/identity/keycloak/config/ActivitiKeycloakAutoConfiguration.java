@@ -44,12 +44,12 @@ public class ActivitiKeycloakAutoConfiguration {
     public KeycloakUserGroupManager keycloakUserGroupManager(KeycloakInstanceWrapper keycloakInstanceWrapper) {
         return new KeycloakUserGroupManager(keycloakInstanceWrapper);
     }
-
-    @Bean
-    @Order(Ordered.LOWEST_PRECEDENCE)
-    @ConditionalOnMissingBean
-    public KeycloakClientPrincipalDetailsProvider keycloakClientPrincipalDetailsProvider(KeycloakInstanceWrapper keycloakInstanceWrapper) {
-        return new KeycloakClientPrincipalDetailsProvider(keycloakInstanceWrapper);
-    }
+//
+//    @Bean
+//    @Order(Ordered.LOWEST_PRECEDENCE)
+//    @ConditionalOnMissingBean
+//    public KeycloakClientPrincipalDetailsProvider keycloakClientPrincipalDetailsProvider(KeycloakInstanceWrapper keycloakInstanceWrapper) {
+//        return new KeycloakClientPrincipalDetailsProvider(keycloakInstanceWrapper);
+//    }
 
 }

@@ -32,6 +32,7 @@ public class KeycloakSecurityManagerImpl extends AbstractSecurityManager {
               principalIdentityProvider,
               principalGroupsProvider,
               principalRolesProvider);
+
     }
 
 

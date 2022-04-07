@@ -23,26 +23,26 @@ import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
 import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalGroupsProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextTokenProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
+import org.activiti.cloud.services.common.security.oidc.OAuth2PrincipalGroupsProvider;
+import org.activiti.cloud.services.common.security.oidc.OAuth2PrincipalIdentityProvider;
+import org.activiti.cloud.services.common.security.oidc.OAuth2PrincipalRolesProvider;
+import org.activiti.cloud.services.common.security.oidc.OAuth2SecurityContextPrincipalProvider;
+import org.activiti.cloud.services.common.security.oidc.OAuth2SecurityManagerImpl;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
-import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
-import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.keycloak.adapters.springsecurity.management.HttpSessionManager;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -50,55 +50,124 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationProvider;
+import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.DefaultJwtBearerTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.JwtBearerGrantRequest;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
 import java.util.List;
 
 @Configuration
-@KeycloakConfiguration
+//@KeycloakConfiguration
 @EnableAuthorizationConfiguration
+@EnableWebSecurity
+@EnableConfigurationProperties({OAuth2ClientProperties.class})
+
 @ConditionalOnWebApplication
 @Import({KeycloakSpringBootConfigResolver.class})
 @ConditionalOnMissingBean(value = {KeycloakConfigResolver.class, SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
 @DependsOn({"keycloakConfigResolver"})
 @PropertySource("classpath:keycloak-configuration.properties")
-public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigurerAdapter {
+public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
     private final AuthorizationConfigurer authorizationConfigurer;
+
+    private static final String OAUTH2_CLIENT_REGISTRATION_ID = "keycloak-client";
 
     @Autowired
     public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer) {
         this.authorizationConfigurer = authorizationConfigurer;
     }
 
-    /**
-     * Registers the KeycloakAuthenticationProvider with the authentication manager.
-     */
+//    /**
+//     * Registers the KeycloakAuthenticationProvider with the authentication manager.
+//     */
+//    @Bean
+//    //OAuth2LoginAuthenticationProvider needs to be provided instead of KeycloakAuthenticationProvider
+//    public InitializingBean configureGlobalAuthenticationManager(AuthenticationManagerBuilder auth,
+//        OAuth2LoginAuthenticationProvider oAuth2LoginAuthenticationProvider) {
+//        return () -> {
+//            oAuth2LoginAuthenticationProvider.setAuthoritiesMapper(new SimpleAuthorityMapper());
+//            auth.authenticationProvider(oAuth2LoginAuthenticationProvider);
+//        };
+//    }
+
+//    @Bean
+//    public OAuth2AuthorizeRequest oAuth2AuthorizeRequest() {
+//        return OAuth2AuthorizeRequest.withClientRegistrationId(OAUTH2_CLIENT_REGISTRATION_ID)
+////            .principal(new AnonymousAuthenticationToken("feignClient", "feignClient",
+////                AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")))
+////            .attribute(OAuth2AuthorizationContext.USERNAME_ATTRIBUTE_NAME, oAuth2Username)
+////            .attribute(OAuth2AuthorizationContext.PASSWORD_ATTRIBUTE_NAME, oAuth2Password)
+//            .build();
+//    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(this.oAuth2LoginAuthenticationProvider(new DefaultAuthorizationCodeTokenResponseClient(),
+            new DefaultOAuth2UserService()));
+    }
+
+    @Override
     @Bean
-    public InitializingBean configureGlobalAuthenticationManager(AuthenticationManagerBuilder auth,
-                                            KeycloakAuthenticationProvider keycloakAuthenticationProvider) {
-        return () -> {
-            keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
-            auth.authenticationProvider(keycloakAuthenticationProvider);
-        };
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+//    @Bean
+//    @ConditionalOnMissingBean
+////    @Override
+//    public KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
+//        return new KeycloakAuthenticationProvider();
+//    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OAuth2LoginAuthenticationProvider oAuth2LoginAuthenticationProvider(OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient,
+        OAuth2UserService<OAuth2UserRequest, OAuth2User> userService){
+        return new OAuth2LoginAuthenticationProvider(accessTokenResponseClient,userService );
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @Override
-    public KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
-        return new KeycloakAuthenticationProvider();
+    public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> oAuth2AuthorizationCodeGrantRequestOAuth2AccessTokenResponseClient() {
+        return new DefaultAuthorizationCodeTokenResponseClient();
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OAuth2UserService<OAuth2UserRequest, OAuth2User> userService() {
+        return new DefaultOAuth2UserService();
+    }
+
+
+
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public SecurityContextPrincipalProvider authenticatedPrincipalProvider() {
+//        return new KeycloakSecurityContextPrincipalProvider();
+//    }
 
     @Bean
     @ConditionalOnMissingBean
     public SecurityContextPrincipalProvider authenticatedPrincipalProvider() {
-        return new KeycloakSecurityContextPrincipalProvider();
+        return new OAuth2SecurityContextPrincipalProvider();
     }
 
     @Bean
@@ -115,30 +184,50 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
         };
     }
 
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public PrincipalIdentityProvider principalIdentityProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+//        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+//        return new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider,
+//            keycloakAccessTokenValidator);
+//    }
+
     @Bean
     @ConditionalOnMissingBean
-    public PrincipalIdentityProvider principalIdentityProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
-        return new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider,
-            keycloakAccessTokenValidator);
+    public PrincipalIdentityProvider principalIdentityProvider() {
+        return new OAuth2PrincipalIdentityProvider();
     }
+
+//    @Bean
+//    @Order(Ordered.HIGHEST_PRECEDENCE)
+//    @ConditionalOnMissingBean
+//    public KeycloakAccessTokenPrincipalGroupsProvider keycloakAccessTokenPrincipalGroupsProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+//        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+//        return new KeycloakAccessTokenPrincipalGroupsProvider(keycloakAccessTokenProvider,
+//            keycloakAccessTokenValidator);
+//    }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public KeycloakAccessTokenPrincipalGroupsProvider keycloakAccessTokenPrincipalGroupsProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
-        return new KeycloakAccessTokenPrincipalGroupsProvider(keycloakAccessTokenProvider,
-            keycloakAccessTokenValidator);
+    public OAuth2PrincipalGroupsProvider oAuth2PrincipalGroupsProvider() {
+        return new OAuth2PrincipalGroupsProvider();
     }
+
+//    @Bean
+//    @Order(Ordered.HIGHEST_PRECEDENCE)
+//    @ConditionalOnMissingBean
+//    public KeycloakAccessTokenPrincipalRolesProvider keycloakAccessTokenPrincipalRolesProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+//        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+//        return new KeycloakAccessTokenPrincipalRolesProvider(keycloakAccessTokenProvider,
+//            keycloakAccessTokenValidator);
+//    }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public KeycloakAccessTokenPrincipalRolesProvider keycloakAccessTokenPrincipalRolesProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
-        return new KeycloakAccessTokenPrincipalRolesProvider(keycloakAccessTokenProvider,
-            keycloakAccessTokenValidator);
+    public PrincipalRolesProvider principalRolesProvider() {
+        return new OAuth2PrincipalRolesProvider();
     }
 
     @Bean
@@ -153,13 +242,26 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
         return new KeycloakPrincipalRolesProviderChain(principalRolesProviders);
     }
 
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public SecurityManager securityManager(SecurityContextPrincipalProvider authenticatedPrincipalProvider,
+//        PrincipalIdentityProvider principalIdentityProvider,
+//        KeycloakPrincipalGroupsProviderChain principalGroupsProvider,
+//        KeycloakPrincipalRolesProviderChain principalRolesProviderChain) {
+//        return new KeycloakSecurityManagerImpl(authenticatedPrincipalProvider,
+//            principalIdentityProvider,
+//            principalGroupsProvider,
+//            principalRolesProviderChain);
+//    }
+
+    //OAUTH2 SECURITY MANAGER
     @Bean
     @ConditionalOnMissingBean
     public SecurityManager securityManager(SecurityContextPrincipalProvider authenticatedPrincipalProvider,
-        PrincipalIdentityProvider principalIdentityProvider,
-        KeycloakPrincipalGroupsProviderChain principalGroupsProvider,
-        KeycloakPrincipalRolesProviderChain principalRolesProviderChain) {
-        return new KeycloakSecurityManagerImpl(authenticatedPrincipalProvider,
+        OAuth2PrincipalIdentityProvider principalIdentityProvider,
+        OAuth2PrincipalGroupsProvider principalGroupsProvider,
+        OAuth2PrincipalRolesProvider principalRolesProviderChain) {
+        return new OAuth2SecurityManagerImpl(authenticatedPrincipalProvider,
             principalIdentityProvider,
             principalGroupsProvider,
             principalRolesProviderChain);
@@ -171,8 +273,14 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
         return new KeycloakSecurityContextTokenProvider();
     }
 
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public SecurityContextTokenProvider securityContextTokenProvider(OAuth2AuthorizedClientService auth2AuthorizedClientService) {
+//        return new OAuth2SecurityContextTokenProvider(auth2AuthorizedClientService);
+//    }
+
     @Bean
-    @Override
+//    @Override
     @ConditionalOnMissingBean(HttpSessionManager.class)
     protected HttpSessionManager httpSessionManager() {
         return new HttpSessionManager();
@@ -183,7 +291,7 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
      * Defines the session authentication strategy.
      */
     @Bean
-    @Override
+//    @Override
     @ConditionalOnMissingBean
     protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
         return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
@@ -191,10 +299,44 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        super.configure(http);
+//        super.configure(http);
         authorizationConfigurer.configure(http);
-        http.authorizeRequests()
-                .anyRequest().permitAll().and().csrf().disable().httpBasic().disable();
+
+        http.antMatcher("/**")
+            .authorizeRequests()
+            .antMatchers("/")
+            .permitAll()
+            .anyRequest()
+            .authenticated()
+            .and()
+            .oauth2Login()
+            .tokenEndpoint()
+            .accessTokenResponseClient(oAuth2AuthorizationCodeGrantRequestOAuth2AccessTokenResponseClient());
+
+//        http
+//            .csrf().disable()
+//            .anonymous().disable()
+//            .authorizeRequests()
+//            .antMatchers("/oauth/token").permitAll();
+
+//        http.authorizeRequests()
+//            .anyRequest().permitAll()
+//            .and()
+//            .csrf().disable()
+//            .httpBasic().disable();
+//            .oauth2Login();
+
+
+//        http.authorizeRequests()
+//            .anyRequest().authenticated()
+//            .and()
+//            .oauth2Login();
     }
+
+//    @Bean
+//    public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
+//
+//        return new NimbusAuthorizationCodeTokenResponseClient();
+//    }
 
 }

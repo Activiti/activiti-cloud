@@ -43,7 +43,7 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
-import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
+import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockOAuth2User;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -617,16 +617,16 @@ public class ProcessVariablesIT {
     @Test
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariables() throws Exception {
         identityTokenProducer.setTestUser("hruser");
-        checkBADREQUESTStartProcessWihWrongDateVariables(false);
+        checkBADREQUESTStartProcessWithWrongDateVariables(false);
     }
 
     @Test
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariablesForAdmin() throws Exception {
         identityTokenProducer.setTestUser("hradmin");
-        checkBADREQUESTStartProcessWihWrongDateVariables(true);
+        checkBADREQUESTStartProcessWithWrongDateVariables(true);
     }
 
-    private void checkBADREQUESTStartProcessWihWrongDateVariables(boolean isAdmin) throws Exception {
+    private void checkBADREQUESTStartProcessWithWrongDateVariables(boolean isAdmin) throws Exception {
         Map<String, Object> variables = new HashMap<>();
 
         variables.put("variableBool", false);
@@ -656,7 +656,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    @WithMockKeycloakUser(username = "hruser", roles = "ACTIVITI_USER")
+    @WithMockOAuth2User(username = "hruser", roles = "ACTIVITI_USER")
     public void testStartProcessVariablesPayloadConverter() {
         // given
         StartProcessPayload startProcessPayload = testStartProcessPayload();
@@ -676,7 +676,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    @WithMockKeycloakUser(username = "hradmin", roles = "ACTIVITI_ADMIN")
+    @WithMockOAuth2User(username = "hradmin", roles = "ACTIVITI_ADMIN")
     public void testAdminStartProcessVariablesPayloadConverter() {
         // given
         identityTokenProducer.setTestUser("hradmin");
@@ -697,7 +697,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    @WithMockKeycloakUser(username = "hruser", roles = "ACTIVITI_USER")
+    @WithMockOAuth2User(username = "hruser", roles = "ACTIVITI_USER")
     public void testStartMessageVariablesPayloadConverter() {
         // given
         identityTokenProducer.setTestUser("hruser");
@@ -718,7 +718,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    @WithMockKeycloakUser(username = "hradmin", roles = "ACTIVITI_ADMIN")
+    @WithMockOAuth2User(username = "hradmin", roles = "ACTIVITI_ADMIN")
     public void testAdminStartMessageVariablesPayloadConverter() {
         // given
         identityTokenProducer.setTestUser("hradmin");

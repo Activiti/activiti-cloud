@@ -39,4 +39,5 @@ public class KeycloakSecurityContextTokenProvider implements SecurityContextToke
                 .map(KeycloakPrincipal::getKeycloakSecurityContext)
                 .map(KeycloakSecurityContext::getTokenString);
     }
+
 }

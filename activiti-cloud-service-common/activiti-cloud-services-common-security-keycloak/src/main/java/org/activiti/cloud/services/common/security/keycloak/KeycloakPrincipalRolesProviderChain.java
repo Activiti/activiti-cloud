@@ -43,4 +43,6 @@ public class KeycloakPrincipalRolesProviderChain implements PrincipalRolesProvid
     protected SecurityException securityException() {
         return new SecurityException("Invalid principal security access token roles");
     }
+
+
 }

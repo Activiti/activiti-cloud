@@ -47,8 +47,8 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     }
 
     @Override
-    public void setTestUser(String keycloakTestUser) {
-        this.testUser = keycloakTestUser;
+    public void setTestUser(String testUser) {
+        this.testUser = testUser;
     }
 
     @Override

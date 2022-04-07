@@ -24,7 +24,7 @@ public interface IdentityTokenProducer {
 
     String getTokenString();
 
-    void setTestUser(String keycloakTestUser);
+    void setTestUser(String testUser);
 
     HttpEntity entityWithAuthorizationHeader(String user, String password);
 

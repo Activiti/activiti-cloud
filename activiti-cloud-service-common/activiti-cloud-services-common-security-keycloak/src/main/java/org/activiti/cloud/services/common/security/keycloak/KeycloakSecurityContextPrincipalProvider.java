@@ -35,4 +35,5 @@ public class KeycloakSecurityContextPrincipalProvider implements SecurityContext
                        .map(KeycloakPrincipal.class::cast);
     }
 
+
 }

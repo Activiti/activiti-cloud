@@ -35,8 +35,8 @@ import org.springframework.test.context.TestContext;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@WithSecurityContext(factory = WithMockKeycloakUserSecurityContextFactory.class)
-public @interface WithMockKeycloakUser {
+@WithSecurityContext(factory = WithMockOAuth2UserSecurityContextFactory.class)
+public @interface WithMockOAuth2User {
 
     String username() default "testuser";
 
@@ -44,11 +44,11 @@ public @interface WithMockKeycloakUser {
 
     String[] groups() default {};
 
-    boolean isActive() default true;
+//    boolean isActive() default true;
 
-    boolean isInteractive() default false;
+//    boolean isInteractive() default false;
 
-    String rolePrefix() default "ROLE_";
+//    String rolePrefix() default "ROLE_";
 
     /**
      * Determines when the {@link SecurityContext} is setup. The default is before
