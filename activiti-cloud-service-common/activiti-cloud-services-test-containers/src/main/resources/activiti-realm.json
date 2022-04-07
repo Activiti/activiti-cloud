@@ -45,6 +45,12 @@
     },
     {
       "name": "testgroup"
+    },
+    {
+      "name": "salesgroup",
+      "realmRoles": [
+        "ACTIVITI_USER"
+      ]
     }
   ],
   "users": [
@@ -161,6 +167,27 @@
       "firstName": "HR",
       "lastName": "User",
       "email": "hr@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "ACTIVITI_USER",
+        "uma_authorization",
+        "offline_access"
+      ],
+      "groups": [
+        "/hr"
+      ]
+    },
+    {
+      "username": "johnsnow",
+      "enabled": true,
+      "firstName": "John",
+      "lastName": "Snow",
+      "email": "john@example.com",
       "credentials": [
         {
           "type": "password",

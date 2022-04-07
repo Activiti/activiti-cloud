@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
@@ -44,7 +45,7 @@ public class ProcessInstanceRestrictionService {
 
     public Predicate restrictProcessInstanceQuery(Predicate predicate,
                                                   SecurityPolicyAccess securityPolicyAccess) {
-        Predicate initiatorPredicate = applyInitiatorRestriction(predicate);
+        Predicate initiatorPredicate = applyInvolvedRestriction(predicate);
 
         if (!securityPoliciesManager.arePoliciesDefined()) {
             return initiatorPredicate;
@@ -55,7 +56,7 @@ public class ProcessInstanceRestrictionService {
                                                  processInstanceFilter);
     }
 
-    private Predicate applyInitiatorRestriction(Predicate predicate) {
+    private Predicate applyInvolvedRestriction(Predicate predicate) {
         String userId = securityManager.getAuthenticatedUserId();
 
         if (userId == null) {
@@ -63,7 +64,14 @@ public class ProcessInstanceRestrictionService {
         }
 
         StringPath initiatorPath = QProcessInstanceEntity.processInstanceEntity.initiator;
-        return initiatorPath.eq(userId).and(predicate);
+        BooleanExpression assigneeExpression = QProcessInstanceEntity.processInstanceEntity
+                                                                      .tasks.any()
+                                                                      .assignee.eq(userId);
+        BooleanExpression candidateExpression = QProcessInstanceEntity.processInstanceEntity
+                                                                      .tasks.any()
+                                                                      .taskCandidateUsers.any()
+                                                                      .userId.eq(userId);
+        return initiatorPath.eq(userId).or(assigneeExpression).or(candidateExpression).and(predicate);
     }
 
 }

@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.acc.shared.service;
+package org.activiti.cloud.identity;
 
-import feign.Param;
-import feign.RequestLine;
+import java.util.List;
+import java.util.Set;
+import org.activiti.cloud.identity.model.Group;
+import org.activiti.cloud.identity.model.User;
 
-public interface SwaggerService {
+public interface IdentityManagementService {
 
-    @RequestLine("GET /v3/api-docs")
-    String getSwaggerSpecification();
+  List<User> findUsers(String search, Set<String> roles, Integer page, Integer size);
 
-    @RequestLine("GET /v3/api-docs/{group}")
-    String getSwaggerSpecification(@Param("group") String group);
+  List<Group> findGroups(String search, Set<String> roles, Integer page, Integer size);
 
 }

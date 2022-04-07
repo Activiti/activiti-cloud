@@ -13,17 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.acc.shared.service;
+package org.activiti.cloud.services.identity.keycloak.model;
 
-import feign.Param;
-import feign.RequestLine;
+public class KeycloakGroup {
 
-public interface SwaggerService {
+  private String id;
+  private String name;
 
-    @RequestLine("GET /v3/api-docs")
-    String getSwaggerSpecification();
+  public String getId() {
+    return id;
+  }
 
-    @RequestLine("GET /v3/api-docs/{group}")
-    String getSwaggerSpecification(@Param("group") String group);
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
 
 }

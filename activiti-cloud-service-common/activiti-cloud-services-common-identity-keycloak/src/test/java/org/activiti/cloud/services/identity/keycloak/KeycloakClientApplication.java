@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.acc.shared.service;
+package org.activiti.cloud.services.identity.keycloak;
 
-import feign.Param;
-import feign.RequestLine;
+import org.activiti.cloud.identity.web.EnableIdentityManagementRestAPI;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-public interface SwaggerService {
+@SpringBootApplication
+@EnableIdentityManagementRestAPI
+public class KeycloakClientApplication {
 
-    @RequestLine("GET /v3/api-docs")
-    String getSwaggerSpecification();
-
-    @RequestLine("GET /v3/api-docs/{group}")
-    String getSwaggerSpecification(@Param("group") String group);
+	public static void main(String[] args) {
+		SpringApplication.run(KeycloakClientApplication.class, args);
+	}
 
 }

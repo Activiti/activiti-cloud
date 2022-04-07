@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.acc.shared.service;
+package org.activiti.cloud.identity.web.assembler;
 
-import feign.Param;
-import feign.RequestLine;
+import org.activiti.cloud.identity.model.Group;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
 
-public interface SwaggerService {
+/**
+ * Assembler for {@link Group} resource
+ */
+@Component
+public class ModelRepresentationGroupAssembler implements RepresentationModelAssembler<Group, EntityModel<Group>> {
 
-    @RequestLine("GET /v3/api-docs")
-    String getSwaggerSpecification();
-
-    @RequestLine("GET /v3/api-docs/{group}")
-    String getSwaggerSpecification(@Param("group") String group);
+    @Override
+    public EntityModel<Group> toModel(Group group) {
+        return EntityModel.of(group);
+    }
 
 }
