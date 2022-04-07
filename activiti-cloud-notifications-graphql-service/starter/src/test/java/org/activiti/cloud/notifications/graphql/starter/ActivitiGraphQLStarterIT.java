@@ -15,18 +15,11 @@
  */
 package org.activiti.cloud.notifications.graphql.starter;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
-
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
@@ -81,12 +74,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ContextConfiguration;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.http.client.HttpClient;
@@ -94,6 +81,18 @@ import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
@@ -1131,6 +1130,96 @@ public class ActivitiGraphQLStarterIT {
     }
 
     @Test
+    public void testGraphqlTasksQueryWithEQNullValues() {
+        // @formatter:off
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            "query {" +
+            "  Tasks(" +
+            "    page: { start: 1, limit: 100 }" +
+            "    where: { status: { IN: [CREATED, ASSIGNED] }, dueDate: { EQ: null } }" +
+            "  ) {" +
+            "    select {" +
+            "      id" +
+            "      businessKey" +
+            "      name" +
+            "      status" +
+            "      priority(orderBy: DESC)" +
+            "      dueDate(orderBy: ASC)" +
+            "      assignee" +
+            "    }" +
+            "  }" +
+            "}");
+        // @formatter:on
+
+        ResponseEntity<GraphQLQueryResult> entity = rest
+            .postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders),
+                           GraphQLQueryResult.class);
+
+        assertThat(entity.getStatusCode())
+            .describedAs(entity.toString())
+            .isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors())
+            .isNull();
+
+        String expected = "{Tasks={select=[" +
+            "{id=2, businessKey=null, name=task2, status=CREATED, priority=10, dueDate=null, assignee=assignee}, " +
+            "{id=4, businessKey=null, name=task4, status=CREATED, priority=10, dueDate=null, assignee=assignee}, " +
+            "{id=6, businessKey=bk6, name=task6, status=ASSIGNED, priority=10, dueDate=null, assignee=assignee}, " +
+            "{id=3, businessKey=null, name=task3, status=CREATED, priority=5, dueDate=null, assignee=assignee}" +
+            "]}}";
+
+        assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
+    @Test
+    public void testGraphqlTasksQueryWithNENullValues() {
+        // @formatter:off
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            "query {" +
+                "  Tasks(" +
+                "    page: { start: 1, limit: 100 }" +
+                "    where: { status: { IN: [ASSIGNED, COMPLETED] }, businessKey: { NE: null } }" +
+                "  ) {" +
+                "    select {" +
+                "      id" +
+                "      businessKey" +
+                "      name" +
+                "      status" +
+                "      priority(orderBy: DESC)" +
+                "      dueDate(orderBy: ASC)" +
+                "      assignee" +
+                "    }" +
+                "  }" +
+                "}");
+        // @formatter:on
+
+        ResponseEntity<GraphQLQueryResult> entity = rest
+            .postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders),
+                           GraphQLQueryResult.class);
+
+        assertThat(entity.getStatusCode())
+            .describedAs(entity.toString())
+            .isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors())
+            .isNull();
+
+        String expected = "{Tasks={select=[" +
+            "{id=6, businessKey=bk6, name=task6, status=ASSIGNED, priority=10, dueDate=null, assignee=assignee}, " +
+            "{id=1, businessKey=bk1, name=task1, status=COMPLETED, priority=5, dueDate=null, assignee=assignee}" +
+            "]}}";
+
+        assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
+    @Test
     public void testGraphqlWhere() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
@@ -1240,8 +1329,8 @@ public class ActivitiGraphQLStarterIT {
         // @formatter:on
 
         ResponseEntity<GraphQLQueryResult> entity = rest
-                                                            .postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders),
-                                                                           GraphQLQueryResult.class);
+                .postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders),
+                               GraphQLQueryResult.class);
 
         assertThat(entity.getStatusCode())
                 .describedAs(entity.toString())
