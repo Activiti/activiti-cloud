@@ -111,6 +111,7 @@ public class ProcessInstanceAdminControllerImplIT {
     public void setUp() {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
+        assertThat(processRuntime).isNotNull();
     }
 
     @Test
