@@ -37,9 +37,12 @@ import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
+import org.activiti.cloud.services.core.ProcessDefinitionService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
+import org.activiti.cloud.services.rest.assemblers.ExtendedCloudProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
@@ -47,17 +50,19 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @RestController
 @RequestMapping(produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -69,33 +74,43 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     private final ProcessDefinitionRepresentationModelAssembler representationModelAssembler;
 
+    private final ExtendedCloudProcessDefinitionRepresentationModelAssembler extendedCloudProcessDefinitionRepresentationModelAssembler;
+
     private final ProcessRuntime processRuntime;
 
     private final AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler;
 
     private final SpringPageConverter pageConverter;
 
+    private final ProcessDefinitionService processDefinitionService;
+
     @Autowired
     public ProcessDefinitionControllerImpl(RepositoryService repositoryService,
                                            ProcessDiagramGeneratorWrapper processDiagramGenerator,
                                            ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
+                                           ExtendedCloudProcessDefinitionRepresentationModelAssembler extendedCloudProcessDefinitionRepresentationModelAssembler,
                                            ProcessRuntime processRuntime,
                                            AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
-                                           SpringPageConverter pageConverter) {
+                                           SpringPageConverter pageConverter,
+                                           ProcessDefinitionService processDefinitionService) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.representationModelAssembler = representationModelAssembler;
+        this.extendedCloudProcessDefinitionRepresentationModelAssembler = extendedCloudProcessDefinitionRepresentationModelAssembler;
         this.processRuntime = processRuntime;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
+        this.processDefinitionService = processDefinitionService;
     }
 
     @Override
-    public PagedModel<EntityModel<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable) {
-        Page<ProcessDefinition> page = processRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
+    public PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getProcessDefinitions(@RequestParam(required = false, defaultValue = "")
+                                                                                         List<String> include,
+                                                                                         Pageable pageable) {
+        Page<ProcessDefinition> page = processDefinitionService.getProcessDefinitions(pageConverter.toAPIPageable(pageable), include);
         return pagedCollectionModelAssembler.toModel(pageable,
                                                   pageConverter.toSpringPage(pageable, page),
-                                                  representationModelAssembler);
+            extendedCloudProcessDefinitionRepresentationModelAssembler);
     }
 
     @Override

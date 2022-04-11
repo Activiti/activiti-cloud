@@ -15,19 +15,7 @@
  */
 package org.activiti.cloud.acc.core.steps.runtime;
 
-import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
-import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.stream.Collectors;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -51,6 +39,20 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
+import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeBundleSteps {
@@ -222,7 +224,7 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public Collection<ProcessDefinition> getProcessDefinitions(){
-        return processDefinitionsApiClient.getProcessDefinitions(DEFAULT_PAGEABLE)
+        return processDefinitionsApiClient.getProcessDefinitions(List.of(), DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)

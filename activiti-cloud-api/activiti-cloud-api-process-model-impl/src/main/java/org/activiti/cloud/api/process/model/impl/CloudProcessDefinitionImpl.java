@@ -16,10 +16,14 @@
 package org.activiti.cloud.api.process.model.impl;
 
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.VariableDefinition;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
-import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 
-public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implements CloudProcessDefinition {
+import java.util.ArrayList;
+import java.util.List;
+
+public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implements ExtendedCloudProcessDefinition {
 
     private String id;
     private String name;
@@ -28,6 +32,7 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
     private int version;
     private String formKey;
     private String category;
+    private List<VariableDefinition> variableDefinitions = new ArrayList<>();
 
     public CloudProcessDefinitionImpl() {
     }
@@ -104,5 +109,14 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    @Override
+    public List<VariableDefinition> getVariableDefinitions() {
+        return variableDefinitions;
+    }
+
+    public void setVariableDefinitions(List<VariableDefinition> variableDefinitions) {
+        this.variableDefinitions = variableDefinitions;
     }
 }

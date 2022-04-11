@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
-import java.util.List;
-
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.rest.assemblers.ExtendedCloudProcessDefinitionRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.GroupCandidatesRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaRepresentationModelAssembler;
@@ -33,7 +33,6 @@ import org.activiti.cloud.services.rest.assemblers.ToCloudProcessInstanceConvert
 import org.activiti.cloud.services.rest.assemblers.ToCloudTaskConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCloudVariableInstanceConverter;
 import org.activiti.cloud.services.rest.assemblers.UserCandidatesRepresentationModelAssembler;
-import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.controllers.RuntimeBundleLinkRelationProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -45,6 +44,8 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 @Configuration
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
@@ -79,6 +80,11 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
         return new ProcessDefinitionRepresentationModelAssembler(new ToCloudProcessDefinitionConverter(runtimeBundleInfoAppender));
+    }
+
+    @Bean
+    public ExtendedCloudProcessDefinitionRepresentationModelAssembler cloudProcessDefinitionRepresentationModelAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new ExtendedCloudProcessDefinitionRepresentationModelAssembler(new ToCloudProcessDefinitionConverter(runtimeBundleInfoAppender));
     }
 
     @Bean

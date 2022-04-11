@@ -15,20 +15,9 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -58,6 +47,18 @@ import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessDefinitionAdminControllerImpl.class)
 @EnableSpringDataWebSupport
@@ -98,10 +99,14 @@ public class ProcessDefinitionAdminControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private ProcessRuntime processRuntime;
+
     @BeforeEach
     public void setUp() {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
+        assertThat(processRuntime).isNotNull();
     }
 
     @Test
