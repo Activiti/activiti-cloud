@@ -169,7 +169,7 @@ public interface ModelRestApi {
             summary = "Update model content",
             description = "Update the content of the model from file.")
     @PutMapping(path = "/models/{modelId}/content",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(NO_CONTENT)
     void updateModelContent(
             @Parameter(description = UPDATE_MODEL_ID_PARAM_DESCR,required = true)
@@ -246,7 +246,7 @@ public interface ModelRestApi {
             summary = "Validate a model content",
             description = "Allows to validate the model content without save it.")
     @PostMapping(path = "/models/{modelId}/validate",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(NO_CONTENT)
     void validateModel(
             @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR, required = true)
@@ -263,7 +263,7 @@ public interface ModelRestApi {
             summary = "Validate model extensions",
             description = "Allows to validate the model extensions without save them.")
     @PostMapping(path = "/models/{modelId}/validate/extensions",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(NO_CONTENT)
     void validateModelExtensions(
             @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR)
