@@ -35,6 +35,7 @@ import org.activiti.cloud.modeling.api.ModelType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -167,7 +168,8 @@ public interface ModelRestApi {
             tags = MODELS,
             summary = "Update model content",
             description = "Update the content of the model from file.")
-    @PutMapping(path = "/models/{modelId}/content")
+    @PutMapping(path = "/models/{modelId}/content",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(NO_CONTENT)
     void updateModelContent(
             @Parameter(description = UPDATE_MODEL_ID_PARAM_DESCR,required = true)
@@ -243,7 +245,8 @@ public interface ModelRestApi {
             tags = MODELS,
             summary = "Validate a model content",
             description = "Allows to validate the model content without save it.")
-    @PostMapping("/models/{modelId}/validate")
+    @PostMapping(path = "/models/{modelId}/validate",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(NO_CONTENT)
     void validateModel(
             @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR, required = true)
@@ -259,7 +262,8 @@ public interface ModelRestApi {
             tags = MODELS,
             summary = "Validate model extensions",
             description = "Allows to validate the model extensions without save them.")
-    @PostMapping("/models/{modelId}/validate/extensions")
+    @PostMapping(path = "/models/{modelId}/validate/extensions",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(NO_CONTENT)
     void validateModelExtensions(
             @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR)
