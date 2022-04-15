@@ -25,11 +25,12 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.springframework.data.domain.Pageable;
@@ -167,7 +168,8 @@ public interface ModelRestApi {
             tags = MODELS,
             summary = "Update model content",
             description = "Update the content of the model from file.")
-    @PutMapping(path = "/models/{modelId}/content")
+    @PutMapping(path = "/models/{modelId}/content",
+        consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(NO_CONTENT)
     void updateModelContent(
             @Parameter(description = UPDATE_MODEL_ID_PARAM_DESCR,required = true)
@@ -243,7 +245,8 @@ public interface ModelRestApi {
             tags = MODELS,
             summary = "Validate a model content",
             description = "Allows to validate the model content without save it.")
-    @PostMapping("/models/{modelId}/validate")
+    @PostMapping(path = "/models/{modelId}/validate",
+        consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(NO_CONTENT)
     void validateModel(
             @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR, required = true)
@@ -259,7 +262,8 @@ public interface ModelRestApi {
             tags = MODELS,
             summary = "Validate model extensions",
             description = "Allows to validate the model extensions without save them.")
-    @PostMapping("/models/{modelId}/validate/extensions")
+    @PostMapping(path = "/models/{modelId}/validate/extensions",
+        consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(NO_CONTENT)
     void validateModelExtensions(
             @Parameter(description = VALIDATE_MODEL_ID_PARAM_DESCR)
