@@ -15,24 +15,25 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
+import java.security.Principal;
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
-import org.keycloak.KeycloakPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.security.Principal;
-import java.util.Optional;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 public class KeycloakSecurityContextPrincipalProvider implements SecurityContextPrincipalProvider {
 
     @Override
     public Optional<Principal> getCurrentPrincipal() {
         return Optional.ofNullable(SecurityContextHolder.getContext())
-                       .map(SecurityContext::getAuthentication)
-                       .map(Authentication::getPrincipal)
-                       .filter(KeycloakPrincipal.class::isInstance)
-                       .map(KeycloakPrincipal.class::cast);
+            .map(SecurityContext::getAuthentication)
+            .map(Authentication::getPrincipal)
+            .filter(Jwt.class::isInstance)
+            .map(Jwt.class::cast)
+            .map(jwt -> new JwtAuthenticationToken(jwt));
     }
 
 }

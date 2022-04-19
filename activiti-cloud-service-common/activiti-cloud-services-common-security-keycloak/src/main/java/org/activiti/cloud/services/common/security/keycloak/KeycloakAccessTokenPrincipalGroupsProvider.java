@@ -15,23 +15,19 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
+import java.security.Principal;
+import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
-import org.keycloak.representations.AccessToken;
+import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 public class KeycloakAccessTokenPrincipalGroupsProvider implements PrincipalGroupsProvider {
 
-    private final KeycloakAccessTokenProvider keycloakAccessTokenProvider;
+    private final JwtAccessTokenProvider keycloakAccessTokenProvider;
     private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
 
-    public KeycloakAccessTokenPrincipalGroupsProvider(@NonNull KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+    public KeycloakAccessTokenPrincipalGroupsProvider(@NonNull JwtAccessTokenProvider keycloakAccessTokenProvider,
                                                       @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
         this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
@@ -40,13 +36,8 @@ public class KeycloakAccessTokenPrincipalGroupsProvider implements PrincipalGrou
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
         return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
-                                          .map(AccessToken::getOtherClaims)
-                                          .map(otherClaims -> otherClaims.get("groups"))
-                                          .filter(Collection.class::isInstance)
-                                          .map(c -> (Collection<String>) c)
-                                          .map(ArrayList::new)
-                                          .map(Collections::unmodifiableList)
+                                          //.filter(keycloakAccessTokenValidator::isValid)
+                                          .map(JwtAdapter::getGroups)
                                           .orElseGet(this::empty);
     }
 
