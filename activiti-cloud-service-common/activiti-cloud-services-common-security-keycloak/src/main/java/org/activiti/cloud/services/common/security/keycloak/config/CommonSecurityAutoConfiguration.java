@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.common.security.keycloak.config;
 
+import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
@@ -25,7 +26,7 @@ import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
 import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalGroupsProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalRolesProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
+import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
@@ -33,66 +34,38 @@ import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRol
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
-import org.keycloak.adapters.KeycloakConfigResolver;
-import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
-import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
-import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
-import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
-import org.keycloak.adapters.springsecurity.management.HttpSessionManager;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
-import java.util.List;
-
 @Configuration
-@KeycloakConfiguration
 @EnableAuthorizationConfiguration
 @ConditionalOnWebApplication
-@Import({KeycloakSpringBootConfigResolver.class})
-@ConditionalOnMissingBean(value = {KeycloakConfigResolver.class, SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
-@DependsOn({"keycloakConfigResolver"})
-@PropertySource("classpath:keycloak-configuration.properties")
-public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigurerAdapter {
+@ConditionalOnMissingBean(value = {SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
+@PropertySource("classpath:keycloak-configuration.properties" )
+public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
     private final AuthorizationConfigurer authorizationConfigurer;
+    @Value("${keycloak.resource}" )
+    private String resource;
+    @Value("${keycloak.use-resource-role-mappings:false}" )
+    private boolean useResourceRoleMapping;
 
     @Autowired
     public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer) {
         this.authorizationConfigurer = authorizationConfigurer;
-    }
-
-    /**
-     * Registers the KeycloakAuthenticationProvider with the authentication manager.
-     */
-    @Bean
-    public InitializingBean configureGlobalAuthenticationManager(AuthenticationManagerBuilder auth,
-                                            KeycloakAuthenticationProvider keycloakAuthenticationProvider) {
-        return () -> {
-            keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
-            auth.authenticationProvider(keycloakAuthenticationProvider);
-        };
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    @Override
-    public KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
-        return new KeycloakAuthenticationProvider();
     }
 
     @Bean
@@ -103,9 +76,8 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
 
     @Bean
     @ConditionalOnMissingBean
-    public KeycloakAccessTokenProvider keycloakAccessTokenProvider() {
-        return new KeycloakAccessTokenProvider() {
-        };
+    public JwtAccessTokenProvider jwtAccessTokenProvider() {
+        return new JwtAccessTokenProvider(resource, useResourceRoleMapping);
     }
 
     @Bean
@@ -117,28 +89,28 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
 
     @Bean
     @ConditionalOnMissingBean
-    public PrincipalIdentityProvider principalIdentityProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+    public PrincipalIdentityProvider principalIdentityProvider(JwtAccessTokenProvider keycloakAccessTokenProvider,
+                                                               KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         return new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider,
-            keycloakAccessTokenValidator);
+                                                     keycloakAccessTokenValidator);
     }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public KeycloakAccessTokenPrincipalGroupsProvider keycloakAccessTokenPrincipalGroupsProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+    public KeycloakAccessTokenPrincipalGroupsProvider keycloakAccessTokenPrincipalGroupsProvider(JwtAccessTokenProvider keycloakAccessTokenProvider,
+                                                                                                 KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         return new KeycloakAccessTokenPrincipalGroupsProvider(keycloakAccessTokenProvider,
-            keycloakAccessTokenValidator);
+                                                              keycloakAccessTokenValidator);
     }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public KeycloakAccessTokenPrincipalRolesProvider keycloakAccessTokenPrincipalRolesProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+    public KeycloakAccessTokenPrincipalRolesProvider keycloakAccessTokenPrincipalRolesProvider(JwtAccessTokenProvider keycloakAccessTokenProvider,
+                                                                                               KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         return new KeycloakAccessTokenPrincipalRolesProvider(keycloakAccessTokenProvider,
-            keycloakAccessTokenValidator);
+                                                             keycloakAccessTokenValidator);
     }
 
     @Bean
@@ -156,13 +128,13 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
     @Bean
     @ConditionalOnMissingBean
     public SecurityManager securityManager(SecurityContextPrincipalProvider authenticatedPrincipalProvider,
-        PrincipalIdentityProvider principalIdentityProvider,
-        KeycloakPrincipalGroupsProviderChain principalGroupsProvider,
-        KeycloakPrincipalRolesProviderChain principalRolesProviderChain) {
+                                           PrincipalIdentityProvider principalIdentityProvider,
+                                           KeycloakPrincipalGroupsProviderChain principalGroupsProvider,
+                                           KeycloakPrincipalRolesProviderChain principalRolesProviderChain) {
         return new KeycloakSecurityManagerImpl(authenticatedPrincipalProvider,
-            principalIdentityProvider,
-            principalGroupsProvider,
-            principalRolesProviderChain);
+                                               principalIdentityProvider,
+                                               principalGroupsProvider,
+                                               principalRolesProviderChain);
     }
 
     @Bean
@@ -171,19 +143,10 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
         return new KeycloakSecurityContextTokenProvider();
     }
 
-    @Bean
-    @Override
-    @ConditionalOnMissingBean(HttpSessionManager.class)
-    protected HttpSessionManager httpSessionManager() {
-        return new HttpSessionManager();
-    }
-
-
     /**
      * Defines the session authentication strategy.
      */
     @Bean
-    @Override
     @ConditionalOnMissingBean
     protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
         return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
@@ -191,10 +154,21 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        super.configure(http);
         authorizationConfigurer.configure(http);
-        http.authorizeRequests()
-                .anyRequest().permitAll().and().csrf().disable().httpBasic().disable();
+        http
+            .authorizeRequests().anyRequest().permitAll()
+            .and()
+            .csrf().disable()
+            .httpBasic().disable()
+            .oauth2ResourceServer()
+            .jwt()
+            .jwtAuthenticationConverter(jwtAuthenticationConverter());
+    }
+
+    private JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakJwtGrantedAuthorityConverter(jwtAccessTokenProvider()));
+        return jwtAuthenticationConverter;
     }
 
 }

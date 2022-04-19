@@ -37,7 +37,7 @@ public class KeycloakAccessTokenValidatorTest {
         when(accessToken.isActive()).thenReturn(true);
 
         // when
-        Boolean result = subject.isValid(accessToken);
+        Boolean result = subject.isValid(null);
 
         // then
         assertThat(result).isTrue();
@@ -51,7 +51,7 @@ public class KeycloakAccessTokenValidatorTest {
         when(accessToken.isActive()).thenReturn(false);
 
         // when
-        Boolean result = subject.isValid(accessToken);
+        Boolean result = subject.isValid(null);
 
         // then
         assertThat(result).isFalse();
@@ -63,7 +63,7 @@ public class KeycloakAccessTokenValidatorTest {
         AccessToken accessToken = null;
 
         // when
-        Throwable result = catchThrowable(() -> { subject.isValid(accessToken); });
+        Throwable result = catchThrowable(() -> { subject.isValid(null); });
 
         // then
         assertThat(result).isInstanceOf(SecurityException.class);

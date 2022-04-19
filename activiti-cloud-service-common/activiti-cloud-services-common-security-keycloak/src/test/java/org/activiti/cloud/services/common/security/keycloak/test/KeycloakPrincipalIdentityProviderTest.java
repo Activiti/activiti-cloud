@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
 
-import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
+import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,7 @@ public class KeycloakPrincipalIdentityProviderTest {
 
     @BeforeEach
     public void setUp() {
-        KeycloakAccessTokenProvider keycloakAccessTokenProvider = new KeycloakAccessTokenProvider() { };
+        JwtAccessTokenProvider keycloakAccessTokenProvider = null; //new JwtAccessTokenProvider() { };
         KeycloakAccessTokenValidator keycloakAccessTokenValidator = new KeycloakAccessTokenValidator() { };
 
         subject = new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider,

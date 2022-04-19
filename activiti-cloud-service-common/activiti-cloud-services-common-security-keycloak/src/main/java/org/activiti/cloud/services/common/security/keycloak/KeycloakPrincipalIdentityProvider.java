@@ -16,18 +16,17 @@
 package org.activiti.cloud.services.common.security.keycloak;
 
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
-import org.keycloak.representations.AccessToken;
+import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.springframework.lang.NonNull;
 
 import java.security.Principal;
-import java.util.Optional;
 
 public class KeycloakPrincipalIdentityProvider implements PrincipalIdentityProvider {
 
-    private final KeycloakAccessTokenProvider keycloakAccessTokenProvider;
+    private final JwtAccessTokenProvider keycloakAccessTokenProvider;
     private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
 
-    public KeycloakPrincipalIdentityProvider(@NonNull KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+    public KeycloakPrincipalIdentityProvider(@NonNull JwtAccessTokenProvider keycloakAccessTokenProvider,
                                              @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
         this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
@@ -36,15 +35,9 @@ public class KeycloakPrincipalIdentityProvider implements PrincipalIdentityProvi
     @Override
     public String getUserId(@NonNull Principal principal) {
         return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
-                                          .map(this::getUserId)
+                                          //.filter(keycloakAccessTokenValidator::isValid)
+                                          .map(JwtAdapter::getUserName)
                                           .orElseThrow(this::securityException);
-    }
-
-    protected String getUserId(AccessToken accessToken) {
-        return Optional.ofNullable(accessToken)
-                       .map(AccessToken::getPreferredUsername)
-                       .orElseThrow(this::securityException);
     }
 
     protected SecurityException securityException() {

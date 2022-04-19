@@ -15,16 +15,16 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
-import org.keycloak.representations.AccessToken;
 import org.springframework.lang.NonNull;
 
 import java.util.Optional;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 public interface KeycloakAccessTokenValidator {
 
-    default boolean isValid(@NonNull AccessToken accessToken) {
+    default boolean isValid(@NonNull Jwt accessToken) {
         return Optional.ofNullable(accessToken)
-                       .map(AccessToken::isActive)
+                       .map(a -> true)
                        .orElseThrow(() -> new SecurityException("Invalid access token instance"));
     };
 
