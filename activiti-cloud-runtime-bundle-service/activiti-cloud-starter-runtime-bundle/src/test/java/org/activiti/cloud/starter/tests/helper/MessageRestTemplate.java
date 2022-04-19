@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.helper;
 
-import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
-
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -26,9 +24,18 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 
 @TestComponent
 public class MessageRestTemplate {
+
+    public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER =
+        new LinkedMultiValueMap<>(Map.of("Content-type", List.of("application/json")));
 
     private TestRestTemplate testRestTemplate;
 
@@ -39,7 +46,7 @@ public class MessageRestTemplate {
     public ResponseEntity<CloudProcessInstance> message(StartMessagePayload payload) {
         return testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/message",
                                          HttpMethod.POST,
-                                         new HttpEntity<>(payload),
+                                         new HttpEntity<>(payload, CONTENT_TYPE_HEADER),
                                          new ParameterizedTypeReference<CloudProcessInstance>() {
                                          });
     }
@@ -55,7 +62,7 @@ public class MessageRestTemplate {
     public ResponseEntity<Void> message(ReceiveMessagePayload payload) {
         return testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/message",
                                          HttpMethod.PUT,
-                                         new HttpEntity<>(payload),
+                                         new HttpEntity<>(payload, CONTENT_TYPE_HEADER),
                                          new ParameterizedTypeReference<Void>() {
                                          });
     }
