@@ -132,6 +132,11 @@
         "account": [
           "manage-account",
           "view-profile"
+        ],
+        "activiti": [
+          "uma_authorization",
+          "ACTIVITI_ADMIN",
+          "offline_access"
         ]
       },
       "notBefore": 0,
