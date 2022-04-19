@@ -49,6 +49,7 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableAuthorizationConfiguration
@@ -157,6 +158,13 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
         authorizationConfigurer.configure(http);
         http
             .authorizeRequests().anyRequest().permitAll()
+            .and()
+            .cors()
+            .configurationSource(request -> {
+                CorsConfiguration corsConfiguration = new CorsConfiguration();
+                corsConfiguration.setAllowedMethods(List.of("GET", "HEAD", "OPTION", "POST", "PUT", "DELETE"));
+                return corsConfiguration.applyPermitDefaultValues();
+            })
             .and()
             .csrf().disable()
             .httpBasic().disable()
