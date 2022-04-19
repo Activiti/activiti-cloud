@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -30,21 +26,17 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
+import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.cloud.starter.tests.helper.SignalRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -55,6 +47,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -70,7 +65,10 @@ public class SignalIT {
     private TaskService taskService;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
+
+    @Autowired
+    private SignalRestTemplate signalRestTemplate;
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
@@ -81,7 +79,7 @@ public class SignalIT {
 
     @BeforeEach
     public void setUp() {
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
@@ -120,12 +118,7 @@ public class SignalIT {
         //when
         runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess");
         SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal().withName("Test").build();
-        ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
-            HttpMethod.POST,
-            new HttpEntity<>(signalProcessInstancesCmd),
-            new ParameterizedTypeReference<Void>() {
-            });
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        signalRestTemplate.signal(signalProcessInstancesCmd);
 
         await("Broadcast Signals").untilAsserted(() -> {
             List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery().processDefinitionKey("broadcastSignalCatchEventProcess").list();
@@ -191,14 +184,9 @@ public class SignalIT {
         SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal().withName("go").build();
 
         //when
-        ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
-            HttpMethod.POST,
-            new HttpEntity<>(signalProcessInstancesCmd),
-            new ParameterizedTypeReference<Void>() {
-            });
+        signalRestTemplate.signal(signalProcessInstancesCmd);
 
         //then
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
     }
@@ -212,15 +200,9 @@ public class SignalIT {
                 "myContent")).build();
 
         //when
-        ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
-            HttpMethod.POST,
-            new HttpEntity<>(signalProcessInstancesCmd),
-            new ParameterizedTypeReference<Void>() {
-            });
+        signalRestTemplate.signal(signalProcessInstancesCmd);
 
         //then
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
         ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
 
@@ -233,12 +215,4 @@ public class SignalIT {
         });
     }
 
-    private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
-        };
-        return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
-            HttpMethod.GET,
-            null,
-            responseType);
-    }
 }

@@ -249,7 +249,7 @@ public class TaskRestTemplate {
     }
 
     public CloudTask createTask(Map<String, Object> jsonAsMap) {
-        return createTask(new HttpEntity<>(jsonAsMap));
+        return createTask(new HttpEntity<>(jsonAsMap, CONTENT_TYPE_HEADER));
     }
 
     public ResponseEntity<PagedModel<CloudTask>> getTasks() {
