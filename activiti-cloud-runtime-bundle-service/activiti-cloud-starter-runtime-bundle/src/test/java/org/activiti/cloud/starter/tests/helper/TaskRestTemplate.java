@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.helper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-
-import java.util.Map;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
@@ -37,19 +33,27 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @TestComponent
 public class TaskRestTemplate {
 
     private static final String TASK_RELATIVE_URL = "/v1/tasks/";
     private static final String ADMIN_TASK_RELATIVE_URL = "/admin/v1/tasks/";
+    private static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER =
+        new LinkedMultiValueMap<>(Map.of("Content-type", List.of("application/json")));
 
     private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudTask>() {
     };
@@ -97,7 +101,9 @@ public class TaskRestTemplate {
                                                ) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(baseURL + task.getId() + "/complete",
                                                                              HttpMethod.POST,
-                                                                             completeTaskPayload!=null ?  new HttpEntity<>(completeTaskPayload) : null,
+                                                                             completeTaskPayload!=null
+                                                                                 ? new HttpEntity<>(completeTaskPayload, CONTENT_TYPE_HEADER)
+                                                                                 : new HttpEntity<>(CONTENT_TYPE_HEADER),
                                                                              TASK_RESPONSE_TYPE);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
         return responseEntity;
@@ -230,7 +236,7 @@ public class TaskRestTemplate {
     }
 
     public CloudTask createTask(CreateTaskPayload createTask) {
-        return createTask(new HttpEntity<>(createTask));
+        return createTask(new HttpEntity<>(createTask, CONTENT_TYPE_HEADER));
     }
 
     private CloudTask createTask(HttpEntity<?> requestEntity) {
@@ -243,7 +249,7 @@ public class TaskRestTemplate {
     }
 
     public CloudTask createTask(Map<String, Object> jsonAsMap) {
-        return createTask(new HttpEntity<>(jsonAsMap));
+        return createTask(new HttpEntity<>(jsonAsMap, CONTENT_TYPE_HEADER));
     }
 
     public ResponseEntity<PagedModel<CloudTask>> getTasks() {
@@ -312,7 +318,7 @@ public class TaskRestTemplate {
                             String baseURL) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(baseURL + taskId,
                                                                              HttpMethod.PUT,
-                                                                             new HttpEntity<>(updateTask),
+                                                                             new HttpEntity<>(updateTask, CONTENT_TYPE_HEADER),
                                                                              TASK_RESPONSE_TYPE);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -324,7 +330,7 @@ public class TaskRestTemplate {
 
         HttpEntity<CreateTaskVariablePayload> requestEntity = new HttpEntity<>(
                 createTaskVariablePayload,
-                null);
+                CONTENT_TYPE_HEADER);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_RELATIVE_URL
                 + taskId + "/variables/",
                                                                         HttpMethod.POST,
@@ -342,7 +348,7 @@ public class TaskRestTemplate {
 
         HttpEntity<UpdateTaskVariablePayload> requestEntity = new HttpEntity<>(
                 updateTaskVariablePayload,
-                null);
+                CONTENT_TYPE_HEADER);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_RELATIVE_URL
                 + taskId + "/variables/{variableName}",
                                                                         HttpMethod.PUT,
@@ -359,7 +365,7 @@ public class TaskRestTemplate {
         ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_RELATIVE_URL
                 + taskId + "/variables/",
                                                                                                     HttpMethod.GET,
-                                                                                                    null,
+                                                                                                    new HttpEntity<>(CONTENT_TYPE_HEADER),
                                                                                                     new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {
                                                                                                     });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -420,7 +426,9 @@ public class TaskRestTemplate {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
             TASK_RELATIVE_URL + task.getId() + "/save",
                                                                              HttpMethod.POST,
-                                                                             saveTaskPayload!=null ?  new HttpEntity<>(saveTaskPayload) : null,
+                                                                             saveTaskPayload != null
+                                                                                 ? new HttpEntity<>(saveTaskPayload, CONTENT_TYPE_HEADER)
+                                                                                 : new HttpEntity<>(CONTENT_TYPE_HEADER),
                                                                              VOID_RESPONSE_TYPE);
 
         return responseEntity;
@@ -429,7 +437,7 @@ public class TaskRestTemplate {
     public ResponseEntity<CloudTask> userAssignTask(AssignTaskPayload assignTask) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_RELATIVE_URL + assignTask.getTaskId() + "/assign",
                 HttpMethod.POST,
-                new HttpEntity<>(assignTask),
+                new HttpEntity<>(assignTask, CONTENT_TYPE_HEADER),
                 TASK_RESPONSE_TYPE);
         return responseEntity;
     }

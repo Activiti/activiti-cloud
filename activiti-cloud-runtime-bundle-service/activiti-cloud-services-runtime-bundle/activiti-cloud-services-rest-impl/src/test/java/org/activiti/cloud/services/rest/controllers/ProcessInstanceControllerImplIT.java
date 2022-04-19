@@ -16,9 +16,6 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstanceMeta;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
@@ -53,7 +50,6 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -65,14 +61,18 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -311,7 +311,8 @@ public class ProcessInstanceControllerImplIT {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.suspend(any())).thenReturn(defaultProcessInstance());
-        mockMvc.perform(post("/v1/process-instances/{processInstanceId}/suspend", 1))
+        mockMvc.perform(post("/v1/process-instances/{processInstanceId}/suspend", 1)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
@@ -321,7 +322,7 @@ public class ProcessInstanceControllerImplIT {
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.resume(any())).thenReturn(defaultProcessInstance());
         mockMvc.perform(post("/v1/process-instances/{processInstanceId}/resume",
-                                 1))
+                                 1).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 

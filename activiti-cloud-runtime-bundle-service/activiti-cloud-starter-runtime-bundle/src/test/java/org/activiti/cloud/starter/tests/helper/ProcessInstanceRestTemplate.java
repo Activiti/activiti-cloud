@@ -15,12 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.helper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
@@ -36,16 +30,23 @@ import org.activiti.engine.impl.util.IoUtil;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @TestComponent
 public class ProcessInstanceRestTemplate {
@@ -53,6 +54,9 @@ public class ProcessInstanceRestTemplate {
     public static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances/";
 
     public static final String PROCESS_INSTANCES_ADMIN_RELATIVE_URL = "/admin/v1/process-instances/";
+
+    public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER =
+        new LinkedMultiValueMap<>(Map.of("Content-type", List.of("application/json")));
 
     private TestRestTemplate testRestTemplate;
 
@@ -139,7 +143,7 @@ public class ProcessInstanceRestTemplate {
     private ResponseEntity<CloudProcessInstance> startProcessWithoutCheck(String baseURL, StartProcessPayload startProcess) {
         return  testRestTemplate.exchange(baseURL,
                                           HttpMethod.POST,
-                                          new HttpEntity<>(startProcess),
+                                          new HttpEntity<>(startProcess, CONTENT_TYPE_HEADER),
                                           new ParameterizedTypeReference<CloudProcessInstance>() {
                                           });
     }
@@ -147,7 +151,7 @@ public class ProcessInstanceRestTemplate {
     private ResponseEntity<CloudProcessInstance> startCreatedProcessCall(String baseURL) {
         return testRestTemplate.exchange(baseURL,
             HttpMethod.POST,
-            new HttpEntity<>(null),
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<CloudProcessInstance>() {
             });
     }
@@ -155,7 +159,7 @@ public class ProcessInstanceRestTemplate {
     private ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessCallFail(String baseURL) {
         return testRestTemplate.exchange(baseURL,
             HttpMethod.POST,
-            new HttpEntity<>(null),
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {
             });
     }
@@ -163,7 +167,7 @@ public class ProcessInstanceRestTemplate {
     private ResponseEntity<CloudProcessInstance> createProcessWithoutCheck(String baseURL, CreateProcessInstancePayload payload) {
         return  testRestTemplate.exchange(baseURL,
             HttpMethod.POST,
-            new HttpEntity<>(payload),
+            new HttpEntity<>(payload, CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<CloudProcessInstance>() {
             });
     }
@@ -215,7 +219,7 @@ public class ProcessInstanceRestTemplate {
                                                                                   StartProcessPayload startProcess) {
         return  testRestTemplate.exchange(baseURL,
                                           HttpMethod.POST,
-                                          new HttpEntity<>(startProcess),
+                                          new HttpEntity<>(startProcess, CONTENT_TYPE_HEADER),
                                           new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {
                                           });
 
@@ -352,7 +356,7 @@ public class ProcessInstanceRestTemplate {
     private ResponseEntity<Void> suspend(String baseURL, String processInstanceId) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(baseURL + processInstanceId + "/suspend",
                                                                         HttpMethod.POST,
-                                                                        null,
+                                                                        new HttpEntity<>(CONTENT_TYPE_HEADER),
                                                                         new ParameterizedTypeReference<Void>() {
                                                                         });
         return responseEntity;
@@ -371,7 +375,7 @@ public class ProcessInstanceRestTemplate {
     private ResponseEntity<Void> resume(String baseURL, String processInstanceId) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(baseURL + processInstanceId + "/resume",
                                                                         HttpMethod.POST,
-                                                                        null,
+                                                                        new HttpEntity<>(CONTENT_TYPE_HEADER),
                                                                         new ParameterizedTypeReference<Void>() {
                                                                         });
         return responseEntity;
@@ -460,7 +464,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     private ResponseEntity<CloudProcessInstance> updateProcess(UpdateProcessPayload updateProcessPayload) {
-        HttpEntity<UpdateProcessPayload> requestEntity = new HttpEntity<>(updateProcessPayload);
+        HttpEntity<UpdateProcessPayload> requestEntity = new HttpEntity<>(updateProcessPayload, CONTENT_TYPE_HEADER);
 
         ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL+ updateProcessPayload.getProcessInstanceId(),
                                                                                         HttpMethod.PUT,
