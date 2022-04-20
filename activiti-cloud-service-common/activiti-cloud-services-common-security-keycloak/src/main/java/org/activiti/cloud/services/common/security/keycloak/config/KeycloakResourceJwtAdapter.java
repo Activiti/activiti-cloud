@@ -31,6 +31,11 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
     }
 
     @Override
+    public Jwt getJwt() {
+        return jwt;
+    }
+
+    @Override
     public List<String> getRoles() {
         return getFromClient(clientId, jwt);
     }

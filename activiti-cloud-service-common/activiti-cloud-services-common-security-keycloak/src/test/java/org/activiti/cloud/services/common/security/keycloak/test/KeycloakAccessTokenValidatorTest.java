@@ -27,7 +27,7 @@ import org.keycloak.representations.AccessToken;
 
 public class KeycloakAccessTokenValidatorTest {
 
-    private KeycloakAccessTokenValidator subject = new KeycloakAccessTokenValidator() {};
+    private KeycloakAccessTokenValidator subject = new KeycloakAccessTokenValidator();
 
     @Test
     public void testIsValidActive() {

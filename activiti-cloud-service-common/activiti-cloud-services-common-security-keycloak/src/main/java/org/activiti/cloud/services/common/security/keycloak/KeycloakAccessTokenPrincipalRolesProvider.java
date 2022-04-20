@@ -36,7 +36,7 @@ public class KeycloakAccessTokenPrincipalRolesProvider implements PrincipalRoles
     @Override
     public List<String> getRoles(@NonNull Principal principal) {
         return keycloakAccessTokenProvider.accessToken(principal)
-                                          //.filter(keycloakAccessTokenValidator::isValid)
+                                          .filter(keycloakAccessTokenValidator::isValid)
                                           .map(JwtAdapter::getRoles)
                                           .orElseGet(this::empty);
     }
