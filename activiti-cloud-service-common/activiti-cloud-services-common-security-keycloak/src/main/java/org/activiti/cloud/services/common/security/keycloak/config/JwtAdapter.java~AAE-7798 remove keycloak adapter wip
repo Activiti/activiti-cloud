@@ -16,9 +16,11 @@
 package org.activiti.cloud.services.common.security.keycloak.config;
 
 import java.util.List;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 public interface JwtAdapter {
 
+    Jwt getJwt();
     List<String> getRoles();
     List<String> getGroups();
     String getUserName();

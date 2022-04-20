@@ -28,6 +28,10 @@ public class KeycloakJwtAdaptor implements JwtAdapter {
         this.jwt = jwt;
     }
 
+    public Jwt getJwt() {
+        return jwt;
+    }
+
     @Override
     public List<String> getRoles() {
         return getRoles(jwt.getClaim("realm_access" ));
