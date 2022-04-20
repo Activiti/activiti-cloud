@@ -35,7 +35,7 @@ public class KeycloakPrincipalIdentityProvider implements PrincipalIdentityProvi
     @Override
     public String getUserId(@NonNull Principal principal) {
         return keycloakAccessTokenProvider.accessToken(principal)
-                                          //.filter(keycloakAccessTokenValidator::isValid)
+                                          .filter(keycloakAccessTokenValidator::isValid)
                                           .map(JwtAdapter::getUserName)
                                           .orElseThrow(this::securityException);
     }

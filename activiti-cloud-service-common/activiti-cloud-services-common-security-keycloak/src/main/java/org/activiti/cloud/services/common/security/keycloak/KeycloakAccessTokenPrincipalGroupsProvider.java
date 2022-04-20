@@ -36,7 +36,7 @@ public class KeycloakAccessTokenPrincipalGroupsProvider implements PrincipalGrou
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
         return keycloakAccessTokenProvider.accessToken(principal)
-                                          //.filter(keycloakAccessTokenValidator::isValid)
+                                          .filter(keycloakAccessTokenValidator::isValid)
                                           .map(JwtAdapter::getGroups)
                                           .orElseGet(this::empty);
     }
