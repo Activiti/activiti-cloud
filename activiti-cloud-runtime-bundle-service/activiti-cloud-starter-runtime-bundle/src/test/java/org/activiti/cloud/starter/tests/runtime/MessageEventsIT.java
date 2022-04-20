@@ -609,32 +609,40 @@ public class MessageEventsIT {
     }
 
     @Test
-    public void shouldCancelWaitingMessageSubscription() {
+    public void shouldCancelWaitingMessageSubscription() throws Exception {
+
         // given
-        int processInstances = 1;
-        List<ResponseEntity<CloudProcessInstance>> instances = new ArrayList<>();
+        int processInstancesQuantity = 1;
+        List<ResponseEntity<CloudProcessInstance>> processInstances = new ArrayList<>();
 
         // when
-        IntStream.range(0, processInstances)
+        IntStream.range(0, processInstancesQuantity)
             .mapToObj(i -> ProcessPayloadBuilder.start()
                 .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
                 .withBusinessKey(BUSINESS_KEY + i)
                 .build())
             .map(processInstanceRestTemplate::startProcess)
-            .forEach(instances::add);
+            .forEach(processInstances::add);
+
+        //Wait for the event to reach Query service
+        Thread.sleep(2000);
 
         // then
         assertThat(runtimeService.createProcessInstanceQuery()
             .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-            .list()).hasSize(processInstances);
+            .list())
+            .hasSize(processInstancesQuantity);
 
         verify(bpmnMessageWaitingEventMessageProducer,
-            times(processInstances)).onEvent(any());
+            times(processInstancesQuantity)).onEvent(any());
 
         // when
-        IntStream.range(0, processInstances)
-            .mapToObj(i -> instances.get(i))
+        IntStream.range(0, processInstancesQuantity)
+            .mapToObj(i -> processInstances.get(i))
             .forEach(processInstanceRestTemplate::delete);
+
+        //Wait for the event to reach Query service
+        Thread.sleep(2000);
 
         // then
         assertThat(runtimeService.createProcessInstanceQuery()
@@ -642,7 +650,7 @@ public class MessageEventsIT {
             .list()).isEmpty();
 
         verify(messageSubscriptionCancelledEventMessageProducer,
-            times(processInstances)).onEvent(any());
+            times(processInstancesQuantity)).onEvent(any());
 
         assertOutputDestination();
     }

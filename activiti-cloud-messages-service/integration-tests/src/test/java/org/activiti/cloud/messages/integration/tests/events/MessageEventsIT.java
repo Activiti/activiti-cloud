@@ -437,34 +437,40 @@ class MessageEventsIT {
     }
 
     @Test
-    void shouldCancelWaitingMessageSubscription() {
+    void shouldCancelWaitingMessageSubscription() throws Exception{
         // given
-        int processInstances = 10;
-        List<ProcessInstance> instances = new ArrayList<>();
+        int processInstanceQuantity = 10;
+        List<ProcessInstance> processInstances = new ArrayList<>();
 
         // when
-        IntStream.range(0, processInstances)
+        IntStream.range(0, processInstanceQuantity)
                 .mapToObj(i -> ProcessPayloadBuilder.start()
                         .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
                         .withBusinessKey(BUSINESS_KEY + i)
                         .build())
                 .<ProcessInstanceResult>map(commandEndpoint::execute)
                 .map(ProcessInstanceResult::getEntity)
-                .forEach(instances::add);
+                .forEach(processInstances::add);
+
+        //Wait for the event to reach Query service
+        Thread.sleep(2000);
 
         // then
         assertThat(runtimeService.createProcessInstanceQuery()
                 .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-                .list()).hasSize(processInstances);
+                .list()).hasSize(processInstanceQuantity);
 
         verify(bpmnMessageWaitingEventMessageProducer,
-                times(processInstances)).onEvent(any());
+                times(processInstanceQuantity)).onEvent(any());
 
         // when
-        IntStream.range(0, processInstances)
-                .mapToObj(i -> instances.get(i))
+        IntStream.range(0, processInstanceQuantity)
+                .mapToObj(i -> processInstances.get(i))
                 .map(it -> new DeleteProcessPayload(it.getId(), "cancelled"))
                 .forEach(commandEndpoint::execute);
+
+        //Wait for the event to reach Query service
+        Thread.sleep(2000);
 
         // then
         assertThat(runtimeService.createProcessInstanceQuery()
@@ -472,9 +478,9 @@ class MessageEventsIT {
                 .list()).isEmpty();
 
         verify(messageSubscriptionCancelledEventMessageProducer,
-                times(processInstances)).onEvent(any());
+                times(processInstanceQuantity)).onEvent(any());
 
-        IntStream.range(0, processInstances)
+        IntStream.range(0, processInstanceQuantity)
                 .mapToObj(i -> BUSINESS_KEY + i)
                 .map("messages-app:BpmnMessage:"::concat)
                 .forEach(groupId -> await().atMost(Durations.FIVE_SECONDS)
