@@ -37,6 +37,7 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.engine.RuntimeService;
+import org.awaitility.Durations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -610,39 +611,43 @@ public class MessageEventsIT {
 
     @Test
     public void shouldCancelWaitingMessageSubscription() {
+
         // given
-        int processInstances = 1;
-        List<ResponseEntity<CloudProcessInstance>> instances = new ArrayList<>();
+        int processInstancesQuantity = 1;
+        List<ResponseEntity<CloudProcessInstance>> processInstances = new ArrayList<>();
 
         // when
-        IntStream.range(0, processInstances)
+        IntStream.range(0, processInstancesQuantity)
             .mapToObj(i -> ProcessPayloadBuilder.start()
                 .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
                 .withBusinessKey(BUSINESS_KEY + i)
                 .build())
             .map(processInstanceRestTemplate::startProcess)
-            .forEach(instances::add);
+            .forEach(processInstances::add);
 
-        // then
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-            .list()).hasSize(processInstances);
+        //then
+        await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
+            assertThat(runtimeService.createProcessInstanceQuery()
+                .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                .list())
+                .hasSize(processInstancesQuantity));
 
         verify(bpmnMessageWaitingEventMessageProducer,
-            times(processInstances)).onEvent(any());
+            times(processInstancesQuantity)).onEvent(any());
 
         // when
-        IntStream.range(0, processInstances)
-            .mapToObj(i -> instances.get(i))
+        IntStream.range(0, processInstancesQuantity)
+            .mapToObj(i -> processInstances.get(i))
             .forEach(processInstanceRestTemplate::delete);
 
-        // then
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-            .list()).isEmpty();
+        //then
+        await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
+            assertThat(runtimeService.createProcessInstanceQuery()
+                .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                .list()).isEmpty());
 
         verify(messageSubscriptionCancelledEventMessageProducer,
-            times(processInstances)).onEvent(any());
+            times(processInstancesQuantity)).onEvent(any());
 
         assertOutputDestination();
     }
