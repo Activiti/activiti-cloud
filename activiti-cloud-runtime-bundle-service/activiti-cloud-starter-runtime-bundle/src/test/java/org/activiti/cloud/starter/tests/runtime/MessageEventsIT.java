@@ -37,6 +37,7 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.engine.RuntimeService;
+import org.awaitility.Durations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -609,7 +610,7 @@ public class MessageEventsIT {
     }
 
     @Test
-    public void shouldCancelWaitingMessageSubscription() throws Exception {
+    public void shouldCancelWaitingMessageSubscription() {
 
         // given
         int processInstancesQuantity = 1;
@@ -624,14 +625,12 @@ public class MessageEventsIT {
             .map(processInstanceRestTemplate::startProcess)
             .forEach(processInstances::add);
 
-        //Wait for the event to reach Query service
-        Thread.sleep(2000);
-
-        // then
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-            .list())
-            .hasSize(processInstancesQuantity);
+        //then
+        await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
+            assertThat(runtimeService.createProcessInstanceQuery()
+                .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                .list())
+                .hasSize(processInstancesQuantity));
 
         verify(bpmnMessageWaitingEventMessageProducer,
             times(processInstancesQuantity)).onEvent(any());
@@ -641,13 +640,11 @@ public class MessageEventsIT {
             .mapToObj(i -> processInstances.get(i))
             .forEach(processInstanceRestTemplate::delete);
 
-        //Wait for the event to reach Query service
-        Thread.sleep(2000);
-
-        // then
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-            .list()).isEmpty();
+        //then
+        await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
+            assertThat(runtimeService.createProcessInstanceQuery()
+                .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+                .list()).isEmpty());
 
         verify(messageSubscriptionCancelledEventMessageProducer,
             times(processInstancesQuantity)).onEvent(any());

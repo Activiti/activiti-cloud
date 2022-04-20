@@ -437,7 +437,7 @@ class MessageEventsIT {
     }
 
     @Test
-    void shouldCancelWaitingMessageSubscription() throws Exception{
+    void shouldCancelWaitingMessageSubscription() {
         // given
         int processInstanceQuantity = 10;
         List<ProcessInstance> processInstances = new ArrayList<>();
@@ -452,13 +452,11 @@ class MessageEventsIT {
                 .map(ProcessInstanceResult::getEntity)
                 .forEach(processInstances::add);
 
-        //Wait for the event to reach Query service
-        Thread.sleep(2000);
-
-        // then
-        assertThat(runtimeService.createProcessInstanceQuery()
+        //then
+        await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
+            assertThat(runtimeService.createProcessInstanceQuery()
                 .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-                .list()).hasSize(processInstanceQuantity);
+                .list()).hasSize(processInstanceQuantity));
 
         verify(bpmnMessageWaitingEventMessageProducer,
                 times(processInstanceQuantity)).onEvent(any());
@@ -469,13 +467,11 @@ class MessageEventsIT {
                 .map(it -> new DeleteProcessPayload(it.getId(), "cancelled"))
                 .forEach(commandEndpoint::execute);
 
-        //Wait for the event to reach Query service
-        Thread.sleep(2000);
-
-        // then
-        assertThat(runtimeService.createProcessInstanceQuery()
+        //then
+        await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
+            assertThat(runtimeService.createProcessInstanceQuery()
                 .processDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-                .list()).isEmpty();
+                .list()).isEmpty());
 
         verify(messageSubscriptionCancelledEventMessageProducer,
                 times(processInstanceQuantity)).onEvent(any());
