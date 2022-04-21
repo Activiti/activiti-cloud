@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.rest.api;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
@@ -45,19 +44,16 @@ public interface ProcessDefinitionController {
     @GetMapping(value = "/v1/process-definitions/{id}/model",
             produces = "application/xml")
     @ResponseBody
-    @Operation(summary = "getProcessModel")
     String getProcessModel(@PathVariable(value = "id") String id);
 
     @GetMapping(value = "/v1/process-definitions/{id}/model",
             produces = "application/json")
     @ResponseBody
-    @Operation(summary = "getProcessModel")
     String getBpmnModel(@PathVariable(value = "id") String id);
 
     @GetMapping(value = "/v1/process-definitions/{id}/model",
             produces = "image/svg+xml")
     @ResponseBody
-    @Operation(summary = "getProcessModel")
     String getProcessDiagram(@PathVariable(value = "id") String id);
 
 }
