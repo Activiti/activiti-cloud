@@ -51,9 +51,6 @@ public class ProcessModelValidatorTest {
                       new BpmnModelUniqueIdValidator(processModelType, processModelContentConverter))
     );
 
-    @Mock
-    private ProjectValidationContext projectValidationContext;
-
     @Test
     void should_validateWithNoErrors_when_categoryIsSet() throws Exception {
         BpmnModel bpmnModel = new BpmnModel();
