@@ -18,11 +18,11 @@ package org.activiti.cloud.services.modeling.validation.process;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
@@ -39,14 +39,20 @@ public class ProcessModelValidatorTest {
     @InjectMocks
     private ProcessModelValidator processModelValidator;
 
-    @Spy
-    private Set<BpmnCommonModelValidator> bpmnCommonModelValidators = new HashSet<>(Arrays.asList(new BpmnModelValidator()));
-
     @Mock
-    private ProcessModelValidator ProcessModelType;
+    private ProcessModelType processModelType;
 
     @Mock
     private ProcessModelContentConverter processModelContentConverter;
+
+    @Spy
+    private Set<BpmnCommonModelValidator> bpmnCommonModelValidators = new HashSet<>(
+        Arrays.asList(new BpmnModelValidator(),
+                      new BpmnModelUniqueIdValidator(processModelType, processModelContentConverter))
+    );
+
+    @Mock
+    private ProjectValidationContext projectValidationContext;
 
     @Test
     void should_validateWithNoErrors_when_categoryIsSet() throws Exception {
@@ -88,13 +94,12 @@ public class ProcessModelValidatorTest {
         given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
             .willReturn(bpmnModel);
 
-        Throwable exception = catchThrowable( () ->
+        Throwable exception = catchThrowable(() ->
             processModelValidator.validate(bytesFromModel,
                 new ProjectValidationContext()));
 
         assertThat(exception)
             .isInstanceOf(SemanticModelValidationException.class)
             .hasMessage("Semantic process model validation errors encountered: [The process category needs to be set]");
-
     }
 }
