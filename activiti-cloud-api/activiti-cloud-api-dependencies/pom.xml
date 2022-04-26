@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-api</artifactId>
-    <version>7.3.0-alpha.15</version>
+    <version>7.3.0</version>
   </parent>
   <artifactId>activiti-cloud-api-dependencies</artifactId>
   <packaging>pom</packaging>
