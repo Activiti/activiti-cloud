@@ -15,20 +15,14 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
-import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
-
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
