@@ -35,6 +35,7 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuilder.putMultipart;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -487,11 +488,11 @@ public class ModelControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        final ResultActions resultActions = mockMvc
+        Throwable exception = catchThrowable(() -> mockMvc
                 .perform(multipart("/v1/models/{model_id}/validate",
                                    processModel.getId())
-                                 .file(file))
-                .andExpect(status().isBadRequest());
+                                 .file(file)));
+                assertThat(exception.getMessage()).containsOnlyOnce("Error reading XML");
     }
 
     @Test
@@ -834,10 +835,11 @@ public class ModelControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+        Throwable exception = catchThrowable(() -> mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   processModel.getId())
-                                .file(file))
-                .andExpect(status().isBadRequest());
+                                .file(file)));
+        assertThat(exception.getCause()).hasMessageContaining("Error reading XML");
+
     }
 
     @Test

@@ -26,6 +26,7 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel
 import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithExtensions;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,6 +58,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Integration tests for validating model content
@@ -154,11 +156,10 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        mockMvc
-                .perform(multipart("/v1/models/{model_id}/validate",
+        Throwable error = catchThrowableOfType(() -> mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                    processModel.getId())
-                                 .file(file))
-                .andExpect(status().isBadRequest());
+                                 .file(file)), NestedServletException.class);
+        assertThat(error.getMessage()).isEqualToIgnoringCase("Request processing failed; nested exception is org.activiti.bpmn.exceptions.XMLException: Error reading XML");
     }
 
     @Test
@@ -658,10 +659,10 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+        Throwable error = catchThrowableOfType(() -> mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   processModel.getId())
-                                .file(file))
-                .andExpect(status().isBadRequest());
+                                .file(file)), NestedServletException.class);
+        assertThat(error.getMessage()).isEqualToIgnoringCase("Request processing failed; nested exception is org.activiti.bpmn.exceptions.XMLException: Error reading XML");
     }
 
     @Test

@@ -46,7 +46,7 @@ public class ProcessModelValidatorTest {
     private ProcessModelContentConverter processModelContentConverter;
 
     @Spy
-    private Set<BpmnCommonModelValidator> bpmnCommonModelValidators = new HashSet<>(Arrays.asList(new BpmnModelValidator(), new BpmnModelUniqueIdValidator(processModelType, processModelContentConverter)));
+    Set<BpmnCommonModelValidator> bpmnCommonModelValidators = new HashSet<>(Arrays.asList(new BpmnModelValidator(), new BpmnModelUniqueIdValidator(processModelType, processModelContentConverter)));
 
     @Test
     void should_validateWithNoErrors_when_categoryIsSet() throws Exception {

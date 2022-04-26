@@ -62,7 +62,7 @@ public class ProcessModelValidator implements ModelContentValidator {
     public void validate(byte[] bytes,
         ValidationContext validationContext) {
 
-        BpmnModel bpmnModel = processContentToBpmnModel(bytes);
+        BpmnModel bpmnModel = processModelContentConverter.convertToBpmnModel(bytes);
 
         List<ModelValidationError> validationErrors = bpmnCommonModelValidators
             .stream()
@@ -75,20 +75,6 @@ public class ProcessModelValidator implements ModelContentValidator {
             log.debug(messageError);
             throw new SemanticModelValidationException(messageError,
                                                        validationErrors);
-        }
-    }
-
-    private BpmnModel processContentToBpmnModel(byte[] processContent) {
-        try {
-            return processModelContentConverter.convertToBpmnModel(processContent);
-        } catch (IOException | XMLStreamException | XMLException ex) {
-            Throwable errorCause = Optional.ofNullable(ex.getCause())
-                    .filter(XMLStreamException.class::isInstance)
-                    .orElse(ex);
-            String messageError = "Syntactic process model XML validation errors encountered: " + errorCause;
-            log.debug(messageError);
-            throw new SyntacticModelValidationException(messageError,
-                                                        errorCause);
         }
     }
 

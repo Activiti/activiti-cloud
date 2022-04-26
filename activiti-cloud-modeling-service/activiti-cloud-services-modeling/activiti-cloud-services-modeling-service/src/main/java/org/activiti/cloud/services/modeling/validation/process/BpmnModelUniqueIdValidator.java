@@ -77,20 +77,7 @@ public class BpmnModelUniqueIdValidator implements BpmnCommonModelValidator {
     private List<Process> getAllBpmnProcesses(ValidationContext validationContext) {
         return validationContext
             .getAvailableModels(processModelType).stream()
-            .map(model -> processContentToBpmnModel(model.getContent()))
+            .map(model -> processModelContentConverter.convertToBpmnModel(model.getContent()))
             .flatMap(currentModel -> currentModel.getProcesses().stream()).collect(Collectors.toList());
-    }
-
-    private BpmnModel processContentToBpmnModel(byte[] processContent) {
-        try {
-            return processModelContentConverter.convertToBpmnModel(processContent);
-        } catch (IOException | XMLStreamException | XMLException ex) {
-            Throwable errorCause = Optional.ofNullable(ex.getCause())
-                .filter(XMLStreamException.class::isInstance)
-                .orElse(ex);
-            String messageError = "Syntactic process model XML validation errors encountered: " + errorCause;
-            throw new SyntacticModelValidationException(messageError,
-                errorCause);
-        }
     }
 }

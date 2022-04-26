@@ -100,6 +100,7 @@ public class BpmnModelUniqueValidatorTest {
         Model duplicateIdProcess = mock(Model.class);
         when(duplicateIdProcess.getContent()).thenReturn(bytesFromBpmnModelEqual);
 
+
         Model currentModelProcess = mock(Model.class);
         when(currentModelProcess.getContent()).thenReturn(bytesFromModelValidating);
 

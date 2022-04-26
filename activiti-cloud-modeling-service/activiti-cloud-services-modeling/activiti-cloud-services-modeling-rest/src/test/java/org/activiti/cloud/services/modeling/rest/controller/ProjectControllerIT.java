@@ -30,6 +30,7 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDescription;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
@@ -54,6 +55,7 @@ import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
@@ -81,6 +83,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.util.NestedServletException;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
@@ -398,11 +401,10 @@ public class ProjectControllerIT {
                 Arrays.asList(new ModelValidationError(),
                               new ModelValidationError());
 
-        MvcResult response = mockMvc.perform(
+        Throwable error = catchThrowableOfType(() -> mockMvc.perform(
                 get("/v1/projects/{projectId}/validate",
-                    project.getId()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+                    project.getId())), NestedServletException.class);
+        assertThat(error.getMessage()).isEqualToIgnoringCase("Request processing failed; nested exception is org.activiti.bpmn.exceptions.XMLException: Error reading XML");
     }
 
     @Test

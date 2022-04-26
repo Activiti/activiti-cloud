@@ -39,6 +39,9 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public class ProcessModelContentConverter implements ModelContentConverter<BpmnProcessModelContent> {
 
+    private final String XML_CONTENT_NOT_PRESEND = "Xml content for the model is not present";
+    private final String XML_NOT_PARSABLE = "Xml content for the model is not valid.";
+
     private final ProcessModelType processModelType;
 
     private final BpmnXMLConverter bpmnConverter;
@@ -60,13 +63,8 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
             return Optional.empty();
         }
 
-        try {
-            return Optional.ofNullable(convertToBpmnModel(bytes))
-                    .map(BpmnProcessModelContent::new);
-        } catch (IOException | XMLStreamException ex) {
-            throw new ModelingException("Invalid bpmn model",
-                                        ex);
-        }
+        return Optional.ofNullable(convertToBpmnModel(bytes))
+                .map(BpmnProcessModelContent::new);
     }
 
     @Override
@@ -79,10 +77,14 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
                 .map(BpmnProcessModelContent::new);
     }
 
-    public BpmnModel convertToBpmnModel(byte[] modelContent) throws IOException, XMLStreamException {
+    public BpmnModel convertToBpmnModel(byte[] modelContent) {
         try (InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(modelContent))) {
             XMLStreamReader xmlReader = createSafeXmlInputFactory().createXMLStreamReader(reader);
             return bpmnConverter.convertToBpmnModel(xmlReader);
+        } catch (IOException ioError) {
+            throw new RuntimeException(this.XML_CONTENT_NOT_PRESEND, ioError);
+        } catch (XMLStreamException xmlParsingError) {
+            throw new RuntimeException(this.XML_NOT_PARSABLE, xmlParsingError);
         }
     }
 
