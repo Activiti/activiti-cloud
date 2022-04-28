@@ -30,7 +30,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @ActiveProfiles("test")
 @SpringBootTest(classes = RbTestApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 @WithMockUser
 class IdentityManagementControllerIT extends AbstractIdentityManagementControllerIT{
