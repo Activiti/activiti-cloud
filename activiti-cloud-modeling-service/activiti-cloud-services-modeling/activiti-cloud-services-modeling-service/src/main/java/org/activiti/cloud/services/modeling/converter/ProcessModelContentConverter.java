@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.modeling.converter;
 
+import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
@@ -32,8 +33,6 @@ import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.apache.commons.lang3.ArrayUtils;
-
-import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
 
 /**
  * Implementation of {@link ModelContentConverter} for process models
@@ -92,11 +91,14 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
                                        Map<String, String> modelIdentifiers) {
         FileContent newFileContent;
         Optional<BpmnProcessModelContent> processModelContent = this.convertToModelContent(fileContent.getFileContent());
+
         if (processModelContent.isPresent()) {
             BpmnProcessModelContent modelContent = processModelContent.get();
             ReferenceIdOverrider referenceIdOverrider = new ReferenceIdOverrider(modelIdentifiers);
+
             this.overrideAllProcessDefinition(modelContent, referenceIdOverrider);
             byte[] overriddenContent = this.convertToBytes(modelContent);
+
             newFileContent = new FileContent(fileContent.getFilename(), fileContent.getContentType(), overriddenContent);
         } else {
             newFileContent = fileContent;
@@ -112,7 +114,7 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
     }
 
     private void overrideAllIdReferences(Process process,
-                                        ReferenceIdOverrider referenceIdOverrider) {
+        ReferenceIdOverrider referenceIdOverrider) {
         process.getFlowElements().forEach(element -> element.accept(referenceIdOverrider));
     }
 
