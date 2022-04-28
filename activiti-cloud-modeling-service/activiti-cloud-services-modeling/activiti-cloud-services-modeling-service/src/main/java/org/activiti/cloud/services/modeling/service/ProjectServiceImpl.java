@@ -21,6 +21,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExt
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
 import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -370,15 +371,19 @@ public class ProjectServiceImpl implements ProjectService {
                                      FileContent fileContent,
                                      ModelType modelType) {
         String modelName = removeExtension(fileContent.getFilename(), JSON);
+
         if (isProjectExtension(modelName, modelType, fileContent)) {
             modelName = StringUtils.removeEnd(modelName, modelType.getExtensionsFileSuffix());
             projectHolder.addModelExtension(modelName, modelType, fileContent);
+
         } else if (isProcessContent(modelName, modelType, fileContent)) {
             modelService.contentFilenameToModelName(modelName, modelType)
                     .ifPresent(fixedModelName -> projectHolder.addProcess(fixedModelName, modelType, fileContent));
+
         } else if (isModelContent(modelName, modelType, fileContent)) {
             modelService.contentFilenameToModelName(modelName, modelType)
                     .ifPresent(fixedModelName -> projectHolder.addModelContent(fixedModelName, modelType, fileContent));
+
         } else {
             if (modelName.endsWith(modelType.getExtensionsFileSuffix())) {
                 modelName = StringUtils.removeEnd(modelName, modelType.getExtensionsFileSuffix());
@@ -397,7 +402,7 @@ public class ProjectServiceImpl implements ProjectService {
                                      ModelType modelType,
                                      FileContent fileContent) {
         return !fileContent.isJson() || (!modelName.endsWith(modelType.getExtensionsFileSuffix())
-                && modelTypeService.isProcessContnent(modelType));
+                && modelTypeService.isProcessContent(modelType));
     }
 
     private boolean isModelContent(String modelName,

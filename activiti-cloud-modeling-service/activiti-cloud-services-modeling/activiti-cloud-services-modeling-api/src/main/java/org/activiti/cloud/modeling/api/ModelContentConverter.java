@@ -53,7 +53,7 @@ public interface ModelContentConverter<T extends ModelContent> {
    * @return the fixed FileContent
    */
   default FileContent overrideModelId(FileContent fileContent,
-                                      Map<String, String> modelIdentifiers){
-    return fileContent;
+      Map<String, String> modelIdentifiers) {
+      return fileContent;
   }
 }

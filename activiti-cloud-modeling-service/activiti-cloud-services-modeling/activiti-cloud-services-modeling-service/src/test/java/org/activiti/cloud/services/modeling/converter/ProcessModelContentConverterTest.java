@@ -15,13 +15,18 @@
  */
 package org.activiti.cloud.services.modeling.converter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.util.HashMap;
 import java.util.Map;
-
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.SubProcess;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,9 +73,26 @@ public class ProcessModelContentConverterTest {
     }
 
     @Test
-    public void should_overrideAllProcessDefinition_when_newProcessId() {
+    public void should_overrideIdReferencesInFlowElements() {
         Process process = new Process();
         process.addFlowElement(flowElement);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        bpmnModel.addProcess(process);
+        BpmnProcessModelContent processModelContent = new BpmnProcessModelContent(bpmnModel);
+
+        processModelContentConverter.overrideAllProcessDefinition(processModelContent, referenceIdOverrider);
+
+        verify(flowElement).accept(referenceIdOverrider);
+    }
+
+    @Test
+    void should_overrideIdReferencesInFlowElementsFromSubprocess_when_processHasSubprocess() {
+        SubProcess subProcess = new SubProcess();
+        subProcess.addFlowElement(flowElement);
+
+        Process process = new Process();
+        process.addFlowElement(subProcess);
 
         BpmnModel bpmnModel = new BpmnModel();
         bpmnModel.addProcess(process);
