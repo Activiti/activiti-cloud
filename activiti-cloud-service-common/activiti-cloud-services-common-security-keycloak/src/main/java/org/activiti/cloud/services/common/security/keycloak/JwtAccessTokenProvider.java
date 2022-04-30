@@ -17,7 +17,7 @@ package org.activiti.cloud.services.common.security.keycloak;
 
 import java.security.Principal;
 import java.util.Optional;
-import org.activiti.cloud.services.common.security.keycloak.config.KeycloakJwtAdaptor;
+import org.activiti.cloud.services.common.security.keycloak.config.KeycloakJwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.config.KeycloakResourceJwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.springframework.lang.NonNull;
@@ -38,7 +38,7 @@ public class JwtAccessTokenProvider {
         if (useResource) {
             return new KeycloakResourceJwtAdapter(clientId, jwt);
         } else {
-            return new KeycloakJwtAdaptor(jwt);
+            return new KeycloakJwtAdapter(jwt);
         }
     }
 

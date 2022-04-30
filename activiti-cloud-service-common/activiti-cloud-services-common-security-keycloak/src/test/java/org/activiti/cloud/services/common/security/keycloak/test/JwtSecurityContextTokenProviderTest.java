@@ -16,32 +16,47 @@
 //package org.activiti.cloud.services.common.security.keycloak.test;
 //
 //import static org.assertj.core.api.Assertions.assertThat;
+//import static org.mockito.Mockito.when;
 //
-//import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
+//import org.activiti.cloud.services.common.security.keycloak.JwtSecurityContextTokenProvider;
 //import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.extension.ExtendWith;
 //import org.keycloak.KeycloakPrincipal;
 //import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 //import org.keycloak.adapters.spi.KeycloakAccount;
 //import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
 //import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+//import org.keycloak.representations.AccessToken;
+//import org.mockito.Mock;
+//import org.mockito.junit.jupiter.MockitoExtension;
 //import org.springframework.security.core.context.SecurityContextHolder;
 //
-//import java.security.Principal;
 //import java.util.Collections;
 //import java.util.Optional;
 //import java.util.UUID;
 //
 //
-//public class KeycloakSecurityContextPrincipalProviderTest {
+//@ExtendWith(MockitoExtension.class)
+//public class JwtSecurityContextTokenProviderTest {
 //
-//    private KeycloakSecurityContextPrincipalProvider subject = new KeycloakSecurityContextPrincipalProvider();
+//    private JwtSecurityContextTokenProvider subject = new JwtSecurityContextTokenProvider();
+//
+//    @Mock
+//    private KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal;
+//
+//    @Mock
+//    private RefreshableKeycloakSecurityContext keycloakSecurityContext;
+//
+//    @Mock
+//    private AccessToken accessToken;
 //
 //    @Test
-//    public void testGetCurrentPrincipal() {
+//    public void testGetCurrentToken() {
 //        // given
+//        when(keycloakSecurityContext.getTokenString()).thenReturn("bearer");
 //        String subjectId = UUID.randomUUID().toString();
 //        KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal = new KeycloakPrincipal<>(subjectId,
-//                                                                                                  new RefreshableKeycloakSecurityContext());
+//                                                                                                  keycloakSecurityContext);
 //        KeycloakAccount account = new SimpleKeycloakAccount(principal,
 //                                                            Collections.emptySet(),
 //                                                            principal.getKeycloakSecurityContext());
@@ -51,22 +66,21 @@
 //                                                                                false));
 //
 //        // when
-//        Optional<Principal> result = subject.getCurrentPrincipal();
+//        Optional<String> result = subject.getCurrentToken();
 //
 //        // then
 //        assertThat(result).isPresent()
-//                          .containsInstanceOf(KeycloakPrincipal.class)
-//                          .contains(principal);
-//
+//                          .contains("bearer");
 //    }
 //
+//
 //    @Test
-//    public void testGetCurrentPrincipalEmpty() {
+//    public void testGetCurrentTokenEmpty() {
 //        // given
 //        SecurityContextHolder.clearContext();
 //
 //        // when
-//        Optional<Principal> result = subject.getCurrentPrincipal();
+//        Optional<String> result = subject.getCurrentToken();
 //
 //        // then
 //        assertThat(result).isEmpty();

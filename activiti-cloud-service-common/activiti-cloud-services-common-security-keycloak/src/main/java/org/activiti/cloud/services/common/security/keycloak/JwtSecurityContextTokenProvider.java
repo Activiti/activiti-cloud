@@ -22,10 +22,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-/**
- * Keycloak implementation for {@link SecurityContextTokenProvider}
- */
-public class KeycloakSecurityContextTokenProvider implements SecurityContextTokenProvider {
+public class JwtSecurityContextTokenProvider implements SecurityContextTokenProvider {
 
     @Override
     public Optional<String> getCurrentToken() {

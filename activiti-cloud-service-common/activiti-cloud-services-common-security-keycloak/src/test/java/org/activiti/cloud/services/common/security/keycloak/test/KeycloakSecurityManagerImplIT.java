@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
-import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
+import org.activiti.cloud.services.common.security.keycloak.test.support.WithActivitiMockUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -48,7 +48,7 @@ public class KeycloakSecurityManagerImplIT {
     }
 
     @Test
-    @WithMockKeycloakUser(username = "hruser")
+    @WithActivitiMockUser(username = "hruser")
     public void testGetAuthenticatedUserId() {
         // given
 
@@ -60,7 +60,7 @@ public class KeycloakSecurityManagerImplIT {
     }
 
     @Test
-    @WithMockKeycloakUser(groups = {"hr", "admins"})
+    @WithActivitiMockUser(groups = {"hr", "admins"})
     public void testGetAuthenticatedUserGroups() {
         // given
 
@@ -73,7 +73,7 @@ public class KeycloakSecurityManagerImplIT {
     }
 
     @Test
-    @WithMockKeycloakUser(roles = {"ACTIVITI_USER"})
+    @WithActivitiMockUser(roles = {"ACTIVITI_USER"})
     public void testGetAuthenticatedUserRoles() {
         // given
 

@@ -19,13 +19,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 
-import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
+import org.activiti.cloud.services.common.security.keycloak.test.support.WithActivitiMockUser;
 
 /**
  * Annotation for testing with mock modeler user
  */
 @Retention(RUNTIME)
-@WithMockKeycloakUser(roles = {"ACTIVITI_MODELER"})
+@WithActivitiMockUser(roles = {"ACTIVITI_MODELER"})
 public @interface WithMockModelerUser {
 
 }

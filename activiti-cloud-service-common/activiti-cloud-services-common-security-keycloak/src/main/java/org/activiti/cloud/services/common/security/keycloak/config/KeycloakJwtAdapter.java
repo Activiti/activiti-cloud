@@ -20,11 +20,11 @@ import java.util.Collections;
 import java.util.List;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-public class KeycloakJwtAdaptor implements JwtAdapter {
+public class KeycloakJwtAdapter implements JwtAdapter {
 
     private final Jwt jwt;
 
-    public KeycloakJwtAdaptor(Jwt jwt){
+    public KeycloakJwtAdapter(Jwt jwt){
         this.jwt = jwt;
     }
 
@@ -34,12 +34,12 @@ public class KeycloakJwtAdaptor implements JwtAdapter {
 
     @Override
     public List<String> getRoles() {
-        return getRoles(jwt.getClaim("realm_access" ));
+        return getRoles(jwt.getClaim("realm_access"));
     }
 
     @Override
     public String getUserName() {
-        return jwt.getClaim("preferred_username" );
+        return jwt.getClaim("preferred_username");
     }
 
     @Override
@@ -48,6 +48,6 @@ public class KeycloakJwtAdaptor implements JwtAdapter {
     }
 
     private List<String> getRoles(JSONObject getRolesParent) {
-        return (List<String>) getRolesParent.get("roles" );
+        return (List<String>) getRolesParent.get("roles");
     }
 }

@@ -50,15 +50,13 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
         return jwt.getClaim("preferred_username");
     }
 
-
-
     private List<String> getFromClient(String clientId, Jwt jwt) {
-        JSONObject resourceAccess = jwt.getClaim("resource_access" );
+        JSONObject resourceAccess = jwt.getClaim("resource_access");
         JSONObject client = (JSONObject) resourceAccess.get(clientId);
         return getRoles(client);
     }
 
     private List<String> getRoles(JSONObject getRolesParent) {
-        return (List<String>) getRolesParent.get("roles" );
+        return (List<String>) getRolesParent.get("roles");
     }
 }
