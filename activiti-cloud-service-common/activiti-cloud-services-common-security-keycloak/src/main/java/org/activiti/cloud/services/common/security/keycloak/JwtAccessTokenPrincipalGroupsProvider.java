@@ -22,21 +22,26 @@ import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-public class KeycloakAccessTokenPrincipalGroupsProvider implements PrincipalGroupsProvider {
+public class JwtAccessTokenPrincipalGroupsProvider implements PrincipalGroupsProvider {
 
-    private final JwtAccessTokenProvider keycloakAccessTokenProvider;
+    private final JwtAccessTokenProvider jwtAccessTokenProvider;
     private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
 
-    public KeycloakAccessTokenPrincipalGroupsProvider(@NonNull JwtAccessTokenProvider keycloakAccessTokenProvider,
+    public JwtAccessTokenPrincipalGroupsProvider(@NonNull JwtAccessTokenProvider jwtAccessTokenProvider,
                                                       @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
-        this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
+        this.jwtAccessTokenProvider = jwtAccessTokenProvider;
         this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
     }
 
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
+<<<<<<< Updated upstream:activiti-cloud-service-common/activiti-cloud-services-common-security-keycloak/src/main/java/org/activiti/cloud/services/common/security/keycloak/KeycloakAccessTokenPrincipalGroupsProvider.java
         return keycloakAccessTokenProvider.accessToken(principal)
                                           .filter(keycloakAccessTokenValidator::isValid)
+=======
+        return jwtAccessTokenProvider.accessToken(principal)
+                                          //.filter(keycloakAccessTokenValidator::isValid)
+>>>>>>> Stashed changes:activiti-cloud-service-common/activiti-cloud-services-common-security-keycloak/src/main/java/org/activiti/cloud/services/common/security/keycloak/JwtAccessTokenPrincipalGroupsProvider.java
                                           .map(JwtAdapter::getGroups)
                                           .orElseGet(this::empty);
     }

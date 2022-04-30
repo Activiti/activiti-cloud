@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.common.security.keycloak.config;
 
-import com.nimbusds.jose.shaded.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenProvider;

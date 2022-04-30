@@ -9,7 +9,7 @@
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
-  <name>Activiti Cloud Services :: Common Keycloak Security</name>
+  <name>Activiti Cloud Services :: Common Security</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti</groupId>
@@ -32,6 +32,11 @@
       <artifactId>spring-security-web</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-oauth2-resource-server</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
@@ -50,10 +55,6 @@
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-test-security-keycloak</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-oauth2-resource-server</artifactId>
     </dependency>
   </dependencies>
 </project>

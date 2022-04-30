@@ -28,15 +28,12 @@ import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithSecurityContext;
 import org.springframework.test.context.TestContext;
 
-/**
- * Annotation for testing with mock Keycloak user
- */
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@WithSecurityContext(factory = WithMockKeycloakUserSecurityContextFactory.class)
-public @interface WithMockKeycloakUser {
+@WithSecurityContext(factory = WithActivitiMockUserSecurityContextFactory.class)
+public @interface WithActivitiMockUser {
 
     String username() default "testuser";
 
