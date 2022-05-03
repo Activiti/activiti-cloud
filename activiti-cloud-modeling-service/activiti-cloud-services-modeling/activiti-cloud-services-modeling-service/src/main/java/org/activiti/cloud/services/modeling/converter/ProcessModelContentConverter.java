@@ -25,11 +25,13 @@ import java.util.Optional;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
+import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.modeling.api.ModelContentConverter;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
+import org.activiti.cloud.modeling.core.error.ModelConversionException;
 import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.apache.commons.lang3.ArrayUtils;
@@ -40,7 +42,8 @@ import org.apache.commons.lang3.ArrayUtils;
 public class ProcessModelContentConverter implements ModelContentConverter<BpmnProcessModelContent> {
 
     private final String XML_CONTENT_NOT_PRESEND = "Xml content for the model is not present";
-    private final String XML_NOT_PARSABLE = "Xml content for the model is not valid.";
+    private final String XML_NOT_PARSABLE = "Xml content for the model is not pasable.";
+    private final String XML_NOT_VALID = "Xml content for the model is not valid.";
 
     private final ProcessModelType processModelType;
 
@@ -82,9 +85,11 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
             XMLStreamReader xmlReader = createSafeXmlInputFactory().createXMLStreamReader(reader);
             return bpmnConverter.convertToBpmnModel(xmlReader);
         } catch (IOException ioError) {
-            throw new RuntimeException(this.XML_CONTENT_NOT_PRESEND, ioError);
+            throw new ModelConversionException(this.XML_CONTENT_NOT_PRESEND, ioError);
         } catch (XMLStreamException xmlParsingError) {
-            throw new RuntimeException(this.XML_NOT_PARSABLE, xmlParsingError);
+            throw new ModelConversionException(this.XML_NOT_PARSABLE, xmlParsingError);
+        } catch (XMLException xmlError) {
+            throw new ModelConversionException(this.XML_NOT_VALID, xmlError);
         }
     }
 

@@ -156,10 +156,9 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        Throwable error = catchThrowableOfType(() -> mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                    processModel.getId())
-                                 .file(file)), NestedServletException.class);
-        assertThat(error.getMessage()).isEqualToIgnoringCase("Request processing failed; nested exception is org.activiti.bpmn.exceptions.XMLException: Error reading XML");
+                                 .file(file)).andExpect(status().isBadRequest()).andExpect(status().reason("Xml content for the model is not valid."));
     }
 
     @Test
@@ -659,10 +658,10 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        Throwable error = catchThrowableOfType(() -> mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   processModel.getId())
-                                .file(file)), NestedServletException.class);
-        assertThat(error.getMessage()).isEqualToIgnoringCase("Request processing failed; nested exception is org.activiti.bpmn.exceptions.XMLException: Error reading XML");
+                                .file(file)).andExpect(status().isBadRequest()).andExpect(status().reason("Xml content for the model is not valid."));
+
     }
 
     @Test

@@ -488,11 +488,9 @@ public class ModelControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        Throwable exception = catchThrowable(() -> mockMvc
-                .perform(multipart("/v1/models/{model_id}/validate",
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                    processModel.getId())
-                                 .file(file)));
-                assertThat(exception.getMessage()).containsOnlyOnce("Error reading XML");
+                                 .file(file)).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -835,11 +833,9 @@ public class ModelControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        Throwable exception = catchThrowable(() -> mockMvc.perform(multipart("/v1/models/{model_id}/validate",
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   processModel.getId())
-                                .file(file)));
-        assertThat(exception.getCause()).hasMessageContaining("Error reading XML");
-
+                                .file(file)).andExpect(status().isBadRequest());
     }
 
     @Test

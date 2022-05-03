@@ -400,10 +400,9 @@ public class ProjectControllerIT {
                 Arrays.asList(new ModelValidationError(),
                               new ModelValidationError());
 
-        Throwable error = catchThrowableOfType(() -> mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                    project.getId())), NestedServletException.class);
-        assertThat(error.getMessage()).isEqualToIgnoringCase("Request processing failed; nested exception is org.activiti.bpmn.exceptions.XMLException: Error reading XML");
+        mockMvc.perform(get("/v1/projects/{projectId}/validate",
+                    project.getId())).andExpect(status().isBadRequest()).andExpect(status().reason("Xml content for the model is not valid."));
+
     }
 
     @Test
@@ -837,7 +836,7 @@ public class ProjectControllerIT {
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
-                .andExpect(status().reason(containsString("Error importing model : Error reading XML")));
+                .andExpect(status().reason(containsString("Xml content for the model is not valid.")));
     }
 
     @Test

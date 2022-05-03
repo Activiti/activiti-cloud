@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ImportProjectException;
+import org.activiti.cloud.modeling.core.error.ModelConversionException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
@@ -111,7 +112,8 @@ public class ModelingRestExceptionHandler {
             SyntacticModelValidationException.class,
             SemanticModelValidationException.class,
             ImportProjectException.class,
-            ImportModelException.class
+            ImportModelException.class,
+            ModelConversionException.class
     })
     public void handleBadRequestException(Exception ex,
                                           HttpServletResponse response) throws IOException {
