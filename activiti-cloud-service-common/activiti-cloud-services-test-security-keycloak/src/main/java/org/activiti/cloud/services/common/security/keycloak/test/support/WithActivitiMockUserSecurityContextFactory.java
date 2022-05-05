@@ -19,6 +19,8 @@ import static com.nimbusds.oauth2.sdk.token.TokenTypeURI.ACCESS_TOKEN;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+import com.nimbusds.jose.shaded.json.JSONArray;
+import com.nimbusds.jose.shaded.json.JSONObject;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -49,44 +51,12 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
 
         Set<String> roles = Sets.newSet(annotation.roles());
         Set<String> groups = Sets.newSet(annotation.groups());
+        String username = annotation.username();
 
-//        RefreshableKeycloakSecurityContext securityContext = mock(RefreshableKeycloakSecurityContext.class);
-//        when(securityContext.isActive()).thenReturn(true);
-//
-//        Access realmAccess = new Access();
-//        realmAccess.roles(roles);
-//
-//        AccessToken accessToken = spy(new AccessToken());
-//        accessToken.setPreferredUsername(annotation.username());
-//        accessToken.setRealmAccess(realmAccess);
-//        accessToken.setOtherClaims("groups", groups);
-//
-//        when(accessToken.isActive()).thenReturn(annotation.isActive());
-//        when(securityContext.getToken()).thenReturn(accessToken);
-//
-//        KeycloakAccount account = new SimpleKeycloakAccount(new KeycloakPrincipal<>(UUID.randomUUID().toString(), securityContext),
-//            roles,
-//            securityContext);
-//
-//        List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
-//
-//        for (String role : account.getRoles()) {
-//            grantedAuthorities.add(new KeycloakRole(role));
-//        }
-//
-//        SimpleAuthorityMapper grantedAuthoritiesMapper = new SimpleAuthorityMapper();
-//        grantedAuthoritiesMapper.setPrefix(annotation.rolePrefix());
-//
-//        context.setAuthentication(new KeycloakAuthenticationToken(account,
-//            annotation.isInteractive(),
-//            grantedAuthoritiesMapper.mapAuthorities(grantedAuthorities)));
-
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("groups", groups);
-//        claims.put("sub", annotation.username());
+        Map<String, Object> claims = prepareClaims(roles, groups, username);
 
         Map<String, Object> headers = new HashMap<>();
-        headers.put("test", "test");
+        headers.put("testHeaderName", "testHeaderValue");
 
 
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
@@ -97,7 +67,6 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         String token = Jwts.builder()
             .setIssuer("Activiti Cloud")
             .setSubject(annotation.username())
-            .claim("groups", groups)
             .setIssuedAt(Date.from(Instant.now()))
             .setExpiration(Date.from(Instant.now().plusSeconds(600)))
             .signWith(
@@ -118,6 +87,21 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         securityContext.setAuthentication(jwtAuthenticationToken);
 
         return securityContext;
+    }
+
+    private Map<String, Object> prepareClaims(Set<String> roles, Set<String> groups, String username) {
+        Map<String, Object> claims = new HashMap<>();
+
+        JSONObject realm_access = new JSONObject();
+        JSONArray rolesArray = new JSONArray();
+        rolesArray.addAll(roles);
+        realm_access.put("roles", rolesArray);
+
+        claims.put("realm_access", realm_access);
+        claims.put("groups", groups);
+        claims.put("preferred_username", username);
+
+        return claims;
     }
 
 }
