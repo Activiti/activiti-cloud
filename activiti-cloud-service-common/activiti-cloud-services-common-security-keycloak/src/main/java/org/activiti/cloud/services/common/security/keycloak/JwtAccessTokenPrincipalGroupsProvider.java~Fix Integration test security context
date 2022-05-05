@@ -35,13 +35,8 @@ public class JwtAccessTokenPrincipalGroupsProvider implements PrincipalGroupsPro
 
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
-<<<<<<< Updated upstream:activiti-cloud-service-common/activiti-cloud-services-common-security-keycloak/src/main/java/org/activiti/cloud/services/common/security/keycloak/KeycloakAccessTokenPrincipalGroupsProvider.java
-        return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
-=======
         return jwtAccessTokenProvider.accessToken(principal)
                                           //.filter(keycloakAccessTokenValidator::isValid)
->>>>>>> Stashed changes:activiti-cloud-service-common/activiti-cloud-services-common-security-keycloak/src/main/java/org/activiti/cloud/services/common/security/keycloak/JwtAccessTokenPrincipalGroupsProvider.java
                                           .map(JwtAdapter::getGroups)
                                           .orElseGet(this::empty);
     }
