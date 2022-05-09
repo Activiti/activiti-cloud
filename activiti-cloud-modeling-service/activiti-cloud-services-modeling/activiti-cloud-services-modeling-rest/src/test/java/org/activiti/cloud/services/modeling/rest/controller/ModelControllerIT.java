@@ -487,11 +487,9 @@ public class ModelControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        final ResultActions resultActions = mockMvc
-                .perform(multipart("/v1/models/{model_id}/validate",
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                    processModel.getId())
-                                 .file(file))
-                .andExpect(status().isBadRequest());
+                                 .file(file)).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -836,8 +834,7 @@ public class ModelControllerIT {
 
         mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   processModel.getId())
-                                .file(file))
-                .andExpect(status().isBadRequest());
+                                .file(file)).andExpect(status().isBadRequest());
     }
 
     @Test

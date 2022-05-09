@@ -46,8 +46,6 @@ public class BpmnModelCallActivityValidator implements BpmnCommonModelValidator 
     private final String NO_REFERENCE_FOR_CALL_ACTIVITY_DESCRIPTION = "No call element found for call activity '%s' found in process '%s'. Call activity must have a call element that reference a process id present in the current project.";
     private final String NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM = "No call element found for call activity '%s' in process '%s'";
     private final String NO_REFERENCE_FOR_CALL_ACTIVITY_REFERENCE_NAME = "Call activity must have a call element validator.";
-    private final String XML_CONTENT_NOT_PRESEND = "Xml content for the model is not present";
-    private final String XML_NOT_PARSABLE = "Xml content for the model is not valid.";
 
     public BpmnModelCallActivityValidator(ProcessModelType processModelType,
                                           ProcessModelContentConverter processModelContentConverter) {
@@ -67,14 +65,8 @@ public class BpmnModelCallActivityValidator implements BpmnCommonModelValidator 
     }
 
     private Stream<String> retrieveProcessIdFromModel(Model model) throws RuntimeException {
-        try {
-            return processModelContentConverter.convertToBpmnModel(model.getContent())
+        return processModelContentConverter.convertToBpmnModel(model.getContent())
                 .getProcesses().stream().map(process -> process.getId());
-        } catch (IOException ioError) {
-            throw new RuntimeException(this.XML_CONTENT_NOT_PRESEND, ioError);
-        } catch (XMLStreamException xmlParsingError) {
-            throw new RuntimeException(this.XML_NOT_PARSABLE, xmlParsingError);
-        }
     }
 
     private Stream<ModelValidationError> validateCallActivities(Set<String> availableProcessesIds,

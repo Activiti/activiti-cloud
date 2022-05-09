@@ -25,12 +25,13 @@ import java.util.Optional;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
+import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.modeling.api.ModelContentConverter;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
-import org.activiti.cloud.modeling.core.error.ModelingException;
+import org.activiti.cloud.modeling.core.error.ModelConversionException;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -38,6 +39,10 @@ import org.apache.commons.lang3.ArrayUtils;
  * Implementation of {@link ModelContentConverter} for process models
  */
 public class ProcessModelContentConverter implements ModelContentConverter<BpmnProcessModelContent> {
+
+    private final String XML_CONTENT_NOT_PRESENT = "Xml content for the model is not present";
+    private final String XML_NOT_PARSABLE = "Xml content for the model is not parsable.";
+    private final String XML_NOT_VALID = "Xml content for the model is not valid.";
 
     private final ProcessModelType processModelType;
 
@@ -60,13 +65,8 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
             return Optional.empty();
         }
 
-        try {
-            return Optional.ofNullable(convertToBpmnModel(bytes))
-                    .map(BpmnProcessModelContent::new);
-        } catch (IOException | XMLStreamException ex) {
-            throw new ModelingException("Invalid bpmn model",
-                                        ex);
-        }
+        return Optional.ofNullable(convertToBpmnModel(bytes))
+                .map(BpmnProcessModelContent::new);
     }
 
     @Override
@@ -79,10 +79,16 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
                 .map(BpmnProcessModelContent::new);
     }
 
-    public BpmnModel convertToBpmnModel(byte[] modelContent) throws IOException, XMLStreamException {
+    public BpmnModel convertToBpmnModel(byte[] modelContent) {
         try (InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(modelContent))) {
             XMLStreamReader xmlReader = createSafeXmlInputFactory().createXMLStreamReader(reader);
             return bpmnConverter.convertToBpmnModel(xmlReader);
+        } catch (IOException ioError) {
+            throw new ModelConversionException(this.XML_CONTENT_NOT_PRESENT, ioError);
+        } catch (XMLStreamException xmlParsingError) {
+            throw new ModelConversionException(this.XML_NOT_PARSABLE, xmlParsingError);
+        } catch (XMLException xmlError) {
+            throw new ModelConversionException(this.XML_NOT_VALID, xmlError);
         }
     }
 

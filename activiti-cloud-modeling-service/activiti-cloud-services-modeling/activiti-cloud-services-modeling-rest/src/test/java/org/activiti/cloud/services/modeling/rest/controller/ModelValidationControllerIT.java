@@ -154,11 +154,9 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        mockMvc
-                .perform(multipart("/v1/models/{model_id}/validate",
+        mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                    processModel.getId())
-                                 .file(file))
-                .andExpect(status().isBadRequest());
+                                 .file(file)).andExpect(status().isBadRequest()).andExpect(status().reason("Xml content for the model is not valid."));
     }
 
     @Test
@@ -660,8 +658,8 @@ public class ModelValidationControllerIT {
 
         mockMvc.perform(multipart("/v1/models/{model_id}/validate",
                                   processModel.getId())
-                                .file(file))
-                .andExpect(status().isBadRequest());
+                                .file(file)).andExpect(status().isBadRequest()).andExpect(status().reason("Xml content for the model is not valid."));
+
     }
 
     @Test

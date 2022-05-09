@@ -170,7 +170,7 @@ public class ModelServiceImpl implements ModelService{
 
         if(PROCESS.equals(modelType.getName()) && model.getContent() != null) {
             // We leverage targetNamespace of bpmn models as a category field
-            model.setCategory(safeGetBpmnModel(model.getContent()).getTargetNamespace());
+            model.setCategory(processModelContentConverter.convertToBpmnModel(model.getContent()).getTargetNamespace());
         }
 
         return modelRepository.createModel(model);
@@ -306,7 +306,8 @@ public class ModelServiceImpl implements ModelService{
         if (modelToBeUpdated.getType().equals(PROCESS) &&
             fixedFileContent.getFileContent() != null &&
             isBpmnModelContent(fixedFileContent.getFileContent())) {
-            modelToBeUpdated.setCategory(safeGetBpmnModel(fixedFileContent.getFileContent()).getTargetNamespace());
+            modelToBeUpdated.setCategory(
+                processModelContentConverter.convertToBpmnModel(fixedFileContent.getFileContent()).getTargetNamespace());
         }
 
         try {
@@ -419,24 +420,16 @@ public class ModelServiceImpl implements ModelService{
                 .stream()
                 .map(Model::getContent)
                 .filter(content -> nonNull(content))
-                .map(this::safeGetBpmnModel)
+                .map(processModelContentConverter::convertToBpmnModel)
                 .map(BpmnModel::getProcesses)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
 
-    private BpmnModel safeGetBpmnModel(byte[] modelContent) {
-        try {
-            return processModelContentConverter.convertToBpmnModel(modelContent);
-        } catch (IOException | XMLStreamException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private boolean isBpmnModelContent (byte[] modelContent) {
         boolean isBpmn = true;
         try {
-            safeGetBpmnModel(modelContent);
+            processModelContentConverter.convertToBpmnModel(modelContent);
         } catch (RuntimeException e) {
             isBpmn = false;
         }
