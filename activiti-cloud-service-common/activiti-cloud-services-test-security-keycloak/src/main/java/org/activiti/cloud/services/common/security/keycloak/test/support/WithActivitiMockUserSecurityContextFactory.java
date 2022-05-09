@@ -97,8 +97,11 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         rolesArray.addAll(roles);
         realm_access.put("roles", rolesArray);
 
+        JSONArray groupsArray = new JSONArray();
+        groupsArray.addAll(groups);
+
         claims.put("realm_access", realm_access);
-        claims.put("groups", groups);
+        claims.put("groups", groupsArray);
         claims.put("preferred_username", username);
 
         return claims;
