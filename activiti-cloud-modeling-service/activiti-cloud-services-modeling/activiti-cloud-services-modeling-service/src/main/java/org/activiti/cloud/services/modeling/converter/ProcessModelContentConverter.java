@@ -41,7 +41,7 @@ import org.apache.commons.lang3.ArrayUtils;
 public class ProcessModelContentConverter implements ModelContentConverter<BpmnProcessModelContent> {
 
     private final String XML_CONTENT_NOT_PRESENT = "Xml content for the model is not present";
-    private final String XML_NOT_PARSABLE = "Xml content for the model is not pasable.";
+    private final String XML_NOT_PARSABLE = "Xml content for the model is not parsable.";
     private final String XML_NOT_VALID = "Xml content for the model is not valid.";
 
     private final ProcessModelType processModelType;
