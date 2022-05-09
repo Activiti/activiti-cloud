@@ -15,6 +15,16 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.modeling.api.Model;
@@ -27,16 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class BpmnModelUniqueValidatorTest {
@@ -58,66 +58,53 @@ public class BpmnModelUniqueValidatorTest {
     }
 
     @Test
-    void should_raiseAnErrorWhenMoreProcessesHaveTheSameId() throws Exception {
-        BpmnModel bpmnModelValidating = createBPMNModelWithProcessId("Process_bpmn_equal");
-        byte[] bytesFromModelValidating = bpmnModelValidating.toString().getBytes();
+    void should_raiseAnErrorWhenMoreProcessesHaveTheSameId() {
+        BpmnModel bpmnModelUnderValidation = createBPMNModelWithProcessId("Process_sharing_the_same_id");
+        BpmnModel bpmnModelSharingTheSameId = createBPMNModelWithProcessId("Process_sharing_the_same_id");
 
-        BpmnModel bpmnModelEqual = createBPMNModelWithProcessId("Process_bpmn_equal");
-        byte[] bytesFromBpmnModelEqual = bpmnModelEqual.toString().getBytes();
+        Model modelWithProcessSharingTheSameId = buildProcessModel(bpmnModelSharingTheSameId);
+        Model currentModelProcess = buildProcessModel(bpmnModelUnderValidation);
 
-        Model duplicateIdProcess = mock(Model.class);
-        when(duplicateIdProcess.getContent()).thenReturn(bytesFromBpmnModelEqual);
+        given(validationContext.getAvailableModels(any())).willReturn(List.of(currentModelProcess, modelWithProcessSharingTheSameId));
+        given(processModelContentConverter.convertToBpmnModel(modelWithProcessSharingTheSameId.getContent())).willReturn(bpmnModelSharingTheSameId);
+        given(processModelContentConverter.convertToBpmnModel(currentModelProcess.getContent())).willReturn(bpmnModelUnderValidation);
 
-        Model currentModelProcess = mock(Model.class);
-        when(currentModelProcess.getContent()).thenReturn(bytesFromModelValidating);
-
-        given(validationContext.getAvailableModels(any())).willReturn(List.of(currentModelProcess, duplicateIdProcess));
-
-        given(processModelContentConverter.convertToBpmnModel(bytesFromBpmnModelEqual))
-            .willReturn(bpmnModelEqual);
-
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModelValidating))
-            .willReturn(bpmnModelValidating);
-
-        Stream<ModelValidationError> errors = bpmnModelUniqueIdValidator.validate(bpmnModelValidating, validationContext);
+        Stream<ModelValidationError> errors = bpmnModelUniqueIdValidator.validate(bpmnModelUnderValidation, validationContext);
 
         List<ModelValidationError> errorsList = errors.collect(Collectors.toList());
 
-        assertThat(errorsList).isNotEmpty();
-        assertThat(errorsList.size()).isEqualTo(1);
-        assertThat(errorsList.get(0).getProblem()).isEqualTo(bpmnModelUniqueIdValidator.DUPLICATED_PROCESS_ID_ERROR);
-        assertThat(errorsList.get(0).getReferenceId()).isEqualTo("Process_bpmn_equal");
+        assertThat(errorsList)
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getReferenceId)
+            .contains(
+                tuple(
+                    BpmnModelUniqueIdValidator.DUPLICATED_PROCESS_ID_ERROR,
+                    "Process_sharing_the_same_id"
+                ));
+    }
+
+    private Model buildProcessModel(BpmnModel model) {
+        Model processModel = mock(Model.class);
+        when(processModel.getContent()).thenReturn(model.toString().getBytes());
+        return processModel;
     }
 
     @Test
-    void should_notShowErrorsWhenMoreProcessesDoesNotHaveTheSameId() throws Exception {
-        BpmnModel bpmnModelValidating = createBPMNModelWithProcessId("Process_bpmn_different");
-        byte[] bytesFromModelValidating = bpmnModelValidating.toString().getBytes();
+    void should_notShowErrorsWhenMoreProcessesDoesNotHaveTheSameId() {
+        BpmnModel bpmnModelUnderValidation = createBPMNModelWithProcessId("Process_under_validation");
+        BpmnModel bpmnModelWithDifferentProcessId = createBPMNModelWithProcessId("Process_bpmn_equal");
 
-        BpmnModel bpmnModelEqual = createBPMNModelWithProcessId("Process_bpmn_equal");
-        byte[] bytesFromBpmnModelEqual = bpmnModelEqual.toString().getBytes();
+        Model modelWithProcessWithDifferentId = buildProcessModel(bpmnModelWithDifferentProcessId);
+        Model currentModelProcess = buildProcessModel(bpmnModelUnderValidation);
 
-        Model duplicateIdProcess = mock(Model.class);
-        when(duplicateIdProcess.getContent()).thenReturn(bytesFromBpmnModelEqual);
+        given(validationContext.getAvailableModels(any())).willReturn(List.of(currentModelProcess, modelWithProcessWithDifferentId));
+        given(processModelContentConverter.convertToBpmnModel(modelWithProcessWithDifferentId.getContent())).willReturn(bpmnModelWithDifferentProcessId);
+        given(processModelContentConverter.convertToBpmnModel(currentModelProcess.getContent())).willReturn(bpmnModelUnderValidation);
 
-
-        Model currentModelProcess = mock(Model.class);
-        when(currentModelProcess.getContent()).thenReturn(bytesFromModelValidating);
-
-        given(validationContext.getAvailableModels(any())).willReturn(List.of(currentModelProcess, duplicateIdProcess));
-
-        given(processModelContentConverter.convertToBpmnModel(bytesFromBpmnModelEqual))
-            .willReturn(bpmnModelEqual);
-
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModelValidating))
-            .willReturn(bpmnModelValidating);
-
-        Stream<ModelValidationError> errors = bpmnModelUniqueIdValidator.validate(bpmnModelValidating, validationContext);
-
+        Stream<ModelValidationError> errors = bpmnModelUniqueIdValidator.validate(bpmnModelUnderValidation, validationContext);
         List<ModelValidationError> errorsList = errors.collect(Collectors.toList());
-
         assertThat(errorsList).isEmpty();
-        assertThat(errorsList.size()).isEqualTo(0);
     }
 
     private BpmnModel createBPMNModelWithProcessId(String processId) {
@@ -128,7 +115,5 @@ public class BpmnModelUniqueValidatorTest {
         bpmnModel.addProcess(process);
         return bpmnModel;
     }
-
-
 
 }
