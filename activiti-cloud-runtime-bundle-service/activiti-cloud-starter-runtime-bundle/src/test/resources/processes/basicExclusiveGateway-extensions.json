@@ -3,7 +3,14 @@
   "name": "myProcess.bpmn",
   "extensions": {
     "basicExclusiveGateway": {
-      "properties": {},
+      "properties": {
+        "0099e926-0af4-41ce-8ad9-a87fcc14c0b5": {
+          "id": "0099e926-0af4-41ce-8ad9-a87fcc14c0b5",
+          "name": "input",
+          "type": "integer",
+          "required": false
+        }
+      },
       "mappings": {
         "task1": {
           "mappingType": "MAP_ALL"
