@@ -15,7 +15,7 @@
     <spring-cloud.version>2021.0.1</spring-cloud.version>
     <spring-cloud-function.version>3.2.3</spring-cloud-function.version>
     <testcontainers.version>1.16.3</testcontainers.version>
-    <liquibase.version>4.8.0</liquibase.version>
+    <liquibase.version>4.10.0</liquibase.version>
   </properties>
   <dependencyManagement>
     <dependencies>
