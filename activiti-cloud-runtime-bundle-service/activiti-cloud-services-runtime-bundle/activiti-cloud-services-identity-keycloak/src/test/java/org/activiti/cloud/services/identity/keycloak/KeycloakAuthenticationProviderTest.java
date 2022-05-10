@@ -26,14 +26,24 @@ import org.keycloak.adapters.spi.KeycloakAccount;
 import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
+import org.springframework.security.config.authentication.AuthenticationManagerBeanDefinitionParser.NullAuthenticationProvider;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class KeycloakAuthenticationProviderTest {
 
-    private KeycloakActivitiAuthenticationProvider keycloakActivitiAuthenticationProvider = spy(new KeycloakActivitiAuthenticationProvider());
+    //TODO replace null implementation
+    private KeycloakActivitiAuthenticationProvider keycloakActivitiAuthenticationProvider = spy(new KeycloakActivitiAuthenticationProvider(new JwtDecoder() {
+        @Override
+        public Jwt decode(String token) throws JwtException {
+            return null;
+        }
+    }));
     private KeycloakAuthenticationToken token;
     private RefreshableKeycloakSecurityContext keycloakSecurityContext;
 

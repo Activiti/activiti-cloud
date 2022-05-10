@@ -43,6 +43,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistryImpl;
@@ -63,6 +65,9 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     private String resource;
     @Value("${keycloak.use-resource-role-mappings:false}" )
     private boolean useResourceRoleMapping;
+
+    @Autowired
+    private AuthenticationProvider authProvider;
 
     @Autowired
     public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer) {
@@ -156,6 +161,7 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
+        http.authenticationProvider(authProvider);
         http
             .authorizeRequests().anyRequest().permitAll()
             .and()
