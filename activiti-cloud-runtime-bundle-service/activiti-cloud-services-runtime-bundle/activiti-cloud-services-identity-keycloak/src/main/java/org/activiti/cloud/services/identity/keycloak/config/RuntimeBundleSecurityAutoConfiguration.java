@@ -17,18 +17,20 @@ package org.activiti.cloud.services.identity.keycloak.config;
 
 import org.activiti.cloud.services.common.security.keycloak.config.CommonSecurityAutoConfiguration;
 import org.activiti.cloud.services.identity.keycloak.KeycloakActivitiAuthenticationProvider;
-import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 
 @Configuration
 @AutoConfigureBefore(CommonSecurityAutoConfiguration.class)
 public class RuntimeBundleSecurityAutoConfiguration {
 
     @Bean
-    public KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
-        return new KeycloakActivitiAuthenticationProvider();
+    public AuthenticationProvider keycloakAuthenticationProvider(JwtDecoder jwtDecoder) {
+        return new KeycloakActivitiAuthenticationProvider(jwtDecoder);
     }
 
 }

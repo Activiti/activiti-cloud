@@ -15,32 +15,39 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 
-public class KeycloakActivitiAuthenticationProvider extends KeycloakAuthenticationProvider {
+public class KeycloakActivitiAuthenticationProvider implements AuthenticationProvider {
 
-    @Override
+    private final AuthenticationProvider authenticationProvider;
+
+    public KeycloakActivitiAuthenticationProvider(JwtDecoder jwtDecoder) {
+        this.authenticationProvider = new JwtAuthenticationProvider(jwtDecoder);
+    }
+
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-        KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) authentication;
+        Authentication result = authenticationProvider.authenticate(authentication);
 
-        String userId = authentication.getName(); //this will be keycloak id
+        String userId = result.getName(); //this will be keycloak id
 
-        if (token.getPrincipal() instanceof KeycloakPrincipal) {
-            KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) token.getPrincipal();
-            //option to use username instead of id
-            if (kp.getKeycloakSecurityContext().getToken() != null && kp.getKeycloakSecurityContext().getToken().getPreferredUsername() != null) {
-                userId = kp.getKeycloakSecurityContext().getToken().getPreferredUsername(); //replace with username - could be changed to e.g. email if desired
-            }
+        Object principal = result.getPrincipal();
+        if (principal instanceof Jwt) {
+            userId = ((Jwt) principal).getClaims().get("preferred_username").toString();
         }
 
         setAuthenticatedUserId(userId);
-        return super.authenticate(authentication);
+        return null;
+    }
+
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return authenticationProvider.supports(authentication);
     }
 
     public void setAuthenticatedUserId(String userId) {
