@@ -8,6 +8,7 @@
     <version>7.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
+<!--  TODO: Change name of module and package structure, since it is doing different things -->
   <name>Activiti Cloud Services :: Identity Keycloak Integration</name>
   <dependencies>
     <dependency>
