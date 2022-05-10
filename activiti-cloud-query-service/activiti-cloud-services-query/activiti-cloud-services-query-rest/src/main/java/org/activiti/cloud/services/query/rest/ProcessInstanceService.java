@@ -77,11 +77,11 @@ public class ProcessInstanceService {
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {
 
-        predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(Optional.ofNullable(predicate)
+        Predicate transformedPredicate = processInstanceRestrictionService.restrictProcessInstanceQuery(Optional.ofNullable(predicate)
                 .orElseGet(BooleanBuilder::new),
             SecurityPolicyAccess.READ);
 
-        return processInstanceRepository.findAll(predicate, pageable);
+        return processInstanceRepository.findAll(transformedPredicate, pageable);
     }
 
     public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variables, Pageable pageable) {
@@ -106,7 +106,7 @@ public class ProcessInstanceService {
     }
 
     public Page<ProcessInstanceEntity> subprocesses(String processInstanceId, Predicate predicate, Pageable pageable) {
-        predicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
+        Predicate transformedPredicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
 
         ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
             processInstanceId,
@@ -119,7 +119,7 @@ public class ProcessInstanceService {
 
         QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
         BooleanExpression expression = process.parentId.eq(processInstanceId);
-        Predicate extendedPredicate = expression.and(predicate);
+        Predicate extendedPredicate = expression.and(transformedPredicate);
 
         return processInstanceRepository.findAll(extendedPredicate, pageable);
     }

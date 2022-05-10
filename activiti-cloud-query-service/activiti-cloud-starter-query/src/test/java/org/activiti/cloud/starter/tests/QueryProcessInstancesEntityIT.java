@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.starter.tests;
 
-import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -910,9 +909,9 @@ public class QueryProcessInstancesEntityIT {
     @MethodSource({"processInstanceWithVariablesData"})
     void should_getProcessInstanceWithVariables(String variableDefinitions, int expectedSize, List<String> expectedVariableValues) {
         ProcessInstance runningProcess1 = processInstanceBuilder.aRunningProcessInstance("first");
-        VariableInstance createdVariable1 = variableBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
+        variableBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
             .onProcessInstance(runningProcess1);
-        VariableInstance createdVariable2 = variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
             .onProcessInstance(runningProcess1);
         eventsAggregator.sendAll();
 
@@ -942,14 +941,14 @@ public class QueryProcessInstancesEntityIT {
     @Test
     void should_getAllProcessInstancesWithVariables() {
         ProcessInstance runningProcess1 = processInstanceBuilder.aRunningProcessInstance("first");
-        VariableInstance createdVariable1 = variableBuilder.aCreatedVariableWithDefinitionId("aaa", "111", "string", "ccc")
+        variableBuilder.aCreatedVariableWithDefinitionId("aaa", "111", "string", "ccc")
             .onProcessInstance(runningProcess1);
-        VariableInstance createdVariable2 = variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
             .onProcessInstance(runningProcess1);
         ProcessInstance runningProcess2 = processInstanceBuilder.aRunningProcessInstance("second");
-        VariableInstance createdVariable3 = variableBuilder.aCreatedVariableWithDefinitionId("aaa", "222", "string", "ccc")
+        variableBuilder.aCreatedVariableWithDefinitionId("aaa", "222", "string", "ccc")
             .onProcessInstance(runningProcess2);
-        VariableInstance createdVariable4 = variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
             .onProcessInstance(runningProcess2);
         eventsAggregator.sendAll();
 

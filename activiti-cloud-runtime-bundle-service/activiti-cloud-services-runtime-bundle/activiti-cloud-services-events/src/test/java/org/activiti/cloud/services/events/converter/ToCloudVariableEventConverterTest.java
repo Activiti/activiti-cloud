@@ -19,6 +19,7 @@ import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.event.impl.VariableCreatedEventImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.VariableDefinition;
@@ -31,6 +32,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,5 +70,6 @@ class ToCloudVariableEventConverterTest {
         assertThat(entity.getType()).isEqualTo("string");
         assertThat((String) entity.getValue()).isEqualTo("example");
         assertThat(entity.getProcessInstanceId()).isEqualTo("processInstanceId");
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudVariableCreatedEventImpl.class));
     }
 }
