@@ -59,6 +59,15 @@ public class KeycloakClientIT {
     }
 
     @Test
+    public void shouldGetUserGroups() {
+        List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
+        List<KeycloakGroup> groups = keycloakClient.getUserGroups(users.get(0).getId());
+
+        assertThat(users).hasSize(1);
+        assertThat(groups).extracting("name").contains("hr");
+    }
+
+    @Test
     public void shouldSearchGroups() {
         List<KeycloakGroup> groups = keycloakClient.searchGroups("testgroup", 0, 50);
 

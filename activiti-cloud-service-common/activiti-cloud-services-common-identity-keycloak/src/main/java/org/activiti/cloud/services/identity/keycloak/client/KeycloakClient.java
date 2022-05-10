@@ -37,6 +37,10 @@ public interface KeycloakClient {
     @Headers("Content-Type: application/json")
     List<KeycloakRoleMapping> getUserRoleMapping(@PathVariable("id")String id);
 
+    @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/groups")
+    @Headers("Content-Type: application/json")
+    List<KeycloakGroup> getUserGroups(@PathVariable("id") String userId);
+
     @RequestMapping(method = RequestMethod.GET, value = "/groups")
     @Headers("Content-Type: application/json")
     List<KeycloakGroup> searchGroups(@RequestParam(value = "search") String search, @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);

@@ -18,7 +18,9 @@ package org.activiti.cloud.identity.web.controller;
 import java.util.List;
 import java.util.Set;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
+import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.web.assembler.ModelRepresentationGroupAssembler;
 import org.activiti.cloud.identity.web.assembler.ModelRepresentationUserAssembler;
 import org.activiti.cloud.identity.model.Group;
@@ -60,7 +62,13 @@ public class IdentityManagementController {
     public PagedModel<EntityModel<User>> getUsers(@RequestParam(value = "search", required = false) String search,
                                                   @RequestParam(value = "role", required = false)  Set<String> roles,
                                                   Pageable pageable) {
-        List<User> users = identityManagementService.findUsers(search, roles, pageable.getPageNumber(), pageable.getPageSize());
+
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch(search);
+        userSearchParams.setRoles(roles);
+        userSearchParams.setFromPageable(pageable);
+
+        List<User> users = identityManagementService.findUsers(userSearchParams);
         Page<User> page = new PageImpl<>(users, pageable, users.size());
         return pagedCollectionUserAssembler.toModel(pageable,
                                                      page,
@@ -71,7 +79,13 @@ public class IdentityManagementController {
     public PagedModel<EntityModel<Group>> getGroups(@RequestParam(value = "search", required = false) String search,
                                                   @RequestParam(value = "role", required = false)  Set<String> roles,
                                                   Pageable pageable) {
-        List<Group> groups = identityManagementService.findGroups(search, roles, pageable.getPageNumber(), pageable.getPageSize());
+
+        GroupSearchParams groupSearchParams = new GroupSearchParams();
+        groupSearchParams.setSearch(search);
+        groupSearchParams.setRoles(roles);
+        groupSearchParams.setFromPageable(pageable);
+
+        List<Group> groups = identityManagementService.findGroups(groupSearchParams);
         Page<Group> page = new PageImpl<>(groups, pageable, groups.size());
         return pagedCollectionGroupAssembler.toModel(pageable,
                                                     page,

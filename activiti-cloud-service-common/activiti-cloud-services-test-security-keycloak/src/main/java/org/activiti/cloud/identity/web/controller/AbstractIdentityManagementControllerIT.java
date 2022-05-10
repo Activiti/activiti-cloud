@@ -53,6 +53,16 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
+    public void should_returnUsers_when_searchByGroup() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/users?group=hr"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries", hasSize(2)))
+            .andExpect(jsonPath("$.list.entries[0].entry.username", is("hradmin")))
+            .andExpect(jsonPath("$.list.entries[1].entry.username", is("hruser")));
+    }
+
+    @Test
     public void should_returnUsers_when_searchByEmail() throws Exception {
         mockMvc
             .perform(get("/v1/identity/users?search=hr@example.com"))

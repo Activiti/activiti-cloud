@@ -22,8 +22,8 @@ import org.activiti.cloud.identity.model.User;
 
 public interface IdentityManagementService {
 
-  List<User> findUsers(String search, Set<String> roles, Integer page, Integer size);
+  List<User> findUsers(UserSearchParams userSearchParams);
 
-  List<Group> findGroups(String search, Set<String> roles, Integer page, Integer size);
+  List<Group> findGroups(GroupSearchParams groupSearchParams);
 
 }
