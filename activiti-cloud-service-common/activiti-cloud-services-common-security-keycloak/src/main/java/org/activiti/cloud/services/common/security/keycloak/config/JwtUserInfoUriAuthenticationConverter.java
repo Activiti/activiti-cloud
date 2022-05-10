@@ -48,6 +48,7 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     public AbstractAuthenticationToken convert(Jwt jwt) {
         Collection<GrantedAuthority> authorities = this.jwtGrantedAuthoritiesConverter.convert(jwt);
         String principalClaimValue = getPrincipalClaimName(jwt);
+        org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(principalClaimValue);
         return new JwtAuthenticationToken(jwt, authorities, principalClaimValue);
     }
 
@@ -58,11 +59,15 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     private String getPrincipalClaimName(Jwt jwt) {
         Instant issuedAt = jwt.getIssuedAt();
         Instant expiresAt = jwt.getExpiresAt();
-        OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
-        OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
-        OAuth2User oAuth2User = this.oAuth2UserService.loadUser(userRequest);
-        return oAuth2User.getAttribute(usernameClaim);
-    }
+        String username = jwt.getClaimAsString(usernameClaim);
+        if(username == null) {
+            OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
+            OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
+            OAuth2User oAuth2User = this.oAuth2UserService.loadUser(userRequest);
+            username = oAuth2User.getAttribute(usernameClaim);
+        }
+        return username;
 
+    }
 
 }

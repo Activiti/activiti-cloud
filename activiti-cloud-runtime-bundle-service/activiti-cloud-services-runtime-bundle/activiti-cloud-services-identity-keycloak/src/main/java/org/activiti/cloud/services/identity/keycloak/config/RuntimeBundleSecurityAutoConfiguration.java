@@ -28,9 +28,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 @AutoConfigureBefore(CommonSecurityAutoConfiguration.class)
 public class RuntimeBundleSecurityAutoConfiguration {
 
-    @Bean
-    public AuthenticationProvider keycloakAuthenticationProvider(JwtDecoder jwtDecoder) {
-        return new KeycloakActivitiAuthenticationProvider(jwtDecoder);
-    }
+//    @Bean
+//    public AuthenticationProvider keycloakAuthenticationProvider(JwtDecoder jwtDecoder) {
+//        return new KeycloakActivitiAuthenticationProvider(jwtDecoder);
+//    }
 
 }

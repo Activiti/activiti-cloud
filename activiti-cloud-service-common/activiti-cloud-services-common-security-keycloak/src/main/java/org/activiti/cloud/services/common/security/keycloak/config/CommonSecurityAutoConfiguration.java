@@ -43,11 +43,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
@@ -61,17 +68,22 @@ import org.springframework.web.cors.CorsConfiguration;
 public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
     private final AuthorizationConfigurer authorizationConfigurer;
+
+    private final OAuth2UserService oAuth2UserService;
+    private final ClientRegistrationRepository clientRegistrationRepository;
+
+
     @Value("${keycloak.resource}" )
     private String resource;
     @Value("${keycloak.use-resource-role-mappings:false}" )
     private boolean useResourceRoleMapping;
 
     @Autowired
-    private AuthenticationProvider authProvider;
-
-    @Autowired
-    public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer) {
+    public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer,
+        ClientRegistrationRepository clientRegistrationRepository) {
         this.authorizationConfigurer = authorizationConfigurer;
+        this.oAuth2UserService = new DefaultOAuth2UserService();
+        this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
     @Bean
@@ -161,7 +173,6 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
-        http.authenticationProvider(authProvider);
         http
             .authorizeRequests().anyRequest().permitAll()
             .and()
@@ -179,10 +190,10 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
             .jwtAuthenticationConverter(jwtAuthenticationConverter());
     }
 
-    private JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakJwtGrantedAuthorityConverter(jwtAccessTokenProvider()));
-        return jwtAuthenticationConverter;
+    private Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("keycloak");
+        KeycloakJwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new KeycloakJwtGrantedAuthorityConverter(jwtAccessTokenProvider());
+        return  new JwtUserInfoUriAuthenticationConverter(jwtGrantedAuthoritiesConverter, clientRegistration, oAuth2UserService);
     }
 
 }
