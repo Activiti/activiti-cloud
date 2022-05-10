@@ -15,169 +15,86 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.activiti.api.runtime.shared.security.SecurityManager;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
-import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
-import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
-import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
-import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.List;
 
 @RestController
 @RequestMapping(
-        value = "/v1/process-instances",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/v1/process-instances",
+    produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
 public class ProcessInstanceController {
 
-    private final ProcessInstanceRepository processInstanceRepository;
+    private final ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
-    private final TaskRepository taskRepository;
+    private final AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
 
-    private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
-
-    private AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
-
-    private SecurityPoliciesManager securityPoliciesApplicationService;
-
-    private ProcessInstanceRestrictionService processInstanceRestrictionService;
-
-    private SecurityManager securityManager;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceController.class);
-
-    private EntityFinder entityFinder;
+    private final ProcessInstanceService processInstanceService;
 
     @Autowired
-    public ProcessInstanceController(ProcessInstanceRepository processInstanceRepository,
-                                     TaskRepository taskRepository,
-                                     ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+    public ProcessInstanceController(ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
                                      AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
-                                     ProcessInstanceRestrictionService processInstanceRestrictionService,
-                                     EntityFinder entityFinder,
-                                     SecurityPoliciesManager securityPoliciesApplicationService,
-                                     SecurityManager securityManager) {
-        this.processInstanceRepository = processInstanceRepository;
-        this.taskRepository = taskRepository;
+                                     ProcessInstanceService processInstanceService) {
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
-        this.processInstanceRestrictionService = processInstanceRestrictionService;
-        this.entityFinder = entityFinder;
-        this.securityPoliciesApplicationService = securityPoliciesApplicationService;
-        this.securityManager = securityManager;
+        this.processInstanceService = processInstanceService;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @JsonView(JsonViews.General.class)
+    @RequestMapping(method = RequestMethod.GET, params = "!variableDefinitions")
     public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                  Pageable pageable) {
-
-        predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(Optional.ofNullable(predicate)
-                                                                                           .orElseGet(BooleanBuilder::new),
-                                                                                    SecurityPolicyAccess.READ);
-
+                                                                 Pageable pageable) {
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                  processInstanceRepository.findAll(predicate,
-                                                                                    pageable),
-                                                  processInstanceRepresentationModelAssembler);
+            processInstanceService.findAll(predicate, pageable),
+            processInstanceRepresentationModelAssembler);
     }
 
+    @JsonView(JsonViews.Variables.class)
+    @RequestMapping(method = RequestMethod.GET, params = "variableDefinitions")
+    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariables(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
+                                                                              @RequestParam(value = "variableDefinitions", required = false, defaultValue = "") List<String> variables,
+                                                                              Pageable pageable) {
+        return pagedCollectionModelAssembler.toModel(pageable,
+            processInstanceService.findAllWithVariables(predicate, variables, pageable),
+            processInstanceRepresentationModelAssembler);
+    }
+
+    @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
 
-        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
-                                                                            processInstanceId,
-                                                                            "Unable to find process instance for the given id:'" + processInstanceId + "'");
-
-        if (!canRead(processInstanceEntity)) {
-            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance id " + processInstanceId);
-            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance");
-        }
-
-        return processInstanceRepresentationModelAssembler.toModel(processInstanceEntity);
+        return processInstanceRepresentationModelAssembler.toModel(processInstanceService.findById(processInstanceId));
     }
 
-
+    @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
-                                                                @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                Pageable pageable) {
-
-        predicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
-
-        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
-                                                                            processInstanceId,
-                                                                            "Unable to find process for the given id:'" + processInstanceId + "'");
-
-        if (!canRead(processInstanceEntity)) {
-            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance id " + processInstanceId);
-            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance");
-        }
-
-        QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
-        BooleanExpression expression = process.parentId.eq(processInstanceId);
-        Predicate extendedPredicate = expression;
-        if (predicate != null) {
-            extendedPredicate = expression.and(predicate);
-        }
+                                                                      @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
+                                                                      Pageable pageable) {
 
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                  processInstanceRepository.findAll(extendedPredicate,
-                                                                                    pageable),
-                                                  processInstanceRepresentationModelAssembler);
-    }
-
-    private boolean canRead(ProcessInstanceEntity processInstanceEntity) {
-        return securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
-                                                          processInstanceEntity.getServiceName()) &&
-               (securityManager.getAuthenticatedUserId().equals(processInstanceEntity.getInitiator()) ||
-                   isInvolvedInATask(processInstanceEntity.getId()));
-    }
-
-    private boolean isInvolvedInATask(String processInstanceId) {
-        String authenticatedUserId = securityManager.getAuthenticatedUserId();
-        List<String> authenticatedUserGroups = securityManager.getAuthenticatedUserGroups();
-
-        QTaskEntity taskEntity = QTaskEntity.taskEntity;
-
-        BooleanExpression taskInvolved = taskEntity.assignee.eq(authenticatedUserId)
-            .or(taskEntity.owner.eq(authenticatedUserId))
-            .or(taskEntity.taskCandidateUsers.any().userId.eq(authenticatedUserId));
-
-        if (authenticatedUserGroups != null && authenticatedUserGroups.size() > 0) {
-            taskInvolved = taskInvolved.or(taskEntity.taskCandidateGroups.any().groupId.in(authenticatedUserGroups));
-        }
-
-        Predicate whereExpression = taskEntity.processInstanceId.eq(processInstanceId).and(taskInvolved);
-
-        return taskRepository.exists(whereExpression);
+            processInstanceService.subprocesses(processInstanceId, predicate, pageable),
+            processInstanceRepresentationModelAssembler);
     }
 }

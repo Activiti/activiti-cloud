@@ -21,6 +21,8 @@ import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 
 public class CloudVariableCreatedEventImpl extends CloudVariableEventImpl implements CloudVariableCreatedEvent {
 
+    private String variableDefinitionId;
+
     public CloudVariableCreatedEventImpl() {
     }
 
@@ -39,5 +41,14 @@ public class CloudVariableCreatedEventImpl extends CloudVariableEventImpl implem
     @Override
     public VariableEvent.VariableEvents getEventType() {
         return VariableEvent.VariableEvents.VARIABLE_CREATED;
+    }
+
+    @Override
+    public String getVariableDefinitionId() {
+        return variableDefinitionId;
+    }
+
+    public void setVariableDefinitionId(String variableDefinitionId) {
+        this.variableDefinitionId = variableDefinitionId;
     }
 }

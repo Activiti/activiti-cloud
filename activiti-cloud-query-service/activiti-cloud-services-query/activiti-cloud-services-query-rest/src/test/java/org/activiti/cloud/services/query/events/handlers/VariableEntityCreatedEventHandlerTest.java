@@ -28,10 +28,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 import java.util.Optional;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -60,6 +60,7 @@ public class VariableEntityCreatedEventHandlerTest {
     public void handleShouldCreateAndStoreProcessInstanceVariable() {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
+        event.setVariableDefinitionId("variableDefId");
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId()))
@@ -80,7 +81,8 @@ public class VariableEntityCreatedEventHandlerTest {
                 .hasTaskId(event.getEntity().getTaskId())
                 .hasType(event.getEntity().getType())
                 .isNotTaskVariable()
-                .hasProcessInstance(processInstanceEntity);
+                .hasProcessInstance(processInstanceEntity)
+                .hasDefinitionId("variableDefId");
     }
 
     private static VariableInstanceImpl<String> buildVariable() {
@@ -91,6 +93,7 @@ public class VariableEntityCreatedEventHandlerTest {
     public void handleShouldCreateAndStoreTaskVariable() {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariableWithTaskId());
+        event.setVariableDefinitionId("variableDefId");
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
 
@@ -116,7 +119,8 @@ public class VariableEntityCreatedEventHandlerTest {
                 .hasTaskId(event.getEntity().getTaskId())
                 .hasType(event.getEntity().getType())
                 .hasTask(taskEntity)
-                .hasProcessInstance(processInstanceEntity);
+                .hasProcessInstance(processInstanceEntity)
+                .hasDefinitionId("variableDefId");
     }
 
     private static VariableInstanceImpl<String> buildVariableWithTaskId() {

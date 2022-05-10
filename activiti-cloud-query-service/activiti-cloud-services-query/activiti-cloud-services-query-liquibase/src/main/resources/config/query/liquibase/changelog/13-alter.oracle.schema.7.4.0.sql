@@ -13,12 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.model.shared.events;
 
-import org.activiti.api.model.shared.event.VariableCreatedEvent;
-
-public interface CloudVariableCreatedEvent extends CloudVariableEvent,
-                                                   VariableCreatedEvent {
-
-    String getVariableDefinitionId();
-}
+alter table process_variable
+  add column definition_id varchar(64);

@@ -16,19 +16,20 @@
 package org.activiti.cloud.alfresco.converter.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.Collections;
-
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Collections;
 
 public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2HttpMessageConverter {
 
@@ -46,27 +47,32 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
     protected void writeInternal(Object object,
                                  @Nullable Type type,
                                  HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-        Object transformedObject = object;
+        if (object instanceof MappingJacksonValue) {
+            MappingJacksonValue mappingJacksonValueObject = ((MappingJacksonValue) object);
+            mappingJacksonValueObject.setValue(transformObject(mappingJacksonValueObject.getValue()));
+            defaultWriteInternal(mappingJacksonValueObject, type, outputMessage);
+        } else {
+            defaultWriteInternal(transformObject(object), type, outputMessage);
+        }
+    }
+
+    private Object transformObject(Object object) {
         if (object instanceof PagedModel) {
-            transformedObject = pagedCollectionModelConverter.pagedCollectionModelToListResponseContent((PagedModel<EntityModel<T>>)object);
+            return pagedCollectionModelConverter.pagedCollectionModelToListResponseContent((PagedModel<EntityModel<T>>) object);
+        } else if (object instanceof CollectionModel) {
+            return pagedCollectionModelConverter.resourcesToListResponseContent((CollectionModel<EntityModel<T>>) object);
+        } else if (object instanceof EntityModel) {
+            return new EntryResponseContent<>(((EntityModel<T>) object).getContent());
         }
-        else if (object instanceof CollectionModel){
-            transformedObject = pagedCollectionModelConverter.resourcesToListResponseContent((CollectionModel<EntityModel<T>>) object);
-        }
-        else if (object instanceof EntityModel) {
-            transformedObject = new EntryResponseContent<>(((EntityModel<T>) object).getContent());
-        }
-        defaultWriteInternal(transformedObject,
-                             type,
-                             outputMessage);
+        return object;
     }
 
     protected void defaultWriteInternal(Object object,
-                                      @Nullable Type type,
-                                      HttpOutputMessage outputMessage) throws IOException {
+                                        @Nullable Type type,
+                                        HttpOutputMessage outputMessage) throws IOException {
         super.writeInternal(object,
-                            type,
-                            outputMessage);
+            type,
+            outputMessage);
     }
 
     @Override
@@ -74,8 +80,8 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
                             Class<?> clazz,
                             MediaType mediaType) {
         return !String.class.equals(type) && super.canWrite(type,
-                                                            clazz,
-                                                            mediaType);
+            clazz,
+            mediaType);
     }
 
 }

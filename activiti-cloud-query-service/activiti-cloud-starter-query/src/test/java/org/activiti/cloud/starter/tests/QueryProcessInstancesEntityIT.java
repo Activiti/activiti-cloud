@@ -15,19 +15,7 @@
  */
 package org.activiti.cloud.starter.tests;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.List;
-
+import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -38,6 +26,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
@@ -46,9 +35,13 @@ import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
+import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -60,6 +53,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -89,12 +96,15 @@ public class QueryProcessInstancesEntityIT {
 
     private ProcessInstanceEventContainedBuilder processInstanceBuilder;
 
+    private VariableEventContainedBuilder variableBuilder;
+
     private TaskEventContainedBuilder taskEventBuilder;
 
     @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
+        variableBuilder = new VariableEventContainedBuilder(eventsAggregator);
         taskEventBuilder = new TaskEventContainedBuilder(eventsAggregator);
         identityTokenProducer.setTestUser("testuser");
     }
@@ -164,7 +174,6 @@ public class QueryProcessInstancesEntityIT {
     public void shouldGetProcessWithUpdatedInfo() {
         //given
         ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
-
 
         eventsAggregator.sendAll();
 
@@ -897,4 +906,61 @@ public class QueryProcessInstancesEntityIT {
         shouldGetProcessInstancesList(processInstanceIds, PROC_URL + "?" + queryString);
     }
 
+    @ParameterizedTest
+    @MethodSource({"processInstanceWithVariablesData"})
+    void should_getProcessInstanceWithVariables(String variableDefinitions, int expectedSize, List<String> expectedVariableValues) {
+        ProcessInstance runningProcess1 = processInstanceBuilder.aRunningProcessInstance("first");
+        VariableInstance createdVariable1 = variableBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
+            .onProcessInstance(runningProcess1);
+        VariableInstance createdVariable2 = variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+            .onProcessInstance(runningProcess1);
+        eventsAggregator.sendAll();
+
+        ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(PROC_URL
+                + (variableDefinitions == null ? "" : "?variableDefinitions=" + variableDefinitions),
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
+            ProcessInstanceStatus.RUNNING);
+        assertThat(responseEntityFiltered.getBody().getContent()).flatExtracting(ProcessInstanceEntity::getVariables).hasSize(expectedSize);
+        if (expectedSize > 0) {
+            assertThat(responseEntityFiltered.getBody().getContent()).flatExtracting(ProcessInstanceEntity::getVariables)
+                .extracting(AbstractVariableEntity::getValue).containsExactlyInAnyOrderElementsOf(expectedVariableValues);
+        }
+    }
+
+    public static Stream<Arguments> processInstanceWithVariablesData() {
+        return Stream.of(
+            Arguments.of("ccc", 1, List.of("bbb")),
+            Arguments.of("fff", 1, List.of("eee")),
+            Arguments.of("ccc,fff", 2, List.of("bbb", "eee")),
+            Arguments.of("other", 0, null),
+            Arguments.of(null, 0, null)
+        );
+    }
+
+    @Test
+    void should_getAllProcessInstancesWithVariables() {
+        ProcessInstance runningProcess1 = processInstanceBuilder.aRunningProcessInstance("first");
+        VariableInstance createdVariable1 = variableBuilder.aCreatedVariableWithDefinitionId("aaa", "111", "string", "ccc")
+            .onProcessInstance(runningProcess1);
+        VariableInstance createdVariable2 = variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+            .onProcessInstance(runningProcess1);
+        ProcessInstance runningProcess2 = processInstanceBuilder.aRunningProcessInstance("second");
+        VariableInstance createdVariable3 = variableBuilder.aCreatedVariableWithDefinitionId("aaa", "222", "string", "ccc")
+            .onProcessInstance(runningProcess2);
+        VariableInstance createdVariable4 = variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+            .onProcessInstance(runningProcess2);
+        eventsAggregator.sendAll();
+
+        ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(PROC_URL
+                + "?variableDefinitions=ccc",
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
+            ProcessInstanceStatus.RUNNING);
+        assertThat(responseEntityFiltered.getBody().getContent()).flatExtracting(ProcessInstanceEntity::getVariables).hasSize(2);
+        assertThat(responseEntityFiltered.getBody().getContent()).flatExtracting(ProcessInstanceEntity::getVariables)
+            .extracting(AbstractVariableEntity::getValue).containsExactly("111", "222");
+    }
 }

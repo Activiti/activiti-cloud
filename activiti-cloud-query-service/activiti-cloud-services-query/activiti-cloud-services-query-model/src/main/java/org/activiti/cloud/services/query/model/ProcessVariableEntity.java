@@ -17,11 +17,20 @@ package org.activiti.cloud.services.query.model;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
 
+@FilterDef(name = "variableDefinitionIds", parameters = @ParamDef(name="variables", type = "string"), defaultCondition = "definition_id in (:variables)")
 @Entity(name="ProcessVariable")
 @Table(name = "PROCESS_VARIABLE",
         indexes = {

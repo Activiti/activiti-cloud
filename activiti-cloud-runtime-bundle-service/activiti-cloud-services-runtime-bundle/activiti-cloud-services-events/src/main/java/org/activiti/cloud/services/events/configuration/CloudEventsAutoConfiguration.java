@@ -64,6 +64,7 @@ import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregato
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.activiti.spring.process.CachingProcessExtensionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -269,8 +270,9 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ToCloudVariableEventConverter cloudVariableEventConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
-        return new ToCloudVariableEventConverter(runtimeBundleInfoAppender);
+    public ToCloudVariableEventConverter cloudVariableEventConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                                     CachingProcessExtensionService processExtensionService) {
+        return new ToCloudVariableEventConverter(runtimeBundleInfoAppender, processExtensionService);
     }
 
     @Bean
