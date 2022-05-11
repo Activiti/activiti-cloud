@@ -15,18 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.querydsl.core.types.Predicate;
-import java.util.Collections;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
@@ -39,6 +28,7 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -53,6 +43,19 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Collections;
+
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TaskAdminController.class)
 @Import({
@@ -91,6 +94,14 @@ public class TaskEntityAdminControllerIT {
 
     @MockBean
     private TaskPermissionsHelper taskPermissionsHelper;
+
+    @MockBean
+    private ProcessInstanceService processInstanceService;
+
+    @BeforeEach
+    void setUp() {
+        assertThat(processInstanceService).isNotNull();
+    }
 
     @Test
     public void allTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {

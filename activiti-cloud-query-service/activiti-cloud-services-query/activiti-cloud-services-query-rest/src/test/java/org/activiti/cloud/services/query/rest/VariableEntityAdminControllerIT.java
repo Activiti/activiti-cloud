@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -36,6 +37,7 @@ import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -81,6 +83,14 @@ public class VariableEntityAdminControllerIT {
 
     @MockBean
     private TaskRepository taskRepository;
+
+    @MockBean
+    private ProcessInstanceService processInstanceService;
+
+    @BeforeEach
+    void setUp() {
+        assertThat(processInstanceService).isNotNull();
+    }
 
     @Test
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {

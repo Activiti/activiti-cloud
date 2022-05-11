@@ -15,20 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.querydsl.core.types.Predicate;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -54,6 +41,20 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @TestPropertySource("classpath:application-test.properties")
@@ -95,6 +96,9 @@ public class ProcessInstanceEntityDeleteControllerIT {
     @MockBean
     private TaskRepository taskRepository;
 
+    @MockBean
+    private ProcessInstanceService processInstanceService;
+
     @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("admin");
@@ -104,6 +108,7 @@ public class ProcessInstanceEntityDeleteControllerIT {
         assertThat(securityPoliciesProperties).isNotNull();
         assertThat(taskLookupRestrictionService).isNotNull();
         assertThat(taskRepository).isNotNull();
+        assertThat(processInstanceService).isNotNull();
     }
 
     @Test

@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -33,6 +34,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -73,6 +75,14 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
 
     @MockBean
     private SecurityPoliciesProperties securityPoliciesProperties;
+
+    @MockBean
+    private ProcessInstanceService processInstanceService;
+
+    @BeforeEach
+    void setUp() {
+        assertThat(processInstanceService).isNotNull();
+    }
 
     @Test
     public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
