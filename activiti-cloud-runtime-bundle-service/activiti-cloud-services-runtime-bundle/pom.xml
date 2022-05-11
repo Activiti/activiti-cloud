@@ -20,7 +20,7 @@
     <module>activiti-cloud-services-rest-api</module>
     <module>activiti-cloud-services-rest-impl</module>
     <module>activiti-cloud-services-identity-basic</module>
-    <module>activiti-cloud-services-identity-keycloak</module>
+    <module>activiti-cloud-services-engine-util</module>
     <module>activiti-cloud-services-job-executor</module>
     <module>messages-events</module>
     <module>activiti-cloud-runtime-bundle-rest-client</module>
