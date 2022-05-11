@@ -46,8 +46,6 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
 
     private String processInstanceId;
 
-    private String definitionId;
-
     @JsonIgnore
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false,
@@ -149,14 +147,6 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
 
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
-    }
-
-    public String getDefinitionId() {
-        return definitionId;
-    }
-
-    public void setDefinitionId(String variableDefinitionId) {
-        this.definitionId = variableDefinitionId;
     }
 
     public ProcessInstanceEntity getProcessInstance() {

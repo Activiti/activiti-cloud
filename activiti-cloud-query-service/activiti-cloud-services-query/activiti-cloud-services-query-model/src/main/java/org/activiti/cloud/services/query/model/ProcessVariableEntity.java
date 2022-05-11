@@ -47,6 +47,7 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
     @SequenceGenerator(name="process_variable_sequence", sequenceName = "process_variable_sequence", allocationSize=50)
     private Long id;
 
+    private String definitionId;
 
     public ProcessVariableEntity() {
     }
@@ -91,6 +92,14 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
     @Override
     public boolean isTaskVariable() {
         return false;
+    }
+
+    public String getDefinitionId() {
+        return definitionId;
+    }
+
+    public void setDefinitionId(String variableDefinitionId) {
+        this.definitionId = variableDefinitionId;
     }
 
     @Override

@@ -93,7 +93,6 @@ public class VariableEntityCreatedEventHandlerTest {
     public void handleShouldCreateAndStoreTaskVariable() {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariableWithTaskId());
-        event.setVariableDefinitionId("variableDefId");
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
 
@@ -119,8 +118,7 @@ public class VariableEntityCreatedEventHandlerTest {
                 .hasTaskId(event.getEntity().getTaskId())
                 .hasType(event.getEntity().getType())
                 .hasTask(taskEntity)
-                .hasProcessInstance(processInstanceEntity)
-                .hasDefinitionId("variableDefId");
+                .hasProcessInstance(processInstanceEntity);
     }
 
     private static VariableInstanceImpl<String> buildVariableWithTaskId() {
