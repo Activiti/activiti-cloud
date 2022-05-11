@@ -47,7 +47,8 @@ public class KeycloakAccessTokenValidator {
 
     @JsonIgnore
     public boolean isExpired(Jwt accessToken) {
-        return accessToken.getExpiresAt() != null && accessToken.getExpiresAt().toEpochMilli() != 0 ? currentTime() > accessToken.getExpiresAt().toEpochMilli() : false;
+        return accessToken.getExpiresAt() != null &&
+            accessToken.getExpiresAt().toEpochMilli() != 0 && currentTime() > accessToken.getExpiresAt().toEpochMilli();
     }
 
     public int currentTime() {
