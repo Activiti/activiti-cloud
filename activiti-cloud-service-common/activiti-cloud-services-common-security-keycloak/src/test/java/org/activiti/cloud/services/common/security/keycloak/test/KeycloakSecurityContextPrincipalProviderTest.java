@@ -14,63 +14,54 @@
  * limitations under the License.
  */
 
-//package org.activiti.cloud.services.common.security.keycloak.test;
-//
-//import static org.assertj.core.api.Assertions.assertThat;
-//
-//import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
-//import org.junit.jupiter.api.Test;
-//import org.keycloak.KeycloakPrincipal;
-//import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
-//import org.keycloak.adapters.spi.KeycloakAccount;
-//import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
-//import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-//import org.springframework.security.core.context.SecurityContextHolder;
-//
-//import java.security.Principal;
-//import java.util.Collections;
-//import java.util.Optional;
-//import java.util.UUID;
-//
-//
-//public class KeycloakSecurityContextPrincipalProviderTest {
-//
-//    private KeycloakSecurityContextPrincipalProvider subject = new KeycloakSecurityContextPrincipalProvider();
-//
-//    @Test
-//    public void testGetCurrentPrincipal() {
-//        // given
-//        String subjectId = UUID.randomUUID().toString();
-//        KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal = new KeycloakPrincipal<>(subjectId,
-//                                                                                                  new RefreshableKeycloakSecurityContext());
-//        KeycloakAccount account = new SimpleKeycloakAccount(principal,
-//                                                            Collections.emptySet(),
-//                                                            principal.getKeycloakSecurityContext());
-//
-//        SecurityContextHolder.getContext()
-//                             .setAuthentication(new KeycloakAuthenticationToken(account,
-//                                                                                false));
-//
-//        // when
-//        Optional<Principal> result = subject.getCurrentPrincipal();
-//
-//        // then
-//        assertThat(result).isPresent()
-//                          .containsInstanceOf(KeycloakPrincipal.class)
-//                          .contains(principal);
-//
-//    }
-//
-//    @Test
-//    public void testGetCurrentPrincipalEmpty() {
-//        // given
-//        SecurityContextHolder.clearContext();
-//
-//        // when
-//        Optional<Principal> result = subject.getCurrentPrincipal();
-//
-//        // then
-//        assertThat(result).isEmpty();
-//    }
-//
-//}
+package org.activiti.cloud.services.common.security.keycloak.test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.security.Principal;
+import java.util.Optional;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
+@ExtendWith(MockitoExtension.class)
+public class KeycloakSecurityContextPrincipalProviderTest {
+
+    private final KeycloakSecurityContextPrincipalProvider subject = new KeycloakSecurityContextPrincipalProvider();
+
+    @Mock
+    private Jwt jwt;
+
+    @Test
+    public void should_getCurrentPrincipal() {
+        // given
+        JwtAuthenticationToken jwtAuthenticationToken = new JwtAuthenticationToken(jwt);
+        SecurityContextHolder.getContext().setAuthentication(jwtAuthenticationToken);
+
+        // when
+        Optional<Principal> result = subject.getCurrentPrincipal();
+
+        // then
+        assertThat(result).isPresent()
+                          .containsInstanceOf(JwtAuthenticationToken.class)
+                          .contains((jwtAuthenticationToken));
+    }
+
+    @Test
+    public void should_getEmptyCurrentPrincipal() {
+        // given
+        SecurityContextHolder.clearContext();
+
+        // when
+        Optional<Principal> result = subject.getCurrentPrincipal();
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+}
