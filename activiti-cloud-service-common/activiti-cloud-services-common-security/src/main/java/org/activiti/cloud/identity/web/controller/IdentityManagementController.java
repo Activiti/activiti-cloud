@@ -40,10 +40,12 @@ public class IdentityManagementController {
 
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public List<User> getUsers(@RequestParam(value = "search", required = false) String search,
-                                                  @RequestParam(value = "role", required = false)  Set<String> roles) {
+                                                  @RequestParam(value = "role", required = false)  Set<String> roles,
+                               @RequestParam(value = "group", required = false)  Set<String> groups) {
 
         UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch(search);
+        userSearchParams.setGroups(groups);
         userSearchParams.setRoles(roles);
 
         return identityManagementService.findUsers(userSearchParams);
