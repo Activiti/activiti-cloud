@@ -32,6 +32,9 @@ import org.springframework.util.CollectionUtils;
 
 public class KeycloakManagementService implements IdentityManagementService {
 
+    public static final int PAGE_START = 0;
+    public static final int PAGE_SIZE = 50;
+
     private final KeycloakClient keycloakClient;
     private final KeycloakUserToUser keycloakUserToUser;
     private final KeycloakGroupToGroup keycloakGroupToGroup;
@@ -47,7 +50,7 @@ public class KeycloakManagementService implements IdentityManagementService {
     @Override
     public List<User> findUsers(UserSearchParams userSearchParams) {
         return keycloakClient
-            .searchUsers(userSearchParams.getSearchKey(), calculateFirst(userSearchParams.getPage(), userSearchParams.getSize()), userSearchParams.getSize())
+            .searchUsers(userSearchParams.getSearchKey(), PAGE_START, PAGE_SIZE)
             .stream()
             .map(keycloakUserToUser::toUser)
             .filter(user -> filterByRoles(user.getRoles(), userSearchParams.getRoles()))
@@ -56,7 +59,7 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     private boolean filterByGroups(User user, Set<String> groups) {
-        return keycloakClient
+        return CollectionUtils.isEmpty(groups) || keycloakClient
             .getUserGroups(user.getId())
             .stream()
             .map(KeycloakGroup::getName)
@@ -66,7 +69,7 @@ public class KeycloakManagementService implements IdentityManagementService {
     @Override
     public List<Group> findGroups(GroupSearchParams groupSearchParams) {
         return keycloakClient
-            .searchGroups(groupSearchParams.getSearch(), calculateFirst(groupSearchParams.getPage(), groupSearchParams.getSize()), groupSearchParams.getSize())
+            .searchGroups(groupSearchParams.getSearch(), PAGE_START, PAGE_SIZE)
             .stream()
             .map(keycloakGroupToGroup::toGroup)
             .filter(user -> filterByRoles(user.getRoles(), groupSearchParams.getRoles()))
@@ -81,10 +84,5 @@ public class KeycloakManagementService implements IdentityManagementService {
                 .findAny()
                 .isPresent();
     }
-
-    private int calculateFirst(Integer page, Integer size) {
-        return page * size;
-    }
-
 
 }

@@ -18,7 +18,6 @@ package org.activiti.cloud.services.identity.keycloak;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -100,11 +99,20 @@ class KeycloakManagementServiceTest {
         UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch("o");
         userSearchParams.setRoles(Set.of("a"));
-        userSearchParams.setPage(0);
-        userSearchParams.setSize(50);
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
         assertThat(users.size()).isEqualTo(2);
         assertThat(users).containsExactly(userTwo, userThree);
+    }
+
+    @Test
+    void shouldReturnUsersWhenSearchingUsingMultipleRoles() {
+        describeSearchUsers();
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setRoles(Set.of("a", "b"));
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(3);
+        assertThat(users).containsExactly(userOne, userTwo, userThree);
     }
 
     @Test
@@ -130,83 +138,12 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    void shouldCalculatePaginationForPage0WhenSearchingForUsers() {
-        when(keycloakClient.searchUsers(eq("o"), any(), any())).thenReturn(List.of());
-
-        UserSearchParams userSearchParams = new UserSearchParams();
-        userSearchParams.setSearch("o");
-        userSearchParams.setRoles(Set.of());
-        userSearchParams.setPage(0);
-        userSearchParams.setSize(10);
-        keycloakManagementService.findUsers(userSearchParams);
-
-        verify(keycloakClient).searchUsers(eq("o"), eq(0), eq(10));
-    }
-
-    @Test
-    void shouldCalculatePaginationFor0WhenSearchingForGroups() {
-        when(keycloakClient.searchGroups(eq("o"), any(), any())).thenReturn(List.of());
-
-        GroupSearchParams groupSearchParams = new GroupSearchParams();
-        groupSearchParams.setSearch("o");
-        groupSearchParams.setRoles(Set.of());
-        groupSearchParams.setPage(0);
-        groupSearchParams.setSize(10);
-        keycloakManagementService.findGroups(groupSearchParams);
-
-        verify(keycloakClient).searchGroups(eq("o"), eq(0), eq(10));
-    }
-
-    @Test
-    void shouldCalculatePaginationFromSecondPageWhenSearchingForUsers() {
-        when(keycloakClient.searchUsers(eq("o"), any(), any())).thenReturn(List.of());
-
-        UserSearchParams userSearchParams = new UserSearchParams();
-        userSearchParams.setSearch("o");
-        userSearchParams.setRoles(Set.of());
-        userSearchParams.setPage(1);
-        userSearchParams.setSize(10);
-        keycloakManagementService.findUsers(userSearchParams);
-
-        verify(keycloakClient).searchUsers(eq("o"), eq(10), eq(10));
-    }
-
-    @Test
-    void shouldCalculatePaginationFromSecondPageWhenSearchingForGroups() {
-        when(keycloakClient.searchGroups(eq("o"), any(), any())).thenReturn(List.of());
-
-        GroupSearchParams groupSearchParams = new GroupSearchParams();
-        groupSearchParams.setSearch("o");
-        groupSearchParams.setRoles(Set.of());
-        groupSearchParams.setPage(1);
-        groupSearchParams.setSize(10);
-        keycloakManagementService.findGroups(groupSearchParams);
-
-        verify(keycloakClient).searchGroups(eq("o"), eq(10), eq(10));
-    }
-
-    @Test
-    void shouldReturnUsersWhenSearchingUsingMultipleRoles() {
-        describeSearchUsers();
-        UserSearchParams userSearchParams = new UserSearchParams();
-        userSearchParams.setSearch("o");
-        userSearchParams.setRoles(Set.of("b", "a"));
-        userSearchParams.setPage(0);
-        userSearchParams.setSize(50);
-        List<User> users = keycloakManagementService.findUsers(userSearchParams);
-        assertThat(users.size()).isEqualTo(3);
-        assertThat(users).containsExactly(userOne, userTwo, userThree);
-    }
-
-    @Test
     void shouldReturnAllUsersWhenSearchingWithoutRoles() {
         describeSearchUsers();
 
         UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch("o");
         userSearchParams.setRoles(Set.of());
-        userSearchParams.setPage(0);
-        userSearchParams.setSize(50);
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
         assertThat(users.size()).isEqualTo(4);
         assertThat(users).containsExactly(userOne, userTwo, userThree, userFour);
@@ -219,8 +156,6 @@ class KeycloakManagementServiceTest {
         GroupSearchParams groupSearchParams = new GroupSearchParams();
         groupSearchParams.setSearch("o");
         groupSearchParams.setRoles(Set.of("a"));
-        groupSearchParams.setPage(0);
-        groupSearchParams.setSize(50);
         List<Group> groups = keycloakManagementService.findGroups(groupSearchParams);
         assertThat(groups.size()).isEqualTo(2);
         assertThat(groups).containsExactly(groupTwo, groupThree);
@@ -232,8 +167,6 @@ class KeycloakManagementServiceTest {
         GroupSearchParams groupSearchParams = new GroupSearchParams();
         groupSearchParams.setSearch("o");
         groupSearchParams.setRoles(Set.of("b", "a"));
-        groupSearchParams.setPage(0);
-        groupSearchParams.setSize(50);
         List<Group> groups = keycloakManagementService.findGroups(groupSearchParams);
         assertThat(groups.size()).isEqualTo(3);
         assertThat(groups).containsExactly(groupOne, groupTwo, groupThree);
@@ -246,8 +179,6 @@ class KeycloakManagementServiceTest {
         GroupSearchParams groupSearchParams = new GroupSearchParams();
         groupSearchParams.setSearch("o");
         groupSearchParams.setRoles(Set.of());
-        groupSearchParams.setPage(0);
-        groupSearchParams.setSize(50);
         List<Group> groups = keycloakManagementService.findGroups(groupSearchParams);
         assertThat(groups.size()).isEqualTo(4);
         assertThat(groups).containsExactly(groupOne, groupTwo, groupThree, groupFour);
