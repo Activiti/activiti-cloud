@@ -32,8 +32,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 @ExtendWith(MockitoExtension.class)
 public class JwtSecurityContextTokenProviderTest {
 
-    public final String TOKEN_VALUE = "bearer";
-    private JwtSecurityContextTokenProvider securityContextTokenProvider = new JwtSecurityContextTokenProvider();
+    public static final String TOKEN_VALUE = "bearer";
+    private final JwtSecurityContextTokenProvider securityContextTokenProvider = new JwtSecurityContextTokenProvider();
 
     @Mock
     private Jwt jwt;
