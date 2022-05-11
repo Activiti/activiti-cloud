@@ -17,7 +17,7 @@ package org.activiti.cloud.services.common.security.keycloak.config;
 
 import java.time.Instant;
 import java.util.Collection;
-import org.activiti.cloud.services.identity.keycloak.EngineAuthenticationSetter;
+import org.activiti.cloud.services.engine.util.EngineAuthenticationSetter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
