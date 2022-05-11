@@ -35,8 +35,7 @@ public class KeycloakUserToUser {
     User user = new User();
     user.setId(kUser.getId());
     user.setUsername(kUser.getUsername());
-    user.setFirstName(kUser.getFirstName());
-    user.setLastName(kUser.getLastName());
+    user.setDisplayName(String.join(" ", kUser.getFirstName(), kUser.getLastName()));
     user.setEmail(kUser.getEmail());
     List<KeycloakRoleMapping> userRoleMapping = keycloakClient.getUserRoleMapping(kUser.getId());
     user.setRoles(keycloakRoleMappingToRole.toRoles(userRoleMapping));

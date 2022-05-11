@@ -66,8 +66,7 @@ class KeycloakUserToUserTest {
     User user = keycloakUserToUser.toUser(kUser);
 
     assertThat(user.getId()).isEqualTo(kUser.getId());
-    assertThat(user.getFirstName()).isEqualTo(kUser.getFirstName());
-    assertThat(user.getLastName()).isEqualTo(kUser.getLastName());
+    assertThat(user.getDisplayName()).isEqualTo("Ping Pong");
     assertThat(user.getEmail()).isEqualTo(kUser.getEmail());
     assertThat(user.getUsername()).isEqualTo(kUser.getUsername());
     assertThat(user.getRoles()).isEqualTo(rolesList);
