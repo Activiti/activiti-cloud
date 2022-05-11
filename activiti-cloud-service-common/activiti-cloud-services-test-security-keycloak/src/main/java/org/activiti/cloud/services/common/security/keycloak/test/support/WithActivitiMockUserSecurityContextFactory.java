@@ -58,7 +58,6 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         Map<String, Object> headers = new HashMap<>();
         headers.put("testHeaderName", "testHeaderValue");
 
-
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         roles.forEach(role -> {
             grantedAuthorities.add(new SimpleGrantedAuthority(annotation.rolePrefix() + role));

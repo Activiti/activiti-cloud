@@ -70,8 +70,8 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     private final AuthorizationConfigurer authorizationConfigurer;
 
     private final OAuth2UserService oAuth2UserService;
-    private final ClientRegistrationRepository clientRegistrationRepository;
 
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Value("${keycloak.resource}" )
     private String resource;
