@@ -35,7 +35,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 @ExtendWith(MockitoExtension.class)
 public class KeycloakAccessTokenValidatorTest {
 
-    private final KeycloakAccessTokenValidator validator = new KeycloakAccessTokenValidator();
+    private final KeycloakAccessTokenValidator validator = new KeycloakAccessTokenValidator(0);
 
     @Mock
     private JwtAdapter jwtAdapter;

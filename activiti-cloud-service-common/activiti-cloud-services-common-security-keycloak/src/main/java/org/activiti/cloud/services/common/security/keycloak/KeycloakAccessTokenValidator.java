@@ -23,9 +23,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public class KeycloakAccessTokenValidator {
 
-    private long offset = 0;
+    private final long offset;
 
-    public void setOffset(int offset) {
+    public KeycloakAccessTokenValidator(long offset) {
         this.offset = offset;
     }
 
