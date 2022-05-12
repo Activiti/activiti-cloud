@@ -40,6 +40,14 @@ public class KeycloakAccessTokenValidator {
         return !isExpired(accessToken) && isNotBefore(accessToken);
     }
 
+    /**
+     * The 'nbf' (NotBefore) claim is used by some auth providers as
+     * a way to set the moment from which a token starts being valid.
+     * A token could not be expired, but if its validity period has not started,
+     * it would be still an invalid token
+     * @param accessToken
+     * @return if the nbf claim is either in the past or the future
+     */
     private boolean isNotBefore(Jwt accessToken) {
         return accessToken.getNotBefore() == null ||
             currentTime() >= accessToken.getNotBefore().toEpochMilli();
