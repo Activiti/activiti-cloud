@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
+import org.activiti.cloud.services.common.security.keycloak.SecurityManagerImpl;
 import org.activiti.cloud.services.common.security.keycloak.test.support.WithActivitiMockUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import java.util.List;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class KeycloakSecurityManagerImplIT {
+public class SecurityManagerImplIT {
 
     @Autowired
     private SecurityManager securityManager;
@@ -39,12 +39,11 @@ public class KeycloakSecurityManagerImplIT {
     @SpringBootConfiguration
     @EnableAutoConfiguration
     static class Application {
-
     }
 
     @Test
     public void contextLoads() {
-        assertThat(securityManager).isInstanceOf(KeycloakSecurityManagerImpl.class);
+        assertThat(securityManager).isInstanceOf(SecurityManagerImpl.class);
     }
 
     @Test

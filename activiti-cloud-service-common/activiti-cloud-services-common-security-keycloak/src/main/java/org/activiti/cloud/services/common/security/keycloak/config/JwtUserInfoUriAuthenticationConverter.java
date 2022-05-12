@@ -68,7 +68,6 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
             username = oAuth2User.getAttribute(usernameClaim);
         }
         return username;
-
     }
 
 }

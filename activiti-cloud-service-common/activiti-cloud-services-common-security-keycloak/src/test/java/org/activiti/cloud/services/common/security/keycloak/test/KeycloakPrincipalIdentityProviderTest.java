@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
+import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
 import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ public class KeycloakPrincipalIdentityProviderTest {
     private KeycloakPrincipalIdentityProvider principalIdentityProvider;
 
     @Mock
-    private KeycloakAccessTokenValidator keycloakAccessTokenValidator;
+    private JwtAccessTokenValidator jwtAccessTokenValidator;
 
     @Mock
     private JwtAdapter jwtAdapter;
@@ -55,7 +55,7 @@ public class KeycloakPrincipalIdentityProviderTest {
         String USERNAME = "usename";
         when(jwtAdapter.getUserName()).thenReturn(USERNAME);
         when(jwtAccessTokenProvider.accessToken(principal)).thenReturn(Optional.of(jwtAdapter));
-        when(keycloakAccessTokenValidator.isValid(jwtAdapter)).thenReturn(true);
+        when(jwtAccessTokenValidator.isValid(jwtAdapter)).thenReturn(true);
 
         // when
         String userId = principalIdentityProvider.getUserId(principal);
@@ -68,7 +68,7 @@ public class KeycloakPrincipalIdentityProviderTest {
     public void should_throwSecurityException_when_tokenIsNotValid() {
         // given
         when(jwtAccessTokenProvider.accessToken(principal)).thenReturn(Optional.of(jwtAdapter));
-        when(keycloakAccessTokenValidator.isValid(jwtAdapter)).thenReturn(false);
+        when(jwtAccessTokenValidator.isValid(jwtAdapter)).thenReturn(false);
 
         // when
         Throwable thrown = catchThrowable(() -> {

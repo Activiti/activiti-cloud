@@ -22,21 +22,21 @@ import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-public class KeycloakAccessTokenPrincipalRolesProvider implements PrincipalRolesProvider {
+public class JtwAccessTokenPrincipalRolesProvider implements PrincipalRolesProvider {
 
-    private final JwtAccessTokenProvider keycloakAccessTokenProvider;
-    private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
+    private final JwtAccessTokenProvider jwtAccessTokenProvider;
+    private final JwtAccessTokenValidator jwtAccessTokenValidator;
 
-    public KeycloakAccessTokenPrincipalRolesProvider(@NonNull JwtAccessTokenProvider keycloakSecurityContextProvider,
-                                                     @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
-        this.keycloakAccessTokenProvider = keycloakSecurityContextProvider;
-        this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
+    public JtwAccessTokenPrincipalRolesProvider(@NonNull JwtAccessTokenProvider keycloakSecurityContextProvider,
+                                                     @NonNull JwtAccessTokenValidator jwtAccessTokenValidator) {
+        this.jwtAccessTokenProvider = keycloakSecurityContextProvider;
+        this.jwtAccessTokenValidator = jwtAccessTokenValidator;
     }
 
     @Override
     public List<String> getRoles(@NonNull Principal principal) {
-        return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
+        return jwtAccessTokenProvider.accessToken(principal)
+                                          .filter(jwtAccessTokenValidator::isValid)
                                           .map(JwtAdapter::getRoles)
                                           .orElseGet(this::empty);
     }

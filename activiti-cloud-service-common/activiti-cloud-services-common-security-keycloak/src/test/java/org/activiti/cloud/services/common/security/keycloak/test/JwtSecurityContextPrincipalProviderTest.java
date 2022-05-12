@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.security.Principal;
 import java.util.Optional;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
+import org.activiti.cloud.services.common.security.keycloak.JwtSecurityContextPrincipalProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -30,9 +30,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 @ExtendWith(MockitoExtension.class)
-public class KeycloakSecurityContextPrincipalProviderTest {
+public class JwtSecurityContextPrincipalProviderTest {
 
-    private final KeycloakSecurityContextPrincipalProvider subject = new KeycloakSecurityContextPrincipalProvider();
+    private final JwtSecurityContextPrincipalProvider subject = new JwtSecurityContextPrincipalProvider();
 
     @Mock
     private Jwt jwt;

@@ -25,15 +25,15 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
 import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
 import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenPrincipalGroupsProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalRolesProvider;
+import org.activiti.cloud.services.common.security.keycloak.JtwAccessTokenPrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
+import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
+import org.activiti.cloud.services.common.security.keycloak.JwtSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.keycloak.JwtSecurityContextTokenProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
+import org.activiti.cloud.services.common.security.keycloak.SecurityManagerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -45,8 +45,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistryImpl;
@@ -55,7 +53,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -93,7 +90,7 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     @Bean
     @ConditionalOnMissingBean
     public SecurityContextPrincipalProvider authenticatedPrincipalProvider() {
-        return new KeycloakSecurityContextPrincipalProvider();
+        return new JwtSecurityContextPrincipalProvider();
     }
 
     @Bean
@@ -104,34 +101,34 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
 
     @Bean
     @ConditionalOnMissingBean
-    public KeycloakAccessTokenValidator keycloakAccessTokenValidator() {
-        return new KeycloakAccessTokenValidator(offset);
+    public JwtAccessTokenValidator keycloakAccessTokenValidator() {
+        return new JwtAccessTokenValidator(offset);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PrincipalIdentityProvider principalIdentityProvider(JwtAccessTokenProvider keycloakAccessTokenProvider,
-                                                               KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+                                                               JwtAccessTokenValidator jwtAccessTokenValidator) {
         return new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider,
-                                                     keycloakAccessTokenValidator);
+            jwtAccessTokenValidator);
     }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
     public JwtAccessTokenPrincipalGroupsProvider keycloakAccessTokenPrincipalGroupsProvider(JwtAccessTokenProvider jwtAccessTokenProvider,
-        KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+        JwtAccessTokenValidator jwtAccessTokenValidator) {
         return new JwtAccessTokenPrincipalGroupsProvider(jwtAccessTokenProvider,
-            keycloakAccessTokenValidator);
+            jwtAccessTokenValidator);
     }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public KeycloakAccessTokenPrincipalRolesProvider keycloakAccessTokenPrincipalRolesProvider(JwtAccessTokenProvider keycloakAccessTokenProvider,
-                                                                                               KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
-        return new KeycloakAccessTokenPrincipalRolesProvider(keycloakAccessTokenProvider,
-                                                             keycloakAccessTokenValidator);
+    public JtwAccessTokenPrincipalRolesProvider keycloakAccessTokenPrincipalRolesProvider(JwtAccessTokenProvider keycloakAccessTokenProvider,
+                                                                                               JwtAccessTokenValidator jwtAccessTokenValidator) {
+        return new JtwAccessTokenPrincipalRolesProvider(keycloakAccessTokenProvider,
+            jwtAccessTokenValidator);
     }
 
     @Bean
@@ -152,7 +149,7 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
                                            PrincipalIdentityProvider principalIdentityProvider,
                                            KeycloakPrincipalGroupsProviderChain principalGroupsProvider,
                                            KeycloakPrincipalRolesProviderChain principalRolesProviderChain) {
-        return new KeycloakSecurityManagerImpl(authenticatedPrincipalProvider,
+        return new SecurityManagerImpl(authenticatedPrincipalProvider,
                                                principalIdentityProvider,
                                                principalGroupsProvider,
                                                principalRolesProviderChain);
