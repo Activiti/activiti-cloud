@@ -18,11 +18,12 @@ package org.activiti.cloud.services.identity.keycloak;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
+import org.activiti.cloud.identity.GroupSearchParams;
+import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.Role;
 import org.activiti.cloud.identity.model.User;
@@ -41,146 +42,156 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class KeycloakManagementServiceTest {
 
-  @Mock
-  private KeycloakClient keycloakClient;
+    @Mock
+    private KeycloakClient keycloakClient;
 
-  @Mock
-  private KeycloakUserToUser keycloakUserToUser;
+    @Mock
+    private KeycloakUserToUser keycloakUserToUser;
 
-  @Mock
-  private KeycloakGroupToGroup keycloakGroupToGroup;
+    @Mock
+    private KeycloakGroupToGroup keycloakGroupToGroup;
 
-  @InjectMocks
-  private KeycloakManagementService keycloakManagementService;
+    @InjectMocks
+    private KeycloakManagementService keycloakManagementService;
 
-  private User userOne = new User();
-  private User userTwo = new User();
-  private User userThree = new User();
-  private User userFour = new User();
+    private User userOne = new User();
+    private User userTwo = new User();
+    private User userThree = new User();
+    private User userFour = new User();
 
-  private Group groupOne = new Group();
-  private Group groupTwo = new Group();
-  private Group groupThree = new Group();
-  private Group groupFour = new Group();
+    private Group groupOne = new Group();
+    private Group groupTwo = new Group();
+    private Group groupThree = new Group();
+    private Group groupFour = new Group();
 
-  @BeforeEach
-  public void setupData() {
-    Role roleA = new Role();
-    roleA.setName("a");
-    Role roleB = new Role();
-    roleB.setName("b");
+    @BeforeEach
+    public void setupData() {
+        Role roleA = new Role();
+        roleA.setName("a");
+        Role roleB = new Role();
+        roleB.setName("b");
 
-    userOne.setId("one");
-    userOne.setRoles(List.of(roleB));
+        userOne.setId("one");
+        userOne.setRoles(List.of(roleB));
 
-    userTwo.setId("two");
-    userTwo.setRoles(List.of(roleA, roleB));
+        userTwo.setId("two");
+        userTwo.setRoles(List.of(roleA, roleB));
 
-    userThree.setId("three");
-    userThree.setRoles(List.of(roleA));
+        userThree.setId("three");
+        userThree.setRoles(List.of(roleA));
 
-    groupOne.setId("one");
-    groupOne.setRoles(List.of(roleB));
+        groupOne.setId("one");
+        groupOne.setName("one");
+        groupOne.setRoles(List.of(roleB));
 
-    groupTwo.setId("two");
-    groupTwo.setRoles(List.of(roleA, roleB));
+        groupTwo.setId("two");
+        groupTwo.setName("one");
+        groupTwo.setRoles(List.of(roleA, roleB));
 
-    groupThree.setId("three");
-    groupThree.setRoles(List.of(roleA));
-  }
-
-  @Test
-  void shouldReturnUsersWhenSearchingUsingOneRole() {
-    describeSearchUsers();
-    List<User> users = keycloakManagementService.findUsers("o", Set.of("a"), 0, 50);
-    assertThat(users.size()).isEqualTo(2);
-    assertThat(users).containsExactly(userTwo, userThree);
-  }
-
-    @Test
-    void shouldCalculatePaginationForPage0WhenSearchingForUsers() {
-        when(keycloakClient.searchUsers(eq("o"), any(), any())).thenReturn(List.of());
-
-        keycloakManagementService.findUsers("o", Set.of(), 0, 10);
-
-        verify(keycloakClient).searchUsers(eq("o"), eq(0), eq(10));
+        groupThree.setId("three");
+        groupThree.setName("one");
+        groupThree.setRoles(List.of(roleA));
     }
 
     @Test
-    void shouldCalculatePaginationFor0WhenSearchingForGroups() {
-        when(keycloakClient.searchGroups(eq("o"), any(), any())).thenReturn(List.of());
-
-        keycloakManagementService.findGroups("o", Set.of(), 0, 10);
-
-        verify(keycloakClient).searchGroups(eq("o"), eq(0), eq(10));
+    void shouldReturnUsersWhenSearchingUsingOneRole() {
+        describeSearchUsers();
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setRoles(Set.of("a"));
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(2);
+        assertThat(users).containsExactly(userTwo, userThree);
     }
 
     @Test
-    void shouldCalculatePaginationFromSecondPageWhenSearchingForUsers() {
-        when(keycloakClient.searchUsers(eq("o"), any(), any())).thenReturn(List.of());
-
-        keycloakManagementService.findUsers("o", Set.of(), 1, 10);
-
-        verify(keycloakClient).searchUsers(eq("o"), eq(10), eq(10));
+    void shouldReturnUsersWhenSearchingUsingMultipleRoles() {
+        describeSearchUsers();
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setRoles(Set.of("a", "b"));
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(3);
+        assertThat(users).containsExactly(userOne, userTwo, userThree);
     }
 
     @Test
-    void shouldCalculatePaginationFromSecondPageWhenSearchingForGroups() {
-        when(keycloakClient.searchGroups(eq("o"), any(), any())).thenReturn(List.of());
+    void shouldReturnUsersWhenSearchingUsingGroupAndRoles() {
+        describeSearchUsers();
+        KeycloakGroup one = new KeycloakGroup();
+        one.setId("one");
+        one.setName("one");
+        when(keycloakClient.getUserGroups(userTwo.getId())).thenReturn(List.of(one));
 
-        keycloakManagementService.findGroups("o", Set.of(), 1, 10);
+        KeycloakGroup two = new KeycloakGroup();
+        two.setId("two");
+        two.setName("two");
+        when(keycloakClient.getUserGroups(userThree.getId())).thenReturn(List.of(two));
 
-        verify(keycloakClient).searchGroups(eq("o"), eq(10), eq(10));
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setGroups(Set.of("one"));
+        userSearchParams.setRoles(Set.of("a"));
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userTwo);
     }
 
-  @Test
-  void shouldReturnUsersWhenSearchingUsingMultipleRoles() {
-    describeSearchUsers();
-    List<User> users = keycloakManagementService.findUsers("o", Set.of("b", "a"), 0, 50);
-    assertThat(users.size()).isEqualTo(3);
-    assertThat(users).containsExactly(userOne, userTwo, userThree);
-  }
+    @Test
+    void shouldReturnAllUsersWhenSearchingWithoutRoles() {
+        describeSearchUsers();
 
-  @Test
-  void shouldReturnAllUsersWhenSearchingWithoutRoles() {
-    describeSearchUsers();
-    List<User> users = keycloakManagementService.findUsers("o", Set.of(), 0, 50);
-    assertThat(users.size()).isEqualTo(4);
-    assertThat(users).containsExactly(userOne, userTwo, userThree, userFour);
-  }
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setRoles(Set.of());
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(4);
+        assertThat(users).containsExactly(userOne, userTwo, userThree, userFour);
+    }
 
-  @Test
-  void shouldReturnGroupsWhenSearchingUsingOneRole() {
-    describeSearchGroups();
-    List<Group> groups = keycloakManagementService.findGroups("o", Set.of("a"), 0, 50);
-    assertThat(groups.size()).isEqualTo(2);
-    assertThat(groups).containsExactly(groupTwo, groupThree);
-  }
+    @Test
+    void shouldReturnGroupsWhenSearchingUsingOneRole() {
+        describeSearchGroups();
 
-  @Test
-  void shouldReturnGroupsWhenSearchingUsingMultipleRoles() {
-    describeSearchGroups();
-    List<Group> groups = keycloakManagementService.findGroups("o", Set.of("b", "a"), 0, 50);
-    assertThat(groups.size()).isEqualTo(3);
-    assertThat(groups).containsExactly(groupOne, groupTwo, groupThree);
-  }
+        GroupSearchParams groupSearchParams = new GroupSearchParams();
+        groupSearchParams.setSearch("o");
+        groupSearchParams.setRoles(Set.of("a"));
+        List<Group> groups = keycloakManagementService.findGroups(groupSearchParams);
+        assertThat(groups.size()).isEqualTo(2);
+        assertThat(groups).containsExactly(groupTwo, groupThree);
+    }
 
-  @Test
-  void shouldReturnAllGroupsWhenSearchingWithoutRoles() {
-    describeSearchGroups();
-    List<Group> groups = keycloakManagementService.findGroups("o", Set.of(), 0, 50);
-    assertThat(groups.size()).isEqualTo(4);
-    assertThat(groups).containsExactly(groupOne, groupTwo, groupThree, groupFour);
-  }
+    @Test
+    void shouldReturnGroupsWhenSearchingUsingMultipleRoles() {
+        describeSearchGroups();
+        GroupSearchParams groupSearchParams = new GroupSearchParams();
+        groupSearchParams.setSearch("o");
+        groupSearchParams.setRoles(Set.of("b", "a"));
+        List<Group> groups = keycloakManagementService.findGroups(groupSearchParams);
+        assertThat(groups.size()).isEqualTo(3);
+        assertThat(groups).containsExactly(groupOne, groupTwo, groupThree);
+    }
 
-  private void describeSearchGroups() {
-    when(keycloakClient.searchGroups(eq("o"), eq(0), eq(50))).thenReturn(List.of(new KeycloakGroup(), new KeycloakGroup(), new KeycloakGroup(), new KeycloakGroup()));
-    when(keycloakGroupToGroup.toGroup(any())).thenReturn(groupOne, groupTwo, groupThree, groupFour);
-  }
+    @Test
+    void shouldReturnAllGroupsWhenSearchingWithoutRoles() {
+        describeSearchGroups();
 
-  private void describeSearchUsers() {
-    when(keycloakClient.searchUsers(eq("o"), eq(0), eq(50))).thenReturn(List.of(new KeycloakUser(), new KeycloakUser(), new KeycloakUser(), new KeycloakUser()));
-    when(keycloakUserToUser.toUser(any())).thenReturn(userOne, userTwo, userThree, userFour);
-  }
+        GroupSearchParams groupSearchParams = new GroupSearchParams();
+        groupSearchParams.setSearch("o");
+        groupSearchParams.setRoles(Set.of());
+        List<Group> groups = keycloakManagementService.findGroups(groupSearchParams);
+        assertThat(groups.size()).isEqualTo(4);
+        assertThat(groups).containsExactly(groupOne, groupTwo, groupThree, groupFour);
+    }
+
+    private void describeSearchGroups() {
+        when(keycloakClient.searchGroups(eq("o"), eq(0), eq(50))).thenReturn(List.of(new KeycloakGroup(), new KeycloakGroup(), new KeycloakGroup(), new KeycloakGroup()));
+        when(keycloakGroupToGroup.toGroup(any())).thenReturn(groupOne, groupTwo, groupThree, groupFour);
+    }
+
+    private void describeSearchUsers() {
+        when(keycloakClient.searchUsers(eq("o"), eq(0), eq(50))).thenReturn(List.of(new KeycloakUser(), new KeycloakUser(), new KeycloakUser(), new KeycloakUser()));
+        when(keycloakUserToUser.toUser(any())).thenReturn(userOne, userTwo, userThree, userFour);
+    }
 
 }

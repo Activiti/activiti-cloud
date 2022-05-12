@@ -21,8 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.activiti.cloud.identity.config.Oauth2FeignConfiguration;
-import org.activiti.cloud.identity.web.assembler.ModelRepresentationGroupAssembler;
-import org.activiti.cloud.identity.web.assembler.ModelRepresentationUserAssembler;
 import org.activiti.cloud.identity.web.controller.IdentityManagementController;
 import org.springframework.context.annotation.Import;
 
@@ -34,8 +32,6 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Import({Oauth2FeignConfiguration.class,
-    IdentityManagementController.class,
-    ModelRepresentationUserAssembler.class,
-    ModelRepresentationGroupAssembler.class})
+    IdentityManagementController.class})
 public @interface EnableIdentityManagementRestAPI {
 }

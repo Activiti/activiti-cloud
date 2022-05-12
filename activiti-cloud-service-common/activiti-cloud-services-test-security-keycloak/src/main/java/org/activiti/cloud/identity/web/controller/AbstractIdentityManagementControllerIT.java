@@ -47,9 +47,20 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/users?search=hr"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(2)))
-            .andExpect(jsonPath("$.list.entries[0].entry.username", is("hradmin")))
-            .andExpect(jsonPath("$.list.entries[1].entry.username", is("hruser")));
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].username", is("hradmin")))
+            .andExpect(jsonPath("$[1].username", is("hruser")));
+    }
+
+    @Test
+    public void should_returnUsers_when_searchByGroup() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/users?group=hr"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].username", is("hradmin")))
+            .andExpect(jsonPath("$[1].username", is("hruser")))
+            .andExpect(jsonPath("$[2].username", is("johnsnow")));
     }
 
     @Test
@@ -57,8 +68,8 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/users?search=hr@example.com"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(1)))
-            .andExpect(jsonPath("$.list.entries[0].entry.username", is("hruser")));
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].username", is("hruser")));
     }
 
     @Test
@@ -66,8 +77,8 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/users?search=snow"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(1)))
-            .andExpect(jsonPath("$.list.entries[0].entry.username", is("johnsnow")));
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
 
     @Test
@@ -75,8 +86,8 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/users?search=john"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(1)))
-            .andExpect(jsonPath("$.list.entries[0].entry.username", is("johnsnow")));
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
 
     @Test
@@ -84,8 +95,8 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/users?search=johnsnow&role=ACTIVITI_USER"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(1)))
-            .andExpect(jsonPath("$.list.entries[0].entry.username", is("johnsnow")));
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
 
     @Test
@@ -93,8 +104,8 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/users?search=hr&role=ACTIVITI_ADMIN"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(1)))
-            .andExpect(jsonPath("$.list.entries[0].entry.username", is("hradmin")));
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].username", is("hradmin")));
     }
 
     @Test
@@ -102,38 +113,11 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/users?role=ACTIVITI_ADMIN"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(4)))
-            .andExpect(jsonPath("$.list.entries[0].entry.username", is("admin")))
-            .andExpect(jsonPath("$.list.entries[1].entry.username", is("hradmin")))
-            .andExpect(jsonPath("$.list.entries[2].entry.username", is("testactivitiadmin")))
-            .andExpect(jsonPath("$.list.entries[3].entry.username", is("testadmin")));
-    }
-
-    @Test
-    public void shouldReturnMultiplePages_when_searchUsersUsingPagination() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/users?skipCount=0&maxItems=8"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(8)))
-            .andExpect(jsonPath("$.list.entries[0].entry.username", is("admin")))
-            .andExpect(jsonPath("$.list.entries[1].entry.username", is("hradmin")))
-            .andExpect(jsonPath("$.list.entries[2].entry.username", is("hruser")))
-            .andExpect(jsonPath("$.list.entries[3].entry.username", is("johnsnow")))
-            .andExpect(jsonPath("$.list.entries[4].entry.username", is("modeler")))
-            .andExpect(jsonPath("$.list.entries[5].entry.username", is("testactivitiadmin")))
-            .andExpect(jsonPath("$.list.entries[6].entry.username", is("testadmin")))
-            .andExpect(jsonPath("$.list.entries[7].entry.username", is("testdevops")));
-
-        mockMvc
-            .perform(get("/v1/identity/users?skipCount=8&maxItems=8"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(1)))
-            .andExpect(jsonPath("$.list.entries[0].entry.username", is("testuser")));
-
-        mockMvc
-            .perform(get("/v1/identity/users?skipCount=16&maxItems=8"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(0)));
+            .andExpect(jsonPath("$", hasSize(4)))
+            .andExpect(jsonPath("$[0].username", is("admin")))
+            .andExpect(jsonPath("$[1].username", is("hradmin")))
+            .andExpect(jsonPath("$[2].username", is("testactivitiadmin")))
+            .andExpect(jsonPath("$[3].username", is("testadmin")));
     }
 
     @Test
@@ -141,9 +125,9 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/groups?search=group"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(2)))
-            .andExpect(jsonPath("$.list.entries[0].entry.name", is("salesgroup")))
-            .andExpect(jsonPath("$.list.entries[1].entry.name", is("testgroup")));
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].name", is("salesgroup")))
+            .andExpect(jsonPath("$[1].name", is("testgroup")));
     }
 
     @Test
@@ -151,8 +135,8 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/groups?search=group&role=ACTIVITI_USER"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(1)))
-            .andExpect(jsonPath("$.list.entries[0].entry.name", is("salesgroup")));
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].name", is("salesgroup")));
     }
 
     @Test
@@ -160,29 +144,8 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/groups?role=ACTIVITI_USER"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(1)))
-            .andExpect(jsonPath("$.list.entries[0].entry.name", is("salesgroup")));
-    }
-
-    @Test
-    public void shouldReturnMultiplePages_when_searchGroupsUsingPagination() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/groups?skipCount=0&maxItems=2"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(2)))
-            .andExpect(jsonPath("$.list.entries[0].entry.name", is("hr")))
-            .andExpect(jsonPath("$.list.entries[1].entry.name", is("salesgroup")));
-
-        mockMvc
-            .perform(get("/v1/identity/groups?skipCount=2&maxItems=2"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(1)))
-            .andExpect(jsonPath("$.list.entries[0].entry.name", is("testgroup")));
-
-        mockMvc
-            .perform(get("/v1/identity/groups?skipCount=4&maxItems=2"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.list.entries", hasSize(0)));
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].name", is("salesgroup")));
     }
 
 }

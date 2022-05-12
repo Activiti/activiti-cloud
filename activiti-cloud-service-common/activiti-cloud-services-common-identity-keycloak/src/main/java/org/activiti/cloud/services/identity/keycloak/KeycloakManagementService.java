@@ -18,16 +18,22 @@ package org.activiti.cloud.services.identity.keycloak;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
+import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.Role;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.springframework.util.CollectionUtils;
 
 public class KeycloakManagementService implements IdentityManagementService {
+
+    public static final int PAGE_START = 0;
+    public static final int PAGE_SIZE = 50;
 
     private final KeycloakClient keycloakClient;
     private final KeycloakUserToUser keycloakUserToUser;
@@ -42,22 +48,31 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     @Override
-    public List<User> findUsers(String key, Set<String> roles, Integer page, Integer size) {
+    public List<User> findUsers(UserSearchParams userSearchParams) {
         return keycloakClient
-            .searchUsers(key, calculateFirst(page, size), size)
+            .searchUsers(userSearchParams.getSearchKey(), PAGE_START, PAGE_SIZE)
             .stream()
             .map(keycloakUserToUser::toUser)
-            .filter(user -> filterByRoles(user.getRoles(), roles))
+            .filter(user -> filterByRoles(user.getRoles(), userSearchParams.getRoles()))
+            .filter(user -> filterByGroups(user, userSearchParams.getGroups()))
             .collect(Collectors.toList());
     }
 
+    private boolean filterByGroups(User user, Set<String> groups) {
+        return CollectionUtils.isEmpty(groups) || keycloakClient
+            .getUserGroups(user.getId())
+            .stream()
+            .map(KeycloakGroup::getName)
+            .anyMatch(groups::contains);
+    }
+
     @Override
-    public List<Group> findGroups(String key, Set<String> roles, Integer page, Integer size) {
+    public List<Group> findGroups(GroupSearchParams groupSearchParams) {
         return keycloakClient
-            .searchGroups(key, calculateFirst(page, size), size)
+            .searchGroups(groupSearchParams.getSearch(), PAGE_START, PAGE_SIZE)
             .stream()
             .map(keycloakGroupToGroup::toGroup)
-            .filter(user -> filterByRoles(user.getRoles(), roles))
+            .filter(user -> filterByRoles(user.getRoles(), groupSearchParams.getRoles()))
             .collect(Collectors.toList());
     }
 
@@ -69,10 +84,5 @@ public class KeycloakManagementService implements IdentityManagementService {
                 .findAny()
                 .isPresent();
     }
-
-    private int calculateFirst(Integer page, Integer size) {
-        return page * size;
-    }
-
 
 }

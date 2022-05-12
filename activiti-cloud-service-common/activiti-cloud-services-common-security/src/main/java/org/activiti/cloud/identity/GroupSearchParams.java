@@ -13,22 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.identity.web.assembler;
+package org.activiti.cloud.identity;
 
-import org.activiti.cloud.identity.model.User;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.stereotype.Component;
+import java.util.Set;
 
-/**
- * Assembler for {@link User} resource
- */
-@Component
-public class ModelRepresentationUserAssembler implements RepresentationModelAssembler<User, EntityModel<User>> {
+public class GroupSearchParams {
 
-    @Override
-    public EntityModel<User> toModel(User user) {
-        return EntityModel.of(user);
+    private String search;
+    private Set<String> roles;
+
+    public String getSearch() {
+        return search;
+    }
+
+    public void setSearch(String search) {
+        this.search = search;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
     }
 
 }
