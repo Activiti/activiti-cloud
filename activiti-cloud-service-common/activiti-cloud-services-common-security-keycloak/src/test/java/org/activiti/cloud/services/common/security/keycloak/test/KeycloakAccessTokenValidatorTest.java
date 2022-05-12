@@ -18,7 +18,6 @@ package org.activiti.cloud.services.common.security.keycloak.test;
 import static org.activiti.cloud.services.common.security.keycloak.test.JwtSecurityContextTokenProviderTest.TOKEN_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -29,7 +28,6 @@ import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.config.KeycloakJwtAdapter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.keycloak.representations.AccessToken;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -37,7 +35,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 @ExtendWith(MockitoExtension.class)
 public class KeycloakAccessTokenValidatorTest {
 
-    private final KeycloakAccessTokenValidator subject = new KeycloakAccessTokenValidator();
+    private final KeycloakAccessTokenValidator validator = new KeycloakAccessTokenValidator();
 
     @Mock
     private JwtAdapter jwtAdapter;
@@ -45,26 +43,54 @@ public class KeycloakAccessTokenValidatorTest {
     @Test
     public void should_validate_whenTokenIsValid() {
         // given
-        Jwt accessToken = createAccessToken(true);
+        Jwt accessToken = createAccessToken(true, false);
 
         when(jwtAdapter.getJwt()).thenReturn(accessToken);
 
         // when
-        Boolean result = subject.isValid(jwtAdapter);
+        Boolean result = validator.isValid(jwtAdapter);
 
         // then
         assertThat(result).isTrue();
     }
 
     @Test
-    public void should_validate_whenTokenIsNotValid() {
+    public void should_validate_whenTokenIsValidAndNotBeforeIsSetInThePast() {
         // given
-        Jwt accessToken = createAccessToken(false);
+        Jwt accessToken = createAccessToken(true, false);
 
         when(jwtAdapter.getJwt()).thenReturn(accessToken);
 
         // when
-        Boolean result = subject.isValid(jwtAdapter);
+        Boolean result = validator.isValid(jwtAdapter);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void should_notValidate_whenTokenIsValidAndNotBeforeIsSetInTheFuture() {
+        // given
+        Jwt accessToken = createAccessToken(true, true);
+
+        when(jwtAdapter.getJwt()).thenReturn(accessToken);
+
+        // when
+        Boolean result = validator.isValid(jwtAdapter);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void should_notValidate_whenTokenIsNotValid() {
+        // given
+        Jwt accessToken = createAccessToken(false, false);
+
+        when(jwtAdapter.getJwt()).thenReturn(accessToken);
+
+        // when
+        Boolean result = validator.isValid(jwtAdapter);
 
         // then
         assertThat(result).isFalse();
@@ -76,13 +102,15 @@ public class KeycloakAccessTokenValidatorTest {
         KeycloakJwtAdapter keycloakJwtAdapter = new KeycloakJwtAdapter(null);
 
         // when
-        Throwable result = catchThrowable(() -> { subject.isValid(keycloakJwtAdapter); });
+        Throwable result = catchThrowable(() -> {
+            validator.isValid(keycloakJwtAdapter);
+        });
 
         // then
         assertThat(result).isInstanceOf(SecurityException.class);
     }
 
-    private Jwt createAccessToken(boolean valid) {
+    private Jwt createAccessToken(boolean valid, boolean notBefore) {
         Map<String, Object> headers = new HashMap<>();
         headers.put("testHeaderName", "testHeaderValue");
 
@@ -92,12 +120,18 @@ public class KeycloakAccessTokenValidatorTest {
         Instant issuedAt;
         Instant expiresAt;
 
-        if(valid) {
+        if (valid) {
             issuedAt = Instant.now();
             expiresAt = Instant.now().plusSeconds(10);
         } else {
             issuedAt = Instant.now().minusSeconds(60);
             expiresAt = Instant.now().minusSeconds(50);
+        }
+
+        if (notBefore) {
+            claims.put("nbf", Instant.now().plusSeconds(10));
+        } else {
+            claims.put("nbf", Instant.now().minusSeconds(10));
         }
 
         return new Jwt(TOKEN_VALUE,
