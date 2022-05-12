@@ -15,4 +15,4 @@
  */
 
 alter table process_variable
-  add column definition_id varchar(64);
+  add column variable_definition_id varchar(64);

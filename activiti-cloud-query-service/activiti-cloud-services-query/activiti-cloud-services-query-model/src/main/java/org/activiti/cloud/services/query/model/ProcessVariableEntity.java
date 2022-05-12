@@ -30,7 +30,7 @@ import javax.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
 
-@FilterDef(name = "variableDefinitionIds", parameters = @ParamDef(name="variables", type = "string"), defaultCondition = "definition_id in (:variables)")
+@FilterDef(name = "variableDefinitionIds", parameters = @ParamDef(name="variables", type = "string"), defaultCondition = "variable_definition_id in (:variables)")
 @Entity(name="ProcessVariable")
 @Table(name = "PROCESS_VARIABLE",
         indexes = {
@@ -47,7 +47,7 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
     @SequenceGenerator(name="process_variable_sequence", sequenceName = "process_variable_sequence", allocationSize=50)
     private Long id;
 
-    private String definitionId;
+    private String variableDefinitionId;
 
     public ProcessVariableEntity() {
     }
@@ -94,12 +94,12 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
         return false;
     }
 
-    public String getDefinitionId() {
-        return definitionId;
+    public String getVariableDefinitionId() {
+        return variableDefinitionId;
     }
 
-    public void setDefinitionId(String variableDefinitionId) {
-        this.definitionId = variableDefinitionId;
+    public void setVariableDefinitionId(String variableDefinitionId) {
+        this.variableDefinitionId = variableDefinitionId;
     }
 
     @Override

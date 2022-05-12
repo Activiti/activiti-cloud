@@ -50,8 +50,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.persistence.EntityManager;
-
 @Configuration
 public class QueryRestWebMvcAutoConfiguration  {
 
@@ -209,12 +207,11 @@ public class QueryRestWebMvcAutoConfiguration  {
     public ProcessInstanceService processInstanceService(ProcessInstanceRepository processInstanceRepository,
                                                          TaskRepository taskRepository,
                                                          ProcessInstanceRestrictionService processInstanceRestrictionService,
-                                                         EntityManager entityManager,
                                                          SecurityPoliciesManager securityPoliciesApplicationService,
                                                          SecurityManager securityManager,
                                                          EntityFinder entityFinder
     ) {
         return new ProcessInstanceService(processInstanceRepository, taskRepository, processInstanceRestrictionService,
-            entityManager, securityPoliciesApplicationService, securityManager, entityFinder);
+            securityPoliciesApplicationService, securityManager, entityFinder);
     }
 }
