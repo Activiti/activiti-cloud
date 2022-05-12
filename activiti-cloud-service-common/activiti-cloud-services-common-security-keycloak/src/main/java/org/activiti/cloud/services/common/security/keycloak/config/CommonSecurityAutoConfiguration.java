@@ -75,8 +75,12 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
 
     @Value("${keycloak.resource}" )
     private String resource;
+
     @Value("${keycloak.use-resource-role-mappings:false}" )
     private boolean useResourceRoleMapping;
+
+    @Value("${authorization.validation.offset:0}" )
+    private long offset;
 
     @Autowired
     public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer,
@@ -101,8 +105,7 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     @Bean
     @ConditionalOnMissingBean
     public KeycloakAccessTokenValidator keycloakAccessTokenValidator() {
-        return new KeycloakAccessTokenValidator() {
-        };
+        return new KeycloakAccessTokenValidator(offset);
     }
 
     @Bean
