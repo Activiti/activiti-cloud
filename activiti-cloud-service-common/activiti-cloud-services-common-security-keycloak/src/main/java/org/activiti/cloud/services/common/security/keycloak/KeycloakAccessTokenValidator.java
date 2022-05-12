@@ -59,7 +59,7 @@ public class KeycloakAccessTokenValidator {
             currentTime() > accessToken.getExpiresAt().toEpochMilli();
     }
 
-    public long currentTime() {
+    private long currentTime() {
         return System.currentTimeMillis() + offset;
     }
 
