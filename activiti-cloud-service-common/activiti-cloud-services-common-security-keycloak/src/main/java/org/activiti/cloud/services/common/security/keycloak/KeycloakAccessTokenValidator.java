@@ -23,7 +23,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public class KeycloakAccessTokenValidator {
 
-    private int offset = 0;
+    private long offset = 0;
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
 
     public boolean isValid(@NonNull JwtAdapter jwtAdapter) {
         return Optional.ofNullable(jwtAdapter)
@@ -32,31 +36,23 @@ public class KeycloakAccessTokenValidator {
             .orElseThrow(() -> new SecurityException("Invalid access token instance"));
     }
 
-    public boolean isActive(Jwt accessToken) {
-        return isActive(accessToken, 0);
+    private boolean isActive(Jwt accessToken) {
+        return !isExpired(accessToken) && isNotBefore(accessToken);
     }
 
-    public boolean isActive(Jwt accessToken, int allowedTimeSkew) {
-        return !isExpired(accessToken) && isNotBefore(accessToken, allowedTimeSkew);
+    private boolean isNotBefore(Jwt accessToken) {
+        return accessToken.getNotBefore() == null ||
+            currentTime() >= accessToken.getNotBefore().toEpochMilli();
     }
 
-    private boolean isNotBefore(Jwt accessToken, int allowedTimeSkew) {
-        return accessToken.getNotBefore() != null ? currentTime() + allowedTimeSkew >= accessToken.getNotBefore().toEpochMilli() : true;
-    }
-
-
-    @JsonIgnore
-    public boolean isExpired(Jwt accessToken) {
+    private boolean isExpired(Jwt accessToken) {
         return accessToken.getExpiresAt() != null &&
-            accessToken.getExpiresAt().toEpochMilli() != 0 && currentTime() > accessToken.getExpiresAt().toEpochMilli();
+            accessToken.getExpiresAt().toEpochMilli() != 0 &&
+            currentTime() > accessToken.getExpiresAt().toEpochMilli();
     }
 
-    public int currentTime() {
-        return ((int) (System.currentTimeMillis() / 1000)) + offset;
-    }
-
-    public void setOffset(int offset) {
-        this.offset = offset;
+    public long currentTime() {
+        return System.currentTimeMillis() + offset;
     }
 
 }
