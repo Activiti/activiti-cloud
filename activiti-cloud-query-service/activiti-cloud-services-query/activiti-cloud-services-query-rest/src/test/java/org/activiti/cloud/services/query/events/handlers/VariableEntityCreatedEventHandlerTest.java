@@ -82,7 +82,7 @@ public class VariableEntityCreatedEventHandlerTest {
                 .hasType(event.getEntity().getType())
                 .isNotTaskVariable()
                 .hasProcessInstance(processInstanceEntity)
-                .hasDefinitionId("variableDefId");
+                .hasVariableDefinitionId("variableDefId");
     }
 
     private static VariableInstanceImpl<String> buildVariable() {
