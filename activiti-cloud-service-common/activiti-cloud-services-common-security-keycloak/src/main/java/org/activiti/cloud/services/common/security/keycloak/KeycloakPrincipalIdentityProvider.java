@@ -24,18 +24,18 @@ import java.security.Principal;
 public class KeycloakPrincipalIdentityProvider implements PrincipalIdentityProvider {
 
     private final JwtAccessTokenProvider keycloakAccessTokenProvider;
-    private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
+    private final JwtAccessTokenValidator jwtAccessTokenValidator;
 
     public KeycloakPrincipalIdentityProvider(@NonNull JwtAccessTokenProvider keycloakAccessTokenProvider,
-                                             @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+                                             @NonNull JwtAccessTokenValidator jwtAccessTokenValidator) {
         this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
-        this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
+        this.jwtAccessTokenValidator = jwtAccessTokenValidator;
     }
 
     @Override
     public String getUserId(@NonNull Principal principal) {
         return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
+                                          .filter(jwtAccessTokenValidator::isValid)
                                           .map(JwtAdapter::getUserName)
                                           .orElseThrow(this::securityException);
     }

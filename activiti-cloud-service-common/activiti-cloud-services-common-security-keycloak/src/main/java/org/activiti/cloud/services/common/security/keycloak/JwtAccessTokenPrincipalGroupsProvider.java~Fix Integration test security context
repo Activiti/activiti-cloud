@@ -25,18 +25,18 @@ import org.springframework.lang.Nullable;
 public class JwtAccessTokenPrincipalGroupsProvider implements PrincipalGroupsProvider {
 
     private final JwtAccessTokenProvider jwtAccessTokenProvider;
-    private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
+    private final JwtAccessTokenValidator jwtAccessTokenValidator;
 
     public JwtAccessTokenPrincipalGroupsProvider(@NonNull JwtAccessTokenProvider jwtAccessTokenProvider,
-        @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+        @NonNull JwtAccessTokenValidator jwtAccessTokenValidator) {
         this.jwtAccessTokenProvider = jwtAccessTokenProvider;
-        this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
+        this.jwtAccessTokenValidator = jwtAccessTokenValidator;
     }
 
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
         return jwtAccessTokenProvider.accessToken(principal)
-            .filter(keycloakAccessTokenValidator::isValid)
+            .filter(jwtAccessTokenValidator::isValid)
             .map(JwtAdapter::getGroups)
             .orElseGet(this::empty);
     }

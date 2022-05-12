@@ -15,17 +15,16 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Optional;
 import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.springframework.lang.NonNull;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-public class KeycloakAccessTokenValidator {
+public class JwtAccessTokenValidator {
 
     private final long offset;
 
-    public KeycloakAccessTokenValidator(long offset) {
+    public JwtAccessTokenValidator(long offset) {
         this.offset = offset;
     }
 
@@ -45,7 +44,7 @@ public class KeycloakAccessTokenValidator {
      * a way to set the moment from which a token starts being valid.
      * A token could not be expired, but if its validity period has not started,
      * it would be still an invalid token
-     * @param accessToken
+     * @param accessToken the Jwt access token
      * @return if the nbf claim is either in the past or the future
      */
     private boolean isNotBefore(Jwt accessToken) {

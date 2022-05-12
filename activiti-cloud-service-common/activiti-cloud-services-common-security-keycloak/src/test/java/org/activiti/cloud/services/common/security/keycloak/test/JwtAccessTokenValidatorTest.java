@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
+import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.config.KeycloakJwtAdapter;
 import org.junit.jupiter.api.Test;
@@ -33,9 +33,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 @ExtendWith(MockitoExtension.class)
-public class KeycloakAccessTokenValidatorTest {
+public class JwtAccessTokenValidatorTest {
 
-    private final KeycloakAccessTokenValidator validator = new KeycloakAccessTokenValidator(0);
+    private final JwtAccessTokenValidator validator = new JwtAccessTokenValidator(0);
 
     @Mock
     private JwtAdapter jwtAdapter;

@@ -41,5 +41,4 @@ public class KeycloakJwtGrantedAuthorityConverter implements Converter<Jwt, Coll
         return grantedAuthorities;
     }
 
-
 }

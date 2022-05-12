@@ -22,9 +22,9 @@ import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.springframework.lang.NonNull;
 
-public class KeycloakSecurityManagerImpl extends AbstractSecurityManager {
+public class SecurityManagerImpl extends AbstractSecurityManager {
 
-    public KeycloakSecurityManagerImpl(@NonNull SecurityContextPrincipalProvider securityContextPrincipalProvider,
+    public SecurityManagerImpl(@NonNull SecurityContextPrincipalProvider securityContextPrincipalProvider,
                                        @NonNull PrincipalIdentityProvider principalIdentityProvider,
                                        @NonNull PrincipalGroupsProvider principalGroupsProvider,
                                        @NonNull PrincipalRolesProvider principalRolesProvider) {
