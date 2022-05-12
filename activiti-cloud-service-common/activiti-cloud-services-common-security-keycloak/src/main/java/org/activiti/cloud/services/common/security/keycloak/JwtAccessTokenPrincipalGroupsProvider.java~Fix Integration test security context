@@ -28,7 +28,7 @@ public class JwtAccessTokenPrincipalGroupsProvider implements PrincipalGroupsPro
     private final KeycloakAccessTokenValidator keycloakAccessTokenValidator;
 
     public JwtAccessTokenPrincipalGroupsProvider(@NonNull JwtAccessTokenProvider jwtAccessTokenProvider,
-                                                      @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+        @NonNull KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
         this.jwtAccessTokenProvider = jwtAccessTokenProvider;
         this.keycloakAccessTokenValidator = keycloakAccessTokenValidator;
     }
@@ -36,9 +36,9 @@ public class JwtAccessTokenPrincipalGroupsProvider implements PrincipalGroupsPro
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
         return jwtAccessTokenProvider.accessToken(principal)
-                                          .filter(keycloakAccessTokenValidator::isValid)
-                                          .map(JwtAdapter::getGroups)
-                                          .orElseGet(this::empty);
+            .filter(keycloakAccessTokenValidator::isValid)
+            .map(JwtAdapter::getGroups)
+            .orElseGet(this::empty);
     }
 
     protected @Nullable List<String> empty() {
