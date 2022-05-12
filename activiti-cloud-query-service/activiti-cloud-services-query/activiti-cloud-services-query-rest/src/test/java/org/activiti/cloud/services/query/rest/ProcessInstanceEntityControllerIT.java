@@ -47,7 +47,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
@@ -102,11 +102,11 @@ public class ProcessInstanceEntityControllerIT {
     private TaskRepository taskRepository;
 
     @MockBean
-    private EntityManager entityManager;
+    private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
     void setUp() {
-        assertThat(entityManager).isNotNull();
+        assertThat(entityManagerFactory).isNotNull();
     }
 
     @Test
