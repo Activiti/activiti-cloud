@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak;
+package org.activiti.cloud.services.common.security.jwt;
 
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
@@ -23,12 +23,12 @@ import org.springframework.lang.NonNull;
 
 import java.security.Principal;
 
-public class KeycloakPrincipalIdentityProvider implements PrincipalIdentityProvider {
+public class JwtPrincipalIdentityProvider implements PrincipalIdentityProvider {
 
     private final JwtAccessTokenProvider keycloakAccessTokenProvider;
     private final JwtAccessTokenValidator jwtAccessTokenValidator;
 
-    public KeycloakPrincipalIdentityProvider(@NonNull JwtAccessTokenProvider keycloakAccessTokenProvider,
+    public JwtPrincipalIdentityProvider(@NonNull JwtAccessTokenProvider keycloakAccessTokenProvider,
                                              @NonNull JwtAccessTokenValidator jwtAccessTokenValidator) {
         this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
         this.jwtAccessTokenValidator = jwtAccessTokenValidator;

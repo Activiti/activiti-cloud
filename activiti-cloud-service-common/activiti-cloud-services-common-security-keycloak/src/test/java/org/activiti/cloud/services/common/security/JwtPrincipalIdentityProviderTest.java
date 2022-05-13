@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak.test;
+package org.activiti.cloud.services.common.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtPrincipalIdentityProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,10 +32,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 @ExtendWith(MockitoExtension.class)
-public class KeycloakPrincipalIdentityProviderTest {
+public class JwtPrincipalIdentityProviderTest {
 
     @InjectMocks
-    private KeycloakPrincipalIdentityProvider principalIdentityProvider;
+    private JwtPrincipalIdentityProvider principalIdentityProvider;
 
     @Mock
     private JwtAccessTokenValidator jwtAccessTokenValidator;

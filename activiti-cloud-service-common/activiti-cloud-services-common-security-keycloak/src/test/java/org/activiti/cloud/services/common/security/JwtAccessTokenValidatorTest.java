@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak.test;
+package org.activiti.cloud.services.common.security;
 
-import static org.activiti.cloud.services.common.security.keycloak.test.JwtSecurityContextTokenProviderTest.TOKEN_VALUE;
+import static org.activiti.cloud.services.common.security.JwtSecurityContextTokenProviderTest.TOKEN_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
