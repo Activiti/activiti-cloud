@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
@@ -9,7 +9,7 @@
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-test-security-keycloak</artifactId>
-  <name>Activiti Cloud Services :: Test Security Keycloak</name>
+  <name>Activiti Cloud Services :: Test Security Context</name>
   <dependencies>
     <dependency>
       <groupId>org.springframework.security</groupId>
@@ -20,24 +20,18 @@
       <artifactId>mockito-core</artifactId>
     </dependency>
     <dependency>
-<!--      <groupId>org.keycloak</groupId>-->
-<!--      <artifactId>keycloak-spring-security-adapter</artifactId>-->
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-oauth2-client</artifactId>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-oauth2-client</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-oauth2-resource-server</artifactId>
     </dependency>
-
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt</artifactId>
       <version>0.9.1</version>
     </dependency>
-
-
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
