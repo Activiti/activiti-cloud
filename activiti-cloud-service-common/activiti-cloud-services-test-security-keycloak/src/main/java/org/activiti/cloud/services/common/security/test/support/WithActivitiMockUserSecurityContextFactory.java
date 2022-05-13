@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak.test.support;
+package org.activiti.cloud.services.common.security.test.support;
 
-import static com.nimbusds.oauth2.sdk.token.TokenTypeURI.ACCESS_TOKEN;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import com.nimbusds.jose.shaded.json.JSONArray;
 import com.nimbusds.jose.shaded.json.JSONObject;
-import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.DefaultJwtBuilder;
 import io.jsonwebtoken.impl.TextCodec;
 import java.time.Instant;
 import java.util.ArrayList;

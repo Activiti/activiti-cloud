@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.starter.tests.monitoring;
 
-import org.activiti.cloud.services.common.security.keycloak.test.support.WithActivitiMockUser;
+import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
