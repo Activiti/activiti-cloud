@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.security.Principal;
 import java.util.Optional;
-import org.activiti.cloud.services.common.security.keycloak.JwtSecurityContextPrincipalProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextPrincipalProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

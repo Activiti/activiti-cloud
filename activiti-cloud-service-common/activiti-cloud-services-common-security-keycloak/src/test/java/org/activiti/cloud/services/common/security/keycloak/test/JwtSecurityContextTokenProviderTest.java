@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import org.activiti.cloud.services.common.security.keycloak.JwtSecurityContextTokenProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
