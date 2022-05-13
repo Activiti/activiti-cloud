@@ -19,8 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.services.common.security.SecurityManagerImpl;
-import org.activiti.cloud.services.common.security.keycloak.test.support.WithActivitiMockUser;
+import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
