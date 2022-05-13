@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak.config;
+package org.activiti.cloud.services.common.security.config;
 
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
@@ -24,16 +24,18 @@ import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
 import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
-import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenPrincipalGroupsProvider;
-import org.activiti.cloud.services.common.security.keycloak.JtwAccessTokenPrincipalRolesProvider;
-import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenProvider;
-import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenValidator;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenPrincipalGroupsProvider;
+import org.activiti.cloud.services.common.security.jwt.JtwAccessTokenPrincipalRolesProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtGrantedAuthorityConverter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
-import org.activiti.cloud.services.common.security.keycloak.JwtSecurityContextPrincipalProvider;
-import org.activiti.cloud.services.common.security.keycloak.JwtSecurityContextTokenProvider;
-import org.activiti.cloud.services.common.security.keycloak.SecurityManagerImpl;
+import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextPrincipalProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextTokenProvider;
+import org.activiti.cloud.services.common.security.SecurityManagerImpl;
+import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

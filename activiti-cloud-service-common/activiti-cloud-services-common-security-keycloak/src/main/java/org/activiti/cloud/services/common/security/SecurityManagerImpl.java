@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak;
+package org.activiti.cloud.services.common.security;
 
 import org.activiti.api.runtime.shared.security.AbstractSecurityManager;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;

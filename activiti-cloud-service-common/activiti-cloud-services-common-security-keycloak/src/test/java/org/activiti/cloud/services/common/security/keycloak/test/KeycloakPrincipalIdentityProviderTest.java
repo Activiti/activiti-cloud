@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenProvider;
-import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenValidator;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
-import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
+import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

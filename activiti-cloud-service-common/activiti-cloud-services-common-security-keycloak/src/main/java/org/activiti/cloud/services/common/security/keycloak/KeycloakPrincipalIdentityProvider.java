@@ -16,7 +16,9 @@
 package org.activiti.cloud.services.common.security.keycloak;
 
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
-import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
+import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.springframework.lang.NonNull;
 
 import java.security.Principal;

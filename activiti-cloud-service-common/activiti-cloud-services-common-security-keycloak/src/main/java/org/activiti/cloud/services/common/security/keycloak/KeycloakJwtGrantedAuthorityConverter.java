@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak.config;
+package org.activiti.cloud.services.common.security.keycloak;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.activiti.cloud.services.common.security.keycloak.JwtAccessTokenProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

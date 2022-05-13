@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak;
+package org.activiti.cloud.services.common.security.jwt;
 
 import java.util.Optional;
-import org.activiti.cloud.services.common.security.keycloak.config.JwtAdapter;
 import org.springframework.lang.NonNull;
 import org.springframework.security.oauth2.jwt.Jwt;
 

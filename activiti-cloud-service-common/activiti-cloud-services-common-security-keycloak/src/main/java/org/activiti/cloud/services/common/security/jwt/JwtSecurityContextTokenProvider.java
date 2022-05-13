@@ -13,27 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak;
+package org.activiti.cloud.services.common.security.jwt;
 
-import java.security.Principal;
 import java.util.Optional;
-import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-public class JwtSecurityContextPrincipalProvider implements SecurityContextPrincipalProvider {
+public class JwtSecurityContextTokenProvider implements SecurityContextTokenProvider {
 
     @Override
-    public Optional<Principal> getCurrentPrincipal() {
+    public Optional<String> getCurrentToken() {
         return Optional.ofNullable(SecurityContextHolder.getContext())
-            .map(SecurityContext::getAuthentication)
-            .map(Authentication::getPrincipal)
-            .filter(Jwt.class::isInstance)
-            .map(Jwt.class::cast)
-            .map(jwt -> new JwtAuthenticationToken(jwt));
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getPrincipal)
+                .filter(Jwt.class::isInstance)
+                .map(Jwt.class::cast)
+                .map(Jwt::getTokenValue);
     }
-
 }
