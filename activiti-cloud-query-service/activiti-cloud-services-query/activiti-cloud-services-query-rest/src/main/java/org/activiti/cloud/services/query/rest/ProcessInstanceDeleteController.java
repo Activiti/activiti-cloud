@@ -15,17 +15,19 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -55,6 +57,7 @@ public class ProcessInstanceDeleteController {
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
     }
 
+    @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
     public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances (@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate) {
 

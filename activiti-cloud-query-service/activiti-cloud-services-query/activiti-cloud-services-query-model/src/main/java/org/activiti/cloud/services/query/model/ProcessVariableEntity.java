@@ -17,11 +17,20 @@ package org.activiti.cloud.services.query.model;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
 
+@FilterDef(name = "variableDefinitionIds", parameters = @ParamDef(name="variables", type = "string"), defaultCondition = "variable_definition_id in (:variables)")
 @Entity(name="ProcessVariable")
 @Table(name = "PROCESS_VARIABLE",
         indexes = {
@@ -38,6 +47,7 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
     @SequenceGenerator(name="process_variable_sequence", sequenceName = "process_variable_sequence", allocationSize=50)
     private Long id;
 
+    private String variableDefinitionId;
 
     public ProcessVariableEntity() {
     }
@@ -82,6 +92,14 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
     @Override
     public boolean isTaskVariable() {
         return false;
+    }
+
+    public String getVariableDefinitionId() {
+        return variableDefinitionId;
+    }
+
+    public void setVariableDefinitionId(String variableDefinitionId) {
+        this.variableDefinitionId = variableDefinitionId;
     }
 
     @Override

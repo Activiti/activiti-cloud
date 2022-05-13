@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.model.shared.events;
+package org.activiti.cloud.services.query.model;
 
-import org.activiti.api.model.shared.event.VariableCreatedEvent;
+public class JsonViews {
 
-public interface CloudVariableCreatedEvent extends CloudVariableEvent,
-                                                   VariableCreatedEvent {
+    public static class General {
+    }
 
-    String getVariableDefinitionId();
+    public static class Variables {
+    }
+
 }

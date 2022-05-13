@@ -18,7 +18,6 @@ package org.activiti.cloud.alfresco.converter.json;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -32,12 +31,14 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJacksonValue;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -169,6 +170,25 @@ public class AlfrescoJackson2HttpMessageConverterTest {
 
         //then
         assertThat(canWrite).isTrue();
+    }
+
+    @Test
+    public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModelInsideMappingJacksonValue() throws Exception {
+        //given
+        final MappingJacksonValue baseMappingJacksonValue = new MappingJacksonValue(basePagedModel);
+        given(pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(basePagedModel))
+            .willReturn(alfrescoPageContentListWrapper);
+
+        doNothing().when(httpMessageConverter).defaultWriteInternal(baseMappingJacksonValue, type, outputMessage);
+
+        //when
+        httpMessageConverter.writeInternal(baseMappingJacksonValue, type, outputMessage);
+
+        //then
+        verify(httpMessageConverter).defaultWriteInternal(
+            argThat(argument -> argument instanceof MappingJacksonValue
+                && ((MappingJacksonValue) argument).getValue() == alfrescoPageContentListWrapper),
+            eq(type), eq(outputMessage));
     }
 
 }

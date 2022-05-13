@@ -17,8 +17,11 @@ package org.activiti.cloud.conf;
 
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.services.query.app.repository.EntityFinder;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
@@ -197,5 +200,18 @@ public class QueryRestWebMvcAutoConfiguration  {
     public TaskPermissionsHelper taskPermissionsHelper(SecurityManager securityManager,
                                                        TaskControllerHelper taskControllerHelper) {
         return new TaskPermissionsHelper(securityManager, taskControllerHelper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceService processInstanceService(ProcessInstanceRepository processInstanceRepository,
+                                                         TaskRepository taskRepository,
+                                                         ProcessInstanceRestrictionService processInstanceRestrictionService,
+                                                         SecurityPoliciesManager securityPoliciesApplicationService,
+                                                         SecurityManager securityManager,
+                                                         EntityFinder entityFinder
+    ) {
+        return new ProcessInstanceService(processInstanceRepository, taskRepository, processInstanceRestrictionService,
+            securityPoliciesApplicationService, securityManager, entityFinder);
     }
 }

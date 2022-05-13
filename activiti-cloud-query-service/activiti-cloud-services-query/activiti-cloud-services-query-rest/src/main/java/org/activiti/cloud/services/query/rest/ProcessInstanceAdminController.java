@@ -15,28 +15,29 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import java.util.Optional;
-
+import com.fasterxml.jackson.annotation.JsonView;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(
@@ -66,6 +67,7 @@ public class ProcessInstanceAdminController {
         this.entityFinder=entityFinder;
     }
 
+    @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                                   Pageable pageable) {
@@ -79,6 +81,7 @@ public class ProcessInstanceAdminController {
                                                   processInstanceRepresentationModelAssembler);
     }
 
+    @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
 

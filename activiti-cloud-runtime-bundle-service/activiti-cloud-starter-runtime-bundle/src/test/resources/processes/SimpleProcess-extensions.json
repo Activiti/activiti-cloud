@@ -3,7 +3,17 @@
   "name": "myProcess.bpmn",
   "extensions": {
     "SimpleProcess": {
-      "properties": {},
+      "properties": {
+        "0099e926-0af4-41ce-8ad9-a87fcc14c0b5": {
+          "id": "0099e926-0af4-41ce-8ad9-a87fcc14c0b5",
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "model": {
+            "$ref": "#/$defs/primitive/string"
+          }
+        }
+      },
       "mappings": {
         "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94": {
           "mappingType": "MAP_ALL"

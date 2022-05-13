@@ -15,19 +15,6 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
@@ -46,6 +33,7 @@ import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.engine.RepositoryService;
+import org.activiti.spring.process.CachingProcessExtensionService;
 import org.activiti.spring.process.variable.VariableValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,6 +48,19 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
 @EnableSpringDataWebSupport
@@ -108,6 +109,9 @@ public class ProcessInstanceVariableControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private CachingProcessExtensionService cachingProcessExtensionService;
+
     @BeforeEach
     public void setUp() {
         //this assertion is not really necessary. It's only here to remove warning
@@ -117,6 +121,7 @@ public class ProcessInstanceVariableControllerImplIT {
         assertThat(resourcesAssembler).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
+        assertThat(cachingProcessExtensionService).isNotNull();
     }
 
     @Test

@@ -16,11 +16,13 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Filter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.ConstraintMode;
@@ -125,7 +127,8 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     	, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<TaskEntity> tasks = new LinkedHashSet<>();
 
-    @JsonIgnore
+    @JsonView(JsonViews.Variables.class)
+    @Filter(name = "variableDefinitionIds")
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
 		, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))

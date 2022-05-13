@@ -24,18 +24,30 @@ import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
+import org.activiti.core.common.model.connector.VariableDefinition;
+import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.model.Extension;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 
 public class ToCloudVariableEventConverter {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    private final CachingProcessExtensionService processExtensionService;
 
-    public ToCloudVariableEventConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+    public ToCloudVariableEventConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                         CachingProcessExtensionService processExtensionService) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+        this.processExtensionService = processExtensionService;
     }
 
     public CloudVariableCreatedEvent from(VariableCreatedEvent event) {
         CloudVariableCreatedEventImpl cloudEvent = new CloudVariableCreatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+
+        cloudEvent.setVariableDefinitionId(getVariableDefinitionId(event));
         return cloudEvent;
     }
 
@@ -49,6 +61,19 @@ public class ToCloudVariableEventConverter {
         CloudVariableDeletedEventImpl cloudEvent = new CloudVariableDeletedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
+    }
+
+    private String getVariableDefinitionId(VariableCreatedEvent event) {
+        return Optional.ofNullable(processExtensionService.getExtensionsForId(event.getProcessDefinitionId()))
+            .map(Extension::getProperties)
+            .map(Map::values)
+            .stream()
+            .flatMap(Collection::stream)
+            .filter(variableDefinition -> variableDefinition.getName() != null)
+            .filter(variableDefinition -> variableDefinition.getName().equals(event.getEntity().getName()))
+            .map(VariableDefinition::getId)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException(String.format("Variable definition id not found for event id %s", event.getId())));
     }
 
 }
