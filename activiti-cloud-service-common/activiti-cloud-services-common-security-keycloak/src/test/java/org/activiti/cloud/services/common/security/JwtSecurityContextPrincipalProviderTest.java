@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.common.security.keycloak.test;
+package org.activiti.cloud.services.common.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

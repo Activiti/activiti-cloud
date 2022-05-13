@@ -30,7 +30,7 @@ import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtGrantedAuthorityConverter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtPrincipalIdentityProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextTokenProvider;
@@ -111,7 +111,7 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     @ConditionalOnMissingBean
     public PrincipalIdentityProvider principalIdentityProvider(JwtAccessTokenProvider keycloakAccessTokenProvider,
                                                                JwtAccessTokenValidator jwtAccessTokenValidator) {
-        return new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider,
+        return new JwtPrincipalIdentityProvider(keycloakAccessTokenProvider,
             jwtAccessTokenValidator);
     }
 
