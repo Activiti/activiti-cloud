@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.services.common.security.test.support;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-
 import com.nimbusds.jose.shaded.json.JSONArray;
 import com.nimbusds.jose.shaded.json.JSONObject;
 import io.jsonwebtoken.Jwts;
@@ -30,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

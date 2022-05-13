@@ -17,7 +17,7 @@ package org.activiti.cloud.services.common.security.jwt;
 
 import java.time.Instant;
 import java.util.Collection;
-import org.activiti.cloud.services.engine.util.EngineAuthenticationSetter;
+import org.activiti.cloud.services.engine.util.EngineAuthenticationSetterHelper;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -49,7 +49,7 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     public AbstractAuthenticationToken convert(Jwt jwt) {
         Collection<GrantedAuthority> authorities = this.jwtGrantedAuthoritiesConverter.convert(jwt);
         String principalClaimValue = getPrincipalClaimName(jwt);
-        EngineAuthenticationSetter.setAuthenticatedUserId(principalClaimValue);
+        EngineAuthenticationSetterHelper.setAuthenticatedUserId(principalClaimValue);
         return new JwtAuthenticationToken(jwt, authorities, principalClaimValue);
     }
 

@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.engine.util;
 
-public class EngineAuthenticationSetter {
+public class EngineAuthenticationSetterHelper {
 
     public static void setAuthenticatedUserId(String userId) {
         org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(userId);
