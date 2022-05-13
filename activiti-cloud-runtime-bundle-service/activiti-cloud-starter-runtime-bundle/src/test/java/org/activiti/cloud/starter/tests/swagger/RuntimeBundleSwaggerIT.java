@@ -28,9 +28,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.core.StringRegularExpression.matchesRegex;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,6 +59,10 @@ public class RuntimeBundleSwaggerIT {
             .andExpect(jsonPath("$.servers").isNotEmpty())
             .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
             .andExpect(jsonPath("$.paths").isNotEmpty())
+            .andExpect(jsonPath("$.paths[\"/v1/process-definitions/{id}/model\"].get.operationId")
+                .value("getProcessDiagram"))
+            .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
+            .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(jsonPath("$.components.schemas").isNotEmpty())
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
