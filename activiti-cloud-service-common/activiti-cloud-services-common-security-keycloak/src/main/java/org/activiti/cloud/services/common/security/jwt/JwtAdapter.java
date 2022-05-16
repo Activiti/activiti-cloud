@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak.config;
+package org.activiti.cloud.services.common.security.jwt;
 
 import java.util.List;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -21,8 +21,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 public interface JwtAdapter {
 
     Jwt getJwt();
-    List<String> getRoles();
-    List<String> getGroups();
+
     String getUserName();
+
+    List<String> getRoles();
+
+    List<String> getGroups();
 
 }
