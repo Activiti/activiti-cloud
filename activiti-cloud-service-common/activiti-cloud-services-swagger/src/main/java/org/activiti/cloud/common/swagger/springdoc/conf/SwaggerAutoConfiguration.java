@@ -17,6 +17,7 @@ package org.activiti.cloud.common.swagger.springdoc.conf;
 
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.customizer.ErrorResponsesOperationCustomizer;
+import org.activiti.cloud.common.swagger.springdoc.customizer.NamingOperationCustomizer;
 import org.activiti.cloud.common.swagger.springdoc.customizer.PathPrefixOpenApiCustomizer;
 import org.activiti.cloud.common.swagger.springdoc.customizer.SchemaTitleOpenApiCustomizer;
 import org.activiti.cloud.common.swagger.springdoc.customizer.SecurityItemOperationCustomizer;
@@ -87,5 +88,11 @@ public class SwaggerAutoConfiguration {
     @ConditionalOnMissingBean
     public SchemaTitleOpenApiCustomizer schemaTitleOpenApiCustomizer() {
         return new SchemaTitleOpenApiCustomizer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public NamingOperationCustomizer namingOperationCustomizer() {
+        return new NamingOperationCustomizer();
     }
 }

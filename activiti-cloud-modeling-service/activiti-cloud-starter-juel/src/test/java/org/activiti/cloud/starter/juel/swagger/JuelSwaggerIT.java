@@ -25,8 +25,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.core.StringRegularExpression.matchesRegex;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,6 +52,8 @@ public class JuelSwaggerIT {
             .andExpect(jsonPath("$.servers").isNotEmpty())
             .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
             .andExpect(jsonPath("$.paths", hasKey("/v1/juel")))
-            .andExpect(jsonPath("$.info.title").value("OpenAPI definition"));
+            .andExpect(jsonPath("$.info.title").value("OpenAPI definition"))
+            .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
+            .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))));
     }
 }

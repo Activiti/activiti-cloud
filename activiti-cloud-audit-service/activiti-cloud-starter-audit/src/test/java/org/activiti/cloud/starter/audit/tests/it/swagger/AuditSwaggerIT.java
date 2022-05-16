@@ -26,9 +26,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.core.StringRegularExpression.matchesRegex;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,7 +59,9 @@ public class AuditSwaggerIT {
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey("CloudRuntimeEventModel")))
-            .andExpect(jsonPath("$.info.title").value("OpenAPI definition"));
+            .andExpect(jsonPath("$.info.title").value("OpenAPI definition"))
+            .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
+            .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))));
     }
 
 }

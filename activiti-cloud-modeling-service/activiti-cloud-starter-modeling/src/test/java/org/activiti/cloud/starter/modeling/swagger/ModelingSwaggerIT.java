@@ -25,7 +25,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.StringRegularExpression.matchesRegex;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -53,7 +55,9 @@ public class ModelingSwaggerIT {
             .andExpect(jsonPath("$.info.title").value("Modeling ReST API"))
             .andExpect(jsonPath("$['paths']['/v1/projects/{projectId}/models']['get']['parameters'][*]['name']",
                 containsInAnyOrder("projectId", "type", "skipCount", "maxItems", "sort")))
-            .andExpect(jsonPath("$.x-service-url-prefix").value(""));
+            .andExpect(jsonPath("$.x-service-url-prefix").value(""))
+            .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
+            .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))));
     }
 
 }

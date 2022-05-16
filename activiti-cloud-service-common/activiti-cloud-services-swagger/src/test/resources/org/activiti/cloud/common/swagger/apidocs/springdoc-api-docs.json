@@ -115,6 +115,177 @@
         ]
       }
     },
+    "/test/operationId": {
+      "get": {
+        "tags": [
+          "operation-id-test-controller"
+        ],
+        "summary": "getTest",
+        "operationId": "getTest",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/test/operationId/paged": {
+      "get": {
+        "tags": [
+          "operation-id-test-controller"
+        ],
+        "summary": "getPagedModel",
+        "operationId": "getPagedModel",
+        "parameters": [
+          {
+            "name": "maxItems",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "skipCount",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/test/operationId/entity": {
+      "get": {
+        "tags": [
+          "operation-id-test-controller"
+        ],
+        "summary": "getEntityModel",
+        "operationId": "getEntityModel",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/test/operationId/collection": {
+      "get": {
+        "tags": [
+          "operation-id-test-controller"
+        ],
+        "summary": "getCollectionModel",
+        "operationId": "getCollectionModel",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
     "/test/entity": {
       "get": {
         "tags": [
