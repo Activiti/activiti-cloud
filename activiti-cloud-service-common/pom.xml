@@ -28,7 +28,7 @@
     <module>activiti-cloud-service-common-config</module>
     <module>activiti-cloud-services-swagger</module>
     <module>activiti-cloud-service-error-handlers</module>
-    <module>activiti-cloud-services-test-security-keycloak</module>
+    <module>activiti-cloud-services-test-security</module>
     <module>activiti-cloud-services-test-containers</module>
     <module>activiti-cloud-service-common-liquibase</module>
     <module>activiti-cloud-service-messaging-config</module>
