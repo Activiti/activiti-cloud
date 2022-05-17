@@ -17,7 +17,6 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.api.model.shared.event.VariableCreatedEvent;
 import org.activiti.api.model.shared.event.VariableDeletedEvent;
-import org.activiti.api.model.shared.event.VariableEvent.VariableEvents;
 import org.activiti.api.model.shared.event.VariableUpdatedEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
