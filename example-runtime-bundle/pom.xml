@@ -26,7 +26,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud.version>7.3.0-alpha.17</activiti-cloud.version>
+    <activiti-cloud.version>7.4.0-alpha.6</activiti-cloud.version>
     <docker-maven-plugin.version>0.34.1</docker-maven-plugin.version>
     <start-class>org.activiti.cloud.runtime.RuntimeBundleApplication</start-class>
   </properties>
