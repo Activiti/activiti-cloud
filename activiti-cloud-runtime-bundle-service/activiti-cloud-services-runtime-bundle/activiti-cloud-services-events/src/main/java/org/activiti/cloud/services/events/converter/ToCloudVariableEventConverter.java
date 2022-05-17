@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.api.model.shared.event.VariableCreatedEvent;
 import org.activiti.api.model.shared.event.VariableDeletedEvent;
+import org.activiti.api.model.shared.event.VariableEvent.VariableEvents;
 import org.activiti.api.model.shared.event.VariableUpdatedEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
@@ -64,7 +65,9 @@ public class ToCloudVariableEventConverter {
     }
 
     private String getVariableDefinitionId(VariableCreatedEvent event) {
-        return Optional.ofNullable(processExtensionService.getExtensionsForId(event.getProcessDefinitionId()))
+        return Optional
+            .ofNullable(event.getProcessDefinitionId())
+            .map(processExtensionService::getExtensionsForId)
             .map(Extension::getProperties)
             .map(Map::values)
             .stream()
@@ -73,7 +76,7 @@ public class ToCloudVariableEventConverter {
             .filter(variableDefinition -> variableDefinition.getName().equals(event.getEntity().getName()))
             .map(VariableDefinition::getId)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException(String.format("Variable definition id not found for event id %s", event.getId())));
+            .orElse(null);
     }
 
 }

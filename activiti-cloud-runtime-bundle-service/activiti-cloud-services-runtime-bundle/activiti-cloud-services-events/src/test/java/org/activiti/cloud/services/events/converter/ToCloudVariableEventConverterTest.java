@@ -48,6 +48,41 @@ class ToCloudVariableEventConverterTest {
     private CachingProcessExtensionService processExtensionService;
 
     @Test
+    void should_returnNull_whenPropertiesAreEmpty() {
+        VariableInstance variableInstance = new VariableInstanceImpl<>("variableName", "string", "example", "processInstanceId", null);
+        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId");
+
+        Extension extension = new Extension();
+        VariableDefinition variableDefinition = new VariableDefinition();
+        variableDefinition.setName("variableName");
+        variableDefinition.setId("variableDefinitionId");
+
+        when(processExtensionService.getExtensionsForId("processDefinitionId")).thenReturn(extension);
+
+        CloudVariableCreatedEvent cloudVariableCreatedEvent = toCloudVariableEventConverter.from(event);
+
+        assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isNull();
+    }
+
+    @Test
+    void should_returnNull_whenProcessDefinitionIdIsNull() {
+        VariableInstance variableInstance = new VariableInstanceImpl<>("variableName", "string", "example", "processInstanceId", null);
+        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, null);
+
+        Extension extension = new Extension();
+        VariableDefinition variableDefinition = new VariableDefinition();
+        variableDefinition.setName("variableName");
+        variableDefinition.setId("variableDefinitionId");
+        HashMap<String, VariableDefinition> properties = new HashMap<>();
+        properties.put("variableDefinitionId", variableDefinition);
+        extension.setProperties(properties);
+
+        CloudVariableCreatedEvent cloudVariableCreatedEvent = toCloudVariableEventConverter.from(event);
+
+        assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isNull();
+    }
+
+    @Test
     void should_convertToCloudVariableCreatedEventWithVariableDefinitionId() {
         VariableInstance variableInstance = new VariableInstanceImpl<>("variableName", "string", "example", "processInstanceId", null);
         VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId");
