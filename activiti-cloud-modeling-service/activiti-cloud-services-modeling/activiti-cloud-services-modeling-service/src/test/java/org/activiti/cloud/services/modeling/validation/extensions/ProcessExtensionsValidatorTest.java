@@ -1,6 +1,7 @@
 package org.activiti.cloud.services.modeling.validation.extensions;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,16 +36,17 @@ public class ProcessExtensionsValidatorTest {
     @Test
     public void shouldNotBeValidWhenDisplayIsTrueAndDiplayNameIsAbsent() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-displayable-variable-without-name.json");
-        try {
-            processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
-        } catch (SemanticModelValidationException e) {
-            List<ModelValidationError> validationErrors = e.getValidationErrors();
-            assertThat(validationErrors).hasSize(2);
-            assertThat(validationErrors).
-                extracting("problem")
-                .containsOnly("subject must not be valid against schema {\"required\":[\"display\"],\"properties\":{\"display\":{\"const\":true}}}",
-                              "required key [displayName] not found");
-        }
+
+        SemanticModelValidationException semanticModelValidationException = catchThrowableOfType(
+            () -> processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT),
+            SemanticModelValidationException.class);
+
+        List<ModelValidationError> validationErrors = semanticModelValidationException.getValidationErrors();
+        assertThat(validationErrors).hasSize(2);
+        assertThat(validationErrors).
+            extracting("problem")
+            .containsOnly("subject must not be valid against schema {\"required\":[\"display\"],\"properties\":{\"display\":{\"const\":true}}}",
+                          "required key [displayName] not found");
     }
 
     @Test
