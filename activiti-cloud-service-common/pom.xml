@@ -48,6 +48,7 @@
     <swagger.version>2.1.13</swagger.version>
     <xstream.version>1.4.19</xstream.version>
     <json-unit.version>2.32.0</json-unit.version>
+    <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -163,6 +164,11 @@
         <groupId>net.javacrumbs.json-unit</groupId>
         <artifactId>json-unit-assertj</artifactId>
         <version>${json-unit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt</artifactId>
+        <version>${jsonwebtoken.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
