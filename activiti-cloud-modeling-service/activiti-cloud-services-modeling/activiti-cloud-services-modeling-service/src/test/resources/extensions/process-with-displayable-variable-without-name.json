@@ -1,0 +1,23 @@
+{
+  "id": "process-baa8aa57-7cbb-40bc-bd70-a1da5f7b0311",
+  "extensions": {
+    "Process_jEKhhV0rp": {
+      "constants": {},
+      "mappings": {},
+      "properties": {
+        "47b3a61f-02c5-4e7e-bafb-f95e1a71d23d": {
+          "id": "47b3a61f-02c5-4e7e-bafb-f95e1a71d23d",
+          "name": "test",
+          "type": "string",
+          "required": false,
+          "model": {
+            "$ref": "#/$defs/primitive/string"
+          },
+          "display": true
+        }
+      },
+      "assignments": {}
+    }
+  }
+}
+

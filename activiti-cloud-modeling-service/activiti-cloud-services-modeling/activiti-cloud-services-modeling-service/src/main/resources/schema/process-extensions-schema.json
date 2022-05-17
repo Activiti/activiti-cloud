@@ -107,6 +107,31 @@
         },
         "required": {
           "type": "boolean"
+        },
+        "display": {
+          "type": "boolean"
+        },
+        "displayName": {
+          "type": "string"
+        }
+      },
+      "dependencies": {
+        "display":{
+          "oneOf": [
+            {
+              "not": {
+                "properties": { "display": { "const": true } },
+                "required": ["display"]
+              }
+            },
+            {
+              "required": ["displayName"],
+              "message": {
+                "type": "string",
+                "required": "If a process variable is displayable in the UI, then a display message must be specified"
+              }
+            }
+          ]
         }
       },
       "allOf": [
