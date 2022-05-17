@@ -64,7 +64,9 @@ public class ToCloudVariableEventConverter {
     }
 
     private String getVariableDefinitionId(VariableCreatedEvent event) {
-        return Optional.ofNullable(processExtensionService.getExtensionsForId(event.getProcessDefinitionId()))
+        return Optional
+            .ofNullable(event.getProcessDefinitionId())
+            .map(processExtensionService::getExtensionsForId)
             .map(Extension::getProperties)
             .map(Map::values)
             .stream()
@@ -73,7 +75,7 @@ public class ToCloudVariableEventConverter {
             .filter(variableDefinition -> variableDefinition.getName().equals(event.getEntity().getName()))
             .map(VariableDefinition::getId)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException(String.format("Variable definition id not found for event id %s", event.getId())));
+            .orElse(null);
     }
 
 }
