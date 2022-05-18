@@ -128,7 +128,7 @@
               "required": ["displayName"],
               "message": {
                 "type": "string",
-                "required": "If a process variable is displayable in the UI, then a display message must be specified"
+                "required": "If a process variable is displayable in the UI, then a display name must be specified"
               }
             }
           ]
