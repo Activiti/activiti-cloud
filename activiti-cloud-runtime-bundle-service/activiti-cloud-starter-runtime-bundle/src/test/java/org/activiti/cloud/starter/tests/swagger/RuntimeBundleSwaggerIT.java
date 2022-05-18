@@ -67,6 +67,9 @@ public class RuntimeBundleSwaggerIT {
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey("EntryResponseContentProcessDefinitionMeta")))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey("ProcessDefinitionMeta")))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey("ProcessDefinitionVariable")))
             .andExpect(jsonPath("$.components.schemas[\"SaveTaskPayload\"].properties").value(hasKey("payloadType")))
             .andExpect(jsonPath("$.info.title").value("OpenAPI definition"));
     }

@@ -28,6 +28,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringRegularExpression.matchesRegex;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,6 +53,9 @@ public class SpringdocApiDocsIT {
         mockMvc.perform(get("/springdoc/v3/api-docs").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey("EntryResponseContentExtendedJsonDeserializerWrapper")))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey("ExtendedJsonDeserializerWrapper")))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey("ExtendedJsonDeserializer")))
             .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(content().json(new String(springdocApiDocsFile.getInputStream().readAllBytes())))
