@@ -192,10 +192,10 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
             .jwtAuthenticationConverter(jwtAuthenticationConverter());
     }
 
-    private Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("keycloak");
         KeycloakJwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new KeycloakJwtGrantedAuthorityConverter(jwtAccessTokenProvider());
-        return  new JwtUserInfoUriAuthenticationConverter(jwtGrantedAuthoritiesConverter, clientRegistration, oAuth2UserService);
+        return new JwtUserInfoUriAuthenticationConverter(jwtGrantedAuthoritiesConverter, clientRegistration, oAuth2UserService);
     }
 
 }

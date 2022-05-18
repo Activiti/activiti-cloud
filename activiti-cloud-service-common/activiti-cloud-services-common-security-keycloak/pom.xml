@@ -37,10 +37,6 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-engine-util</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
     </dependency>
 
