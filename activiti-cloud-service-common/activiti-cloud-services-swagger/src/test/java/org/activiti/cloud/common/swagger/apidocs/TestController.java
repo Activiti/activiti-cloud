@@ -46,4 +46,9 @@ public class TestController {
     public PagedModel<EntityModel<String>> getPagedModel(Pageable pageable) {
         return PagedModel.empty();
     }
+
+    @GetMapping("jsonDeserializer")
+    public EntityModel<ExtendedJsonDeserializerWrapper> getExtendedJsonDeserializer() {
+        return EntityModel.of(new ExtendedJsonDeserializerWrapper());
+    }
 }
