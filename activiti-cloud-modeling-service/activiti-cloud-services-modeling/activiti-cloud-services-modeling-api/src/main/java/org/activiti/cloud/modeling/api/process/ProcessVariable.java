@@ -37,6 +37,10 @@ public class ProcessVariable {
 
     private Object value;
 
+    private boolean display;
+
+    private String displayName;
+
     public String getId() {
         return id;
     }
@@ -75,5 +79,21 @@ public class ProcessVariable {
 
     public void setValue(Object value) {
         this.value = value;
+    }
+
+    public boolean isDisplay() {
+        return display;
+    }
+
+    public void setDisplay(boolean display) {
+        this.display = display;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }
