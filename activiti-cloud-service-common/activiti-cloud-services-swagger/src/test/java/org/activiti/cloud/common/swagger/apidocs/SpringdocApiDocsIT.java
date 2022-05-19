@@ -61,4 +61,11 @@ public class SpringdocApiDocsIT {
             .andExpect(content().json(new String(springdocApiDocsFile.getInputStream().readAllBytes())))
             .andReturn();
     }
+
+    @Test
+    public void shouldNot_generateSpringfoxApiDocs() throws Exception {
+        mockMvc.perform(get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
+	        .andExpect(status().isNotFound())
+	        .andReturn();
+    }
 }

@@ -25,6 +25,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -62,6 +63,7 @@ import java.util.function.Predicate;
 @Configuration
 @EnableOpenApi
 @PropertySource("classpath:swagger-config.properties")
+@ConditionalOnProperty(value = "springfox.enabled", havingValue = "true", matchIfMissing = true)
 public class SwaggerAutoConfiguration {
 
     @Bean
