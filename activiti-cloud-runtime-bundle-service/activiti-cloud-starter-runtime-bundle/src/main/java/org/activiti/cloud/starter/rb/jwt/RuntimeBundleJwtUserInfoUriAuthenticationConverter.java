@@ -28,9 +28,16 @@ public class RuntimeBundleJwtUserInfoUriAuthenticationConverter implements Conve
         this.jwtUserInfoUriAuthenticationConverter = jwtUserInfoUriAuthenticationConverter;
     }
 
+    /**
+     * In Runtime Bundle's case, we need to perform the same conversion as in other modules using the common jwt converter,
+     * but also adding the id of the currently authenticated user so that it can be set as the initiator of the process instance
+     * @param jwt
+     * @return the Jwt authentication token
+     */
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
-        org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(jwtUserInfoUriAuthenticationConverter.getPrincipalClaimName(jwt));
-        return jwtUserInfoUriAuthenticationConverter.convert(jwt);
+        AbstractAuthenticationToken result = jwtUserInfoUriAuthenticationConverter.convert(jwt);
+        org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(result.getName());
+        return result;
     }
 }
