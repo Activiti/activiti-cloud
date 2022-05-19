@@ -18,7 +18,6 @@ package org.activiti.cloud.services.common.security.jwt;
 import java.security.Principal;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
-import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 

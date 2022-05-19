@@ -18,6 +18,7 @@ package org.activiti.cloud.services.common.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.util.List;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser;
 import org.junit.jupiter.api.Test;
@@ -26,8 +27,6 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-
-import java.util.List;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class SecurityManagerImplIT {

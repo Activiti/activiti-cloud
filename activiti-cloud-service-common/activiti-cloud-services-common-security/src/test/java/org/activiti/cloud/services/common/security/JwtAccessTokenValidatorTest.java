@@ -17,7 +17,6 @@ package org.activiti.cloud.services.common.security;
 
 import static org.activiti.cloud.services.common.security.JwtSecurityContextTokenProviderTest.TOKEN_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -25,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtAdapter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -94,20 +92,6 @@ public class JwtAccessTokenValidatorTest {
 
         // then
         assertThat(result).isFalse();
-    }
-
-    @Test
-    public void should_thrownSecurityException_whenTokenIsNull() {
-        // given
-        KeycloakJwtAdapter keycloakJwtAdapter = new KeycloakJwtAdapter(null);
-
-        // when
-        Throwable result = catchThrowable(() -> {
-            validator.isValid(keycloakJwtAdapter);
-        });
-
-        // then
-        assertThat(result).isInstanceOf(SecurityException.class);
     }
 
     private Jwt createAccessToken(boolean valid, boolean notBefore) {

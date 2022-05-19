@@ -17,7 +17,6 @@ package org.activiti.cloud.services.common.security.jwt;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

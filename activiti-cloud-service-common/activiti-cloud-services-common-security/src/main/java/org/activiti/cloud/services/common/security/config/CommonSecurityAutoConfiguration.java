@@ -33,8 +33,9 @@ import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
 import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
-import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenPrincipalGroupsProvider;
+import org.activiti.cloud.services.common.security.SecurityManagerImpl;
 import org.activiti.cloud.services.common.security.jwt.JtwAccessTokenPrincipalRolesProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenPrincipalGroupsProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.jwt.JwtPrincipalGroupsProviderChain;
@@ -42,7 +43,6 @@ import org.activiti.cloud.services.common.security.jwt.JwtPrincipalIdentityProvi
 import org.activiti.cloud.services.common.security.jwt.JwtPrincipalRolesProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextTokenProvider;
-import org.activiti.cloud.services.common.security.SecurityManagerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -51,7 +51,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
@@ -70,7 +69,6 @@ import org.springframework.web.cors.CorsConfiguration;
 @EnableAuthorizationConfiguration
 @ConditionalOnWebApplication
 @ConditionalOnMissingBean(value = {SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
-@PropertySource("classpath:keycloak-configuration.properties" )
 @Import(CommonJwtAuthenticationConverterConfiguration.class)
 public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
