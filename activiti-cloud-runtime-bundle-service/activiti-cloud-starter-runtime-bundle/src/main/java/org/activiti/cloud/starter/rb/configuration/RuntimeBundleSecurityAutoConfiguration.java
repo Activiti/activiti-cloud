@@ -15,31 +15,29 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
-import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.starter.rb.jwt.RuntimeBundleJwtUserInfoUriAuthenticationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 @Configuration
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class RuntimeBundleSecurityAutoConfiguration extends CommonSecurityAutoConfiguration {
+public class RuntimeBundleSecurityAutoConfiguration {
+
+    private final Converter<Jwt, AbstractAuthenticationToken> jwtUserInfoUriAuthenticationConverter;
 
     @Autowired
-    public RuntimeBundleSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer,
-        ClientRegistrationRepository clientRegistrationRepository) {
-        super(authorizationConfigurer, clientRegistrationRepository);
+    public RuntimeBundleSecurityAutoConfiguration(Converter<Jwt, AbstractAuthenticationToken> jwtUserInfoUriAuthenticationConverter) {
+        this.jwtUserInfoUriAuthenticationConverter = jwtUserInfoUriAuthenticationConverter;
     }
 
-    @Override
+    @Primary
+    @Bean("runtimeBundleJwtUserInfoUriAuthenticationConverter")
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        return new RuntimeBundleJwtUserInfoUriAuthenticationConverter((JwtUserInfoUriAuthenticationConverter) super.jwtAuthenticationConverter());
+        return new RuntimeBundleJwtUserInfoUriAuthenticationConverter((JwtUserInfoUriAuthenticationConverter) jwtUserInfoUriAuthenticationConverter);
     }
 }

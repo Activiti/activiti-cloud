@@ -28,20 +28,19 @@ import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenPrincipalGr
 import org.activiti.cloud.services.common.security.jwt.JtwAccessTokenPrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtGrantedAuthorityConverter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtPrincipalIdentityProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextTokenProvider;
 import org.activiti.cloud.services.common.security.SecurityManagerImpl;
-import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -50,10 +49,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
@@ -64,19 +59,12 @@ import org.springframework.web.cors.CorsConfiguration;
 @ConditionalOnWebApplication
 @ConditionalOnMissingBean(value = {SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
 @PropertySource("classpath:keycloak-configuration.properties" )
+@Import(CommonJwtAuthenticationConverterConfiguration.class)
 public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
 
     private final AuthorizationConfigurer authorizationConfigurer;
 
-    private final OAuth2UserService oAuth2UserService;
-
-    private final ClientRegistrationRepository clientRegistrationRepository;
-
-    @Value("${keycloak.resource}" )
-    private String resource;
-
-    @Value("${keycloak.use-resource-role-mappings:false}" )
-    private boolean useResourceRoleMapping;
+    private final Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter;
 
     @Value("${authorization.validation.offset:0}" )
     private long offset;
@@ -86,22 +74,15 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
 
     @Autowired
     public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer,
-        ClientRegistrationRepository clientRegistrationRepository) {
+        Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter) {
         this.authorizationConfigurer = authorizationConfigurer;
-        this.oAuth2UserService = new DefaultOAuth2UserService();
-        this.clientRegistrationRepository = clientRegistrationRepository;
+        this.jwtAuthenticationConverter = jwtAuthenticationConverter;
     }
 
     @Bean
     @ConditionalOnMissingBean
     public SecurityContextPrincipalProvider authenticatedPrincipalProvider() {
         return new JwtSecurityContextPrincipalProvider();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public JwtAccessTokenProvider jwtAccessTokenProvider() {
-        return new JwtAccessTokenProvider(resource, useResourceRoleMapping);
     }
 
     @Bean
@@ -193,13 +174,7 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
             .httpBasic().disable()
             .oauth2ResourceServer()
             .jwt()
-            .jwtAuthenticationConverter(jwtAuthenticationConverter());
-    }
-
-    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("keycloak");
-        KeycloakJwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new KeycloakJwtGrantedAuthorityConverter(jwtAccessTokenProvider());
-        return new JwtUserInfoUriAuthenticationConverter(jwtGrantedAuthoritiesConverter, clientRegistration, oAuth2UserService);
+            .jwtAuthenticationConverter(jwtAuthenticationConverter);
     }
 
 }
