@@ -37,9 +37,9 @@ import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenPrincipalGr
 import org.activiti.cloud.services.common.security.jwt.JtwAccessTokenPrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
+import org.activiti.cloud.services.common.security.jwt.JwtPrincipalGroupsProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtPrincipalIdentityProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
+import org.activiti.cloud.services.common.security.jwt.JwtPrincipalRolesProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextTokenProvider;
 import org.activiti.cloud.services.common.security.SecurityManagerImpl;
@@ -99,22 +99,22 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
 
     @Bean
     @ConditionalOnMissingBean
-    public JwtAccessTokenValidator keycloakAccessTokenValidator() {
+    public JwtAccessTokenValidator jwtAccessTokenValidator() {
         return new JwtAccessTokenValidator(offset);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PrincipalIdentityProvider principalIdentityProvider(JwtAccessTokenProvider keycloakAccessTokenProvider,
+    public PrincipalIdentityProvider principalIdentityProvider(JwtAccessTokenProvider jwtAccessTokenProvider,
                                                                JwtAccessTokenValidator jwtAccessTokenValidator) {
-        return new JwtPrincipalIdentityProvider(keycloakAccessTokenProvider,
+        return new JwtPrincipalIdentityProvider(jwtAccessTokenProvider,
             jwtAccessTokenValidator);
     }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public JwtAccessTokenPrincipalGroupsProvider keycloakAccessTokenPrincipalGroupsProvider(JwtAccessTokenProvider jwtAccessTokenProvider,
+    public JwtAccessTokenPrincipalGroupsProvider jwtAccessTokenPrincipalGroupsProvider(JwtAccessTokenProvider jwtAccessTokenProvider,
         JwtAccessTokenValidator jwtAccessTokenValidator) {
         return new JwtAccessTokenPrincipalGroupsProvider(jwtAccessTokenProvider,
             jwtAccessTokenValidator);
@@ -123,30 +123,30 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public JtwAccessTokenPrincipalRolesProvider keycloakAccessTokenPrincipalRolesProvider(JwtAccessTokenProvider keycloakAccessTokenProvider,
+    public JtwAccessTokenPrincipalRolesProvider jtwAccessTokenPrincipalRolesProvider(JwtAccessTokenProvider jwtAccessTokenProvider,
                                                                                                JwtAccessTokenValidator jwtAccessTokenValidator) {
-        return new JtwAccessTokenPrincipalRolesProvider(keycloakAccessTokenProvider,
+        return new JtwAccessTokenPrincipalRolesProvider(jwtAccessTokenProvider,
             jwtAccessTokenValidator);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public KeycloakPrincipalGroupsProviderChain principalGroupsProviderChain(List<PrincipalGroupsProvider> principalGroupsProviders) {
-        return new KeycloakPrincipalGroupsProviderChain(principalGroupsProviders);
+    public JwtPrincipalGroupsProviderChain principalGroupsProviderChain(List<PrincipalGroupsProvider> principalGroupsProviders) {
+        return new JwtPrincipalGroupsProviderChain(principalGroupsProviders);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public KeycloakPrincipalRolesProviderChain principalRolesProviderChain(List<PrincipalRolesProvider> principalRolesProviders) {
-        return new KeycloakPrincipalRolesProviderChain(principalRolesProviders);
+    public JwtPrincipalRolesProviderChain principalRolesProviderChain(List<PrincipalRolesProvider> principalRolesProviders) {
+        return new JwtPrincipalRolesProviderChain(principalRolesProviders);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public SecurityManager securityManager(SecurityContextPrincipalProvider authenticatedPrincipalProvider,
                                            PrincipalIdentityProvider principalIdentityProvider,
-                                           KeycloakPrincipalGroupsProviderChain principalGroupsProvider,
-                                           KeycloakPrincipalRolesProviderChain principalRolesProviderChain) {
+                                           JwtPrincipalGroupsProviderChain principalGroupsProvider,
+                                           JwtPrincipalRolesProviderChain principalRolesProviderChain) {
         return new SecurityManagerImpl(authenticatedPrincipalProvider,
                                                principalIdentityProvider,
                                                principalGroupsProvider,

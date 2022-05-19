@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak;
+package org.activiti.cloud.services.common.security.jwt;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,12 +23,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-public class KeycloakJwtGrantedAuthorityConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+public class JwtGrantedAuthorityConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
     private final String authorityPrefix = "ROLE_";
     private final JwtAccessTokenProvider jwtAccessTokenProvider;
 
-    public KeycloakJwtGrantedAuthorityConverter(JwtAccessTokenProvider jwtAccessTokenProvider) {
+    public JwtGrantedAuthorityConverter(JwtAccessTokenProvider jwtAccessTokenProvider) {
         this.jwtAccessTokenProvider = jwtAccessTokenProvider;
     }
 

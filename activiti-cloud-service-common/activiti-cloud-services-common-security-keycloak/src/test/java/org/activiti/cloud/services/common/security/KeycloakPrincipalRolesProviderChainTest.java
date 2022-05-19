@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
+import org.activiti.cloud.services.common.security.jwt.JwtPrincipalRolesProviderChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 public class KeycloakPrincipalRolesProviderChainTest {
 
-    private KeycloakPrincipalRolesProviderChain subject;
+    private JwtPrincipalRolesProviderChain subject;
 
     @Mock
     PrincipalRolesProvider provider1;
@@ -49,7 +49,7 @@ public class KeycloakPrincipalRolesProviderChainTest {
 
     @BeforeEach
     public void setUp() {
-        subject = new KeycloakPrincipalRolesProviderChain(Arrays.asList(provider1, provider2));
+        subject = new JwtPrincipalRolesProviderChain(Arrays.asList(provider1, provider2));
     }
 
     @Test

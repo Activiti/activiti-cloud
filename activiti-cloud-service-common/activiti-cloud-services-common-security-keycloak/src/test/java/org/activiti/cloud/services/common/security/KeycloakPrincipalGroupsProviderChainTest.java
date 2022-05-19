@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
+import org.activiti.cloud.services.common.security.jwt.JwtPrincipalGroupsProviderChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +40,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 @ExtendWith(MockitoExtension.class)
 public class KeycloakPrincipalGroupsProviderChainTest {
 
-    private KeycloakPrincipalGroupsProviderChain subject;
+    private JwtPrincipalGroupsProviderChain subject;
 
     @Mock
     PrincipalGroupsProvider provider1;
@@ -50,7 +50,7 @@ public class KeycloakPrincipalGroupsProviderChainTest {
 
     @BeforeEach
     public void setUp() {
-        subject = new KeycloakPrincipalGroupsProviderChain(Arrays.asList(provider1, provider2));
+        subject = new JwtPrincipalGroupsProviderChain(Arrays.asList(provider1, provider2));
     }
 
     @Test

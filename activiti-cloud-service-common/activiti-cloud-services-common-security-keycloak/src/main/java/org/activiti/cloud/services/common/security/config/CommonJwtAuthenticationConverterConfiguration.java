@@ -17,13 +17,9 @@ package org.activiti.cloud.services.common.security.config;
 
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtAdapter;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtGrantedAuthorityConverter;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakResourceJwtAdapter;
+import org.activiti.cloud.services.common.security.jwt.JwtGrantedAuthorityConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -52,26 +48,12 @@ public class CommonJwtAuthenticationConverterConfiguration {
         this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = "keycloak.use-resource-role-mappings", havingValue = "false", matchIfMissing = true)
-    public JwtAccessTokenProvider jwtGlobalAccessTokenProvider() {
-        return new JwtAccessTokenProvider(jwt -> new KeycloakJwtAdapter(jwt));
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = "keycloak.use-resource-role-mappings", havingValue = "true")
-    public JwtAccessTokenProvider jwtResourceAccessTokenProvider(@Value("${keycloak.resource}" ) String resource) {
-        return new JwtAccessTokenProvider(jwt -> new KeycloakResourceJwtAdapter(resource, jwt));
-    }
-
 
     @Bean("commonJwtAuthenticationConverter")
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(JwtAccessTokenProvider jwtAccessTokenProvider) {
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(iamName);
-        KeycloakJwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new KeycloakJwtGrantedAuthorityConverter(jwtAccessTokenProvider);
+        JwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthorityConverter(jwtAccessTokenProvider);
         return new JwtUserInfoUriAuthenticationConverter(jwtGrantedAuthoritiesConverter, clientRegistration, oAuth2UserService);
     }
 

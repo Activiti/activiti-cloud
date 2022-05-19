@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.common.security.keycloak;
+package org.activiti.cloud.services.common.security.jwt;
 
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.springframework.lang.NonNull;
@@ -23,11 +23,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class KeycloakPrincipalGroupsProviderChain implements PrincipalGroupsProvider {
+public class JwtPrincipalGroupsProviderChain implements PrincipalGroupsProvider {
 
     private final List<PrincipalGroupsProvider> providers;
 
-    public KeycloakPrincipalGroupsProviderChain(@NonNull List<PrincipalGroupsProvider> providers) {
+    public JwtPrincipalGroupsProviderChain(@NonNull List<PrincipalGroupsProvider> providers) {
         this.providers = Collections.unmodifiableList(providers);
     }
 
