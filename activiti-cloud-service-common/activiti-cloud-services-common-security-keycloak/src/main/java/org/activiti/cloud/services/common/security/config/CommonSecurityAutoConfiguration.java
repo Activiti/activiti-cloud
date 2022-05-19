@@ -81,6 +81,9 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     @Value("${authorization.validation.offset:0}" )
     private long offset;
 
+    @Value("${cors.allowedOrigins:*}" )
+    private List<String> allowedOrigins;
+
     @Autowired
     public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer,
         ClientRegistrationRepository clientRegistrationRepository) {
@@ -182,6 +185,7 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
             .configurationSource(request -> {
                 CorsConfiguration corsConfiguration = new CorsConfiguration();
                 corsConfiguration.setAllowedMethods(List.of("GET", "HEAD", "OPTION", "POST", "PUT", "DELETE"));
+                corsConfiguration.setAllowedOrigins(allowedOrigins);
                 return corsConfiguration.applyPermitDefaultValues();
             })
             .and()
