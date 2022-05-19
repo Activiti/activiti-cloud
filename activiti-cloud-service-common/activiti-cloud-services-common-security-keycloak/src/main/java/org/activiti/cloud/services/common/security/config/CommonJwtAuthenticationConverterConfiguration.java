@@ -46,6 +46,9 @@ public class CommonJwtAuthenticationConverterConfiguration {
     @Value("${keycloak.use-resource-role-mappings:false}" )
     private boolean useResourceRoleMapping;
 
+    @Value("${activiti.cloud.services.oauth2.iam-name")
+    private String iamName;
+
     @Autowired
     public CommonJwtAuthenticationConverterConfiguration(ClientRegistrationRepository clientRegistrationRepository) {
         this.oAuth2UserService = new DefaultOAuth2UserService();
@@ -61,8 +64,20 @@ public class CommonJwtAuthenticationConverterConfiguration {
     @Bean("commonJwtAuthenticationConverter")
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("keycloak");
+        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(iamName);
         KeycloakJwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new KeycloakJwtGrantedAuthorityConverter(jwtAccessTokenProvider());
         return new JwtUserInfoUriAuthenticationConverter(jwtGrantedAuthoritiesConverter, clientRegistration, oAuth2UserService);
+    }
+
+    public void setIamName(String iamName) {
+        this.iamName = iamName;
+    }
+
+    public void setResource(String resource) {
+        this.resource = resource;
+    }
+
+    public void setUseResourceRoleMapping(boolean useResourceRoleMapping) {
+        this.useResourceRoleMapping = useResourceRoleMapping;
     }
 }
