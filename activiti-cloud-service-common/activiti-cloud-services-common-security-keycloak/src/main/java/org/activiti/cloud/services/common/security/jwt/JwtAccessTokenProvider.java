@@ -17,6 +17,8 @@ package org.activiti.cloud.services.common.security.jwt;
 
 import java.security.Principal;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakResourceJwtAdapter;
 import org.springframework.lang.NonNull;
@@ -25,20 +27,14 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 public class JwtAccessTokenProvider {
 
-    private final String clientId;
-    private final boolean useResource;
+    private final Function<Jwt, JwtAdapter> function;
 
-    public JwtAccessTokenProvider(String clientId, boolean useResource) {
-        this.clientId = clientId;
-        this.useResource = useResource;
+    public JwtAccessTokenProvider(Function<Jwt, JwtAdapter> supplier) {
+        this.function = supplier;
     }
 
     public JwtAdapter accessToken(@NonNull Jwt jwt) {
-        if (useResource) {
-            return new KeycloakResourceJwtAdapter(clientId, jwt);
-        } else {
-            return new KeycloakJwtAdapter(jwt);
-        }
+        return function.apply(jwt);
     }
 
     public Optional<JwtAdapter> accessToken(@NonNull Principal principal) {

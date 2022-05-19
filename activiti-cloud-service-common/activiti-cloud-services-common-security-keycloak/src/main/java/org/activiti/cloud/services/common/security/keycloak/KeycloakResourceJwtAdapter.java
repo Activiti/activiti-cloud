@@ -23,11 +23,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public class KeycloakResourceJwtAdapter implements JwtAdapter {
 
-    private final String clientId;
+    private final String resourceId;
     private final Jwt jwt;
 
-    public KeycloakResourceJwtAdapter(String clientId, Jwt jwt) {
-        this.clientId = clientId;
+    public KeycloakResourceJwtAdapter(String resourceId, Jwt jwt) {
+        this.resourceId = resourceId;
         this.jwt = jwt;
     }
 
@@ -38,7 +38,7 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
 
     @Override
     public List<String> getRoles() {
-        return getFromClient(clientId, jwt);
+        return getFromClient(resourceId, jwt);
     }
 
     @Override
