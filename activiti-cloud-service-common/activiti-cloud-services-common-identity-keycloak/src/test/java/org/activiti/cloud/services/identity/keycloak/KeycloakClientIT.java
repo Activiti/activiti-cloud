@@ -18,7 +18,6 @@ package org.activiti.cloud.services.identity.keycloak;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.activiti.cloud.services.common.security.keycloak.config.KeycloakSecurityConfiguration;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;

@@ -27,6 +27,7 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource("classpath:keycloak-configuration.properties" )
+@ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
 public class KeycloakSecurityConfiguration {
 
     @Bean
