@@ -62,5 +62,10 @@
       <artifactId>activiti-cloud-services-test-containers</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
