@@ -16,9 +16,15 @@
     <spring-cloud-function.version>3.2.3</spring-cloud-function.version>
     <testcontainers.version>1.16.3</testcontainers.version>
     <liquibase.version>4.8.0</liquibase.version>
+    <h2.version>1.4.200</h2.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>${h2.version}</version>
+      </dependency>        
       <dependency>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-core</artifactId>
