@@ -12,9 +12,15 @@
   <packaging>pom</packaging>
   <properties>
     <querydsl.version>5.0.0</querydsl.version>
+    <graphql-java.version>13.0</graphql-java.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.graphql-java</groupId>
+        <artifactId>graphql-java</artifactId>
+        <version>${graphql-java.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-notifications-graphql-schema</artifactId>
