@@ -13,20 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.identity;
+package org.activiti.cloud.identity.model;
 
-import java.security.Principal;
-import java.util.List;
-import org.activiti.cloud.identity.model.Group;
-import org.activiti.cloud.identity.model.User;
-import org.activiti.cloud.identity.model.UserRoles;
+import java.util.Set;
+public class UserApplicationAccess {
 
-public interface IdentityManagementService {
+    private String name;
+    private Set<String> roles;
 
-  List<User> findUsers(UserSearchParams userSearchParams);
+    public UserApplicationAccess(String name, Set<String> roles) {
+        this.name = name;
+        this.roles = roles;
+    }
 
-  List<Group> findGroups(GroupSearchParams groupSearchParams);
+    public String getName() {
+        return name;
+    }
 
-  UserRoles getUserRoles(Principal principal);
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
 
 }

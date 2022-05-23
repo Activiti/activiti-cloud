@@ -27,7 +27,7 @@ class KeycloakRoleMappingToRoleTest {
   private KeycloakRoleMappingToRole keycloakRoleMappingToRole = new KeycloakRoleMappingToRole();
 
   @Test
-  public void shouldTransformKeykloackRoleMappingToRole() {
+  public void shouldTransformKeycloakRoleMappingToRole() {
     KeycloakRoleMapping kRole = new KeycloakRoleMapping();
     kRole.setId("123");
     kRole.setName("test");
@@ -39,7 +39,7 @@ class KeycloakRoleMappingToRoleTest {
   }
 
   @Test
-  public void shouldTransformKeykloackRoleMappingsToRoles() {
+  public void shouldTransformKeycloakRoleMappingsToRoles() {
     KeycloakRoleMapping kRole1 = new KeycloakRoleMapping();
     kRole1.setId("123");
     kRole1.setName("test");

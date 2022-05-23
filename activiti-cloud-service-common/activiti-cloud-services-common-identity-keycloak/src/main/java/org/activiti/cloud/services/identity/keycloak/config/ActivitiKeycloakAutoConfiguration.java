@@ -25,6 +25,7 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingToRole;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -66,8 +67,10 @@ public class ActivitiKeycloakAutoConfiguration {
     @ConditionalOnMissingBean
     public IdentityManagementService identityManagementService(KeycloakClient keycloakClient,
                                                                KeycloakUserToUser keycloakUserToUser,
-                                                               KeycloakGroupToGroup keycloakGroupToGroup) {
-        return new KeycloakManagementService(keycloakClient, keycloakUserToUser, keycloakGroupToGroup);
+                                                               KeycloakGroupToGroup keycloakGroupToGroup,
+                                                               KeycloakTokenToUserRoles keycloakTokenToUserRoles) {
+        return new KeycloakManagementService(keycloakClient, keycloakUserToUser, keycloakGroupToGroup,
+            keycloakTokenToUserRoles);
     }
 
     @Bean
@@ -86,6 +89,12 @@ public class ActivitiKeycloakAutoConfiguration {
     @ConditionalOnMissingBean
     public KeycloakGroupToGroup keycloakGroupToGroup(KeycloakClient keycloakClient, KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
         return new KeycloakGroupToGroup(keycloakClient, keycloakRoleMappingToRole);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public KeycloakTokenToUserRoles keycloakTokenToUserRoles() {
+        return new KeycloakTokenToUserRoles();
     }
 
 }

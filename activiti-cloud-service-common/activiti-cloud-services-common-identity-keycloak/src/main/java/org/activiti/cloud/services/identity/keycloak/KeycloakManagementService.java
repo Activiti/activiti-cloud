@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,10 +25,15 @@ import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.Role;
 import org.activiti.cloud.identity.model.User;
+import org.activiti.cloud.identity.model.UserRoles;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.springframework.util.CollectionUtils;
 
 public class KeycloakManagementService implements IdentityManagementService {
@@ -38,13 +44,16 @@ public class KeycloakManagementService implements IdentityManagementService {
     private final KeycloakClient keycloakClient;
     private final KeycloakUserToUser keycloakUserToUser;
     private final KeycloakGroupToGroup keycloakGroupToGroup;
+    private final KeycloakTokenToUserRoles keycloakTokenToUserRoles;
 
     public KeycloakManagementService(KeycloakClient keycloakClient,
                                      KeycloakUserToUser keycloakUserToUser,
-                                     KeycloakGroupToGroup keycloakGroupToGroup) {
+                                     KeycloakGroupToGroup keycloakGroupToGroup,
+                                     KeycloakTokenToUserRoles keycloakTokenToUserRoles) {
         this.keycloakClient = keycloakClient;
         this.keycloakUserToUser = keycloakUserToUser;
         this.keycloakGroupToGroup = keycloakGroupToGroup;
+        this.keycloakTokenToUserRoles = keycloakTokenToUserRoles;
     }
 
     @Override
@@ -85,4 +94,13 @@ public class KeycloakManagementService implements IdentityManagementService {
                 .isPresent();
     }
 
+    @Override
+    public UserRoles getUserRoles(Principal principal) {
+        KeycloakPrincipal<KeycloakSecurityContext> kPrincipal = (KeycloakPrincipal<KeycloakSecurityContext>)principal;
+        AccessToken accessToken = kPrincipal
+            .getKeycloakSecurityContext()
+            .getToken();
+
+        return keycloakTokenToUserRoles.toUserRoles(accessToken);
+    }
 }

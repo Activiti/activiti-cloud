@@ -46,6 +46,8 @@ public @interface WithMockKeycloakUser {
 
     boolean isActive() default true;
 
+    ResourceRoles[] resourcesRoles() default {};
+
     boolean isInteractive() default false;
 
     String rolePrefix() default "ROLE_";
@@ -59,4 +61,9 @@ public @interface WithMockKeycloakUser {
      */
     @AliasFor(annotation = WithSecurityContext.class)
     TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_METHOD;
+
+    @interface ResourceRoles {
+        String resource() default "";
+        String[] roles() default {};
+    }
 }

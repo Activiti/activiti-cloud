@@ -20,10 +20,13 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser.ResourceRoles;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.spi.KeycloakAccount;
@@ -58,6 +61,14 @@ public class WithMockKeycloakUserSecurityContextFactory implements WithSecurityC
         accessToken.setPreferredUsername(annotation.username());
         accessToken.setRealmAccess(realmAccess);
         accessToken.setOtherClaims("groups", groups);
+
+        Map<String, Access> resourceAccess = new HashMap<>();
+        for(ResourceRoles resourceRoles: annotation.resourcesRoles()){
+            Access access = new Access();
+            access.roles(Sets.newSet(resourceRoles.roles()));
+            resourceAccess.put(resourceRoles.resource(), access);
+        }
+        accessToken.setResourceAccess(resourceAccess);
 
         when(accessToken.isActive()).thenReturn(annotation.isActive());
         when(securityContext.getToken()).thenReturn(accessToken);

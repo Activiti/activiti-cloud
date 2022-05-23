@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.identity.web.controller;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 import org.activiti.cloud.identity.GroupSearchParams;
@@ -22,7 +23,9 @@ import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.User;
+import org.activiti.cloud.identity.model.UserRoles;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -62,4 +65,8 @@ public class IdentityManagementController {
         return identityManagementService.findGroups(groupSearchParams);
     }
 
+    @RequestMapping(value = "/roles", method = RequestMethod.GET)
+    public UserRoles getUserRoles(@AuthenticationPrincipal Principal principal) {
+        return identityManagementService.getUserRoles(principal);
+    }
 }
