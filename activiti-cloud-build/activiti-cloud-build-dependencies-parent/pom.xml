@@ -12,8 +12,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>2021.0.1</spring-cloud.version>
-    <spring-cloud-function.version>3.2.3</spring-cloud-function.version>
+    <spring-cloud.version>2021.0.2</spring-cloud.version>
     <testcontainers.version>1.16.3</testcontainers.version>
     <liquibase.version>4.8.0</liquibase.version>
     <h2.version>1.4.200</h2.version>
@@ -47,13 +46,6 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-function-dependencies</artifactId>
-        <version>${spring-cloud-function.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
