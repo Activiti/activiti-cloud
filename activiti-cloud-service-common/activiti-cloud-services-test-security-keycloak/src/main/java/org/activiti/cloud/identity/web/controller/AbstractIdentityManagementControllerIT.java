@@ -17,11 +17,14 @@ package org.activiti.cloud.identity.web.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.contains;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
+import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser.ResourceRoles;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -146,6 +149,49 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].name", is("salesgroup")));
+    }
+
+    @Test
+    @WithMockKeycloakUser(roles = {"role1"}, resourcesRoles = {
+        @ResourceRoles(resource="app1", roles={"role1","role2"}),
+        @ResourceRoles(resource="app2", roles="role1")
+    })
+    public void should_returnAccessRoles() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/roles"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.globalAccess").exists())
+            .andExpect(jsonPath("$.globalAccess.roles", hasSize(1)))
+            .andExpect(jsonPath("$.globalAccess.roles[0]", is("role1")))
+            .andExpect(jsonPath("$.applicationAccess", hasSize(2)))
+            .andExpect(jsonPath("$.applicationAccess[0].name", is("app2")))
+            .andExpect(jsonPath("$.applicationAccess[0].roles",contains("role1")))
+            .andExpect(jsonPath("$.applicationAccess[1].name", is("app1")))
+            .andExpect(jsonPath("$.applicationAccess[1].roles",contains("role1", "role2")));
+    }
+
+    @Test
+    @WithMockKeycloakUser(roles = {"role1"})
+    public void should_notReturnApplicationAccessRoles_when_userHasNotResourceRoles() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/roles"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.globalAccess").exists())
+            .andExpect(jsonPath("$.globalAccess.roles", hasSize(1)))
+            .andExpect(jsonPath("$.globalAccess.roles[0]", is("role1")))
+            .andExpect(jsonPath("$.applicationAccess", hasSize(0)));
+    }
+
+    @Test
+    @WithMockKeycloakUser(resourcesRoles = {
+        @ResourceRoles(resource="app1", roles={"role1"})})
+    public void should_notReturnGlobalAccessRoles_when_userHasNotRealmRoles() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/roles"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.applicationAccess", hasSize(1)))
+            .andExpect(jsonPath("$.globalAccess").exists())
+            .andExpect(jsonPath("$.globalAccess.roles", hasSize(0)));
     }
 
 }
