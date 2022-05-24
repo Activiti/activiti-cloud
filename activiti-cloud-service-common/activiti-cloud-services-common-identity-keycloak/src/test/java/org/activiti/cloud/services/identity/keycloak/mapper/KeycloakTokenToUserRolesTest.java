@@ -22,6 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.nimbusds.jose.shaded.json.JSONObject;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.identity.model.UserApplicationAccess;
@@ -46,8 +47,8 @@ public class KeycloakTokenToUserRolesTest {
         assertThat(userRoles.getApplicationAccess())
             .extracting(UserApplicationAccess::getName, UserApplicationAccess::getRoles)
             .containsOnly(
-                tuple("resource1", Set.of("role1")),
-                tuple("resource2", Set.of("role1", "role2")));
+                tuple("resource1", List.of("role1")),
+                tuple("resource2", List.of("role1", "role2")));
     }
 
     @Test
@@ -76,8 +77,8 @@ public class KeycloakTokenToUserRolesTest {
         assertThat(userRoles.getApplicationAccess())
             .extracting(UserApplicationAccess::getName, UserApplicationAccess::getRoles)
             .containsOnly(
-                tuple("resource1", Set.of("role1")),
-                tuple("resource2", Set.of("role1", "role2")));
+                tuple("resource1", List.of("role1")),
+                tuple("resource2", List.of("role1", "role2")));
 
         assertThat(userRoles.getGlobalAccess().getRoles())
             .isEmpty();
@@ -90,8 +91,8 @@ public class KeycloakTokenToUserRolesTest {
 
         if (withResourceRoleMappings) {
             resourceRoleMappings = new JSONObject(Map.of(
-                "resource1", new JSONObject(Map.of("roles", Set.of("role1"))),
-                "resource2", new JSONObject(Map.of("roles", Set.of("role1", "role2")))
+                "resource1", new JSONObject(Map.of("roles", List.of("role1"))),
+                "resource2", new JSONObject(Map.of("roles", List.of("role1", "role2")))
             ));
         } else {
             resourceRoleMappings = null;
@@ -99,7 +100,7 @@ public class KeycloakTokenToUserRolesTest {
 
         if (withRealmRoleMappings) {
             realmRoleMappings = new JSONObject(Map.of(
-                "roles", Set.of("role1", "role2", "role3")
+                "roles", List.of("role1", "role2", "role3")
             ));
         } else {
             realmRoleMappings = null;
