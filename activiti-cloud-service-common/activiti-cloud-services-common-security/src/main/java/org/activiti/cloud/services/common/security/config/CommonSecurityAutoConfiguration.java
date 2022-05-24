@@ -15,15 +15,6 @@
  */
 package org.activiti.cloud.services.common.security.config;
 
-import com.nimbusds.jose.JOSEObjectType;
-import com.nimbusds.jose.KeySourceException;
-import com.nimbusds.jose.proc.DefaultJOSEObjectTypeVerifier;
-import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector;
-import com.nimbusds.jose.proc.JWSKeySelector;
-import com.nimbusds.jose.proc.SecurityContext;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
@@ -46,7 +37,6 @@ import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextTokenPr
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,8 +49,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -185,20 +173,6 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
             .oauth2ResourceServer()
             .jwt()
             .jwtAuthenticationConverter(jwtAuthenticationConverter);
-    }
-
-    @Bean
-    @ConditionalOnProperty("spring.security.oauth2.resourceserver.jwt.key-set-uri")
-    public JwtDecoder jwtDecoder(@Value("${spring.security.oauth2.resourceserver.jwt.key-set-uri}") String jwkSetUrl,
-                                 @Value("${spring.security.oauth2.resourceserver.jws-type-verifier:jwt}") String jWSTypeVerifier) throws MalformedURLException, KeySourceException {
-        JWSKeySelector<SecurityContext> jwsKeySelector = JWSAlgorithmFamilyJWSKeySelector.fromJWKSetURL(new URL(jwkSetUrl));
-
-        DefaultJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
-        jwtProcessor.setJWSKeySelector(jwsKeySelector);
-
-        jwtProcessor.setJWSTypeVerifier(new DefaultJOSEObjectTypeVerifier(new JOSEObjectType(jWSTypeVerifier)));
-
-        return new NimbusJwtDecoder(jwtProcessor);
     }
 
 }
