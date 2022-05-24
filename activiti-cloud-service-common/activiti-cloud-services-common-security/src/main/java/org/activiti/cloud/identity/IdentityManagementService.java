@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.identity;
 
-import java.security.Principal;
 import java.util.List;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.User;
