@@ -39,7 +39,7 @@ public class CommonJwtAuthenticationConverterConfiguration {
 
     private final ClientRegistrationRepository clientRegistrationRepository;
 
-    @Value("${activiti.cloud.services.oauth2.iam-name")
+    @Value("${activiti.cloud.services.oauth2.iam-name}")
     private String iamName;
 
     @Autowired
