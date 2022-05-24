@@ -56,14 +56,14 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     }
 
     public String getPrincipalClaimName(Jwt jwt) {
-        Instant issuedAt = jwt.getIssuedAt();
-        Instant expiresAt = jwt.getExpiresAt();
         String username = jwt.getClaimAsString(usernameClaim);
         if(username == null) {
+            Instant issuedAt = jwt.getIssuedAt();
+            Instant expiresAt = jwt.getExpiresAt();
             OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
             OAuth2User oAuth2User = this.oAuth2UserService.loadUser(userRequest);
-            username = oAuth2User.getAttribute(usernameClaim);
+            username = oAuth2User.getName();
         }
         return username;
     }
