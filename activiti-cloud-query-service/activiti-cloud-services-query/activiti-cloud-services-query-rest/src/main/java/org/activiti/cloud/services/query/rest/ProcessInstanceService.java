@@ -40,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,6 +86,7 @@ public class ProcessInstanceService {
         return processInstanceRepository.findAll(transformedPredicate, pageable);
     }
 
+    @Transactional
     public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variables, Pageable pageable) {
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("variableDefinitionIds");
