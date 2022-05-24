@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.identity.keycloak.mapper;
 
+import com.nimbusds.jose.shaded.json.JSONObject;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,35 +25,46 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.identity.model.UserApplicationAccess;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.activiti.cloud.identity.model.UserRoles.UserGlobalAccess;
-import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.AccessToken.Access;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 public class KeycloakTokenToUserRoles {
 
-    public UserRoles toUserRoles(AccessToken token) {
+    public static final String ROLES = "roles";
+    public static final String RESOURCE = "resource_access";
+    public static final String REALM = "realm_access";
+
+    public UserRoles toUserRoles(Jwt token) {
         UserRoles userRoles = new UserRoles();
+
         if(token != null) {
-            List<UserApplicationAccess> applicationAccess = getAppAccessFromResourceAccess(token.getResourceAccess());
+            List<UserApplicationAccess> applicationAccess = getResourceRoles(token);
             userRoles.setApplicationAccess(applicationAccess);
 
-            Set<String> globalRoles = getRolesFromAccess(token.getRealmAccess());
+            List<String> globalRoles = getGlobalRoles(token);
             userRoles.setGlobalAccess(new UserGlobalAccess(globalRoles));
         }
         return userRoles;
     }
 
-    private List<UserApplicationAccess> getAppAccessFromResourceAccess(Map<String, Access> resourceAccess) {
-        return Optional.ofNullable(resourceAccess)
+    private List<UserApplicationAccess> getResourceRoles(Jwt token) {
+        return Optional.ofNullable(token.getClaimAsMap(RESOURCE))
             .map(Map::entrySet)
             .orElse(Collections.emptySet())
             .stream()
-            .map(e -> new UserApplicationAccess(e.getKey(), getRolesFromAccess(e.getValue())))
+            .map(e -> new UserApplicationAccess(e.getKey(), getRoles((JSONObject) e.getValue())))
             .collect(Collectors.toList());
     }
 
-    private Set<String> getRolesFromAccess(Access access) {
-        return Optional.ofNullable(access)
-            .map(Access::getRoles)
-            .orElse(Collections.emptySet());
+    public List<String> getGlobalRoles(Jwt jwt) {
+        if(jwt.getClaim(REALM) != null) {
+            return getRoles(jwt.getClaim(REALM));
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    private List<String> getRoles(JSONObject getRolesParent) {
+        return Optional.ofNullable((List<String>) getRolesParent.get(ROLES))
+            .orElse(Collections.emptyList());
     }
 }

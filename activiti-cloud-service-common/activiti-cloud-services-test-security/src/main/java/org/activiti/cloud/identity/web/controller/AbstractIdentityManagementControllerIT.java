@@ -23,8 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
-import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser.ResourceRoles;
+import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser;
+import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser.ResourceRoles;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -152,7 +152,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    @WithMockKeycloakUser(roles = {"role1"}, resourcesRoles = {
+    @WithActivitiMockUser(roles = {"role1"}, resourcesRoles = {
         @ResourceRoles(resource="app1", roles={"role1","role2"}),
         @ResourceRoles(resource="app2", roles="role1")
     })
@@ -171,7 +171,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    @WithMockKeycloakUser(roles = {"role1"})
+    @WithActivitiMockUser(roles = {"role1"})
     public void should_notReturnApplicationAccessRoles_when_userHasNotResourceRoles() throws Exception {
         mockMvc
             .perform(get("/v1/identity/roles"))
@@ -183,7 +183,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    @WithMockKeycloakUser(resourcesRoles = {
+    @WithActivitiMockUser(resourcesRoles = {
         @ResourceRoles(resource="app1", roles={"role1"})})
     public void should_notReturnGlobalAccessRoles_when_userHasNotRealmRoles() throws Exception {
         mockMvc

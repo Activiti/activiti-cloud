@@ -22,11 +22,15 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser.ResourceRoles;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -42,17 +46,19 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
     public SecurityContext createSecurityContext(WithActivitiMockUser annotation) {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
-        Set<String> roles = Sets.newSet(annotation.roles());
+        Set<String> globalRoles = Sets.newSet(annotation.roles());
         Set<String> groups = Sets.newSet(annotation.groups());
         String username = annotation.username();
+        Map<String,String[]> resourceRoles = Arrays.stream(annotation.resourcesRoles())
+            .collect(Collectors.toMap(ResourceRoles::resource,ResourceRoles::roles));
 
-        Map<String, Object> claims = prepareClaims(roles, groups, username);
+        Map<String, Object> claims = prepareClaims(globalRoles, groups, username, resourceRoles);
 
         Map<String, Object> headers = new HashMap<>();
         headers.put("testHeaderName", "testHeaderValue");
 
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        roles.forEach(role -> {
+        globalRoles.forEach(role -> {
             grantedAuthorities.add(new SimpleGrantedAuthority(annotation.rolePrefix() + role));
         });
 
@@ -81,20 +87,33 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         return securityContext;
     }
 
-    private Map<String, Object> prepareClaims(Set<String> roles, Set<String> groups, String username) {
-        Map<String, Object> claims = new HashMap<>();
+    private Map<String, Object> prepareClaims(Set<String> globalRoles,
+        Set<String> groups,
+        String username,
+        Map<String,String[]> resourceRoles) {
 
-        JSONObject realm_access = new JSONObject();
-        JSONArray rolesArray = new JSONArray();
-        rolesArray.addAll(roles);
-        realm_access.put("roles", rolesArray);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("preferred_username", username);
+
+        JSONObject realmAccess = new JSONObject();
+        JSONArray globalRolesArray = new JSONArray();
+        globalRolesArray.addAll(globalRoles);
+        realmAccess.put("roles", globalRolesArray);
+        claims.put("realm_access", realmAccess);
+
+        JSONObject resourceAccess = new JSONObject();
+        for (String key : resourceRoles.keySet()) {
+            JSONObject resourceRolesJSON = new JSONObject();
+            JSONArray resourceRolesArray = new JSONArray();
+            resourceRolesArray.addAll(Arrays.asList(resourceRoles.get(key)));
+            resourceRolesJSON.put("roles", resourceRolesArray);
+            resourceAccess.put(key, resourceRolesJSON);
+        }
+        claims.put("resource_access", resourceAccess);
 
         JSONArray groupsArray = new JSONArray();
         groupsArray.addAll(groups);
-
-        claims.put("realm_access", realm_access);
         claims.put("groups", groupsArray);
-        claims.put("preferred_username", username);
 
         return claims;
     }
