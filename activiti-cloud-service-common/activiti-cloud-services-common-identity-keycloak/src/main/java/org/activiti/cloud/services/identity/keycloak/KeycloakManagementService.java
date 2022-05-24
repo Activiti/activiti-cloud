@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,7 +31,6 @@ import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserR
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.CollectionUtils;
 
 public class KeycloakManagementService implements IdentityManagementService {
@@ -46,9 +44,9 @@ public class KeycloakManagementService implements IdentityManagementService {
     private final KeycloakTokenToUserRoles keycloakTokenToUserRoles;
 
     public KeycloakManagementService(KeycloakClient keycloakClient,
-                                     KeycloakUserToUser keycloakUserToUser,
-                                     KeycloakGroupToGroup keycloakGroupToGroup,
-                                     KeycloakTokenToUserRoles keycloakTokenToUserRoles) {
+        KeycloakUserToUser keycloakUserToUser,
+        KeycloakGroupToGroup keycloakGroupToGroup,
+        KeycloakTokenToUserRoles keycloakTokenToUserRoles) {
         this.keycloakClient = keycloakClient;
         this.keycloakUserToUser = keycloakUserToUser;
         this.keycloakGroupToGroup = keycloakGroupToGroup;

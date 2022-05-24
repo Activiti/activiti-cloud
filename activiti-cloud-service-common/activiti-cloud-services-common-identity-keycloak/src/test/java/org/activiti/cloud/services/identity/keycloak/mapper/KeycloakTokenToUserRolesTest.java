@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import com.nimbusds.jose.shaded.json.JSONObject;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.activiti.cloud.identity.model.UserApplicationAccess;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.junit.jupiter.api.Test;

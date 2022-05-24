@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.identity.web.controller;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 import org.activiti.cloud.identity.GroupSearchParams;
@@ -27,7 +26,6 @@ import org.activiti.cloud.identity.model.UserRoles;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
