@@ -12,13 +12,24 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>2021.0.1</spring-cloud.version>
-    <spring-cloud-function.version>3.2.3</spring-cloud-function.version>
+    <spring-cloud.version>2021.0.2</spring-cloud.version>
     <testcontainers.version>1.16.3</testcontainers.version>
     <liquibase.version>4.8.0</liquibase.version>
+    <h2.version>1.4.200</h2.version>
+    <graphql-java.version>13.0</graphql-java.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.graphql-java</groupId>
+        <artifactId>graphql-java</artifactId>
+        <version>${graphql-java.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>${h2.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-core</artifactId>
@@ -35,13 +46,6 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-function-dependencies</artifactId>
-        <version>${spring-cloud-function.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
