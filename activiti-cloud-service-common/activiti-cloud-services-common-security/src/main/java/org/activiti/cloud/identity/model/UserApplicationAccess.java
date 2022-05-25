@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.identity.model;
 
-import java.util.Set;
+import java.util.List;
 public class UserApplicationAccess {
 
     private String name;
-    private Set<String> roles;
+    private List<String> roles;
 
-    public UserApplicationAccess(String name, Set<String> roles) {
+    public UserApplicationAccess(String name, List<String> roles) {
         this.name = name;
         this.roles = roles;
     }
@@ -34,11 +34,11 @@ public class UserApplicationAccess {
         this.name = name;
     }
 
-    public Set<String> getRoles() {
+    public List<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<String> roles) {
+    public void setRoles(List<String> roles) {
         this.roles = roles;
     }
 

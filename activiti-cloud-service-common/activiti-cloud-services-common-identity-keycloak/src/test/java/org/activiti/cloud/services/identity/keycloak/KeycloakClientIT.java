@@ -28,8 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest(classes = KeycloakClientApplication.class,
-    properties = {"keycloak.realm=activiti"})
+@SpringBootTest(classes ={ KeycloakClientApplication.class},
+    properties = {"keycloak.realm=activiti", "keycloak.use-resource-role-mappings=false"})
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientIT {
 

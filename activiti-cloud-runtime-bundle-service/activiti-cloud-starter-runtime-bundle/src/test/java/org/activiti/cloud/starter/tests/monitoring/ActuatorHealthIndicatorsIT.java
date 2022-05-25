@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.starter.tests.monitoring;
 
-import org.activiti.cloud.services.common.security.keycloak.test.support.WithMockKeycloakUser;
+import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ public class ActuatorHealthIndicatorsIT {
     private MockMvc mvc;
 
     @Test
-    @WithMockKeycloakUser(username = "admin", roles = "ACTIVITI_ADMIN", groups = "admins")
+    @WithActivitiMockUser(username = "admin", roles = "ACTIVITI_ADMIN", groups = "admins")
     public void should_displayActuatorHealthIndicatorsDetails_when_authorized() throws Exception {
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/actuator/health"))
             .andExpect(status().is2xxSuccessful())
@@ -57,7 +57,7 @@ public class ActuatorHealthIndicatorsIT {
     }
 
     @Test
-    @WithMockKeycloakUser(username = "user", roles = "ACTIVITI_USER", groups = "users")
+    @WithActivitiMockUser(username = "user", roles = "ACTIVITI_USER", groups = "users")
     public void should_notDisplayActuatorHealthIndicatorsDetails_when_notAuthorized() throws Exception {
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/actuator/health"))
             .andExpect(status().is2xxSuccessful())

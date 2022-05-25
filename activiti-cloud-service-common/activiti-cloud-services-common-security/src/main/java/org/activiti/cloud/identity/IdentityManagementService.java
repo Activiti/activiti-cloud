@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.identity;
 
-import java.security.Principal;
 import java.util.List;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 public interface IdentityManagementService {
 
@@ -27,6 +27,6 @@ public interface IdentityManagementService {
 
   List<Group> findGroups(GroupSearchParams groupSearchParams);
 
-  UserRoles getUserRoles(Principal principal);
+  UserRoles getUserRoles(Jwt principal);
 
 }

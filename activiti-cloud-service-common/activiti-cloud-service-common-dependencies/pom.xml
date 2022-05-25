@@ -34,11 +34,6 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-common-security</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -54,7 +49,7 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-test-security-keycloak</artifactId>
+        <artifactId>activiti-cloud-services-test-security</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

@@ -41,17 +41,17 @@ public class UserRoles {
 
     public static class UserGlobalAccess {
 
-        private Set<String> roles;
+        private List<String> roles;
 
-        public UserGlobalAccess(Set<String> roles) {
+        public UserGlobalAccess(List<String> roles) {
             this.roles = roles;
         }
 
-        public Set<String> getRoles() {
+        public List<String> getRoles() {
             return roles;
         }
 
-        public void setRoles(Set<String> roles) {
+        public void setRoles(List<String> roles) {
             this.roles = roles;
         }
 

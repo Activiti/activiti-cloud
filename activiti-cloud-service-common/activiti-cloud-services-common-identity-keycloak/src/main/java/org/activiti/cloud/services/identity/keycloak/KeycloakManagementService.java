@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,9 +30,7 @@ import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.representations.AccessToken;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.CollectionUtils;
 
 public class KeycloakManagementService implements IdentityManagementService {
@@ -47,9 +44,9 @@ public class KeycloakManagementService implements IdentityManagementService {
     private final KeycloakTokenToUserRoles keycloakTokenToUserRoles;
 
     public KeycloakManagementService(KeycloakClient keycloakClient,
-                                     KeycloakUserToUser keycloakUserToUser,
-                                     KeycloakGroupToGroup keycloakGroupToGroup,
-                                     KeycloakTokenToUserRoles keycloakTokenToUserRoles) {
+        KeycloakUserToUser keycloakUserToUser,
+        KeycloakGroupToGroup keycloakGroupToGroup,
+        KeycloakTokenToUserRoles keycloakTokenToUserRoles) {
         this.keycloakClient = keycloakClient;
         this.keycloakUserToUser = keycloakUserToUser;
         this.keycloakGroupToGroup = keycloakGroupToGroup;
@@ -95,12 +92,7 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     @Override
-    public UserRoles getUserRoles(Principal principal) {
-        KeycloakPrincipal<KeycloakSecurityContext> kPrincipal = (KeycloakPrincipal<KeycloakSecurityContext>)principal;
-        AccessToken accessToken = kPrincipal
-            .getKeycloakSecurityContext()
-            .getToken();
-
-        return keycloakTokenToUserRoles.toUserRoles(accessToken);
+    public UserRoles getUserRoles(Jwt principal) {
+        return keycloakTokenToUserRoles.toUserRoles(principal);
     }
 }

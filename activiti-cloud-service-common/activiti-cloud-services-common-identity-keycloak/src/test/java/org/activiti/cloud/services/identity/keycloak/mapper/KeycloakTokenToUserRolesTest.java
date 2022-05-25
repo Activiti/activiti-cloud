@@ -15,45 +15,30 @@
  */
 package org.activiti.cloud.services.identity.keycloak.mapper;
 
+import static org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles.REALM;
+import static org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles.RESOURCE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import com.nimbusds.jose.shaded.json.JSONObject;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.activiti.cloud.identity.model.UserApplicationAccess;
 import org.activiti.cloud.identity.model.UserRoles;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.AccessToken.Access;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.oauth2.jwt.Jwt;
 
-@ExtendWith(MockitoExtension.class)
 public class KeycloakTokenToUserRolesTest {
 
-    @InjectMocks
-    private KeycloakTokenToUserRoles keycloakTokenToUserRoles;
-
-    private AccessToken accessToken = new AccessToken();
-
-    @BeforeEach
-    public void setupData() {
-        Access realmAccess = new Access();
-        realmAccess.roles(Set.of("role1", "role2", "role3"));
-        accessToken.setRealmAccess(realmAccess);
-
-        Map<String, Access> resourceAccess = Map.of(
-            "resource1", new Access().roles(Set.of("role1")),
-            "resource2", new Access().roles(Set.of("role1", "role2")));
-        accessToken.setResourceAccess(resourceAccess);
-    }
+    private KeycloakTokenToUserRoles keycloakTokenToUserRoles = new KeycloakTokenToUserRoles();
+    private Jwt jwt;
 
     @Test
-    public void shouldTransformKeycloakTokenToUserRoles() {
-        UserRoles userRoles = keycloakTokenToUserRoles.toUserRoles(accessToken);
+    public void shouldTransformJwtTokenToUserRoles() {
+        mockJwt(true, true);
+
+        UserRoles userRoles = keycloakTokenToUserRoles.toUserRoles(jwt);
 
         assertThat(userRoles.getGlobalAccess().getRoles())
             .hasSize(3)
@@ -61,8 +46,8 @@ public class KeycloakTokenToUserRolesTest {
         assertThat(userRoles.getApplicationAccess())
             .extracting(UserApplicationAccess::getName, UserApplicationAccess::getRoles)
             .containsOnly(
-                tuple("resource1", Set.of("role1")),
-                tuple("resource2", Set.of("role1", "role2")));
+                tuple("resource1", List.of("role1")),
+                tuple("resource2", List.of("role1", "role2")));
     }
 
     @Test
@@ -73,8 +58,9 @@ public class KeycloakTokenToUserRolesTest {
 
     @Test
     public void shouldReturnGlobalAccessWhenResourceAccessIsNull() {
-        accessToken.setResourceAccess(null);
-        UserRoles userRoles = keycloakTokenToUserRoles.toUserRoles(accessToken);
+        mockJwt(false, true);
+
+        UserRoles userRoles = keycloakTokenToUserRoles.toUserRoles(jwt);
         assertThat(userRoles.getGlobalAccess().getRoles())
             .hasSize(3)
             .containsOnly("role1", "role2", "role3");
@@ -84,16 +70,52 @@ public class KeycloakTokenToUserRolesTest {
 
     @Test
     public void shouldReturnApplicationAccessWhenRealmAccessIsNull() {
-        accessToken.setRealmAccess(null);
-        UserRoles userRoles = keycloakTokenToUserRoles.toUserRoles(accessToken);
+        mockJwt(true, false);
+
+        UserRoles userRoles = keycloakTokenToUserRoles.toUserRoles(jwt);
         assertThat(userRoles.getApplicationAccess())
             .extracting(UserApplicationAccess::getName, UserApplicationAccess::getRoles)
             .containsOnly(
-                tuple("resource1", Set.of("role1")),
-                tuple("resource2", Set.of("role1", "role2")));
+                tuple("resource1", List.of("role1")),
+                tuple("resource2", List.of("role1", "role2")));
 
         assertThat(userRoles.getGlobalAccess().getRoles())
             .isEmpty();
+    }
+
+    private void mockJwt(boolean withResourceRoleMappings, boolean withRealmRoleMappings) {
+
+        JSONObject resourceRoleMappings;
+        JSONObject realmRoleMappings;
+
+        if (withResourceRoleMappings) {
+            resourceRoleMappings = new JSONObject(Map.of(
+                "resource1", new JSONObject(Map.of("roles", List.of("role1"))),
+                "resource2", new JSONObject(Map.of("roles", List.of("role1", "role2")))
+            ));
+        } else {
+            resourceRoleMappings = null;
+        }
+
+        if (withRealmRoleMappings) {
+            realmRoleMappings = new JSONObject(Map.of(
+                "roles", List.of("role1", "role2", "role3")
+            ));
+        } else {
+            realmRoleMappings = null;
+        }
+
+        jwt = Jwt.withTokenValue("mock-token-value")
+            .header("mock-header", "mock-header-value")
+            .claims(e -> {
+                if (withRealmRoleMappings) {
+                    e.put(REALM, realmRoleMappings);
+                }
+                if (withResourceRoleMappings) {
+                    e.put(RESOURCE, resourceRoleMappings);
+                }
+            })
+            .build();
     }
 
 }

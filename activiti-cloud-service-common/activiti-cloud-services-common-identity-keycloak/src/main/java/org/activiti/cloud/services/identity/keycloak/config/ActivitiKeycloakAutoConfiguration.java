@@ -69,8 +69,7 @@ public class ActivitiKeycloakAutoConfiguration {
                                                                KeycloakUserToUser keycloakUserToUser,
                                                                KeycloakGroupToGroup keycloakGroupToGroup,
                                                                KeycloakTokenToUserRoles keycloakTokenToUserRoles) {
-        return new KeycloakManagementService(keycloakClient, keycloakUserToUser, keycloakGroupToGroup,
-            keycloakTokenToUserRoles);
+        return new KeycloakManagementService(keycloakClient, keycloakUserToUser, keycloakGroupToGroup, keycloakTokenToUserRoles);
     }
 
     @Bean

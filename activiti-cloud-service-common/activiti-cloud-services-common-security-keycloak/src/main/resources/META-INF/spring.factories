@@ -1,3 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.activiti.cloud.services.common.security.keycloak.config.CommonSecurityAutoConfiguration,\
-org.activiti.cloud.services.common.security.keycloak.config.CustomKeycloakResolverConfiguration
+org.activiti.cloud.services.common.security.keycloak.config.KeycloakSecurityConfiguration
