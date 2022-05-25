@@ -23,6 +23,7 @@
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>7.4.0-alpha.11</activiti-cloud.version>
     <start-class>org.activiti.cloud.query.QueryApplication</start-class>
+    <graphql-java.version>13.0</graphql-java.version>
   </properties>
   <dependencyManagement>
     <dependencies>
