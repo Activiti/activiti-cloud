@@ -27,9 +27,9 @@ import org.springframework.context.annotation.Configuration;
 @EnableCaching
 public class IdentitySearchCacheConfiguration {
 
-    @Value("${keycloak.client.cache.cacheExpireAfterWrite:PT5m}")
+    @Value("${identity.client.cache.cacheExpireAfterWrite:PT5m}")
     private String cacheExpireAfterWrite;
-    @Value("${keycloak.client.cache.cacheMaxSize:1000}")
+    @Value("${identity.client.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
 
     @Bean

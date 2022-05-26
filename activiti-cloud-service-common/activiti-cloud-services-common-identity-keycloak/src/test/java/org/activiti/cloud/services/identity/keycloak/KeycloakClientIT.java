@@ -27,6 +27,8 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(
@@ -34,13 +36,16 @@ import org.springframework.test.context.ContextConfiguration;
     properties = {
         "keycloak.realm=activiti",
         "keycloak.use-resource-role-mappings=false"
-    }
+    ,   "identity.client.cache.cacheExpireAfterWrite=PT5s"}
 )
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientIT {
 
     @Autowired
     private KeycloakClient keycloakClient;
+
+    @Autowired
+    private CacheManager cacheManager;
 
     private final String ACTIVITI_USER_ROLE = "ACTIVITI_USER";
     private final String ACTIVITI_ADMIN_ROLE = "ACTIVITI_ADMIN";
@@ -115,6 +120,66 @@ public class KeycloakClientIT {
 
         assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains(ACTIVITI_USER_ROLE);
+    }
+
+    @Test
+    public void shouldGetGroupRolesFromCache() throws InterruptedException {
+        Cache cache = cacheManager.getCache("groupRoleMapping");
+        cache.clear();
+        List<KeycloakGroup> users = keycloakClient.searchGroups("salesgroup", 0, 50);
+        String key = users.get(0).getId();
+        assertThat(cache.get(key)).isNull();
+
+        List<KeycloakRoleMapping> roles = keycloakClient.getGroupRoleMapping(key);
+
+        assertThat(roles).hasSize(1);
+        assertThat(roles).extracting("name").contains("ACTIVITI_USER");
+
+        assertThat(cache.get(key)).isNotNull();
+        Thread.sleep(5000);
+        //check if the cache expires
+        assertThat(cache.get(key)).isNull();
+    }
+
+    @Test
+    public void shouldGetUserGroupsCache() throws InterruptedException {
+        Cache cache = cacheManager.getCache("userGroups");
+        cache.clear();
+        List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
+        String key = users.get(0).getId();
+
+        assertThat(cache.get(key)).isNull();
+
+        List<KeycloakGroup> groups = keycloakClient.getUserGroups(key);
+
+        assertThat(users).hasSize(1);
+        assertThat(groups).extracting("name").contains("hr");
+
+        assertThat(cache.get(key)).isNotNull();
+        Thread.sleep(5000);
+        //check if the cache expires
+        assertThat(cache.get(key)).isNull();
+    }
+
+    @Test
+    public void shouldGetUserRolesCache() throws InterruptedException {
+        Cache cache = cacheManager.getCache("userRoleMapping");
+        cache.clear();
+        List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
+        String key = users.get(0).getId();
+        assertThat(cache.get(key)).isNull();
+
+        List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(key);
+
+        assertThat(roles).hasSize(3);
+        assertThat(roles).extracting("name").contains("ACTIVITI_USER");
+        assertThat(roles).extracting("name").contains("uma_authorization");
+        assertThat(roles).extracting("name").contains("offline_access");
+
+        assertThat(cache.get(key)).isNotNull();
+        Thread.sleep(5000);
+        //check if the cache expires
+        assertThat(cache.get(key)).isNull();
     }
 
     @Test

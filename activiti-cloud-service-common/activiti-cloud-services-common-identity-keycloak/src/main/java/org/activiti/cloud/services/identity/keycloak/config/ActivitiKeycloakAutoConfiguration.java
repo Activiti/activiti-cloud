@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.identity.keycloak.config;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import java.time.Duration;
 import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDetailsProvider;
@@ -23,9 +25,15 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakManagementService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingToRole;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +47,11 @@ import org.springframework.core.annotation.Order;
 @EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
 @EnableFeignClients(clients = KeycloakClient.class)
 public class ActivitiKeycloakAutoConfiguration {
+
+    @Value("${identity.client.cache.cacheExpireAfterWrite:PT5m}")
+    private String cacheExpireAfterWrite;
+    @Value("${identity.client.cache.cacheMaxSize:1000}")
+    private int cacheMaxSize;
 
     @Bean
     @ConditionalOnMissingBean(KeycloakInstanceWrapper.class)
@@ -63,6 +76,33 @@ public class ActivitiKeycloakAutoConfiguration {
     @ConditionalOnMissingBean
     public IdentityManagementService identityManagementService(KeycloakClient keycloakClient) {
         return new KeycloakManagementService(keycloakClient);
+    }
+
+    @Bean
+    public CaffeineCache groupRoleMappingCache() {
+        return new CaffeineCache("groupRoleMapping",
+                                 Caffeine.newBuilder()
+                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                                     .maximumSize(cacheMaxSize)
+                                     .build());
+    }
+
+    @Bean
+    public CaffeineCache userRoleMappingCache() {
+        return new CaffeineCache("userRoleMapping",
+                                 Caffeine.newBuilder()
+                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                                     .maximumSize(cacheMaxSize)
+                                     .build());
+    }
+
+    @Bean
+    public CaffeineCache userGroupsCache() {
+        return new CaffeineCache("userGroups",
+                                 Caffeine.newBuilder()
+                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                                     .maximumSize(cacheMaxSize)
+                                     .build());
     }
 
 }
