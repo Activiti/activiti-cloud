@@ -1,0 +1,50 @@
+{
+  "id": "StartEventStaticMapping",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "StartEventStaticMapping": {
+      "constants": {},
+      "mappings": {
+        "Task_03vo218": {
+          "inputs": {
+            "static": {
+              "type": "variable",
+              "value": "strVar"
+            }
+          }
+        },
+        "Event_1": {
+          "inputs": {
+            "static": {
+              "type": "value",
+              "value": "static value"
+            },
+            "variable": {
+              "type": "variable",
+              "value": "strVar"
+            }
+          }
+        }
+      },
+      "properties": {
+        "e1a2835d-ce94-40c1-b289-5a3eedbfb583": {
+          "id": "e1a2835d-ce94-40c1-b289-5a3eedbfb583",
+          "name": "strVar",
+          "type": "string",
+          "required": false,
+          "model": {
+            "$ref": "#/$defs/primitive/string"
+          },
+          "value": "str value"
+        }
+      },
+      "assignments": {
+        "Task_03vo218": {
+          "type": "expression",
+          "assignment": "assignee",
+          "id": "Task_03vo218"
+        }
+      }
+    }
+  }
+}
