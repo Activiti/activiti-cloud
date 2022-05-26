@@ -15,8 +15,10 @@
  */
 package org.activiti.cloud.identity.web.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+import java.util.Set;
 import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser;
 import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser.ResourceRoles;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +35,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -42,6 +49,9 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    private CacheManager cacheManager;
 
     @BeforeEach
     public void setUp() {
@@ -359,4 +369,50 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(0)));
     }
+
+    @Test
+    public void should_returnGroups_when_searchByNameWithCache() throws Exception {
+        mockMvc
+            .perform(get("/v1/groups?search=search"))
+            .andExpect(status().isOk());
+
+        mockMvc
+            .perform(get("/v1/groups?search=search&role=role"))
+            .andExpect(status().isOk());
+
+        mockMvc
+            .perform(get("/v1/groups?role=role"))
+            .andExpect(status().isOk());
+
+        Cache cache = cacheManager.getCache("groupSearch");
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role")))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey(null, Set.of("role")))).isNotNull();
+    }
+
+    @Test
+    public void should_returnUsers_when_searchByLastNameCache() throws Exception {
+        mockMvc
+            .perform(get("/v1/users?search=search"))
+            .andExpect(status().isOk());
+
+        mockMvc
+            .perform(get("/v1/users?search=search&group=group"))
+            .andExpect(status().isOk());
+
+        mockMvc
+            .perform(get("/v1/users?search=search&role=role"))
+            .andExpect(status().isOk());
+
+        mockMvc
+            .perform(get("/v1/users?search=search&role=role&group=group"))
+            .andExpect(status().isOk());
+
+        CaffeineCache cache = (CaffeineCache) cacheManager.getCache("userSearch");
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group")))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group")))).isNotNull();
+    }
+
 }

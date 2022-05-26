@@ -25,6 +25,7 @@ import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -46,6 +47,7 @@ public class IdentityManagementController {
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.GET)
+    @Cacheable("userSearch")
     public List<User> getUsers(@RequestParam(value = "search", required = false) String search,
         @RequestParam(value = "role", required = false)  Set<String> roles,
         @RequestParam(value = "group", required = false)  Set<String> groups,
@@ -61,6 +63,7 @@ public class IdentityManagementController {
     }
 
     @RequestMapping(value = "/groups", method = RequestMethod.GET)
+    @Cacheable("groupSearch")
     public List<Group> getGroups(@RequestParam(value = "search", required = false) String search,
         @RequestParam(value = "role", required = false)  Set<String> roles,
         @RequestParam(value = "application", required = false)  String application) {
