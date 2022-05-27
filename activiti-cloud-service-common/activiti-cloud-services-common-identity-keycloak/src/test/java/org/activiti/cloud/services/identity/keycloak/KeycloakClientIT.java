@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
@@ -106,6 +107,47 @@ public class KeycloakClientIT {
 
         assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains("ACTIVITI_USER");
+    }
+
+    @Test
+    public void shouldGetClients() {
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(null,0, 50);
+
+        assertThat(clients).extracting("clientId").contains("activiti");
+        assertThat(clients).extracting("clientId").contains("activiti-keycloak");
+    }
+
+    @Test
+    public void shouldGetClientsWhenPaginated() {
+        List<KeycloakClientRepresentation> clientPage1 = keycloakClient.searchClients(null,0, 1);
+        assertThat(clientPage1).hasSize(1);
+        assertThat(clientPage1).extracting("clientId").contains("account");
+
+        List<KeycloakClientRepresentation> clientPage2 = keycloakClient.searchClients(null, 1, 1);
+
+        assertThat(clientPage2).hasSize(1);
+        assertThat(clientPage2).extracting("clientId").contains("account-console");
+    }
+
+    @Test
+    public void shouldGetClientsFilteredByClientId() {
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti-keycloak", 0, 50);
+
+        assertThat(clients).hasSize(1);
+        assertThat(clients).extracting("clientId").contains("activiti-keycloak");
+    }
+
+    @Test
+    public void shouldGetUserClientRoles() {
+        List<KeycloakUser> users = keycloakClient.searchUsers("testActivitiAdmin", 0, 50);
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+
+        List<KeycloakRoleMapping> roles = keycloakClient.getUserClientRoleMapping(users.get(0).getId(), clients.get(0).getId());
+
+        assertThat(roles).hasSize(3);
+        assertThat(roles).extracting("name").contains("ACTIVITI_ADMIN");
+        assertThat(roles).extracting("name").contains("uma_authorization");
+        assertThat(roles).extracting("name").contains("offline_access");
     }
 
 }
