@@ -19,8 +19,10 @@ import java.util.List;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+@PreAuthorize("isAuthenticated()")
 public interface IdentityManagementService {
 
   List<User> findUsers(UserSearchParams userSearchParams);
