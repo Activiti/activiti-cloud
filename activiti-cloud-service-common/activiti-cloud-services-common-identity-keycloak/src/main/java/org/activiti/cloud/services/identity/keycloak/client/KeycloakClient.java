@@ -17,6 +17,7 @@ package org.activiti.cloud.services.identity.keycloak.client;
 
 import feign.Headers;
 import java.util.List;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
@@ -48,4 +49,15 @@ public interface KeycloakClient {
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}/role-mappings/realm/composite")
     @Headers("Content-Type: application/json")
     List<KeycloakRoleMapping> getGroupRoleMapping(@PathVariable("id") String id);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/clients")
+    @Headers("Content-Type: application/json")
+    List<KeycloakClientRepresentation> searchClients(
+        @RequestParam(value = "clientId", required = false) String clientId,
+        @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/clients/{client}/composite")
+    @Headers("Content-Type: application/json")
+    List<KeycloakRoleMapping> getUserClientRoleMapping(@PathVariable("id") String id,
+        @PathVariable("client") String client);
 }

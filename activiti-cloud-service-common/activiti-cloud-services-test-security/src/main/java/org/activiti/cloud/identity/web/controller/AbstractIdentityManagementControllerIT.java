@@ -103,6 +103,52 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
+    public void should_returnUsers_when_searchByApplication() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/users?application=activiti"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].username", is("hruser")))
+            .andExpect(jsonPath("$[1].username", is("testactivitiadmin")))
+            .andExpect(jsonPath("$[2].username", is("testuser")));
+    }
+
+    @Test
+    public void should_NotReturnUsers_when_searchByInvalidApplication() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/users?application=activitis"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    public void should_returnUsers_when_searchByUsernameAndApplication() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/users?search=hruser&application=activiti"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].username", is("hruser")));
+    }
+
+    @Test
+    public void should_returnUsers_when_searchByGroupAndApplication() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/users?group=hr&application=activiti"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].username", is("hruser")));
+    }
+
+    @Test
+    public void should_returnUsers_when_searchByRoleAndApplication() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/users?role=ACTIVITI_ADMIN&application=activiti"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].username", is("testactivitiadmin")));
+    }
+
+    @Test
     public void should_returnOnlyAdmins_when_searchByUsernameAndRoleAdmin() throws Exception {
         mockMvc
             .perform(get("/v1/identity/users?search=hr&role=ACTIVITI_ADMIN"))
