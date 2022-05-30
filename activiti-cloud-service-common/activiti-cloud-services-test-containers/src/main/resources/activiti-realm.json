@@ -50,7 +50,12 @@
       "name": "salesgroup",
       "realmRoles": [
         "ACTIVITI_USER"
-      ]
+      ],
+      "clientRoles": {
+        "activiti": [
+          "ACTIVITI_USER"
+        ]
+      }
     }
   ],
   "users": [

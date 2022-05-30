@@ -198,6 +198,23 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
+    public void should_returnGroups_when_searchByApplication() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/groups?application=activiti"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].name", is("salesgroup")));
+    }
+
+    @Test
+    public void should_NotReturnGroups_when_searchByInvalidApplication() throws Exception {
+        mockMvc
+            .perform(get("/v1/identity/groups?application=fake"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
     @WithActivitiMockUser(roles = {"role1"}, resourcesRoles = {
         @ResourceRoles(resource="app1", roles={"role1","role2"}),
         @ResourceRoles(resource="app2", roles="role1")

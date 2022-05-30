@@ -150,4 +150,16 @@ public class KeycloakClientIT {
         assertThat(roles).extracting("name").contains("offline_access");
     }
 
+    @Test
+    public void shouldGetGroupClientRoles() {
+        List<KeycloakGroup> groups = keycloakClient.searchGroups("salesgroup", 0, 50);
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+
+        List<KeycloakRoleMapping> roles = keycloakClient
+            .getGroupClientRoleMapping(groups.get(0).getId(), clients.get(0).getId());
+
+        assertThat(roles).hasSize(1);
+        assertThat(roles).extracting("name").contains("ACTIVITI_USER");
+    }
+
 }
