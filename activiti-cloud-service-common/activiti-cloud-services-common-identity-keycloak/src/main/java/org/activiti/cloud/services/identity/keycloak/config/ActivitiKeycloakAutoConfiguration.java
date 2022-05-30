@@ -39,7 +39,7 @@ import org.springframework.core.annotation.Order;
 
 @Configuration
 @PropertySource("classpath:keycloak-client.properties")
-@ConditionalOnProperty(name = "activiti.cloud.services.keycloak.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
 @EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
 @EnableFeignClients(clients = KeycloakClient.class)
 public class ActivitiKeycloakAutoConfiguration {

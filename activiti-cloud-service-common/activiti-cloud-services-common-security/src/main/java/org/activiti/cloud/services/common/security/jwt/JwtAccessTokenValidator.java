@@ -30,11 +30,11 @@ public class JwtAccessTokenValidator {
     public boolean isValid(@NonNull JwtAdapter jwtAdapter) {
         return Optional.ofNullable(jwtAdapter)
             .map(JwtAdapter::getJwt)
-            .map(this::isActive)
+            .map(this::isValid)
             .orElseThrow(() -> new SecurityException("Invalid access token instance"));
     }
 
-    private boolean isActive(Jwt accessToken) {
+    public boolean isValid(Jwt accessToken) {
         return !isExpired(accessToken) && isNotBefore(accessToken);
     }
 
