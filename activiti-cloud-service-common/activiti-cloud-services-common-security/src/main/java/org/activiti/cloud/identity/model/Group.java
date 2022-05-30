@@ -15,13 +15,10 @@
  */
 package org.activiti.cloud.identity.model;
 
-import java.util.List;
-
 public class Group {
 
   private String id;
   private String name;
-  private List<Role> roles;
 
   public String getId() {
     return id;
@@ -39,11 +36,4 @@ public class Group {
     this.name = name;
   }
 
-  public void setRoles(List<Role> roles) {
-    this.roles = roles;
-  }
-
-  public List<Role> getRoles() {
-    return roles;
-  }
 }

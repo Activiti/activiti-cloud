@@ -15,11 +15,9 @@
  */
 package org.activiti.cloud.services.identity.keycloak.mapper;
 
-import java.util.List;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
-import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 
 public class KeycloakGroupToGroup {
 
@@ -35,8 +33,6 @@ public class KeycloakGroupToGroup {
     Group group = new Group();
     group.setId(kGroup.getId());
     group.setName(kGroup.getName());
-    List<KeycloakRoleMapping> userRoleMapping = keycloakClient.getGroupRoleMapping(group.getId());
-    group.setRoles(keycloakRoleMappingToRole.toRoles(userRoleMapping));
     return group;
   }
 

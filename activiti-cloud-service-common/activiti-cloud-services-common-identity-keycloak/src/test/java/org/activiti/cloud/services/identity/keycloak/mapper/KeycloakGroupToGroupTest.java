@@ -16,15 +16,10 @@
 package org.activiti.cloud.services.identity.keycloak.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
-import java.util.List;
 import org.activiti.cloud.identity.model.Group;
-import org.activiti.cloud.identity.model.Role;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
-import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,21 +45,10 @@ class KeycloakGroupToGroupTest {
     kGroup.setId("123");
     kGroup.setName("test");
 
-    KeycloakRoleMapping keycloakRoleMapping = new KeycloakRoleMapping();
-    List<KeycloakRoleMapping> keycloakRoleMappingList = List.of(keycloakRoleMapping);
-    when(keycloakClient.getGroupRoleMapping(eq("123"))).thenReturn(keycloakRoleMappingList);
-
-    Role role = new Role();
-    role.setId("456");
-    role.setName("ROLE");
-    List<Role> rolesList = List.of(role);
-    when(keycloakRoleMappingToRole.toRoles(eq(keycloakRoleMappingList))).thenReturn(rolesList);
-
     Group group = keycloakGroupToGroup.toGroup(kGroup);
 
     assertThat(group.getId()).isEqualTo(kGroup.getId());
     assertThat(group.getName()).isEqualTo(kGroup.getName());
-    assertThat(group.getRoles()).isEqualTo(rolesList);
   }
 
 }

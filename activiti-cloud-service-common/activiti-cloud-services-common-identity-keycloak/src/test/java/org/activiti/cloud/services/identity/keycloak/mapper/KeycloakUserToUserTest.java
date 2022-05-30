@@ -16,30 +16,16 @@
 package org.activiti.cloud.services.identity.keycloak.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
-import java.util.List;
-import org.activiti.cloud.identity.model.Role;
 import org.activiti.cloud.identity.model.User;
-import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
-import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class KeycloakUserToUserTest {
-
-  @Mock
-  private KeycloakClient keycloakClient;
-
-  @Mock
-  private KeycloakRoleMappingToRole keycloakRoleMappingToRole;
-
   @InjectMocks
   private KeycloakUserToUser keycloakUserToUser;
 
@@ -53,22 +39,11 @@ class KeycloakUserToUserTest {
     kUser.setLastName("Pong");
     kUser.setUsername("pingPong");
 
-    KeycloakRoleMapping keycloakRoleMapping = new KeycloakRoleMapping();
-    List<KeycloakRoleMapping> keycloakRoleMappingList = List.of(keycloakRoleMapping);
-    when(keycloakClient.getUserRoleMapping(eq("123"))).thenReturn(keycloakRoleMappingList);
-
-    Role role = new Role();
-    role.setId("456");
-    role.setName("ROLE");
-    List<Role> rolesList = List.of(role);
-    when(keycloakRoleMappingToRole.toRoles(eq(keycloakRoleMappingList))).thenReturn(rolesList);
-
     User user = keycloakUserToUser.toUser(kUser);
 
     assertThat(user.getId()).isEqualTo(kUser.getId());
     assertThat(user.getDisplayName()).isEqualTo("Ping Pong");
     assertThat(user.getEmail()).isEqualTo(kUser.getEmail());
     assertThat(user.getUsername()).isEqualTo(kUser.getUsername());
-    assertThat(user.getRoles()).isEqualTo(rolesList);
   }
 }
