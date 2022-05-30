@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -40,6 +39,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(
@@ -69,6 +72,7 @@ public class TaskAdminController {
         this.taskControllerHelper = taskControllerHelper;
     }
 
+    @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<QueryCloudTask>> findAll(
         @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
@@ -81,6 +85,7 @@ public class TaskAdminController {
                 new StandAloneTaskFilter(standalone)));
     }
 
+    @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
     public EntityModel<QueryCloudTask> findById(@PathVariable String taskId) {
 

@@ -20,7 +20,7 @@ public class JsonViews {
     public static class General {
     }
 
-    public static class Variables {
+    public static class ProcessVariables {
     }
 
 }

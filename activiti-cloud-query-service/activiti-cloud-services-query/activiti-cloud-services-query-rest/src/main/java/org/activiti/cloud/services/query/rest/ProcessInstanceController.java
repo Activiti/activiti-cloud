@@ -70,7 +70,7 @@ public class ProcessInstanceController {
             processInstanceRepresentationModelAssembler);
     }
 
-    @JsonView(JsonViews.Variables.class)
+    @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableDefinitions")
     public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariables(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                                               @RequestParam(value = "variableDefinitions", required = false, defaultValue = "") List<String> variables,
