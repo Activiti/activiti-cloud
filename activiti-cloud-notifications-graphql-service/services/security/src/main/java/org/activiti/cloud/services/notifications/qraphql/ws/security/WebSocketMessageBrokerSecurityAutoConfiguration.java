@@ -44,8 +44,8 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public JwtInerceptorConfigurer jwsTokenChannelAuthenticationConfigurer(KeycloakAccessTokenVerifier keycloakTokenVerifier) {
-            return new JwtInerceptorConfigurer(keycloakTokenVerifier);
+        public JwtInterceptorConfigurer jwsTokenChannelAuthenticationConfigurer(KeycloakAccessTokenVerifier keycloakTokenVerifier) {
+            return new JwtInterceptorConfigurer(keycloakTokenVerifier);
         }
 
         @Bean

@@ -35,16 +35,16 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
-public class JwtInerceptorConfigurer implements WebSocketMessageBrokerConfigurer {
+public class JwtInterceptorConfigurer implements WebSocketMessageBrokerConfigurer {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtInerceptorConfigurer.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtInterceptorConfigurer.class);
     private static final String GRAPHQL_MESSAGE_TYPE = "graphQLMessageType";
 
     private final KeycloakAccessTokenVerifier tokenVerifier;
     private List<String> headerValues = Arrays.asList("connection_init", "start");
     private String headerName = GRAPHQL_MESSAGE_TYPE;
 
-    public JwtInerceptorConfigurer(KeycloakAccessTokenVerifier tokenVerifier) {
+    public JwtInterceptorConfigurer(KeycloakAccessTokenVerifier tokenVerifier) {
         this.tokenVerifier = tokenVerifier;
     }
 
