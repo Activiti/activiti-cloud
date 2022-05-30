@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import java.util.List;
+import java.util.Map;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
@@ -26,8 +28,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
 
 public interface ProcessDefinitionController {
 
@@ -55,5 +55,10 @@ public interface ProcessDefinitionController {
             produces = "image/svg+xml")
     @ResponseBody
     String getProcessDiagram(@PathVariable(value = "id") String id);
+
+    @GetMapping(value = "/v1/process-definitions/{id}/static-values",
+        produces = "application/json")
+    @ResponseBody
+    Map<String, Object> getProcessModelStaticValuesMappingForStartEvent(@PathVariable(value = "id") String id);
 
 }

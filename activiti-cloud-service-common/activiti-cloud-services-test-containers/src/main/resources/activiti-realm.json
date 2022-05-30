@@ -61,7 +61,8 @@
       "clientRoles": {
         "realm-management": [
           "query-realms",
-          "view-users"
+          "view-users",
+          "view-clients"
         ]
       }
     },
@@ -183,6 +184,13 @@
         "uma_authorization",
         "offline_access"
       ],
+      "clientRoles": {
+        "activiti": [
+          "uma_authorization",
+          "ACTIVITI_USER",
+          "offline_access"
+        ]
+      },
       "groups": [
         "/hr"
       ]
@@ -266,6 +274,13 @@
         "uma_authorization",
         "offline_access"
       ],
+      "clientRoles": {
+        "activiti": [
+          "uma_authorization",
+          "ACTIVITI_USER",
+          "offline_access"
+        ]
+      },
       "groups": [
         "/testgroup"
       ]

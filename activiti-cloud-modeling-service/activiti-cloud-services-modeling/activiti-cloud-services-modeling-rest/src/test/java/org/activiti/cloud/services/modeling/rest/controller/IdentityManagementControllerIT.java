@@ -19,7 +19,7 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 
 import org.activiti.cloud.identity.web.controller.AbstractIdentityManagementControllerIT;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
-import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -32,7 +32,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
-@WithMockModelerUser
+@WithMockUser
 class IdentityManagementControllerIT extends AbstractIdentityManagementControllerIT {
 
 }

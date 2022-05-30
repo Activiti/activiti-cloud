@@ -29,8 +29,11 @@ import org.activiti.cloud.identity.model.Role;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
+import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingToRole;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +54,9 @@ class KeycloakManagementServiceTest {
     @Mock
     private KeycloakGroupToGroup keycloakGroupToGroup;
 
+    @Mock
+    private KeycloakRoleMappingToRole keycloakRoleMappingToRole;
+
     @InjectMocks
     private KeycloakManagementService keycloakManagementService;
 
@@ -64,11 +70,19 @@ class KeycloakManagementServiceTest {
     private Group groupThree = new Group();
     private Group groupFour = new Group();
 
+    private Role roleA = new Role();
+    private Role roleB = new Role();
+
+    private KeycloakRoleMapping keycloakRoleA = new KeycloakRoleMapping();
+    private KeycloakRoleMapping keycloakRoleB = new KeycloakRoleMapping();
+
+    private KeycloakClientRepresentation clientOne = new KeycloakClientRepresentation();
+
     @BeforeEach
     public void setupData() {
-        Role roleA = new Role();
+        keycloakRoleA.setName("a");
+        keycloakRoleB.setName("b");
         roleA.setName("a");
-        Role roleB = new Role();
         roleB.setName("b");
 
         userOne.setId("one");
@@ -91,6 +105,9 @@ class KeycloakManagementServiceTest {
         groupThree.setId("three");
         groupThree.setName("one");
         groupThree.setRoles(List.of(roleA));
+
+        clientOne.setId("one");
+        clientOne.setClientId("client-one");
     }
 
     @Test
@@ -150,6 +167,79 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
+    void shouldReturnUsersWhenUsingApplication() {
+        describeSearchUsers();
+        setupUserApplicationRoles(userOne, List.of(keycloakRoleB));
+
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setApplication("client-one");
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userOne);
+    }
+
+    @Test
+    void shouldReturnOnlyApplicationUsersWhenSearchingUsingApplicationAndGroups() {
+        describeSearchUsers();
+        setupUserApplicationRoles(userOne, List.of(keycloakRoleB));
+
+        KeycloakGroup groupOne = new KeycloakGroup();
+        groupOne.setId("one");
+        groupOne.setName("one");
+        when(keycloakClient.getUserGroups(userOne.getId())).thenReturn(List.of(groupOne));
+
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setApplication("client-one");
+        userSearchParams.setGroups(Set.of("one"));
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userOne);
+    }
+
+    @Test
+    void shouldReturnOnlyApplicationUsersWhenSearchingUsingApplicationAndRoles() {
+        describeSearchUsers();
+        setupUserApplicationRoles(userOne, List.of(keycloakRoleA));
+        setupUserApplicationRoles(userTwo, List.of(keycloakRoleA, keycloakRoleB));
+
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setRoles(Set.of("b"));
+        userSearchParams.setApplication("client-one");
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userTwo);
+    }
+
+    @Test
+    void shouldReturnOnlyApplicationUsersWhenSearchingUsingApplicationAndRolesAndGroups() {
+        describeSearchUsers();
+        setupUserApplicationRoles(userOne, List.of(keycloakRoleA));
+        setupUserApplicationRoles(userTwo, List.of(keycloakRoleA, keycloakRoleB));
+
+        KeycloakGroup kGroupOne = new KeycloakGroup();
+        kGroupOne.setId("one");
+        kGroupOne.setName("one");
+        KeycloakGroup kGroupTwo = new KeycloakGroup();
+        kGroupTwo.setId("two");
+        kGroupTwo.setName("two");
+
+        when(keycloakClient.getUserGroups(userOne.getId())).thenReturn(List.of(kGroupOne));
+        when(keycloakClient.getUserGroups(userTwo.getId())).thenReturn(List.of(kGroupTwo));
+
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setRoles(Set.of("a"));
+        userSearchParams.setApplication("client-one");
+        userSearchParams.setGroups(Set.of("one"));
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userOne);
+    }
+
+    @Test
     void shouldReturnGroupsWhenSearchingUsingOneRole() {
         describeSearchGroups();
 
@@ -192,6 +282,13 @@ class KeycloakManagementServiceTest {
     private void describeSearchUsers() {
         when(keycloakClient.searchUsers(eq("o"), eq(0), eq(50))).thenReturn(List.of(new KeycloakUser(), new KeycloakUser(), new KeycloakUser(), new KeycloakUser()));
         when(keycloakUserToUser.toUser(any())).thenReturn(userOne, userTwo, userThree, userFour);
+    }
+
+    private void setupUserApplicationRoles(User user, List<KeycloakRoleMapping> keycloakRoleMappings) {
+        when(keycloakClient.searchClients("client-one",0, 1)).thenReturn(List.of(clientOne));
+        when(keycloakClient.getUserClientRoleMapping(user.getId(), clientOne.getId()))
+            .thenReturn(keycloakRoleMappings);
+        when(keycloakRoleMappingToRole.toRole(any())).thenReturn(roleA,roleB,roleA);
     }
 
 }

@@ -16,6 +16,7 @@
 package org.activiti.cloud.identity.model;
 
 import java.util.List;
+import java.util.Map;
 
 public class User {
 
@@ -24,6 +25,7 @@ public class User {
   private String email;
   private String displayName;
   private List<Role> roles;
+  private Map<String, List<Role>> applicationRoles;
 
   public String getId() {
     return id;
@@ -49,19 +51,28 @@ public class User {
     this.email = email;
   }
 
-    public String getDisplayName() {
-        return displayName;
-    }
+  public String getDisplayName() {
+    return displayName;
+  }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
-    public List<Role> getRoles() {
+  public List<Role> getRoles() {
     return roles;
   }
 
   public void setRoles(List<Role> roles) {
     this.roles = roles;
+  }
+
+  public Map<String, List<Role>> getApplicationRoles() {
+    return applicationRoles;
+  }
+
+  public void setApplicationRoles(
+      Map<String, List<Role>> applicationRoles) {
+    this.applicationRoles = applicationRoles;
   }
 }

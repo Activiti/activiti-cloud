@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.identity;
+package org.activiti.cloud.services.identity.keycloak.model;
 
-import java.util.List;
-import org.activiti.cloud.identity.model.Group;
-import org.activiti.cloud.identity.model.User;
-import org.activiti.cloud.identity.model.UserRoles;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.oauth2.jwt.Jwt;
+public class KeycloakClientRepresentation {
 
-@PreAuthorize("isAuthenticated()")
-public interface IdentityManagementService {
+    String id;
+    String clientId;
 
-  List<User> findUsers(UserSearchParams userSearchParams);
+    public String getId() {
+        return id;
+    }
 
-  List<Group> findGroups(GroupSearchParams groupSearchParams);
+    public void setId(String id) {
+        this.id = id;
+    }
 
-  UserRoles getUserRoles(Jwt principal);
+    public String getClientId() {
+        return clientId;
+    }
 
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 }
