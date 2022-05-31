@@ -43,8 +43,11 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
 
     @Override
     public List<String> getGroups() {
-        List<String> groups = jwt.getClaimAsStringList("groups");
-        return groups.isEmpty() ? null : groups;
+        if (jwt.hasClaim("groups")) {
+            return jwt.getClaimAsStringList("groups");
+        } else {
+            return null;
+        }
     }
 
     @Override
