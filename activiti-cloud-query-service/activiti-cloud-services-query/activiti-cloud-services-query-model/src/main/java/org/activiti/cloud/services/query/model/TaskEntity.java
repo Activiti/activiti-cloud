@@ -67,7 +67,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     /**
      * serialVersionUID
      */
-//    private static final long serialVersionUID = -5497829030558062471L;
     private static final long serialVersionUID = 1L;
 
     @Id

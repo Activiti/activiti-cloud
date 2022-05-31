@@ -35,6 +35,7 @@ import org.springframework.hateoas.PagedModel;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
 
 public class TaskControllerHelper {
@@ -63,43 +64,29 @@ public class TaskControllerHelper {
 
     public PagedModel<EntityModel<QueryCloudTask>> findAll(Predicate predicate,
         VariableSearch variableSearch, Pageable pageable, List<QueryDslPredicateFilter> filters) {
-        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
 
-        Page<TaskEntity> page;
-        if (variableSearch.isSet()) {
-            page = taskRepository
-                .findByVariableNameAndValue(variableSearch.getName(), variableSearch.getValue(),
-                    extendedPredicate,
-                    pageable);
-        } else {
-            page = taskRepository.findAll(extendedPredicate, pageable);
-        }
-
-        return pagedCollectionModelAssembler.toModel(pageable,
-            page,
-            taskRepresentationModelAssembler);
+        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
+        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
+    @Transactional
     public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(Predicate predicate,
-                                                                               VariableSearch variableSearch, Pageable pageable, List<QueryDslPredicateFilter> filters, List<String> processVariableDefinitions) {
+                                                                               VariableSearch variableSearch,
+                                                                               Pageable pageable,
+                                                                               List<QueryDslPredicateFilter> filters,
+                                                                               List<String> processVariableDefinitions) {
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("variableDefinitionIds");
         filter.setParameterList("variables", processVariableDefinitions);
 
-        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
+        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
 
-        Page<TaskEntity> page;
-        if (variableSearch.isSet()) {
-            page = taskRepository
-                .findByVariableNameAndValue(variableSearch.getName(), variableSearch.getValue(),
-                    extendedPredicate,
-                    pageable);
-        } else {
-            page = taskRepository.findAll(extendedPredicate, pageable);
-        }
-
-        page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
-
+        page.forEach(taskEntity -> {
+            Hibernate.initialize(taskEntity.getProcessVariables());
+            Hibernate.initialize(taskEntity.getCandidateGroups());
+            Hibernate.initialize(taskEntity.getCandidateUsers());
+            entityManager.detach(taskEntity);
+        });
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
@@ -117,6 +104,21 @@ public class TaskControllerHelper {
     public boolean canUserViewTask(Predicate predicate) {
         Predicate conditions = taskLookupRestrictionService.restrictToInvolvedUsersQuery(predicate);
         return taskRepository.existsInProcessInstanceScope(conditions);
+    }
+
+    private Page<TaskEntity> findPage(Predicate predicate, VariableSearch variableSearch, Pageable pageable, List<QueryDslPredicateFilter> filters) {
+        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
+
+        Page<TaskEntity> page;
+        if (variableSearch.isSet()) {
+            page = taskRepository
+                .findByVariableNameAndValue(variableSearch.getName(), variableSearch.getValue(),
+                    extendedPredicate,
+                    pageable);
+        } else {
+            page = taskRepository.findAll(extendedPredicate, pageable);
+        }
+        return page;
     }
 
 }
