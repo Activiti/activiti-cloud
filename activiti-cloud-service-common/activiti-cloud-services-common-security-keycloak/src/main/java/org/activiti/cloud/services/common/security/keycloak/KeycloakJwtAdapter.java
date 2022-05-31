@@ -44,7 +44,8 @@ public class KeycloakJwtAdapter implements JwtAdapter {
 
     @Override
     public List<String> getGroups() {
-        return jwt.getClaim("groups");
+        List<String> groups = jwt.getClaimAsStringList("groups");
+        return groups.isEmpty() ? null : groups;
     }
 
     private List<String> getRoles(JSONObject getRolesParent) {
