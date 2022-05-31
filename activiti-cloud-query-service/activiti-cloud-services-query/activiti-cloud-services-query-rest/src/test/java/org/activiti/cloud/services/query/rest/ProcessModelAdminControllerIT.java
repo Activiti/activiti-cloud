@@ -39,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.persistence.EntityManagerFactory;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,9 +88,13 @@ public class ProcessModelAdminControllerIT {
     @MockBean
     private ProcessInstanceService processInstanceService;
 
+    @MockBean
+    private EntityManagerFactory entityManagerFactory;
+
     @BeforeEach
     void setUp() {
         assertThat(processInstanceService).isNotNull();
+        assertThat(entityManagerFactory).isNotNull();
     }
 
     @Test
