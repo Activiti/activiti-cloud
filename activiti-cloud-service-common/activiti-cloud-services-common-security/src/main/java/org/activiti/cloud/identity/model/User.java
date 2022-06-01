@@ -18,6 +18,8 @@ package org.activiti.cloud.identity.model;
 public class User {
 
   private String id;
+  private String firstname;
+  private String lastName;
   private String username;
   private String email;
   private String displayName;
@@ -28,6 +30,22 @@ public class User {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public String getFirstname() {
+    return firstname;
+  }
+
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  public String getLastName() {
+    return lastName;
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
   }
 
   public String getUsername() {
