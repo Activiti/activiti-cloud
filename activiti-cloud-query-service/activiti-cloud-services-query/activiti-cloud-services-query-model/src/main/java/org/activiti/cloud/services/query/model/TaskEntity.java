@@ -30,6 +30,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Filter;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -184,7 +185,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
 
     @JsonView(JsonViews.ProcessVariables.class)
     @Filter(name = "variableDefinitionIds")
-    @ManyToMany(fetch=FetchType.LAZY)
+    @ManyToMany(fetch=FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
         name = "task_process_variable",
         joinColumns = {@JoinColumn(name = "task_id")},
