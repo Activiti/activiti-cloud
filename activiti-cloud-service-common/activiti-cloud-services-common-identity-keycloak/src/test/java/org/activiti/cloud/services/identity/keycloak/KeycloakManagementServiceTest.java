@@ -131,8 +131,8 @@ class KeycloakManagementServiceTest {
         userSearchParams.setSearch("o");
         userSearchParams.setRoles(Set.of("a", "b"));
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
-        assertThat(users.size()).isEqualTo(3);
-        assertThat(users).containsExactly(userOne, userTwo, userThree);
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userTwo);
     }
 
     @Test
@@ -153,6 +153,26 @@ class KeycloakManagementServiceTest {
         userSearchParams.setSearch("o");
         userSearchParams.setGroups(Set.of("one"));
         userSearchParams.setRoles(Set.of("a"));
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userTwo);
+    }
+
+    @Test
+    void shouldReturnUsersWhenSearchingUsingMultipleGroups() {
+        describeSearchUsers();
+        KeycloakGroup one = new KeycloakGroup();
+        one.setId("one");
+        one.setName("one");
+        KeycloakGroup two = new KeycloakGroup();
+        two.setId("two");
+        two.setName("two");
+        when(keycloakClient.getUserGroups(userOne.getId())).thenReturn(List.of(one));
+        when(keycloakClient.getUserGroups(userTwo.getId())).thenReturn(List.of(one, two));
+
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("o");
+        userSearchParams.setGroups(Set.of("one", "two"));
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
         assertThat(users.size()).isEqualTo(1);
         assertThat(users).containsExactly(userTwo);
@@ -264,8 +284,8 @@ class KeycloakManagementServiceTest {
         groupSearchParams.setSearch("o");
         groupSearchParams.setRoles(Set.of("b", "a"));
         List<Group> groups = keycloakManagementService.findGroups(groupSearchParams);
-        assertThat(groups.size()).isEqualTo(3);
-        assertThat(groups).containsExactly(groupOne, groupTwo, groupThree);
+        assertThat(groups.size()).isEqualTo(1);
+        assertThat(groups).containsExactly(groupTwo);
     }
 
     @Test
