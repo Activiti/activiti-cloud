@@ -310,4 +310,24 @@
              stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-query"
+             id="alter15-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/15-alter.pg.schema.7.4.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="alter14-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/14-alter.oracle.schema.7.4.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+
 </databaseChangeLog>

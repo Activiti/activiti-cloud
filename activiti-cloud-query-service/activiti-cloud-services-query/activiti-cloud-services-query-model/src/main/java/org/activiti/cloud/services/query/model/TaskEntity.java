@@ -39,6 +39,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -182,9 +184,12 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
 
     @JsonView(JsonViews.ProcessVariables.class)
     @Filter(name = "variableDefinitionIds")
-    @OneToMany(fetch=FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "processInstanceId", insertable = false, updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @ManyToMany(fetch=FetchType.LAZY)
+    @JoinTable(
+        name = "task_process_variable",
+        joinColumns = {@JoinColumn(name = "task_id")},
+        inverseJoinColumns = {@JoinColumn(name = "process_variable_id")}
+    )
     private Set<ProcessVariableEntity> processVariables = new LinkedHashSet<>();
 
     public TaskEntity() {
@@ -596,7 +601,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     public void setProcessVariables(Set<ProcessVariableEntity> processVariables) {
-        this.processVariables = processVariables;
+        this.processVariables = new LinkedHashSet<>();
+        this.processVariables.addAll(processVariables);
     }
 
     @Override
