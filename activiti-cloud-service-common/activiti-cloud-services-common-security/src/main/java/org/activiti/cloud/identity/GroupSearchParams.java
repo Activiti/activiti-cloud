@@ -21,6 +21,7 @@ public class GroupSearchParams {
 
     private String search;
     private Set<String> roles;
+    private String application;
 
     public String getSearch() {
         return search;
@@ -36,6 +37,14 @@ public class GroupSearchParams {
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public String getApplication() {
+        return application;
+    }
+
+    public void setApplication(String application) {
+        this.application = application;
     }
 
 }

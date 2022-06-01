@@ -58,11 +58,13 @@ public class IdentityManagementController {
 
     @RequestMapping(value = "/groups", method = RequestMethod.GET)
     public List<Group> getGroups(@RequestParam(value = "search", required = false) String search,
-                                                  @RequestParam(value = "role", required = false)  Set<String> roles) {
+        @RequestParam(value = "role", required = false)  Set<String> roles,
+        @RequestParam(value = "application", required = false)  String application) {
 
         GroupSearchParams groupSearchParams = new GroupSearchParams();
         groupSearchParams.setSearch(search);
         groupSearchParams.setRoles(roles);
+        groupSearchParams.setApplication(application);
 
         return identityManagementService.findGroups(groupSearchParams);
     }

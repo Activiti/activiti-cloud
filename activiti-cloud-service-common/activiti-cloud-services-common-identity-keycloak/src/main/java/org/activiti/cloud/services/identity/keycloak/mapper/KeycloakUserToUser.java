@@ -15,10 +15,8 @@
  */
 package org.activiti.cloud.services.identity.keycloak.mapper;
 
-import java.util.List;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
-import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 
 public class KeycloakUserToUser {
@@ -37,8 +35,6 @@ public class KeycloakUserToUser {
     user.setUsername(kUser.getUsername());
     user.setDisplayName(String.join(" ", kUser.getFirstName(), kUser.getLastName()));
     user.setEmail(kUser.getEmail());
-    List<KeycloakRoleMapping> userRoleMapping = keycloakClient.getUserRoleMapping(kUser.getId());
-    user.setRoles(keycloakRoleMappingToRole.toRoles(userRoleMapping));
     return user;
   }
 

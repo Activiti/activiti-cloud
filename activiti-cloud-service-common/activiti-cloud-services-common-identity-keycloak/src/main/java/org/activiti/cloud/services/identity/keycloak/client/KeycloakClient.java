@@ -32,11 +32,12 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/users")
     @Headers("Content-Type: application/json")
-    List<KeycloakUser> searchUsers(@RequestParam(value = "search") String search, @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
+    List<KeycloakUser> searchUsers(@RequestParam(value = "search") String search,
+        @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
 
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/realm/composite")
     @Headers("Content-Type: application/json")
-    List<KeycloakRoleMapping> getUserRoleMapping(@PathVariable("id")String id);
+    List<KeycloakRoleMapping> getUserRoleMapping(@PathVariable("id") String id);
 
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/groups")
     @Headers("Content-Type: application/json")
@@ -44,7 +45,8 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups")
     @Headers("Content-Type: application/json")
-    List<KeycloakGroup> searchGroups(@RequestParam(value = "search") String search, @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
+    List<KeycloakGroup> searchGroups(@RequestParam(value = "search") String search,
+        @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}/role-mappings/realm/composite")
     @Headers("Content-Type: application/json")
@@ -59,5 +61,10 @@ public interface KeycloakClient {
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/clients/{client}/composite")
     @Headers("Content-Type: application/json")
     List<KeycloakRoleMapping> getUserClientRoleMapping(@PathVariable("id") String id,
+        @PathVariable("client") String client);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}/role-mappings/clients/{client}/composite")
+    @Headers("Content-Type: application/json")
+    List<KeycloakRoleMapping> getGroupClientRoleMapping(@PathVariable("id") String id,
         @PathVariable("client") String client);
 }
