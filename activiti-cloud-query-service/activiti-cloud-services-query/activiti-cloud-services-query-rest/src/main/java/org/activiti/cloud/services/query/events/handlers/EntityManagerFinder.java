@@ -21,12 +21,17 @@ import org.hibernate.jpa.QueryHints;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class EntityManagerFinder {
 
     private static final String VARIABLES = "variables";
+    private static final String PROCESS_VARIABLES = "processVariables";
     private static final String TASK_CANDIDATE_USERS = "taskCandidateUsers";
     private static final String TASK_CANDIDATE_GROUPS = "taskCandidateGroups";
     private final EntityManager entityManager;
@@ -43,6 +48,18 @@ public class EntityManagerFinder {
         return Optional.ofNullable(entityManager.find(TaskEntity.class,
                                                       taskId,
                                                       Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+    }
+
+    public List<TaskEntity> findTasksWithProcessVariables(String processInstanceId) {
+        EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
+        entityGraph.addAttributeNodes(PROCESS_VARIABLES);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<TaskEntity> cq = cb.createQuery(TaskEntity.class);
+        Root<TaskEntity> root = cq.from(TaskEntity.class);
+        cq.select(root)
+            .where(cb.equal(root.get("processInstanceId"), processInstanceId));
+        return entityManager.createQuery(cq).setHint(QueryHints.HINT_LOADGRAPH, entityGraph).getResultList();
     }
 
     public Optional<TaskEntity> findTaskWithCandidateUsers(String taskId) {
