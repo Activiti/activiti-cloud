@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,19 +31,20 @@ import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
-public class KeycloakSecurityContextInerceptorConfigurer implements WebSocketMessageBrokerConfigurer {
+public class JwtInterceptorConfigurer implements WebSocketMessageBrokerConfigurer {
 
-    private static final Logger logger = LoggerFactory.getLogger(KeycloakSecurityContextInerceptorConfigurer.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtInterceptorConfigurer.class);
     private static final String GRAPHQL_MESSAGE_TYPE = "graphQLMessageType";
 
     private final KeycloakAccessTokenVerifier tokenVerifier;
     private List<String> headerValues = Arrays.asList("connection_init", "start");
     private String headerName = GRAPHQL_MESSAGE_TYPE;
 
-    public KeycloakSecurityContextInerceptorConfigurer(KeycloakAccessTokenVerifier tokenVerifier) {
+    public JwtInterceptorConfigurer(KeycloakAccessTokenVerifier tokenVerifier) {
         this.tokenVerifier = tokenVerifier;
     }
 
@@ -62,11 +62,11 @@ public class KeycloakSecurityContextInerceptorConfigurer implements WebSocketMes
                                 .filter(KeycloakAuthenticationToken.class::isInstance)
                                 .map(KeycloakAuthenticationToken.class::cast)
                                 .map(KeycloakAuthenticationToken::getCredentials)
-                                .map(KeycloakSecurityContext.class::cast)
-                                .ifPresent(keycloakSecurityContext -> {
+                                .map(Jwt.class::cast)
+                                .ifPresent(jwt -> {
                                     try {
                                         logger.info("Verifying Access Token for {}", accessor.getHeader(GRAPHQL_MESSAGE_TYPE));
-                                        tokenVerifier.verifyToken(keycloakSecurityContext.getTokenString());
+                                        tokenVerifier.verifyToken(jwt.getTokenValue());
 
                                     } catch (Exception e) {
                                         throw new BadCredentialsException("Invalid token", e);
