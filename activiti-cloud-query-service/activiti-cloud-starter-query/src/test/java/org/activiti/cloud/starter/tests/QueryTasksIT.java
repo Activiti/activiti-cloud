@@ -2133,15 +2133,39 @@ public class QueryTasksIT {
     @Test
     public void should_getCreatedTaskWithProcessVariables() {
         //given
-        final ProcessInstance processInstance =
-            processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator", TESTUSER);
-        taskEventContainedBuilder.aCreatedTask("Task", processInstance);
+        taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
 
         variableEventContainedBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
-            .onProcessInstance(processInstance);
+            .onProcessInstance(runningProcessInstance);
 
         variableEventContainedBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
-            .onProcessInstance(processInstance);
+            .onProcessInstance(runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            //when
+            Collection<TaskEntity> retrievedTasks = executeRequestGetTasksWithProcessVariables("ccc").getBody().getContent();
+
+            //then
+            assertThat(retrievedTasks)
+                .extracting(Task::getName,
+                    getProcessVariableField(VariableInstance::getName),
+                    getProcessVariableField(VariableInstance::getValue),
+                    getProcessVariableField(t -> ((ProcessVariableEntity)t).getVariableDefinitionId()))
+                .containsExactly(tuple("Task", "aaa", "bbb", "ccc"));
+        });
+    }
+
+    @Test
+    public void should_getCreatedTaskWithPreviouslyCreatedProcessVariables() {
+        //given
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
+            .onProcessInstance(runningProcessInstance);
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+            .onProcessInstance(runningProcessInstance);
+
+        taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
 
         eventsAggregator.sendAll();
 
@@ -2162,20 +2186,18 @@ public class QueryTasksIT {
     @Test
     public void should_getOnlyTasksWithProcessVariablesRequested() {
         //given
-        final ProcessInstance processInstance =
-            processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator", TESTUSER);
         final ProcessInstance otherProcessInstance =
             processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator", TESTUSER);
-        taskEventContainedBuilder.aCreatedTask("Created task", processInstance);
-        taskEventContainedBuilder.aCompletedTask("Completed task", processInstance);
+        taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
+        taskEventContainedBuilder.aCompletedTask("Completed task", runningProcessInstance);
         taskEventContainedBuilder.aCompletedTask("Other completed task", otherProcessInstance);
         taskEventContainedBuilder.aCompletedTask("Other created task", otherProcessInstance);
 
         variableEventContainedBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
-            .onProcessInstance(processInstance);
+            .onProcessInstance(runningProcessInstance);
 
         variableEventContainedBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
-            .onProcessInstance(processInstance);
+            .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
@@ -2199,20 +2221,18 @@ public class QueryTasksIT {
     @Test
     public void should_notGetProcessVariablesWhenNotRequested() {
         //given
-        final ProcessInstance processInstance =
-            processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator", TESTUSER);
         final ProcessInstance otherProcessInstance =
             processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator", TESTUSER);
-        taskEventContainedBuilder.aCreatedTask("Created task", processInstance);
-        taskEventContainedBuilder.aCompletedTask("Completed task", processInstance);
+        taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
+        taskEventContainedBuilder.aCompletedTask("Completed task", runningProcessInstance);
         taskEventContainedBuilder.aCompletedTask("Other completed task", otherProcessInstance);
         taskEventContainedBuilder.aCompletedTask("Other created task", otherProcessInstance);
 
         variableEventContainedBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
-            .onProcessInstance(processInstance);
+            .onProcessInstance(runningProcessInstance);
 
         variableEventContainedBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
-            .onProcessInstance(processInstance);
+            .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
