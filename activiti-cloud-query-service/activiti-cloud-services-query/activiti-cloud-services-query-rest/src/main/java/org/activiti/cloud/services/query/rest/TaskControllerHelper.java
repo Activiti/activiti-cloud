@@ -81,12 +81,7 @@ public class TaskControllerHelper {
 
         Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
 
-        page.forEach(taskEntity -> {
-            Hibernate.initialize(taskEntity.getProcessVariables());
-            Hibernate.initialize(taskEntity.getCandidateGroups());
-            Hibernate.initialize(taskEntity.getCandidateUsers());
-            entityManager.detach(taskEntity);
-        });
+        page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
