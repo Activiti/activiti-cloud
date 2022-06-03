@@ -54,12 +54,12 @@ public class EntityManagerFinder {
         EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
         entityGraph.addAttributeNodes(PROCESS_VARIABLES);
 
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<TaskEntity> cq = cb.createQuery(TaskEntity.class);
-        Root<TaskEntity> root = cq.from(TaskEntity.class);
-        cq.select(root)
-            .where(cb.equal(root.get("processInstanceId"), processInstanceId));
-        return entityManager.createQuery(cq).setHint(QueryHints.HINT_LOADGRAPH, entityGraph).getResultList();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<TaskEntity> criteriaQuery = criteriaBuilder.createQuery(TaskEntity.class);
+        Root<TaskEntity> root = criteriaQuery.from(TaskEntity.class);
+        criteriaQuery.select(root)
+            .where(criteriaBuilder.equal(root.get("processInstanceId"), processInstanceId));
+        return entityManager.createQuery(criteriaQuery).setHint(QueryHints.HINT_LOADGRAPH, entityGraph).getResultList();
     }
 
     public Optional<TaskEntity> findTaskWithCandidateUsers(String taskId) {
