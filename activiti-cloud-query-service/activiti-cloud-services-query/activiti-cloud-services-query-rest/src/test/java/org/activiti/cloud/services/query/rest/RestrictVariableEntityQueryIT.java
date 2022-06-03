@@ -81,8 +81,8 @@ public class RestrictVariableEntityQueryIT {
     @AfterEach
     public void tearDown() {
         taskCandidateUserRepository.deleteAll();
-        variableRepository.deleteAll();
         taskRepository.deleteAll();
+        variableRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
 

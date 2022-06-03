@@ -244,6 +244,13 @@ create table application
     primary key (id)
 );
 
+create table task_process_variable
+(
+  task_id varchar(255) not null,
+  process_variable_id  bigint not null,
+  primary key (task_id, process_variable_id)
+);
+
 create index bpmn_activity_status_idx on bpmn_activity (status);
 create index bpmn_activity_processInstance_idx on bpmn_activity (process_instance_id);
 alter table bpmn_activity
@@ -279,3 +286,7 @@ alter table integration_context
     add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
 alter table process_model
     add constraint FKmqdabtfsoy52f0585vkfj40b foreign key (process_definition_id) references process_definition;
+alter table task_process_variable
+  add constraint fk_task_id foreign key (task_id) references task;
+alter table task_process_variable
+  add constraint fk_process_variable_id foreign key (process_variable_id) references process_variable;

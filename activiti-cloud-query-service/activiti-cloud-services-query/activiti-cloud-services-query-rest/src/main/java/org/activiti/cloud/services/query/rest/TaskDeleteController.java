@@ -15,9 +15,11 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,7 @@ public class TaskDeleteController {
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
     }
 
+    @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
     public CollectionModel<EntityModel<QueryCloudTask>> deleteTasks (@QuerydslPredicate(root = TaskEntity.class) Predicate predicate) {
 
