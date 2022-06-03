@@ -75,7 +75,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -2108,17 +2107,17 @@ public class QueryTasksIT {
         //given
         taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
             .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
             .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             //when
-            Collection<TaskEntity> retrievedTasks = executeRequestGetTasksWithProcessVariables("ccc").getBody().getContent();
+            Collection<TaskEntity> retrievedTasks = executeRequestGetTasksWithProcessVariables("varADefinitionId").getBody().getContent();
 
             //then
             assertThat(retrievedTasks)
@@ -2126,7 +2125,7 @@ public class QueryTasksIT {
                     getProcessVariableField(VariableInstance::getName),
                     getProcessVariableField(VariableInstance::getValue),
                     getProcessVariableField(t -> ((ProcessVariableEntity)t).getVariableDefinitionId()))
-                .containsExactly(tuple("Task", "aaa", "bbb", "ccc"));
+                .containsExactly(tuple("Task", "varAName", "varAValue", "varADefinitionId"));
         });
     }
 
@@ -2135,17 +2134,17 @@ public class QueryTasksIT {
         //given
         taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
             .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
             .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             //when
-            Collection<TaskEntity> retrievedTasks = executeRequestGetTasksWithProcessVariables("ccc").getBody().getContent();
+            Collection<TaskEntity> retrievedTasks = executeRequestGetTasksWithProcessVariables("varADefinitionId").getBody().getContent();
 
             //then
             assertThat(retrievedTasks)
@@ -2153,25 +2152,25 @@ public class QueryTasksIT {
                     getProcessVariableField(VariableInstance::getName),
                     getProcessVariableField(VariableInstance::getValue),
                     getProcessVariableField(t -> ((ProcessVariableEntity)t).getVariableDefinitionId()))
-                .containsExactly(tuple("Task", "aaa", "bbb", "ccc"));
+                .containsExactly(tuple("Task", "varAName", "varAValue", "varADefinitionId"));
         });
     }
 
     @Test
     public void should_getCreatedTaskWithPreviouslyCreatedProcessVariables() {
         //given
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
             .onProcessInstance(runningProcessInstance);
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
             .onProcessInstance(runningProcessInstance);
 
         taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
 
         eventsAggregator.sendAll();
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             //when
-            Collection<TaskEntity> retrievedTasks = executeRequestGetTasksWithProcessVariables("ccc").getBody().getContent();
+            Collection<TaskEntity> retrievedTasks = executeRequestGetTasksWithProcessVariables("varADefinitionId").getBody().getContent();
 
             //then
             assertThat(retrievedTasks)
@@ -2179,7 +2178,7 @@ public class QueryTasksIT {
                     getProcessVariableField(VariableInstance::getName),
                     getProcessVariableField(VariableInstance::getValue),
                     getProcessVariableField(t -> ((ProcessVariableEntity)t).getVariableDefinitionId()))
-                .containsExactly(tuple("Task", "aaa", "bbb", "ccc"));
+                .containsExactly(tuple("Task", "varAName", "varAValue", "varADefinitionId"));
         });
     }
 
@@ -2193,17 +2192,17 @@ public class QueryTasksIT {
         taskEventContainedBuilder.aCompletedTask("Other completed task", otherProcessInstance);
         taskEventContainedBuilder.aCompletedTask("Other created task", otherProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
             .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
             .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             //when
-            Collection<TaskEntity> retrievedTasks = executeRequestGetTasksWithProcessVariables("ccc").getBody().getContent();
+            Collection<TaskEntity> retrievedTasks = executeRequestGetTasksWithProcessVariables("varADefinitionId").getBody().getContent();
 
             //then
             assertThat(retrievedTasks)
@@ -2211,8 +2210,8 @@ public class QueryTasksIT {
                     getProcessVariableField(VariableInstance::getName),
                     getProcessVariableField(VariableInstance::getValue),
                     getProcessVariableField(t -> ((ProcessVariableEntity)t).getVariableDefinitionId()))
-                .containsExactlyInAnyOrder(tuple("Created task", "aaa", "bbb", "ccc"),
-                    tuple("Completed task", "aaa", "bbb", "ccc"),
+                .containsExactlyInAnyOrder(tuple("Created task", "varAName", "varAValue", "varADefinitionId"),
+                    tuple("Completed task", "varAName", "varAValue", "varADefinitionId"),
                     tuple("Other completed task", null, null, null),
                     tuple("Other created task", null, null, null));
         });
@@ -2228,15 +2227,15 @@ public class QueryTasksIT {
         taskEventContainedBuilder.aCompletedTask("Other completed task", otherProcessInstance);
         taskEventContainedBuilder.aCompletedTask("Other created task", otherProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
             .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
             .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             //when
             Collection<TaskEntity> retrievedTasks = executeRequestGetTasks().getBody().getContent();
 
