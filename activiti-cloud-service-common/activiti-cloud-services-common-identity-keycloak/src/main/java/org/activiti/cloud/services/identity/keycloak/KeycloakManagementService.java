@@ -128,7 +128,8 @@ public class KeycloakManagementService implements IdentityManagementService {
             .getUserGroups(user.getId())
             .stream()
             .map(KeycloakGroup::getName)
-            .anyMatch(groups::contains);
+            .collect(Collectors.toSet())
+            .containsAll(groups);
     }
 
     @Override
@@ -196,9 +197,9 @@ public class KeycloakManagementService implements IdentityManagementService {
         return CollectionUtils.isEmpty(filterRoles) ||
             currentRoles != null && currentRoles
                 .stream()
-                .filter(role -> filterRoles.contains(role.getName()))
-                .findAny()
-                .isPresent();
+                .map(Role::getName)
+                .collect(Collectors.toSet())
+                .containsAll(filterRoles);
     }
 
     @Override
