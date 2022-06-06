@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -385,9 +384,9 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk());
 
         Cache cache = cacheManager.getCache("groupSearch");
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role")))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey(null, Set.of("role")))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey(null, Set.of("role"), null))).isNotNull();
     }
 
     @Test
@@ -408,11 +407,11 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/users?search=search&role=role&group=group"))
             .andExpect(status().isOk());
 
-        CaffeineCache cache = (CaffeineCache) cacheManager.getCache("userSearch");
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group")))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group")))).isNotNull();
+        Cache cache = cacheManager.getCache("userSearch");
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null))).isNotNull();
     }
 
 }
