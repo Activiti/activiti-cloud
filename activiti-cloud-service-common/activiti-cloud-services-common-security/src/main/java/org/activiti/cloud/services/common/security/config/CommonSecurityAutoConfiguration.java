@@ -24,6 +24,7 @@ import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
 import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
+import org.activiti.cloud.services.common.security.CustomBearerTokenAccessDeniedHandler;
 import org.activiti.cloud.services.common.security.SecurityManagerImpl;
 import org.activiti.cloud.services.common.security.jwt.JtwAccessTokenPrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenPrincipalGroupsProvider;
@@ -49,6 +50,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -167,6 +169,9 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
                 corsConfiguration.setAllowedOrigins(allowedOrigins);
                 return corsConfiguration.applyPermitDefaultValues();
             })
+            .and()
+            .exceptionHandling()
+            .accessDeniedHandler(new CustomBearerTokenAccessDeniedHandler(new BearerTokenAccessDeniedHandler()))
             .and()
             .csrf().disable()
             .httpBasic().disable()
