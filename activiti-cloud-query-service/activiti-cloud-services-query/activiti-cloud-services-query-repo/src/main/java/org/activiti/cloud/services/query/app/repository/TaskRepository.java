@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.dsl.StringPath;
-import java.util.Arrays;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -24,6 +23,8 @@ import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+import java.util.Arrays;
 
 @RepositoryRestResource(exported = false)
 public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, String>,
@@ -55,6 +56,7 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, S
             .first((path, value) -> path.like("%" + value.toString() + "%"));
 
         bindings.excluding(root.variables);
+        bindings.excluding(root.processVariables);
         bindings.excluding(root.standalone);
     }
 }

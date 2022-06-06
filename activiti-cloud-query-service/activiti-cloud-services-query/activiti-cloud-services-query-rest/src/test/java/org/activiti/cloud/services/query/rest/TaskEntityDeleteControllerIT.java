@@ -40,6 +40,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.persistence.EntityManagerFactory;
 import java.util.Collections;
 import java.util.List;
 
@@ -93,9 +94,13 @@ public class TaskEntityDeleteControllerIT {
     @MockBean
     private ProcessInstanceService processInstanceService;
 
+    @MockBean
+    private EntityManagerFactory entityManagerFactory;
+
     @BeforeEach
     void setUp() {
         assertThat(processInstanceService).isNotNull();
+        assertThat(entityManagerFactory).isNotNull();
     }
 
     @Test

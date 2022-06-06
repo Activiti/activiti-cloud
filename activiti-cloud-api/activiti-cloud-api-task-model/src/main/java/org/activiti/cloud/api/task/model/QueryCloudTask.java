@@ -15,14 +15,19 @@
  */
 package org.activiti.cloud.api.task.model;
 
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+
 import java.util.List;
+import java.util.Set;
 
 public interface QueryCloudTask extends CloudTask{
-    public String getProcessDefinitionName();
+    String getProcessDefinitionName();
 
     List<TaskPermissions> getPermissions();
 
     void setPermissions(List<TaskPermissions> User);
+
+    Set<? extends CloudVariableInstance> getProcessVariables();
 
     enum TaskPermissions {
         VIEW,
