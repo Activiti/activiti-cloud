@@ -127,7 +127,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     	, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<TaskEntity> tasks = new LinkedHashSet<>();
 
-    @JsonView(JsonViews.Variables.class)
+    @JsonView(JsonViews.ProcessVariables.class)
     @Filter(name = "variableDefinitionIds")
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false

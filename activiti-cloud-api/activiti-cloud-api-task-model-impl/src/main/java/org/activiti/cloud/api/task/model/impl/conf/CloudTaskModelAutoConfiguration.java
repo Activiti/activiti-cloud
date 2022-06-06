@@ -27,7 +27,9 @@ import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.impl.CloudTaskImpl;
+import org.activiti.cloud.api.task.model.impl.QueryCloudTaskImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskActivatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
@@ -90,6 +92,8 @@ public class CloudTaskModelAutoConfiguration {
 
         resolver.addMapping(CloudTask.class,
                             CloudTaskImpl.class);
+        resolver.addMapping(QueryCloudTask.class,
+                            QueryCloudTaskImpl.class);
 
         module.setAbstractTypes(resolver);
 

@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
@@ -46,6 +45,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(
@@ -88,7 +91,8 @@ public class TaskController {
         this.taskPermissionsHelper = taskPermissionsHelper;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @JsonView(JsonViews.General.class)
+    @RequestMapping(method = RequestMethod.GET, params = "!variableDefinitions")
     public PagedModel<EntityModel<QueryCloudTask>> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
                                                        @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
                                                        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
@@ -98,6 +102,19 @@ public class TaskController {
             new StandAloneTaskFilter(standalone), taskLookupRestrictionService));
     }
 
+    @JsonView(JsonViews.ProcessVariables.class)
+    @RequestMapping(method = RequestMethod.GET, params = "variableDefinitions")
+    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+                                                                                             @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+                                                                                             @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+                                                                                             @RequestParam(value = "variableDefinitions", required = false, defaultValue = "") List<String> processVariableDefinitions,
+                                                                                             VariableSearch variableSearch,
+                                                                                             Pageable pageable) {
+        return taskControllerHelper.findAllWithProcessVariables(predicate, variableSearch, pageable, Arrays.asList(new RootTasksFilter(rootTasksOnly),
+            new StandAloneTaskFilter(standalone), taskLookupRestrictionService), processVariableDefinitions);
+    }
+
+    @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
     public EntityModel<QueryCloudTask> findById(@PathVariable String taskId) {
 

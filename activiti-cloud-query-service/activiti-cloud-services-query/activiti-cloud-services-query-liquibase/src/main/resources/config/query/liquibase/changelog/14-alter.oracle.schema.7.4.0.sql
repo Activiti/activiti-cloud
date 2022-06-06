@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.model;
 
-public class JsonViews {
-
-    public static class General {
-    }
-
-    public static class ProcessVariables {
-    }
-
-}
+create table task_process_variable
+(
+  task_id varchar(255) not null,
+  process_variable_id bigint not null
+);
+alter table if exists task_process_variable
+  add constraint fk_task_id foreign key (task_id) references task;
+alter table if exists task_process_variable
+  add constraint fk_process_variable_id foreign key (process_variable_id) references process_variable;

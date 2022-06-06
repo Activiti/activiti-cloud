@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import org.activiti.api.process.model.ProcessInstance;
@@ -26,10 +27,33 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Filter;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.*;
-import java.util.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ConstraintMode;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity(name = "Task")
@@ -41,7 +65,7 @@ import java.util.stream.Collectors;
         })
 @DynamicInsert
 @DynamicUpdate
-public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask {
+public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask, Serializable {
 
     /**
      * serialVersionUID
@@ -158,6 +182,16 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
             foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<TaskVariableEntity> variables = new LinkedHashSet<>();
+
+    @JsonView(JsonViews.ProcessVariables.class)
+    @Filter(name = "variableDefinitionIds")
+    @ManyToMany(fetch=FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinTable(
+        name = "task_process_variable",
+        joinColumns = {@JoinColumn(name = "task_id")},
+        inverseJoinColumns = {@JoinColumn(name = "process_variable_id")}
+    )
+    private Set<ProcessVariableEntity> processVariables = new LinkedHashSet<>();
 
     public TaskEntity() {
     }
@@ -560,6 +594,16 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     @Override
     public void setPermissions(List<TaskPermissions> permissions) {
         this.permissions = permissions;
+    }
+
+    @Override
+    public Set<ProcessVariableEntity> getProcessVariables() {
+        return processVariables;
+    }
+
+    public void setProcessVariables(Set<ProcessVariableEntity> processVariables) {
+        this.processVariables = new LinkedHashSet<>();
+        this.processVariables.addAll(processVariables);
     }
 
     @Override

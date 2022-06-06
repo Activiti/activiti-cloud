@@ -44,9 +44,11 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.persistence.EntityManagerFactory;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -71,6 +73,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
+@TestPropertySource("classpath:application-test.properties")
 public class TaskEntityControllerIT {
 
     @Autowired
@@ -100,9 +103,13 @@ public class TaskEntityControllerIT {
     @MockBean
     private ProcessInstanceService processInstanceService;
 
+    @MockBean
+    private EntityManagerFactory entityManagerFactory;
+
     @BeforeEach
     void setUp() {
         assertThat(processInstanceService).isNotNull();
+        assertThat(entityManagerFactory).isNotNull();
     }
 
     @Test

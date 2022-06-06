@@ -43,6 +43,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.persistence.EntityManagerFactory;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
@@ -93,9 +94,13 @@ public class TaskEntityVariableEntityControllerIT {
     @MockBean
     private ProcessInstanceService processInstanceService;
 
+    @MockBean
+    private EntityManagerFactory entityManagerFactory;
+
     @BeforeEach
     void setUp() {
         assertThat(processInstanceService).isNotNull();
+        assertThat(entityManagerFactory).isNotNull();
     }
 
     @Test

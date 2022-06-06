@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Set;
 
 public class ProcessVariableCreatedEventHandler {
 
@@ -54,6 +55,7 @@ public class ProcessVariableCreatedEventHandler {
                                                                                                                             processInstanceEntity);
                                                         processInstanceEntity.getVariables()
                                                                              .add(variableEntity);
+                                                        assignToTasks(processInstanceId, variableName, variableEntity);
                                                     });
                            });
     }
@@ -79,5 +81,17 @@ public class ProcessVariableCreatedEventHandler {
         entityManager.persist(variableEntity);
 
         return variableEntity;
+    }
+
+    private void assignToTasks(String processInstanceId, String variableName, ProcessVariableEntity variableEntity) {
+        entityManagerFinder.findTasksWithProcessVariables(processInstanceId)
+            .forEach(taskEntity -> {
+                Set<ProcessVariableEntity> processVariables = taskEntity.getProcessVariables();
+                if (processVariables.stream().map(ProcessVariableEntity::getName).anyMatch(variableName::equals)) {
+                    LOGGER.warn("Process variable " + variableName + " already exists in the task " + taskEntity.getId() + "!");
+                } else {
+                    taskEntity.getProcessVariables().add(variableEntity);
+                }
+            });
     }
 }
