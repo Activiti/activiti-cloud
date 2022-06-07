@@ -17,9 +17,14 @@ package org.activiti.cloud.identity.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
+import java.util.Collection;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,6 +36,18 @@ public class IdentitySearchCacheConfiguration {
     private String cacheExpireAfterWrite;
     @Value("${identity.client.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
+
+    @Bean
+    public CacheManager cacheManager(Collection<Cache> caches) {
+        SimpleCacheManager cacheManager = new SimpleCacheManager() {
+            @Override
+            protected Cache getMissingCache(String name) {
+                return new CaffeineCache(name, Caffeine.newBuilder().build());
+            }
+        };
+        cacheManager.setCaches(caches);
+        return cacheManager;
+    }
 
     @Bean
     public CaffeineCache userSearchCache() {
