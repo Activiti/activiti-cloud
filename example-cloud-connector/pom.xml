@@ -19,7 +19,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud.version>7.4.0-alpha.18</activiti-cloud.version>
+    <activiti-cloud.version>7.4.0-alpha.20</activiti-cloud.version>
     <start-class>org.activiti.cloud.examples.CloudConnectorApp</start-class>
   </properties>
   <dependencyManagement>
