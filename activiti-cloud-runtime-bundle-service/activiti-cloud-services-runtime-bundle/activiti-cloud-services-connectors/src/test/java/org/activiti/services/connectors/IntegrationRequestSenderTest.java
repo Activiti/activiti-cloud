@@ -161,7 +161,6 @@ public class IntegrationRequestSenderTest {
         Expression mockExpression = mock(Expression.class);
         given(mockExpression.getValue(delegateExecution)).willReturn(serviceTask.getName());
         given(expressionManager.createExpression(anyString())).willReturn(mockExpression);
-        
     }
 
     private void configureProperties() {
