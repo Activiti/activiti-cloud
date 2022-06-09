@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.common.security.keycloak;
 
 import com.nimbusds.jose.shaded.json.JSONObject;
+import java.util.Collections;
 import java.util.List;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -34,7 +35,11 @@ public class KeycloakJwtAdapter implements JwtAdapter {
 
     @Override
     public List<String> getRoles() {
-        return getRoles(jwt.getClaim("realm_access"));
+        if(jwt.hasClaim("realm_access")) {
+            return getRoles(jwt.getClaim("realm_access"));
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override
