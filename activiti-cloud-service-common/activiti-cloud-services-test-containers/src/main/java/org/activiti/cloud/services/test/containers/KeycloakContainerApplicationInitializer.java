@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.test.containers;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -23,7 +24,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 public class KeycloakContainerApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:16.1.1")
+    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:18.0.0")
         .withAdminUsername("admin")
         .withAdminPassword("admin")
         .withRealmImportFile("activiti-realm.json")
@@ -46,9 +47,19 @@ public class KeycloakContainerApplicationInitializer implements ApplicationConte
 
     public static String[] getContainerProperties() {
         return new String[] {
-            "keycloak.auth-server-url=" + keycloakContainer.getAuthServerUrl(),
+            "keycloak.auth-server-url=" + getAuthServerUrl(),
             "activiti.keycloak.client-id=activiti-keycloak",
             "activiti.keycloak.client-secret=545bc187-f10f-41f9-8d5f-cfca3dbada9c",
             "activiti.keycloak.grant-type=client_credentials"};
+    }
+
+    @NotNull
+    private static String getAuthServerUrl() {
+        String authServerUrl = keycloakContainer.getAuthServerUrl();
+        if(authServerUrl.endsWith("/")) {
+            return authServerUrl.substring(0, authServerUrl.length()-1);
+        } else {
+            return authServerUrl;
+        }
     }
 }
