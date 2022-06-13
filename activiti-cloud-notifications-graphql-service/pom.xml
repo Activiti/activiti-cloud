@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>7.4.0-alpha.24</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-notifications-service-graphql-parent</artifactId>
   <name>Activiti Cloud Notifications GraphQL Service :: Parent</name>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>7.4.0-alpha.24</version>
   <packaging>pom</packaging>
   <properties>
     <graphql-jpa-query.version>0.4.19</graphql-jpa-query.version>

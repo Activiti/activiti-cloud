@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>7.4.0-alpha.24</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-messages-service-parent</artifactId>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>7.4.0-alpha.24</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud Messages Service :: Parent</name>
   <dependencyManagement>
