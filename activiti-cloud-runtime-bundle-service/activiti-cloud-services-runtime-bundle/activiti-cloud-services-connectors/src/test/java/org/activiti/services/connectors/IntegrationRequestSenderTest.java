@@ -22,8 +22,10 @@ import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.el.ExpressionManager;
 import org.activiti.engine.impl.persistence.deploy.DeploymentManager;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -44,8 +46,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class IntegrationRequestSenderTest {
@@ -94,6 +99,9 @@ public class IntegrationRequestSenderTest {
     @Mock
     private ExtensionsVariablesMappingProvider inboundVariablesProvider;
 
+    @Mock
+    private ExpressionManager expressionManager;
+
     private DelegateExecution delegateExecution;
 
     @Captor
@@ -119,7 +127,8 @@ public class IntegrationRequestSenderTest {
         IntegrationContextEntity contextEntity = mock(IntegrationContextEntity.class);
         given(contextEntity.getId()).willReturn(INTEGRATION_CONTEXT_ID);
 
-        IntegrationContext integrationContext = new IntegrationContextBuilder(inboundVariablesProvider).from(contextEntity, delegateExecution);
+        IntegrationContext integrationContext = new IntegrationContextBuilder(inboundVariablesProvider,
+                                                                              expressionManager).from(contextEntity, delegateExecution);
         integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setServiceFullName(APP_NAME);
     }
@@ -137,6 +146,7 @@ public class IntegrationRequestSenderTest {
 
     private void configureExecution() {
         ServiceTask serviceTask = new ServiceTask();
+        serviceTask.setName("Service Task");
         serviceTask.setImplementation(CONNECTOR_TYPE);
 
         delegateExecution = DelegateExecutionBuilder.anExecution()
@@ -147,6 +157,10 @@ public class IntegrationRequestSenderTest {
                                                     .withBusinessKey(BUSINESS_KEY)
                                                     .withParentProcessInstanceId(MY_PARENT_PROC_ID)
                                                     .build();
+
+        Expression mockExpression = mock(Expression.class);
+        given(mockExpression.getValue(delegateExecution)).willReturn(serviceTask.getName());
+        given(expressionManager.createExpression(anyString())).willReturn(mockExpression);
     }
 
     private void configureProperties() {

@@ -129,11 +129,13 @@ public class ConnectorAuditProducerIT {
                     .collect(Collectors.toList());
 
                 assertThat(receivedActivityStartedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((BPMNActivity) event.getEntity()).getElementId())
+                    .extracting(RuntimeEvent::getEventType,
+                                event -> ((BPMNActivity) event.getEntity()).getElementId(),
+                                event -> ((BPMNActivity) event.getEntity()).getActivityName())
                     .containsExactlyInAnyOrder(
-                        tuple(ACTIVITY_STARTED, "miCloudConnectorId"),
-                        tuple(ACTIVITY_STARTED, "miCloudConnectorId"),
-                        tuple(ACTIVITY_STARTED, "miCloudConnectorId")
+                        tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-0"),
+                        tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-1"),
+                        tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
                 List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = receivedEvents.stream()
@@ -144,11 +146,13 @@ public class ConnectorAuditProducerIT {
                     .collect(Collectors.toList());
 
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
+                    .extracting(RuntimeEvent::getEventType,
+                                event -> ((IntegrationContext) event.getEntity()).getClientId(),
+                                event -> ((IntegrationContext) event.getEntity()).getClientName())
                     .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId"),
-                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId"),
-                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId")
+                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-0"),
+                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-1"),
+                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
@@ -169,11 +173,13 @@ public class ConnectorAuditProducerIT {
                     .collect(Collectors.toList());
 
                 assertThat(receivedActivityCompletedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((BPMNActivity) event.getEntity()).getElementId())
+                    .extracting(RuntimeEvent::getEventType,
+                                event -> ((BPMNActivity) event.getEntity()).getElementId(),
+                                event -> ((BPMNActivity) event.getEntity()).getActivityName())
                     .containsExactlyInAnyOrder(
-                        tuple(ACTIVITY_COMPLETED, "miCloudConnectorId"),
-                        tuple(ACTIVITY_COMPLETED, "miCloudConnectorId"),
-                        tuple(ACTIVITY_COMPLETED, "miCloudConnectorId")
+                        tuple(ACTIVITY_COMPLETED, "miCloudConnectorId", "miCloudConnectorName-0"),
+                        tuple(ACTIVITY_COMPLETED, "miCloudConnectorId", "miCloudConnectorName-1"),
+                        tuple(ACTIVITY_COMPLETED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
                 List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = receivedEvents.stream()
@@ -184,11 +190,13 @@ public class ConnectorAuditProducerIT {
                     .collect(Collectors.toList());
 
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
+                    .extracting(RuntimeEvent::getEventType,
+                                event -> ((IntegrationContext) event.getEntity()).getClientId(),
+                                event -> ((IntegrationContext) event.getEntity()).getClientName())
                     .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId"),
-                        tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId"),
-                        tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId")
+                        tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-0"),
+                        tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-1"),
+                        tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
                 assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
@@ -220,11 +228,13 @@ public class ConnectorAuditProducerIT {
                     .collect(Collectors.toList());
 
                 assertThat(receivedActivityStartedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((BPMNActivity) event.getEntity()).getElementId())
+                    .extracting(RuntimeEvent::getEventType,
+                                event -> ((BPMNActivity) event.getEntity()).getElementId(),
+                                event -> ((BPMNActivity) event.getEntity()).getActivityName())
                     .containsExactlyInAnyOrder(
-                        tuple(ACTIVITY_STARTED, "miCloudConnectorId"),
-                        tuple(ACTIVITY_STARTED, "miCloudConnectorId"),
-                        tuple(ACTIVITY_STARTED, "miCloudConnectorId")
+                        tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-0"),
+                        tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-1"),
+                        tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
                 List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = receivedEvents.stream()
@@ -235,11 +245,13 @@ public class ConnectorAuditProducerIT {
                     .collect(Collectors.toList());
 
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
+                    .extracting(RuntimeEvent::getEventType,
+                                event -> ((IntegrationContext) event.getEntity()).getClientId(),
+                                event -> ((IntegrationContext) event.getEntity()).getClientName())
                     .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId"),
-                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId"),
-                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId")
+                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-0"),
+                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-1"),
+                        tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
@@ -275,11 +287,13 @@ public class ConnectorAuditProducerIT {
                     .collect(Collectors.toList());
 
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
+                    .extracting(RuntimeEvent::getEventType,
+                                event -> ((IntegrationContext) event.getEntity()).getClientId(),
+                                event -> ((IntegrationContext) event.getEntity()).getClientName())
                     .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_ERROR_RECEIVED, "miCloudConnectorId"),
-                        tuple(INTEGRATION_ERROR_RECEIVED, "miCloudConnectorId"),
-                        tuple(INTEGRATION_ERROR_RECEIVED, "miCloudConnectorId")
+                        tuple(INTEGRATION_ERROR_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-0"),
+                        tuple(INTEGRATION_ERROR_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-1"),
+                        tuple(INTEGRATION_ERROR_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
             });
     }

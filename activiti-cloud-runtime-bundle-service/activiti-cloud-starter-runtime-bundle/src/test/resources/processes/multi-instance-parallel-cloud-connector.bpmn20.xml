@@ -9,7 +9,7 @@
       <bpmn:incoming>SequenceFlow_1plg9em</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1plg9em" sourceRef="miCloudConnectorId" targetRef="EndEvent_1cvobxs" />
-    <bpmn:serviceTask id="miCloudConnectorId" name="miCloudConnectorName" implementation="miCloudConnector">
+    <bpmn:serviceTask id="miCloudConnectorId" name="miCloudConnectorName-${loopCounter}" implementation="miCloudConnector">
       <bpmn:incoming>SequenceFlow_0j28z0s</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1plg9em</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics>
