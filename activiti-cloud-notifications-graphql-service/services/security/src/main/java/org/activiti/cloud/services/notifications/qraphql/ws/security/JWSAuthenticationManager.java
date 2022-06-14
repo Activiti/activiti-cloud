@@ -43,18 +43,22 @@ public class JWSAuthenticationManager implements AuthenticationManager {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         JWSAuthentication token = null;
         try {
-            token = JWSAuthentication.class.cast(authentication);
+            if(authentication instanceof JWSAuthentication) {
 
-            String credentials = (String) token.getCredentials();
+                token = JWSAuthentication.class.cast(authentication);
 
-            AccessToken accessToken = tokenVerifier.verifyToken(credentials);
+                String credentials = (String) token.getCredentials();
 
-            Collection<? extends GrantedAuthority> authorities = authoritiesMapper.getGrantedAuthorities(accessToken.getRealmAccess()
-                                                                                                                    .getRoles());
-            User user = new User(accessToken.getPreferredUsername(), credentials, authorities);
+                AccessToken accessToken = tokenVerifier.verifyToken(credentials);
 
-            token = new JWSAuthentication(credentials, user, authorities);
-            token.setDetails(accessToken);
+                Collection<? extends GrantedAuthority> authorities = authoritiesMapper
+                    .getGrantedAuthorities(accessToken.getRealmAccess().getRoles());
+
+                User user = new User(accessToken.getPreferredUsername(), credentials, authorities);
+
+                token = new JWSAuthentication(credentials, user, authorities);
+                token.setDetails(accessToken);
+            }
 
         } catch (VerificationException e) {
             throw new BadCredentialsException("Invalid token", e);
