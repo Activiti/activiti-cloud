@@ -56,13 +56,13 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
     }
 
     private List<String> getFromClient(String clientId, Jwt jwt) {
-        JSONObject resourceAccess = jwt.getClaim("resource_access");
-
-        if (resourceAccess.get(clientId) != null) {
-            return getRoles((JSONObject) resourceAccess.get(clientId));
-        } else {
-            return Collections.emptyList();
+        if(jwt.hasClaim("resource_access")) {
+            JSONObject resourceAccess = jwt.getClaim("resource_access");
+            if (resourceAccess.get(clientId) != null) {
+                return getRoles((JSONObject) resourceAccess.get(clientId));
+            }
         }
+        return Collections.emptyList();
     }
 
     private List<String> getRoles(JSONObject getRolesParent) {
