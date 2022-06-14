@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.rest.controller;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 import org.activiti.cloud.identity.web.controller.AbstractIdentityManagementControllerIT;
+import org.activiti.cloud.identity.web.controller.config.Oauth2FeignConfiguration;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
@@ -28,7 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = ModelingRestApplication.class)
+@SpringBootTest(classes = { ModelingRestApplication.class, Oauth2FeignConfiguration.class})
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
