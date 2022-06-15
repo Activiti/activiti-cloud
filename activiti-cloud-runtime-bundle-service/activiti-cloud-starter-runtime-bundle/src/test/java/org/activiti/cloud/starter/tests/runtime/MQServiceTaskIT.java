@@ -15,7 +15,14 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
+import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingProperties;
 
@@ -24,9 +31,16 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
+
+    @Autowired
+    private CanFailConnector canFailConnector;
+
+    @Autowired
+    IntegrationRequestReplayer integrationRequestReplayer;
 
     @Test
     public void shouldConfigureDefaultConnectorBindingProperties() {
@@ -48,6 +62,36 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
                       entry("Constants Connector.constantsActionName", "Constants Connector.constantsActionName"),
                       entry("Variable Mapping Connector.variableMappingActionName", "Variable Mapping Connector.variableMappingActionName"),
                       entry("miCloudConnector", "miCloudConnector"));
+    }
+
+    @Test
+    public void shouldRecoverFromFailure() {
+        //given
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("firstName", "John");
+        ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskErrorRecoverProcess",
+            "businessKey",
+            variables);
+        assertThat(procInst).isNotNull();
+        await("the service task should fail the execution")
+            .untilTrue( canFailConnector.exceptionThrown());
+        assertThat(
+            taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list()).isEmpty();
+
+        //when
+        canFailConnector.setShouldThrowException(false);
+        integrationRequestReplayer.replay(canFailConnector.getLatestReceivedIntegrationRequest().getIntegrationContext().getId());
+
+        //then
+        await("the execution should arrive in the human tasks which follows the service task")
+            .untilAsserted(() -> {
+                    List<Task> tasks = taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list();
+                    assertThat(tasks).isNotNull();
+                    assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
+                }
+            );
+
     }
 
 }

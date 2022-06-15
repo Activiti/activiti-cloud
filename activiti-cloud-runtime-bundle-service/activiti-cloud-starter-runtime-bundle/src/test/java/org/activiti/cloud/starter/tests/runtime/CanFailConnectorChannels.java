@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.activiti.cloud.starter.tests.helper.HelperConfiguration;
-import org.activiti.cloud.starter.tests.util.VariablesUtil;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Import;
+import org.springframework.cloud.stream.annotation.Input;
+import org.springframework.messaging.SubscribableChannel;
 
-@TestConfiguration
-@Import({HelperConfiguration.class,
-    ServiceTaskConsumerHandler.class,
-    IntegrationResultSender.class,
-    CanFailConnector.class,
-    VariablesUtil.class})
-public class RuntimeITConfiguration {
+public interface CanFailConnectorChannels {
+
+    String CAN_FAIL_CONNECTOR = "canFailConnector";
+    @Input(CAN_FAIL_CONNECTOR)
+    SubscribableChannel canFailConnector();
 
 }

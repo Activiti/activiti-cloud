@@ -28,6 +28,7 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
+import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,18 +82,17 @@ public class MQServiceTaskBehaviorTest {
     private ArgumentCaptor<IntegrationRequestImpl> integrationRequestCaptor;
 
     @Mock
-    private BindingServiceProperties bindingServiceProperties;
+    private IntegrationRequestBuilder integrationRequestBuilder;
 
     @BeforeEach
     public void setUp() {
         behavior = spy(new MQServiceTaskBehavior(integrationContextManager,
                                                  eventPublisher,
                                                  integrationContextBuilder,
-                                                 runtimeBundleInfoAppender,
-                                                 defaultServiceTaskBehavior,
+            defaultServiceTaskBehavior,
                                                  processEngineEventsAggregator,
                                                  runtimeBundleProperties,
-                                                 bindingServiceProperties));
+            integrationRequestBuilder));
     }
 
     @Test
