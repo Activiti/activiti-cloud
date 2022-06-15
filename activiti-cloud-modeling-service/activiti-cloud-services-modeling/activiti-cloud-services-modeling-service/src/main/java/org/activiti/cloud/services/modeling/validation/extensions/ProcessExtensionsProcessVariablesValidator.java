@@ -49,7 +49,7 @@ public class ProcessExtensionsProcessVariablesValidator implements ProcessExtens
 
         return extensions.getVariablesMappings().values()
                 .stream()
-                .flatMap(actionMappings -> actionMappings.entrySet().stream())
+                .flatMap(actionMappings -> actionMappings.getServiceTaskActionTypeMap().entrySet().stream())
                 .flatMap(taskMappingEntry -> this.validateProcessVariableMapping(taskMappingEntry.getKey(),
                                                                             taskMappingEntry.getValue(),
                                                                             bpmnModel.getId(),
