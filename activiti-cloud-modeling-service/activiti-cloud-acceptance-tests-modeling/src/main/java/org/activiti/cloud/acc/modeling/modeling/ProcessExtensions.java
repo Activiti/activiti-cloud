@@ -15,24 +15,19 @@
  */
 package org.activiti.cloud.acc.modeling.modeling;
 
-import com.google.common.collect.ImmutableMap;
-import org.activiti.cloud.modeling.api.process.Extensions;
-import org.activiti.cloud.modeling.api.process.ProcessVariable;
-import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
-import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
-
+import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toMap;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
-import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
-import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
+import org.activiti.cloud.modeling.api.process.Extensions;
+import org.activiti.cloud.modeling.api.process.ProcessVariable;
+import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
+import org.activiti.cloud.modeling.api.process.TaskMapping;
 
 /**
  * Modeling utils
@@ -61,18 +56,18 @@ public class ProcessExtensions {
                                           ProcessExtensions::toProcessVariable));
     }
 
-    public static Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>> variableMappings(Collection<String> processVariables) {
-        return singletonMap(EXTENSIONS_TASK_NAME,
-                            ImmutableMap.of(INPUTS,
-                                            processVariables
-                                                    .stream()
-                                                    .collect(toMap(Function.identity(),
-                                                                   ProcessExtensions::toFixedProcessVariableMapping)),
-                                            OUTPUTS,
-                                            processVariables
-                                                    .stream()
-                                                    .collect(toMap(Function.identity(),
-                                                                   ProcessExtensions::toVariableProcessVariableMapping))));
+    public static Map<String, TaskMapping> variableMappings(Collection<String> processVariables) {
+        TaskMapping taskMapping = new TaskMapping();
+        taskMapping.setInputs(processVariables
+            .stream()
+            .collect(toMap(Function.identity(),
+                ProcessExtensions::toFixedProcessVariableMapping)));
+        taskMapping.setOutputs(processVariables
+            .stream()
+            .collect(toMap(Function.identity(),
+                ProcessExtensions::toVariableProcessVariableMapping)));
+
+        return singletonMap(EXTENSIONS_TASK_NAME, taskMapping);
     }
 
     public static ProcessVariable toProcessVariable(String name) {

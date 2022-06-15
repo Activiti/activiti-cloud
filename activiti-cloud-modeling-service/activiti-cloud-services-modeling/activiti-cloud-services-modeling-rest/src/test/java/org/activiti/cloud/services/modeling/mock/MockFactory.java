@@ -39,6 +39,7 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.api.process.ProcessVariable;
 import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
+import org.activiti.cloud.modeling.api.process.TaskMapping;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
@@ -200,14 +201,11 @@ public class MockFactory {
                                         Map<String, ProcessVariableMapping> inputsMappings,
                                         Map<String, ProcessVariableMapping> outputsMappings) {
         Extensions extensions = new Extensions();
+        TaskMapping taskMapping = new TaskMapping();
+        taskMapping.setInputs(inputsMappings);
+        taskMapping.setOutputs(outputsMappings);
         extensions.setProcessVariables(processVariables);
-        extensions.setVariablesMappings(
-                singletonMap(serviceTask,
-                        Map.of(INPUTS,
-                                inputsMappings,
-                                OUTPUTS,
-                                outputsMappings))
-        );
+        extensions.setVariablesMappings(singletonMap(serviceTask,taskMapping));
         return extensions;
     }
 

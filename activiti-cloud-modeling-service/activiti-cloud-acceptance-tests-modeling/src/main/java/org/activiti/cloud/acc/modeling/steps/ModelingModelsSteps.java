@@ -15,11 +15,32 @@
  */
 package org.activiti.cloud.acc.modeling.steps;
 
+import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
+import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.HOST_VALUE;
+import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.extensions;
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.springframework.hateoas.IanaLinkRelations.SELF;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
@@ -35,23 +56,8 @@ import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
-
-import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
-import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.HOST_VALUE;
-import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.extensions;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
-import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
-import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
-import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.IanaLinkRelations.SELF;
+import org.springframework.hateoas.Link;
 
 /**
  * Modeling steps for models
@@ -266,8 +272,11 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         });
 
         assertThat(this.getExtensionFromMap(model).getVariablesMappings()).containsKeys(EXTENSIONS_TASK_NAME);
-        assertThat(this.getExtensionFromMap(model).getVariablesMappings().get(EXTENSIONS_TASK_NAME)).containsKeys(INPUTS,
-                                                                                                        OUTPUTS);
+        assertThat(
+            this.getExtensionFromMap(model).getVariablesMappings().get(EXTENSIONS_TASK_NAME).getInputs()).isNotNull();
+        assertThat(
+            this.getExtensionFromMap(model).getVariablesMappings().get(EXTENSIONS_TASK_NAME).getOutputs()).isNotNull();
+
         assertProcessVariableMappings(model,
                                       INPUTS,
                                       processVariables);
