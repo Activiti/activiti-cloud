@@ -19,7 +19,7 @@
     <module>activiti-cloud-starter-runtime-bundle-it</module>
   </modules>
   <properties>
-    <activiti.version>7.2.1-alpha.1</activiti.version>
+    <activiti.version>7.2.3-alpha.1</activiti.version>
   </properties>
   <dependencyManagement>
     <dependencies>
