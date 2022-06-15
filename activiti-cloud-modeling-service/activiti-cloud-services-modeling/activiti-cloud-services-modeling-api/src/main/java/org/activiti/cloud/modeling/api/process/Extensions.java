@@ -36,7 +36,7 @@ public class Extensions {
     private Map<String, ProcessVariable> processVariables = new HashMap<>();
 
     @JsonProperty("mappings")
-    private Map<String, TaskMapping> variablesMappings = new HashMap<>();
+    private Map<String, TaskVariableMapping> variablesMappings = new HashMap<>();
 
     @JsonProperty("constants")
     private Map<String,  Map<String, Constant>> constants = new HashMap<>();
@@ -52,11 +52,11 @@ public class Extensions {
         this.processVariables = processVariables;
     }
 
-    public Map<String, TaskMapping> getVariablesMappings() {
+    public Map<String, TaskVariableMapping> getVariablesMappings() {
         return variablesMappings;
     }
 
-    public void setVariablesMappings(Map<String, TaskMapping> variablesMappings) {
+    public void setVariablesMappings(Map<String, TaskVariableMapping> variablesMappings) {
         this.variablesMappings = variablesMappings;
     }
 

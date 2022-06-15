@@ -22,11 +22,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * Email template mapping item
+ * Task Variable Mapping representation
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class TaskMapping {
+public class TaskVariableMapping {
 
     private MappingType mappingType;
     private Map<String, ProcessVariableMapping> inputs = new HashMap<>();
