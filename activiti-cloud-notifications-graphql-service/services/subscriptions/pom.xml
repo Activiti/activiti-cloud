@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-notifications-graphql</artifactId>
-    <version>7.2.1-SNAPSHOT</version>
+    <version>7.2.3-alpha.1</version>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql-subscriptions</artifactId>
   <name>Activiti Cloud Notifications :: Services :: GraphQL Subscriptions</name>
