@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-notifications-service-graphql-parent</artifactId>
-    <version>7.2.1-SNAPSHOT</version>
+    <version>7.2.3-alpha.2</version>
   </parent>
   <name>Activiti Cloud Notifications :: GraphQL Dependencies (Bill Of Materials)</name>
   <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
