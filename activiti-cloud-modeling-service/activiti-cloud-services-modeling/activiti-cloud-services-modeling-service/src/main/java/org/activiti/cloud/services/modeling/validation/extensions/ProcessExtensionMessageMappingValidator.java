@@ -15,22 +15,27 @@
  */
 package org.activiti.cloud.services.modeling.validation.extensions;
 
-import org.activiti.bpmn.model.*;
+import static java.lang.String.format;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.activiti.bpmn.model.BoundaryEvent;
+import org.activiti.bpmn.model.EndEvent;
+import org.activiti.bpmn.model.Event;
+import org.activiti.bpmn.model.FlowNode;
+import org.activiti.bpmn.model.IntermediateCatchEvent;
+import org.activiti.bpmn.model.MessageEventDefinition;
+import org.activiti.bpmn.model.StartEvent;
+import org.activiti.bpmn.model.ThrowEvent;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
-
-import java.util.Set;
-import java.util.Map;
-import java.util.List;
-import java.util.Collection;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.lang.String.format;
 
 /**
  * Implementation of {@link ProcessExtensionsValidator} for validating message payload name
@@ -55,7 +60,8 @@ public class ProcessExtensionMessageMappingValidator implements ProcessExtension
             .collect(Collectors.toSet());
 
         return extensions.getVariablesMappings().entrySet().stream().flatMap(taskMapping ->
-            validateMapping(bpmnModel.getId(), taskMapping.getKey(), taskMapping.getValue(), messageElements));
+            validateMapping(bpmnModel.getId(), taskMapping.getKey(),
+                taskMapping.getValue().getServiceTaskActionTypeMap(), messageElements));
     }
 
     private Stream<ModelValidationError> validateMapping(String processId,

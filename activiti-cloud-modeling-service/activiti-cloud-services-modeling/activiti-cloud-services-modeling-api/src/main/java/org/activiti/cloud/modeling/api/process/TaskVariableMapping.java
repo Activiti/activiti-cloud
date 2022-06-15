@@ -18,6 +18,7 @@ package org.activiti.cloud.modeling.api.process;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import java.util.HashMap;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -40,10 +41,6 @@ public class TaskVariableMapping {
         this.inputs = inputs;
     }
 
-    public ProcessVariableMapping getInputMapping(String inputName) {
-        return inputs.get(inputName);
-    }
-
     public Map<String, ProcessVariableMapping> getOutputs() {
         return outputs;
     }
@@ -60,6 +57,7 @@ public class TaskVariableMapping {
         this.mappingType = mappingType;
     }
 
+    @JsonIgnore
     public Map<String, ProcessVariableMapping> get(ServiceTaskActionType serviceTaskActionType) {
         if (serviceTaskActionType == ServiceTaskActionType.INPUTS) {
             return getInputs();
@@ -68,6 +66,18 @@ public class TaskVariableMapping {
         } else {
             return new HashMap<>();
         }
+    }
+
+    @JsonIgnore
+    public Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> getServiceTaskActionTypeMap() {
+        Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> serviceTaskActionTypeMap = new HashMap<>();
+        if (getInputs() != null) {
+            serviceTaskActionTypeMap.put(ServiceTaskActionType.INPUTS, getInputs());
+        }
+        if (getOutputs() != null) {
+            serviceTaskActionTypeMap.put(ServiceTaskActionType.OUTPUTS, getOutputs());
+        }
+        return serviceTaskActionTypeMap;
     }
 
     public enum MappingType {
