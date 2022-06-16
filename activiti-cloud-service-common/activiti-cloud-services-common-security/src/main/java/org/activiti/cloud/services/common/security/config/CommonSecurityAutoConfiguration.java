@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.common.security.config;
 
+import feign.RequestInterceptor;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
@@ -24,6 +25,7 @@ import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
 import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
+import org.activiti.cloud.security.feign.TokenRelayRequestInterceptor;
 import org.activiti.cloud.services.common.security.CustomBearerTokenAccessDeniedHandler;
 import org.activiti.cloud.services.common.security.SecurityManagerImpl;
 import org.activiti.cloud.services.common.security.jwt.JtwAccessTokenPrincipalRolesProvider;
@@ -154,6 +156,12 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     @ConditionalOnMissingBean
     protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
         return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RequestInterceptor tokenRelayRequestInterceptor(SecurityContextTokenProvider securityContextTokenProvider) {
+        return new TokenRelayRequestInterceptor(securityContextTokenProvider);
     }
 
     @Override

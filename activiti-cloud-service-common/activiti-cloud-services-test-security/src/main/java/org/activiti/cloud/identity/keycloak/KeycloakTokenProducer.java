@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.test.identity.keycloak;
+package org.activiti.cloud.identity.keycloak;
 
-import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
-import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.activiti.cloud.identity.IdentityTokenProducer;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,13 +41,30 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
 
     @Override
     public String getTokenString() {
-        AccessTokenResponse token = getAccessTokenResponse(testUser, testPassword);
-        return "Bearer " + token.getToken();
+        return "Bearer " + getAccessTokenString();
     }
 
     @Override
-    public void setTestUser(String keycloakTestUser) {
+    public String getAccessTokenString() {
+        AccessTokenResponse token = getAccessTokenResponse(testUser, testPassword);
+        return token.getToken();
+    }
+
+    @Override
+    public IdentityTokenProducer withTestUser(String keycloakTestUser) {
         this.testUser = keycloakTestUser;
+        return this;
+    }
+
+    @Override
+    public IdentityTokenProducer withTestPassword(String testPassword) {
+        this.testPassword = testPassword;
+        return this;
+    }
+
+    public IdentityTokenProducer withResource(String resource) {
+        this.resource = resource;
+        return this;
     }
 
     @Override

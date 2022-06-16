@@ -15,17 +15,16 @@
  */
 package org.activiti.cloud.services.test;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
-import org.activiti.cloud.services.test.identity.interceptor.IdentityTokenInterceptor;
-import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
-import org.activiti.cloud.services.test.identity.keycloak.KeycloakTokenProducer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import org.activiti.cloud.identity.IdentityTokenProducer;
+import org.activiti.cloud.identity.interceptor.IdentityTokenInterceptor;
+import org.activiti.cloud.identity.keycloak.KeycloakProperties;
+import org.activiti.cloud.identity.keycloak.KeycloakTokenProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.test.identity;
+package org.activiti.cloud.identity;
 
+import org.activiti.cloud.identity.keycloak.KeycloakTokenProducer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
@@ -24,7 +25,11 @@ public interface IdentityTokenProducer {
 
     String getTokenString();
 
-    void setTestUser(String keycloakTestUser);
+    IdentityTokenProducer withResource(String resource);
+    IdentityTokenProducer withTestPassword(String password);
+    IdentityTokenProducer withTestUser(String user);
+
+    String getAccessTokenString();
 
     HttpEntity entityWithAuthorizationHeader(String user, String password);
 
