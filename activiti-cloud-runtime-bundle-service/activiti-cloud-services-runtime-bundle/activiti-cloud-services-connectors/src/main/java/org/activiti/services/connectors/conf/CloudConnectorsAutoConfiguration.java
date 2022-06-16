@@ -98,15 +98,12 @@ public class CloudConnectorsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationRequestReplayer integrationRequestReplayer(
-        IntegrationContextService integrationContextService,
-        RuntimeService runtimeService, IntegrationContextBuilder integrationContextBuilder,
-        IntegrationRequestBuilder integrationRequestBuilder,
-        IntegrationRequestSender integrationRequestSender){
-        return new IntegrationRequestReplayer(integrationContextService, runtimeService,
-            integrationContextBuilder,
-            integrationRequestBuilder,
-            integrationRequestSender);
+    public IntegrationRequestReplayer integrationRequestReplayer(RuntimeService runtimeService,
+                                                                 ManagementService managementService,
+                                                                 MQServiceTaskBehavior mqServiceTaskBehavior){
+        return new IntegrationRequestReplayer(runtimeService,
+                                              managementService,
+                                              mqServiceTaskBehavior);
     }
 
     @Bean

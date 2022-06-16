@@ -15,9 +15,8 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
@@ -27,6 +26,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingProperties;
 
 import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +41,10 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
     private CanFailConnector canFailConnector;
 
     @Autowired
-    IntegrationRequestReplayer integrationRequestReplayer;
+    private IntegrationRequestReplayer integrationRequestReplayer;
+
+    @Autowired
+    private IntegrationContextService integrationContextService;
 
     @Test
     public void shouldConfigureDefaultConnectorBindingProperties() {
@@ -67,21 +71,24 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
     @Test
     public void shouldRecoverFromFailure() {
         //given
-
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName", "John");
         ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskErrorRecoverProcess",
-            "businessKey",
-            variables);
+                                                                            "businessKey",
+                                                                            variables);
         assertThat(procInst).isNotNull();
         await("the service task should fail the execution")
-            .untilTrue( canFailConnector.exceptionThrown());
-        assertThat(
-            taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list()).isEmpty();
+            .untilTrue(canFailConnector.exceptionThrown());
 
+        assertThat(taskService.createTaskQuery()
+                              .processInstanceId(procInst.getProcessInstanceId())
+                              .list()).isEmpty();
         //when
+        IntegrationContext integrationContext = canFailConnector.getLatestReceivedIntegrationRequest()
+                                                                .getIntegrationContext();
         canFailConnector.setShouldThrowException(false);
-        integrationRequestReplayer.replay(canFailConnector.getLatestReceivedIntegrationRequest().getIntegrationContext().getId());
+        integrationRequestReplayer.replay(integrationContext.getExecutionId(),
+                                          integrationContext.getClientId());
 
         //then
         await("the execution should arrive in the human tasks which follows the service task")
@@ -91,7 +98,6 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
                     assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
                 }
             );
-
     }
 
 }

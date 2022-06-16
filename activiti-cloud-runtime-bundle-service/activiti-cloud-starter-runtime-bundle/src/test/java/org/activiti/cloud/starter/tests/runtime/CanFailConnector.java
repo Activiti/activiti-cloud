@@ -16,11 +16,12 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @TestComponent
 @EnableBinding(CanFailConnectorChannels.class)
@@ -47,7 +48,7 @@ public class CanFailConnector {
         exceptionThrown.set(false);
         if (shouldThrowException) {
             exceptionThrown.set(true);
-            throw new RuntimeException("The connector 'canFail' is configured to throw an exception");
+            return;
         }
         integrationResultSender.send(integrationRequest, integrationRequest.getIntegrationContext());
     }
