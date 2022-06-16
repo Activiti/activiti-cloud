@@ -72,7 +72,7 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
                 .stream()
                 .flatMap(taskMapping -> validateTaskMapping(bpmnModel.getId(),
                                                             taskMapping.getKey(),
-                                                            taskMapping.getValue(),
+                                                            taskMapping.getValue().getServiceTaskActionTypeMap(),
                                                             getTaskConstants(extensions,taskMapping.getKey()),
                                                             availableTasks,
                                                             validationContext));

@@ -18,8 +18,6 @@ package org.activiti.cloud.services.modeling.mock;
 import static java.util.Collections.singletonMap;
 import static org.activiti.cloud.modeling.api.ProcessModelType.BPMN20_XML;
 import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
 import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
@@ -39,6 +37,7 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.api.process.ProcessVariable;
 import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
+import org.activiti.cloud.modeling.api.process.TaskVariableMapping;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
@@ -200,14 +199,11 @@ public class MockFactory {
                                         Map<String, ProcessVariableMapping> inputsMappings,
                                         Map<String, ProcessVariableMapping> outputsMappings) {
         Extensions extensions = new Extensions();
+        TaskVariableMapping taskVariableMapping = new TaskVariableMapping();
+        taskVariableMapping.setInputs(inputsMappings);
+        taskVariableMapping.setOutputs(outputsMappings);
         extensions.setProcessVariables(processVariables);
-        extensions.setVariablesMappings(
-                singletonMap(serviceTask,
-                        Map.of(INPUTS,
-                                inputsMappings,
-                                OUTPUTS,
-                                outputsMappings))
-        );
+        extensions.setVariablesMappings(singletonMap(serviceTask, taskVariableMapping));
         return extensions;
     }
 
