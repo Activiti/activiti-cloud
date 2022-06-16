@@ -32,10 +32,12 @@ public class CanFailConnector {
     private IntegrationRequest latestReceivedIntegrationRequest;
 
     private final IntegrationResultSender integrationResultSender;
+    private final IntegrationErrorSender integrationErrorSender;
 
-    public CanFailConnector(
-        IntegrationResultSender integrationResultSender) {
+    public CanFailConnector(IntegrationResultSender integrationResultSender,
+                            IntegrationErrorSender integrationErrorSender) {
         this.integrationResultSender = integrationResultSender;
+        this.integrationErrorSender = integrationErrorSender;
     }
 
     public void setShouldThrowException(boolean shouldThrowException) {
@@ -48,6 +50,8 @@ public class CanFailConnector {
         exceptionThrown.set(false);
         if (shouldThrowException) {
             exceptionThrown.set(true);
+            integrationErrorSender.send(integrationRequest,
+                                        new RuntimeException("task failed"));
             return;
         }
         integrationResultSender.send(integrationRequest, integrationRequest.getIntegrationContext());

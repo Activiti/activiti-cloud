@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Import;
 @Import({HelperConfiguration.class,
     ServiceTaskConsumerHandler.class,
     IntegrationResultSender.class,
+    IntegrationErrorSender.class,
     CanFailConnector.class,
     VariablesUtil.class})
 public class RuntimeITConfiguration {
