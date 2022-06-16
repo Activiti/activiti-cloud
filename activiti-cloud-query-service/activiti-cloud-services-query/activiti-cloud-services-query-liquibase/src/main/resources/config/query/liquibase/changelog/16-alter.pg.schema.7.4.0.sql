@@ -16,3 +16,6 @@
 
 update bpmn_activity set id = concat(process_instance_id, ':', element_id, ':', execution_id)
   where id not like '%:%:%';
+
+update integration_context set id = concat(process_instance_id, ':', element_id, ':', execution_id)
+  where id not like '%:%:%';
