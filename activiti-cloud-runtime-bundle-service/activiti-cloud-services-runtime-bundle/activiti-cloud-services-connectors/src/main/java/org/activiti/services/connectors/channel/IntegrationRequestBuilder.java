@@ -24,8 +24,8 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 
 public class IntegrationRequestBuilder implements Serializable {
 
-    public final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    public final BindingServiceProperties bindingServiceProperties;
+    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    private final BindingServiceProperties bindingServiceProperties;
 
     public IntegrationRequestBuilder(RuntimeBundleInfoAppender runtimeBundleInfoAppender, BindingServiceProperties bindingServiceProperties) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
