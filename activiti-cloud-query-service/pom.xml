@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>7.4.0-alpha.30</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-query-service-parent</artifactId>
   <name>Activiti Cloud Query :: Parent</name>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>7.4.0-alpha.30</version>
   <packaging>pom</packaging>
   <modules>
 
