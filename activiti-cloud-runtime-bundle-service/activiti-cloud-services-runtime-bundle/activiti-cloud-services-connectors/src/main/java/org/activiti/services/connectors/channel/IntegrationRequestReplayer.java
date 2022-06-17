@@ -42,19 +42,15 @@ public class IntegrationRequestReplayer {
 
     public void replay(String executionId, String flowNodeId) {
         List<Execution> executions = runtimeService.createExecutionQuery()
-                                                   .executionId(executionId)
-                                                   .list();
-        if (executions.size() > 0) {
-            ExecutionEntity execution = ExecutionEntity.class.cast(executions.get(0));
-            if (execution.getActivityId().equals(flowNodeId)) {
-                managementService.executeCommand((Command<Void>) commandContext -> {
-                    mqServiceTaskBehavior.execute(execution);
-                    return null;
-                });
-            } else {
-                throw new ActivitiException("Unable to replay integration context because it points to flowNode '" +
-                    flowNodeId + "' while the related execution points to flowNode '" + execution.getActivityId() );
-            }
+            .executionId(executionId)
+            .activityId(flowNodeId)
+            .list();
+        if (!executions.isEmpty()) {
+            ExecutionEntity execution = (ExecutionEntity) executions.get(0);
+            managementService.executeCommand((Command<Void>) commandContext -> {
+                mqServiceTaskBehavior.execute(execution);
+                return null;
+            });
         } else {
             String message = "Unable to replay integration request because no task is in this RB is waiting for integration result with execution id `" +
                 executionId + ", flow node id `" + flowNodeId + "'";
