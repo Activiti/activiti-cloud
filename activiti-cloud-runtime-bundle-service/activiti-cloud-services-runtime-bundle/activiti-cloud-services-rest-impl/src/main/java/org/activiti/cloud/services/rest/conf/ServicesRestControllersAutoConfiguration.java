@@ -29,6 +29,7 @@ import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImp
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceTasksControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableControllerImpl;
+import org.activiti.cloud.services.rest.controllers.RecoverControllerImpl;
 import org.activiti.cloud.services.rest.controllers.RuntimeBundleExceptionHandler;
 import org.activiti.cloud.services.rest.controllers.TaskAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskControllerImpl;
@@ -60,7 +61,8 @@ import org.springframework.context.annotation.Import;
         CandidateUserControllerImpl.class,
         CandidateUserAdminControllerImpl.class,
         CandidateGroupControllerImpl.class,
-        CandidateGroupAdminControllerImpl.class})
+        CandidateGroupAdminControllerImpl.class,
+        RecoverControllerImpl.class})
 public class ServicesRestControllersAutoConfiguration {
 
 }

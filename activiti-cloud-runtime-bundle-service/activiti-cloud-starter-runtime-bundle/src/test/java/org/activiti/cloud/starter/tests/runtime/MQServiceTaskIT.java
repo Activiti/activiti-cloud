@@ -16,20 +16,26 @@
 package org.activiti.cloud.starter.tests.runtime;
 
 import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.engine.integration.IntegrationContextService;
+import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.stream.config.BindingProperties;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.CONTENT_TYPE_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.awaitility.Awaitility.await;
@@ -41,10 +47,7 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
     private CanFailConnector canFailConnector;
 
     @Autowired
-    private IntegrationRequestReplayer integrationRequestReplayer;
-
-    @Autowired
-    private IntegrationContextService integrationContextService;
+    private TestRestTemplate testRestTemplate;
 
     @Test
     public void shouldConfigureDefaultConnectorBindingProperties() {
@@ -87,8 +90,7 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
         IntegrationContext integrationContext = canFailConnector.getLatestReceivedIntegrationRequest()
                                                                 .getIntegrationContext();
         canFailConnector.setShouldSendError(false);
-        integrationRequestReplayer.replay(integrationContext.getExecutionId(),
-                                          integrationContext.getClientId());
+        replayServiceTask(integrationContext);
 
         //then
         await("the execution should arrive in the human tasks which follows the service task")
@@ -98,6 +100,18 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
                     assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
                 }
             );
+    }
+
+    private void replayServiceTask(IntegrationContext integrationContext) {
+        identityTokenProducer.setTestUser("testadmin");
+        final ResponseEntity<Void> responseEntity = testRestTemplate.exchange("/admin/v1/recover/replay-service-task",
+            HttpMethod.POST,
+            new HttpEntity<>(new ReplayServiceTaskRequest(integrationContext.getExecutionId(),
+                integrationContext.getClientId()), CONTENT_TYPE_HEADER),
+            new ParameterizedTypeReference<>() {
+            });
+        identityTokenProducer.setTestUser(keycloakTestUser);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
 }
