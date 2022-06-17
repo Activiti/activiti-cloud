@@ -78,7 +78,7 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
                                                                             variables);
         assertThat(procInst).isNotNull();
         await("the service task should fail the execution")
-            .untilTrue(canFailConnector.exceptionThrown());
+            .untilTrue(canFailConnector.errorSent());
 
         assertThat(taskService.createTaskQuery()
                               .processInstanceId(procInst.getProcessInstanceId())
@@ -86,7 +86,7 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
         //when
         IntegrationContext integrationContext = canFailConnector.getLatestReceivedIntegrationRequest()
                                                                 .getIntegrationContext();
-        canFailConnector.setShouldThrowException(false);
+        canFailConnector.setShouldSendError(false);
         integrationRequestReplayer.replay(integrationContext.getExecutionId(),
                                           integrationContext.getClientId());
 

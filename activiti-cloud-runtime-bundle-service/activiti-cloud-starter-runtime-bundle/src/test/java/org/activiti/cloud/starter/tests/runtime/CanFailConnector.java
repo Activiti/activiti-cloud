@@ -27,8 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @EnableBinding(CanFailConnectorChannels.class)
 public class CanFailConnector {
 
-    private boolean shouldThrowException = true;
-    private AtomicBoolean exceptionThrown = new AtomicBoolean(false);
+    private boolean shouldSendError = true;
+    private AtomicBoolean integrationErrorSent = new AtomicBoolean(false);
     private IntegrationRequest latestReceivedIntegrationRequest;
 
     private final IntegrationResultSender integrationResultSender;
@@ -40,25 +40,26 @@ public class CanFailConnector {
         this.integrationErrorSender = integrationErrorSender;
     }
 
-    public void setShouldThrowException(boolean shouldThrowException) {
-        this.shouldThrowException = shouldThrowException;
+    public void setShouldSendError(boolean shouldSendError) {
+        this.shouldSendError = shouldSendError;
     }
 
     @StreamListener(value = CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
     public void canFailConnector(IntegrationRequest integrationRequest) {
         latestReceivedIntegrationRequest = integrationRequest;
-        exceptionThrown.set(false);
-        if (shouldThrowException) {
-            exceptionThrown.set(true);
+        integrationErrorSent.set(false);
+        if (shouldSendError) {
+            integrationErrorSent.set(true);
             integrationErrorSender.send(integrationRequest,
                                         new RuntimeException("task failed"));
-            return;
+        } else {
+            integrationResultSender.send(integrationRequest,
+                integrationRequest.getIntegrationContext());
         }
-        integrationResultSender.send(integrationRequest, integrationRequest.getIntegrationContext());
     }
 
-    public AtomicBoolean exceptionThrown() {
-        return exceptionThrown;
+    public AtomicBoolean errorSent() {
+        return integrationErrorSent;
     }
 
     public IntegrationRequest getLatestReceivedIntegrationRequest() {
