@@ -35,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -43,7 +44,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class MQServiceTaskBehaviorTest {
@@ -82,6 +88,9 @@ public class MQServiceTaskBehaviorTest {
     private ArgumentCaptor<IntegrationRequestImpl> integrationRequestCaptor;
 
     @Mock
+    private BindingServiceProperties bindingServiceProperties;
+
+    @InjectMocks
     private IntegrationRequestBuilder integrationRequestBuilder;
 
     @BeforeEach
