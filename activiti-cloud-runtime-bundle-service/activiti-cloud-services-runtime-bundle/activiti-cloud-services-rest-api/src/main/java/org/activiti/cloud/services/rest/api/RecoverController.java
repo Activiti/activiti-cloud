@@ -22,11 +22,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.validation.Valid;
+
 @RequestMapping(value = "/admin/v1/recover",
     produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
 public interface RecoverController {
 
     @PostMapping(value = "/replay-service-task")
-    ResponseEntity<Void> replayServiceTask(ReplayServiceTaskRequest replayServiceTaskRequest);
+    ResponseEntity<Void> replayServiceTask(@Valid ReplayServiceTaskRequest replayServiceTaskRequest);
 
 }
