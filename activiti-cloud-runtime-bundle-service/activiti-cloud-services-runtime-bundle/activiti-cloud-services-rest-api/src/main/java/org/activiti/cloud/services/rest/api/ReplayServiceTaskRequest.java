@@ -16,11 +16,8 @@
 
 package org.activiti.cloud.services.rest.api;
 
-import org.springframework.validation.annotation.Validated;
-
 import javax.validation.constraints.NotEmpty;
 
-@Validated
 public class ReplayServiceTaskRequest {
 
     @NotEmpty

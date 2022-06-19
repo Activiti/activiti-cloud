@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import javax.validation.Valid;
 import org.activiti.cloud.services.rest.api.RecoverController;
 import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
@@ -24,6 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestController
 public class RecoverControllerImpl implements RecoverController {
