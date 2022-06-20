@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
 import org.activiti.cloud.services.rest.api.ServiceTaskAdminController;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.springframework.http.HttpStatus;
@@ -25,15 +26,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ServiceTaskAdminControllerImpl implements ServiceTaskAdminController {
 
-    private IntegrationRequestReplayer integrationRequestReplayer;
+    private final IntegrationRequestReplayer integrationRequestReplayer;
 
     public ServiceTaskAdminControllerImpl(IntegrationRequestReplayer integrationRequestReplayer) {
         this.integrationRequestReplayer = integrationRequestReplayer;
     }
 
     @Override
-    public ResponseEntity<Void> replayServiceTask(String executionId, String flowNodeId) {
-        integrationRequestReplayer.replay(executionId, flowNodeId);
+    public ResponseEntity<Void> replayServiceTask(String executionId, ReplayServiceTaskRequest replayServiceTaskRequest) {
+        integrationRequestReplayer.replay(executionId, replayServiceTaskRequest.getFlowNodeId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

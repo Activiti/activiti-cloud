@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.tests.runtime;
 
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.junit.jupiter.api.Test;
@@ -29,10 +30,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.CONTENT_TYPE_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.awaitility.Awaitility.await;
@@ -55,9 +58,9 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
 
         //then
         assertThat(bindings)
-            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
-                                                                                        entry.getValue()
-                                                                                             .getDestination()))
+            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
+                entry.getValue()
+                    .getDestination()))
             .contains(entry("mealsConnector", "mealsConnector"),
                       entry("rest.GET", "rest.GET"),
                       entry("perfromBusinessTask", "perfromBusinessTask"),
@@ -101,11 +104,11 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
 
     private void replayServiceTask(IntegrationContext integrationContext) {
         identityTokenProducer.setTestUser("testadmin");
-        final ResponseEntity<Void> responseEntity = testRestTemplate.exchange("/admin/v1/executions/{executionId}/replay-service-task/{flowNodeId}",
+        final ResponseEntity<Void> responseEntity = testRestTemplate.exchange("/admin/v1/executions/{executionId}/replay/service-task",
             HttpMethod.POST,
-            null,
+            new HttpEntity<>(new ReplayServiceTaskRequest(integrationContext.getClientId()), CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<>() {
-            }, integrationContext.getExecutionId(), integrationContext.getClientId());
+            }, integrationContext.getExecutionId());
         identityTokenProducer.setTestUser(keycloakTestUser);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
