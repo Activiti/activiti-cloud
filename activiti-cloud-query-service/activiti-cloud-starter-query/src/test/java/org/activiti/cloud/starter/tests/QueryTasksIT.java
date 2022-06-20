@@ -145,7 +145,7 @@ public class QueryTasksIT {
         variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
         runningProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator",
                                                                                              TESTUSER);
-        identityTokenProducer.setTestUser(TESTUSER);
+        identityTokenProducer.withTestUser(TESTUSER);
     }
 
     @AfterEach
@@ -600,7 +600,7 @@ public class QueryTasksIT {
     @Test
     public void shouldGetRestrictedTasksWithUserPermission() {
         //given
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate("task with candidate",
                                                                                   "testuser",
                                                                                   runningProcessInstance);
@@ -648,7 +648,7 @@ public class QueryTasksIT {
                                                                   runningProcessInstance);
         eventsAggregator.sendAll();
 
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
 
         await().untilAsserted(() -> {
             //when
@@ -717,7 +717,7 @@ public class QueryTasksIT {
 
         eventsAggregator.sendAll();
 
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
 
 
         await().untilAsserted(() -> {
@@ -755,7 +755,7 @@ public class QueryTasksIT {
                                                                             runningProcessInstance);
         eventsAggregator.sendAll();
 
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
 
         //when
         await().untilAsserted(() -> {
@@ -823,7 +823,7 @@ public class QueryTasksIT {
                                                                              runningProcessInstance);
         eventsAggregator.sendAll();
 
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
 
         //when
         await().untilAsserted(() -> {
@@ -893,7 +893,7 @@ public class QueryTasksIT {
                                                                   runningProcessInstance);
         eventsAggregator.sendAll();
 
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
 
         await().untilAsserted(() -> {
             //when
@@ -935,7 +935,7 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody().getAssignee()).isEqualTo("hruser");
 
             //Restore user
-            identityTokenProducer.setTestUser("testuser");
+            identityTokenProducer.withTestUser("testuser");
 
         });
     }
@@ -1430,7 +1430,7 @@ public class QueryTasksIT {
             assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
         });
 
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
 
         ((TaskImpl)task).setAssignee("testuser");
         ((TaskImpl)task).setStatus(Task.TaskStatus.ASSIGNED);
@@ -1483,7 +1483,7 @@ public class QueryTasksIT {
                                                                      runningProcessInstance);
         eventsAggregator.sendAll();
 
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
 
         //when
         await().untilAsserted(() -> {
@@ -1678,7 +1678,7 @@ public class QueryTasksIT {
 
     @Test
     public void should_notGetTasks_by_ProcessInstance_userIsNotInvolved() {
-        identityTokenProducer.setTestUser(HRUSER);
+        identityTokenProducer.withTestUser(HRUSER);
         taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
                                                          "fakeUser",
                                                          runningProcessInstance);
@@ -1700,7 +1700,7 @@ public class QueryTasksIT {
 
     @Test
     public void should_getTasks_by_ProcessInstance_when_userIsCandidate() {
-        identityTokenProducer.setTestUser(HRUSER);
+        identityTokenProducer.withTestUser(HRUSER);
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
                                                                       TESTUSER,
@@ -1732,7 +1732,7 @@ public class QueryTasksIT {
 
     @Test
     public void should_getTasks_by_ProcessInstance_when_userIsAssignee() {
-        identityTokenProducer.setTestUser(HRUSER);
+        identityTokenProducer.withTestUser(HRUSER);
 
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
@@ -1765,7 +1765,7 @@ public class QueryTasksIT {
 
     @Test
     public void should_getTasks_by_ProcessInstance_when_userIsInGroupCandidate() {
-        identityTokenProducer.setTestUser(HRUSER);
+        identityTokenProducer.withTestUser(HRUSER);
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
                                                                       TESTUSER,
@@ -1832,7 +1832,7 @@ public class QueryTasksIT {
         Task task3 = taskEventContainedBuilder.anAssignedTask("Task3",
                                                               TESTUSER,
                                                               runningProcessInstance);
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
 
         eventsAggregator.sendAll();
 
@@ -1854,7 +1854,7 @@ public class QueryTasksIT {
         assertAdminCanRetrieveTaskById(task2.getId());
         assertAdminCanRetrieveTaskById(task3.getId());
 
-        identityTokenProducer.setTestUser(TESTUSER);
+        identityTokenProducer.withTestUser(TESTUSER);
     }
 
 

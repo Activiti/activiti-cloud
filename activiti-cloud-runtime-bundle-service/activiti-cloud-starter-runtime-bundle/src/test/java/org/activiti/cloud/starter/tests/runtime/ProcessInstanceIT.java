@@ -90,7 +90,7 @@ public class ProcessInstanceIT {
     @BeforeEach
     public void setUp() {
         keycloakTestUser = "hruser";
-        identityTokenProducer.setTestUser(keycloakTestUser);
+        identityTokenProducer.withTestUser(keycloakTestUser);
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -219,7 +219,7 @@ public class ProcessInstanceIT {
     @Test
     public void shouldNotStartProcessWithoutPermission() {
         //testuser does not have access to SIMPLE_PROCESS according to access-control.properties
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
 
         assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
             processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
@@ -228,7 +228,7 @@ public class ProcessInstanceIT {
     @Test
     public void shouldStartProcessIfAdmin() {
         //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
 
         StartProcessPayload startProcess = ProcessPayloadBuilder.start()
             .withProcessDefinitionKey(SIMPLE_PROCESS)
@@ -331,7 +331,7 @@ public class ProcessInstanceIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
 
         //when
         ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
@@ -380,14 +380,14 @@ public class ProcessInstanceIT {
 
         //when
         //testadmin should see process instances at admin endpoint
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         responseEntity = processInstanceRestTemplate.adminSuspend(startProcessEntity);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // switch back to initiator user to access the process instance
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
     }
@@ -414,19 +414,19 @@ public class ProcessInstanceIT {
 
         //First suspend process and check that everything is OK
         //testadmin should see process instances at admin endpoint
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         ResponseEntity<Void> responseEntity = processInstanceRestTemplate.adminSuspend(startProcessEntity);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // switch back to initiator user to access the process instance
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         //Check that process is really in a suspended state
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
 
         //when
         //change user
-        identityTokenProducer.setTestUser(keycloakTestUser);
+        identityTokenProducer.withTestUser(keycloakTestUser);
         responseEntity = processInstanceRestTemplate.adminResume(startProcessEntity);
 
         //then
@@ -435,14 +435,14 @@ public class ProcessInstanceIT {
 
         //when
         //testadmin should see process instances at admin endpoint
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         responseEntity = processInstanceRestTemplate.adminResume(startProcessEntity);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // switch back to initiator user to access the process instance
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
         processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
@@ -496,7 +496,7 @@ public class ProcessInstanceIT {
         String newBusinessKey = startProcessEntity.getBody().getBusinessKey() != null ? startProcessEntity.getBody().getBusinessKey() + " UPDATED" : " UPDATED";
         String newName = startProcessEntity.getBody().getName() != null ? startProcessEntity.getBody().getName() + " UPDATED" : " UPDATED";
 
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
 
         ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminUpdate(startProcessEntity,
             newBusinessKey,
@@ -565,7 +565,7 @@ public class ProcessInstanceIT {
         assertThat(processEntity.getBody().getProcessDefinitionId()).contains("SimpleProcess:");
 
         //when
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminDelete(processEntity);
 
         //then

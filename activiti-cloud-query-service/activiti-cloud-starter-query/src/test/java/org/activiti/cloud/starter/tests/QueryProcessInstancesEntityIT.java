@@ -105,7 +105,7 @@ public class QueryProcessInstancesEntityIT {
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
         variableBuilder = new VariableEventContainedBuilder(eventsAggregator);
         taskEventBuilder = new TaskEventContainedBuilder(eventsAggregator);
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
     }
 
     @AfterEach
@@ -222,7 +222,7 @@ public class QueryProcessInstancesEntityIT {
 
 
         await().untilAsserted(() -> {
-             identityTokenProducer.setTestUser("hradmin");
+             identityTokenProducer.withTestUser("hradmin");
 
              ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "/" + process.getId(),
                                                                             HttpMethod.GET,
@@ -361,7 +361,7 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
         await().untilAsserted(() -> {
 
             ResponseEntity<PagedModel<CloudProcessInstance>> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "?page=0&size=10",

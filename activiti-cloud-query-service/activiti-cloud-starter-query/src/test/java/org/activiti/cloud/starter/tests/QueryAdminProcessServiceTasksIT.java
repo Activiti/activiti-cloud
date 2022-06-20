@@ -138,7 +138,7 @@ public class QueryAdminProcessServiceTasksIT {
 
     @BeforeEach
     public void setUp() throws IOException {
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
 
         eventsAggregator = new EventsAggregator(producer);
 
@@ -625,7 +625,7 @@ public class QueryAdminProcessServiceTasksIT {
     @Test
     public void shouldNotGetProcessInstanceServiceTasks() throws InterruptedException {
         //given
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
 
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 

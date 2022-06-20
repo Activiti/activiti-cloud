@@ -91,7 +91,7 @@ public class ExclusiveGatewayAuditProducerIT {
 
     @BeforeEach
     public void setUp() {
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 

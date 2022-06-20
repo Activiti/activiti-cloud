@@ -18,15 +18,18 @@ package org.activiti.cloud.starter.tests.definition;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Iterator;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
@@ -45,10 +48,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Iterator;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties",
@@ -82,7 +81,7 @@ public class ProcessDefinitionIT {
         //given
         //processes are automatically deployed from src/test/resources/processes
 
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
 
         //when
         ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(
@@ -294,7 +293,7 @@ public class ProcessDefinitionIT {
         //given
         //processes are automatically deployed from src/test/resources/processes
 
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
         //when
         ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
 
@@ -309,7 +308,7 @@ public class ProcessDefinitionIT {
             SIMPLE_PROCESS,
             PROCESS_WITH_BOUNDARY_SIGNAL);
 
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
 
         //but hruser should see different set according to access-control.properties
         entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
@@ -324,7 +323,7 @@ public class ProcessDefinitionIT {
         //given
         //processes are automatically deployed from src/test/resources/processes
 
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
 
         //testadmin should see restricted set at non-admin endpoint
         //when

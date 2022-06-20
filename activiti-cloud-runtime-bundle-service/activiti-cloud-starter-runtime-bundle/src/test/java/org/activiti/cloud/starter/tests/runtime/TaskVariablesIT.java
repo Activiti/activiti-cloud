@@ -79,7 +79,7 @@ public class TaskVariablesIT {
 
     @BeforeEach
     public void setUp() {
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
 
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -162,7 +162,7 @@ public class TaskVariablesIT {
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
 
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         taskRestTemplate.adminCreateVariable(taskId, "var2", "test2");
 
         //when
@@ -245,7 +245,7 @@ public class TaskVariablesIT {
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
 
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
 
         taskRestTemplate.adminCreateVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
         taskRestTemplate.adminCreateVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));

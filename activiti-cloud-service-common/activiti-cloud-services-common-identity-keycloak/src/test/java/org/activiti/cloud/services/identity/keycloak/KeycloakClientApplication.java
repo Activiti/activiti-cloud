@@ -17,7 +17,7 @@ package org.activiti.cloud.services.identity.keycloak;
 
 import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
-import org.activiti.cloud.identity.keycloak.KeycloakTokenProducer;
+import org.activiti.cloud.services.test.identity.keycloak.KeycloakTokenProducer;
 import org.activiti.cloud.identity.web.EnableIdentityManagementRestAPI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;

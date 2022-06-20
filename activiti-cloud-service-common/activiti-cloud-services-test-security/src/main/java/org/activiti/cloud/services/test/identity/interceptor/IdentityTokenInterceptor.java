@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.identity.interceptor;
+package org.activiti.cloud.services.test.identity.interceptor;
 
-import static org.activiti.cloud.identity.IdentityTokenProducer.AUTHORIZATION_HEADER;
+import static org.activiti.cloud.services.test.identity.IdentityTokenProducer.AUTHORIZATION_HEADER;
 
 import java.io.IOException;
-import org.activiti.cloud.identity.IdentityTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;

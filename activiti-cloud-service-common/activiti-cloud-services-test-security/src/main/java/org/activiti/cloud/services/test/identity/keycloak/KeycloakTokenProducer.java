@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.identity.keycloak;
+package org.activiti.cloud.services.test.identity.keycloak;
 
-import org.activiti.cloud.identity.IdentityTokenProducer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.http.HttpEntity;

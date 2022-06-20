@@ -72,7 +72,7 @@ public class TaskVariableMappingIT {
 
     @BeforeEach
     public void setUp() {
-        identityTokenProducer.setTestUser(keycloakTestUser);
+        identityTokenProducer.withTestUser(keycloakTestUser);
     }
 
     @Test
