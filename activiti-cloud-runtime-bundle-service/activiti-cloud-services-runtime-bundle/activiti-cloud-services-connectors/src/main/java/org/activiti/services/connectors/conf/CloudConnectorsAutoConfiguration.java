@@ -30,6 +30,8 @@ import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
+import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
+import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
@@ -90,6 +92,22 @@ public class CloudConnectorsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public IntegrationRequestBuilder integrationRequestBuilder(RuntimeBundleInfoAppender runtimeBundleInfoAppender,  BindingServiceProperties bindingServiceProperties) {
+        return  new IntegrationRequestBuilder(runtimeBundleInfoAppender, bindingServiceProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IntegrationRequestReplayer integrationRequestReplayer(RuntimeService runtimeService,
+                                                                 ManagementService managementService,
+                                                                 MQServiceTaskBehavior mqServiceTaskBehavior){
+        return new IntegrationRequestReplayer(runtimeService,
+                                              managementService,
+                                              mqServiceTaskBehavior);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public IntegrationContextMessageBuilderFactory integrationContextMessageBuilderFactory(RuntimeBundleProperties properties) {
         return new IntegrationContextMessageBuilderFactory(properties);
     }
@@ -114,13 +132,12 @@ public class CloudConnectorsAutoConfiguration {
         IntegrationContextManager integrationContextManager,
         ApplicationEventPublisher eventPublisher,
         IntegrationContextBuilder integrationContextBuilder,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         DefaultServiceTaskBehavior defaultServiceTaskBehavior,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         RuntimeBundleProperties runtimeBundleProperties,
-        BindingServiceProperties bindingServiceProperties) {
+        IntegrationRequestBuilder integrationRequestBuilder) {
         return new MQServiceTaskBehavior(integrationContextManager, eventPublisher, integrationContextBuilder,
-            runtimeBundleInfoAppender, defaultServiceTaskBehavior, processEngineEventsAggregator, runtimeBundleProperties,
-            bindingServiceProperties);
+            defaultServiceTaskBehavior, processEngineEventsAggregator, runtimeBundleProperties,
+            integrationRequestBuilder);
     }
 }

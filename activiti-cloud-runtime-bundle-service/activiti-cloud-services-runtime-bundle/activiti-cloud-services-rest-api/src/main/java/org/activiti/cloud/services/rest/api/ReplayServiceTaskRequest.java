@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.tests.runtime;
 
-import org.activiti.cloud.starter.tests.helper.HelperConfiguration;
-import org.activiti.cloud.starter.tests.util.VariablesUtil;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Import;
+package org.activiti.cloud.services.rest.api;
 
-@TestConfiguration
-@Import({HelperConfiguration.class,
-    ServiceTaskConsumerHandler.class,
-    IntegrationResultSender.class,
-    IntegrationErrorSender.class,
-    CanFailConnector.class,
-    VariablesUtil.class})
-public class RuntimeITConfiguration {
+import javax.validation.constraints.NotEmpty;
+
+public class ReplayServiceTaskRequest {
+
+    @NotEmpty
+    private String flowNodeId;
+
+    public ReplayServiceTaskRequest() {
+    }
+
+    public ReplayServiceTaskRequest(String flowNodeId) {
+        this.flowNodeId = flowNodeId;
+    }
+
+    public String getFlowNodeId() {
+        return flowNodeId;
+    }
 
 }
