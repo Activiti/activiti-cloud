@@ -17,28 +17,18 @@
 package org.activiti.cloud.services.rest.api;
 
 import javax.validation.constraints.NotEmpty;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-public class ReplayServiceTaskRequest {
+@RequestMapping(value = "/admin/v1/executions",
+    produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+public interface ServiceTaskAdminController {
 
-    @NotEmpty
-    private String executionId;
-    @NotEmpty
-    private String flowNodeId;
-
-    public ReplayServiceTaskRequest() {
-    }
-
-    public ReplayServiceTaskRequest(String executionId, String flowNodeId) {
-        this.executionId = executionId;
-        this.flowNodeId = flowNodeId;
-    }
-
-    public String getExecutionId() {
-        return executionId;
-    }
-
-    public String getFlowNodeId() {
-        return flowNodeId;
-    }
+    @PostMapping(value = "/{executionId}/replay-service-task/{flowNodeId}")
+    ResponseEntity<Void> replayServiceTask(@PathVariable @NotEmpty String executionId, @PathVariable @NotEmpty String flowNodeId);
 
 }
