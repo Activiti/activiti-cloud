@@ -15,13 +15,28 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import java.util.Optional;
+import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
+import org.activiti.cloud.identity.keycloak.KeycloakTokenProducer;
 import org.activiti.cloud.identity.web.EnableIdentityManagementRestAPI;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 @EnableIdentityManagementRestAPI
 public class KeycloakClientApplication {
+
+    @Bean
+    public SecurityContextTokenProvider securityContextTokenProvider(@Value("${keycloak.auth-server-url:}") String authServerUrl,
+                                                                     @Value("${keycloak.realm:}") String realm) {
+        return () -> Optional.of(new KeycloakTokenProducer(authServerUrl, realm)
+                                     .withTestUser("testuser")
+                                     .withTestPassword("password")
+                                     .withResource("activiti")
+                                     .getAccessTokenString());
+    }
 
 	public static void main(String[] args) {
 		SpringApplication.run(KeycloakClientApplication.class, args);
