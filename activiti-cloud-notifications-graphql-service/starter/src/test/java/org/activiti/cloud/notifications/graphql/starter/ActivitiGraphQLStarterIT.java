@@ -136,7 +136,7 @@ public class ActivitiGraphQLStarterIT {
     @BeforeEach
     public void setUp() {
 
-        identityTokenProducer.setTestUser(TESTADMIN);
+        identityTokenProducer.withTestUser(TESTADMIN);
         authHeaders = identityTokenProducer.authorizationHeaders();
         authHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
     }
