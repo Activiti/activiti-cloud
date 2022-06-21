@@ -18,20 +18,26 @@ package org.activiti.cloud.services.test.identity.keycloak;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessTokenResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
 public class KeycloakTokenProducer implements IdentityTokenProducer {
 
-    private final String authServerUrl;
+    @Value("${keycloak.resource:}")
+    protected String resource;
 
-    private final String realm;
+    @Value("${keycloak.auth-server-url:}")
+    private String authServerUrl;
 
-    private String resource;
+    @Value("${keycloak.realm:}")
+    private String realm;
 
-    private String testUser;
+    @Value("${activiti.identity.test-user:}")
+    protected String testUser;
 
-    private String testPassword;
+    @Value("${activiti.identity.test-password:}")
+    protected String testPassword;
 
     public KeycloakTokenProducer(String authServerUrl, String realm) {
         this.authServerUrl = authServerUrl;
