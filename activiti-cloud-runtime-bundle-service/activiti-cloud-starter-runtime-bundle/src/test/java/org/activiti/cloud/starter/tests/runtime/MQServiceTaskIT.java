@@ -103,13 +103,13 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
     }
 
     private void replayServiceTask(IntegrationContext integrationContext) {
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         final ResponseEntity<Void> responseEntity = testRestTemplate.exchange("/admin/v1/executions/{executionId}/replay/service-task",
             HttpMethod.POST,
             new HttpEntity<>(new ReplayServiceTaskRequest(integrationContext.getClientId()), CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<>() {
             }, integrationContext.getExecutionId());
-        identityTokenProducer.setTestUser(keycloakTestUser);
+        identityTokenProducer.withTestUser(keycloakTestUser);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
