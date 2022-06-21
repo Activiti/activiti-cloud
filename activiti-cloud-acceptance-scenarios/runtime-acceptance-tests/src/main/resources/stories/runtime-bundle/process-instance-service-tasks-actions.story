@@ -51,3 +51,14 @@ Scenario: get all error service tasks by query
 Given the user is authenticated as testadmin
 When the user starts a process with service tasks called BPMN_ERROR_CONNECTOR_PROCESS
 Then the user can get list of service tasks for process key testBpmnErrorConnectorProcess and status ERROR
+
+Scenario: replay service task execution with ERROR status
+Given the user is authenticated as testadmin
+And the user provides a variable named var with value test
+When the user starts an instance of process called testErrorConnectorProcess with the provided variables
+And integration error event is emitted for the process
+And the user can get list of service tasks with status of ERROR
+Then the user set the instance variable var with value replay
+And the user can replay service task execution
+And the user can get list of service tasks with status of COMPLETED
+And the process with service tasks is completed

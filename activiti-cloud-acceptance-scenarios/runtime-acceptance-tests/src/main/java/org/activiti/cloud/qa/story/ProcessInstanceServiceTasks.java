@@ -16,18 +16,9 @@
 
 package org.activiti.cloud.qa.story;
 
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
-import static org.assertj.core.api.Assertions.entry;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 import feign.FeignException;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-
+import net.serenitybdd.core.Serenity;
+import net.thucydides.core.annotations.Steps;
 import net.thucydides.core.steps.StepEventBus;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -37,16 +28,28 @@ import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acc.core.steps.runtime.admin.ServiceTasksAdminSteps;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
+import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedModel;
 
-import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 public class ProcessInstanceServiceTasks {
 
@@ -61,6 +64,9 @@ public class ProcessInstanceServiceTasks {
 
     @Steps
     private AuditSteps auditSteps;
+
+    @Steps
+    private ServiceTasksAdminSteps serviceTasksAdminSteps;
 
     private ProcessInstance processInstance;
 
@@ -159,6 +165,7 @@ public class ProcessInstanceServiceTasks {
         assertThat(thrown).isNull();
     }
 
+    @When("the user can get list of service tasks with status of $status")
     @Then("the user can get list of service tasks with status of $status")
     public void verifyGetServiceTaskByStatus(String status) {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
@@ -287,4 +294,27 @@ public class ProcessInstanceServiceTasks {
         return CloudIntegrationEvent.class.cast(event).getEntity();
     }
 
+    @Then("the user can replay service task execution")
+    public void verifyReplayServiceTaskExecution() throws Exception {
+
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await().untilAsserted(() -> {
+            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByProcessInstanceId(processId);
+
+            Optional<CloudIntegrationErrorReceivedEvent> event = events.stream()
+                                                      .filter(CloudIntegrationErrorReceivedEvent.class::isInstance)
+                                                      .map(CloudIntegrationErrorReceivedEvent.class::cast)
+                                                      .findFirst();
+
+            assertThat(event).isPresent();
+
+            IntegrationContext integrationContext = event.get().getEntity();
+            String executionId = integrationContext.getExecutionId();
+            String clientId = integrationContext.getClientId();
+
+            serviceTasksAdminSteps.replayServiceTask(executionId,
+                                                     new ReplayServiceTaskRequest(clientId));
+        });
+    }
 }

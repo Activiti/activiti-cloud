@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.qa.story;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.model.VariableInstance;
@@ -31,6 +27,10 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.CollectionModel;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 public class ProcessInstanceVariables {
     @Steps
@@ -95,6 +95,7 @@ public class ProcessInstanceVariables {
     }
 
     @When("the user set the instance variable $variableName1 with value $value1")
+    @Then("the user set the instance variable $variableName1 with value $value1")
     public void setProcessVariables(String variableName1, String value1) {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 

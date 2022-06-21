@@ -15,26 +15,29 @@
  */
 package org.activiti.cloud.qa.story;
 
-import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
+import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessRuntimeAdminSteps;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 public class ProcessInstanceSignalEvents {
 
@@ -48,12 +51,14 @@ public class ProcessInstanceSignalEvents {
     private ProcessQuerySteps processQuerySteps;
 
     @Steps
+    private ProcessQueryAdminSteps processQueryAdminSteps;
+
+    @Steps
     private AuditSteps auditSteps;
 
     private CloudProcessInstance processInstanceCatchSignal;
     private CloudProcessInstance processInstanceBoundarySignal;
     private CloudProcessInstance processInstanceThrowSignal;
-    private int checkCnt=0;
 
     @When("services are started")
     public void checkServicesStatus() {
@@ -115,19 +120,20 @@ public class ProcessInstanceSignalEvents {
     }
 
 
-    @Then("check number of processes with processDefinitionKey $processDefinitionKey")
+    @Then("query number of processes with processDefinitionKey $processDefinitionKey")
     public void checkProcessCount(String processDefinitionKey) throws Exception {
         List<CloudProcessInstance> processes = getProcessesByProcessDefinitionKey(processDefinitionKey);
-        checkCnt = processes.size();
+        Serenity.setSessionVariable("checkCnt").to(processes.size());
     }
 
     @Then("check number of processes with processDefinitionKey $processDefinitionKey increased")
     public void checkProcessCountIncreased(String processDefinitionKey) throws Exception {
-        List<CloudProcessInstance> processes = getProcessesByProcessDefinitionKey(processDefinitionKey);
-        assertThat(processes).isNotEmpty();
-
-        assertThat(processes.size()).isGreaterThan(checkCnt);
-        checkCnt=processes.size();
+        Integer checkCnt = Serenity.sessionVariableCalled("checkCnt");
+        await().untilAsserted(() -> {
+            List<CloudProcessInstance> processes = getProcessesByProcessDefinitionKey(processDefinitionKey);
+            assertThat(processes).isNotEmpty();
+            assertThat(processes.size()).isGreaterThan(checkCnt);
+        });
     }
 
 
@@ -143,7 +149,7 @@ public class ProcessInstanceSignalEvents {
     }
 
     public List<CloudProcessInstance> getProcessesByProcessDefinitionKey(String processDefinitionKey) throws Exception {
-        return processQuerySteps
+        return processQueryAdminSteps
                 .getProcessInstancesByProcessDefinitionKey(processDefinitionKey)
                 .getContent()
                 .stream()
@@ -153,20 +159,20 @@ public class ProcessInstanceSignalEvents {
     public void checkSignalEventReceivedByProcess(CloudProcessInstance process) throws Exception  {
         assertThat(process).isNotNull();
 
-        Collection<CloudRuntimeEvent> receivedEvents = auditSteps.getEventsByProcessInstanceIdAndEventType(process.getId(),
-                                                                                                           "SIGNAL_RECEIVED");
+        await().untilAsserted(() -> {
+            Collection<CloudRuntimeEvent> receivedEvents = auditSteps.getEventsByProcessInstanceIdAndEventType(process.getId(),
+                                                                                                               "SIGNAL_RECEIVED");
 
-        assertThat(receivedEvents)
-          .isNotEmpty()
-          .extracting( CloudRuntimeEvent::getEventType,
-                       CloudRuntimeEvent::getProcessInstanceId,
-                       CloudRuntimeEvent::getProcessDefinitionKey)
-          .contains(
+            assertThat(receivedEvents)
+                .isNotEmpty()
+                .extracting( CloudRuntimeEvent::getEventType,
+                             CloudRuntimeEvent::getProcessInstanceId,
+                             CloudRuntimeEvent::getProcessDefinitionKey)
+                .contains(
                     tuple(SIGNAL_RECEIVED,
                           process.getId(),
                           process.getProcessDefinitionKey()));
-
-
+        });
     }
 
 

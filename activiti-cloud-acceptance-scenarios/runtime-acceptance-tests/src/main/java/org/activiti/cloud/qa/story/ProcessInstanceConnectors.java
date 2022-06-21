@@ -15,17 +15,8 @@
  */
 package org.activiti.cloud.qa.story;
 
-import static java.util.Collections.singletonMap;
-import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import java.util.List;
-import java.util.Map;
+import net.serenitybdd.core.Serenity;
+import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.BPMNError;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent.ErrorEvents;
@@ -47,8 +38,16 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.springframework.hateoas.CollectionModel;
 
-import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Collections.singletonMap;
+import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 public class ProcessInstanceConnectors {
 
@@ -151,6 +150,7 @@ public class ProcessInstanceConnectors {
                                                                resultCollectionValue);
     }
 
+    @When("integration error event is emitted for the process")
     @Then("integration error event is emitted for the process")
     public void verifyIntegrationEventsForProcesses() throws Exception {
 
