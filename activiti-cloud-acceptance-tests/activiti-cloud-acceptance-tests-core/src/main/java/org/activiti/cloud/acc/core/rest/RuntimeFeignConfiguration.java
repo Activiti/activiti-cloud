@@ -38,6 +38,7 @@ import org.activiti.cloud.acc.core.services.query.admin.TaskQueryAdminService;
 import org.activiti.cloud.acc.core.services.runtime.ProcessVariablesRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessVariablesRuntimeAdminService;
+import org.activiti.cloud.acc.core.services.runtime.admin.ServiceTasksAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskVariablesRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.diagram.ProcessRuntimeDiagramService;
@@ -187,6 +188,15 @@ public class RuntimeFeignConfiguration {
                         new HalDecoder(objectMapper))
                 .target(TaskRuntimeAdminService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ServiceTasksAdminService serviceTasksAdminService() {
+        return FeignRestDataClient
+            .builder(new JacksonEncoder(objectMapper),
+                     new HalDecoder(objectMapper))
+            .target(ServiceTasksAdminService.class,
+                    runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
     @Bean
