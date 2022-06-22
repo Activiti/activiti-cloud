@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-    <version>7.4.0-alpha.20</version>
+    <version>7.4.0-mock.1</version>
     <relativePath>../activiti-cloud-runtime-bundle-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>

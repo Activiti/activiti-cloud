@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-notifications-graphql</artifactId>
-    <version>7.4.0-alpha.20</version>
+    <version>7.4.0-mock.1</version>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql-security</artifactId>
   <name>Activiti Cloud Notifications :: Services :: GraphQL Security</name>
