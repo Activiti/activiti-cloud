@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.jpa;
 
-import java.util.List;
-import java.util.Optional;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -28,6 +26,9 @@ import org.activiti.cloud.services.modeling.jpa.version.VersionGenerationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+import java.util.Optional;
 
 public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, ModelEntity> {
 
@@ -49,6 +50,11 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
         return modelJpaRepository.findAllByProjectIdAndTypeEquals(project.getId(),
             modelTypeFilter.getName(),
             pageable);
+    }
+
+    @Override
+    public Page<ModelEntity> getModelsByName(ProjectEntity project, String name, Pageable pageable) {
+        return modelJpaRepository.findAllByProjectIdAndNameLike(project.getId(), name, pageable);
     }
 
     @Override
