@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/v1/identity", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/v1", produces = MediaType.APPLICATION_JSON_VALUE)
 public class IdentityManagementController {
 
     private final IdentityManagementService identityManagementService;
