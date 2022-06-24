@@ -54,7 +54,7 @@ public class QuerySwaggerIT {
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
         MvcResult result = mockMvc
-            .perform(get("/springdoc/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.servers").isNotEmpty())

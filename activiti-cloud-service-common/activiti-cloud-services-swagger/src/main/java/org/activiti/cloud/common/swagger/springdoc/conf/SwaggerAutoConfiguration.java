@@ -35,7 +35,6 @@ import org.springframework.context.annotation.PropertySource;
  * and provides specification for Alfresco MediaType format
  * This configuration is not self-contained: when adding this as dependency provide following properties
  * <pre>
- *     springdoc.enabled=true
  *     springdoc.packages-to-scan=[base-package-to-scan]
  *     springdoc.api-docs.path=[path-to-custom-api-docs]
  * </pre>
