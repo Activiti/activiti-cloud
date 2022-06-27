@@ -15,15 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
-import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileContent;
-import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
-import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
-import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.UPLOAD_FILE_PARAM_NAME;
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Model;
@@ -53,6 +44,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebInputException;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Optional;
+
+import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileContent;
+import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
+import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
+import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.UPLOAD_FILE_PARAM_NAME;
 
 /**
  * Controller for {@link Model} resources
@@ -104,6 +106,15 @@ public class ModelController implements ModelRestApi {
                 findModelType(type),
                 pageable),
             representationModelAssembler);
+    }
+
+    @Override
+    public PagedModel<EntityModel<Model>> getModelsByName(@PathVariable String projectId,
+                                                          @RequestParam(MODEL_NAME_PARAM_NAME) String name,
+                                                          Pageable pageable) {
+        Project project = projectController.findProjectById(projectId);
+        return pagedCollectionModelAssembler.toModel(pageable,
+            modelService.getModelsByName(project, name, pageable), representationModelAssembler);
     }
 
     @Override
