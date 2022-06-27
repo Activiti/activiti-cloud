@@ -110,7 +110,8 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(jsonPath("$", hasSize(3)))
             .andExpect(jsonPath("$[0].username", is("hruser")))
             .andExpect(jsonPath("$[1].username", is("testactivitiadmin")))
-            .andExpect(jsonPath("$[2].username", is("testuser")));
+            .andExpect(jsonPath("$[2].username", is("testuser")))
+            .andExpect(jsonPath("$[3].username", is("testmanager")));
     }
 
     @Test
