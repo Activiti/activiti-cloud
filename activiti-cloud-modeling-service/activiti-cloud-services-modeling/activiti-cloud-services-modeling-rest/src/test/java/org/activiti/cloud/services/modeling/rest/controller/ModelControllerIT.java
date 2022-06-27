@@ -15,6 +15,44 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.modeling.api.ConnectorModelType;
+import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.ModelValidationError;
+import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.process.Extensions;
+import org.activiti.cloud.modeling.api.process.ModelScope;
+import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
+import org.activiti.cloud.modeling.repository.ModelRepository;
+import org.activiti.cloud.modeling.repository.ProjectRepository;
+import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
+import org.activiti.cloud.services.modeling.entity.ModelEntity;
+import org.activiti.cloud.services.modeling.entity.ProjectEntity;
+import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
+import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
+import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
@@ -54,38 +92,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.modeling.api.ConnectorModelType;
-import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.modeling.api.ModelValidationError;
-import org.activiti.cloud.modeling.api.Project;
-import org.activiti.cloud.modeling.api.process.Extensions;
-import org.activiti.cloud.modeling.api.process.ModelScope;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
-import org.activiti.cloud.modeling.repository.ModelRepository;
-import org.activiti.cloud.modeling.repository.ProjectRepository;
-import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
-import org.activiti.cloud.services.modeling.entity.ModelEntity;
-import org.activiti.cloud.services.modeling.entity.ProjectEntity;
-import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
-import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
-import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
@@ -1382,4 +1388,40 @@ public class ModelControllerIT {
                 .isEqualTo(String.format("A model with the same type already exists within the project with id: %s", project.getId()));
     }
 
+    @ParameterizedTest
+    @MethodSource("projectModelsByNameArguments")
+    public void should_returnProjectModels_when_gettingProjectModelsByName(String input, int expectedSize,
+                                                                           String firstName, String secondName) throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("parent-project"));
+
+        modelRepository.createModel(processModel(project,"Process Model 1"));
+        modelRepository.createModel(processModel(project, "Process Model 2"));
+        modelRepository.createModel(connectorModel(project, "Connector Model 1"));
+        modelRepository.createModel(connectorModel(project, "Connector Model 2"));
+
+        final ResultActions resultActions = mockMvc
+            .perform(get("/v1/projects/{projectId}/models/findByName?name={input}", project.getId(), input)
+                .header("accept", "application/json"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries", hasSize(expectedSize)));
+        if (expectedSize > 0) {
+            resultActions
+                .andExpect(jsonPath("$.list.entries[0].entry.name", is(firstName)))
+                .andExpect(jsonPath("$.list.entries[1].entry.name", is(secondName)));
+        }
+    }
+
+    private static Stream<Arguments> projectModelsByNameArguments() {
+        return Stream.of(
+            Arguments.of("p", 2, "Process Model 1", "Process Model 2"),
+            Arguments.of("process", 2, "Process Model 1", "Process Model 2"),
+            Arguments.of("PROCESS", 2, "Process Model 1", "Process Model 2"),
+            Arguments.of("Process Model", 2, "Process Model 1", "Process Model 2"),
+            Arguments.of("Connector", 2, "Connector Model 1", "Connector Model 2"),
+            Arguments.of("1", 2, "Process Model 1", "Connector Model 1"),
+            Arguments.of("wrong input", 0, null, null),
+            Arguments.of("", 0, null, null),
+            Arguments.of(null, 0, null, null)
+        );
+    }
 }

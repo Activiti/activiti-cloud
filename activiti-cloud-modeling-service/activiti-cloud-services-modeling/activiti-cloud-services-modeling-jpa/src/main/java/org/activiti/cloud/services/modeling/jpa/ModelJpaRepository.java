@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.jpa;
 
 
-import java.util.List;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.springframework.data.domain.Page;
@@ -25,6 +24,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+import java.util.List;
 
 /**
  * JPA Repository for {@link ModelEntity} entity
@@ -54,4 +55,7 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String> {
 
     @Query("SELECT m FROM Model m LEFT JOIN m.projects p WHERE m.type=:modelTypeFilter AND (m.scope=:scope OR p.id IS NULL)" )
     Page<ModelEntity> findAllByScopeAndTypeEqualsWithOrphans(@Param("scope") ModelScope scope, @Param("modelTypeFilter") String modelTypeFilter, Pageable pageable);
+
+    @Query("SELECT m FROM Model m LEFT JOIN m.projects p WHERE p.id=:projectId AND lower(m.name) LIKE lower(concat('%', :name, '%'))")
+    Page<ModelEntity> findAllByProjectIdAndNameLike(@Param("projectId") String projectId, @Param("name") String name, Pageable pageable);
 }
