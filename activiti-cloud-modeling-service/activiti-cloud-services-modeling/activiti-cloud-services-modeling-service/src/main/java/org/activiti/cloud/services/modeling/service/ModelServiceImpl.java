@@ -15,31 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
-import static java.util.Objects.nonNull;
-import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.modeling.api.ValidationContext.EMPTY_CONTEXT;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
-import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
-import static org.apache.commons.lang3.StringUtils.removeEnd;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-import javax.xml.stream.XMLStreamException;
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
@@ -71,6 +46,31 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
+
+import javax.transaction.Transactional;
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
+import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.modeling.api.ValidationContext.EMPTY_CONTEXT;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.removeEnd;
 
 /**
  * Business logic related to {@link Model} entities including process models, form models, connectors, data models and decision table models.
@@ -134,6 +134,14 @@ public class ModelServiceImpl implements ModelService{
         return modelRepository.getModels(project,
                                          modelType,
                                          pageable);
+    }
+
+    @Override
+    public Page<Model> getModelsByName(Project project, String name, Pageable pageable) {
+        if (isEmpty(name)) {
+            return Page.empty(pageable);
+        }
+        return modelRepository.getModelsByName(project, name, pageable);
     }
 
     @Override

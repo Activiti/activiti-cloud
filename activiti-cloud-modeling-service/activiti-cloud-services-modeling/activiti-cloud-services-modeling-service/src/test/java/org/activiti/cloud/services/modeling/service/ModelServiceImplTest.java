@@ -15,23 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import javax.xml.stream.XMLStreamException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
@@ -65,6 +48,29 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -424,6 +430,28 @@ public class ModelServiceImplTest {
         modelService.updateModel(modelThree, modelThree);
 
         verify(modelRepository).updateModel(modelThree,modelThree);
+    }
+
+    @Test
+    public void should_getModels_when_searchingByName() {
+        when(modelRepository.getModelsByName(eq(projectOne), eq(modelTwo.getName()), any(Pageable.class)))
+            .thenReturn(new PageImpl(asList(modelTwo)));
+
+        Page<Model> models = modelService.getModelsByName(projectOne, modelTwo.getName(), PageRequest.of(0, 50));
+
+        assertThat(models.getContent()).hasSize(1);
+        assertThat(models.getContent().get(0)).isEqualTo(modelTwo);
+
+        verify(modelRepository).getModelsByName(eq(projectOne), eq(modelTwo.getName()), any(Pageable.class));
+    }
+
+    @Test
+    public void should_getEmptyList_when_searchingWithEmptyString() {
+        Page<Model> models = modelService.getModelsByName(projectOne, "", PageRequest.of(0, 50));
+
+        assertThat(models.getContent()).hasSize(0);
+
+        verify(modelRepository, never()).getModelsByName(any(), any(), any());
     }
 
     private ModelImpl createModelImpl() {

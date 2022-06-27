@@ -15,22 +15,9 @@
  */
 package org.activiti.cloud.services.modeling.rest.api;
 
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_SVG;
-import static org.activiti.cloud.services.modeling.rest.api.ModelRestApi.MODELS;
-import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.ATTACHMENT_API_PARAM_DESCR;
-import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.EXPORT_AS_ATTACHMENT_PARAM_NAME;
-import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.UPLOAD_FILE_PARAM_NAME;
-import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.springframework.data.domain.Pageable;
@@ -49,6 +36,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_SVG;
+import static org.activiti.cloud.services.modeling.rest.api.ModelRestApi.MODELS;
+import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.ATTACHMENT_API_PARAM_DESCR;
+import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.EXPORT_AS_ATTACHMENT_PARAM_NAME;
+import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.UPLOAD_FILE_PARAM_NAME;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 /**
  * Controller for process resources.
  */
@@ -60,6 +61,8 @@ public interface ModelRestApi {
     String MODELS = "models";
 
     String GET_MODELS_TYPE_PARAM_DESCR = "The type of the model to filter";
+
+    String GET_MODELS_NAME_PARAM_DESCR = "The name or part of the name of the model to filter";
 
     String GET_MODELS_PROJECT_ID_PARAM_DESCR = "The id of the project to get the models for";
 
@@ -92,6 +95,8 @@ public interface ModelRestApi {
     String VALIDATE_EXTENSIONS_FILE_PARAM_DESCR = "The file containing the model extensions to validate";
 
     String MODEL_TYPE_PARAM_NAME = "type";
+
+    String MODEL_NAME_PARAM_NAME = "name";
 
     String VALIDATE_PROJECT_ID_PARAM_DESCR = "The id of the project in whose context the model is going to be validated";
 
@@ -131,6 +136,19 @@ public interface ModelRestApi {
             @PathVariable String projectId,
             @Parameter(description = GET_MODELS_TYPE_PARAM_DESCR)
             @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
+            Pageable pageable);
+
+    @Operation(
+            tags = MODELS,
+            summary = "List models for an project searching by name",
+            description = "Get the models associated with an project searching by part of the name ignoring case. " +
+                "Minimal information for each model is returned.")
+    @GetMapping(path = "/projects/{projectId}/models/findByName")
+    PagedModel<EntityModel<Model>> getModelsByName(
+            @Parameter(description = GET_MODELS_PROJECT_ID_PARAM_DESCR, required = true)
+            @PathVariable String projectId,
+            @Parameter(description = GET_MODELS_NAME_PARAM_DESCR)
+            @RequestParam(MODEL_NAME_PARAM_NAME) String name,
             Pageable pageable);
 
     @Operation(
