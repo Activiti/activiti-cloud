@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.service.api;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.modeling.api.Model;
@@ -31,6 +28,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 /**
  * Business logic related to {@link Model} entities
  */
@@ -41,6 +42,10 @@ public interface ModelService {
     Page<Model> getModels(Project project,
                           ModelType modelType,
                           Pageable pageable);
+
+    Page<Model> getModelsByName(Project project,
+                                String name,
+                                Pageable pageable);
 
     Model buildModel(String type,
                      String name);
