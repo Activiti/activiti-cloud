@@ -107,11 +107,11 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/identity/users?application=activiti"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(jsonPath("$[0].username", is("hruser")))
             .andExpect(jsonPath("$[1].username", is("testactivitiadmin")))
-            .andExpect(jsonPath("$[2].username", is("testuser")))
-            .andExpect(jsonPath("$[3].username", is("testmanager")));
+            .andExpect(jsonPath("$[2].username", is("testmanager")))
+            .andExpect(jsonPath("$[3].username", is("testuser")));
     }
 
     @Test
