@@ -46,7 +46,7 @@ public class JuelSwaggerIT {
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
-        mockMvc.perform(get("/springdoc/v3/api-docs/Juel").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v3/api-docs/Juel").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.servers").isNotEmpty())
