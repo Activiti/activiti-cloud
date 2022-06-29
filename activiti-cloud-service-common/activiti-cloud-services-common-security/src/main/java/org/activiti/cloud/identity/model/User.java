@@ -18,7 +18,7 @@ package org.activiti.cloud.identity.model;
 public class User {
 
   private String id;
-  private String firstname;
+  private String firstName;
   private String lastName;
   private String username;
   private String email;
@@ -32,12 +32,12 @@ public class User {
     this.id = id;
   }
 
-  public String getFirstname() {
-    return firstname;
+  public String getFirstName() {
+    return firstName;
   }
 
-  public void setFirstname(String firstname) {
-    this.firstname = firstname;
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
   }
 
   public String getLastName() {
