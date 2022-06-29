@@ -1,4 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.activiti.cloud.common.swagger.conf.SwaggerAutoConfiguration,\
   org.activiti.cloud.common.swagger.springdoc.conf.SwaggerAutoConfiguration,\
   org.activiti.cloud.common.swagger.springdoc.conf.SwaggerCustomizerConfiguration
