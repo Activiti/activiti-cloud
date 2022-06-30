@@ -29,8 +29,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest(classes ={ KeycloakClientApplication.class},
-    properties = {"keycloak.realm=activiti", "keycloak.use-resource-role-mappings=false"})
+@SpringBootTest(
+    classes = {KeycloakClientApplication.class},
+    properties = {
+        "keycloak.realm=activiti",
+        "keycloak.use-resource-role-mappings=false"
+    }
+)
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientIT {
 
@@ -38,7 +43,7 @@ public class KeycloakClientIT {
     private KeycloakClient keycloakClient;
 
     @Test
-    public void shouldSearchUsers() {
+    public void should_searchUsers() {
         List<KeycloakUser> users = keycloakClient.searchUsers("hr", 0, 50);
 
         assertThat(users).hasSize(2);
@@ -47,7 +52,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldSearchUsersWhenPaginated() {
+    public void should_searchUsers_when_paginated() {
         List<KeycloakUser> usersPage1 = keycloakClient.searchUsers("hr", 0, 1);
 
         assertThat(usersPage1).hasSize(1);
@@ -60,7 +65,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetUserGroups() {
+    public void should_getUserGroups() {
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
         List<KeycloakGroup> groups = keycloakClient.getUserGroups(users.get(0).getId());
 
@@ -69,7 +74,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldSearchGroups() {
+    public void should_searchGroups() {
         List<KeycloakGroup> groups = keycloakClient.searchGroups("testgroup", 0, 50);
 
         assertThat(groups).hasSize(1);
@@ -77,7 +82,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldSearchGroupsWhenPaginated() {
+    public void should_searchGroups_when_paginated() {
         List<KeycloakGroup> groupsPage1 = keycloakClient.searchGroups("group", 0, 1);
 
         assertThat(groupsPage1).hasSize(1);
@@ -90,7 +95,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetUserRoles() {
+    public void should_getUserRoles() {
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
         List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(users.get(0).getId());
 
@@ -101,7 +106,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetGroupRoles() {
+    public void should_getGroupRoles() {
         List<KeycloakGroup> users = keycloakClient.searchGroups("salesgroup", 0, 50);
         List<KeycloakRoleMapping> roles = keycloakClient.getGroupRoleMapping(users.get(0).getId());
 
@@ -110,7 +115,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetClients() {
+    public void should_getClients() {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(null,0, 50);
 
         assertThat(clients).extracting("clientId").contains("activiti");
@@ -118,7 +123,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetClientsWhenPaginated() {
+    public void should_getClients_when_paginated() {
         List<KeycloakClientRepresentation> clientPage1 = keycloakClient.searchClients(null,0, 1);
         assertThat(clientPage1).hasSize(1);
         assertThat(clientPage1).extracting("clientId").contains("account");
@@ -130,7 +135,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetClientsFilteredByClientId() {
+    public void should_getClientsFilteredByClientId() {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti-keycloak", 0, 50);
 
         assertThat(clients).hasSize(1);
@@ -138,7 +143,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetUserClientRoles() {
+    public void should_getUserClientRoles() {
         List<KeycloakUser> users = keycloakClient.searchUsers("testActivitiAdmin", 0, 50);
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
 
@@ -151,7 +156,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetGroupClientRoles() {
+    public void should_getGroupClientRoles() {
         List<KeycloakGroup> groups = keycloakClient.searchGroups("salesgroup", 0, 50);
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
 

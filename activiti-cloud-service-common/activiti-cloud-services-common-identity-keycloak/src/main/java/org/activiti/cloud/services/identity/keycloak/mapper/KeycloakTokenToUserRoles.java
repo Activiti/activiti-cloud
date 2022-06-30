@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.cloud.identity.model.UserApplicationAccess;
 import org.activiti.cloud.identity.model.UserRoles;
@@ -33,7 +32,7 @@ public class KeycloakTokenToUserRoles {
     public static final String RESOURCE = "resource_access";
     public static final String REALM = "realm_access";
 
-    public UserRoles toUserRoles(Jwt token) {
+    public static UserRoles toUserRoles(Jwt token) {
         UserRoles userRoles = new UserRoles();
 
         if(token != null) {
@@ -46,7 +45,7 @@ public class KeycloakTokenToUserRoles {
         return userRoles;
     }
 
-    private List<UserApplicationAccess> getResourceRoles(Jwt token) {
+    private static List<UserApplicationAccess> getResourceRoles(Jwt token) {
         return Optional.ofNullable(token.getClaimAsMap(RESOURCE))
             .map(Map::entrySet)
             .orElse(Collections.emptySet())
@@ -55,7 +54,7 @@ public class KeycloakTokenToUserRoles {
             .collect(Collectors.toList());
     }
 
-    public List<String> getGlobalRoles(Jwt jwt) {
+    private static List<String> getGlobalRoles(Jwt jwt) {
         if(jwt.getClaim(REALM) != null) {
             return getRoles(jwt.getClaim(REALM));
         } else {
@@ -63,7 +62,7 @@ public class KeycloakTokenToUserRoles {
         }
     }
 
-    private List<String> getRoles(JSONObject getRolesParent) {
+    private static List<String> getRoles(JSONObject getRolesParent) {
         return Optional.ofNullable((List<String>) getRolesParent.get(ROLES))
             .orElse(Collections.emptyList());
     }
