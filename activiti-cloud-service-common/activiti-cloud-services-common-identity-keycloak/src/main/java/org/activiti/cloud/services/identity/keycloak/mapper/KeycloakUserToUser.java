@@ -34,7 +34,7 @@ public class KeycloakUserToUser {
     user.setId(kUser.getId());
     user.setUsername(kUser.getUsername());
     user.setDisplayName(String.join(" ", kUser.getFirstName(), kUser.getLastName()));
-    user.setFirstname(kUser.getFirstName());
+    user.setFirstName(kUser.getFirstName());
     user.setLastName(kUser.getLastName());
     user.setEmail(kUser.getEmail());
     return user;

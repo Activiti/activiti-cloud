@@ -15,10 +15,12 @@
  */
 package org.activiti.cloud.identity.model;
 
+import java.util.Objects;
+
 public class User {
 
   private String id;
-  private String firstname;
+  private String firstName;
   private String lastName;
   private String username;
   private String email;
@@ -32,12 +34,12 @@ public class User {
     this.id = id;
   }
 
-  public String getFirstname() {
-    return firstname;
+  public String getFirstName() {
+    return firstName;
   }
 
-  public void setFirstname(String firstname) {
-    this.firstname = firstname;
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
   }
 
   public String getLastName() {
@@ -72,4 +74,32 @@ public class User {
     this.displayName = displayName;
   }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof User)) {
+            return false;
+        }
+        User that = (User) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, username, email, displayName);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "id='" + id + '\'' +
+            ", firstName='" + firstName + '\'' +
+            ", lastName='" + lastName + '\'' +
+            ", username='" + username + '\'' +
+            ", email='" + email + '\'' +
+            ", displayName='" + displayName + '\'' +
+            '}';
+    }
 }
