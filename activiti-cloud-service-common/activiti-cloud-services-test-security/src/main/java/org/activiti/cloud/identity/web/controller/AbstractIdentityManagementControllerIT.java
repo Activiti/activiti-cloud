@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,14 +27,12 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser;
 import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser.ResourceRoles;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
 @Disabled
@@ -54,7 +53,7 @@ public abstract class AbstractIdentityManagementControllerIT {
         roles = {"role1"}
     )
     public void should_notReturnApplicationAccessRoles_when_userHasNotResourceRoles() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/roles"))
+        this.mockMvc.perform(get("/v1/roles"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.globalAccess").exists())
             .andExpect(jsonPath("$.globalAccess.roles", hasSize(1)))
@@ -69,7 +68,7 @@ public abstract class AbstractIdentityManagementControllerIT {
         )}
     )
     public void should_notReturnGlobalAccessRoles_when_userHasNotRealmRoles() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/roles")).
+        this.mockMvc.perform(get("/v1/roles")).
             andExpect(status().isOk())
             .andExpect(jsonPath("$.globalAccess").exists())
             .andExpect(jsonPath("$.globalAccess.roles", hasSize(0)));
@@ -77,7 +76,7 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnGroups_when_searchByName() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/groups?search=group"))
+        this.mockMvc.perform(get("/v1/groups?search=group"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[?(@.name)].name", containsInAnyOrder("testgroup", "salesgroup")));
@@ -85,35 +84,35 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnUsers_when_searchByUsername() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/users?search=hr"))
+        this.mockMvc.perform(get("/v1/users?search=hr"))
             .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser")));
     }
 
     @Test
     public void should_returnUsers_when_searchByGroup() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/users?group=hr"))
+        this.mockMvc.perform(get("/v1/users?group=hr"))
             .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(3)))
             .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "johnsnow")));
     }
 
     @Test
     public void should_returnUsers_when_searchByEmail() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/users?search=hr@example.com"))
+        this.mockMvc.perform(get("/v1/users?search=hr@example.com"))
             .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("hruser")));
     }
 
     @Test
     public void should_returnUsers_when_searchByLastName() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/users?search=snow"))
+        this.mockMvc.perform(get("/v1/users?search=snow"))
             .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
 
     @Test
     public void should_returnUsers_when_searchByFirstName() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/v1/users?search=john"))
+        this.mockMvc.perform(get("/v1/users?search=john"))
             .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
