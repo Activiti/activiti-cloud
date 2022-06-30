@@ -45,12 +45,9 @@ public class KeycloakManagementService implements IdentityManagementService {
     public static final int PAGE_SIZE = 50;
 
     private final KeycloakClient keycloakClient;
-    private final KeycloakTokenToUserRoles keycloakTokenToUserRoles;
 
-    public KeycloakManagementService(KeycloakClient keycloakClient,
-        KeycloakTokenToUserRoles keycloakTokenToUserRoles) {
+    public KeycloakManagementService(KeycloakClient keycloakClient) {
         this.keycloakClient = keycloakClient;
-        this.keycloakTokenToUserRoles = keycloakTokenToUserRoles;
     }
 
     @Override
@@ -197,7 +194,7 @@ public class KeycloakManagementService implements IdentityManagementService {
 
     @Override
     public UserRoles getUserRoles(Jwt principal) {
-        return keycloakTokenToUserRoles.toUserRoles(principal);
+        return KeycloakTokenToUserRoles.toUserRoles(principal);
     }
 
     private boolean filterByApplication(List<Role> applicationRoles) {
