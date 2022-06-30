@@ -98,12 +98,12 @@ class KeycloakManagementServiceTest {
     void should_returnUsers_when_searchingUsingOneRole() {
         defineSearchUsersFromKeycloak();
         setUpUsersRealmRoles();
-
         UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch("o");
         userSearchParams.setRoles(Set.of("a"));
 
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
+
         assertThat(users.size()).isEqualTo(2);
         assertThat(users).containsExactly(userTwo, userThree);
     }
@@ -115,7 +115,9 @@ class KeycloakManagementServiceTest {
         UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch("o");
         userSearchParams.setRoles(Set.of("a", "b"));
+
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
+
         assertThat(users.size()).isEqualTo(1);
         assertThat(users).containsExactly(userTwo);
     }
