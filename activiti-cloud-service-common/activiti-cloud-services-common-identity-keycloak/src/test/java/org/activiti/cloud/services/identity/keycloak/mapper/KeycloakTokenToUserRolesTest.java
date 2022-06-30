@@ -31,14 +31,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public class KeycloakTokenToUserRolesTest {
 
-    private KeycloakTokenToUserRoles keycloakTokenToUserRoles = new KeycloakTokenToUserRoles();
     private Jwt jwt;
 
     @Test
     public void shouldTransformJwtTokenToUserRoles() {
         mockJwt(true, true);
 
-        UserRoles userRoles = keycloakTokenToUserRoles.toUserRoles(jwt);
+        UserRoles userRoles = KeycloakTokenToUserRoles.toUserRoles(jwt);
 
         assertThat(userRoles.getGlobalAccess().getRoles())
             .hasSize(3)
@@ -52,7 +51,7 @@ public class KeycloakTokenToUserRolesTest {
 
     @Test
     public void shouldReturnEmptyUserRolesWhenTokenIsNull() {
-        UserRoles userRoles = assertDoesNotThrow(() -> keycloakTokenToUserRoles.toUserRoles(null));
+        UserRoles userRoles = assertDoesNotThrow(() -> KeycloakTokenToUserRoles.toUserRoles(null));
         assertThat(userRoles).isNotNull();
     }
 
@@ -60,7 +59,7 @@ public class KeycloakTokenToUserRolesTest {
     public void shouldReturnGlobalAccessWhenResourceAccessIsNull() {
         mockJwt(false, true);
 
-        UserRoles userRoles = keycloakTokenToUserRoles.toUserRoles(jwt);
+        UserRoles userRoles = KeycloakTokenToUserRoles.toUserRoles(jwt);
         assertThat(userRoles.getGlobalAccess().getRoles())
             .hasSize(3)
             .containsOnly("role1", "role2", "role3");
@@ -72,7 +71,7 @@ public class KeycloakTokenToUserRolesTest {
     public void shouldReturnApplicationAccessWhenRealmAccessIsNull() {
         mockJwt(true, false);
 
-        UserRoles userRoles = keycloakTokenToUserRoles.toUserRoles(jwt);
+        UserRoles userRoles = KeycloakTokenToUserRoles.toUserRoles(jwt);
         assertThat(userRoles.getApplicationAccess())
             .extracting(UserApplicationAccess::getName, UserApplicationAccess::getRoles)
             .containsOnly(
@@ -83,7 +82,8 @@ public class KeycloakTokenToUserRolesTest {
             .isEmpty();
     }
 
-    private void mockJwt(boolean withResourceRoleMappings, boolean withRealmRoleMappings) {
+    private void mockJwt(boolean withResourceRoleMappings,
+        boolean withRealmRoleMappings) {
 
         JSONObject resourceRoleMappings;
         JSONObject realmRoleMappings;
