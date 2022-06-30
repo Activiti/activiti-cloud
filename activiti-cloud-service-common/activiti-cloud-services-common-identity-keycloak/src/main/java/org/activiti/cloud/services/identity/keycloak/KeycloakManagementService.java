@@ -46,14 +46,11 @@ public class KeycloakManagementService implements IdentityManagementService {
 
     private final KeycloakClient keycloakClient;
     private final KeycloakTokenToUserRoles keycloakTokenToUserRoles;
-    private final KeycloakRoleMappingToRole keycloakRoleMappingToRole;
 
     public KeycloakManagementService(KeycloakClient keycloakClient,
-        KeycloakTokenToUserRoles keycloakTokenToUserRoles,
-        KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
+        KeycloakTokenToUserRoles keycloakTokenToUserRoles) {
         this.keycloakClient = keycloakClient;
         this.keycloakTokenToUserRoles = keycloakTokenToUserRoles;
-        this.keycloakRoleMappingToRole = keycloakRoleMappingToRole;
     }
 
     @Override
@@ -71,9 +68,11 @@ public class KeycloakManagementService implements IdentityManagementService {
         }
     }
 
-    private List<User> filterUsersInRealmScope(List<User> users ,UserSearchParams userSearchParams) {
+    private List<User> filterUsersInRealmScope(List<User> users,
+        UserSearchParams userSearchParams) {
+
         Map<String, List<Role>> usersRolesMapping = new HashMap<>();
-        if(!CollectionUtils.isEmpty(userSearchParams.getRoles())) {
+        if (!CollectionUtils.isEmpty(userSearchParams.getRoles())) {
             mapUserWithRealmRoles(users, usersRolesMapping);
         }
         return users
@@ -90,7 +89,7 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     private List<Role> getUserRealmRoles(String userId) {
-        return keycloakRoleMappingToRole.toRoles(
+        return KeycloakRoleMappingToRole.toRoles(
                     keycloakClient.getUserRoleMapping(userId));
     }
 
@@ -160,7 +159,7 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     private List<Role> getGroupRealmRoles(String groupId) {
-        return keycloakRoleMappingToRole.toRoles(
+        return KeycloakRoleMappingToRole.toRoles(
             keycloakClient.getGroupRoleMapping(groupId));
     }
 
@@ -210,7 +209,7 @@ public class KeycloakManagementService implements IdentityManagementService {
 
     private List<Role> getUserApplicationRoles(String userId, String clientId) {
         if (!clientId.isEmpty()) {
-            return keycloakRoleMappingToRole
+            return KeycloakRoleMappingToRole
                 .toRoles(keycloakClient.getUserClientRoleMapping(userId, clientId));
         }
         return Collections.emptyList();
@@ -218,7 +217,7 @@ public class KeycloakManagementService implements IdentityManagementService {
 
     private List<Role> getGroupApplicationRoles(String groupId, String clientId) {
         if (!clientId.isEmpty()) {
-            return keycloakRoleMappingToRole
+            return KeycloakRoleMappingToRole
                 .toRoles(keycloakClient.getGroupClientRoleMapping(groupId, clientId));
         }
         return Collections.emptyList();
