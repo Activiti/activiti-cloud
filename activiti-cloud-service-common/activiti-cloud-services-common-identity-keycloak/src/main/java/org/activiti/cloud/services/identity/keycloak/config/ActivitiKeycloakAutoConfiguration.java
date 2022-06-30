@@ -23,7 +23,6 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakManagementService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
-import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingToRole;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -65,11 +64,9 @@ public class ActivitiKeycloakAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public IdentityManagementService identityManagementService(KeycloakClient keycloakClient,
-        KeycloakGroupToGroup keycloakGroupToGroup,
         KeycloakTokenToUserRoles keycloakTokenToUserRoles,
         KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
         return new KeycloakManagementService(keycloakClient,
-            keycloakGroupToGroup,
             keycloakTokenToUserRoles,
             keycloakRoleMappingToRole);
     }
@@ -78,12 +75,6 @@ public class ActivitiKeycloakAutoConfiguration {
     @ConditionalOnMissingBean
     public KeycloakRoleMappingToRole keycloakRoleMappingToRole() {
         return new KeycloakRoleMappingToRole();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public KeycloakGroupToGroup keycloakGroupToGroup(KeycloakClient keycloakClient, KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
-        return new KeycloakGroupToGroup(keycloakClient, keycloakRoleMappingToRole);
     }
 
     @Bean

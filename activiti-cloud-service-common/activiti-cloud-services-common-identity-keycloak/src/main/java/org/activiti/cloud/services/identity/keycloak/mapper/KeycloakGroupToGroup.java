@@ -16,24 +16,15 @@
 package org.activiti.cloud.services.identity.keycloak.mapper;
 
 import org.activiti.cloud.identity.model.Group;
-import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 
 public class KeycloakGroupToGroup {
 
-  private final KeycloakClient keycloakClient;
-  private final KeycloakRoleMappingToRole keycloakRoleMappingToRole;
-
-  public KeycloakGroupToGroup(KeycloakClient keycloakClient, KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
-    this.keycloakClient = keycloakClient;
-    this.keycloakRoleMappingToRole = keycloakRoleMappingToRole;
-  }
-
-  public Group toGroup(KeycloakGroup kGroup) {
-    Group group = new Group();
-    group.setId(kGroup.getId());
-    group.setName(kGroup.getName());
-    return group;
-  }
+    public static Group toGroup(KeycloakGroup kGroup) {
+        Group group = new Group();
+        group.setId(kGroup.getId());
+        group.setName(kGroup.getName());
+        return group;
+    }
 
 }
