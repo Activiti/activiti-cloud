@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.identity.model;
 
 import java.util.Objects;
@@ -25,6 +26,27 @@ public class User {
     private String username;
     private String email;
     private String displayName;
+
+    public User() {
+    }
+
+    public User(String id,
+        String firstName,
+        String lastName,
+        String username,
+        String email,
+        String displayName) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.email = email;
+        this.displayName = displayName;
+    }
+
+    public static UserBuilder builder() {
+        return new UserBuilder();
+    }
 
     public String getId() {
         return id;
@@ -103,7 +125,7 @@ public class User {
             '}';
     }
 
-    public class UserBuilder {
+    public static class UserBuilder {
 
         private String id;
         private String firstName;
@@ -111,20 +133,6 @@ public class User {
         private String username;
         private String email;
         private String displayName;
-
-        public UserBuilder(String id,
-            String firstName,
-            String lastName,
-            String username,
-            String email,
-            String displayName) {
-            this.id = id;
-            this.firstName = firstName;
-            this.lastName = lastName;
-            this.username = username;
-            this.email = email;
-            this.displayName = displayName;
-        }
 
         public UserBuilder id(String id) {
             this.id = id;
@@ -156,8 +164,8 @@ public class User {
             return this;
         }
 
-        public UserBuilder build() {
-            return new UserBuilder(id, firstName, lastName, username, email, displayName);
+        public User build() {
+            return new User(id, firstName, lastName, username, email, displayName);
         }
     }
 }
