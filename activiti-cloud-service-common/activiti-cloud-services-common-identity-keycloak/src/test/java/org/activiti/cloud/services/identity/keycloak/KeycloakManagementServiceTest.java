@@ -95,7 +95,7 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    void shouldReturnUsersWhenSearchingUsingOneRole() {
+    void should_returnUsers_when_searchingUsingOneRole() {
         defineSearchUsersFromKeycloak();
         setUpUsersRealmRoles();
 
@@ -109,7 +109,7 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    void shouldReturnUsersWhenSearchingUsingMultipleRoles() {
+    void should_returnUsers_when_searchingUsingMultipleRoles() {
         defineSearchUsersFromKeycloak();
         setUpUsersRealmRoles();
         UserSearchParams userSearchParams = new UserSearchParams();
