@@ -45,18 +45,15 @@ public class KeycloakManagementService implements IdentityManagementService {
     public static final int PAGE_SIZE = 50;
 
     private final KeycloakClient keycloakClient;
-    private final KeycloakUserToUser keycloakUserToUser;
     private final KeycloakGroupToGroup keycloakGroupToGroup;
     private final KeycloakTokenToUserRoles keycloakTokenToUserRoles;
     private final KeycloakRoleMappingToRole keycloakRoleMappingToRole;
 
     public KeycloakManagementService(KeycloakClient keycloakClient,
-        KeycloakUserToUser keycloakUserToUser,
         KeycloakGroupToGroup keycloakGroupToGroup,
         KeycloakTokenToUserRoles keycloakTokenToUserRoles,
         KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
         this.keycloakClient = keycloakClient;
-        this.keycloakUserToUser = keycloakUserToUser;
         this.keycloakGroupToGroup = keycloakGroupToGroup;
         this.keycloakTokenToUserRoles = keycloakTokenToUserRoles;
         this.keycloakRoleMappingToRole = keycloakRoleMappingToRole;
@@ -67,7 +64,7 @@ public class KeycloakManagementService implements IdentityManagementService {
         List<User> users= keycloakClient
             .searchUsers(userSearchParams.getSearchKey(), PAGE_START, PAGE_SIZE)
             .stream()
-            .map(keycloakUserToUser::toUser)
+            .map(KeycloakUserToUser::toUser)
             .collect(Collectors.toList());
 
         if(!StringUtils.isEmpty(userSearchParams.getApplication())) {

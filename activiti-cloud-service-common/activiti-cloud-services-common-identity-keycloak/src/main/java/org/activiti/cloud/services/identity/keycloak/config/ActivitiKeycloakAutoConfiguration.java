@@ -26,7 +26,6 @@ import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingToRole;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles;
-import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -66,18 +65,13 @@ public class ActivitiKeycloakAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public IdentityManagementService identityManagementService(KeycloakClient keycloakClient,
-                                                               KeycloakUserToUser keycloakUserToUser,
-                                                               KeycloakGroupToGroup keycloakGroupToGroup,
-                                                               KeycloakTokenToUserRoles keycloakTokenToUserRoles,
-                                                               KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
-        return new KeycloakManagementService(keycloakClient, keycloakUserToUser, keycloakGroupToGroup,
-            keycloakTokenToUserRoles, keycloakRoleMappingToRole);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public KeycloakUserToUser keycloakUserToUser(KeycloakClient keycloakClient, KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
-        return new KeycloakUserToUser(keycloakClient, keycloakRoleMappingToRole);
+        KeycloakGroupToGroup keycloakGroupToGroup,
+        KeycloakTokenToUserRoles keycloakTokenToUserRoles,
+        KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
+        return new KeycloakManagementService(keycloakClient,
+            keycloakGroupToGroup,
+            keycloakTokenToUserRoles,
+            keycloakRoleMappingToRole);
     }
 
     @Bean
