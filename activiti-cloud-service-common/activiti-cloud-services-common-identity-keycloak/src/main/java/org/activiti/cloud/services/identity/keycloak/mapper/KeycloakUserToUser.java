@@ -16,28 +16,21 @@
 package org.activiti.cloud.services.identity.keycloak.mapper;
 
 import org.activiti.cloud.identity.model.User;
-import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 
 public class KeycloakUserToUser {
 
-  private final KeycloakClient keycloakClient;
-  private final KeycloakRoleMappingToRole keycloakRoleMappingToRole;
-
-  public KeycloakUserToUser(KeycloakClient keycloakClient, KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
-    this.keycloakClient = keycloakClient;
-    this.keycloakRoleMappingToRole = keycloakRoleMappingToRole;
-  }
-
-  public User toUser(KeycloakUser kUser) {
-    User user = new User();
-    user.setId(kUser.getId());
-    user.setUsername(kUser.getUsername());
-    user.setDisplayName(String.join(" ", kUser.getFirstName(), kUser.getLastName()));
-    user.setFirstname(kUser.getFirstName());
-    user.setLastName(kUser.getLastName());
-    user.setEmail(kUser.getEmail());
-    return user;
-  }
+    public static User toUser(KeycloakUser kUser) {
+        return User.builder()
+            .id(kUser.getId())
+            .firstName(kUser.getFirstName())
+            .lastName(kUser.getLastName())
+            .username(kUser.getUsername())
+            .email(kUser.getEmail())
+            .displayName(String.join(" ",
+                kUser.getFirstName(),
+                kUser.getLastName()))
+            .build();
+    }
 
 }

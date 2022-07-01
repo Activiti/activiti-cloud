@@ -36,6 +36,17 @@
             ]
           }
         }
+      },
+      {
+        "name": "APPLICATION_MANAGER",
+        "composites": {
+          "client": {
+            "realm-management": [
+              "view-users",
+              "view-clients"
+            ]
+          }
+        }
       }
     ]
   },
@@ -333,6 +344,31 @@
       "groups": [
         "/testgroup"
       ]
+    },
+    {
+      "username": "testmanager",
+      "enabled": true,
+      "firstName": "Test",
+      "lastName": "Manager",
+      "email": "testManager@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "APPLICATION_MANAGER",
+        "uma_authorization",
+        "offline_access"
+      ],
+      "clientRoles": {
+        "activiti": [
+          "uma_authorization",
+          "APPLICATION_MANAGER",
+          "offline_access"
+        ]
+      }
     }
   ],
   "clients": [

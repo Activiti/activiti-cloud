@@ -1,11 +1,8 @@
 # Activiti Cloud Services Swagger
 
-This module provides base springfox and springdoc configuration for swagger auto-generated specification file.
+This module provides base springdoc configuration for swagger auto-generated specification file.
 
 It provides swagger specification files:
-
--   for springfox available under `v3/api-docs` or `v3/api-docs?group=[groupName]`;
-    provides specification for Alfresco MediaType format
 
 -   for springdoc available under `v3/api-docs` or `v3/api-docs/[groupName]`;
     provides specification for Alfresco MediaType format
@@ -30,7 +27,6 @@ When adding this as dependency provide
 #### for base OpenApi
 the following properties
 ```
-    springdoc.enabled=true
     springdoc.packages-to-scan=[base-package-to-scan]
     springdoc.api-docs.path=[path-to-custom-api-docs]
 ```
@@ -42,11 +38,7 @@ and a bean for OpenApi:
     }
 ```
 #### for group OpenApi
-the following property
-```
-    springdoc.enabled=true
-```
-and a bean for GroupedOpenApi:
+a bean for GroupedOpenApi:
 ```
     @Bean
     public GroupedOpenApi groupedOpenApi() {
@@ -55,13 +47,4 @@ and a bean for GroupedOpenApi:
             .packagesToScan([base-package-to-scan])
             .build();
     }
-```
-
-### Springfox (deprecated)
--   Declare a bean that will select the apis to be scanned. I.e.:
-```
-@Bean
-public Predicate<RequestHandler> apiSelector() {
-    return RequestHandlerSelectors.basePackage("org.activiti.cloud.services");
-}
 ```

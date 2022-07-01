@@ -13,63 +13,159 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.identity.model;
+
+import java.util.Objects;
 
 public class User {
 
-  private String id;
-  private String firstname;
-  private String lastName;
-  private String username;
-  private String email;
-  private String displayName;
+    private String id;
+    private String firstName;
+    private String lastName;
+    private String username;
+    private String email;
+    private String displayName;
 
-  public String getId() {
-    return id;
-  }
+    public User() {
+    }
 
-  public void setId(String id) {
-    this.id = id;
-  }
+    public User(String id,
+        String firstName,
+        String lastName,
+        String username,
+        String email,
+        String displayName) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.email = email;
+        this.displayName = displayName;
+    }
 
-  public String getFirstname() {
-    return firstname;
-  }
+    public static UserBuilder builder() {
+        return new UserBuilder();
+    }
 
-  public void setFirstname(String firstname) {
-    this.firstname = firstname;
-  }
+    public String getId() {
+        return id;
+    }
 
-  public String getLastName() {
-    return lastName;
-  }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
-  }
+    public String getFirstName() {
+        return firstName;
+    }
 
-  public String getUsername() {
-    return username;
-  }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-  public void setUsername(String username) {
-    this.username = username;
-  }
+    public String getLastName() {
+        return lastName;
+    }
 
-  public String getEmail() {
-    return email;
-  }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-  public void setEmail(String email) {
-    this.email = email;
-  }
+    public String getUsername() {
+        return username;
+    }
 
-  public String getDisplayName() {
-    return displayName;
-  }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
-  }
+    public String getEmail() {
+        return email;
+    }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof User)) {
+            return false;
+        }
+        User that = (User) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, username, email, displayName);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "id='" + id + '\'' +
+            ", firstName='" + firstName + '\'' +
+            ", lastName='" + lastName + '\'' +
+            ", username='" + username + '\'' +
+            ", email='" + email + '\'' +
+            ", displayName='" + displayName + '\'' +
+            '}';
+    }
+
+    public static class UserBuilder {
+
+        private String id;
+        private String firstName;
+        private String lastName;
+        private String username;
+        private String email;
+        private String displayName;
+
+        public UserBuilder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public UserBuilder firstName(String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public UserBuilder lastName(String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public UserBuilder username(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public UserBuilder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public UserBuilder displayName(String displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        public User build() {
+            return new User(id, firstName, lastName, username, email, displayName);
+        }
+    }
 }

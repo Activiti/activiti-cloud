@@ -50,7 +50,7 @@ public class SpringdocApiDocsIT {
 
     @Test
     public void should_generateSpringdocApiDocs() throws Exception {
-        mockMvc.perform(get("/springdoc/v3/api-docs").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.components.schemas").value(hasKey("EntryResponseContentExtendedJsonDeserializerWrapper")))

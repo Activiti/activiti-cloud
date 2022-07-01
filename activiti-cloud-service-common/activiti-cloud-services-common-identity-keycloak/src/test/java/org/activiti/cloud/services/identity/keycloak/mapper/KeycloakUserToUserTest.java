@@ -21,31 +21,28 @@ import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class KeycloakUserToUserTest {
-  @InjectMocks
-  private KeycloakUserToUser keycloakUserToUser;
 
-  @Test
-  void shouldTransformKeycloakUserToUser() {
+    @Test
+    void should_transformKeycloakUserToUser() {
 
-    KeycloakUser kUser = new KeycloakUser();
-    kUser.setId("123");
-    kUser.setEmail("test@test.it");
-    kUser.setFirstName("Ping");
-    kUser.setLastName("Pong");
-    kUser.setUsername("pingPong");
+        KeycloakUser kUser = new KeycloakUser();
+        kUser.setId("123");
+        kUser.setEmail("test@test.it");
+        kUser.setFirstName("Ping");
+        kUser.setLastName("Pong");
+        kUser.setUsername("pingPong");
 
-    User user = keycloakUserToUser.toUser(kUser);
+        User user = KeycloakUserToUser.toUser(kUser);
 
-    assertThat(user.getId()).isEqualTo(kUser.getId());
-    assertThat(user.getDisplayName()).isEqualTo("Ping Pong");
-    assertThat(user.getEmail()).isEqualTo(kUser.getEmail());
-    assertThat(user.getUsername()).isEqualTo(kUser.getUsername());
-    assertThat(user.getFirstname()).isEqualTo("Ping");
-    assertThat(user.getLastName()).isEqualTo("Pong");
-  }
+        assertThat(user.getId()).isEqualTo(kUser.getId());
+        assertThat(user.getDisplayName()).isEqualTo("Ping Pong");
+        assertThat(user.getEmail()).isEqualTo(kUser.getEmail());
+        assertThat(user.getUsername()).isEqualTo(kUser.getUsername());
+        assertThat(user.getFirstName()).isEqualTo("Ping");
+        assertThat(user.getLastName()).isEqualTo("Pong");
+    }
 }

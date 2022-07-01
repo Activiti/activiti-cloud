@@ -23,10 +23,6 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakManagementService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
-import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
-import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingToRole;
-import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles;
-import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -65,37 +61,8 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IdentityManagementService identityManagementService(KeycloakClient keycloakClient,
-                                                               KeycloakUserToUser keycloakUserToUser,
-                                                               KeycloakGroupToGroup keycloakGroupToGroup,
-                                                               KeycloakTokenToUserRoles keycloakTokenToUserRoles,
-                                                               KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
-        return new KeycloakManagementService(keycloakClient, keycloakUserToUser, keycloakGroupToGroup,
-            keycloakTokenToUserRoles, keycloakRoleMappingToRole);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public KeycloakUserToUser keycloakUserToUser(KeycloakClient keycloakClient, KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
-        return new KeycloakUserToUser(keycloakClient, keycloakRoleMappingToRole);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public KeycloakRoleMappingToRole keycloakRoleMappingToRole() {
-        return new KeycloakRoleMappingToRole();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public KeycloakGroupToGroup keycloakGroupToGroup(KeycloakClient keycloakClient, KeycloakRoleMappingToRole keycloakRoleMappingToRole) {
-        return new KeycloakGroupToGroup(keycloakClient, keycloakRoleMappingToRole);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public KeycloakTokenToUserRoles keycloakTokenToUserRoles() {
-        return new KeycloakTokenToUserRoles();
+    public IdentityManagementService identityManagementService(KeycloakClient keycloakClient) {
+        return new KeycloakManagementService(keycloakClient);
     }
 
 }
