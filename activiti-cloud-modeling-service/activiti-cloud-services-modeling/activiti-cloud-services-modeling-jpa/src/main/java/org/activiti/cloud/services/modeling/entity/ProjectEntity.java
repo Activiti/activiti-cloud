@@ -15,14 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.entity;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -31,9 +23,21 @@ import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import java.util.HashSet;
+import java.util.Set;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 /**
  * Project model entity
  */
+@Table(name = "Project", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "createdBy"}))
 @Entity(name = "Project")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
@@ -49,7 +53,6 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     private String id;
 
-    @Column(unique = true)
     private String name;
 
     private String description;

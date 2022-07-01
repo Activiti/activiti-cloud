@@ -54,7 +54,7 @@ create table project_models
 alter table model_versions
     add constraint UK_ei9juhk09r20q4bmvgpjrcrs3 unique (versions_version, versions_versioned_entity_id);
 alter table project
-    add constraint UK_3k75vvu7mevyvvb5may5lj8k7 unique (name);
+    add constraint unique_project_name_createdby unique (name, created_by);
 alter table model
     add constraint FKqjpgrrtoo1bryor3iymmb03pu foreign key (latest_version_version, latest_version_versioned_entity_id) references model_version;
 alter table model_versions
