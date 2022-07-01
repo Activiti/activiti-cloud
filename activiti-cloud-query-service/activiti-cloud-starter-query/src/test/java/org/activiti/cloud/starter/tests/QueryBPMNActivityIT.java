@@ -223,10 +223,11 @@ public class QueryBPMNActivityIT {
         eventsAggregator.sendAll();
 
         //then
+        String processInstanceId = events.get(0)
+                                         .getProcessInstanceId();
 
         await().untilAsserted(() -> {
-            Optional<ProcessInstanceEntity> result = processInstanceRepository.findById(events.get(0)
-                                                                                                             .getProcessInstanceId());
+            Optional<ProcessInstanceEntity> result = processInstanceRepository.findById(processInstanceId);
             assertThat(result).isPresent()
                               .get()
                               .extracting(ProcessInstanceEntity::getStatus)
