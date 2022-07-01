@@ -15,10 +15,14 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
 import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
@@ -31,6 +35,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessDefinitionReposit
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -40,7 +45,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.Resource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -50,6 +57,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,6 +94,12 @@ public class QueryBPMNActivityIT {
     private String processDefinitionId = UUID.randomUUID().toString();
 
     private EventsAggregator eventsAggregator;
+
+    @Value("classpath:events/multi-instance-sequence.json")
+    private Resource multiInstanceSequenceJson;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -196,4 +210,29 @@ public class QueryBPMNActivityIT {
                                                 tuple(reviewTaskActivity.getElementId(),reviewTaskActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.STARTED));
         });
     }
+
+    @Test
+    public void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
+        //given
+        List<CloudRuntimeEvent> events = objectMapper.readValue(multiInstanceSequenceJson.getFile(),
+                                                                new TypeReference<List<CloudRuntimeEvent>>() {});
+
+        eventsAggregator.addEvents(events.toArray(new CloudRuntimeEvent[] {}));
+
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+
+        await().untilAsserted(() -> {
+            Optional<ProcessInstanceEntity> result = processInstanceRepository.findById(events.get(0)
+                                                                                                             .getProcessInstanceId());
+            assertThat(result).isPresent()
+                              .get()
+                              .extracting(ProcessInstanceEntity::getStatus)
+                              .isEqualTo(ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        });
+
+    }
+
 }
