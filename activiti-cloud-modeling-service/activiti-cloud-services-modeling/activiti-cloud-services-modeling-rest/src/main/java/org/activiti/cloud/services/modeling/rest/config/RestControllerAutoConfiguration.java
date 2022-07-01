@@ -25,10 +25,12 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
 @EnableIdentityManagementRestAPI
+@PropertySource("classpath:modeling-rest.properties")
 @Import({
     ModelController.class,
     ProjectController.class,
