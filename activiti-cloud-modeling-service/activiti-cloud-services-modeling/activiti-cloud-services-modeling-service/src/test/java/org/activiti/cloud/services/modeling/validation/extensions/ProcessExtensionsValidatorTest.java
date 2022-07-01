@@ -15,11 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.validation.extensions;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
-
-import java.io.IOException;
-import java.util.List;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.config.ModelingApiAutoConfiguration;
@@ -34,6 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.io.IOException;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 @SpringBootTest
 @ContextConfiguration(classes = {
@@ -82,4 +83,9 @@ public class ProcessExtensionsValidatorTest {
         processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
     }
 
+    @Test
+    public void shouldBeValidWhenAnalyticsIsPresent() throws IOException {
+        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-analytics-variable.json");
+        processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
+    }
 }

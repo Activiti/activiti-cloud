@@ -113,6 +113,9 @@
         },
         "displayName": {
           "type": "string"
+        },
+        "analytics": {
+          "type": "boolean"
         }
       },
       "dependencies": {
