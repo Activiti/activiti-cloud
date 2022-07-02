@@ -23,6 +23,7 @@ import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
@@ -34,8 +35,10 @@ import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowReposito
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -89,6 +92,9 @@ public class QueryBPMNActivityIT {
     private BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
 
     @Autowired
+    private ServiceTaskRepository serviceTaskRepository;
+
+    @Autowired
     private MyProducer producer;
 
     private String processDefinitionId = UUID.randomUUID().toString();
@@ -126,6 +132,7 @@ public class QueryBPMNActivityIT {
         processInstanceRepository.deleteAll();
         bpmnActivityRepository.deleteAll();
         bpmnSequenceFlowRepository.deleteAll();
+        serviceTaskRepository.deleteAll();
     }
 
     @Test
@@ -232,6 +239,19 @@ public class QueryBPMNActivityIT {
                               .get()
                               .extracting(ProcessInstanceEntity::getStatus)
                               .isEqualTo(ProcessInstance.ProcessInstanceStatus.COMPLETED);
+
+            List<ServiceTaskEntity> serviceTasks = serviceTaskRepository.findByProcessInstanceId(processInstanceId);
+
+            assertThat(serviceTasks).hasSize(1)
+                                    .extracting(ServiceTaskEntity::getStatus)
+                                    .containsOnly(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+
+            List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(processInstanceId);
+
+            assertThat(activities).hasSize(4)
+                                  .extracting(BPMNActivityEntity::getStatus)
+                                  .containsOnly(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+
         });
 
     }
