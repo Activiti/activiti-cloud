@@ -21,6 +21,10 @@ public class UserApplicationAccess {
     private String name;
     private List<String> roles;
 
+    public UserApplicationAccess() {
+
+    }
+
     public UserApplicationAccess(String name, List<String> roles) {
         this.name = name;
         this.roles = roles;

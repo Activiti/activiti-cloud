@@ -43,6 +43,9 @@ public class UserRoles {
 
         private List<String> roles;
 
+        public UserGlobalAccess() {
+        }
+
         public UserGlobalAccess(List<String> roles) {
             this.roles = roles;
         }

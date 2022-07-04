@@ -99,7 +99,7 @@ public class QueryAdminProcessDiagramIT {
 
     @BeforeEach
     public void setUp() throws IOException {
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
 
         eventsAggregator = new EventsAggregator(producer);
 
@@ -155,7 +155,7 @@ public class QueryAdminProcessDiagramIT {
     @Test
     public void shouldNotGetProcessInstanceDiagramAdmin() throws InterruptedException {
         //given
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
 
         ProcessInstanceImpl process = startSimpleProcessInstance();
 

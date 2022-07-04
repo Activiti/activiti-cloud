@@ -88,7 +88,7 @@ public class TasksIT {
 
     @BeforeEach
     public void setUp() {
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
 
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -181,7 +181,7 @@ public class TasksIT {
         Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         CloudTask task = tasks.iterator().next();
 
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
 
         UpdateTaskPayload updateTask = TaskPayloadBuilder.update().withTaskId(task.getId())
             .withName("Updated name")
@@ -193,14 +193,14 @@ public class TasksIT {
 
         //then
         //once admin/v1/tasks/{taskId} is available there will be no need to switch users
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
         ResponseEntity<CloudTask> taskResponseEntity = taskRestTemplate.getTask(task.getId());
 
         assertThat(taskResponseEntity.getBody().getName()).isEqualTo("Updated name");
         assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("Updated description");
 
         //Check UpdateTaskPayload without taskId
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         updateTask = TaskPayloadBuilder.update()
             .withName("New Updated name")
             .withDescription("New Updated description")
@@ -210,7 +210,7 @@ public class TasksIT {
         taskRestTemplate.adminUpdateTask(task.getId(), updateTask);
 
         //then
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
         taskResponseEntity = taskRestTemplate.getTask(task.getId());
 
         assertThat(taskResponseEntity.getBody().getName()).isEqualTo("New Updated name");
@@ -225,7 +225,7 @@ public class TasksIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //SIMPLE_PROCESS not visible to testuser according to access-control.properties
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
 
         //when
         ResponseEntity<PagedModel<CloudTask>> responseEntity = taskRestTemplate.getTasks();
@@ -257,7 +257,7 @@ public class TasksIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
 
         //when
         ResponseEntity<PagedModel<CloudTask>> responseEntity = taskRestTemplate.adminGetTasks();
@@ -336,7 +336,7 @@ public class TasksIT {
         //given
         CloudTask standaloneTask = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("parent task").withDescription("This is my parent task").build());
         //when
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         ResponseEntity<CloudTask> delete = taskRestTemplate.adminDelete(standaloneTask);
 
         //then
@@ -364,7 +364,7 @@ public class TasksIT {
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //when
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminGetTask(task.getId());
 
         //then
@@ -425,7 +425,7 @@ public class TasksIT {
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //when
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminComplete(task);
 
         //then
@@ -456,7 +456,7 @@ public class TasksIT {
         String taskId = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next().getId();
 
         //when
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminGetTask(taskId);
         assertThat(responseEntity).isNotNull();
 
@@ -465,7 +465,7 @@ public class TasksIT {
         assertThat(task.getAssignee()).isNull();
 
         //when
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
         AssignTaskPayload assignTaskPayload = TaskPayloadBuilder
             .assign()
             .withTaskId(task.getId())
@@ -526,7 +526,7 @@ public class TasksIT {
         taskRestTemplate.release(task);
 
         //Claim task by another user
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
         ResponseEntity<CloudTask> responseTask = taskRestTemplate.claim(task);
 
         //then

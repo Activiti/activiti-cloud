@@ -127,7 +127,7 @@ public class ProcessVariablesIT {
 
     @BeforeEach
     public void setUp() {
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
 
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -217,7 +217,7 @@ public class ProcessVariablesIT {
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
             variables);
 
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
 
         ResponseEntity<Void> variablesResponse = processInstanceRestTemplate.adminRemoveVariables(startResponse.getBody().getId(), variablesNames);
 
@@ -273,7 +273,7 @@ public class ProcessVariablesIT {
     @Test
     public void adminShouldUpdateProcessVariables() {
         //given
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",
@@ -332,7 +332,7 @@ public class ProcessVariablesIT {
             variables);
 
         //testuser doesn't have permission according to access-control.properties
-        identityTokenProducer.setTestUser("testuser");
+        identityTokenProducer.withTestUser("testuser");
 
         await().untilAsserted(() -> {
 
@@ -355,7 +355,7 @@ public class ProcessVariablesIT {
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
             variables);
 
-        identityTokenProducer.setTestUser("testadmin");
+        identityTokenProducer.withTestUser("testadmin");
 
         //should see at /{processInstanceId}/variables
         await().untilAsserted(() -> {
@@ -382,14 +382,14 @@ public class ProcessVariablesIT {
     @Test
     public void shouldProperHandleProcessVariablesForAdmin() throws Exception {
         //given
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
         checkProcessVariables(true);
     }
 
     @Test
     public void shouldProperHandleProcessVariables() throws Exception {
         //given
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
         checkProcessVariables(false);
     }
 
@@ -542,13 +542,13 @@ public class ProcessVariablesIT {
 
     @Test
     public void shouldStartProcessWihDateVariables() throws Exception {
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
         checkStartProcessWihDateVariables(false);
     }
 
     @Test
     public void shouldStartProcessWihDateVariablesFromAdmin() throws Exception {
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
         checkStartProcessWihDateVariables(true);
     }
 
@@ -616,13 +616,13 @@ public class ProcessVariablesIT {
 
     @Test
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariables() throws Exception {
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
         checkBADREQUESTStartProcessWihWrongDateVariables(false);
     }
 
     @Test
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariablesForAdmin() throws Exception {
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
         checkBADREQUESTStartProcessWihWrongDateVariables(true);
     }
 
@@ -679,7 +679,7 @@ public class ProcessVariablesIT {
     @WithActivitiMockUser(username = "hradmin", roles = "ACTIVITI_ADMIN")
     public void testAdminStartProcessVariablesPayloadConverter() {
         // given
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
 
         StartProcessPayload startProcessPayload = testStartProcessPayload();
 
@@ -700,7 +700,7 @@ public class ProcessVariablesIT {
     @WithActivitiMockUser(username = "hruser", roles = "ACTIVITI_USER")
     public void testStartMessageVariablesPayloadConverter() {
         // given
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
 
         StartMessagePayload startMessagePayload = testStartMessagePayload();
 
@@ -721,7 +721,7 @@ public class ProcessVariablesIT {
     @WithActivitiMockUser(username = "hradmin", roles = "ACTIVITI_ADMIN")
     public void testAdminStartMessageVariablesPayloadConverter() {
         // given
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
 
         StartMessagePayload startMessagePayload = testStartMessagePayload();
 

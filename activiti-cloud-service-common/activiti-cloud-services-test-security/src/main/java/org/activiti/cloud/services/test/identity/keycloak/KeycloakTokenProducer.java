@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.test.identity.keycloak;
 
-import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessTokenResponse;
@@ -25,10 +24,14 @@ import org.springframework.http.HttpHeaders;
 
 public class KeycloakTokenProducer implements IdentityTokenProducer {
 
-    private KeycloakProperties keycloakProperties;
-
     @Value("${keycloak.resource:}")
     protected String resource;
+
+    @Value("${keycloak.auth-server-url:}")
+    private String authServerUrl;
+
+    @Value("${keycloak.realm:}")
+    private String realm;
 
     @Value("${activiti.identity.test-user:}")
     protected String testUser;
@@ -36,19 +39,37 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     @Value("${activiti.identity.test-password:}")
     protected String testPassword;
 
-    public KeycloakTokenProducer(KeycloakProperties keycloakProperties) {
-        this.keycloakProperties = keycloakProperties;
+    public KeycloakTokenProducer(String authServerUrl, String realm) {
+        this.authServerUrl = authServerUrl;
+        this.realm = realm;
     }
 
     @Override
     public String getTokenString() {
-        AccessTokenResponse token = getAccessTokenResponse(testUser, testPassword);
-        return "Bearer " + token.getToken();
+        return "Bearer " + getAccessTokenString();
     }
 
     @Override
-    public void setTestUser(String keycloakTestUser) {
+    public String getAccessTokenString() {
+        AccessTokenResponse token = getAccessTokenResponse(testUser, testPassword);
+        return token.getToken();
+    }
+
+    @Override
+    public IdentityTokenProducer withTestUser(String keycloakTestUser) {
         this.testUser = keycloakTestUser;
+        return this;
+    }
+
+    @Override
+    public IdentityTokenProducer withTestPassword(String testPassword) {
+        this.testPassword = testPassword;
+        return this;
+    }
+
+    public IdentityTokenProducer withResource(String resource) {
+        this.resource = resource;
+        return this;
     }
 
     @Override
@@ -91,8 +112,8 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     }
 
     private AccessTokenResponse getAccessTokenResponse(String user, String password) {
-        return Keycloak.getInstance(keycloakProperties.getAuthServerUrl(),
-                                    keycloakProperties.getRealm(),
+        return Keycloak.getInstance(authServerUrl,
+                                    realm,
                                     user,
                                     password,
                                     resource).tokenManager().getAccessToken();

@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -59,9 +58,7 @@ public class JwtInterceptorConfigurer implements WebSocketMessageBrokerConfigure
                 if (accessor != null) {
                     if(headerValues.contains(accessor.getHeader(headerName))) {
                         Optional.ofNullable(accessor.getUser())
-                                .filter(KeycloakAuthenticationToken.class::isInstance)
-                                .map(KeycloakAuthenticationToken.class::cast)
-                                .map(KeycloakAuthenticationToken::getCredentials)
+                                .filter(Jwt.class::isInstance)
                                 .map(Jwt.class::cast)
                                 .ifPresent(jwt -> {
                                     try {

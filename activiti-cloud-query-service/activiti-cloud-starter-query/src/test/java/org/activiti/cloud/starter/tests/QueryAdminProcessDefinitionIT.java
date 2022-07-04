@@ -72,7 +72,7 @@ public class QueryAdminProcessDefinitionIT {
 
     @BeforeEach
     public void setUp() {
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
     }
 
     @AfterEach

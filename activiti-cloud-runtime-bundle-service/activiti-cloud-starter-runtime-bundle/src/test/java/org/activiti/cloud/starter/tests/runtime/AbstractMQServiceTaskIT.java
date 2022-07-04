@@ -86,7 +86,7 @@ public abstract class AbstractMQServiceTaskIT {
 
     @BeforeEach
     public void setUp() {
-        identityTokenProducer.setTestUser(keycloakTestUser);
+        identityTokenProducer.withTestUser(keycloakTestUser);
     }
 
     @Test

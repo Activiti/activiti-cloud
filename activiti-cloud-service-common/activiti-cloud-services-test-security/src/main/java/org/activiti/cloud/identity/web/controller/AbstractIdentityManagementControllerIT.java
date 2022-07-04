@@ -15,13 +15,14 @@
  */
 package org.activiti.cloud.identity.web.controller;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.contains;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser;
 import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser.ResourceRoles;
@@ -46,57 +47,80 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    public void should_returnUsers_when_searchByUsername() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/users?search=hr"))
+    @WithActivitiMockUser(
+        roles = {"role1"}
+    )
+    public void should_notReturnApplicationAccessRoles_when_userHasNotResourceRoles() throws Exception {
+        this.mockMvc.perform(get("/v1/roles"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.globalAccess").exists())
+            .andExpect(jsonPath("$.globalAccess.roles", hasSize(1)))
+            .andExpect(jsonPath("$.globalAccess.roles[0]", is("role1")));
+    }
+
+    @Test
+    @WithActivitiMockUser(
+        resourcesRoles = {@ResourceRoles(
+            resource = "app1",
+            roles = {"role1"}
+        )}
+    )
+    public void should_notReturnGlobalAccessRoles_when_userHasNotRealmRoles() throws Exception {
+        this.mockMvc.perform(get("/v1/roles")).
+            andExpect(status().isOk())
+            .andExpect(jsonPath("$.globalAccess").exists())
+            .andExpect(jsonPath("$.globalAccess.roles", hasSize(0)));
+    }
+
+    @Test
+    public void should_returnGroups_when_searchByName() throws Exception {
+        this.mockMvc.perform(get("/v1/groups?search=group"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[0].username", is("hradmin")))
-            .andExpect(jsonPath("$[1].username", is("hruser")));
+            .andExpect(jsonPath("$[?(@.name)].name", containsInAnyOrder("testgroup", "salesgroup")));
+    }
+
+    @Test
+    public void should_returnUsers_when_searchByUsername() throws Exception {
+        this.mockMvc.perform(get("/v1/users?search=hr"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser")));
     }
 
     @Test
     public void should_returnUsers_when_searchByGroup() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/users?group=hr"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(3)))
-            .andExpect(jsonPath("$[0].username", is("hradmin")))
-            .andExpect(jsonPath("$[1].username", is("hruser")))
-            .andExpect(jsonPath("$[2].username", is("johnsnow")));
+        this.mockMvc.perform(get("/v1/users?group=hr"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "johnsnow")));
     }
 
     @Test
     public void should_returnUsers_when_searchByEmail() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/users?search=hr@example.com"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(1)))
+        this.mockMvc.perform(get("/v1/users?search=hr@example.com"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("hruser")));
     }
 
     @Test
     public void should_returnUsers_when_searchByLastName() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/users?search=snow"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(1)))
+        this.mockMvc.perform(get("/v1/users?search=snow"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
 
     @Test
     public void should_returnUsers_when_searchByFirstName() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/users?search=john"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(1)))
+        this.mockMvc.perform(get("/v1/users?search=john"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
+
+    //----
 
     @Test
     public void should_returnOnlyUsers_when_searchByUsernameAndRoleUser() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/users?search=johnsnow&role=ACTIVITI_USER"))
+            .perform(get("/v1/users?search=johnsnow&role=ACTIVITI_USER"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("johnsnow")));
@@ -105,7 +129,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnUsers_when_searchByApplication() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/users?application=activiti"))
+            .perform(get("/v1/users?application=activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(jsonPath("$[0].username", is("hruser")))
@@ -117,7 +141,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_NotReturnUsers_when_searchByInvalidApplication() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/users?application=activitis"))
+            .perform(get("/v1/users?application=activitis"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(0)));
     }
@@ -125,7 +149,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnUsers_when_searchByUsernameAndApplication() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/users?search=hruser&application=activiti"))
+            .perform(get("/v1/users?search=hruser&application=activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("hruser")));
@@ -134,7 +158,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnUsers_when_searchByGroupAndApplication() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/users?group=hr&application=activiti"))
+            .perform(get("/v1/users?group=hr&application=activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("hruser")));
@@ -143,7 +167,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnUsers_when_searchByRoleAndApplication() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/users?role=ACTIVITI_ADMIN&application=activiti"))
+            .perform(get("/v1/users?role=ACTIVITI_ADMIN&application=activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("testactivitiadmin")));
@@ -152,7 +176,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnOnlyAdmins_when_searchByUsernameAndRoleAdmin() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/users?search=hr&role=ACTIVITI_ADMIN"))
+            .perform(get("/v1/users?search=hr&role=ACTIVITI_ADMIN"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("hradmin")));
@@ -161,7 +185,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnOnlyAdmins_when_searchByRoleAdmin() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/users?role=ACTIVITI_ADMIN"))
+            .perform(get("/v1/users?role=ACTIVITI_ADMIN"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(jsonPath("$[0].username", is("admin")))
@@ -171,19 +195,9 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    public void should_returnGroups_when_searchByName() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/groups?search=group"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[0].name", is("salesgroup")))
-            .andExpect(jsonPath("$[1].name", is("testgroup")));
-    }
-
-    @Test
     public void should_returnGroups_when_searchByNameAndRole() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/groups?search=group&role=ACTIVITI_USER"))
+            .perform(get("/v1/groups?search=group&role=ACTIVITI_USER"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].name", is("salesgroup")));
@@ -192,7 +206,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnGroups_when_searchByRole() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/groups?role=ACTIVITI_USER"))
+            .perform(get("/v1/groups?role=ACTIVITI_USER"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].name", is("salesgroup")));
@@ -201,7 +215,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnGroups_when_searchByApplication() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/groups?application=activiti"))
+            .perform(get("/v1/groups?application=activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].name", is("salesgroup")));
@@ -210,7 +224,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_NotReturnGroups_when_searchByInvalidApplication() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/groups?application=fake"))
+            .perform(get("/v1/groups?application=fake"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(0)));
     }
@@ -222,7 +236,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     })
     public void should_returnAccessRoles() throws Exception {
         mockMvc
-            .perform(get("/v1/identity/roles"))
+            .perform(get("/v1/roles"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.globalAccess").exists())
             .andExpect(jsonPath("$.globalAccess.roles", hasSize(1)))
@@ -232,30 +246,6 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(jsonPath("$.applicationAccess[0].roles",contains("role1")))
             .andExpect(jsonPath("$.applicationAccess[1].name", is("app1")))
             .andExpect(jsonPath("$.applicationAccess[1].roles",contains("role1", "role2")));
-    }
-
-    @Test
-    @WithActivitiMockUser(roles = {"role1"})
-    public void should_notReturnApplicationAccessRoles_when_userHasNotResourceRoles() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/roles"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.globalAccess").exists())
-            .andExpect(jsonPath("$.globalAccess.roles", hasSize(1)))
-            .andExpect(jsonPath("$.globalAccess.roles[0]", is("role1")))
-            .andExpect(jsonPath("$.applicationAccess", hasSize(0)));
-    }
-
-    @Test
-    @WithActivitiMockUser(resourcesRoles = {
-        @ResourceRoles(resource="app1", roles={"role1"})})
-    public void should_notReturnGlobalAccessRoles_when_userHasNotRealmRoles() throws Exception {
-        mockMvc
-            .perform(get("/v1/identity/roles"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.applicationAccess", hasSize(1)))
-            .andExpect(jsonPath("$.globalAccess").exists())
-            .andExpect(jsonPath("$.globalAccess.roles", hasSize(0)));
     }
 
 }

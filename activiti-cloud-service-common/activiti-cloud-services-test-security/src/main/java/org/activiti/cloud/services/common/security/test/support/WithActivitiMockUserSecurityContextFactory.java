@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.common.security.test.support;
 
 import com.nimbusds.jose.shaded.json.JSONArray;
-import com.nimbusds.jose.shaded.json.JSONObject;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
@@ -31,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser.ResourceRoles;
 import org.mockito.internal.util.collections.Sets;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -40,6 +40,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 public class WithActivitiMockUserSecurityContextFactory implements WithSecurityContextFactory<WithActivitiMockUser> {
+
+    @Autowired
+    private RolesClaimProvider rolesClaimProvider;
 
     @Override
     public SecurityContext createSecurityContext(WithActivitiMockUser annotation) {
@@ -94,21 +97,8 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         Map<String, Object> claims = new HashMap<>();
         claims.put("preferred_username", username);
 
-        JSONObject realmAccess = new JSONObject();
-        JSONArray globalRolesArray = new JSONArray();
-        globalRolesArray.addAll(globalRoles);
-        realmAccess.put("roles", globalRolesArray);
-        claims.put("realm_access", realmAccess);
-
-        JSONObject resourceAccess = new JSONObject();
-        for (String key : resourceRoles.keySet()) {
-            JSONObject resourceRolesJSON = new JSONObject();
-            JSONArray resourceRolesArray = new JSONArray();
-            resourceRolesArray.addAll(Arrays.asList(resourceRoles.get(key)));
-            resourceRolesJSON.put("roles", resourceRolesArray);
-            resourceAccess.put(key, resourceRolesJSON);
-        }
-        claims.put("resource_access", resourceAccess);
+        rolesClaimProvider.setGlobalRoles(globalRoles, claims);
+        rolesClaimProvider.setResourceRoles(resourceRoles, claims);
 
         JSONArray groupsArray = new JSONArray();
         groupsArray.addAll(groups);
@@ -116,5 +106,7 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
 
         return claims;
     }
+
+
 
 }

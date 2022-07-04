@@ -89,7 +89,7 @@ public class QueryBPMNActivityIT {
 
     @BeforeEach
     public void setUp() throws IOException {
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
 
         eventsAggregator = new EventsAggregator(producer);
 

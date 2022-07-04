@@ -13,26 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.test.identity;
+package org.activiti.cloud.services.common.security.test.support;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
+import java.util.Map;
+import java.util.Set;
 
-public interface IdentityTokenProducer {
+public interface RolesClaimProvider {
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
+    void setResourceRoles(Map<String, String[]> resourceRoles, Map<String, Object> claims);
 
-    String getTokenString();
-
-    void setTestUser(String keycloakTestUser);
-
-    HttpEntity entityWithAuthorizationHeader(String user, String password);
-
-    HttpEntity entityWithoutAuthentication();
-
-    HttpEntity entityWithAuthorizationHeader();
-
-    String getTestUser();
-
-    HttpHeaders authorizationHeaders();
+    void setGlobalRoles(Set<String> globalRoles, Map<String, Object> claims);
 }

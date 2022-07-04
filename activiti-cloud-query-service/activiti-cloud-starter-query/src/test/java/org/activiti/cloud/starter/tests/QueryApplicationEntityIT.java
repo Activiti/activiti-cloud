@@ -81,7 +81,7 @@ public class QueryApplicationEntityIT {
 
     @Test
     public void shouldGetDeployedApplicationsWhenUserIsAdmin() {
-        identityTokenProducer.setTestUser("hradmin");
+        identityTokenProducer.withTestUser("hradmin");
         getDeployedApplication(ADMIN_APPS_URL);
     }
 

@@ -74,7 +74,7 @@ public class QueryProcessDefinitionIT {
 
     @BeforeEach
     public void setUp() {
-        identityTokenProducer.setTestUser("hruser");
+        identityTokenProducer.withTestUser("hruser");
     }
 
     @AfterEach
