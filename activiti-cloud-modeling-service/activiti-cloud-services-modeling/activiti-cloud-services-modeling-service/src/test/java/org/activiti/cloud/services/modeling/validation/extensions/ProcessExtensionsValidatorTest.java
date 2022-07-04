@@ -88,4 +88,21 @@ public class ProcessExtensionsValidatorTest {
         byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-analytics-variable.json");
         processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
     }
+
+    @Test
+    public void shouldBeInvalidWhenAnalyticsIsPresent() throws IOException {
+        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-invalid-analytics-variable.json");
+
+        SemanticModelValidationException semanticModelValidationException = catchThrowableOfType(
+            () -> processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT),
+            SemanticModelValidationException.class);
+
+        List<ModelValidationError> validationErrors = semanticModelValidationException.getValidationErrors();
+        assertThat(validationErrors).hasSize(3);
+        assertThat(validationErrors).
+            extracting("problem")
+            .containsOnly("string [file] does not match pattern integer|string|boolean|date|datetime",
+                          "string [folder] does not match pattern integer|string|boolean|date|datetime",
+                          "string [json] does not match pattern integer|string|boolean|date|datetime");
+    }
 }

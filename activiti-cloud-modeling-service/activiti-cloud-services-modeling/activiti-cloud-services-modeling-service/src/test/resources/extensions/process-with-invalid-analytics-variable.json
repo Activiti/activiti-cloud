@@ -1,0 +1,33 @@
+{
+  "id": "process-baa8aa57-7cbb-40bc-bd70-a1da5f7b0311",
+  "extensions": {
+    "Process_jEKhhV0rp": {
+      "constants": {},
+      "mappings": {},
+      "properties": {
+        "c49e32f8-fb23-11ec-b939-0242ac120002": {
+          "id": "c49e32f8-fb23-11ec-b939-0242ac120002",
+          "name": "var_file",
+          "type": "file",
+          "required": false,
+          "analytics": true
+        },
+        "f2be210c-fb23-11ec-b939-0242ac120002": {
+          "id": "f2be210c-fb23-11ec-b939-0242ac120002",
+          "name": "var_folder",
+          "type": "folder",
+          "required": false,
+          "analytics": true
+
+        },
+        "ecc5c8b8-fb23-11ec-b939-0242ac120002": {
+          "id": "ecc5c8b8-fb23-11ec-b939-0242ac120002",
+          "name": "var_json",
+          "type": "json",
+          "required": false,
+          "analytics": true
+        }
+      }
+    }
+  }
+}

@@ -5,18 +5,42 @@
       "constants": {},
       "mappings": {},
       "properties": {
-        "47b3a61f-02c5-4e7e-bafb-f95e1a71d23d": {
-          "id": "47b3a61f-02c5-4e7e-bafb-f95e1a71d23d",
-          "name": "test",
+        "6b1feabe-fb23-11ec-b939-0242ac120002": {
+          "id": "6b1feabe-fb23-11ec-b939-0242ac120002",
+          "name": "var_string",
           "type": "string",
           "required": false,
-          "model": {
-            "$ref": "#/$defs/primitive/string"
-          },
+          "analytics": true
+        },
+        "73dd752c-fb23-11ec-b939-0242ac120002": {
+          "id": "73dd752c-fb23-11ec-b939-0242ac120002",
+          "name": "var_integer",
+          "type": "integer",
+          "required": false,
+          "analytics": true
+        },
+        "78f6e6a6-fb23-11ec-b939-0242ac120002": {
+          "id": "78f6e6a6-fb23-11ec-b939-0242ac120002",
+          "name": "var_boolean",
+          "type": "boolean",
+          "required": false,
+          "analytics": true
+        },
+        "80b8e3b2-fb23-11ec-b939-0242ac120002": {
+          "id": "80b8e3b2-fb23-11ec-b939-0242ac120002",
+          "name": "var_date",
+          "type": "date",
+          "required": false,
+          "analytics": true
+        },
+        "9c3401d0-fb23-11ec-b939-0242ac120002": {
+          "id": "9c3401d0-fb23-11ec-b939-0242ac120002",
+          "name": "var_datetime",
+          "type": "datetime",
+          "required": false,
           "analytics": true
         }
-      },
-      "assignments": {}
+      }
     }
   }
 }
