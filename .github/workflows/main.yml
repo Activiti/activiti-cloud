@@ -133,7 +133,7 @@ jobs:
       - name: Build Example Runtime Bundle
         run: make docker/example-runtime-bundle
 
-      - name: Build Activity Cloud Query
+      - name: Build Activiti Cloud Query
         run: make docker/activiti-cloud-query
 
       - name: Build Example Cloud Connector
@@ -141,6 +141,9 @@ jobs:
 
       - name: Build Activiti Cloud Modeling
         run: make mvn/activiti-cloud-modeling/liquibase docker/activiti-cloud-modeling
+
+      - name: Build Activiti Cloud Identity Adapter
+        run: make docker/activiti-cloud-identity-adapter
 
   test:
     runs-on: ubuntu-latest
@@ -364,6 +367,7 @@ jobs:
           # Launching the tests
           make test/modeling-acceptance-tests
           make test/runtime-acceptance-tests
+          make test/identity-adapter-acceptance-tests
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: ${{ always() }}
@@ -497,6 +501,7 @@ jobs:
           yq -i e '.activiti-cloud-query.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-modeling.image.tag = env(VERSION)' values.yaml
+          yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.5.0
       - name: Update helm docs
