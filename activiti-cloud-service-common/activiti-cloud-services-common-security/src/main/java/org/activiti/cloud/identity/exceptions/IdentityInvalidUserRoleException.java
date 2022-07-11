@@ -20,4 +20,3 @@ public class IdentityInvalidUserRoleException extends IdentityException {
         super("role {" + role  + "} can't be assigned to user {" + username + "}");
     }
 }
-
