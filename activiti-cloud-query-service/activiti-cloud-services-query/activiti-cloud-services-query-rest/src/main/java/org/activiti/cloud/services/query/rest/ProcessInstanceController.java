@@ -62,7 +62,7 @@ public class ProcessInstanceController {
     }
 
     @JsonView(JsonViews.General.class)
-    @RequestMapping(method = RequestMethod.GET, params = "!variableDefinitions")
+    @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
     public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                                  Pageable pageable) {
         return pagedCollectionModelAssembler.toModel(pageable,
@@ -71,12 +71,12 @@ public class ProcessInstanceController {
     }
 
     @JsonView(JsonViews.ProcessVariables.class)
-    @RequestMapping(method = RequestMethod.GET, params = "variableDefinitions")
+    @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
     public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariables(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                              @RequestParam(value = "variableDefinitions", required = false, defaultValue = "") List<String> variables,
+                                                                              @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> variableKeys,
                                                                               Pageable pageable) {
         return pagedCollectionModelAssembler.toModel(pageable,
-            processInstanceService.findAllWithVariables(predicate, variables, pageable),
+            processInstanceService.findAllWithVariables(predicate, variableKeys, pageable),
             processInstanceRepresentationModelAssembler);
     }
 

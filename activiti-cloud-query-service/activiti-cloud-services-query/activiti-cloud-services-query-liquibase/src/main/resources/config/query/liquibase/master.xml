@@ -349,4 +349,25 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
+
+  <changeSet author="activiti-query"
+    id="alter17-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+      encoding="utf8"
+      path="changelog/17-alter.pg.schema.7.4.1.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+    id="alter17-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+      encoding="utf8"
+      path="changelog/17-alter.oracle.schema.7.4.1.sql"
+      relativeToChangelogFile="true"
+      splitStatements="false"
+      stripComments="true"/>
+  </changeSet>
+
 </databaseChangeLog>
