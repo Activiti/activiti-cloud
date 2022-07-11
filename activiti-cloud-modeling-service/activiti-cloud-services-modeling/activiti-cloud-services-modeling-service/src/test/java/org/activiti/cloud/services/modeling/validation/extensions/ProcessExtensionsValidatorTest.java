@@ -98,11 +98,12 @@ public class ProcessExtensionsValidatorTest {
             SemanticModelValidationException.class);
 
         List<ModelValidationError> validationErrors = semanticModelValidationException.getValidationErrors();
-        assertThat(validationErrors).hasSize(3);
+        assertThat(validationErrors).hasSize(4);
         assertThat(validationErrors).
             extracting("problem")
-            .containsOnly("string [file] does not match pattern integer|string|boolean|date|datetime",
-                          "string [folder] does not match pattern integer|string|boolean|date|datetime",
-                          "string [json] does not match pattern integer|string|boolean|date|datetime");
+            .containsOnly("string [datetime] does not match pattern ^integer$|^string$|^boolean$|^date$",
+                          "string [file] does not match pattern ^integer$|^string$|^boolean$|^date$",
+                          "string [folder] does not match pattern ^integer$|^string$|^boolean$|^date$",
+                          "string [json] does not match pattern ^integer$|^string$|^boolean$|^date$");
     }
 }

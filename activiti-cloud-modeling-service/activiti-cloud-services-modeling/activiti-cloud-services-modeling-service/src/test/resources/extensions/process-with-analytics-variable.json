@@ -32,13 +32,6 @@
           "type": "date",
           "required": false,
           "analytics": true
-        },
-        "9c3401d0-fb23-11ec-b939-0242ac120002": {
-          "id": "9c3401d0-fb23-11ec-b939-0242ac120002",
-          "name": "var_datetime",
-          "type": "datetime",
-          "required": false,
-          "analytics": true
         }
       }
     }

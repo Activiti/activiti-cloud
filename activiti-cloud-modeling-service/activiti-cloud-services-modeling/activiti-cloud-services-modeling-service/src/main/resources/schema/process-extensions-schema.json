@@ -394,9 +394,9 @@
           "then": {
             "properties": {
               "type": {
-                "pattern": "integer|string|boolean|date|datetime",
+                "pattern": "^integer$|^string$|^boolean$|^date$",
                 "message": {
-                  "pattern": "Mismatch value type - {{name}}({{id}}). Expected type for analytics is one of integer|string|boolean|date|datetime"
+                  "pattern": "Mismatch value type - {{name}}({{id}}). Expected type for analytics is one of integer|string|boolean|date"
                 }
               }
             }
