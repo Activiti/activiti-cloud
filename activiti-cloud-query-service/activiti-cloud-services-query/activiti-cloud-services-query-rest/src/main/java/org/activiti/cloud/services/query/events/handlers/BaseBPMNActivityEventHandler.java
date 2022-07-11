@@ -39,8 +39,16 @@ public abstract class BaseBPMNActivityEventHandler {
 
         String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
 
-        BaseBPMNActivityEntity bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class,
-                                                                   pkId);
+        BaseBPMNActivityEntity bpmnActivityEntity = null;
+
+        if ("serviceTask".equals(bpmnActivity.getActivityType())) {
+            bpmnActivityEntity = entityManager.find(ServiceTaskEntity.class,
+                                                    pkId);
+        } else {
+            bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class,
+                                                    pkId);
+        }
+
         if (bpmnActivityEntity == null) {
             bpmnActivityEntity = createBpmnActivityEntity(event);
         }
