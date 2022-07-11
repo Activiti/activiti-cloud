@@ -48,11 +48,27 @@
           }
         }
       }
-    ]
+    ],
+    "client": {
+      "test-client": [
+        {
+          "name": "ACTIVITI_USER",
+          "clientRole": true
+        },
+        {
+          "name": "ACTIVITI_ADMIN",
+          "clientRole": true
+        }
+      ]
+    }
   },
   "groups": [
     {
-      "name": "hr"
+      "id": "60c6753b-4f1c-498a-96d2-be6790fae09c",
+      "name": "hr",
+      "realmRoles": [
+        "ACTIVITI_USER"
+      ]
     },
     {
       "name": "testgroup"
@@ -246,6 +262,7 @@
       ]
     },
     {
+      "id": "5f682999-d11d-4a42-bc42-86b7e6752223",
       "username": "testadmin",
       "enabled": true,
       "firstName": "Test",
@@ -295,6 +312,9 @@
           "uma_authorization",
           "ACTIVITI_USER",
           "offline_access"
+        ],
+        "realm-management": [
+          "manage-users"
         ]
       },
       "groups": [
@@ -410,6 +430,31 @@
       "serviceAccountsEnabled": true,
       "publicClient": false,
       "protocol": "openid-connect",
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    },
+    {
+      "clientId": "test-client",
+      "enabled": true,
+      "implicitFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "publicClient": true,
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
       "defaultClientScopes": [
         "web-origins",
         "profile",

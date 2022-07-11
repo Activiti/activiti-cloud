@@ -23,6 +23,7 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -67,4 +68,19 @@ public interface KeycloakClient {
     @Headers("Content-Type: application/json")
     List<KeycloakRoleMapping> getGroupClientRoleMapping(@PathVariable("id") String id,
         @PathVariable("client") String client);
+
+    @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles")
+    @Headers("Content-Type: application/json")
+    List<KeycloakRoleMapping> getClientRoles(@PathVariable("id") String id);
+
+    @RequestMapping(method = RequestMethod.POST, value = "/users/{id}/role-mappings/clients/{client}")
+    @Headers("Content-Type: application/json")
+    List<KeycloakRoleMapping> addUserClientRoleMapping(@PathVariable("id") String id,
+        @PathVariable("client") String client, @RequestBody List<KeycloakRoleMapping> roles);
+
+    @RequestMapping(method = RequestMethod.POST, value = "/groups/{id}/role-mappings/clients/{client}")
+    @Headers("Content-Type: application/json")
+    List<KeycloakRoleMapping> addGroupClientRoleMapping(@PathVariable("id") String id,
+        @PathVariable("client") String client, @RequestBody List<KeycloakRoleMapping> roles);
+
 }

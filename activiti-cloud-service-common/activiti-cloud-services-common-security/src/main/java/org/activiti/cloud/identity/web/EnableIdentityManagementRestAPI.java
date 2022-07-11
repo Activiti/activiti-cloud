@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.activiti.cloud.identity.web.controller.IdentityManagementController;
+import org.activiti.cloud.identity.web.controller.IdentityManagementRestExceptionHandler;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -30,6 +31,8 @@ import org.springframework.context.annotation.Import;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@Import({IdentityManagementController.class})
+@Import({IdentityManagementController.class,
+    IdentityManagementRestExceptionHandler.class
+})
 public @interface EnableIdentityManagementRestAPI {
 }
