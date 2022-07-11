@@ -15,10 +15,15 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
 import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
@@ -30,7 +35,10 @@ import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowReposito
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -40,7 +48,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.Resource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -50,6 +60,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,11 +92,20 @@ public class QueryBPMNActivityIT {
     private BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
 
     @Autowired
+    private ServiceTaskRepository serviceTaskRepository;
+
+    @Autowired
     private MyProducer producer;
 
     private String processDefinitionId = UUID.randomUUID().toString();
 
     private EventsAggregator eventsAggregator;
+
+    @Value("classpath:events/multi-instance-sequence.json")
+    private Resource multiInstanceSequenceJson;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -112,6 +132,7 @@ public class QueryBPMNActivityIT {
         processInstanceRepository.deleteAll();
         bpmnActivityRepository.deleteAll();
         bpmnSequenceFlowRepository.deleteAll();
+        serviceTaskRepository.deleteAll();
     }
 
     @Test
@@ -196,4 +217,43 @@ public class QueryBPMNActivityIT {
                                                 tuple(reviewTaskActivity.getElementId(),reviewTaskActivity.getActivityType(), BPMNActivityEntity.BPMNActivityStatus.STARTED));
         });
     }
+
+    @Test
+    public void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
+        //given
+        List<CloudRuntimeEvent> events = objectMapper.readValue(multiInstanceSequenceJson.getFile(),
+                                                                new TypeReference<List<CloudRuntimeEvent>>() {});
+
+        eventsAggregator.addEvents(events.toArray(new CloudRuntimeEvent[] {}));
+
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        String processInstanceId = events.get(0)
+                                         .getProcessInstanceId();
+
+        await().untilAsserted(() -> {
+            Optional<ProcessInstanceEntity> result = processInstanceRepository.findById(processInstanceId);
+            assertThat(result).isPresent()
+                              .get()
+                              .extracting(ProcessInstanceEntity::getStatus)
+                              .isEqualTo(ProcessInstance.ProcessInstanceStatus.COMPLETED);
+
+            List<ServiceTaskEntity> serviceTasks = serviceTaskRepository.findByProcessInstanceId(processInstanceId);
+
+            assertThat(serviceTasks).hasSize(1)
+                                    .extracting(ServiceTaskEntity::getStatus)
+                                    .containsOnly(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+
+            List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(processInstanceId);
+
+            assertThat(activities).hasSize(4)
+                                  .extracting(BPMNActivityEntity::getStatus)
+                                  .containsOnly(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+
+        });
+
+    }
+
 }
