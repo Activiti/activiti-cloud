@@ -1,0 +1,11 @@
+name: Versions propagation auto-merge
+on:
+  pull_request:
+    types: [labeled]
+    branches:
+      - develop
+
+jobs:
+  enable-auto-merge:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/versions-propagation-auto-merge.yml@v1.8.0
+    secrets: inherit
