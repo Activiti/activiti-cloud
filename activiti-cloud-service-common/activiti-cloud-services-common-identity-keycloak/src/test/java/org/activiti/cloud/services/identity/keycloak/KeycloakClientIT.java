@@ -229,4 +229,24 @@ public class KeycloakClientIT {
             .anyMatch(kRole -> kRole.getName().equals(roleName));
     }
 
+    @Test
+    public void should_getUsersClientRoleMapping() {
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        String clientId = clients.get(0).getId();
+        List<KeycloakUser> users = keycloakClient.getUsersClientRoleMapping(clientId, ACTIVITI_ADMIN_ROLE);
+
+        assertThat(users).hasSize(1);
+        assertThat(users).extracting("username").contains("testactivitiadmin");
+    }
+
+    @Test
+    public void should_getGroupsClientRoleMapping() {
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        String clientId = clients.get(0).getId();
+        List<KeycloakGroup> groups = keycloakClient.getGroupsClientRoleMapping(clientId, ACTIVITI_USER_ROLE);
+
+        assertThat(groups).hasSize(1);
+        assertThat(groups).extracting("name").contains("salesgroup");
+    }
+
 }

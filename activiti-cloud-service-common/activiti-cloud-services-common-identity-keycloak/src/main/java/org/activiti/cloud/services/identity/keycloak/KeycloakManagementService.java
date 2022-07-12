@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import java.text.CollationElementIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,7 +34,8 @@ import org.activiti.cloud.identity.exceptions.IdentityInvalidUserException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidUserRoleException;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.Role;
-import org.activiti.cloud.identity.model.SecurityRepresentation;
+import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
+import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
@@ -215,17 +217,57 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     @Override
-    public void addApplicationPermissions(String application, List<SecurityRepresentation> securityRepresentations) {
+    public List<SecurityResponseRepresentation> getApplicationPermissions(String application, Set<String> roles) {
+        String clientId = getKeycloakClientId(application);
+        Set<String> applicationRolesFilter = getApplicationRolesToSearch(roles, clientId);
+        List<SecurityResponseRepresentation> applicationPermissions = new ArrayList<>();
+
+        applicationRolesFilter.forEach( role -> {
+            SecurityResponseRepresentation securityResponseRepresentation = new SecurityResponseRepresentation();
+            securityResponseRepresentation.setRole(role);
+            securityResponseRepresentation.setUsers(getUsersClientRoleMapping(clientId, role));
+            securityResponseRepresentation.setGroups(getGroupsClientRoleMapping(clientId, role));
+            applicationPermissions.add(securityResponseRepresentation);
+        });
+
+        return applicationPermissions;
+    }
+
+    private List<User> getUsersClientRoleMapping(String clientId, String role) {
+        return keycloakClient.getUsersClientRoleMapping(clientId, role)
+            .stream()
+            .map(KeycloakUserToUser::toUser)
+            .collect(Collectors.toList());
+    }
+
+    private List<Group> getGroupsClientRoleMapping(String clientId, String role) {
+        return keycloakClient.getGroupsClientRoleMapping(clientId, role)
+            .stream()
+            .map(KeycloakGroupToGroup::toGroup)
+            .collect(Collectors.toList());
+    }
+
+    private Set<String> getApplicationRolesToSearch(Set<String> roles, String clientId) {
+        return keycloakClient
+            .getClientRoles(clientId)
+            .stream()
+            .map(KeycloakRoleMapping::getName)
+            .filter(clientRole -> CollectionUtils.isEmpty(roles) || roles.contains(clientRole))
+            .collect(Collectors.toSet());
+    }
+
+    @Override
+    public void addApplicationPermissions(String application, List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations) {
         String clientId = getKeycloakClientId(application);
         if(StringUtils.isEmpty(clientId)) {
             throw new IdentityInvalidApplicationException(application);
         }
-        securityRepresentations.forEach(securityRepresentation -> {
+        securityRequestBodyRepresentations.forEach(securityRepresentation -> {
             String roleName = securityRepresentation.getRole();
             KeycloakRoleMapping keycloakRoleMapping = getKeyCloakRoleFromRoleName(roleName, clientId);
 
-            List<String> validatedUsers = new ArrayList();
-            List<String> validatedGroups = new ArrayList();
+            List<String> validatedUsers = new ArrayList<>();
+            List<String> validatedGroups = new ArrayList<>();
 
             if(securityRepresentation.getUsers() != null) {
                 securityRepresentation.getUsers().forEach(

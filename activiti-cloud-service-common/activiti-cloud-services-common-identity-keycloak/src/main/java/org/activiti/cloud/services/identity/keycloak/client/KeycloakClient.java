@@ -83,4 +83,14 @@ public interface KeycloakClient {
     List<KeycloakRoleMapping> addGroupClientRoleMapping(@PathVariable("id") String id,
         @PathVariable("client") String client, @RequestBody List<KeycloakRoleMapping> roles);
 
+    @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles/{role-name}/users")
+    @Headers("Content-Type: application/json")
+    List<KeycloakUser> getUsersClientRoleMapping(@PathVariable("id") String id,
+        @PathVariable("role-name") String roleName);
+
+    @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles/{role-name}/groups")
+    @Headers("Content-Type: application/json")
+    List<KeycloakGroup> getGroupsClientRoleMapping(@PathVariable("id") String id,
+        @PathVariable("role-name") String roleName);
+
 }

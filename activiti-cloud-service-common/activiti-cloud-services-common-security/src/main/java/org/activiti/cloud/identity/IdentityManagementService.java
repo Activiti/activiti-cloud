@@ -16,8 +16,10 @@
 package org.activiti.cloud.identity;
 
 import java.util.List;
+import java.util.Set;
 import org.activiti.cloud.identity.model.Group;
-import org.activiti.cloud.identity.model.SecurityRepresentation;
+import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
+import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -30,5 +32,7 @@ public interface IdentityManagementService {
 
   UserRoles getUserRoles(Jwt principal);
 
-  void addApplicationPermissions(String application, List<SecurityRepresentation> securityRepresentations);
+  void addApplicationPermissions(String application, List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations);
+
+  List<SecurityResponseRepresentation> getApplicationPermissions (String application, Set<String> roles);
 }
