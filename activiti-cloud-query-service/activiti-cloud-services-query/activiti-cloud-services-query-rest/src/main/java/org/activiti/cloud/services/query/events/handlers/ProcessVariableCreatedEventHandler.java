@@ -76,6 +76,7 @@ public class ProcessVariableCreatedEventHandler {
                                                                          null);
         variableEntity.setValue(variableCreatedEvent.getEntity().getValue());
         variableEntity.setVariableDefinitionId(variableCreatedEvent.getVariableDefinitionId());
+        variableEntity.setProcessDefinitionKey(variableCreatedEvent.getProcessDefinitionKey());
         variableEntity.setProcessInstance(processInstanceEntity);
 
         entityManager.persist(variableEntity);
