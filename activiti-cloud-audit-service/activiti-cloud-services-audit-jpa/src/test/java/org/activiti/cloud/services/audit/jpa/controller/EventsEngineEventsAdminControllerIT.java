@@ -39,6 +39,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -46,9 +47,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,6 +65,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     AlfrescoWebAutoConfiguration.class
 })
 public class EventsEngineEventsAdminControllerIT {
+
+    private static final String HEADER_ATTACHMENT_FILENAME = "attachment;filename=";
+    private static final String CSV_FILENAME = "20220710_testApp_audit.csv";
+
+    private static String CSV_CONTENT = "\"APPNAME\",\"APPVERSION\",\"BUSINESSKEY\",\"ENTITY\",\"ENTITYID\",\"EVENTTYPE\",\"ID\",\"MESSAGEID\",\"PARENTPROCESSINSTANCEID\",\"PROCESSDEFINITIONID\",\"PROCESSDEFINITIONKEY\",\"PROCESSDEFINITIONVERSION\",\"PROCESSINSTANCEID\",\"SEQUENCENUMBER\",\"SERVICEFULLNAME\",\"SERVICENAME\",\"SERVICETYPE\",\"SERVICEVERSION\",\"TIME\"\n" +
+        "\"\",\"\",\"\",\"ProcessInstance{id='10', name='null', processDefinitionId='1', processDefinitionKey='null', parentId='null', initiator='null', startDate=null, completedDate=null, businessKey='null', status=null, processDefinitionVersion='null', processDefinitionName='null'}\",\"\",\"PROCESS_STARTED\",\"eventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n" +
+        "\"\",\"\",\"\",\"ProcessInstance{id='10', name='null', processDefinitionId='1', processDefinitionKey='null', parentId='null', initiator='null', startDate=null, completedDate=null, businessKey='null', status=null, processDefinitionVersion='null', processDefinitionName='null'}\",\"\",\"PROCESS_STARTED\",\"eventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n";
 
     @MockBean
     private EventsRepository eventsRepository;
@@ -97,6 +107,24 @@ public class EventsEngineEventsAdminControllerIT {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    public void exportEvents() throws Exception {
+        PageRequest pageable = PageRequest.of(1,
+            10);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(2),
+            pageable,
+            11);
+
+        given(eventsRepository.findAll(any(PageRequest.class))).willReturn(eventsPage);
+
+        MvcResult response = mockMvc.perform(get("/admin/{version}/events/export/" + CSV_FILENAME, "v1"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertCsv(response.getResponse(), CSV_CONTENT);
+    }
+
+
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {
 
         List<AuditEventEntity> eventsList = new ArrayList<>();
@@ -123,7 +151,7 @@ public class EventsEngineEventsAdminControllerIT {
         eventEntity.setEventType(ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name());
         eventEntity.setProcessDefinitionId("1");
         eventEntity.setProcessInstanceId("10");
-        eventEntity.setTimestamp(System.currentTimeMillis());
+        eventEntity.setTimestamp(1657205977551L);
         return eventEntity;
     }
 
@@ -191,4 +219,23 @@ public class EventsEngineEventsAdminControllerIT {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
+
+    private void assertCsv(MockHttpServletResponse response, String expectedContent) {
+        assertThat(response).isNotNull();
+        assertThat(response.getContentType()).isNotEmpty();
+        assertThat(response.getContentType()).isEqualTo("text/csv");
+        byte[] contentBytes = response.getContentAsByteArray();
+        assertThat(contentBytes).isNotEmpty();
+
+        String contentDispositionHeader = response.getHeader(CONTENT_DISPOSITION);
+
+        assertThat(contentDispositionHeader)
+            .isNotEmpty()
+            .startsWith(HEADER_ATTACHMENT_FILENAME);
+
+        String fileName = contentDispositionHeader.substring(HEADER_ATTACHMENT_FILENAME.length());
+        assertThat(fileName).isEqualTo(CSV_FILENAME);
+        assertThat(new String(contentBytes)).isEqualTo(expectedContent);
+    }
+
 }
