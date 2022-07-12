@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import java.text.CollationElementIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
