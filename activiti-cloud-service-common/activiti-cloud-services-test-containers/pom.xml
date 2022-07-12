@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-    <version>7.4.1-alpha.4</version>
+    <version>7.4.1</version>
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-test-containers</artifactId>

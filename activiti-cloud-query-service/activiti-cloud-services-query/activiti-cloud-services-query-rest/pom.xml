@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-query</artifactId>
-    <version>7.4.1-alpha.4</version>
+    <version>7.4.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>activiti-cloud-services-query-rest</artifactId>
