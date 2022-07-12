@@ -33,7 +33,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(
@@ -63,11 +66,25 @@ public class ProcessInstanceTasksController {
     }
 
     @JsonView(JsonViews.General.class)
-    @RequestMapping(value = "/tasks", method = RequestMethod.GET)
+    @RequestMapping(value = "/tasks", method = RequestMethod.GET, params = "!variableKeys")
     public PagedModel<EntityModel<QueryCloudTask>> getTasks(@PathVariable String processInstanceId,
                                                         Pageable pageable) {
-        Predicate restrictQuery = QTaskEntity.taskEntity.processInstanceId.eq(processInstanceId);
+        Predicate restrictedQuery = restrictQuery(processInstanceId);
 
-        return  taskControllerHelper.findAllByInvolvedUserQuery(restrictQuery, pageable);
+        return  taskControllerHelper.findAllByInvolvedUserQuery(restrictedQuery, pageable);
+    }
+
+    @JsonView(JsonViews.ProcessVariables.class)
+    @RequestMapping(value = "/tasks", method = RequestMethod.GET, params = "variableKeys")
+    public PagedModel<EntityModel<QueryCloudTask>> getTasksWithProcessVariables(@PathVariable String processInstanceId,
+                                                                                @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> processVariableKeys,
+                                                                                Pageable pageable) {
+        Predicate restrictedQuery = restrictQuery(processInstanceId);
+
+        return  taskControllerHelper.findAllByInvolvedUserQueryWithProcessVariables(restrictedQuery, processVariableKeys, pageable);
+    }
+
+    private Predicate restrictQuery(String processInstanceId) {
+        return QTaskEntity.taskEntity.processInstanceId.eq(processInstanceId);
     }
 }

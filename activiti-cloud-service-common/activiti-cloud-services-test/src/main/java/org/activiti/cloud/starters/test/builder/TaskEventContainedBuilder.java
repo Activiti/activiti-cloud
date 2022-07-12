@@ -20,6 +20,8 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
+import org.activiti.cloud.api.task.model.impl.QueryCloudTaskImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
@@ -75,6 +77,17 @@ public class TaskEventContainedBuilder {
         TaskImpl task = buildTask(taskName,
                                   Task.TaskStatus.ASSIGNED,
                                   processInstance);
+        task.setAssignee(username);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+                                   new CloudTaskAssignedEventImpl(task));
+        return task;
+    }
+
+    public QueryCloudTask anAssignedQueryCloudTask(String taskName,
+                                         String username,
+                                         ProcessInstance processInstance) {
+        QueryCloudTaskImpl task = buildQueryCloudTask(taskName, Task.TaskStatus.ASSIGNED, processInstance);
         task.setAssignee(username);
 
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
@@ -172,12 +185,32 @@ public class TaskEventContainedBuilder {
         return task;
     }
 
+    public QueryCloudTask aQueryCloudTaskWithUserCandidate(String taskName,
+                                                           String username,
+                                                           ProcessInstance processInstance) {
+        QueryCloudTaskImpl task = buildQueryCloudTask(taskName, Task.TaskStatus.CREATED, processInstance);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+            new CloudTaskCandidateUserAddedEventImpl(new TaskCandidateUserImpl(username,
+                task.getId())));
+        return task;
+    }
+
     public Task aTaskWithGroupCandidate(String taskName,
                                        String groupId,
                                        ProcessInstance processInstance) {
         TaskImpl task = buildTask(taskName,
                                   Task.TaskStatus.CREATED,
                                   processInstance);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+                                   new CloudTaskCandidateGroupAddedEventImpl(new TaskCandidateGroupImpl(groupId,
+                                                                                                        task.getId())));
+        return task;
+    }
+
+    public QueryCloudTask aQueryCloudTaskWithGroupCandidate(String taskName,
+                                                  String groupId,
+                                                  ProcessInstance processInstance) {
+        QueryCloudTaskImpl task = buildQueryCloudTask(taskName, Task.TaskStatus.CREATED, processInstance);
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
                                    new CloudTaskCandidateGroupAddedEventImpl(new TaskCandidateGroupImpl(groupId,
                                                                                                         task.getId())));
@@ -221,6 +254,20 @@ public class TaskEventContainedBuilder {
                                      status);
         task.setCreatedDate(new Date());
         if(processInstance != null) {
+            task.setProcessInstanceId(processInstance.getId());
+        }
+        return task;
+    }
+
+    public static QueryCloudTaskImpl buildQueryCloudTask(String taskName,
+                                                         Task.TaskStatus status,
+                                                         ProcessInstance processInstance) {
+        QueryCloudTaskImpl task = new QueryCloudTaskImpl();
+        task.setId(UUID.randomUUID().toString());
+        task.setName(taskName);
+        task.setStatus(status);
+        task.setCreatedDate(new Date());
+        if (processInstance != null) {
             task.setProcessInstanceId(processInstance.getId());
         }
         return task;
