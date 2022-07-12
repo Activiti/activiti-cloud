@@ -21,11 +21,14 @@ import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.model.Group;
+import org.activiti.cloud.identity.model.SecurityRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -73,4 +76,12 @@ public class IdentityManagementController {
     public UserRoles getUserRoles(@AuthenticationPrincipal Jwt principal) {
         return identityManagementService.getUserRoles(principal);
     }
+
+    @RequestMapping(value = "/permissions/{application}", method = RequestMethod.POST)
+    public void addApplicationPermissions(
+        @PathVariable String application,
+        @RequestBody List<SecurityRepresentation> securityRepresentations) {
+          identityManagementService.addApplicationPermissions(application, securityRepresentations);
+    }
+
 }

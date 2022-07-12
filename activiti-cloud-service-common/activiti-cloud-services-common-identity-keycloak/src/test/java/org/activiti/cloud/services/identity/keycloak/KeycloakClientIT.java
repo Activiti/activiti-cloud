@@ -42,6 +42,9 @@ public class KeycloakClientIT {
     @Autowired
     private KeycloakClient keycloakClient;
 
+    private final String ACTIVITI_USER_ROLE = "ACTIVITI_USER";
+    private final String ACTIVITI_ADMIN_ROLE = "ACTIVITI_ADMIN";
+
     @Test
     public void should_searchUsers() {
         List<KeycloakUser> users = keycloakClient.searchUsers("hr", 0, 50);
@@ -100,7 +103,7 @@ public class KeycloakClientIT {
         List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(users.get(0).getId());
 
         assertThat(roles).hasSize(3);
-        assertThat(roles).extracting("name").contains("ACTIVITI_USER");
+        assertThat(roles).extracting("name").contains(ACTIVITI_USER_ROLE);
         assertThat(roles).extracting("name").contains("uma_authorization");
         assertThat(roles).extracting("name").contains("offline_access");
     }
@@ -111,7 +114,7 @@ public class KeycloakClientIT {
         List<KeycloakRoleMapping> roles = keycloakClient.getGroupRoleMapping(users.get(0).getId());
 
         assertThat(roles).hasSize(1);
-        assertThat(roles).extracting("name").contains("ACTIVITI_USER");
+        assertThat(roles).extracting("name").contains(ACTIVITI_USER_ROLE);
     }
 
     @Test
@@ -150,7 +153,7 @@ public class KeycloakClientIT {
         List<KeycloakRoleMapping> roles = keycloakClient.getUserClientRoleMapping(users.get(0).getId(), clients.get(0).getId());
 
         assertThat(roles).hasSize(3);
-        assertThat(roles).extracting("name").contains("ACTIVITI_ADMIN");
+        assertThat(roles).extracting("name").contains(ACTIVITI_ADMIN_ROLE);
         assertThat(roles).extracting("name").contains("uma_authorization");
         assertThat(roles).extracting("name").contains("offline_access");
     }
@@ -164,7 +167,66 @@ public class KeycloakClientIT {
             .getGroupClientRoleMapping(groups.get(0).getId(), clients.get(0).getId());
 
         assertThat(roles).hasSize(1);
-        assertThat(roles).extracting("name").contains("ACTIVITI_USER");
+        assertThat(roles).extracting("name").contains(ACTIVITI_USER_ROLE);
+    }
+
+    @Test
+    public void should_getClientRoles() {
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        List<KeycloakRoleMapping> roles = keycloakClient.getClientRoles(clients.get(0).getId());
+        assertThat(roles).isNotEmpty();
+    }
+
+    @Test
+    public void should_addUserClientRoleMapping() {
+        String testAdminUserId = "5f682999-d11d-4a42-bc42-86b7e6752223";
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        String clientId = clients.get(0).getId();
+        List<KeycloakRoleMapping> kRoles = keycloakClient.getClientRoles(clients.get(0).getId());
+        KeycloakRoleMapping kRoleToAdd = kRoles.stream()
+            .filter(kRole -> kRole.getName().equals(ACTIVITI_ADMIN_ROLE))
+            .findFirst()
+            .get();
+
+        assertThat(userHasClientRole(testAdminUserId,clientId,ACTIVITI_ADMIN_ROLE)).isFalse();
+
+        keycloakClient.addUserClientRoleMapping(testAdminUserId, clientId,
+            List.of(kRoleToAdd));
+
+        assertThat(userHasClientRole(testAdminUserId,clientId,ACTIVITI_ADMIN_ROLE)).isTrue();
+    }
+
+    @Test
+    public void should_addGroupClientRoleMapping() {
+        String hrGroupId = "60c6753b-4f1c-498a-96d2-be6790fae09c";
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        String clientId = clients.get(0).getId();
+        List<KeycloakRoleMapping> kRoles = keycloakClient.getClientRoles(clients.get(0).getId());
+        KeycloakRoleMapping kRoleToAdd = kRoles.stream()
+            .filter(kRole -> kRole.getName().equals(ACTIVITI_USER_ROLE))
+            .findFirst()
+            .get();
+
+        assertThat(groupHasClientRole(hrGroupId,clientId,ACTIVITI_USER_ROLE)).isFalse();
+
+        keycloakClient.addGroupClientRoleMapping(hrGroupId, clientId,
+            List.of(kRoleToAdd));
+
+        assertThat(groupHasClientRole(hrGroupId,clientId,ACTIVITI_USER_ROLE)).isTrue();
+    }
+
+    private boolean userHasClientRole(String userId, String clientId, String roleName) {
+        return keycloakClient
+            .getUserClientRoleMapping(userId, clientId)
+            .stream()
+            .anyMatch(kRole -> kRole.getName().equals(roleName));
+    }
+
+    private boolean groupHasClientRole(String groupId, String clientId, String roleName) {
+        return keycloakClient
+            .getGroupClientRoleMapping(groupId, clientId)
+            .stream()
+            .anyMatch(kRole -> kRole.getName().equals(roleName));
     }
 
 }

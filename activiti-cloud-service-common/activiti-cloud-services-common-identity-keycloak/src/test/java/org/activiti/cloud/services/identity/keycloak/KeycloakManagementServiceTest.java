@@ -16,19 +16,30 @@
 package org.activiti.cloud.services.identity.keycloak;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.UserSearchParams;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupRoleException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidRoleException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidUserException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidUserRoleException;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.Role;
+import org.activiti.cloud.identity.model.SecurityRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
@@ -323,6 +334,188 @@ class KeycloakManagementServiceTest {
         assertThatGroupsAreEqual(groups, Stream.of(groupTwo));
     }
 
+    @Test
+    public void should_throwInvalidApplicationException_When_AddingPermissionAndApplicationIsInvalid () {
+        String expectedMessage = "Invalid Security data: application {fakeClient} is invalid or doesn't exist";
+
+        IdentityInvalidApplicationException exception = assertThrows(IdentityInvalidApplicationException.class,
+            () -> keycloakManagementService.addApplicationPermissions(
+                "fakeClient", List.of(new SecurityRepresentation())));
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    void should_throwIdentityInvalidRoleException_when_addingApplicationPermissionsWithInvalidRole() {
+        String expectedMessage = "Invalid Security data: role {fakeRole} is invalid or doesn't exist";
+        setUpClient();
+        SecurityRepresentation securityRepresentation = new SecurityRepresentation();
+        securityRepresentation.setRole("fakeRole");
+
+        IdentityInvalidRoleException exception = assertThrows(IdentityInvalidRoleException.class,
+            () -> keycloakManagementService.addApplicationPermissions("client-one",
+                List.of(securityRepresentation)));
+
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+    }
+
+
+    @Test
+    void should_throwIdentityInvalidUserException_when_addingApplicationPermissionsWithInvalidUser() {
+        String expectedMessage = "Invalid Security data: user {fakeUser} is invalid or doesn't exist";
+        setUpClient();
+        when(keycloakClient.searchUsers(eq("fakeUser"), eq(0), eq(50)))
+            .thenReturn(Collections.emptyList());
+        when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleA));
+
+        SecurityRepresentation securityRepresentation = new SecurityRepresentation();
+        securityRepresentation.setRole("a");
+        securityRepresentation.setUsers(List.of("fakeUser"));
+
+        IdentityInvalidUserException exception = assertThrows(IdentityInvalidUserException.class,
+            () -> keycloakManagementService.addApplicationPermissions("client-one",
+                List.of(securityRepresentation)));
+
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    void should_returnIdentityInvalidUserRoleException_when_addingApplicationPermissionsWithInvalidUserRole() {
+        String expectedMessage = "Invalid Security data: role {a} can't be assigned to user {userOne}";
+        setUpClient();
+        setUpUsersRealmRoles();
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setUsername("userOne");
+        keycloakUser.setId("one");
+        when(keycloakClient.searchUsers(eq("userOne"), eq(0), eq(50)))
+            .thenReturn(List.of(keycloakUser));
+        when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleA));
+
+        SecurityRepresentation securityRepresentation = new SecurityRepresentation();
+        securityRepresentation.setRole("a");
+        securityRepresentation.setUsers(List.of("userOne"));
+
+        IdentityInvalidUserRoleException exception = assertThrows(IdentityInvalidUserRoleException.class,
+            () -> keycloakManagementService.addApplicationPermissions("client-one",
+                List.of(securityRepresentation)));
+
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    void should_addApplicationPermissionsToUsers() {
+        setUpClient();
+        setUpUsersRealmRoles();
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setUsername("userOne");
+        keycloakUser.setId("one");
+        when(keycloakClient.searchUsers(eq("userOne"), eq(0), eq(50)))
+            .thenReturn(List.of(keycloakUser));
+        when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleB));
+
+        SecurityRepresentation securityRepresentation = new SecurityRepresentation();
+        securityRepresentation.setRole("b");
+        securityRepresentation.setUsers(List.of("userOne"));
+
+        keycloakManagementService.addApplicationPermissions("client-one",
+            List.of(securityRepresentation));
+
+        verify(keycloakClient,times(1))
+            .addUserClientRoleMapping(keycloakUser.getId(),clientOne.getId(), List.of(keycloakRoleB));
+    }
+
+    @Test
+    void should_notAddApplicationPermissionsToUsers_whenGroupIsInvalid() {
+        String expectedMessage = "Invalid Security data: group {fakeGroup} is invalid or doesn't exist";
+        setUpClient();
+        setUpUsersRealmRoles();
+        KeycloakUser keycloakUser = new KeycloakUser();
+        keycloakUser.setUsername("userOne");
+        keycloakUser.setId("one");
+        when(keycloakClient.searchUsers(eq("userOne"), eq(0), eq(50)))
+            .thenReturn(List.of(keycloakUser));
+        when(keycloakClient.searchGroups(eq("fakeGroup"), eq(0), eq(50)))
+            .thenReturn(Collections.emptyList());
+        when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleB));
+
+        SecurityRepresentation securityRepresentation = new SecurityRepresentation();
+        securityRepresentation.setRole("b");
+        securityRepresentation.setUsers(List.of("userOne"));
+        securityRepresentation.setGroups(List.of("fakeGroup"));
+
+        IdentityInvalidGroupException exception = assertThrows(IdentityInvalidGroupException.class,
+            () -> keycloakManagementService.addApplicationPermissions("client-one",
+                List.of(securityRepresentation)));
+
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+
+        verify(keycloakClient,times(0))
+            .addUserClientRoleMapping(keycloakUser.getId(),clientOne.getId(), List.of(keycloakRoleB));
+    }
+
+    @Test
+    void should_throwIdentityInvalidGroupException_when_addingApplicationPermissionsWithInvalidGroup() {
+        String expectedMessage = "Invalid Security data: group {fakeGroup} is invalid or doesn't exist";
+        setUpClient();
+        when(keycloakClient.searchGroups(eq("fakeGroup"), eq(0), eq(50)))
+            .thenReturn(Collections.emptyList());
+        when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleA));
+
+        SecurityRepresentation securityRepresentation = new SecurityRepresentation();
+        securityRepresentation.setRole("a");
+        securityRepresentation.setGroups(List.of("fakeGroup"));
+
+        IdentityInvalidGroupException exception = assertThrows(IdentityInvalidGroupException.class,
+            () -> keycloakManagementService.addApplicationPermissions("client-one",
+                List.of(securityRepresentation)));
+
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    void should_returnIdentityInvalidGroupRoleException_when_addingApplicationPermissionsWithInvalidGroupRole() {
+        String expectedMessage = "Invalid Security data: role {a} can't be assigned to group {groupOne}";
+        setUpClient();
+        setUpGroupsRealmRoles();
+        KeycloakGroup keycloakGroup = new KeycloakGroup();
+        keycloakGroup.setName("groupOne");
+        keycloakGroup.setId("one");
+        when(keycloakClient.searchGroups(eq("groupOne"), eq(0), eq(50)))
+            .thenReturn(List.of(keycloakGroup));
+        when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleA));
+
+        SecurityRepresentation securityRepresentation = new SecurityRepresentation();
+        securityRepresentation.setRole("a");
+        securityRepresentation.setGroups(List.of("groupOne"));
+
+        IdentityInvalidGroupRoleException exception = assertThrows(IdentityInvalidGroupRoleException.class,
+            () -> keycloakManagementService.addApplicationPermissions("client-one",
+                List.of(securityRepresentation)));
+
+        assertThat(exception.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    void should_addApplicationPermissionsToGroup() {
+        setUpClient();
+        setUpGroupsRealmRoles();
+        KeycloakGroup keycloakGroup = new KeycloakGroup();
+        keycloakGroup.setName("groupOne");
+        keycloakGroup.setId("one");
+        when(keycloakClient.searchGroups(eq("groupOne"), eq(0), eq(50)))
+            .thenReturn(List.of(keycloakGroup));
+        when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleB));
+
+        SecurityRepresentation securityRepresentation = new SecurityRepresentation();
+        securityRepresentation.setRole("b");
+        securityRepresentation.setGroups(List.of("groupOne"));
+
+        keycloakManagementService.addApplicationPermissions("client-one",
+            List.of(securityRepresentation));
+
+        verify(keycloakClient,times(1))
+            .addGroupClientRoleMapping(keycloakGroup.getId(),clientOne.getId(), List.of(keycloakRoleB));
+    }
+
     private void assertThatGroupsAreEqual(List<Group> groups, Stream<Group> groupsToCompare) {
         assertTrue(
             groupsToCompare.map(Group::getId)
@@ -364,17 +557,15 @@ class KeycloakManagementServiceTest {
     }
 
     private void setUpUsersApplicationRoles() {
-        when(keycloakClient.searchClients("client-one", 0, 1))
-            .thenReturn(List.of(clientOne));
+        setUpClient();
         when(keycloakClient.getUserClientRoleMapping(userOne.getId(), clientOne.getId()))
             .thenReturn(keycloakRolesListA);
-        when(keycloakClient.getUserClientRoleMapping(groupTwo.getId(), clientOne.getId()))
+        when(keycloakClient.getUserClientRoleMapping(userTwo.getId(), clientOne.getId()))
             .thenReturn(keycloakRolesListAB);
     }
 
     private void setUpGroupsApplicationRoles() {
-        when(keycloakClient.searchClients("client-one", 0, 1))
-            .thenReturn(List.of(clientOne));
+        setUpClient();
         when(keycloakClient.getGroupClientRoleMapping(groupOne.getId(), clientOne.getId()))
             .thenReturn(keycloakRolesListA);
         when(keycloakClient.getGroupClientRoleMapping(groupTwo.getId(), clientOne.getId()))
@@ -391,6 +582,11 @@ class KeycloakManagementServiceTest {
         lenient().when(keycloakClient.getUserRoleMapping(userOne.getId())).thenReturn(keycloakRolesListB);
         lenient().when(keycloakClient.getUserRoleMapping(userTwo.getId())).thenReturn(keycloakRolesListAB);
         lenient().when(keycloakClient.getUserRoleMapping(userThree.getId())).thenReturn(keycloakRolesListA);
+    }
+
+    private void setUpClient() {
+        when(keycloakClient.searchClients("client-one", 0, 1))
+            .thenReturn(List.of(clientOne));
     }
 
 }

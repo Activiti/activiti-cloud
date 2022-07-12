@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -53,9 +55,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     public void should_notReturnApplicationAccessRoles_when_userHasNotResourceRoles() throws Exception {
         this.mockMvc.perform(get("/v1/roles"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.globalAccess").exists())
-            .andExpect(jsonPath("$.globalAccess.roles", hasSize(1)))
-            .andExpect(jsonPath("$.globalAccess.roles[0]", is("role1")));
+            .andExpect(jsonPath("$.applicationAccess", hasSize(0)));
     }
 
     @Test
@@ -115,8 +115,6 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
 
-    //----
-
     @Test
     public void should_returnOnlyUsers_when_searchByUsernameAndRoleUser() throws Exception {
         mockMvc
@@ -139,7 +137,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    public void should_NotReturnUsers_when_searchByInvalidApplication() throws Exception {
+    public void should_notReturnUsers_when_searchByInvalidApplication() throws Exception {
         mockMvc
             .perform(get("/v1/users?application=activitis"))
             .andExpect(status().isOk())
@@ -208,8 +206,9 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/groups?role=ACTIVITI_USER"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].name", is("salesgroup")));
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].name", is("hr")))
+            .andExpect(jsonPath("$[1].name", is("salesgroup")));
     }
 
     @Test
@@ -222,7 +221,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    public void should_NotReturnGroups_when_searchByInvalidApplication() throws Exception {
+    public void should_notReturnGroups_when_searchByInvalidApplication() throws Exception {
         mockMvc
             .perform(get("/v1/groups?application=fake"))
             .andExpect(status().isOk())
@@ -246,6 +245,90 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(jsonPath("$.applicationAccess[0].roles",contains("role1")))
             .andExpect(jsonPath("$.applicationAccess[1].name", is("app1")))
             .andExpect(jsonPath("$.applicationAccess[1].roles",contains("role1", "role2")));
+    }
+
+    @Test
+    public void should_returnStatusOk_when_addingAppPermissions() throws Exception {
+        mockMvc
+            .perform(post("/v1/permissions/{application}", "test-client")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[\n"
+                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
+                    + "    \"users\":[\"hradmin\"],\n"
+                    + "    \"groups\":[]}\n"
+                    + "  ]"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void should_returnNotFound_when_addingAppPermissionsToInvalidApplication() throws Exception {
+        mockMvc
+            .perform(post("/v1/permissions/{application}", "fakeApp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[\n"
+                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
+                    + "    \"users\":[\"hradmin\"],\n"
+                    + "    \"groups\":[]}\n"
+                    + "  ]"))
+            .andExpect(status().isNotFound())
+            .andExpect(status().reason("Invalid Security data: application {fakeApp} is invalid or doesn't exist"));
+    }
+
+    @Test
+    public void should_returnBadRequest_when_addingAppPermissionsWithInvalidRole() throws Exception {
+        mockMvc
+            .perform(post("/v1/permissions/{application}", "test-client")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[\n"
+                    + "    {\"role\":\"fakeRole\",\n"
+                    + "    \"users\":[\"testUser\"],\n"
+                    + "    \"groups\":[]}\n"
+                    + "  ]"))
+            .andExpect(status().isBadRequest())
+            .andExpect(status().reason("Invalid Security data: role {fakeRole} is invalid or doesn't exist"));
+    }
+
+    @Test
+    public void should_returnBadRequest_when_addingAppPermissionsWithInvalidUserRole() throws Exception {
+        mockMvc
+            .perform(post("/v1/permissions/{application}", "test-client")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[\n"
+                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
+                    + "    \"users\":[\"hruser\"],\n"
+                    + "    \"groups\":[]}\n"
+                    + "  ]"))
+            .andExpect(status().isBadRequest())
+            .andExpect(status()
+                .reason("Invalid Security data: role {ACTIVITI_ADMIN} can't be assigned to user {hruser}"));
+    }
+
+    @Test
+    public void should_returnBadRequest_when_addingAppPermissionsWithInvalidGroup() throws Exception {
+        mockMvc
+            .perform(post("/v1/permissions/{application}", "test-client")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[\n"
+                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
+                    + "    \"users\":[\"testadmin\"],\n"
+                    + "    \"groups\":[\"fakeGroup\"]}\n"
+                    + "  ]"))
+            .andExpect(status().isBadRequest())
+            .andExpect(status().reason("Invalid Security data: group {fakeGroup} is invalid or doesn't exist"));
+    }
+
+    @Test
+    public void should_returnBadRequest_when_addingAppPermissionsWithInvalidGroupRole() throws Exception {
+        mockMvc
+            .perform(post("/v1/permissions/{application}", "test-client")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[\n"
+                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
+                    + "    \"users\":[\"testadmin\"],\n"
+                    + "    \"groups\":[\"hr\"]}\n"
+                    + "  ]"))
+            .andExpect(status().isBadRequest())
+            .andExpect(status().reason("Invalid Security data: role {ACTIVITI_ADMIN} can't be assigned to group {hr}"));
     }
 
 }
