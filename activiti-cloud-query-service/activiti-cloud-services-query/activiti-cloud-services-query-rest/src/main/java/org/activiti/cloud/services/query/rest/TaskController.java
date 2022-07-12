@@ -92,7 +92,7 @@ public class TaskController {
     }
 
     @JsonView(JsonViews.General.class)
-    @RequestMapping(method = RequestMethod.GET, params = "!variableDefinitions")
+    @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
     public PagedModel<EntityModel<QueryCloudTask>> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
                                                        @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
                                                        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
@@ -103,15 +103,15 @@ public class TaskController {
     }
 
     @JsonView(JsonViews.ProcessVariables.class)
-    @RequestMapping(method = RequestMethod.GET, params = "variableDefinitions")
+    @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
     public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
                                                                                              @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
                                                                                              @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-                                                                                             @RequestParam(value = "variableDefinitions", required = false, defaultValue = "") List<String> processVariableDefinitions,
+                                                                                             @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> processVariableKeys,
                                                                                              VariableSearch variableSearch,
                                                                                              Pageable pageable) {
         return taskControllerHelper.findAllWithProcessVariables(predicate, variableSearch, pageable, Arrays.asList(new RootTasksFilter(rootTasksOnly),
-            new StandAloneTaskFilter(standalone), taskLookupRestrictionService), processVariableDefinitions);
+            new StandAloneTaskFilter(standalone), taskLookupRestrictionService), processVariableKeys);
     }
 
     @JsonView(JsonViews.General.class)

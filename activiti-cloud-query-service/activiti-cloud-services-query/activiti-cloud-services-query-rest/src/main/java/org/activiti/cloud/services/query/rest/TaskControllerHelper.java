@@ -74,26 +74,47 @@ public class TaskControllerHelper {
                                                                                VariableSearch variableSearch,
                                                                                Pageable pageable,
                                                                                List<QueryDslPredicateFilter> filters,
-                                                                               List<String> processVariableDefinitions) {
-        Session session = entityManager.unwrap(Session.class);
-        Filter filter = session.enableFilter("variableDefinitionIds");
-        filter.setParameterList("variables", processVariableDefinitions);
-
+                                                                               List<String> processVariableKeys) {
+        addProcessVariablesFilter(processVariableKeys);
         Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
-
-        page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
+        initializeProcessVariables(page);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate,
                                                                      Pageable pageable) {
 
-        Predicate conditions = taskLookupRestrictionService.restrictToInvolvedUsersQuery(predicate);
-        Page<TaskEntity> page = taskRepository.findInProcessInstanceScope(conditions, pageable);
-
+        Page<TaskEntity> page = findAllByInvolvedUser(predicate, pageable);
         return pagedCollectionModelAssembler.toModel(pageable,
                                                      page,
                                                      taskRepresentationModelAssembler);
+    }
+
+    @Transactional
+    public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQueryWithProcessVariables(Predicate predicate,
+                                                                                                  List<String> processVariableKeys,
+                                                                                                  Pageable pageable) {
+        addProcessVariablesFilter(processVariableKeys);
+        Page<TaskEntity> page = findAllByInvolvedUser(predicate, pageable);
+        initializeProcessVariables(page);
+        return pagedCollectionModelAssembler.toModel(pageable,
+            page,
+            taskRepresentationModelAssembler);
+    }
+
+    private void initializeProcessVariables(Page<TaskEntity> page) {
+        page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
+    }
+
+    private void addProcessVariablesFilter(List<String> processVariableKeys) {
+        Session session = entityManager.unwrap(Session.class);
+        Filter filter = session.enableFilter("variablesFilter");
+        filter.setParameterList("variableKeys", processVariableKeys);
+    }
+
+    private Page<TaskEntity> findAllByInvolvedUser(Predicate predicate, Pageable pageable) {
+        Predicate conditions = taskLookupRestrictionService.restrictToInvolvedUsersQuery(predicate);
+        return taskRepository.findInProcessInstanceScope(conditions, pageable);
     }
 
     public boolean canUserViewTask(Predicate predicate) {

@@ -1024,11 +1024,21 @@ public class QueryTasksIT {
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
 
-    private ResponseEntity<PagedModel<QueryCloudTask>> executeRequestGetTasksWithProcessVariables(String... variableDefinitionIds) {
-        return testRestTemplate.exchange(TASKS_URL + "?variableDefinitions=" + String.join(",", variableDefinitionIds),
+    private ResponseEntity<PagedModel<QueryCloudTask>> executeRequestGetTasksWithProcessVariables(String... variableKeys) {
+        return testRestTemplate.exchange(TASKS_URL + "?variableKeys=" + String.join(",", variableKeys),
                                          HttpMethod.GET,
                                          identityTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_TASKS_RESPONSE_TYPE);
+    }
+
+    private ResponseEntity<PagedModel<QueryCloudTask>> executeRequestGetTasksWithProcessVariables(ProcessInstance processInstance,
+                                                                                                  String... variableKeys) {
+        return testRestTemplate.exchange("/v1/process-instances/{processInstanceId}/tasks?variableKeys=" +
+                                         String.join(",", variableKeys),
+                                         HttpMethod.GET,
+                                         identityTokenProducer.entityWithAuthorizationHeader(),
+                                         PAGED_TASKS_RESPONSE_TYPE,
+                                         processInstance.getId());
     }
 
     private ResponseEntity<PagedModel<Task>> executeRequestGetAdminTasks(ProcessInstance processInstance) {
@@ -1039,11 +1049,11 @@ public class QueryTasksIT {
                                          processInstance.getId());
     }
 
-    private ResponseEntity<PagedModel<Task>> executeRequestGetTasks(ProcessInstance processInstance) {
+    private ResponseEntity<PagedModel<QueryCloudTask>> executeRequestGetTasks(ProcessInstance processInstance) {
         return testRestTemplate.exchange("/v1/process-instances/{processInstanceId}/tasks",
                                          HttpMethod.GET,
                                          identityTokenProducer.entityWithAuthorizationHeader(),
-                                         PAGED_TASK_INTERFACE_RESPONSE_TYPE,
+                                         PAGED_TASKS_RESPONSE_TYPE,
                                          processInstance.getId());
     }
 
@@ -1686,14 +1696,14 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+            ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(runningProcessInstance);
 
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             assertThat(responseEntity.getBody()).isNotNull();
-            Collection<Task> tasks = responseEntity.getBody().getContent();
+            Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
             assertThat(tasks).isEmpty();
         });
     }
@@ -1702,11 +1712,11 @@ public class QueryTasksIT {
     public void should_getTasks_by_ProcessInstance_when_userIsCandidate() {
         identityTokenProducer.withTestUser(HRUSER);
         //given
-        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
-                                                                      TESTUSER,
-                                                                      runningProcessInstance);
+        QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate("Task1",
+                                                                                          TESTUSER,
+                                                                                          runningProcessInstance);
 
-        Task task2 = taskEventContainedBuilder.aTaskWithUserCandidate("Task2",
+        QueryCloudTask task2 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate("Task2",
                                                                       HRUSER,
                                                                       runningProcessInstance);
 
@@ -1715,14 +1725,14 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+            ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(runningProcessInstance);
 
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             assertThat(responseEntity.getBody()).isNotNull();
-            Collection<Task> tasks = responseEntity.getBody().getContent();
+            Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
             assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
         });
 
@@ -1735,27 +1745,27 @@ public class QueryTasksIT {
         identityTokenProducer.withTestUser(HRUSER);
 
         //given
-        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
-                                                                      TESTUSER,
-                                                                      runningProcessInstance);
+        QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate("Task1",
+                                                                                TESTUSER,
+                                                                                runningProcessInstance);
 
-        Task task2 = taskEventContainedBuilder.anAssignedTask("Task2",
-                                                              HRUSER,
-                                                              runningProcessInstance);
+        QueryCloudTask task2 = taskEventContainedBuilder.anAssignedQueryCloudTask("Task2",
+                                                                        HRUSER,
+                                                                        runningProcessInstance);
 
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+            ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(runningProcessInstance);
 
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             assertThat(responseEntity.getBody()).isNotNull();
-            Collection<Task> tasks = responseEntity.getBody().getContent();
+            Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
             assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
         });
 
@@ -1767,11 +1777,11 @@ public class QueryTasksIT {
     public void should_getTasks_by_ProcessInstance_when_userIsInGroupCandidate() {
         identityTokenProducer.withTestUser(HRUSER);
         //given
-        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+        QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate("Task1",
                                                                       TESTUSER,
                                                                       runningProcessInstance);
 
-        Task task2 = taskEventContainedBuilder.aTaskWithGroupCandidate("Task2",
+        QueryCloudTask task2 = taskEventContainedBuilder.aQueryCloudTaskWithGroupCandidate("Task2",
                                                                        "hr",
                                                                        runningProcessInstance);
 
@@ -1780,14 +1790,14 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+            ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(runningProcessInstance);
 
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             assertThat(responseEntity.getBody()).isNotNull();
-            Collection<Task> tasks = responseEntity.getBody().getContent();
+            Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
             assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
         });
         assertCanRetrieveTaskById(task1.getId());
@@ -1797,7 +1807,7 @@ public class QueryTasksIT {
     @Test
     public void should_getTasks_by_ProcessInstance_when_userIsInitiator() {
         //given
-        Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1",
+        QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate("Task1",
                                                                       HRUSER,
                                                                       runningProcessInstance);
 
@@ -1806,14 +1816,14 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+            ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(runningProcessInstance);
 
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             assertThat(responseEntity.getBody()).isNotNull();
-            Collection<Task> tasks = responseEntity.getBody().getContent();
+            Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
             assertThat(tasks.size()).isEqualTo(1);
             assertThat(tasks).contains(task1);
         });
@@ -1898,14 +1908,14 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedModel<Task>> responseEntity = executeRequestGetTasks(runningProcessInstance);
+            ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(runningProcessInstance);
 
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             assertThat(responseEntity.getBody()).isNotNull();
-            Collection<Task> tasks = responseEntity.getBody().getContent();
+            Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
             assertThat(tasks)
                 .flatExtracting(Task::getName, Task::getCandidateUsers, Task::getCandidateGroups)
                 .contains(task1.getName(), Collections.singletonList("testuser"), Collections.emptyList());
@@ -2105,17 +2115,17 @@ public class QueryTasksIT {
         //given
         taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
             //when
-            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varADefinitionId").getBody().getContent();
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varAProcessDefinitionKey/varAName").getBody().getContent();
 
             //then
             assertThat(retrievedTasks)
@@ -2131,17 +2141,17 @@ public class QueryTasksIT {
         //given
         taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
             //when
-            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varADefinitionId").getBody().getContent();
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varAProcessDefinitionKey/varAName").getBody().getContent();
 
             //then
             assertThat(retrievedTasks)
@@ -2155,9 +2165,9 @@ public class QueryTasksIT {
     @Test
     public void should_getCreatedTaskWithPreviouslyCreatedProcessVariables() {
         //given
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
 
         taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
@@ -2166,7 +2176,7 @@ public class QueryTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varADefinitionId").getBody().getContent();
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varAProcessDefinitionKey/varAName").getBody().getContent();
 
             //then
             assertThat(retrievedTasks)
@@ -2187,17 +2197,17 @@ public class QueryTasksIT {
         taskEventContainedBuilder.aCompletedTask("Other completed task", otherProcessInstance);
         taskEventContainedBuilder.aCompletedTask("Other created task", otherProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
             //when
-            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varADefinitionId").getBody().getContent();
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varAProcessDefinitionKey/varAName").getBody().getContent();
 
             //then
             assertThat(retrievedTasks)
@@ -2221,10 +2231,10 @@ public class QueryTasksIT {
         taskEventContainedBuilder.aCompletedTask("Other completed task", otherProcessInstance);
         taskEventContainedBuilder.aCompletedTask("Other created task", otherProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varAName", "varAValue", "string", "varADefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariableWithDefinitionId("varBName", "varBValue", "string", "varBDefinitionId")
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
             .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
@@ -2243,6 +2253,148 @@ public class QueryTasksIT {
 
     private Function<QueryCloudTask, Object> getProcessVariableField(Function<CloudVariableInstance, ?> function) {
         return queryCloudTask -> queryCloudTask.getProcessVariables().stream().map(function).findFirst().orElse(null);
+    }
+
+    @Test
+    public void should_getCompletedTaskWithProcessVariablesForProcessInstance() {
+        //given
+        taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables(
+                runningProcessInstance,"varAProcessDefinitionKey/varAName").getBody().getContent();
+
+            //then
+            assertThat(retrievedTasks)
+                .extracting(Task::getName,
+                    getProcessVariableField(VariableInstance::getName),
+                    getProcessVariableField(VariableInstance::getValue))
+                .containsExactly(tuple("Task", "varAName", "varAValue"));
+        });
+    }
+
+    @Test
+    public void should_getCreatedTaskWithProcessVariablesForProcessInstance() {
+        //given
+        taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables(
+                runningProcessInstance, "varAProcessDefinitionKey/varAName").getBody().getContent();
+
+            //then
+            assertThat(retrievedTasks)
+                .extracting(Task::getName,
+                    getProcessVariableField(VariableInstance::getName),
+                    getProcessVariableField(VariableInstance::getValue))
+                .containsExactly(tuple("Task", "varAName", "varAValue"));
+        });
+    }
+
+    @Test
+    public void should_getCreatedTaskWithPreviouslyCreatedProcessVariablesForProcessInstance() {
+        //given
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables(
+                runningProcessInstance, "varAProcessDefinitionKey/varAName").getBody().getContent();
+
+            //then
+            assertThat(retrievedTasks)
+                .extracting(Task::getName,
+                    getProcessVariableField(VariableInstance::getName),
+                    getProcessVariableField(VariableInstance::getValue))
+                .containsExactly(tuple("Task", "varAName", "varAValue"));
+        });
+    }
+
+    @Test
+    public void should_getOnlyTasksWithProcessVariablesRequestedForProcessInstance() {
+        //given
+        final ProcessInstance otherProcessInstance =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator", TESTUSER);
+        taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
+        taskEventContainedBuilder.aCompletedTask("Completed task", runningProcessInstance);
+        taskEventContainedBuilder.aCompletedTask("Other completed task", otherProcessInstance);
+        taskEventContainedBuilder.aCompletedTask("Other created task", otherProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables(
+                runningProcessInstance, "varAProcessDefinitionKey/varAName").getBody().getContent();
+
+            //then
+            assertThat(retrievedTasks)
+                .extracting(Task::getName,
+                    getProcessVariableField(VariableInstance::getName),
+                    getProcessVariableField(VariableInstance::getValue))
+                .containsExactlyInAnyOrder(tuple("Created task", "varAName", "varAValue"),
+                    tuple("Completed task", "varAName", "varAValue"));
+        });
+    }
+
+    @Test
+    public void should_notGetProcessVariablesWhenNotRequestedForProcessInstance() {
+        //given
+        final ProcessInstance otherProcessInstance =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("ProcessInstanceWithInitiator", TESTUSER);
+        taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
+        taskEventContainedBuilder.aCompletedTask("Completed task", runningProcessInstance);
+        taskEventContainedBuilder.aCompletedTask("Other completed task", otherProcessInstance);
+        taskEventContainedBuilder.aCompletedTask("Other created task", otherProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasks(runningProcessInstance).getBody().getContent();
+
+            //then
+            assertThat(retrievedTasks)
+                .extracting(Task::getName, QueryCloudTask -> CollectionUtils.isEmpty((QueryCloudTask.getProcessVariables())))
+                .containsExactly(tuple("Created task", true), tuple("Completed task", true));
+        });
     }
 
 }

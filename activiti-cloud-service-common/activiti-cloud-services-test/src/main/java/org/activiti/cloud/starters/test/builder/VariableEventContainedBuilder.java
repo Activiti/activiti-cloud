@@ -38,16 +38,16 @@ public class VariableEventContainedBuilder {
     public <T> VariableEventContainedBuilder aCreatedVariable(String name,
                                                               T value,
                                                               String type) {
-        return aCreatedVariableWithDefinitionId(name, value, type, null);
+        return aCreatedVariableWithProcessDefinitionKey(name, value, type, null);
     }
 
-    public <T> VariableEventContainedBuilder aCreatedVariableWithDefinitionId(String name,
-                                                                              T value,
-                                                                              String type,
-                                                                              String variableDefinitionId) {
+    public <T> VariableEventContainedBuilder aCreatedVariableWithProcessDefinitionKey(String name,
+                                                                                      T value,
+                                                                                      String type,
+                                                                                      String processDefinitionKey) {
         variableInstance = buildVariable(name, type, value);
         CloudVariableCreatedEventImpl cloudVariableCreatedEvent = new CloudVariableCreatedEventImpl(variableInstance);
-        cloudVariableCreatedEvent.setVariableDefinitionId(variableDefinitionId);
+        cloudVariableCreatedEvent.setProcessDefinitionKey(processDefinitionKey);
         eventsAggregator.addEvents(cloudVariableCreatedEvent);
         return this;
     }
