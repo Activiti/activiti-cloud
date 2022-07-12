@@ -184,7 +184,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private Set<TaskVariableEntity> variables = new LinkedHashSet<>();
 
     @JsonView(JsonViews.ProcessVariables.class)
-    @Filter(name = "variableDefinitionIds")
+    @Filter(name = "variablesFilter")
     @ManyToMany(fetch=FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
         name = "task_process_variable",
