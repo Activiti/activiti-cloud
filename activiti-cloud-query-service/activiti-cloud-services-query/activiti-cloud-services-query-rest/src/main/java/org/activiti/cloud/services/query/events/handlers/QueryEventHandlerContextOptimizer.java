@@ -66,6 +66,7 @@ public class QueryEventHandlerContextOptimizer {
     public static final String VARIABLES = "variables";
     public static final String TASKS = "tasks";
     public static final String ACTIVITIES = "activities";
+    public static final String SERVICE_TASKS = "serviceTasks";
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContextOptimizer.class);
 
     private Map<Class<? extends CloudRuntimeEvent>, Integer> order =
@@ -118,7 +119,7 @@ public class QueryEventHandlerContextOptimizer {
                     .ifPresent(e -> entityGraph.addAttributeNodes(TASKS));
                 findRuntimeEvent(events,
                                  CloudBPMNActivityEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes(ACTIVITIES));
+                    .ifPresent(e -> entityGraph.addAttributeNodes(ACTIVITIES, SERVICE_TASKS));
 
                 Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
                                                        processInstanceId,
