@@ -30,7 +30,11 @@ import javax.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
 
-@FilterDef(name = "variableDefinitionIds", parameters = @ParamDef(name="variables", type = "string"), defaultCondition = "variable_definition_id in (:variables)")
+@FilterDef(name = "variablesFilter",
+        parameters = {
+            @ParamDef(name = "variableKeys", type = "string")
+        },
+        defaultCondition = "concat(process_definition_key, '/', name) in (:variableKeys)")
 @Entity(name="ProcessVariable")
 @Table(name = "PROCESS_VARIABLE",
         indexes = {
@@ -48,6 +52,8 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
     private Long id;
 
     private String variableDefinitionId;
+
+    private String processDefinitionKey;
 
     public ProcessVariableEntity() {
     }
@@ -100,6 +106,14 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     public void setVariableDefinitionId(String variableDefinitionId) {
         this.variableDefinitionId = variableDefinitionId;
+    }
+
+    public String getProcessDefinitionKey() {
+        return processDefinitionKey;
+    }
+
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
     }
 
     @Override

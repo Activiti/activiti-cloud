@@ -74,10 +74,10 @@ public class TaskControllerHelper {
                                                                                VariableSearch variableSearch,
                                                                                Pageable pageable,
                                                                                List<QueryDslPredicateFilter> filters,
-                                                                               List<String> processVariableDefinitions) {
+                                                                               List<String> processVariableKeys) {
         Session session = entityManager.unwrap(Session.class);
-        Filter filter = session.enableFilter("variableDefinitionIds");
-        filter.setParameterList("variables", processVariableDefinitions);
+        Filter filter = session.enableFilter("variablesFilter");
+        filter.setParameterList("variableKeys", processVariableKeys);
 
         Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
 

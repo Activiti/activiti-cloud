@@ -907,16 +907,16 @@ public class QueryProcessInstancesEntityIT {
 
     @ParameterizedTest
     @MethodSource({"processInstanceWithVariablesData"})
-    void should_getProcessInstanceWithVariables(String variableDefinitions, int expectedSize, List<String> expectedVariableValues) {
+    void should_getProcessInstanceWithVariables(String variableKeys, int expectedSize, List<String> expectedVariableValues) {
         ProcessInstance runningProcess1 = processInstanceBuilder.aRunningProcessInstance("first");
-        variableBuilder.aCreatedVariableWithDefinitionId("aaa", "bbb", "string", "ccc")
+        variableBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
             .onProcessInstance(runningProcess1);
-        variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
             .onProcessInstance(runningProcess1);
         eventsAggregator.sendAll();
 
         ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(PROC_URL
-                + (variableDefinitions == null ? "" : "?variableDefinitions=" + variableDefinitions),
+                + (variableKeys == null ? "" : "?variableKeys=" + variableKeys),
             HttpMethod.GET,
             identityTokenProducer.entityWithAuthorizationHeader(),
             PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
@@ -930,9 +930,9 @@ public class QueryProcessInstancesEntityIT {
 
     public static Stream<Arguments> processInstanceWithVariablesData() {
         return Stream.of(
-            Arguments.of("ccc", 1, List.of("bbb")),
-            Arguments.of("fff", 1, List.of("eee")),
-            Arguments.of("ccc,fff", 2, List.of("bbb", "eee")),
+            Arguments.of("varAProcessDefinitionKey/varAName", 1, List.of("varAValue")),
+            Arguments.of("varBProcessDefinitionKey/varBName", 1, List.of("varBValue")),
+            Arguments.of("varAProcessDefinitionKey/varAName,varBProcessDefinitionKey/varBName", 2, List.of("varAValue", "varBValue")),
             Arguments.of("other", 0, null),
             Arguments.of(null, 0, null)
         );
@@ -941,19 +941,19 @@ public class QueryProcessInstancesEntityIT {
     @Test
     void should_getAllProcessInstancesWithVariables() {
         ProcessInstance runningProcess1 = processInstanceBuilder.aRunningProcessInstance("first");
-        variableBuilder.aCreatedVariableWithDefinitionId("aaa", "111", "string", "ccc")
+        variableBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "111", "string", "varAProcessDefinitionKey")
             .onProcessInstance(runningProcess1);
-        variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
             .onProcessInstance(runningProcess1);
         ProcessInstance runningProcess2 = processInstanceBuilder.aRunningProcessInstance("second");
-        variableBuilder.aCreatedVariableWithDefinitionId("aaa", "222", "string", "ccc")
+        variableBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "222", "string", "varAProcessDefinitionKey")
             .onProcessInstance(runningProcess2);
-        variableBuilder.aCreatedVariableWithDefinitionId("ddd", "eee", "string", "fff")
+        variableBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
             .onProcessInstance(runningProcess2);
         eventsAggregator.sendAll();
 
         ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(PROC_URL
-                + "?variableDefinitions=ccc",
+                + "?variableKeys=varAProcessDefinitionKey/varAName",
             HttpMethod.GET,
             identityTokenProducer.entityWithAuthorizationHeader(),
             PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,

@@ -120,6 +120,7 @@ create table process_variable
     type                varchar(255),
     value               text,
     variable_definition_id varchar(64),
+    process_definition_key varchar(255),
     primary key (id)
 );
 create table task

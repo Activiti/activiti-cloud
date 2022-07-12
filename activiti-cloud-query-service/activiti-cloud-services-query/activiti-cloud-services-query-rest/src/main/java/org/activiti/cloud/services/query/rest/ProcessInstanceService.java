@@ -87,10 +87,10 @@ public class ProcessInstanceService {
     }
 
     @Transactional
-    public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variables, Pageable pageable) {
+    public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variableKeys, Pageable pageable) {
         Session session = entityManager.unwrap(Session.class);
-        Filter filter = session.enableFilter("variableDefinitionIds");
-        filter.setParameterList("variables", variables);
+        Filter filter = session.enableFilter("variablesFilter");
+        filter.setParameterList("variableKeys", variableKeys);
         Page<ProcessInstanceEntity> processInstanceEntities = findAll(predicate, pageable);
         // Due to performance issues (e.g. https://github.com/Activiti/Activiti/issues/3139)
         // we have to explicitly initialize the lazy loaded field to be able to work with disabled Open Session in View
