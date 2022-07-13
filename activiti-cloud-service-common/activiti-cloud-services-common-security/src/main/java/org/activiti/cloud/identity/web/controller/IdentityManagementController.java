@@ -21,7 +21,8 @@ import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.model.Group;
-import org.activiti.cloud.identity.model.SecurityRepresentation;
+import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
+import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.springframework.http.MediaType;
@@ -80,8 +81,13 @@ public class IdentityManagementController {
     @RequestMapping(value = "/permissions/{application}", method = RequestMethod.POST)
     public void addApplicationPermissions(
         @PathVariable String application,
-        @RequestBody List<SecurityRepresentation> securityRepresentations) {
-          identityManagementService.addApplicationPermissions(application, securityRepresentations);
+        @RequestBody List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations) {
+          identityManagementService.addApplicationPermissions(application, securityRequestBodyRepresentations);
     }
 
+    @RequestMapping(value = "/permissions/{application}", method = RequestMethod.GET)
+    public List<SecurityResponseRepresentation> getApplicationPermissions(@PathVariable String application,
+        @RequestParam(value = "role", required = false)  Set<String> roles) {
+        return identityManagementService.getApplicationPermissions(application, roles);
+    }
 }

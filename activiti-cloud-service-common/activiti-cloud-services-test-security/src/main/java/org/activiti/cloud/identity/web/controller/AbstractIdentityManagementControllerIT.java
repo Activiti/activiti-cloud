@@ -331,4 +331,32 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().reason("Invalid Security data: role {ACTIVITI_ADMIN} can't be assigned to group {hr}"));
     }
 
+    @Test
+    public void should_returnApplicationPermissions_when_filteringByRole() throws Exception {
+        this.mockMvc.perform(get("/v1/permissions/{application}?role={role}",
+            "activiti", "ACTIVITI_USER")).
+            andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].role", is("ACTIVITI_USER")))
+            .andExpect(jsonPath("$[0].users[?(@.username)].username",
+                containsInAnyOrder("hruser", "testuser")))
+            .andExpect(jsonPath("$[0].groups[?(@.name)].name",
+                containsInAnyOrder( "salesgroup")));
+    }
+
+    @Test
+    public void should_returnApplicationPermissions() throws Exception {
+        this.mockMvc.perform(get("/v1/permissions/{application}", "activiti"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(5)))
+            .andExpect(jsonPath("$[?(@.role)].role", containsInAnyOrder("ACTIVITI_USER",
+                "ACTIVITI_ADMIN", "APPLICATION_MANAGER", "uma_authorization", "offline_access")));
+    }
+
+    @Test
+    public void should_notReturnApplicationPermissions_when_roleIsInvalid() throws Exception {
+        this.mockMvc.perform(get("/v1/permissions/{application}?role={role}", "activiti", "role"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(0)));
+    }
 }

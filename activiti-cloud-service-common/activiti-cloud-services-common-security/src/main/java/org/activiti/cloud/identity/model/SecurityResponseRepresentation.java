@@ -16,15 +16,13 @@
 package org.activiti.cloud.identity.model;
 
 import java.util.List;
-import java.util.Objects;
 
-public class SecurityRepresentation {
-
+public class SecurityResponseRepresentation {
     private String role;
 
-    private List<String> groups;
+    private List<Group> groups;
 
-    private List<String> users;
+    private List<User> users;
 
     public String getRole() {
         return role;
@@ -34,39 +32,19 @@ public class SecurityRepresentation {
         this.role = role;
     }
 
-    public List<String> getGroups() {
+    public List<Group> getGroups() {
         return groups;
     }
 
-    public void setGroups(List<String> groups) {
+    public void setGroups(List<Group> groups) {
         this.groups = groups;
     }
 
-    public List<String> getUsers() {
+    public List<User> getUsers() {
         return users;
     }
 
-    public void setUsers(List<String> users) {
+    public void setUsers(List<User> users) {
         this.users = users;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        SecurityRepresentation that = (SecurityRepresentation) o;
-        return Objects.equals(role, that.role) &&
-            Objects.equals(groups, that.groups) &&
-            Objects.equals(users, that.users);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(role, groups, users);
-    }
-
 }
