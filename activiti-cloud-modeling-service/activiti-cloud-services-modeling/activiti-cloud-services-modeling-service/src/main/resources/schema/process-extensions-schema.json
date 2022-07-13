@@ -113,6 +113,9 @@
         },
         "displayName": {
           "type": "string"
+        },
+        "analytics": {
+          "type": "boolean"
         }
       },
       "dependencies": {
@@ -372,6 +375,29 @@
                     }
                   }
                 ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "properties": {
+                "analytics": {
+                  "enum": [
+                    false
+                  ]
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "type": {
+                "pattern": "^integer$|^string$|^boolean$|^date$",
+                "message": {
+                  "pattern": "Mismatch value type - {{name}}({{id}}). Expected type for analytics is one of integer|string|boolean|date"
+                }
               }
             }
           }
