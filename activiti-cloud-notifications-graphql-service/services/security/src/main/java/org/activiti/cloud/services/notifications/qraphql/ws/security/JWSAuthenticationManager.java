@@ -17,8 +17,9 @@ package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
 import java.util.Collection;
 
-import org.keycloak.common.VerificationException;
-import org.keycloak.representations.AccessToken;
+import java.util.Set;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessToken;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -32,10 +33,10 @@ import org.springframework.security.core.userdetails.User;
 @Qualifier("websoket")
 public class JWSAuthenticationManager implements AuthenticationManager {
 
-    private final KeycloakAccessTokenVerifier tokenVerifier;
+    private final GraphQLAccessTokenVerifier tokenVerifier;
     private Attributes2GrantedAuthoritiesMapper authoritiesMapper = new SimpleAttributes2GrantedAuthoritiesMapper();
 
-    public JWSAuthenticationManager(KeycloakAccessTokenVerifier tokenVerifier) {
+    public JWSAuthenticationManager(GraphQLAccessTokenVerifier tokenVerifier) {
         this.tokenVerifier = tokenVerifier;
     }
 
@@ -49,18 +50,20 @@ public class JWSAuthenticationManager implements AuthenticationManager {
 
                 String credentials = (String) token.getCredentials();
 
-                AccessToken accessToken = tokenVerifier.verifyToken(credentials);
+                GraphQLAccessToken accessToken = tokenVerifier.verifyToken(credentials);
+                Set<String> roles = accessToken.getRoles();
+                String preferredUsername = accessToken.getUsername();
 
                 Collection<? extends GrantedAuthority> authorities = authoritiesMapper
-                    .getGrantedAuthorities(accessToken.getRealmAccess().getRoles());
+                    .getGrantedAuthorities(roles);
 
-                User user = new User(accessToken.getPreferredUsername(), credentials, authorities);
+                User user = new User(preferredUsername, credentials, authorities);
 
                 token = new JWSAuthentication(credentials, user, authorities);
                 token.setDetails(accessToken);
             }
 
-        } catch (VerificationException e) {
+        } catch (Exception e) {
             throw new BadCredentialsException("Invalid token", e);
         }
 
