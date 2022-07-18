@@ -33,4 +33,3 @@ public class JwtSecurityContextPrincipalProvider implements SecurityContextPrinc
     }
 
 }
-
