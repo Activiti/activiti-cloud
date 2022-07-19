@@ -20,10 +20,10 @@ import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessToken;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 
 public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
 
@@ -50,7 +50,7 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
                 accessToken
             );
         } else {
-            throw new RuntimeException("Invalid JWT token");
+            throw new BadCredentialsException("Invalid JWT token");
         }
 
     }
