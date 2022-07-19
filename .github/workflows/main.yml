@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Set up python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.0
 
@@ -59,7 +59,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v2
         if: ${{ github.event_name == 'push' }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-pysemver@v1.2.1
         if: ${{ github.event_name == 'push' }}
