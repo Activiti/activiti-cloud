@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-update bpmn_activity set id = concat(process_instance_id, ':', element_id, ':', execution_id)
+update integration_context set id = concat(process_instance_id, ':', client_id, ':', execution_id)
   where id not like '%:%:%';
