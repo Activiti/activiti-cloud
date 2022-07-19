@@ -18,7 +18,7 @@ package org.activiti.cloud.services.notifications.qraphql.ws.security;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
+import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -39,11 +39,11 @@ public class JwtInterceptorConfigurer implements WebSocketMessageBrokerConfigure
     private static final Logger logger = LoggerFactory.getLogger(JwtInterceptorConfigurer.class);
     private static final String GRAPHQL_MESSAGE_TYPE = "graphQLMessageType";
 
-    private final KeycloakAccessTokenVerifier tokenVerifier;
+    private final GraphQLAccessTokenVerifier tokenVerifier;
     private List<String> headerValues = Arrays.asList("connection_init", "start");
     private String headerName = GRAPHQL_MESSAGE_TYPE;
 
-    public JwtInterceptorConfigurer(KeycloakAccessTokenVerifier tokenVerifier) {
+    public JwtInterceptorConfigurer(GraphQLAccessTokenVerifier tokenVerifier) {
         this.tokenVerifier = tokenVerifier;
     }
 

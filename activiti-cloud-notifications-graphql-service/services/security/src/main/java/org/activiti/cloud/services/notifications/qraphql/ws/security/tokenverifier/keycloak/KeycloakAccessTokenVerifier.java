@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.notifications.qraphql.ws.security;
+package org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.keycloak;
 
 import java.math.BigInteger;
 import java.net.URL;
@@ -28,12 +28,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessToken;
 import org.keycloak.TokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.jose.jws.JWSHeader;
 import org.keycloak.representations.AccessToken;
 
-public class KeycloakAccessTokenVerifier {
+public class KeycloakAccessTokenVerifier implements GraphQLAccessTokenVerifier {
 
     private final KeycloakProperties config;
     private final ConcurrentHashMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();
@@ -45,22 +47,29 @@ public class KeycloakAccessTokenVerifier {
 
     /**
      * Verifies a token against a keycloak instance
+     *
      * @param tokenString the string representation of the jws token
      * @return a validated keycloak AccessToken
      * @throws VerificationException when the token is not valid
      */
     @SuppressWarnings("deprecation")
-    public AccessToken verifyToken(String tokenString) throws VerificationException {
+    public GraphQLAccessToken verifyToken(String tokenString) throws Exception {
 
         TokenVerifier<AccessToken> tokenVerifier = TokenVerifier.create(tokenString, AccessToken.class);
 
         PublicKey pk = getPublicKey(tokenVerifier.getHeader());
 
-        return tokenVerifier.withDefaultChecks()
-                            .realmUrl(getRealmUrl())
-                            .publicKey(pk)
-                            .verify()
-                            .getToken();
+        AccessToken accessToken = tokenVerifier.withDefaultChecks()
+            .realmUrl(getRealmUrl())
+            .publicKey(pk)
+            .verify()
+            .getToken();
+
+        return new GraphQLAccessToken(
+            accessToken.getPreferredUsername(),
+            accessToken.getRealmAccess().getRoles(),
+            accessToken
+        );
     }
 
     protected PublicKey getPublicKey(JWSHeader jwsHeader) {
