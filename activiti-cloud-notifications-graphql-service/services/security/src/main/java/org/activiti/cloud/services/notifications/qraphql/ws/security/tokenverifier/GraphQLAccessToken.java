@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier;
 
 import java.util.Set;
-import org.keycloak.representations.AccessToken;
 
 public class GraphQLAccessToken {
 
