@@ -332,6 +332,7 @@
 
   <changeSet author="activiti-query"
              id="alter15-oracle-schema" dbms="oracle">
+    <validCheckSum>ANY</validCheckSum>
     <sqlFile dbms="oracle"
              encoding="utf8"
              path="changelog/15-alter.oracle.schema.7.4.0.sql"
@@ -342,6 +343,7 @@
 
   <changeSet author="activiti-query"
              id="alter16-schema" dbms="postgresql">
+    <validCheckSum>ANY</validCheckSum>
     <sqlFile dbms="postgresql"
              encoding="utf8"
              path="changelog/16-alter.pg.schema.7.4.0.sql"
