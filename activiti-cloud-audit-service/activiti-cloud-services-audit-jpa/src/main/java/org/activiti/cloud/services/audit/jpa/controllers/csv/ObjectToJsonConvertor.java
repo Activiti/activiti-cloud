@@ -41,10 +41,14 @@ public class ObjectToJsonConvertor extends AbstractBeanField {
         try {
             return objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
-            logger.error("Could serialise event " + value + " to json in cvs export.");
+            logger.error("CSV export exception. Could not serialise event entity " + value + " to json.", e);
+            throw new ObjectToJsonConversionException("Export to CSV failed. Could not serialise event entity.");
         }
-        return "";
     }
 
-
+    class ObjectToJsonConversionException extends RuntimeException {
+        ObjectToJsonConversionException(String message) {
+            super(message);
+        }
+    }
 }
